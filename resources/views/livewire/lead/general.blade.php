@@ -34,7 +34,6 @@
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled
                     x-bind:readonly="!edit"
-                    :label="__('Address')"
                     wire:model="leadForm.address_id"
                     required
                     select="label:label|value:id"
@@ -50,7 +49,18 @@
                             'with' => 'contact.media',
                         ],
                     ]"
-                />
+                >
+                    <x-slot:label>
+                        <x-link
+                            icon="link"
+                            :text="__('Address')"
+                            href="#"
+                            class="pointer-events-auto"
+                            wire:navigate
+                            x-bind:href="$wire.leadForm.address_id ? '{{ route('address.id', ':id') }}'.replace(':id', $wire.leadForm.address_id) : '#'"
+                        />
+                    </x-slot>
+                </x-select.styled>
             </div>
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled
@@ -113,7 +123,6 @@
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled
                     x-bind:readonly="!edit"
-                    :label="__('Recommended by')"
                     wire:model="leadForm.recommended_by_address_id"
                     select="label:label|value:id"
                     unfiltered
@@ -128,7 +137,18 @@
                             'with' => 'contact.media',
                         ],
                     ]"
-                />
+                >
+                    <x-slot:label>
+                        <x-link
+                            icon="link"
+                            :text="__('Recommended by')"
+                            href="#"
+                            class="pointer-events-auto"
+                            wire:navigate
+                            x-bind:href="$wire.leadForm.recommended_by_address_id ? '{{ route('address.id', ':id') }}'.replace(':id', $wire.leadForm.recommended_by_address_id) : '#'"
+                        />
+                    </x-slot>
+                </x-select.styled>
             </div>
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled

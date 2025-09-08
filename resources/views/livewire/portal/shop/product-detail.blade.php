@@ -104,7 +104,7 @@
                         @endif
                     </div>
                     @show
-                    <div class="text-secondary-400 text-2xs">
+                    <div class="text-2xs text-secondary-400">
                         @if (auth()->user()?->priceList?->is_net)
                             * {{ __('All prices net plus VAT') }}
                         @else

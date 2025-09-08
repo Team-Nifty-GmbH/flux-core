@@ -135,9 +135,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         );
     }
 
-    protected function getHtmlBody(OffersPrinting $item): string
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
     {
-        return html_entity_decode($item->orderType->mail_body);
+        return $item->orderType?->email_template_id;
     }
 
     protected function getPrintLayouts(): array
@@ -147,13 +147,6 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->with('orderType')
             ->get(['id', 'order_type_id'])
             ->printLayouts();
-    }
-
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return html_entity_decode(
-            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
-        );
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array

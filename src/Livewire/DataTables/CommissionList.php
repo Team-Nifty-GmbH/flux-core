@@ -4,8 +4,8 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Commission\CreateCommissionCreditNotes;
 use FluxErp\Models\Commission;
-use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class CommissionList extends BaseDataTable

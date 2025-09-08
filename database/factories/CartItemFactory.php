@@ -12,12 +12,12 @@ class CartItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'amount' => $this->faker->randomDigitNotZero(),
-            'price' => $this->faker->randomFloat(2),
-            'total_net' => $this->faker->randomFloat(2),
-            'total_gross' => $this->faker->randomFloat(2),
-            'total' => $this->faker->randomFloat(2),
+            'name' => fake()->name,
+            'amount' => fake()->randomDigitNotZero(),
+            'price' => fake()->randomFloat(2),
+            'total_net' => fake()->randomFloat(2),
+            'total_gross' => fake()->randomFloat(2),
+            'total' => fake()->randomFloat(2),
         ];
     }
 }

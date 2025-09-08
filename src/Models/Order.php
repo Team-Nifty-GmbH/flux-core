@@ -7,9 +7,11 @@ use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
@@ -41,6 +43,7 @@ use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\DeliveryNote;
+use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
@@ -56,13 +59,14 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
+class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
@@ -208,7 +212,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 $order->getSerialNumber('order_number');
             }
 
-            if ($order->isDirty('invoice_number')) {
+            if ($order->isDirty('invoice_number') && ! is_null($order->invoice_number)) {
                 $orderPositions = $order->orderPositions()
                     ->whereNotNull('credit_account_id')
                     ->where('post_on_credit_account', '!=', 0)
@@ -217,8 +221,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 DB::transaction(function () use ($order, $orderPositions): void {
                     foreach ($orderPositions as $orderPosition) {
                         $multiplier = match (true) {
-                            $orderPosition->post_on_credit_account > 0 => 1,
-                            $orderPosition->post_on_credit_account < 0 => -1,
+                            $orderPosition->post_on_credit_account->value > 0 => 1,
+                            $orderPosition->post_on_credit_account->value < 0 => -1,
                             default => 0,
                         };
 
@@ -286,6 +290,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             if ($order->wasChanged('is_locked')) {
                 $order->broadcastEvent('locked');
             }
+
+            if (($order->wasChanged('approval_user_id') || $order->wasRecentlyCreated) && $order->approval_user_id) {
+                $order->approvalUser?->subscribeNotificationChannel($order->broadcastChannel());
+
+                event(OrderApprovalRequestEvent::make($order));
+            }
+
+            if (
+                ($order->wasChanged('responsible_user_id') || $order->wasRecentlyCreated)
+                && $order->responsible_user_id
+            ) {
+                $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
+            }
         });
 
         static::deleted(function (Order $order): void {
@@ -313,6 +330,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'total_purchase_price' => Money::class,
             'total_cost' => Money::class,
             'margin' => Money::class,
+            'subtotal_net_price' => Money::class,
+            'subtotal_gross_price' => Money::class,
+            'subtotal_vats' => 'array',
             'total_net_price' => Money::class,
             'total_gross_price' => Money::class,
             'total_vats' => 'array',
@@ -322,21 +342,15 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'total_position_discount_flat' => Money::class,
             'balance' => Money::class,
             'payment_reminder_next_date' => 'date',
-            'payment_texts' => 'array',
             'order_date' => 'date',
             'invoice_date' => 'date',
             'system_delivery_date' => 'date',
             'system_delivery_date_end' => 'date',
             'customer_delivery_date' => 'date',
             'date_of_approval' => 'date',
-            'has_logistic_notify_phone_number' => 'boolean',
-            'has_logistic_notify_number' => 'boolean',
             'is_locked' => 'boolean',
-            'is_new_customer' => 'boolean',
             'is_imported' => 'boolean',
-            'is_merge_invoice' => 'boolean',
             'is_confirmed' => 'boolean',
-            'is_paid' => 'boolean',
             'requires_approval' => 'boolean',
         ];
     }
@@ -369,6 +383,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsTo(User::class, 'agent_id');
     }
 
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
+    }
+
     public function calculateBalance(): static
     {
         $this->balance = bcround(
@@ -385,24 +404,27 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateDiscounts(): static
     {
-        $this->total_net_price = $this->discounts()
-            ->ordered()
-            ->get(['id', 'discount', 'is_percentage'])
-            ->reduce(
-                function (string|float|int $previous, Discount $discount): string|float|int {
-                    $new = $discount->is_percentage
-                        ? discount($previous, $discount->discount)
-                        : bcsub($previous, $discount->discount, 9);
+        $this->total_net_price = bcround(
+            $this->discounts()
+                ->ordered()
+                ->get(['id', 'discount', 'is_percentage'])
+                ->reduce(
+                    function (string|float|int $previous, Discount $discount): string|float|int {
+                        $new = $discount->is_percentage
+                            ? max(0, discount($previous, $discount->discount))
+                            : max(0, bcsub($previous, $discount->discount, 9));
 
-                    $discount->update([
-                        'discount_percentage' => diff_percentage($previous, $new),
-                        'discount_flat' => bcsub($previous, $new, 9),
-                    ]);
+                        $discount->update([
+                            'discount_percentage' => diff_percentage($previous, $new),
+                            'discount_flat' => bcsub($previous, $new, 9),
+                        ]);
 
-                    return $new;
-                },
-                $this->total_net_price ?? 0
-            );
+                        return $new;
+                    },
+                    $this->total_net_price ?? 0
+                ),
+            2
+        );
 
         $this->total_discount_percentage = diff_percentage($this->total_base_net_price, $this->total_net_price);
         $this->total_discount_flat = bcsub($this->total_base_net_price, $this->total_net_price, 9);
@@ -412,13 +434,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateMargin(): static
     {
-        $this->total_purchase_price = $this->orderPositions()
-            ->where('is_alternative', false)
-            ->sum('purchase_price');
-
         $this->margin = Rounding::round(
-            bcsub($this->total_net_price, $this->total_purchase_price, 9),
-            2
+            $this->orderPositions()
+                ->where('is_alternative', false)
+                ->sum('margin')
         );
 
         $variableCosts = 0;
@@ -536,59 +555,68 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateTotalVats(): static
     {
-        $totalVats = $this->orderPositions()
+        $vatGroups = $this->orderPositions()
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
             ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(vat_price) as total_vat_price,
-                sum(total_net_price) as total_net_price,
-                sum(total_base_net_price) as total_base_net_price,
-                sum(total_base_gross_price) as total_base_gross_price,
-                vat_rate_percentage'
-            )
+            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage')
             ->get()
-            ->map(function (OrderPosition $item) {
-                if ($this->total_discount_percentage) {
-                    $item->total_net_price = discount(
-                        $item->total_base_net_price,
-                        $this->total_discount_percentage
-                    );
-                    $item->total_vat_price = bcsub(
-                        discount($item->total_base_gross_price, $this->total_discount_percentage),
-                        $item->total_net_price
-                    );
-                }
+            ->keyBy('vat_rate_percentage');
 
-                return $item->only(
+        foreach ($this->discounts()->ordered()->get() as $discount) {
+            if ($discount->is_percentage) {
+                $vatGroups->transform(function (OrderPosition $item) use ($discount): OrderPosition {
+                    $item->total_net_price = discount($item->total_net_price, $discount->discount);
+
+                    return $item;
+                });
+            } else {
+                $total = $vatGroups->reduce(function (string $carry, OrderPosition $item): string {
+                    return bcadd($carry, $item->total_net_price, 9);
+                }, '0');
+
+                if (bccomp($total, '0', 9) > 0) {
+                    $remainingTotal = max(0, bcsub($total, $discount->discount, 9));
+
+                    $vatGroups->transform(function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
+                        $proportion = bcdiv($item->total_net_price, $total, 9);
+                        $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
+
+                        return $item;
+                    });
+                }
+            }
+        }
+
+        $this->total_vats = $vatGroups
+            ->map(function (OrderPosition $item): array {
+                return [
+                    'vat_rate_percentage' => $item->vat_rate_percentage,
+                    'total_vat_price' => bcround(bcmul($item->total_net_price, $item->vat_rate_percentage, 9), 2),
+                    'total_net_price' => bcround($item->total_net_price, 2),
+                ];
+            })
+            ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
+                return $vats->put(
+                    $this->shipping_costs_vat_rate_percentage,
                     [
-                        'vat_rate_percentage',
-                        'total_vat_price',
-                        'total_net_price',
+                        'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
+                        'total_vat_price' => bcadd(
+                            $this->shipping_costs_vat_price,
+                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_vat_price') ?? 0,
+                            9
+                        ),
+                        'total_net_price' => bcadd(
+                            $this->shipping_costs_net_price,
+                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_net_price') ?? 0,
+                            9
+                        ),
                     ]
                 );
             })
-            ->keyBy('vat_rate_percentage');
-
-        if ($this->shipping_costs_vat_price) {
-            $totalVats->put(
-                $this->shipping_costs_vat_rate_percentage,
-                [
-                    'total_vat_price' => bcadd(
-                        $this->shipping_costs_vat_price,
-                        $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_vat_price'] ?? 0,
-                        9
-                    ),
-                    'total_net_price' => bcadd(
-                        $this->shipping_costs_net_price,
-                        $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_net_price'] ?? 0,
-                        9
-                    ),
-                    'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
-                ]
-            );
-        }
-
-        $this->total_vats = $totalVats->sortBy('vat_rate_percentage')->values();
+            ->sortBy('vat_rate_percentage')
+            ->values()
+            ->toArray();
 
         return $this;
     }
@@ -651,6 +679,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return null;
     }
 
+    public function getEmailTemplateModelType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getLabel(): ?string
     {
         return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
@@ -663,18 +696,43 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function getPrintViews(): array
     {
-        return $this->orderType?->order_type_enum->isPurchase()
-            ? [
+        // This has to be done this way, as this method is also called on order types settings with an empty order.
+        if ($this->orderType?->order_type_enum->isPurchase()) {
+            $printViews = [
                 'supplier-order' => SupplierOrder::class,
-            ]
-            : [
+            ];
+        } else {
+            $printViews = [
                 'invoice' => Invoice::class,
+                'final-invoice' => FinalInvoice::class,
                 'offer' => Offer::class,
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
                 'refund' => Refund::class,
                 'delivery-note' => DeliveryNote::class,
             ];
+        }
+
+        if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
+            $children = $this->children()
+                ->pluck('invoice_number')
+                ->toArray();
+
+            if (
+                $children
+                && count($children) === count(array_filter($children))
+            ) {
+                // If all children have an invoice number, only show final invoice
+                unset($printViews['invoice']);
+            } elseif ($children) {
+                // If the order has children, but not all have an invoice number, remove invoice and final invoice
+                unset($printViews['invoice'], $printViews['final-invoice']);
+            }
+        } elseif ($this->orderType) {
+            unset($printViews['final-invoice']);
+        }
+
+        return $printViews;
     }
 
     public function getSerialNumber(string|array $types, ?int $clientId = null): static

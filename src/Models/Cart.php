@@ -8,6 +8,7 @@ use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Support\Arrayable;
@@ -22,7 +23,16 @@ use InvalidArgumentException;
 
 class Cart extends FluxModel
 {
-    use HasPackageFactory, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+
+    protected function casts(): array
+    {
+        return [
+            'is_portal_public' => 'boolean',
+            'is_public' => 'boolean',
+            'is_watchlist' => 'boolean',
+        ];
+    }
 
     public function addItems(array|int $products): static
     {

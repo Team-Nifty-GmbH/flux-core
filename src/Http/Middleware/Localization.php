@@ -12,18 +12,20 @@ class Localization
 {
     public function handle(Request $request, Closure $next): mixed
     {
-        try {
-            $userLanguage = Auth::user()?->language?->language_code;
-        } catch (Throwable) {
-            $userLanguage = null;
-        }
+        if (! app()->runningUnitTests()) {
+            try {
+                $userLanguage = Auth::user()?->language?->language_code;
+            } catch (Throwable) {
+                $userLanguage = null;
+            }
 
-        app()->setlocale(
-            $request->header('content-language') ??
-            $userLanguage ??
-            resolve_static(Language::class, 'default')?->language_code ??
-            config('app.locale')
-        );
+            app()->setlocale(
+                $request->header('content-language') ??
+                $userLanguage ??
+                resolve_static(Language::class, 'default')?->language_code ??
+                config('app.locale')
+            );
+        }
 
         return $next($request);
     }

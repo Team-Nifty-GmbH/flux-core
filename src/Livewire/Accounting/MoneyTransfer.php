@@ -2,14 +2,10 @@
 
 namespace FluxErp\Livewire\Accounting;
 
-use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\OrderType;
 use FluxErp\States\Order\PaymentState\Paid;
-use FluxErp\States\PaymentRun\Open;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class MoneyTransfer extends DirectDebit
 {
@@ -23,35 +19,7 @@ class MoneyTransfer extends DirectDebit
         'commission',
     ];
 
-    public function createPaymentRun(): void
-    {
-        $orderPayments = $this->getSelectedModels()
-            ->map(fn ($order) => [
-                'order_id' => $order->id,
-                'amount' => bcround($order->balance, 2),
-            ])
-            ->toArray();
-
-        try {
-            CreatePaymentRun::make([
-                'state' => Open::$name,
-                'payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer,
-                'orders' => $orderPayments,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->reset('selected');
-
-        $this->notification()->success(__('Payment Run created.'))->send();
-        $this->loadData();
-    }
+    protected PaymentRunTypeEnum $paymentRunTypeEnum = PaymentRunTypeEnum::MoneyTransfer;
 
     protected function getBuilder(Builder $builder): Builder
     {

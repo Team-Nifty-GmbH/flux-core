@@ -2,9 +2,9 @@
 
 namespace FluxErp\Livewire\Task;
 
-use Exception;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Task\DeleteTask;
+use FluxErp\Actions\Task\ReplicateTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task as TaskModel;
@@ -26,7 +26,11 @@ class Task extends Component
 
     public array $availableStates = [];
 
+    public TaskForm $replica;
+
     public TaskForm $task;
+
+    public int $taskId;
 
     public string $taskTab = 'task.general';
 
@@ -61,6 +65,8 @@ class Task extends Component
                 ];
             })
             ->toArray();
+
+        $this->taskId = $task->id;
     }
 
     public function render(): View|Factory|Application
@@ -74,7 +80,7 @@ class Task extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => app(TaskModel::class)->getMorphClass(),
+                'type' => morph_alias(TaskModel::class),
             ])
                 ->checkPermission()
                 ->validate()
@@ -100,8 +106,8 @@ class Task extends Component
                 ->validate()
                 ->execute();
 
-            $this->redirect(route('tasks'));
-        } catch (Exception $e) {
+            $this->redirectRoute('tasks', navigate: true);
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -128,6 +134,23 @@ class Task extends Component
         ];
     }
 
+    #[Renderless]
+    public function replicate(): void
+    {
+        try {
+            $replica = ReplicateTask::make($this->replica->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirectRoute(name: 'tasks.id', parameters: ['id' => $replica->id], navigate: true);
+    }
+
     public function resetForm(): void
     {
         $task = resolve_static(TaskModel::class, 'query')
@@ -150,15 +173,34 @@ class Task extends Component
     {
         try {
             $this->task->save();
-        } catch (Exception $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Task')]))->send();
+        $this->notification()
+            ->success(__(':model saved', ['model' => __('Task')]))
+            ->send();
         $this->skipRender();
 
         return true;
+    }
+
+    #[Renderless]
+    public function showReplicate(): void
+    {
+        $this->replica = $this->task;
+
+        $this->js(<<<'JS'
+            $modalOpen('replicate-task-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function updateReplica(TaskModel $task): void
+    {
+        $this->replica->reset();
+        $this->replica->fill($task);
     }
 }

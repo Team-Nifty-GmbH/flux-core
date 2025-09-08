@@ -3,26 +3,30 @@
 namespace FluxErp\Livewire;
 
 use Exception;
+use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Livewire\Forms\CommunicationForm;
-use FluxErp\Mail\GenericMail;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Mail;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class EditMail extends Component
 {
     use Actions, WithFileUploads;
+
+    public array $emailTemplates = [];
 
     public array $files = [];
 
@@ -32,7 +36,13 @@ class EditMail extends Component
 
     public bool $multiple = false;
 
+    public ?int $selectedTemplateId = null;
+
     public ?string $sessionKey = null;
+
+    public ?array $templateData = null;
+
+    public ?string $templateModelType = null;
 
     protected $listeners = [
         'create',
@@ -63,19 +73,76 @@ class EditMail extends Component
     }
 
     #[Renderless]
+    public function applyTemplate(): void
+    {
+        if (
+            ! $this->selectedTemplateId
+            || ! $template = resolve_static(EmailTemplate::class, 'query')
+                ->whereKey($this->selectedTemplateId)
+                ->first()
+        ) {
+            return;
+        }
+
+        $renderedSubject = html_entity_decode($template->subject ?? '');
+        $renderedHtmlBody = html_entity_decode($template->html_body ?? '');
+        $renderedTextBody = html_entity_decode($template->text_body ?? '');
+        $templateAttachments = $template->getMedia()
+            ->map(fn (\Spatie\MediaLibrary\MediaCollections\Models\Media $media) => [
+                'id' => $media->getKey(),
+                'name' => $media->file_name,
+            ])
+            ->toArray();
+
+        if (! $this->multiple && $this->templateData) {
+            try {
+                $renderedSubject = Blade::render($renderedSubject, $this->templateData);
+                $renderedHtmlBody = Blade::render($renderedHtmlBody, $this->templateData);
+                $renderedTextBody = Blade::render($renderedTextBody, $this->templateData);
+            } catch (Exception $e) {
+                $this->notification()
+                    ->error(__('Template rendering failed: ') . $e->getMessage())
+                    ->send();
+            }
+        }
+
+        $fillData = [
+            'cc' => array_merge($this->mailMessage->cc ?? [], $template->cc ?? []),
+            'bcc' => array_merge($this->mailMessage->bcc ?? [], $template->bcc ?? []),
+            'subject' => $renderedSubject,
+            'html_body' => $renderedHtmlBody,
+            'text_body' => $renderedTextBody,
+            'attachments' => array_merge($this->mailMessage->attachments ?? [], $templateAttachments),
+        ];
+
+        if (! $this->multiple) {
+            $fillData['to'] = $this->mailMessage->to ?: ($template->to ?? []);
+        }
+
+        $this->mailMessage->fill($fillData);
+    }
+
+    #[Renderless]
     public function clear(): void
     {
         $this->mailMessage->reset();
+        $this->selectedTemplateId = null;
 
         $this->cleanupOldUploads();
     }
 
     #[Renderless]
-    public function create(array|CommunicationForm|Model $values): void
-    {
+    public function create(
+        array|CommunicationForm|Model $values,
+        ?string $templateModelType = null,
+        ?array $templateData = null,
+        ?int $defaultTemplateId = null
+    ): void {
         $this->multiple = false;
         $this->sessionKey = null;
         $this->reset('mailMessages');
+        $this->templateModelType = $templateModelType;
+        $this->templateData = $templateData;
 
         if ($values instanceof Model || is_array($values)) {
             $this->mailMessage->fill($values);
@@ -83,7 +150,23 @@ class EditMail extends Component
             $this->mailMessage = $values;
         }
 
+        $this->emailTemplates = resolve_static(EmailTemplate::class, 'query')
+            ->when(
+                $this->templateModelType,
+                fn (Builder $query) => $query
+                    ->where('model_type', $this->templateModelType)
+                    ->orWhereNull('model_type')
+            )
+            ->get(['id', 'name'])
+            ->toArray();
+
+        if ($defaultTemplateId) {
+            $this->selectedTemplateId = $defaultTemplateId;
+            $this->applyTemplate();
+        }
+
         $this->js(<<<'JS'
+            $tallstackuiSelect('email-template').setOptions($wire.emailTemplates);
             $modalOpen('edit-mail');
         JS);
     }
@@ -97,34 +180,21 @@ class EditMail extends Component
             $data = count($data) === 1 && Arr::isList($data) ? $data[0] : $data;
             session()->forget($key);
 
-            $bladeParameters = $this->getBladeParameters($data);
+            $templateModelType = data_get($data, 'model_type');
+            $templateData = data_get($data, 'template_data');
+            $defaultTemplateId = data_get($data, 'default_template_id');
+
+            if (! $templateData) {
+                $bladeParameters = $this->getBladeParameters($data);
+                if ($bladeParameters instanceof SerializableClosure) {
+                    $templateData = $bladeParameters->getClosure()();
+                }
+            }
+
             $data['blade_parameters_serialized'] = false;
             $data['blade_parameters'] = null;
 
-            $data = array_merge(
-                $data,
-                [
-                    'subject' => Blade::render(
-                        data_get($data, 'subject'),
-                        $bladeParameters instanceof SerializableClosure
-                            ? $bladeParameters->getClosure()()
-                            : []
-                    ),
-                    'html_body' => Blade::render(
-                        data_get($data, 'html_body'),
-                        $bladeParameters instanceof SerializableClosure
-                            ? $bladeParameters->getClosure()()
-                            : []
-                    ),
-                    'text_body' => Blade::render(
-                        data_get($data, 'text_body'),
-                        $bladeParameters instanceof SerializableClosure
-                            ? $bladeParameters->getClosure()()
-                            : []
-                    ),
-                ]
-            );
-            $this->create($data);
+            $this->create($data, $templateModelType, $templateData, $defaultTemplateId);
         } else {
             $this->createMany($data);
             $this->sessionKey = $key;
@@ -135,7 +205,69 @@ class EditMail extends Component
     public function createMany(Collection|array $mailMessages): void
     {
         $sessionKey = $this->sessionKey;
-        $this->create($mailMessages[0]);
+
+        if (count($mailMessages) === 1) {
+            $data = Arr::first($mailMessages);
+            if ($sessionKey) {
+                session()->forget($sessionKey);
+            }
+
+            $bladeParameters = $this->getBladeParameters($data);
+            $bladeParams = $bladeParameters instanceof SerializableClosure
+                ? $bladeParameters->getClosure()()
+                : [];
+
+            $data['blade_parameters_serialized'] = false;
+            $data['blade_parameters'] = null;
+
+            $templateModelType = data_get($data, 'model_type');
+            $templateData = data_get($data, 'template_data');
+            $defaultTemplateId = data_get($data, 'default_template_id');
+
+            $renderedData = [];
+
+            if (! blank(data_get($data, 'subject'))) {
+                $renderedData['subject'] = Blade::render(
+                    html_entity_decode(data_get($data, 'subject')),
+                    $bladeParams
+                );
+            }
+
+            if (! blank(data_get($data, 'html_body'))) {
+                $renderedData['html_body'] = Blade::render(
+                    html_entity_decode(data_get($data, 'html_body')),
+                    $bladeParams
+                );
+            }
+
+            if (! blank(data_get($data, 'text_body'))) {
+                $renderedData['text_body'] = Blade::render(
+                    html_entity_decode(data_get($data, 'text_body')),
+                    $bladeParams
+                );
+            }
+
+            $data = array_merge($data, $renderedData);
+            $this->create($data, $templateModelType, $templateData, $defaultTemplateId);
+
+            return;
+        }
+
+        $firstMessage = Arr::first($mailMessages);
+        $templateModelType = data_get($firstMessage, 'model_type');
+        $templateData = data_get($firstMessage, 'template_data');
+
+        $templateIds = collect($mailMessages)
+            ->pluck('default_template_id')
+            ->unique()
+            ->filter();
+
+        $defaultTemplateId = null;
+        if ($templateIds->count() === 1) {
+            $defaultTemplateId = $templateIds->first();
+        }
+
+        $this->create($firstMessage, $templateModelType, $templateData, $defaultTemplateId);
         $this->sessionKey = $sessionKey;
         $this->mailMessage->reset('attachments');
 
@@ -143,9 +275,7 @@ class EditMail extends Component
             $this->mailMessages = $mailMessages;
         }
 
-        if (count($mailMessages) > 1) {
-            $this->multiple = true;
-        }
+        $this->multiple = count($mailMessages) > 1;
     }
 
     #[Renderless]
@@ -155,9 +285,17 @@ class EditMail extends Component
     }
 
     #[Renderless]
+    public function selectTemplate(EmailTemplate $template): void
+    {
+        $this->selectedTemplateId = $template->getKey();
+        $this->applyTemplate();
+    }
+
+    #[Renderless]
     public function send(): bool
     {
         $editedMailMessage = $this->mailMessage->toArray();
+
         if (! $this->mailMessages && ! $this->sessionKey) {
             $this->mailMessages = [$this->mailMessage];
         } else {
@@ -165,66 +303,92 @@ class EditMail extends Component
         }
 
         $single = count($this->mailMessages) === 1;
-        if (! $single) {
-            unset($editedMailMessage['to']);
-        }
-
-        $bcc = $this->mailMessage->bcc;
-        $cc = $this->mailMessage->cc;
-        $exceptions = 0;
+        $successCount = 0;
+        $failedCount = 0;
 
         foreach ($this->mailMessages as $mailMessage) {
-            $bladeParameters = $this->getBladeParameters($mailMessage);
-
-            if (! $mailMessage instanceof CommunicationForm) {
-                $this->mailMessage->reset();
-
-                $this->mailMessage->fill(array_merge(
-                    $mailMessage,
-                    array_filter($editedMailMessage),
-                    [
-                        'bcc' => $bcc,
-                    ]
-                ));
-            }
-
-            $mail = GenericMail::make($this->mailMessage, $bladeParameters);
             try {
-                $message = Mail::to($this->mailMessage->to)
-                    ->cc($cc)
-                    ->bcc($bcc);
+                $data = is_array($mailMessage)
+                    ? $mailMessage
+                    : $mailMessage->toArray();
 
-                if ($single) {
-                    $message->send($mail);
+                if (! $single) {
+                    $editedWithoutTo = $editedMailMessage;
+                    unset($editedWithoutTo['to']);
+                    $data = array_merge($data, array_filter($editedWithoutTo));
                 } else {
-                    $message->queue($mail);
+                    $data = array_merge($data, array_filter($editedMailMessage));
                 }
-            } catch (Exception $e) {
+
+                $data['template_id'] = $this->selectedTemplateId;
+
+                $bladeParams = data_get($mailMessage, 'blade_parameters');
+                if (data_get($mailMessage, 'blade_parameters_serialized') && is_string($bladeParams)) {
+                    $bladeParams = unserialize($bladeParams);
+                }
+
+                if ($bladeParams instanceof SerializableClosure) {
+                    $data['blade_parameters'] = serialize($bladeParams);
+                    $data['blade_parameters_serialized'] = true;
+                } elseif (! is_null($bladeParams)) {
+                    $data['blade_parameters'] = $bladeParams;
+                }
+
+                $data['queue'] = ! $single;
+
+                $result = SendMail::make($data)
+                    ->validate()
+                    ->execute();
+
+                if (data_get($result, 'success')) {
+                    $successCount++;
+                } else {
+                    $failedCount++;
+
+                    if ($single) {
+                        exception_to_notifications(
+                            exception: new Exception(
+                                data_get($result, 'error') ?? data_get($result, 'message')
+                            ),
+                            component: $this,
+                            description: data_get($data, 'subject')
+                        );
+
+                        return false;
+                    }
+                }
+            } catch (Throwable $e) {
+                $failedCount++;
                 exception_to_notifications(
                     exception: $e,
                     component: $this,
-                    description: $this->mailMessage->subject
+                    description: data_get($mailMessage, 'subject')
                 );
 
-                if ($this->multiple) {
-                    $exceptions++;
-
-                    continue;
+                if ($single) {
+                    return false;
                 }
-
-                return false;
             }
         }
 
-        if ($exceptions === 0) {
-            $this->notification()->success(__('Email(s) sent successfully!'))->send();
+        if ($failedCount === 0) {
+            $this->notification()
+                ->success(__('Email(s) sent successfully!'))
+                ->send();
+        } elseif ($successCount === 0) {
+            $this->notification()
+                ->error(__('Failed to send emails!'))
+                ->send();
+        } else {
+            $this->notification()
+                ->warning(__(':success email(s) sent, :failed failed', [
+                    'success' => $successCount,
+                    'failed' => $failedCount,
+                ]))
+                ->send();
         }
 
-        if (count($this->mailMessages) === $exceptions) {
-            $this->notification()->error(__('Failed to send emails!'))->send();
-        }
-
-        return true;
+        return $failedCount === 0;
     }
 
     #[Renderless]

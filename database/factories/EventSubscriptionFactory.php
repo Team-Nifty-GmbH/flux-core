@@ -12,8 +12,8 @@ class EventSubscriptionFactory extends Factory
     public function definition(): array
     {
         return [
-            'is_broadcast' => $this->faker->boolean,
-            'is_notifiable' => $this->faker->boolean,
+            'is_broadcast' => fake()->boolean,
+            'is_notifiable' => fake()->boolean,
         ];
     }
 }

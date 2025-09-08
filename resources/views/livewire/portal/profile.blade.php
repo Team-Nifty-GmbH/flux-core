@@ -27,7 +27,7 @@
 
             @section('portal.profile.address')
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.salutation') }}"
@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.title') }}"
@@ -53,7 +53,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.firstname') }}"
@@ -66,7 +66,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.lastname') }}"
@@ -79,7 +79,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.street') }}"
@@ -92,7 +92,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.country_id') }}"
@@ -110,7 +110,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="postal-code"
@@ -130,7 +130,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.language_id') }}"
@@ -148,7 +148,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('password') }}"
@@ -164,7 +164,7 @@
         </form>
         @if (auth()->user()->can('profiles.{id?}.get') && auth()->id() !== ($address['id'] ?? ''))
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.can_login') }}"
@@ -177,7 +177,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('address.email') }}"
@@ -190,7 +190,7 @@
                 </div>
             </div>
             <div
-                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
+                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 dark:border-secondary-700"
             >
                 <label
                     for="{{ md5('permissions') }}"
@@ -227,7 +227,7 @@
             class="space-y-6"
         >
             <template x-for="(contactOptionGroups, key) in contactOptions">
-                <div class="dark:bg-secondary-700 rounded-md bg-gray-50 p-3">
+                <div class="rounded-md bg-gray-50 p-3 dark:bg-secondary-700">
                     <h4
                         class="pl-3 text-lg font-semibold dark:text-gray-50"
                         x-text="key"

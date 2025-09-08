@@ -1,26 +1,14 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Contact;
-
 use FluxErp\Livewire\Contact\Projects;
 use FluxErp\Models\Contact;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class ProjectsTest extends BaseSetup
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('renders successfully', function (): void {
+    $contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-        $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Projects::class, ['contactId' => $this->contact->id])
-            ->assertStatus(200);
-    }
-}
+    Livewire::test(Projects::class, ['contactId' => $contact->id])
+        ->assertOk();
+});

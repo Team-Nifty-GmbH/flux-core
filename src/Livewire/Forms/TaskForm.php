@@ -8,11 +8,14 @@ use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Models\Task;
+use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class TaskForm extends FluxForm
 {
+    use SupportsAutoRender;
+
     public array $additionalColumns = [];
 
     public ?string $budget = null;

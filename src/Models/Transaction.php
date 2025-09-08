@@ -3,11 +3,13 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -20,9 +22,9 @@ use Illuminate\Support\Facades\Auth;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Transaction extends FluxModel implements InteractsWithDataTables
+class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscribable
 {
-    use Categorizable, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+    use Categorizable, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasTags,
         HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
     protected static function booted(): void

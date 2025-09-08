@@ -1,7 +1,5 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Widgets;
-
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use FluxErp\Enums\OrderTypeEnum;
@@ -16,133 +14,120 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\WorkTime;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class TotalUnassignedBillableHoursTest extends BaseSetup
+beforeEach(function (): void {
+    $contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
+
+    $address = Address::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'contact_id' => $contact->id,
+    ]);
+
+    $priceList = PriceList::factory()->create();
+
+    $currency = Currency::factory()->create([
+        'is_default' => true,
+    ]);
+
+    $language = Language::factory()->create();
+
+    $orderType = OrderType::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
+
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create([
+            'is_default' => false,
+        ]);
+
+    $order = Order::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'address_invoice_id' => $address->id,
+        'address_delivery_id' => $address->id,
+        'is_locked' => false,
+    ]);
+
+    $orderPosition = OrderPosition::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_id' => $order->id,
+    ]);
+
+    $this->workTime = WorkTime::factory()
+        ->for($this->user)
+        ->create([
+            'order_position_id' => null,
+            'is_daily_work_time' => false,
+            'is_billable' => true,
+            'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
+            'ended_at' => Carbon::now()->toDateTimeString(),
+            'total_time_ms' => 7200000,
+        ]);
+
+    WorkTime::factory()
+        ->for($this->user)
+        ->create([
+            'order_position_id' => null,
+            'is_daily_work_time' => true,
+            'is_billable' => true,
+            'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
+            'ended_at' => Carbon::now()->toDateTimeString(),
+            'total_time_ms' => 7200000,
+        ]);
+
+    WorkTime::factory()
+        ->for($this->user)
+        ->create([
+            'order_position_id' => null,
+            'is_daily_work_time' => false,
+            'is_billable' => false,
+            'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
+            'ended_at' => Carbon::now()->toDateTimeString(),
+            'total_time_ms' => 7200000,
+        ]);
+
+    WorkTime::factory()
+        ->for($this->user)
+        ->create([
+            'order_position_id' => $orderPosition->id,
+            'is_daily_work_time' => false,
+            'is_billable' => false,
+            'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
+            'ended_at' => Carbon::now()->toDateTimeString(),
+            'total_time_ms' => 7200000,
+        ]);
+});
+
+test('calculates correct sum of unassigned billable hours', function (): void {
+    Livewire::test(TotalUnassignedBillableHours::class)
+        ->assertSet('sum', calculateDisplayedTime($this->workTime->total_time_ms))
+        ->assertHasNoErrors()
+        ->assertOk();
+});
+
+test('renders successfully', function (): void {
+    Livewire::test(TotalUnassignedBillableHours::class)
+        ->assertOk();
+});
+
+function calculateDisplayedTime(int $ms): string
 {
-    protected string $livewireComponent = TotalUnassignedBillableHours::class;
+    $interval = CarbonInterval::milliseconds($ms)->cascade();
 
-    private WorkTime $workTime;
+    $totalHours = (int) $interval->totalHours;
+    $minutes = $interval->minutes;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
-
-        $address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
-        ]);
-
-        $priceList = PriceList::factory()->create();
-
-        $currency = Currency::factory()->create([
-            'is_default' => true,
-        ]);
-
-        $language = Language::factory()->create();
-
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
-
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create([
-                'is_default' => false,
-            ]);
-
-        $order = Order::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'address_invoice_id' => $address->id,
-            'address_delivery_id' => $address->id,
-            'is_locked' => false,
-        ]);
-
-        $orderPosition = OrderPosition::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_id' => $order->id,
-        ]);
-
-        $this->workTime = WorkTime::factory()
-            ->for($this->user)
-            ->create([
-                'order_position_id' => null,
-                'is_daily_work_time' => false,
-                'is_billable' => true,
-                'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
-                'ended_at' => Carbon::now()->toDateTimeString(),
-                'total_time_ms' => 7200000,
-            ]);
-
-        WorkTime::factory()
-            ->for($this->user)
-            ->create([
-                'order_position_id' => null,
-                'is_daily_work_time' => true,
-                'is_billable' => true,
-                'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
-                'ended_at' => Carbon::now()->toDateTimeString(),
-                'total_time_ms' => 7200000,
-            ]);
-
-        WorkTime::factory()
-            ->for($this->user)
-            ->create([
-                'order_position_id' => null,
-                'is_daily_work_time' => false,
-                'is_billable' => false,
-                'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
-                'ended_at' => Carbon::now()->toDateTimeString(),
-                'total_time_ms' => 7200000,
-            ]);
-
-        WorkTime::factory()
-            ->for($this->user)
-            ->create([
-                'order_position_id' => $orderPosition->id,
-                'is_daily_work_time' => false,
-                'is_billable' => false,
-                'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
-                'ended_at' => Carbon::now()->toDateTimeString(),
-                'total_time_ms' => 7200000,
-            ]);
-    }
-
-    public function test_calculates_correct_sum_of_unassigned_billable_hours(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertSet('sum', $this->calculateDisplayedTime($this->workTime->total_time_ms))
-            ->assertHasNoErrors()
-            ->assertStatus(200);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-
-    protected function calculateDisplayedTime(int $ms): string
-    {
-        $interval = CarbonInterval::milliseconds($ms)->cascade();
-
-        $totalHours = (int) $interval->totalHours;
-        $minutes = $interval->minutes;
-
-        return __('time.hours_minutes', [
-            'hours' => $totalHours,
-            'minutes' => $minutes,
-        ]);
-    }
+    return __('time.hours_minutes', [
+        'hours' => $totalHours,
+        'minutes' => $minutes,
+    ]);
 }

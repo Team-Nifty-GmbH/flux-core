@@ -12,8 +12,10 @@ use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Number;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class ContactBankConnection extends FluxModel
+class ContactBankConnection extends FluxModel implements InteractsWithDataTables
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
@@ -37,6 +39,26 @@ class ContactBankConnection extends FluxModel
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->contact?->getAvatarUrl();
+    }
+
+    public function getDescription(): ?string
+    {
+        return Number::currency($this->balance);
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->bank_name ?? __('Unknown');
+    }
+
+    public function getUrl(): ?string
+    {
+        return null;
     }
 
     public function sepaMandates(): HasMany

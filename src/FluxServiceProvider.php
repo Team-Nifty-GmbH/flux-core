@@ -43,6 +43,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
@@ -279,6 +280,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.targets');
                 Menu::register(route: 'settings.lead-loss-reasons');
                 Menu::register(route: 'settings.lead-states');
+                Menu::register(route: 'settings.email-templates');
                 Menu::register(route: 'settings.tokens');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');

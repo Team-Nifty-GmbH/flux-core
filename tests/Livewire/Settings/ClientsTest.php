@@ -1,16 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Settings;
-
 use FluxErp\Livewire\Settings\Clients;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class ClientsTest extends BaseSetup
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Clients::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Clients::class)
+        ->assertOk();
+});

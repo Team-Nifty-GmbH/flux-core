@@ -33,7 +33,7 @@
                     wire:model="transactionForm.contact_bank_connection_id"
                     required
                     disabled
-                    select="label:bank_name|value:id"
+                    select="label:label|value:id|description:description"
                     unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\ContactBankConnection::class),

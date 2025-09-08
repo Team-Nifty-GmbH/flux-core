@@ -4,15 +4,11 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
-use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\States\Order\PaymentState\Paid;
-use FluxErp\States\PaymentRun\Open;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
+use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class DirectDebit extends OrderList
@@ -31,62 +27,36 @@ class DirectDebit extends OrderList
         'contact_bank_connection.sepa_mandates.sepa_mandate_type_enum',
     ];
 
+    protected PaymentRunTypeEnum $paymentRunTypeEnum = PaymentRunTypeEnum::DirectDebit;
+
     protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('Create Payment Run'))
-                ->attributes([
-                    'wire:click' => 'createPaymentRun',
-                    'wire:flux-confirm' => __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes'),
-                ])
+                ->wireClick('createPaymentRun')
                 ->when(resolve_static(CreatePaymentRun::class, 'canPerformAction', [false])),
         ];
     }
 
+    #[Renderless]
     public function createPaymentRun(): void
     {
-        $orderPayments = $this->getSelectedModelsQuery()
-            ->with('contactBankConnection.sepaMandates')
-            ->whereHas(
-                'contactBankConnection.sepaMandates',
-                fn (Builder $query) => $query->whereNotNull('signed_date')
-            )
-            ->get()
-            ->map(fn (Order $order) => [
-                'order_id' => $order->id,
-                'amount' => bcround($order->balance, 2),
-                'type' => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum ?? null,
-            ])
-            ->groupBy('type')
-            ->toArray();
+        $selectedOrders = $this->getSelectedModelsQuery()->get($this->modelKeyName);
 
-        foreach ($orderPayments as $type => $payments) {
-            try {
-                CreatePaymentRun::make([
-                    'state' => Open::$name,
-                    'payment_run_type_enum' => PaymentRunTypeEnum::DirectDebit,
-                    'sepa_mandate_type_enum' => SepaMandateTypeEnum::tryFrom($type) ?? SepaMandateTypeEnum::BASIC,
-                    'orders' => $payments,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+        if ($selectedOrders->isEmpty()) {
+            $this->toast()
+                ->error(__('Please select at least one order.'))
+                ->send();
 
-                return;
-            }
+            return;
         }
 
-        $this->reset('selected');
+        session(['payment_run_preview_orders' => $selectedOrders->toArray()]);
+        session(['payment_run_type_enum' => $this->paymentRunTypeEnum]);
 
-        $this->toast()
-            ->success(__(':model created', ['model' => __('Payment Run')]))
-            ->send();
-
-        $this->loadData();
+        $this->redirectRoute('accounting.payment-run-preview', navigate: true);
     }
 
     protected function getBuilder(Builder $builder): Builder

@@ -1,7 +1,5 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web\Portal;
-
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -11,123 +9,110 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 
-class OrdersTest extends PortalSetup
-{
-    private Order $order;
+beforeEach(function (): void {
+    $priceList = PriceList::factory()->create([
+        'is_default' => true,
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $currency = Currency::factory()->create([
+        'is_default' => true,
+    ]);
 
-        $priceList = PriceList::factory()->create([
+    $language = Language::factory()->create();
+
+    $orderType = OrderType::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
+
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create([
             'is_default' => true,
+            'is_active' => true,
+            'is_sales' => true,
         ]);
 
-        $currency = Currency::factory()->create([
-            'is_default' => true,
-        ]);
+    $this->order = Order::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'address_invoice_id' => $this->address->id,
+        'address_delivery_id' => $this->address->id,
+        'is_locked' => true,
+    ]);
+});
 
-        $language = Language::factory()->create();
+test('portal orders id no user', function (): void {
+    $this->actingAsGuest();
 
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $this->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
+});
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create([
-                'is_default' => true,
-                'is_active' => true,
-                'is_sales' => true,
-            ]);
+test('portal orders id order not contact id', function (): void {
+    $this->order->update(['contact_id' => null]);
 
-        $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'address_invoice_id' => $this->user->id,
-            'address_delivery_id' => $this->user->id,
-            'is_locked' => true,
-        ]);
-    }
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-    public function test_portal_orders_id_no_user(): void
-    {
-        $this->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertNotFound();
+});
 
-    public function test_portal_orders_id_order_not_contact_id(): void
-    {
-        $this->order->update(['contact_id' => null]);
+test('portal orders id order not found', function (): void {
+    $this->order->delete();
 
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-        $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(404);
-    }
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertNotFound();
+});
 
-    public function test_portal_orders_id_order_not_found(): void
-    {
-        $this->order->delete();
+test('portal orders id order not locked', function (): void {
+    $this->order->update(['is_locked' => false, 'is_imported' => false]);
 
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-        $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(404);
-    }
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertNotFound();
+});
 
-    public function test_portal_orders_id_order_not_locked(): void
-    {
-        $this->order->update(['is_locked' => false, 'is_imported' => false]);
+test('portal orders id page', function (): void {
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(404);
-    }
+test('portal orders id without permission', function (): void {
+    Permission::findOrCreate('orders.{id}.get', 'address');
 
-    public function test_portal_orders_id_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertForbidden();
+});
 
-        $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(200);
-    }
+test('portal orders no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_portal_orders_id_without_permission(): void
-    {
-        Permission::findOrCreate('orders.{id}.get', 'address');
+    $this->get(route('portal.orders'))
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
+});
 
-        $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(403);
-    }
+test('portal orders page', function (): void {
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.get', 'address'));
 
-    public function test_portal_orders_no_user(): void
-    {
-        $this->get(route('portal.orders'))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
+    $this->actingAs($this->address, 'address')->get(route('portal.orders'))
+        ->assertOk();
+});
 
-    public function test_portal_orders_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.get', 'address'));
+test('portal orders without permission', function (): void {
+    Permission::findOrCreate('orders.get', 'address');
 
-        $this->actingAs($this->user, 'address')->get(route('portal.orders'))
-            ->assertStatus(200);
-    }
-
-    public function test_portal_orders_without_permission(): void
-    {
-        Permission::findOrCreate('orders.get', 'address');
-
-        $this->actingAs($this->user, 'address')->get(route('portal.orders'))
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->address, 'address')->get(route('portal.orders'))
+        ->assertForbidden();
+});

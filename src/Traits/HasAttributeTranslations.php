@@ -74,7 +74,11 @@ trait HasAttributeTranslations
                         data_get($translation, 'value'),
                         [
                             '<p></p>',
-                            $model->getRawOriginal(data_get($translation, 'attribute')),
+                            data_get(
+                                $model->getPrevious(),
+                                data_get($translation, 'attribute'),
+                                $model->getAttribute(data_get($translation, 'attribute'))
+                            ),
                         ],
                         true
                     )

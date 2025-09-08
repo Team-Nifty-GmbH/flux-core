@@ -32,7 +32,6 @@ use FluxErp\Models\Discount;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order as OrderModel;
-use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -71,8 +70,6 @@ class Order extends Component
     public OrderReplicateForm $replicateOrder;
 
     public ScheduleForm $schedule;
-
-    public array $selectedOrderPositions = [];
 
     public array $states = [];
 
@@ -403,7 +400,7 @@ class Order extends Component
                 ->color('red')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
-                        && $this->order->invoice_date
+                        && $this->order->invoice_number
                         && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->whereIn('order_type_enum', [
@@ -418,7 +415,7 @@ class Order extends Component
                 })
                 ->attributes([
                     'class' => 'w-full',
-                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
+                    'wire:click' => 'replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
                 ]),
             DataTableButton::make()
                 ->text(__('Create Split-Order'))
@@ -426,7 +423,7 @@ class Order extends Component
                 ->color('indigo')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
-                        && ! $this->order->invoice_date
+                        && ! $this->order->invoice_number
                         && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
@@ -439,7 +436,7 @@ class Order extends Component
                 })
                 ->attributes([
                     'class' => 'w-full',
-                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
+                    'wire:click' => 'replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
                 ]),
         ];
     }
@@ -504,12 +501,6 @@ class Order extends Component
     }
 
     #[Renderless]
-    public function recalculateReplicateOrderPositions(): void
-    {
-        $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
-    }
-
-    #[Renderless]
     public function reOrderDiscount(Discount $discount, int $index): bool
     {
         try {
@@ -535,37 +526,31 @@ class Order extends Component
     #[Renderless]
     public function replicate(?string $orderTypeEnum = null): void
     {
+        if (
+            resolve_static(OrderType::class, 'query')
+                ->where('order_type_enum', $orderTypeEnum)
+                ->where('is_active', true)
+                ->exists()
+            && in_array($orderTypeEnum, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])) {
+            $this->redirectRoute(
+                'orders.create-child-order',
+                [
+                    'orderId' => $this->order->id,
+                    'type' => $orderTypeEnum,
+                ],
+                navigate: true
+            );
+
+            return;
+        }
+
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
 
-        $replicateOrderTypes = resolve_static(OrderType::class, 'query')
-            ->where('order_type_enum', $orderTypeEnum)
-            ->where('is_active', true)
-            ->get(['id'])
-            ->toArray();
+        $this->replicateOrder->order_positions = null;
 
-        if ($replicateOrderTypes) {
-            $this->replicateOrder->parent_id = $this->order->id;
-            $this->replicateOrder->order_positions = [];
-            if (count($replicateOrderTypes) === 1) {
-                $this->replicateOrder->order_type_id = $replicateOrderTypes[0]['id'];
-            }
-
-            $this->js(<<<'JS'
-                $modalOpen('create-child-order');
-            JS);
-        } else {
-            $this->replicateOrder->order_positions = null;
-            $this->skipRender();
-
-            $this->js(<<<'JS'
-                $modalOpen('replicate-order');
-            JS);
-        }
-
-        $orderTypeIds = json_encode(array_column($replicateOrderTypes, 'id'));
-        $this->js(<<<JS
-            \$tallstackuiSelect('replicate-order-order-type').mergeRequestParams({whereIn: [['id', $orderTypeIds]]})
+        $this->js(<<<'JS'
+            $modalOpen('replicate-order');
         JS);
     }
 
@@ -671,41 +656,6 @@ class Order extends Component
         }
     }
 
-    #[Renderless]
-    public function takeOrderPositions(array $positionIds): void
-    {
-        $orderPositions = resolve_static(OrderPosition::class, 'query')
-            ->whereIntegerInRaw('order_positions.id', $positionIds)
-            ->where('order_positions.order_id', $this->order->id)
-            ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
-            ->selectRaw(
-                'order_positions.id' .
-                ', order_positions.amount' .
-                ', order_positions.name' .
-                ', order_positions.description' .
-                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
-                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
-            )
-            ->groupBy([
-                'order_positions.id',
-                'order_positions.amount',
-                'order_positions.name',
-                'order_positions.description',
-            ])
-            ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > descendantAmount')
-            ->get();
-
-        foreach ($orderPositions as $orderPosition) {
-            $this->replicateOrder->order_positions[] = [
-                'id' => $orderPosition->id,
-                'amount' => $orderPosition->totalAmount,
-                'name' => $orderPosition->name,
-                'description' => $orderPosition->description,
-            ];
-        }
-    }
-
     public function toggleLock(): void
     {
         try {
@@ -786,7 +736,7 @@ class Order extends Component
                         'order_column',
                         'is_percentage',
                     ]),
-                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
+                'orderType:id,name,email_template_id,print_layouts,order_type_enum',
                 'priceList:id,name,is_net',
                 'users:id,name',
             ])
@@ -848,9 +798,9 @@ class Order extends Component
         );
     }
 
-    protected function getHtmlBody(OffersPrinting $item): string
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
     {
-        return html_entity_decode($item->orderType->mail_body);
+        return $item->orderType?->email_template_id;
     }
 
     protected function getPrintLayouts(): array
@@ -864,9 +814,7 @@ class Order extends Component
 
     protected function getSubject(OffersPrinting $item): string
     {
-        return html_entity_decode(
-            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
-        );
+        return __(Str::headline($item->orderType->name)) . ' ' . $item->order_number;
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array

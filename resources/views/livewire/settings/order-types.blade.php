@@ -16,7 +16,7 @@
                         :placeholder="__('Select a Client')"
                         wire:model="orderType.client_id"
                         select="label:name|value:id"
-                        :options="$clients"
+                        :request="route('search', \FluxErp\Models\Client::class)"
                     />
                     <x-select.styled
                         :label="__('Order Type')"
@@ -58,13 +58,30 @@
                         wire:model="orderType.is_visible_in_sidebar"
                         :label="__('Is Visible In Sidebar')"
                     />
-                    <x-input
-                        wire:model="orderType.mail_subject"
-                        :label="__('Mail Subject')"
-                    />
-                    <x-flux::editor
-                        wire:model="orderType.mail_body"
-                        :label="__('Mail Body')"
+                    <x-select.styled
+                        :label="__('Email Template')"
+                        wire:model="orderType.email_template_id"
+                        select="label:label|value:id"
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\EmailTemplate::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'searchFields' => [
+                                    'name',
+                                ],
+                                'where' => [
+                                    [
+                                        'model_type',
+                                        '=',
+                                        morph_alias(\FluxErp\Models\Order::class),
+                                    ],
+                                ],
+                                'whereNull' => [
+                                    'model_type',
+                                    'or',
+                                ],
+                            ],
+                        ]"
                     />
                 </div>
             </div>

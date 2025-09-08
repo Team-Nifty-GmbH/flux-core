@@ -3,10 +3,12 @@
 namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\CreateTaskRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class CreateTask extends FluxAction
 {
@@ -31,6 +33,16 @@ class CreateTask extends FluxAction
 
         if ($users) {
             $task->users()->attach($users);
+
+            event(TaskAssignedEvent::make($task)
+                ->subscribeChannel(
+                    collect($users)
+                        ->when(
+                            $this->getData('responsible_user_id'),
+                            fn (Collection $users) => $users->add($this->getData('responsible_user_id'))
+                        )
+                )
+            );
         }
 
         if ($orderPositions) {
@@ -46,7 +58,7 @@ class CreateTask extends FluxAction
             $task->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
-        return $task->fresh();
+        return $task->refresh();
     }
 
     protected function prepareForValidation(): void
