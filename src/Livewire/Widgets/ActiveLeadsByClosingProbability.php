@@ -75,7 +75,8 @@ class ActiveLeadsByClosingProbability extends BarChart
                 ),
                 $granularity
             );
-        })->sortKeys();
+        })
+            ->sortKeys();
 
         $this->series = [
             [
