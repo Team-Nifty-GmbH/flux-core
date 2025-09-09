@@ -64,8 +64,17 @@ class ActiveLeadsByClosingProbability extends BarChart
             })
             ->get();
 
+        // Group leads into probability intervals ("bins") for histogram-like aggregation
         $bins = $activeLeads->groupBy(function ($lead) use ($granularity) {
-            return floor($lead->probability_percentage * 100 / $granularity) * $granularity;
+            return bcmul(
+                bcfloor(
+                    bcdiv(
+                        bcmul($lead->probability_percentage, 100),
+                        $granularity
+                    )
+                ),
+                $granularity
+            );
         })->sortKeys();
 
         $this->series = [
@@ -79,7 +88,7 @@ class ActiveLeadsByClosingProbability extends BarChart
 
         foreach ($bins as $lower => $leadsInBin) {
             $upper = $lower + $granularity;
-            $label = __(':lower%–:upper%', [
+            $label = __(':lower% – :upper%', [
                 'lower' => $lower,
                 'upper' => $upper,
             ]);
