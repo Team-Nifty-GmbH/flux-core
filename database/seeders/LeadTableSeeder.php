@@ -15,7 +15,9 @@ class LeadTableSeeder extends Seeder
     {
         $addresses = Address::all(['id']);
         $leadStates = LeadState::all(['id']);
-        $leadRecordOrigins = RecordOrigin::all()->where('model_type', morph_alias(Lead::class))->get(['id']);
+        $leadRecordOrigins = RecordOrigin::query()
+            ->where('model_type', morph_alias(Lead::class))
+            ->get(['id']);
 
         foreach (User::all(['id']) as $user) {
             Lead::factory()->create([

@@ -68,7 +68,8 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
                             ->where('is_won', false)
                             ->where('is_lost', false);
                     })
-                        ->whereBetween('end', [$start, $end]);
+                        ->where('start', '<=', $end)
+                        ->where('end', '>=', $start);
                 },
             ])
             ->having('total', '>', 0)
@@ -84,7 +85,6 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
                     'data' => [$user->total],
                 ];
             })
-            ->take(25)
             ->values()
             ->all();
     }
@@ -123,15 +123,17 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('user_id', data_get($params, 'id'))
-                ->whereValueBetween(now(), ['start', 'end'])
+                ->where('start', '<=', $end)
+                ->where('end', '>=', $start)
                 ->whereHas(
                     'leadState',
                     fn (Builder $query) => $query
                         ->where('is_won', false)
                         ->where('is_lost', false)
                 ),
-            __('Active leads by :user', ['user' => data_get($params, 'name')]) . ' ' .
-            __('between :start and :end', ['start' => $start, 'end' => $end]),
+            __('Active leads by :user', ['user' => data_get($params, 'name')])
+            . ' '
+            . __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
             ->store();
 
