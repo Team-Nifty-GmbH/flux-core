@@ -54,6 +54,7 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         $order = CreateOrder::make($this->data)->validate()->execute();
 
         foreach (data_get($this->data, 'purchase_invoice_positions', []) as $position) {
+            data_forget($position, 'uuid');
             CreateOrderPosition::make(
                 array_merge(
                     $position,
