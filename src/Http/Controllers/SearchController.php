@@ -106,18 +106,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereBetween')) {
-            $pairs = $request->get('whereBetween');
-
-            if (is_array($pairs)) {
-                for ($i = 0; $i < count($pairs); $i += 2) {
-                    $column = $pairs[$i] ?? null;
-                    $range = $pairs[$i + 1] ?? null;
-
-                    if (is_string($column) && is_array($range) && count($range) === 2) {
-                        $query->whereBetween($column, $range);
-                    }
-                }
-            }
+            $query->whereBetween(...$request->get('whereBetween'));
         }
 
         if ($request->has('whereNotBetween')) {

@@ -33,7 +33,7 @@ class MyTargetProgresses extends RadialBarChart
     public function mount(): void
     {
         $this->userId = auth()->id();
-        $this->chart['id'] = data_get($this->chart, 'id', 'apx-' . $this->getId());
+        $this->chart['id'] = data_get($this->chart, 'id') ?? ('apx-' . $this->getId());
 
         parent::mount();
     }
@@ -81,7 +81,7 @@ class MyTargetProgresses extends RadialBarChart
     {
         return $target && $this->userId
             ? bcmul(
-                bcdiv($target->calculateCurrentValue($this->userId), abs($target->target_value)),
+                bcdiv($target->calculateCurrentValue($this->userId), bcabs($target->target_value)),
                 100
             )
             : 0;
