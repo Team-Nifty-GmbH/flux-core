@@ -8,9 +8,12 @@ export default class SnippetBoxElement extends PrintElement {
         this._content = null;
     }
 
-    get snippet() {
+    async snippet() {
         if (this._content === null) {
-            this._content = this.store.component.snippetToJson(this._snippetId);
+            const { content } = await this.store.component.snippetToJson(
+                this._snippetId,
+            );
+            this._content = content;
             return this._content;
         } else {
             return this._content;

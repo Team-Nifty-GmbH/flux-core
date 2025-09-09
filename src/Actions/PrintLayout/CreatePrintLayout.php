@@ -6,10 +6,11 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PrintLayout;
 use FluxErp\Rulesets\PrintLayout\CreatePrintLayoutRuleset;
 use FluxErp\Traits\Livewire\PrintLayout\MediaHandler;
+use FluxErp\Traits\Livewire\PrintLayout\SnippetHandler;
 
 class CreatePrintLayout extends FluxAction
 {
-    use MediaHandler;
+    use MediaHandler, SnippetHandler;
     public static function models(): array
     {
         return [PrintLayout::class];
@@ -43,6 +44,8 @@ class CreatePrintLayout extends FluxAction
         // footer
         $footer = $this->getData('footer', []);
         $this->addMedia($footer,$temporaryMedia,$printLayout->id);
+        $this->addSnippets($footer,$this->getData('temporary_snippets.footer', []),$printLayout->id);
+
 
         $printLayout->fill([
             'margin' => $this->getData('margin', []),

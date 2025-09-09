@@ -211,9 +211,14 @@ export default function () {
                 return { name: `box-${item.snippetId}`, ref: item };
             });
 
+            const maxId = Math.max(
+                ...this.visibleSnippetBoxes.map((item) => item.snippetId),
+                0,
+            );
+
             const temporaryNames = this.temporarySnippetBoxes.map(
                 (item, index) => {
-                    return { name: `box-${index + 1}`, ref: item };
+                    return { name: `box-${maxId + index + 1}`, ref: item };
                 },
             );
 
@@ -374,7 +379,7 @@ export default function () {
                 }
             });
 
-            json?.snippets.map((item) => {
+            json.snippets?.map((item) => {
                 const element =
                     $refs['footer-snippet']?.content.cloneNode(true);
                 if (element) {

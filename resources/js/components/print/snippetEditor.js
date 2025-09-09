@@ -11,8 +11,7 @@ export default function ($store, id) {
             );
             if (index !== -1) {
                 this.elementObj = $store.visibleSnippetBoxes[index];
-                const { content } = await this.elementObj.snippet;
-                this.text = content;
+                this.text = await this.elementObj.snippet();
             } else {
                 throw new Error('Snippet Element not found');
             }
@@ -24,8 +23,7 @@ export default function ($store, id) {
             this.elementObj.content = this.text;
         },
         async resetContent() {
-            const { content } = await this.elementObj.snippet;
-            this.text = content;
+            this.text = await this.elementObj.snippet();
         },
     };
 }

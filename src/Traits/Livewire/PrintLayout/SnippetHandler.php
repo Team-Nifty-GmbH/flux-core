@@ -3,6 +3,8 @@
 namespace FluxErp\Traits\Livewire\PrintLayout;
 
 use FluxErp\Actions\PrintLayoutSnippet\CreatePrintLayoutSnippet;
+use FluxErp\Actions\PrintLayoutSnippet\DeletePrintLayoutSnippet;
+use FluxErp\Actions\PrintLayoutSnippet\UpdatePrintLayoutSnippet;
 
 trait SnippetHandler
 {
@@ -36,8 +38,47 @@ trait SnippetHandler
         }
     }
 
-    public function syncSnippets()
+    // used to sync snippets between front-end and back-end on user submit (user edited/deleted the snippet on front-end)
+    // editing/deleting snippets on frond-end will not be immediately reflected on back-end
+    // in order to preserve previous state if user decides to cancel the operation
+    /**
+     * @param array $rootElement - related to header, footer or first_page_header
+     *                                  containing latest media snapshot from front-end
+     * @param array $dbSnapshot - snapshot of media related to header, footer or first_page_header
+     *                            before user started editing it on front-end
+     * @return void
+     */
+    public function syncSnippets(array &$rootElement, array $dbSnapshot): void
     {
+        $diff =  array_diff(array_column($dbSnapshot,'id'),array_column($rootElement['snippets'] ?? [],'id'));
+
+        // delete snippets that are in dbSnapshot but not in rootElement['snippets']
+        if($diff) {
+            foreach ($diff as $snippetId) {
+                DeletePrintLayoutSnippet::make([
+                    'id' => $snippetId,
+                ])->checkPermission()
+                    ->validate()
+                    ->execute();
+            }
+        }
+
+        // update remaining snippets
+        if($rootElement['snippets']) {
+            foreach ($rootElement['snippets'] as &$snippet) {
+            UpdatePrintLayoutSnippet::make([
+                'id' => $snippet['id'],
+                'content' => $snippet['content'],
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            unset($snippet['content']);
+            }
+            // clean up - to ensure in place changes are reflected outside the method
+            unset($snippet);
+        }
 
     }
 }

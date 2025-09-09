@@ -271,6 +271,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 this.editFirstPageHeader = false;
                 // due to nature of a file upload - it is not renderlless - Livewire will drive the re-render
                 // all the elements will disappear - hence stores need to be reloaded
+                // TODO: add condition if template snippet is added - to reload
                 if (
                     $footerStore.temporaryVisibleMedia.length > 0 ||
                     $headerStore.temporaryVisibleMedia.length > 0 ||

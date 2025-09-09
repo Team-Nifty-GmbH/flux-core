@@ -44,8 +44,10 @@ class UpdatePrintLayout extends FluxAction
 
         // footer
         $snapshotDBFooterMedia = $printLayout->footer['media'] ?? [];
+        $snapshotDBFooterSnippets = $printLayout->footer['snippets'] ?? [];
         $footer = $this->getData('footer');
         $this->syncMedia($footer['media'] ?? [], $snapshotDBFooterMedia);
+        $this->syncSnippets($footer, $snapshotDBFooterSnippets);
         $this->addMedia($footer,$temporaryMedia,$this->getData('id'));
         $this->addSnippets($footer,$this->getData('temporary_snippets.footer', []),$this->getData('id'));
 
