@@ -72,7 +72,6 @@ class ConversionRateByLeadOrigin extends BarChart
             ])
             ->having('total', '>', 0)
             ->orderByDesc('total')
-            ->limit(10)
             ->get();
 
         $leadsWithWonLeadState = resolve_static(RecordOrigin::class, 'query')
@@ -88,7 +87,6 @@ class ConversionRateByLeadOrigin extends BarChart
             ])
             ->having('total', '>', 0)
             ->orderByDesc('total')
-            ->limit(10)
             ->get();
 
         $this->series = $leadsWithWonOrLostLeadState
