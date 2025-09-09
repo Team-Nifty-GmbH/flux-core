@@ -36,6 +36,10 @@ class ConversionRateByLeadOrigin extends BarChart
 
     public bool $showTotals = false;
 
+    public ?array $yaxis = [
+        'labels' => ['show' => false],
+    ];
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -54,7 +58,7 @@ class ConversionRateByLeadOrigin extends BarChart
         $start = $this->getStart()->toDateString();
         $end = $this->getEnd()->toDateString();
 
-        $LeadsWithWonOrLostLeadState = resolve_static(RecordOrigin::class, 'query')
+        $leadsWithWonOrLostLeadState = resolve_static(RecordOrigin::class, 'query')
             ->where('model_type', morph_alias(Lead::class))
             ->withCount([
                 'leads as total' => function (Builder $query) use ($start, $end): void {
@@ -71,7 +75,7 @@ class ConversionRateByLeadOrigin extends BarChart
             ->limit(10)
             ->get();
 
-        $LeadsWithWonLeadState = resolve_static(RecordOrigin::class, 'query')
+        $leadsWithWonLeadState = resolve_static(RecordOrigin::class, 'query')
             ->where('model_type', morph_alias(Lead::class))
             ->withCount([
                 'leads as total' => function (Builder $query) use ($start, $end): void {
@@ -87,27 +91,26 @@ class ConversionRateByLeadOrigin extends BarChart
             ->limit(10)
             ->get();
 
-        $this->series = $LeadsWithWonOrLostLeadState
-            ->map(function (Model $LeadWithWonOrLostLeadState) use ($LeadsWithWonLeadState): array {
-                $conversionRate = round(bcdiv(
-                    $LeadsWithWonLeadState->find($LeadWithWonOrLostLeadState->getKey())?->total ?? 0,
-                    $LeadWithWonOrLostLeadState->total,
-                    3
-                ) * 100, 1);
+        $this->series = $leadsWithWonOrLostLeadState
+            ->map(function (Model $leadWithWonOrLostLeadState) use ($leadsWithWonLeadState): array {
+                $conversionRate = bcround(
+                    bcmul(
+                        bcdiv(
+                            $leadsWithWonLeadState->find($leadWithWonOrLostLeadState->getKey())?->total ?? 0,
+                            $leadWithWonOrLostLeadState->total
+                        ),
+                        100),
+                    1);
 
                 return [
-                    'id' => $LeadWithWonOrLostLeadState->getKey(),
-                    'name' => $LeadWithWonOrLostLeadState->name,
-                    'color' => ChartColorEnum::forKey($LeadWithWonOrLostLeadState->getKey())->value,
+                    'id' => $leadWithWonOrLostLeadState->getKey(),
+                    'name' => $leadWithWonOrLostLeadState->name,
+                    'color' => ChartColorEnum::forKey($leadWithWonOrLostLeadState->getKey())->value,
                     'data' => [$conversionRate],
                 ];
             })
             ->values()
             ->all();
-
-        $this->yaxis = [
-            'labels' => ['show' => false],
-        ];
     }
 
     #[Js]
