@@ -221,6 +221,18 @@ export default function () {
                     .forEach((element) => {
                         element.positionBackInBound();
                     });
+
+                this.temporarySnippetBoxes
+                    .filter((item) => this.elementsOutOfView.includes(item.id))
+                    .forEach((element) => {
+                        element.positionBackInBound();
+                    });
+
+                this.visibleSnippetBoxes
+                    .filter((item) => this.elementsOutOfView.includes(item.id))
+                    .forEach((element) => {
+                        element.positionBackInBound();
+                    });
             }
         },
         saveText() {

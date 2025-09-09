@@ -400,6 +400,15 @@ export default function () {
                 ? resizableElementHeights.push(...visibleMedia)
                 : resizableElementHeights.push(0);
 
+            // temp snippet boxes height
+            const tempSnippetBoxes = this.temporarySnippetBoxes.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+
+            tempSnippetBoxes.length > 0
+                ? resizableElementHeights.push(...tempSnippetBoxes)
+                : resizableElementHeights.push(0);
+
             return Math.max(...resizableElementHeights);
         },
         async reload($refs, isClientChange = true) {
@@ -407,7 +416,7 @@ export default function () {
                 this.observer.disconnect();
             }
 
-            // if client is not chaged - Livewire will not remove the cloned elements
+            // if client is not changed - Livewire will not remove the cloned elements
             if (!isClientChange) {
                 this.visibleElements.forEach((item) => {
                     this.footer.removeChild(item.element);
@@ -603,7 +612,7 @@ export default function () {
                     const footerSnippets = this.temporarySnippetBoxes.map(
                         (item) => {
                             return {
-                                text: item.content,
+                                content: item.content,
                                 x: roundToOneDecimal(
                                     item.position.x / this.pxPerCm,
                                 ),
@@ -625,7 +634,6 @@ export default function () {
                             };
                         },
                     );
-                    console.log(footerSnippets);
                     await this.component.set(
                         'form.temporary_snippets',
                         { footer: footerSnippets },

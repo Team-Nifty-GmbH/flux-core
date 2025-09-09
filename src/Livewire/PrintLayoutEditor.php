@@ -6,6 +6,7 @@ use FluxErp\Livewire\Forms\PrintLayoutForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\Media;
 use FluxErp\Models\PrintLayout;
+use FluxErp\Models\PrintLayoutSnippet;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Carbon;
@@ -67,6 +68,15 @@ class PrintLayoutEditor extends Component
             'client' => $client,
             'bank_connections' => $bankConnections,
         ];
+    }
+
+    #[Renderless]
+    public function snippetToJson(int $id): array
+    {
+        return resolve_static(PrintLayoutSnippet::class, 'query')
+            ->whereKey($id)
+            ->first()
+            ->toArray();
     }
 
     public function mount(): void

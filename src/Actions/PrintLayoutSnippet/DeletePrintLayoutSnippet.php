@@ -3,20 +3,25 @@
 namespace FluxErp\Actions\PrintLayoutSnippet;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\PrintLayoutSnippet;
+use FluxErp\Rulesets\PrintLayoutSnippet\DeletePrintLayoutSnippetRuleset;
 
 class DeletePrintLayoutSnippet extends FluxAction
 {
     public static function models(): array
     {
-        // TODO: Implement models() method.
+        return [PrintLayoutSnippet::class];
     }
 
     protected function getRulesets(): string|array {
-
+        return [DeletePrintLayoutSnippetRuleset::class];
     }
 
     public function performAction(): mixed
     {
-        // TODO: Implement performAction() method.
+        return resolve_static(PrintLayoutSnippet::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first()
+            ->delete();
     }
 }

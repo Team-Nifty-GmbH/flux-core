@@ -3,7 +3,6 @@
 namespace FluxErp\Actions\PrintLayout;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\PrintLayout;
 use FluxErp\Rulesets\PrintLayout\CreatePrintLayoutRuleset;
 use FluxErp\Traits\Livewire\PrintLayout\MediaHandler;

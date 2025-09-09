@@ -3,20 +3,29 @@
 namespace FluxErp\Actions\PrintLayoutSnippet;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\PrintLayoutSnippet;
+use FluxErp\Rulesets\PrintLayoutSnippet\UpdatePrintLayoutSnippetRuleset;
 
 class UpdatePrintLayoutSnippet extends FluxAction
 {
     public static function models(): array
     {
-        // TODO: Implement models() method.
+        return [PrintLayoutSnippet::class];
     }
 
     protected function getRulesets(): string|array {
-
+        return [UpdatePrintLayoutSnippetRuleset::class];
     }
 
     public function performAction(): mixed
     {
-        // TODO: Implement performAction() method.
+        $snippet = resolve_static(PrintLayoutSnippet::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
+
+        $snippet->fill($this->data);
+        $snippet->save();
+
+        return $snippet->refresh();
     }
 }
