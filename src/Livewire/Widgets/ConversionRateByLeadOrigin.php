@@ -59,6 +59,7 @@ class ConversionRateByLeadOrigin extends BarChart
         $end = $this->getEnd()->toDateString();
 
         $leadsWithWonOrLostLeadState = resolve_static(RecordOrigin::class, 'query')
+            ->select(['id', 'name'])
             ->where('model_type', morph_alias(Lead::class))
             ->withCount([
                 'leads as total' => function (Builder $query) use ($start, $end): void {
@@ -75,6 +76,7 @@ class ConversionRateByLeadOrigin extends BarChart
             ->get();
 
         $leadsWithWonLeadState = resolve_static(RecordOrigin::class, 'query')
+            ->select(['id', 'name'])
             ->where('model_type', morph_alias(Lead::class))
             ->withCount([
                 'leads as total' => function (Builder $query) use ($start, $end): void {
