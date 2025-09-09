@@ -203,7 +203,7 @@
                 x-ref="footer-additional-snippet"
             >
                 <div
-                    x-data="snippetEditor(footerStore,$el.id)"
+                    x-data="temporarySnippetEditor(footerStore,$el.id)"
                     x-init="onInit"
                     x-on:mousedown="printStore.editFooter && footerStore.snippetEditorXData === null ? footerStore.onMouseDown($event,$el.id,'temporary-snippet') : null"
                     id="footer-snippet-placeholder"
@@ -224,9 +224,9 @@
                             dragable="false"
                             x-on:mousedown="toggleEditor()"
                             name="pencil" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
-                        <template x-if="footerStore.snippetEditorXData?.elementObj.id === elementObj.id">
+                        <template x-if="footerStore.snippetEditorXData?.elementObj.id === objId">
                             <x-flux::editor
-                                x-editable="footerStore.snippetEditorXData?.elementObj.id === elementObj.id"
+                                x-editable="footerStore.snippetEditorXData?.elementObj.id === objId"
                                 class="absolute top-0 left-0 w-full p-0"
                                 x-modelable="content"
                                 x-model="text"
@@ -246,6 +246,62 @@
                             dragable="false"
                             x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary-snippet')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 bottom-0 h-4 w-4 rounded-full"></x-icon>
+                    </div>
+                </div>
+            </template>
+            <template
+                id="{{ uniqid() }}"
+                x-ref="footer-snippet">
+                <div
+                    x-data="snippetEditor(footerStore,$el.id)"
+                    x-init="onInit"
+                    id="footer-snippet"
+                    x-on:mousedown="printStore.editFooter && footerStore.snippetEditorXData === null ? footerStore.onMouseDown($event,$el.id,'snippet') : null"
+                    data-type="resizable"
+                    draggable="false"
+                    class="absolute w-[10cm] h-[1.7cm] border"
+                    :class="{
+                    'border-primary-200': footerStore.isSnippetResizeClicked,
+                    'bg-gray-100' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id
+                    }"
+                >
+                    <div
+                        draggable="false"
+                        x-cloak x-show="printStore.editFooter" class="relative w-full h-full">
+                        <x-icon
+                            x-cloak
+                            x-show="footerStore.snippetEditorXData === null"
+                            dragable="false"
+                            x-on:mousedown="toggleEditor()"
+                            name="pencil" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
+                        <template x-if="footerStore.snippetEditorXData?.elementObj.id === objId">
+                            <x-flux::editor
+                                x-editable="footerStore.snippetEditorXData?.elementObj.id === objId"
+                                class="absolute top-0 left-0 w-full p-0"
+                                x-modelable="content"
+                                x-model="text"
+                                :full-height="true"
+                                :tooltip-dropdown="true"
+                                :transparent="true" />
+                        </template>
+                        <div
+                            x-cloak
+                            x-show="footerStore.snippetEditorXData === null"
+                            class="text-left text-[12px] p-1"
+                            x-html="text">
+                        </div>
+                        <x-icon
+                            x-cloak
+                            x-show="footerStore.snippetEditorXData === null"
+                            dragable="false"
+                            x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'snippet')"
+                            name="arrows-pointing-out" class="absolute cursor-pointer right-0 bottom-0 h-4 w-4 rounded-full"></x-icon>
+                    </div>
+                    <div
+                        x-cloak
+                        x-show="!printStore.editFooter"
+                        class="text-left text-[12px] p-1"
+                        x-html="text">
                     </div>
                 </div>
             </template>

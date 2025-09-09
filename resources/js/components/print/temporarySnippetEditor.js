@@ -5,16 +5,14 @@ export default function ($store, id) {
         },
         elementObj: null,
         text: '',
-        async onInit() {
-            const index = $store.visibleSnippetBoxes.findIndex(
+        onInit() {
+            const index = $store.temporarySnippetBoxes.findIndex(
                 (item) => item.id === id,
             );
             if (index !== -1) {
-                this.elementObj = $store.visibleSnippetBoxes[index];
-                const { content } = await this.elementObj.snippet;
-                this.text = content;
+                this.elementObj = $store.temporarySnippetBoxes[index];
             } else {
-                throw new Error('Snippet Element not found');
+                throw new Error('Template Snippet Element not found');
             }
         },
         toggleEditor() {
@@ -23,9 +21,8 @@ export default function ($store, id) {
         saveText() {
             this.elementObj.content = this.text;
         },
-        async resetContent() {
-            const { content } = await this.elementObj.snippet;
-            this.text = content;
+        resetContent() {
+            this.text = this.elementObj.content;
         },
     };
 }

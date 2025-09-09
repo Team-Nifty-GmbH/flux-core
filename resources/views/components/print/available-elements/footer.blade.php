@@ -134,7 +134,7 @@
             <div class="text-gray-400 text-[12px]" x-text="snippet.name"></div>
             <x-button.circle
                 x-bind:disabled="footerStore.snippetEditorXData !== null"
-                x-on:click="footerStore.deleteTemporarySnippet(snippet.ref.id)"
+                x-on:click="footerStore.deleteSnippet(snippet.ref.id)"
                 icon="trash"
             />
         </div>

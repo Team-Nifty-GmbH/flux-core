@@ -127,6 +127,25 @@ export default function () {
                         `Temporary element with id ${id} not found`,
                     );
                 }
+            } else if (source === 'snippet') {
+                const index = this.visibleSnippetBoxes.findIndex(
+                    (item) => item.id === id,
+                );
+                if (index !== -1) {
+                    const element = this.visibleSnippetBoxes[index];
+                    this._selectedElement.id = id;
+                    this._selectedElement.ref = element;
+                    const { x, y } = element.position;
+                    this._selectedElement.x = x;
+                    this._selectedElement.y = y;
+                    this._selectedElement.startX = e.clientX;
+                    this._selectedElement.startY = e.clientY;
+                    // only for snippet resize
+                    this._selectedElement.width = element.width;
+                    this._selectedElement.height = element.height;
+                } else {
+                    throw new Error(`Snippet element with id ${id} not found`);
+                }
             } else {
                 throw new Error(
                     `Invalid source: ${source} - eather 'element' or 'temporary'`,

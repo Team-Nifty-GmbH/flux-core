@@ -22,7 +22,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
         editMargin: false,
         editHeader: false,
         editFirstPageHeader: false,
-        editFooter: true,
+        editFooter: false,
         async selectClient(e, $wire, $refs) {
             this._loading = true;
             await $wire.selectClient(e.target.value);

@@ -3,6 +3,7 @@ import headerStore from './store/print/headerStore.js';
 import footerStore from './store/print/footerStore.js';
 import printStore from './store/print/printStore.js';
 import firstPageHeaderStore from './store/print/firstPageHeaderStore.js';
+import temporarySnippetEditor from './components/print/temporarySnippetEditor.js';
 import snippetEditor from './components/print/snippetEditor.js';
 import { roundToOneDecimal } from './components/utils/print/utils.js';
 import tippy from 'tippy.js';
@@ -14,7 +15,9 @@ import tippy from 'tippy.js';
 
 window.tippy = tippy;
 window.roundToOneDecimal = roundToOneDecimal;
+window.temporarySnippetEditor = temporarySnippetEditor;
 window.snippetEditor = snippetEditor;
+// tippy related
 window.setupEditor = setupEditor;
 
 document.addEventListener('alpine:init', () => {

@@ -8,6 +8,7 @@ import PrintElement from '../../components/print/printElement.js';
 import TemporaryMediaElement from '../../components/print/temporaryMediaElement.js';
 import MediaElement from '../../components/print/mediaElement.js';
 import TemporarySnippetBoxElement from '../../components/print/temporarySnippetBoxElement.js';
+import SnippetBoxElement from '../../components/print/snippetBoxElement.js';
 
 export default function () {
     return {
@@ -29,6 +30,7 @@ export default function () {
             this.isFooterClicked = true;
             this.startPointFooterVertical = e.clientY;
         },
+        // TODO: diactivate on edit false
         onMouseUpFooter() {
             if (this.isFooterClicked) {
                 this.isFooterClicked = false;
@@ -205,14 +207,17 @@ export default function () {
             return this.isImgResizeClicked || this.isSnippetResizeClicked;
         },
         get snippetNames() {
-            // TODO: add also saved snippet boxes - update index on last saved snippet box id
+            const savedNames = this.visibleSnippetBoxes.map((item) => {
+                return { name: `box-${item.snippetId}`, ref: item };
+            });
+
             const temporaryNames = this.temporarySnippetBoxes.map(
                 (item, index) => {
                     return { name: `box-${index + 1}`, ref: item };
                 },
             );
 
-            return temporaryNames;
+            return [...savedNames, ...temporaryNames];
         },
         toggleElement($ref, id) {
             if (this.footer === null) {
@@ -305,6 +310,10 @@ export default function () {
                 this.visibleMedia.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleSnippetBoxes.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
             }
         },
         _mapFooter($refs, json) {
@@ -364,6 +373,33 @@ export default function () {
                     }
                 }
             });
+
+            json?.snippets.map((item) => {
+                const element =
+                    $refs['footer-snippet']?.content.cloneNode(true);
+                if (element) {
+                    this.footer.appendChild(element);
+                    const children = Array.from(this.footer.children);
+                    const index = children.findIndex(
+                        (el) => el.id === 'footer-snippet',
+                    );
+                    if (index !== -1) {
+                        const child = children[index];
+                        this.visibleSnippetBoxes.push(
+                            new SnippetBoxElement(child, this, item.id).init({
+                                x: item.x * this.pxPerCm,
+                                y: item.y * this.pyPerCm,
+                                ...(item.width && {
+                                    width: item.width * this.pxPerCm,
+                                }),
+                                ...(item.height && {
+                                    height: item.height * this.pyPerCm,
+                                }),
+                            }),
+                        );
+                    }
+                }
+            });
         },
         _adjustedMinFooterHeight() {
             // taking in account logo height, additional media (temp and saved) height, and free-text fields
@@ -407,6 +443,14 @@ export default function () {
 
             tempSnippetBoxes.length > 0
                 ? resizableElementHeights.push(...tempSnippetBoxes)
+                : resizableElementHeights.push(0);
+
+            const visibleSnippetBoxes = this.visibleSnippetBoxes.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+
+            visibleSnippetBoxes.length > 0
+                ? resizableElementHeights.push(...visibleSnippetBoxes)
                 : resizableElementHeights.push(0);
 
             return Math.max(...resizableElementHeights);
@@ -588,17 +632,31 @@ export default function () {
                 throw new Error(`Media with id ${id} not found`);
             }
         },
-        deleteTemporarySnippet(id) {
-            const index = this.temporarySnippetBoxes.findIndex(
+        deleteSnippet(id) {
+            const indexTemp = this.temporarySnippetBoxes.findIndex(
                 (item) => item.id === id,
             );
-            if (index !== -1) {
-                const obj = this.temporarySnippetBoxes[index];
+            if (indexTemp !== -1) {
+                const obj = this.temporarySnippetBoxes[indexTemp];
                 this.observer.unobserve(obj.element);
                 this.footer.removeChild(obj.element);
-                this.temporarySnippetBoxes.splice(index, 1);
-            } else {
-                throw new Error(`Temporary snippet with id ${id} not found`);
+                this.temporarySnippetBoxes.splice(indexTemp, 1);
+            }
+
+            const indexSnippet = this.visibleSnippetBoxes.findIndex(
+                (item) => item.id === id,
+            );
+            if (indexSnippet !== -1) {
+                const obj = this.visibleSnippetBoxes[indexSnippet];
+                this.observer.unobserve(obj.element);
+                this.footer.removeChild(obj.element);
+                this.visibleSnippetBoxes.splice(indexSnippet, 1);
+            }
+
+            if (indexTemp === -1 && indexSnippet === -1) {
+                throw new Error(
+                    `Snippet box or Temporary Snippet box with id ${id} not found`,
+                );
             }
         },
         async prepareToSubmit() {
@@ -695,6 +753,33 @@ export default function () {
                             ? this.temporaryVisibleMedia.map((item) => {
                                   return {
                                       name: item.temporaryFileName,
+                                      x: roundToOneDecimal(
+                                          item.position.x / this.pxPerCm,
+                                      ),
+                                      y: roundToOneDecimal(
+                                          item.position.y / this.pyPerCm,
+                                      ),
+                                      width:
+                                          item.width !== null
+                                              ? roundToOneDecimal(
+                                                    item.width / this.pxPerCm,
+                                                )
+                                              : null,
+                                      height:
+                                          item.height !== null
+                                              ? roundToOneDecimal(
+                                                    item.height / this.pyPerCm,
+                                                )
+                                              : null,
+                                  };
+                              })
+                            : null,
+                    snippets:
+                        this.visibleSnippetBoxes.length > 0
+                            ? this.visibleSnippetBoxes.map((item) => {
+                                  return {
+                                      id: item.snippetId,
+                                      content: item.content,
                                       x: roundToOneDecimal(
                                           item.position.x / this.pxPerCm,
                                       ),
