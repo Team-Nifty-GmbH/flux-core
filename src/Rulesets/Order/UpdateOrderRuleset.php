@@ -86,7 +86,6 @@ class UpdateOrderRuleset extends FluxRuleset
             ],
             'language_id' => [
                 'integer',
-                'nullable',
                 app(ModelExists::class, ['model' => Language::class]),
             ],
             'order_type_id' => [
