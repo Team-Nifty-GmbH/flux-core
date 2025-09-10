@@ -11,17 +11,17 @@ class WidgetFactory extends Factory
 
     public function definition(): array
     {
-        $widget = $this->faker->randomElement(\FluxErp\Facades\Widget::all());
+        $widget = fake()->randomElement(\FluxErp\Facades\Widget::all());
 
         return [
-            'name' => $this->faker->jobTitle,
+            'name' => fake()->jobTitle,
             'component_name' => $widget['name'] ?? 'widgets.generic',
             'height' => method_exists($widget, 'getDefaultHeight')
                 ? $widget['class']::getDefaultHeight()
-                : $this->faker->numberBetween(1, 12),
+                : fake()->numberBetween(1, 12),
             'width' => method_exists($widget, 'getDefaultWidth')
                 ? $widget['class']::getDefaultWidth()
-                : $this->faker->numberBetween(1, 12),
+                : fake()->numberBetween(1, 12),
         ];
     }
 }

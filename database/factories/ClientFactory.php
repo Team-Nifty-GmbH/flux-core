@@ -14,7 +14,7 @@ class ClientFactory extends Factory
     {
         $i = 0;
         while (Client::query()
-            ->where('client_code', $clientCode = $this->faker->unique()->countryISOAlpha3())
+            ->where('client_code', $clientCode = fake()->unique()->countryISOAlpha3())
             ->exists() && $i < 100) {
             $i++;
         }
@@ -24,17 +24,17 @@ class ClientFactory extends Factory
         }
 
         return [
-            'name' => $this->faker->company(),
+            'name' => fake()->company(),
             'client_code' => $clientCode,
-            'ceo' => $this->faker->name(),
-            'street' => $this->faker->streetAddress(),
-            'city' => $this->faker->city(),
-            'postcode' => $this->faker->postcode(),
-            'phone' => $this->faker->phoneNumber(),
-            'fax' => $this->faker->phoneNumber(),
-            'email' => $this->faker->companyEmail(),
-            'website' => $this->faker->url(),
-            'is_active' => $this->faker->boolean(90),
+            'ceo' => fake()->name(),
+            'street' => fake()->streetAddress(),
+            'city' => fake()->city(),
+            'postcode' => fake()->postcode(),
+            'phone' => fake()->phoneNumber(),
+            'fax' => fake()->phoneNumber(),
+            'email' => fake()->companyEmail(),
+            'website' => fake()->url(),
+            'is_active' => fake()->boolean(90),
         ];
     }
 }

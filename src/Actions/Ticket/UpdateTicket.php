@@ -2,16 +2,14 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\EventSubscription\CreateEventSubscription;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Comment;
+use FluxErp\Events\Ticket\TicketAssignedEvent;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
-use FluxErp\Models\User;
 use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
+use FluxErp\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 
 class UpdateTicket extends FluxAction
 {
@@ -32,31 +30,27 @@ class UpdateTicket extends FluxAction
         $ticket = resolve_static(Ticket::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
+        $authenticatable = $ticket->authenticatable;
 
         $ticket->fill($this->data);
         $ticket->save();
+        $ticket->load('authenticatable');
+
+        if (
+            $ticket->authenticatable->isNot($authenticatable)
+            && in_array(Notifiable::class, class_uses_recursive($ticket->authenticatable))
+        ) {
+            $authenticatable?->unsubscribeNotificationChannel($ticket->broadcastChannel());
+            $ticket->authenticatable->subscribeNotificationChannel($ticket->broadcastChannel());
+        }
 
         if (is_array($users)) {
-            foreach (data_get($ticket->users()->sync($users), 'attached', []) as $user) {
-                try {
-                    CreateEventSubscription::make([
-                        'event' => eloquent_model_event(
-                            'created',
-                            resolve_static(Comment::class, 'class')
-                        ),
-                        'subscribable_id' => $user,
-                        'subscribable_type' => morph_alias(User::class),
-                        'model_type' => $ticket->getMorphClass(),
-                        'model_id' => $ticket->id,
-                        'is_broadcast' => false,
-                        'is_notifiable' => true,
-                    ])->validate()->execute();
-                } catch (ValidationException $e) {
-                    if (! data_get($e->errors(), 'subscription') || count($e->errors()) !== 1) {
-                        throw $e;
-                    }
-                }
-            }
+            $result = $ticket->users()->sync($users);
+
+            event(TicketAssignedEvent::make($ticket)
+                ->subscribeChannel(data_get($result, 'attached') ?? [])
+                ->unsubscribeChannel(data_get($result, 'detached') ?? [])
+            );
         }
 
         return $ticket->refresh();

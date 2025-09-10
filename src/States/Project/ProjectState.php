@@ -2,11 +2,11 @@
 
 namespace FluxErp\States\Project;
 
-use FluxErp\States\State;
+use FluxErp\States\EndableState;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class ProjectState extends State implements HasFrontendFormatter
+abstract class ProjectState extends EndableState implements HasFrontendFormatter
 {
     abstract public function color(): string;
 

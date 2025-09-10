@@ -20,7 +20,7 @@ class Login extends Component
     #[Rule(['required', 'email'])]
     public string $email;
 
-    public string $password = '';
+    public ?string $password = null;
 
     protected string $dashboardRoute = 'dashboard';
 

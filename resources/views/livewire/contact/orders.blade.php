@@ -1,7 +1,7 @@
 <div>
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
-            <div class="divide-secondary-200 space-y-2.5 divide-y">
+            <div class="space-y-2.5 divide-y divide-secondary-200">
                 <x-select.styled
                     :label="__('Order type')"
                     wire:model="order.order_type_id"

@@ -12,14 +12,14 @@ class MediaFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => $this->faker->uuid(),
+            'uuid' => fake()->uuid(),
             'collection_name' => 'default',
-            'name' => $filename = $this->faker->word() . '.png',
+            'name' => $filename = fake()->word() . '.png',
             'file_name' => $filename,
             'mime_type' => 'image/png',
             'disk' => 'public',
             'conversions_disk' => 'public',
-            'size' => $this->faker->numberBetween(1024, 5120),
+            'size' => fake()->numberBetween(1024, 5120),
             'manipulations' => [],
             'custom_properties' => [],
             'generated_conversions' => ['thumb' => true],

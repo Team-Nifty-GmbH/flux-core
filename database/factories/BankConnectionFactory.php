@@ -12,11 +12,11 @@ class BankConnectionFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'account_holder' => $this->faker->name,
-            'bank_name' => $this->faker->name,
-            'iban' => $this->faker->bothify('??####################'),
-            'bic' => $this->faker->bothify('##????##?#?'),
+            'name' => fake()->name,
+            'account_holder' => fake()->name,
+            'bank_name' => fake()->name,
+            'iban' => fake()->bothify('??####################'),
+            'bic' => fake()->bothify('##????##?#?'),
         ];
     }
 }

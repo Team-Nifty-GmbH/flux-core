@@ -25,7 +25,7 @@
                 <div class="flex flex-col gap-1.5">
                     <x-input
                         wire:model="mailFolder.name"
-                        :text="__('Name')"
+                        :label="__('Name')"
                         :disabled="true"
                     />
                     <x-toggle
@@ -132,7 +132,7 @@
             <div class="flex flex-col gap-1.5">
                 <x-input
                     wire:model="mailAccount.smtp_email"
-                    :text="__('Email')"
+                    :label="__('Email')"
                 />
                 <x-password
                     wire:model="mailAccount.smtp_password"

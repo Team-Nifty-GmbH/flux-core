@@ -12,8 +12,8 @@ class DiscountFactory extends Factory
     public function definition(): array
     {
         return [
-            'discount' => $this->faker->numberBetween(1, 10000) / 100,
-            'is_percentage' => $this->faker->boolean(),
+            'discount' => fake()->numberBetween(1, 10000) / 100,
+            'is_percentage' => fake()->boolean(),
         ];
     }
 }

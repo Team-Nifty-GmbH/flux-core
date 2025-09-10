@@ -12,11 +12,11 @@ class TagFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->word(),
-            'slug' => $this->faker->unique()->slug(),
-            'type' => $this->faker->optional()->word(),
-            'color' => $this->faker->optional()->hexColor(),
-            'order_column' => $this->faker->optional()->numberBetween(1, 100),
+            'name' => fake()->unique()->word(),
+            'slug' => fake()->unique()->slug(),
+            'type' => fake()->optional()->word(),
+            'color' => fake()->optional()->hexColor(),
+            'order_column' => fake()->optional()->numberBetween(1, 100),
         ];
     }
 }

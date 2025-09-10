@@ -31,7 +31,7 @@
                 },
             }"
         >
-            <div class="divide-secondary-200 space-y-2.5 divide-y">
+            <div class="space-y-2.5 divide-y divide-secondary-200">
                 <x-select.styled
                     :label="__('Order type')"
                     wire:model="replicateOrder.order_type_id"
@@ -207,7 +207,7 @@
         <div class="flex flex-col gap-1.5">
             <x-input
                 wire:model="discount.name"
-                :text="__('Name')"
+                :label="__('Name')"
                 id="discount-name"
             />
             <div x-cloak x-show="$wire.discount.is_percentage">
@@ -987,7 +987,7 @@
                                 </div>
                             </template>
                             <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
+                                class="flex justify-between bg-gray-50 p-2.5 dark:bg-secondary-700"
                             >
                                 <div>
                                     {{ __('Total Gross') }}
@@ -999,7 +999,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
+                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
                             >
                                 <div>
                                     {{ __('Balance') }}
@@ -1043,7 +1043,7 @@
                                 wire:model="order.invoice_date"
                                 :without-time="true"
                                 :disabled="true"
-                                :text="__('Invoice Date')"
+                                :label="__('Invoice Date')"
                             />
                             <x-date
                                 wire:model="order.system_delivery_date"

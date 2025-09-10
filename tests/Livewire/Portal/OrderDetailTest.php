@@ -1,7 +1,5 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Portal;
-
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\OrderDetail;
 use FluxErp\Models\Address;
@@ -12,103 +10,92 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Database\Eloquent\Collection;
 use Livewire\Livewire;
 
-class OrderDetailTest extends BaseSetup
-{
-    private Collection $orders;
+beforeEach(function (): void {
+    $contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $address = Address::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'contact_id' => $contact->id,
+    ]);
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
+    $currency = Currency::factory()->create();
 
-        $address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
-        ]);
+    $language = Language::factory()->create();
 
-        $currency = Currency::factory()->create();
+    $orderType = OrderType::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
 
-        $language = Language::factory()->create();
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create();
 
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $priceList = PriceList::factory()->create();
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create();
-
-        $priceList = PriceList::factory()->create();
-
-        $this->orders = Order::factory()
-            ->count(1)
-            ->hasOrderPositions(
-                1,
-                function ($attributes, $order) {
-                    return [
-                        'client_id' => $order->client_id,
-                        'name' => 'test orderposition',
-                    ];
-                }
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $language->id,
-                'order_type_id' => $orderType->id,
-                'payment_type_id' => $paymentType->id,
-                'price_list_id' => $priceList->id,
-                'currency_id' => $currency->id,
-                'contact_id' => $this->contact->id,
-                'address_invoice_id' => $this->address->id,
-                'address_delivery_id' => $this->address->id,
-                'is_locked' => true,
-            ]);
-
-        $this->orders[] = Order::factory()->create([
+    $this->orders = Order::factory()
+        ->count(1)
+        ->hasOrderPositions(
+            1,
+            function ($attributes, $order) {
+                return [
+                    'client_id' => $order->client_id,
+                    'name' => 'test orderposition',
+                ];
+            }
+        )
+        ->create([
             'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,
             'price_list_id' => $priceList->id,
             'currency_id' => $currency->id,
-            'contact_id' => $contact->id,
-            'address_invoice_id' => $address->id,
-            'address_delivery_id' => $address->id,
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $this->address->id,
+            'address_delivery_id' => $this->address->id,
             'is_locked' => true,
         ]);
 
-        Order::addGlobalScope('portal', function ($query): void {
-            $query->where('contact_id', auth()->user()->contact_id)
-                ->where(fn ($query) => $query->where('is_locked', true)
-                    ->orWhere('is_imported', true)
-                );
-        });
-    }
+    $this->orders[] = Order::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'contact_id' => $contact->id,
+        'address_invoice_id' => $address->id,
+        'address_delivery_id' => $address->id,
+        'is_locked' => true,
+    ]);
 
-    public function test_dont_render_order_from_other_address(): void
-    {
-        Livewire::test(OrderDetail::class, ['id' => $this->orders[1]->id])
-            ->assertStatus(404);
-    }
+    Order::addGlobalScope('portal', function ($query): void {
+        $query->where('contact_id', auth()->user()->contact_id)
+            ->where(fn ($query) => $query->where('is_locked', true)
+                ->orWhere('is_imported', true)
+            );
+    });
 
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
-            ->assertStatus(200);
-    }
+    $this->be($this->address, 'address');
+});
 
-    public function test_select_order_position(): void
-    {
-        Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
-            ->call('selectPosition', $this->orders[0]->orderPositions->first()->id)
-            ->assertSet('positionDetails.id', $this->orders[0]->orderPositions->first()->id);
-    }
-}
+test('dont render order from other address', function (): void {
+    Livewire::test(OrderDetail::class, ['id' => $this->orders[1]->id])
+        ->assertNotFound();
+});
+
+test('renders successfully', function (): void {
+    Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
+        ->assertOk();
+});
+
+test('select order position', function (): void {
+    Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
+        ->call('selectPosition', $this->orders[0]->orderPositions->first()->id)
+        ->assertSet('positionDetails.id', $this->orders[0]->orderPositions->first()->id);
+});
