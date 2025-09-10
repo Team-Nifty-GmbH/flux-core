@@ -4,6 +4,8 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Address;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Rulesets\Order\UpdateOrderRuleset;
@@ -72,6 +74,14 @@ class UpdateOrder extends FluxAction
         }
 
         return $order->withoutRelations()->fresh();
+    }
+
+    public function prepareForValidation(): void
+    {
+        $this->data['language_id'] ??= resolve_static(Address::class, 'query')
+            ->whereKey($this->getData('invoice_address_id'))
+            ->value('language_id')
+            ?? resolve_static(Language::class, 'default')?->getKey();
     }
 
     protected function validateData(): void
