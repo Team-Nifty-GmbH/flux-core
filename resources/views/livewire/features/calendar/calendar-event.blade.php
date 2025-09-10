@@ -35,7 +35,9 @@
                 wire:navigate
             >
                 <x-slot:text>
-                    <span x-text="$wire.event.model?.label || '{{ __('View Details') }}'"></span>
+                    <span
+                        x-text="$wire.event.model?.label || '{{ __('View Details') }}'"
+                    ></span>
                 </x-slot>
             </x-link>
             @show

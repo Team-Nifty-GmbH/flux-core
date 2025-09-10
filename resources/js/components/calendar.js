@@ -274,15 +274,21 @@ const calendar = () => {
                 calendar.events = (info, successCallback, failureCallback) => {
                     calendar.isLoading = true;
 
-                    axios.post('/calendar-events', {
-                        info: info,
-                        calendar: calendar
-                    })
-                        .then(response => {
-                            successCallback(response.data.map(this.mapDatesToUtc));
+                    axios
+                        .post('/calendar-events', {
+                            info: info,
+                            calendar: calendar,
                         })
-                        .catch(error => {
-                            console.error('Error loading calendar events:', error);
+                        .then((response) => {
+                            successCallback(
+                                response.data.map(this.mapDatesToUtc),
+                            );
+                        })
+                        .catch((error) => {
+                            console.error(
+                                'Error loading calendar events:',
+                                error,
+                            );
                             failureCallback(error);
                         })
                         .finally(() => {
@@ -520,13 +526,18 @@ const calendar = () => {
                         let statusBadges = document.createElement('div');
                         statusBadges.className = 'flex-shrink-0 mr-1';
 
-                        const appendTitle = info.event.extendedProps.appendTitle;
+                        const appendTitle =
+                            info.event.extendedProps.appendTitle;
                         if (typeof appendTitle === 'string') {
                             statusBadges.innerHTML = appendTitle;
-                        } else if (typeof appendTitle === 'object' && appendTitle.text) {
+                        } else if (
+                            typeof appendTitle === 'object' &&
+                            appendTitle.text
+                        ) {
                             const badge = document.createElement('span');
                             badge.className = `inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium`;
-                            badge.style.backgroundColor = appendTitle.color || '#6b7280';
+                            badge.style.backgroundColor =
+                                appendTitle.color || '#6b7280';
                             badge.style.color = '#ffffff';
                             badge.textContent = appendTitle.text;
                             statusBadges.appendChild(badge);
@@ -566,17 +577,15 @@ const calendar = () => {
 
             const allEventSources = this.getCalendarEventSources();
 
-            this.traverseCalendars(
-                allEventSources,
-                (calendar) => {
-                    const shouldShow = !this.config.activeCalendars ||
-                        this.config.activeCalendars.includes(String(calendar.id));
+            this.traverseCalendars(allEventSources, (calendar) => {
+                const shouldShow =
+                    !this.config.activeCalendars ||
+                    this.config.activeCalendars.includes(String(calendar.id));
 
-                    if (shouldShow) {
-                        this.showEventSource(calendar);
-                    }
-                },
-            );
+                if (shouldShow) {
+                    this.showEventSource(calendar);
+                }
+            });
 
             this.$dispatch('calendar-initialized', this.calendar);
         },
