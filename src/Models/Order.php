@@ -254,13 +254,15 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                     }
                 });
 
-                $order->calculateBalance();
-
                 if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {
                     $order->payment_reminder_next_date = $order->invoice_date->addDays(
                         $order->payment_reminder_days_1
                     );
                 }
+            }
+
+            if (! is_null($order->invoice_number)) {
+                $order->calculateBalance();
             }
 
             if ($order->isDirty('iban')
