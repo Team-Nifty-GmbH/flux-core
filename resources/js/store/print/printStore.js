@@ -282,6 +282,22 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                     await $footerStore.reload($refs);
                     await $headerStore.reload($refs);
                     await $firstPageHeaderStore.reload($refs);
+                } else {
+                    // if no media uploaded - replace template snippets only
+                    if ($footerStore.temporarySnippetBoxes.length > 0) {
+                        // false means behave as if client change - reload all footer components
+                        await $footerStore.reload($refs, false);
+                    }
+
+                    if ($headerStore.temporarySnippetBoxes.length > 0) {
+                        await $headerStore.reload($refs, false);
+                    }
+
+                    if (
+                        $firstPageHeaderStore.temporarySnippetBoxes.length > 0
+                    ) {
+                        await $firstPageHeaderStore.reload($refs, false);
+                    }
                 }
             }
             this._loading = false;
