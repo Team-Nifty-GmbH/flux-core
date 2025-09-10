@@ -222,9 +222,15 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->where('start', '<=', $end)
-                ->where('end', '>=', $start)
-                ->orWhereBetween('created_at', [$start, $end]);
+            $query->whereValueBetween($start, ['start', 'end'])
+                ->orWhereValueBetween($end, ['start', 'end'])
+                ->orWhereBetween('start', [$start, $end])
+                ->orWhereBetween('end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start')
+                        ->whereNull('end')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
         });
     }
 
