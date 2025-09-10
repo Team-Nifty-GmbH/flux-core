@@ -108,9 +108,11 @@
         }
 
         body {
-            max-width: 80rem;
-            margin: 0 auto !important;
-            padding: 20mm;
+            /*max-width: 80rem;*/
+            width: 21cm;
+            /*margin: 0 auto !important;*/
+            /*padding: 20mm;*/
+            padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 0 }};
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             border-radius: 10px;

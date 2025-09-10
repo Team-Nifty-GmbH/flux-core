@@ -10,6 +10,7 @@ use Dompdf\Options;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Contracts\SignablePrintView;
 use FluxErp\Models\Client;
+use FluxErp\Models\PrintLayout;
 use FluxErp\Printing\Printable;
 use FluxErp\Traits\Makeable;
 use Illuminate\Database\Eloquent\Model;
@@ -220,6 +221,23 @@ abstract class PrintableView extends Component
 
     protected function getPageCss(): array
     {
+        $model = $this->getModel();
+        if($model?->client_id) {
+            $layout = resolve_static(PrintLayout::class,'query')
+                ->where('client_id', $model->client_id)
+                ->where('model_type', morph_alias($model::class))
+                ->first()?->toArray();
+            if($layout['margin']) {
+                $margin = $layout['margin'];
+                return ['margin' => [
+                    ($margin['marginTop'] ?? 3.2) . 'cm',
+                    ($margin['marginRight'] ?? 2.0) . 'cm',
+                    ($margin['marginBottom'] ?? 2.8) . 'cm',
+                    ($margin['marginLeft'] ?? 1.8) . 'cm',
+                ]];
+            }
+        }
+
         return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
     }
 

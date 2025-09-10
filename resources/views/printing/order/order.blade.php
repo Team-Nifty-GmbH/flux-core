@@ -1,9 +1,14 @@
 @use(\Illuminate\Support\Number)
 @use(\FluxErp\Models\PriceList)
+@use(\FluxErp\Models\PrintLayout)
 @use(\FluxErp\Models\Currency)
 @use(\Illuminate\Support\Fluent)
 @php
     $isNet = ($model->priceList ?? resolve_static(PriceList::class, 'default'))->is_net;
+    $layout = resolve_static(PrintLayout::class,'query')
+        ->where('client_id', $model->client_id)
+        ->where('model_type', morph_alias($model::class))
+        ->first()->toArray() ?? [];
 @endphp
 
 @section('first-page-header')
