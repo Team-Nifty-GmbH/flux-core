@@ -196,6 +196,8 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
             ],
             'allDay' => true,
             'is_editable' => true,

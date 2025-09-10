@@ -245,6 +245,10 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'status' => $this->leadState()->value('name'),
             'invited' => [],
             'description' => $this->description,
+            'extendedProps' => [
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
+            ],
             'allDay' => true,
             'is_editable' => true,
             'is_invited' => false,

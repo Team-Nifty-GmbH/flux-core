@@ -127,6 +127,13 @@ class Calendar extends Component
         ));
         $this->event->original_start = data_get($event, 'start');
 
+        if (data_get($event, 'extendedProps.modelUrl') || data_get($event, 'extendedProps.modelLabel')) {
+            $this->event->model = [
+                'url' => data_get($event, 'extendedProps.modelUrl'),
+                'label' => data_get($event, 'extendedProps.modelLabel'),
+            ];
+        }
+
         if (data_get($this->event, 'id')) {
             $explodedId = explode('|', $this->event->id);
             $this->event->id = $explodedId[0];

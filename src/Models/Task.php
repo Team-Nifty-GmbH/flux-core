@@ -246,6 +246,8 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
             ],
             'allDay' => false,
             'is_editable' => true,
