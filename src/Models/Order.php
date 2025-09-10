@@ -592,8 +592,14 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->map(function (OrderPosition $item): array {
                 return [
                     'vat_rate_percentage' => $item->vat_rate_percentage,
-                    'total_vat_price' => bcround(bcmul($item->total_net_price, $item->vat_rate_percentage, 9), 2),
-                    'total_net_price' => bcround($item->total_net_price, 2),
+                    'total_vat_price' => bcround(
+                        bcmul(
+                            $item->total_net_price ?? 0,
+                            $item->vat_rate_percentage,
+                            9),
+                        2
+                    ),
+                    'total_net_price' => bcround($item->total_net_price ?? 0, 2),
                 ];
             })
             ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
