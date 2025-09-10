@@ -23,6 +23,7 @@ use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -193,6 +194,11 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public function leadState(): BelongsTo
     {
         return $this->belongsTo(LeadState::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 
     public function recalculateWeightedGrossProfit(): void
