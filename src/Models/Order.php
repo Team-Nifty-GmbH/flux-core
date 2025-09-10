@@ -775,6 +775,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this->belongsTo(Language::class);
     }
 
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class);
+    }
+
     public function newCollection(array $models = []): Collection
     {
         return app(OrderCollection::class, ['items' => $models]);
