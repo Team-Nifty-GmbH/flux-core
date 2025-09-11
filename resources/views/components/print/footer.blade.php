@@ -1,60 +1,85 @@
-<footer class="fixed h-auto w-full bg-white text-center">
+@props([
+    'footerLayout' => null,
+])
+
+@php
+    $bankConnections = $client->bankConnections;
+    $bankIds = array_map(fn($item) => 'footer-bank-' . $item['id'],$bankConnections->toArray() );
+@endphp
+
+@if($footerLayout)
+<footer
+    style="height: {{ $footerLayout['height'] }}cm"
+    class="relative w-full bg-violet-200 border-semi-black border-t">
+ @foreach($footerLayout['elements'] as $element)
+    {{--  client    --}}
+    @if($element['id'] === 'footer-client-' . $client['id'] )
+        <address
+            style="left: {{ $element['x'] }}cm; top: {{ $element['y'] }}cm;"
+            class="absolute not-italic">
+            <x-flux::print.elements.client  :client="$client" />
+        </address>
+    @endif
+    {{--  logo    --}}
+    @if($element['id'] === 'footer-logo' && $client->logo_small)
+        <x-flux::print.elements.logo :client="$client" :logo="$element" />
+    @endif
+    {{--  bank connection    --}}
+    @if(in_array($element['id'], $bankIds))
+        @php
+            $index = array_search($element['id'], $bankIds);
+            $bank = is_numeric($index) ? $bankConnections[$index] : null;
+        @endphp
+        @if($bank)
+            <div
+                style="left: {{ $element['x'] }}cm; top: {{ $element['y'] }}cm;"
+                class="absolute">
+                <x-flux::print.elements.bank-connection :bank-connection="$bank" />
+            </div>
+        @endif
+    @endif
+ @endforeach
+    {{--  media    --}}
+ @if($footerLayout['media'])
+     @foreach($footerLayout['media'] as $media)
+            <x-flux::print.elements.media :media="$media" />
+     @endforeach
+ @endif
+    {{--  snippets    --}}
+ @if($footerLayout['snippets'])
+         @foreach($footerLayout['snippets'] as $snippet)
+             <x-flux::print.elements.snippet :snippet="$snippet" />
+         @endforeach
+ @endif
+</footer>
+@else
+{{--  default footer if no layout saved --}}
+<footer class="h-auto w-full bg-white text-center">
     <div class="footer-content text-2xs leading-3">
-        @section('footer.logo')
             <div class="absolute left-0 right-0 m-auto max-h-32 px-6">
+                @if($client->logo_small)
                 <img
                     class="logo-small footer-logo m-auto"
                     src="{{ $client->logo_small }}"
                 />
+                @endif
             </div>
-        @show
         <div class="w-full">
             <div class="border-semi-black border-t">
-                @section('footer.client-address')
                     <address class="float-left text-left not-italic">
-                        <div class="font-semibold">
-                            {{ $client->name ?? '' }}
-                        </div>
-                        <div>
-                            {{ $client->ceo ?? '' }}
-                        </div>
-                        <div>
-                            {{ $client->street ?? '' }}
-                        </div>
-                        <div>
-                            {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
-                        </div>
-                        <div>
-                            {{ $client->phone ?? '' }}
-                        </div>
-                        <div>
-                            <div>
-                                {{ $client->vat_id }}
-                            </div>
-                        </div>
+                        <x-flux::print.elements.client  :client="$client" />
                     </address>
-                @show
-                @section('footer.bank-connections')
                     @foreach ($client->bankConnections as $bankConnection)
                         <div class="float-right pl-3 text-left">
-                            <div class="font-semibold">
-                                {{ $bankConnection->bank_name ?? '' }}
-                            </div>
-                            <div>
-                                {{ $bankConnection->iban ?? '' }}
-                            </div>
-                            <div>
-                                {{ $bankConnection->bic ?? '' }}
-                            </div>
+                            <x-flux::print.elements.bank-connection :bank-connection="$bankConnection" />
                         </div>
                         @if ($client->logo_small)
                             @break
                         @endif
                     @endforeach
-
-                @show
                 <div class="clear-both"></div>
             </div>
         </div>
     </div>
 </footer>
+@endif

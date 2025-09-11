@@ -46,6 +46,18 @@ abstract class PrintableView extends Component
         return static::$layout;
     }
 
+    public function getPrintLayout() : array | null
+    {
+        $model = $this->getModel();
+        if($model?->client_id) {
+           return  resolve_static(PrintLayout::class, 'query')
+                ->where('client_id', $model->client_id)
+                ->where('model_type', morph_alias($model::class))
+               ->first()?->toArray();
+        }
+        return null;
+    }
+
     public static function setLayout(?string $layout): void
     {
         static::$layout = $layout;
@@ -227,7 +239,7 @@ abstract class PrintableView extends Component
                 ->where('client_id', $model->client_id)
                 ->where('model_type', morph_alias($model::class))
                 ->first()?->toArray();
-            if($layout['margin']) {
+            if($layout && $layout['margin']) {
                 $margin = $layout['margin'];
                 return ['margin' => [
                     ($margin['marginTop'] ?? 3.2) . 'cm',
@@ -310,6 +322,7 @@ abstract class PrintableView extends Component
                     'pageCss' => $this->getPageCss(),
                     'hasHeader' => $this->renderHeader(),
                     'hasFooter' => $this->renderFooter(),
+                    'layout' => $this->getPrintLayout(),
                 ]
             );
     }

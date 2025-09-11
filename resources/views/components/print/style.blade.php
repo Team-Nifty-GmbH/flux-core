@@ -49,32 +49,32 @@
     }
 
     @section('style.header')
-        header {
-            top: -20mm;
-        }
+        /*header {*/
+        /*    top: -20mm;*/
+        /*}*/
     @show
 
     @section('style.footer')
-        footer {
-            bottom: -30mm;
-            padding-bottom: 10mm;
-        }
+        /*footer {*/
+        /*    bottom: -30mm;*/
+        /*    padding-bottom: 10mm;*/
+        /*}*/
     @show
 
-    .logo{
-        height:70px;
-    }
+    /*.logo{*/
+    /*    height:70px;*/
+    /*}*/
 
-    .logo-small{
-        height:50px;
-    }
+    /*.logo-small{*/
+    /*    height:50px;*/
+    /*}*/
 
-    .footer-logo {
-        transform: translateY(-50%);
-        background-color: white;
-        padding-left: 3mm;
-        padding-right: 3mm;
-    }
+    /*.footer-logo {*/
+    /*    transform: translateY(-50%);*/
+    /*    background-color: white;*/
+    /*    padding-left: 3mm;*/
+    /*    padding-right: 3mm;*/
+    /*}*/
 
     .bg-even-children >:nth-child(even){
         background: #F2F4F7;
@@ -104,15 +104,13 @@
         }
 
         footer {
-            display: none;
+            /*display: none;*/
         }
 
         body {
-            /*max-width: 80rem;*/
             width: 21cm;
-            /*margin: 0 auto !important;*/
-            /*padding: 20mm;*/
-            padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 0 }};
+            margin: 0 auto !important;
+            padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 20 . 'mm' }};
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             border-radius: 10px;
@@ -120,12 +118,21 @@
 
         html {
             background: #f5f5f5;
+            overflow-y: auto;
         }
     }
 
     @media print {
         body {
             margin-bottom: 30px;
+        }
+
+        header {
+            position: fixed;
+        }
+
+        footer {
+            position: fixed;
         }
     }
 </style>

@@ -34,11 +34,11 @@
             <x-flux::print.header />
         @endif
 
-        @if ($hasFooter ?? true)
-            <x-flux::print.footer />
-        @endif
-
         {!! $slot !!}
+
+        @if ($hasFooter ?? true)
+            <x-flux::print.footer :footer-layout="$layout && $layout['footer']" />
+        @endif
         @if ($signaturePath)
             <div class="mt-10 flex justify-end">
                 <div>

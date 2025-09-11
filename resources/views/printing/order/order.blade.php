@@ -8,7 +8,7 @@
     $layout = resolve_static(PrintLayout::class,'query')
         ->where('client_id', $model->client_id)
         ->where('model_type', morph_alias($model::class))
-        ->first()->toArray() ?? [];
+        ->first()?->toArray();
 @endphp
 
 @section('first-page-header')
