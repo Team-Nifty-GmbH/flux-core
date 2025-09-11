@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Rulesets\ContactBankConnection\UpdateContactBankConnectionRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class UpdateContactBankConnection extends FluxAction
 {
@@ -38,5 +39,20 @@ class UpdateContactBankConnection extends FluxAction
         $contactBankConnection->save();
 
         return $contactBankConnection->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->getData('iban')) {
+            $this->data['iban'] = is_string($this->getData('iban'))
+                ? Str::of($this->getData('iban'))->upper()->remove(' ')->toString()
+                : $this->getData('iban');
+        }
+
+        if ($this->getData('bic')) {
+            $this->data['bic'] = is_string($this->getData('bic'))
+                ? Str::of($this->getData('bic'))->upper()->remove(' ')->toString()
+                : $this->getData('bic');
+        }
     }
 }

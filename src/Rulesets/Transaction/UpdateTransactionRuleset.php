@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Transaction;
 
 use FluxErp\Models\Currency;
 use FluxErp\Models\Transaction;
+use FluxErp\Rules\Bic;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -48,7 +49,12 @@ class UpdateTransactionRuleset extends FluxRuleset
                 'nullable',
                 app(Iban::class),
             ],
-            'counterpart_bic' => 'string|max:255|nullable',
+            'counterpart_bic' => [
+                'string',
+                'max:255',
+                'nullable',
+                app(Bic::class),
+            ],
             'counterpart_bank_name' => 'string|max:255|nullable',
             'is_ignored' => 'boolean',
         ];
