@@ -62,13 +62,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Traits\Conditionable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
         HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
@@ -254,15 +255,13 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                     }
                 });
 
+                $order->calculateBalance();
+
                 if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {
                     $order->payment_reminder_next_date = $order->invoice_date->addDays(
                         $order->payment_reminder_days_1
                     );
                 }
-            }
-
-            if (! is_null($order->invoice_number)) {
-                $order->calculateBalance();
             }
 
             if ($order->isDirty('iban')
@@ -497,7 +496,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->calculateDiscounts()
             ->calculateTotalGrossPrice()
             ->calculateMargin()
-            ->calculateTotalVats();
+            ->calculateTotalVats()
+            ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
     }
 
     public function calculateTotalGrossPrice(): static
