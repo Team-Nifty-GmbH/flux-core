@@ -493,27 +493,30 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this
             ->calculateTotalNetPrice()
             ->calculateDiscounts()
+            ->calculateTotalVats()
             ->calculateTotalGrossPrice()
-            ->calculateMargin()
-            ->calculateTotalVats();
+            ->calculateMargin();
     }
 
     public function calculateTotalGrossPrice(): static
     {
+        $totalVat = array_reduce(
+            $this->total_vats ?? [],
+            fn (string $carry, array $item): string => bcadd($carry, data_get($item, 'total_vat_price', 0)),
+            0
+        );
+
+        $this->total_gross_price = bcround(
+            bcadd($this->total_net_price, $totalVat),
+            2
+        );
+
         $totalBaseGross = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_gross_price = discount(
-            bcround(
-                bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
-                2
-            ),
-            $this->total_discount_percentage
-        );
-
         $this->total_base_gross_price = bcround(
-            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
+            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0),
             2
         );
         $this->total_base_discounted_gross_price = $this->total_gross_price;
