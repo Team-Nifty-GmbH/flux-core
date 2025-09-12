@@ -71,7 +71,7 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
                     $query->whereHas('leadState', function (Builder $query): void {
                         $query->where('is_won', true);
                     })
-                        ->whereBetween('end', [$start, $end]);
+                        ->whereBetween('closed_at', [$start, $end]);
                 },
             ])
             ->having('total', '>', 0)

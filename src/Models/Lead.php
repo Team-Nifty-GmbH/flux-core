@@ -138,6 +138,13 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
                 $lead->recalculateWeightedRevenue();
             }
+
+            if ($lead->isDirty('lead_state_id')) {
+                $isClosed = $lead->leadState
+                    && ($lead->leadState->is_won || $lead->leadState->is_lost);
+
+                $lead->closed_at = $isClosed ? now() : null;
+            }
         });
     }
 

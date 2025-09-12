@@ -47,7 +47,7 @@ class LostLeadsByLeadLossReason extends CircleChart implements HasWidgetOptions
             ->whereNotNull('lead_loss_reason_id')
             ->whereHas('leadLossReason', fn (Builder $query) => $query->where('is_active', true))
             ->whereBetween(
-                'created_at',
+                'closed_at',
                 [
                     $this->getStart()->toDateTimeString(),
                     $this->getEnd()->toDateTimeString(),
