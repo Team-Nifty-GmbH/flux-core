@@ -62,8 +62,8 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
             '#FF9800',
         ];
 
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        $start = $this->getStart();
+        $end = $this->getEnd();
 
         $leadCounts = resolve_static(User::class, 'query')
             ->withCount([
@@ -124,8 +124,8 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
     #[Renderless]
     public function show(array $params): void
     {
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        $start = $this->getStart();
+        $end = $this->getEnd();
 
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),

@@ -43,7 +43,6 @@ beforeEach(function (): void {
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now(),
                     'closed_at' => Carbon::now(),
                 ])
             )
@@ -51,7 +50,6 @@ beforeEach(function (): void {
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfWeek(),
                     'closed_at' => Carbon::now()->startOfWeek(),
                 ])
             )
@@ -59,7 +57,6 @@ beforeEach(function (): void {
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfMonth(),
                     'closed_at' => Carbon::now()->startOfMonth(),
                 ])
             )
@@ -67,7 +64,6 @@ beforeEach(function (): void {
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfQuarter(),
                     'closed_at' => Carbon::now()->startOfQuarter(),
                 ])
             )
@@ -75,7 +71,6 @@ beforeEach(function (): void {
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfYear(),
                     'closed_at' => Carbon::now()->startOfYear(),
                 ])
             );
