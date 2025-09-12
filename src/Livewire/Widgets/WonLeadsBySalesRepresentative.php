@@ -131,7 +131,7 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('user_id', data_get($params, 'id'))
-                ->whereBetween('end', [$start, $end])
+                ->whereBetween('closed_at', [$start, $end])
                 ->whereHas(
                     'leadState',
                     fn (Builder $query) => $query->where('is_won', true)

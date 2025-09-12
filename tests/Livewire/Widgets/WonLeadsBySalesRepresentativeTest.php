@@ -224,7 +224,7 @@ function getWonLeadCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame,
         ->filter(
             fn (Lead $lead) => $lead->user_id === $user->id
                 && $lead->leadState->is_won === true
-                && $lead->end->between(...$timeFrame->getRange())
+                && $lead->closed_at->between(...$timeFrame->getRange())
         )
         ->count();
 }

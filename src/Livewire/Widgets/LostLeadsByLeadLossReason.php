@@ -96,7 +96,7 @@ class LostLeadsByLeadLossReason extends CircleChart implements HasWidgetOptions
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('lead_loss_reason_id', data_get($leadLossReason, 'id'))
-                ->whereBetween('created_at', [$start, $end]),
+                ->whereBetween('closed_at', [$start, $end]),
             __(
                 'Leads with lead loss reason: :lead-loss-reason',
                 [

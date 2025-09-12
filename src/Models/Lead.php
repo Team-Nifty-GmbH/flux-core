@@ -96,6 +96,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start',
             'end',
+            'closed_at',
             'created_at',
             'updated_at',
         ];
