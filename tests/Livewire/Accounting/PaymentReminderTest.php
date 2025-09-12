@@ -31,7 +31,7 @@ test('mark selected as paid', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
+        ->for(PaymentType::factory(), 'paymentType')
         ->for(
             OrderType::factory()
                 ->state([

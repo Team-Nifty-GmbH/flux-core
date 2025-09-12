@@ -134,4 +134,33 @@
             />
         </div>
     </x-card>
+
+    @teleport('body')
+        <x-modal
+            id="order-transaction-modal"
+            x-on:open="$focusOn('order-transaction-amount')"
+        >
+            <x-number
+                id="order-transaction-amount"
+                :label="__('Amount')"
+                wire:model="orderTransactionForm.amount"
+                step="0.01"
+                :corner-hint="__('Amount')"
+                placeholder="0.00"
+            />
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('order-transaction-modal')"
+                />
+                <x-button
+                    :text="__('Save')"
+                    x-on:click="$wire.save().then((success) => {
+                        if (success) $modalClose('order-transaction-modal');
+                    })"
+                />
+            </x-slot>
+        </x-modal>
+    @endteleport
 </div>

@@ -71,6 +71,11 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         return $this;
     }
 
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
     public function getAvatarUrl(): ?string
     {
         return null;

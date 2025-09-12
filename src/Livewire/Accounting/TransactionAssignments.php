@@ -204,7 +204,7 @@ class TransactionAssignments extends Component
                     $query->whereKey($this->bankAccounts);
                 });
             })
-            ->latest()
+            ->latest('booking_date')
             ->with([
                 'orders' => function (BelongsToMany $query): void {
                     $query->select([
