@@ -44,6 +44,7 @@ beforeEach(function (): void {
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
                     'end' => Carbon::now(),
+                    'closed_at' => Carbon::now(),
                 ])
             )
             ->merge(
@@ -51,6 +52,7 @@ beforeEach(function (): void {
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
                     'end' => Carbon::now()->startOfWeek(),
+                    'closed_at' => Carbon::now()->startOfWeek(),
                 ])
             )
             ->merge(
@@ -58,6 +60,7 @@ beforeEach(function (): void {
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
                     'end' => Carbon::now()->startOfMonth(),
+                    'closed_at' => Carbon::now()->startOfMonth(),
                 ])
             )
             ->merge(
@@ -65,6 +68,7 @@ beforeEach(function (): void {
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
                     'end' => Carbon::now()->startOfQuarter(),
+                    'closed_at' => Carbon::now()->startOfQuarter(),
                 ])
             )
             ->merge(
@@ -72,6 +76,7 @@ beforeEach(function (): void {
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
                     'end' => Carbon::now()->startOfYear(),
+                    'closed_at' => Carbon::now()->startOfYear(),
                 ])
             );
     }
