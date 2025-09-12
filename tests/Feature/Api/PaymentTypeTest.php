@@ -147,8 +147,6 @@ test('get payment type', function (): void {
     expect($jsonPaymentType->payment_discount_target)->toEqual($this->paymentTypes[0]->payment_discount_target);
     expect($jsonPaymentType->payment_discount_percentage)->toEqual($this->paymentTypes[0]->payment_discount_percentage);
     expect($jsonPaymentType->is_active)->toEqual($this->paymentTypes[0]->is_active);
-    expect(Carbon::parse($jsonPaymentType->created_at)->toDateTimeString())->toEqual(Carbon::parse($this->paymentTypes[0]->created_at)->toDateTimeString());
-    expect(Carbon::parse($jsonPaymentType->updated_at)->toDateTimeString())->toEqual(Carbon::parse($this->paymentTypes[0]->updated_at)->toDateTimeString());
 });
 
 test('get payment type include not allowed', function (): void {

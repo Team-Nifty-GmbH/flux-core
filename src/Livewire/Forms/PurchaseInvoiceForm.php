@@ -55,6 +55,12 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?int $order_type_id = null;
 
+    public ?float $payment_discount_percent = null;
+
+    public ?string $payment_discount_target_date = null;
+
+    public ?string $payment_target_date = null;
+
     public ?int $payment_type_id = null;
 
     public array $purchase_invoice_positions = [];
@@ -64,6 +70,15 @@ class PurchaseInvoiceForm extends FluxForm
     public ?string $system_delivery_date_end = null;
 
     public ?string $total_gross_price = null;
+
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        $this->payment_discount_percent = ! is_null($this->payment_discount_percent)
+            ? bcmul($this->payment_discount_percent, 100)
+            : null;
+    }
 
     public function findMostUsedLedgerAccountId(): void
     {
@@ -95,6 +110,16 @@ class PurchaseInvoiceForm extends FluxForm
 
         $this->client_id = resolve_static(Client::class, 'default')?->getKey();
         $this->currency_id = resolve_static(Currency::class, 'default')?->getKey();
+    }
+
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+        $data['payment_discount_percent'] = ! is_null($this->payment_discount_percent)
+            ? bcdiv($this->payment_discount_percent, 100)
+            : null;
+
+        return $data;
     }
 
     protected function getActions(): array
