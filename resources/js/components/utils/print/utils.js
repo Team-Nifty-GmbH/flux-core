@@ -5,6 +5,11 @@ export function roundToOneDecimal(value) {
     return Math.round(value * 10) / 10;
 }
 
+export function roundToTwoDecimals(value) {
+    // Round to 0.01 cm
+    return Math.round(value * 100) / 100;
+}
+
 export function intersectionHandlerFactory($store) {
     return (entries) => {
         entries.forEach((entry) => {

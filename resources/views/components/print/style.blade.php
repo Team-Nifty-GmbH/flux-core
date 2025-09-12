@@ -94,8 +94,10 @@
         @endforeach
     }
 
-    .page-count:after {
-        content: "{{ __('Page') }} " counter(page) " {{ __('of') }} DOMPDF_PAGE_COUNT_PLACEHOLDER";
+    @page {
+        .page-count:after {
+            content: "{{ __('Page') }} " counter(page) " {{ __('of') }} DOMPDF_PAGE_COUNT_PLACEHOLDER";
+        }
     }
 
     @media screen {

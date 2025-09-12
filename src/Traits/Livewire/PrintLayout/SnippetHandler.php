@@ -79,6 +79,5 @@ trait SnippetHandler
             // clean up - to ensure in place changes are reflected outside the method
             unset($snippet);
         }
-
     }
 }

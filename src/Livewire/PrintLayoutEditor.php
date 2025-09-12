@@ -167,6 +167,9 @@ class PrintLayoutEditor extends Component
     {
         try {
             $this->form->save();
+            // clean up temporary media and snippets after successful save
+            $this->form->temporaryMedia = [];
+            $this->form->temporary_snippets = [];
             return true;
         } catch (ValidationException|UnauthorizedException $e)
         {

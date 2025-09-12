@@ -37,7 +37,7 @@
         {!! $slot !!}
 
         @if ($hasFooter ?? true)
-            <x-flux::print.footer :footer-layout="$layout && $layout['footer']" />
+            <x-flux::print.footer :footer-layout="is_array($layout) ? $layout['footer'] : null" />
         @endif
         @if ($signaturePath)
             <div class="mt-10 flex justify-end">

@@ -86,6 +86,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
 use FluxErp\Models\PrintJob;
 use FluxErp\Models\PrintLayout;
+use FluxErp\Models\PrintLayoutSnippet;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductOption;
@@ -191,6 +192,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'price_list' => PriceList::class,
             'print_job' => PrintJob::class,
             'print_layout' => PrintLayout::class,
+            'print_layout_snippet' => PrintLayoutSnippet::class,
             'printer' => Printer::class,
             'product' => Product::class,
             'product_cross_selling' => ProductCrossSelling::class,
