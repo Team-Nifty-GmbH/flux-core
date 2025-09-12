@@ -3,8 +3,10 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
     return {
         async onInit($wire, $refs) {
             this._loading = true;
-            this.pxPerCm = $refs['scale'].offsetWidth;
-            this.pyPerCm = $refs['scale'].offsetHeight;
+            const  {height, width} = $refs['scale'].getBoundingClientRect()
+            this.pxPerCm = width;
+            this.pyPerCm = height;
+            console.log(height, width);
             $headerStore.onInit(this.pxPerCm, this.pyPerCm);
             $firstPageHeaderStore.onInit(this.pxPerCm, this.pyPerCm);
             $footerStore.onInit(this.pxPerCm, this.pyPerCm);
@@ -17,6 +19,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 $firstPageHeaderStore.register($wire, $refs),
                 $footerStore.register($wire, $refs),
             ]);
+
             this._loading = false;
         },
         editMargin: false,

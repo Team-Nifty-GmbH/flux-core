@@ -1,7 +1,8 @@
 import baseStore from './baseStore.js';
 import {
     intersectionHandlerFactory,
-    roundToOneDecimal,
+    // roundToTwoDecimals,
+    roundToTwoDecimals,
     STEP,
 } from '../../components/utils/print/utils.js';
 import PrintElement from '../../components/print/printElement.js';
@@ -49,7 +50,7 @@ export default function () {
                 if (Math.abs(delta) >= STEP) {
                     const newHeight = Math.max(
                         0,
-                        roundToOneDecimal(
+                        roundToTwoDecimals(
                             this._footerHeight + STEP * (delta > 0 ? 1 : -1),
                         ),
                     );
@@ -416,7 +417,7 @@ export default function () {
             if (indexOfLogo !== -1) {
                 const element = this.visibleElements[indexOfLogo];
                 resizableElementHeights.push(
-                    roundToOneDecimal((element.height || 0) / this.pyPerCm),
+                    roundToTwoDecimals((element.height || 0) / this.pyPerCm),
                 );
             } else {
                 resizableElementHeights.push(0);
@@ -424,7 +425,7 @@ export default function () {
 
             // temp media height
             const tempVisibleMedia = this.temporaryVisibleMedia.map((item) => {
-                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+                return roundToTwoDecimals((item.height || 0) / this.pyPerCm);
             });
 
             if (tempVisibleMedia.length > 0) {
@@ -435,7 +436,7 @@ export default function () {
 
             // media
             const visibleMedia = this.visibleMedia.map((item) => {
-                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+                return roundToTwoDecimals((item.height || 0) / this.pyPerCm);
             });
             visibleMedia.length > 0
                 ? resizableElementHeights.push(...visibleMedia)
@@ -443,7 +444,7 @@ export default function () {
 
             // temp snippet boxes height
             const tempSnippetBoxes = this.temporarySnippetBoxes.map((item) => {
-                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+                return roundToTwoDecimals((item.height || 0) / this.pyPerCm);
             });
 
             tempSnippetBoxes.length > 0
@@ -451,7 +452,7 @@ export default function () {
                 : resizableElementHeights.push(0);
 
             const visibleSnippetBoxes = this.visibleSnippetBoxes.map((item) => {
-                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+                return roundToTwoDecimals((item.height || 0) / this.pyPerCm);
             });
 
             visibleSnippetBoxes.length > 0
@@ -676,21 +677,21 @@ export default function () {
                         (item) => {
                             return {
                                 content: item.content,
-                                x: roundToOneDecimal(
+                                x: roundToTwoDecimals(
                                     item.position.x / this.pxPerCm,
                                 ),
-                                y: roundToOneDecimal(
+                                y: roundToTwoDecimals(
                                     item.position.y / this.pyPerCm,
                                 ),
                                 width:
                                     item.width !== null
-                                        ? roundToOneDecimal(
+                                        ? roundToTwoDecimals(
                                               item.width / this.pxPerCm,
                                           )
                                         : null,
                                 height:
                                     item.height !== null
-                                        ? roundToOneDecimal(
+                                        ? roundToTwoDecimals(
                                               item.height / this.pyPerCm,
                                           )
                                         : null,
@@ -709,21 +710,21 @@ export default function () {
                     elements: this.visibleElements.map((item) => {
                         return {
                             id: item.id,
-                            x: roundToOneDecimal(
+                            x: roundToTwoDecimals(
                                 item.position.x / this.pxPerCm,
                             ),
-                            y: roundToOneDecimal(
+                            y: roundToTwoDecimals(
                                 item.position.y / this.pyPerCm,
                             ),
                             width:
                                 item.width !== null
-                                    ? roundToOneDecimal(
+                                    ? roundToTwoDecimals(
                                           item.width / this.pxPerCm,
                                       )
                                     : null,
                             height:
                                 item.height !== null
-                                    ? roundToOneDecimal(
+                                    ? roundToTwoDecimals(
                                           item.height / this.pyPerCm,
                                       )
                                     : null,
@@ -733,21 +734,21 @@ export default function () {
                         return {
                             id: item.mediaId,
                             src: item.src,
-                            x: roundToOneDecimal(
+                            x: roundToTwoDecimals(
                                 item.position.x / this.pxPerCm,
                             ),
-                            y: roundToOneDecimal(
+                            y: roundToTwoDecimals(
                                 item.position.y / this.pyPerCm,
                             ),
                             width:
                                 item.width !== null
-                                    ? roundToOneDecimal(
+                                    ? roundToTwoDecimals(
                                           item.width / this.pxPerCm,
                                       )
                                     : null,
                             height:
                                 item.height !== null
-                                    ? roundToOneDecimal(
+                                    ? roundToTwoDecimals(
                                           item.height / this.pyPerCm,
                                       )
                                     : null,
@@ -758,21 +759,21 @@ export default function () {
                             ? this.temporaryVisibleMedia.map((item) => {
                                   return {
                                       name: item.temporaryFileName,
-                                      x: roundToOneDecimal(
+                                      x: roundToTwoDecimals(
                                           item.position.x / this.pxPerCm,
                                       ),
-                                      y: roundToOneDecimal(
+                                      y: roundToTwoDecimals(
                                           item.position.y / this.pyPerCm,
                                       ),
                                       width:
                                           item.width !== null
-                                              ? roundToOneDecimal(
+                                              ? roundToTwoDecimals(
                                                     item.width / this.pxPerCm,
                                                 )
                                               : null,
                                       height:
                                           item.height !== null
-                                              ? roundToOneDecimal(
+                                              ? roundToTwoDecimals(
                                                     item.height / this.pyPerCm,
                                                 )
                                               : null,
@@ -785,21 +786,21 @@ export default function () {
                                   return {
                                       id: item.snippetId,
                                       content: item.content,
-                                      x: roundToOneDecimal(
+                                      x: roundToTwoDecimals(
                                           item.position.x / this.pxPerCm,
                                       ),
-                                      y: roundToOneDecimal(
+                                      y: roundToTwoDecimals(
                                           item.position.y / this.pyPerCm,
                                       ),
                                       width:
                                           item.width !== null
-                                              ? roundToOneDecimal(
+                                              ? roundToTwoDecimals(
                                                     item.width / this.pxPerCm,
                                                 )
                                               : null,
                                       height:
                                           item.height !== null
-                                              ? roundToOneDecimal(
+                                              ? roundToTwoDecimals(
                                                     item.height / this.pyPerCm,
                                                 )
                                               : null,
