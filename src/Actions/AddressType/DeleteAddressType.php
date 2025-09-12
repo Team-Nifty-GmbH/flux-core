@@ -36,7 +36,7 @@ class DeleteAddressType extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        if ($addressType->is_lock) {
+        if ($addressType->is_locked) {
             $errors += [
                 'is_locked' => [__('Address type is locked')],
             ];
