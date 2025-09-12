@@ -107,8 +107,8 @@ class OverallLeadWonLostRatio extends CircleChart implements HasWidgetOptions
 
     protected function redirectWithFilter($filterCallback, string $label): void
     {
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        $start = $this->getStart();
+        $end = $this->getEnd();
 
         $base = $this->getBaseFilter($start, $end);
 
