@@ -20,7 +20,6 @@ class CreateTargetRuleset extends FluxRuleset
             'uuid' => 'nullable|string|uuid|unique:targets,uuid',
             'target_value' => [
                 'required',
-                'gt:0',
                 app(Numeric::class),
             ],
             'start_date' => 'required|date',
@@ -48,14 +47,12 @@ class CreateTargetRuleset extends FluxRuleset
             'user_shares' => 'nullable|array',
             'user_shares.*.relative' => [
                 'nullable',
-                app(Numeric::class),
+                app(Numeric::class, ['min' => 0]),
                 'min:0',
-                'max:100',
             ],
             'user_shares.*.absolute' => [
                 'nullable',
                 app(Numeric::class),
-                'min:0',
             ],
         ];
     }

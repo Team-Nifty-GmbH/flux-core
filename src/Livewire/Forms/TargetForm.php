@@ -47,38 +47,17 @@ class TargetForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Target) {
-            $model = $values->loadMissing('users');
+            $values->loadMissing('users:id');
 
-            $userShares = [];
-            $targetValue = ($model->target_value ?? 0);
-
-            foreach ($model->users as $user) {
-                $pivot = $user->pivot ?? null;
-
-                $alloc = null;
-                $abs = null;
-
-                if ($pivot) {
-                    $alloc = is_null($pivot->target_share) ? null : $pivot->target_share;
-                }
-
-                if ($alloc !== null) {
-                    if ($targetValue > 0) {
-                        $abs = bcround($alloc * $targetValue, 2);
-                    }
-                }
-
-                $userShares[$user->id] = [
-                    'relative' => bcround(bcmul($alloc, 100), 2),
-                    'absolute' => $abs,
-                ];
-            }
-
-            $arr = $model->toArray();
-            $arr['users'] = $model->users->pluck('id')->all();
-            $arr['user_shares'] = $userShares;
-
-            parent::fill($arr);
+            $values = $values->toArray();
+            $values['user_shares'] = array_map(
+                fn (array $user) => [
+                    'id' => data_get($user, 'id'),
+                    'target_share' => data_get($user, 'pivot.target_share'),
+                ],
+                $values['users'] ?? []
+            );
+            $values['users'] = array_column($values['users'] ?? [], 'id');
 
             return;
         }
