@@ -38,6 +38,7 @@ class CreateTarget extends FluxAction
                     'target_share' => is_null($rel)
                     ? bcdiv($abs, $targetValue)
                     : bcdiv($rel, 100),
+                    'target_share_is_percentage' => ! is_null($rel),
                 ];
             }
 

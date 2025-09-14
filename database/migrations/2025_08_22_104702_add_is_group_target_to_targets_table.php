@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('targets', function (Blueprint $table): void {
-            $table->boolean('is_group_target')->after('parent_id')->default(false);
+            $table->boolean('is_group_target')->default(false)->after('priority');
         });
     }
 
