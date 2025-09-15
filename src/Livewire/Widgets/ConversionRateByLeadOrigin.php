@@ -99,8 +99,10 @@ class ConversionRateByLeadOrigin extends BarChart
                             $leadsWithWonLeadState->find($leadWithWonOrLostLeadState->getKey())?->total ?? 0,
                             $leadWithWonOrLostLeadState->total
                         ),
-                        100),
-                    1);
+                        100
+                    ),
+                    1
+                );
 
                 return [
                     'id' => $leadWithWonOrLostLeadState->getKey(),
