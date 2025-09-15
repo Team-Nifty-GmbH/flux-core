@@ -10,7 +10,7 @@
 @if($footerLayout)
 <footer
     style="height: {{ $footerLayout['height'] }}cm"
-    class="relative w-full bg-violet-200 border-semi-black border-t">
+    class="relative w-full bg-violet-200 border-semi-black border-t text-2xs leading-3">
  @foreach($footerLayout['elements'] as $element)
     {{--  client    --}}
     @if($element['id'] === 'footer-client-' . $client['id'] )

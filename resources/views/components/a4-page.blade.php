@@ -1,5 +1,6 @@
 <div
     class="h-[29.7cm] min-h-[29.7cm] w-[21cm] min-w-[21cm] bg-white shadow"
+    style="font-family: Montserrat"
 >
     <div
         x-on:mousemove.window="printStore.isAnyClicked ? printStore.onMouseMove($event) : null"

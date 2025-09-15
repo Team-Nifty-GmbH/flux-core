@@ -549,6 +549,11 @@ export default function () {
                 this.visibleMedia.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleSnippetBoxes.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
+
             }
         },
         async addToTemporaryMedia(event, $refs) {
