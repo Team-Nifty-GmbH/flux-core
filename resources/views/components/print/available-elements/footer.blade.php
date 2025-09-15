@@ -1,6 +1,8 @@
 <div x-show="printStore.editFooter" x-cloak>
     <div class="pb-4 text-lg text-gray-600">Client</div>
-    <div class="flex items-center justify-between">
+    <div
+        style="font-family: Montserrat"
+        class="flex items-center justify-between">
         <address class="not-italic">
             <div class="font-semibold">
                 {{ $client->name ?? '' }}
@@ -29,7 +31,9 @@
     </div>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
     <div class="pb-4 text-lg text-gray-600">Bank Connections</div>
-    <div class="flex flex-col gap-4">
+    <div
+        style="font-family: Montserrat"
+        class="flex flex-col gap-4">
         @foreach ($this->client?->bankConnections ?? [] as $bankConnection)
             <div class="flex items-center justify-between">
                 <div>

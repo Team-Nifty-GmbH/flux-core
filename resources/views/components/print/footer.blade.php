@@ -22,7 +22,15 @@
     @endif
     {{--  logo    --}}
     @if($element['id'] === 'footer-logo' && $client->logo_small)
-        <x-flux::print.elements.logo :client="$client" :logo="$element" />
+            <div
+                class="absolute"
+                style="
+                height: {{ $element['height'] ?? '1.7' }}cm ;
+                width:{{ is_null($element['width']) ? 'auto' : $element['width'] . 'cm'  }};
+                left: {{ $element['x'] }}cm;
+                top: {{ $element['y'] }}cm;">
+                    <x-flux::print.elements.footer-logo :client="$client" />
+                </div>
     @endif
     {{--  bank connection    --}}
     @if(in_array($element['id'], $bankIds))
@@ -56,12 +64,9 @@
 {{--  default footer if no layout saved --}}
 <footer class="h-auto w-full bg-white text-center">
     <div class="footer-content text-2xs leading-3">
-            <div class="absolute left-0 right-0 m-auto max-h-32 px-6">
+            <div class="absolute left-0 right-0 h-[1.7cm] w-fit m-auto px-6">
                 @if($client->logo_small)
-                <img
-                    class="logo-small footer-logo m-auto"
-                    src="{{ $client->logo_small }}"
-                />
+                    <x-flux::print.elements.footer-logo :client="$client" />
                 @endif
             </div>
         <div class="w-full">

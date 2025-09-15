@@ -1,3 +1,4 @@
+{{-- TODO: add page count position as a default element --}}
 <header
     class="h-[1.7cm] w-full bg-white text-center relative"
     x-on:mouseup.window="headerStore.onMouseUp()"

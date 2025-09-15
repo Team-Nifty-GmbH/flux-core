@@ -31,7 +31,7 @@
     </head>
     <body class="text-xs">
         @if ($hasHeader ?? true)
-            <x-flux::print.header />
+            <x-flux::print.header :header-layout="is_array($layout) ? $layout['header'] : null"/>
         @endif
 
         {!! $slot !!}
