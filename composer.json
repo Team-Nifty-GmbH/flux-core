@@ -46,7 +46,7 @@
         "pestphp/pest-plugin-livewire": "^4.0",
         "pestphp/pest-plugin-type-coverage": "^4.0",
         "phpstan/phpstan": "^2.0",
-        "squizlabs/php_codesniffer": "^3.6",
+        "squizlabs/php_codesniffer": "^4.0",
         "vlucas/phpdotenv": "^5.5"
     },
     "suggest": {
