@@ -93,6 +93,20 @@
             />
         </div>
     </template>
+    <template id="{{ uniqid() }}"
+              x-ref="header-page-count"
+    >
+        <div
+            id="header-page-count"
+            data-type="container"
+            draggable="false"
+            x-on:mousedown="printStore.editHeader ?  headerStore.onMouseDown($event, 'header-page-count') : null"
+            class="absolute left-0 top-0 w-fit select-none"
+            :class="{'bg-gray-300' : !headerStore.isImgResizeClicked && headerStore.selectedElementId === 'header-page-count'}"
+        >
+            <div class="text-xs">Page 1 of 1</div>
+        </div>
+    </template>
     <template
         id="{{ uniqid() }}"
         x-ref="header-additional-img"

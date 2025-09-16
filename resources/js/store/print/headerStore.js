@@ -65,11 +65,15 @@ export default function () {
                         $refs['header-logo'].content.cloneNode(true),
                     );
 
+                this.header.appendChild(
+                    $refs['header-page-count'].content.cloneNode(true),
+                )
+
                 this.visibleElements = Array.from(this.header.children)
                     .filter((item) => item.id && true)
                     .map((item) => new PrintElement(item, this));
 
-                ['start', 'end'].forEach((position, index) => {
+                ['start', 'end','bottom-start'].forEach((position, index) => {
                     this.visibleElements[index] &&
                         this.visibleElements[index].init(position);
                 });
@@ -291,11 +295,15 @@ export default function () {
                         $refs['header-logo'].content.cloneNode(true),
                     );
 
+                this.header.appendChild(
+                    $refs['header-page-count'].content.cloneNode(true),
+                )
+
                 this.visibleElements = Array.from(this.header.children)
                     .filter((item) => item.id && true)
                     .map((item) => new PrintElement(item, this));
 
-                ['start', 'end'].forEach((position, index) => {
+                ['start', 'end', 'bottom-start'].forEach((position, index) => {
                     this.visibleElements[index] &&
                         this.visibleElements[index].init(position);
                 });

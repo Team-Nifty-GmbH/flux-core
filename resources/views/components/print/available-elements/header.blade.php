@@ -1,9 +1,15 @@
 <div x-cloak x-show="printStore.editHeader">
-    <div  class="flex items-center justify-between">
+    <div  class="pb-4 flex items-center justify-between">
         <div class=" text-lg text-gray-600">Subject</div>
         <x-toggle
             x-on:change="headerStore.toggleElement($refs,'header-subject')"
             x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-subject')"
+        />
+    </div>
+    <div class=" flex items-center justify-between">
+        <div class=" text-lg text-gray-600">Page Count</div>
+        <x-toggle
+
         />
     </div>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
