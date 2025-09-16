@@ -16,6 +16,7 @@
     :client="$client"
     :address="Fluent::make($model->address_invoice)"
     :$model
+    :first-page-header-layout="is_null($layout) ? null : $layout['first_page_header']"
 >
     <x-slot:right-block>
         @section('first-page-right-block')
@@ -27,7 +28,7 @@
                         {{ __('Order no.') }}
                     </td>
                     <td class="py-0 text-right">
-                        {{ $model->order_number }}
+                       {{ $model->order_number }}
                     </td>
                 </tr>
                 <tr class="leading-none">

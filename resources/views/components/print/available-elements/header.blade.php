@@ -9,7 +9,8 @@
     <div class=" flex items-center justify-between">
         <div class=" text-lg text-gray-600">Page Count</div>
         <x-toggle
-
+            x-on:change="headerStore.toggleElement($refs,'header-page-count')"
+            x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-page-count')"
         />
     </div>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>

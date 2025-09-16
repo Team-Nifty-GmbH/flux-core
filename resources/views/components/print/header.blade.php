@@ -47,6 +47,7 @@
             @endif
     </header>
 @else
+{{-- default header if no changes are made--}}
 <header class="h-auto w-full bg-white text-center font-light">
     <div class="header-content">
         <div>
