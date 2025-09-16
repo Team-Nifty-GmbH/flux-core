@@ -23,7 +23,7 @@ class MyLeadWonLostRatio extends OverallLeadWonLostRatio
             return $query
                 ->whereNotNull('lead_state_id')
                 ->where('user_id', $userId)
-                ->whereBetween('created_at', [$start, $end]);
+                ->whereBetween('closed_at', [$start, $end]);
         };
     }
 }

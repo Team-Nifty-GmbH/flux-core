@@ -96,6 +96,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start',
             'end',
+            'closed_at',
             'created_at',
             'updated_at',
         ];
@@ -138,6 +139,13 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
                 $lead->recalculateWeightedRevenue();
             }
+
+            if ($lead->isDirty('lead_state_id')) {
+                $isClosed = $lead->leadState
+                    && ($lead->leadState->is_won || $lead->leadState->is_lost);
+
+                $lead->closed_at = $isClosed ? now() : null;
+            }
         });
     }
 
@@ -146,6 +154,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start' => 'date:Y-m-d',
             'end' => 'date:Y-m-d',
+            'closed_at' => 'datetime',
             'expected_revenue' => Money::class,
             'expected_gross_profit' => Money::class,
         ];
