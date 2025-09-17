@@ -147,11 +147,13 @@ class Editor extends Component
         public bool $orderedList = true,
         public bool $quote = true,
         public bool $codeBlock = true,
+        public bool $textAlign = false,
 
         public bool $tooltipDropdown = false,
         public bool $transparent = false,
         public ?int $defaultFontSize = null,
         public bool $fullHeight = false,
+        public bool $showEditorPadding = true,
         public array $availableFontSizes = [
             12,
             14,

@@ -23,6 +23,7 @@
         "@tiptap/extension-mention": "^3.0.7",
         "@tiptap/extension-text-style": "^3.0.7",
         "@tiptap/extension-underline": "^3.0.7",
+        "@tiptap/extension-text-align": "^3.4.4",
         "@tiptap/pm": "^3.0.7",
         "@tiptap/starter-kit": "^3.0.7",
         "@types/lodash.debounce": "^4.0.8",

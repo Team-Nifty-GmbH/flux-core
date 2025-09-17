@@ -215,6 +215,27 @@
             ></x-button>
         @endif
 
+        @if($textAlign)
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3-bottom-left"
+                x-on:click="editor().chain().focus().setTextAlign('left').run()" >
+            </x-button>
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3"
+                x-on:click="editor().chain().focus().setTextAlign('center').run()" >
+            </x-button>
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3-bottom-right"
+                x-on:click="editor().chain().focus().setTextAlign('right').run()" >
+            </x-button>
+        @endif
+
         @if ($codeBlock)
             <x-button
                 flat

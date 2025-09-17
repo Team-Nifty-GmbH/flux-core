@@ -201,6 +201,7 @@
                                 x-model="text"
                                 :full-height="true"
                                 :tooltip-dropdown="true"
+                                :text-align="true"
                                 :transparent="true" />
                         </template>
                         <div
@@ -250,13 +251,14 @@
                                 x-modelable="content"
                                 x-model="text"
                                 :full-height="true"
+                                :text-align="true"
                                 :tooltip-dropdown="true"
                                 :transparent="true" />
                         </template>
                         <div
                             x-cloak
                             x-show="footerStore.snippetEditorXData === null"
-                            class="text-left text-[12px] p-1"
+                            class="text-[12px] p-1"
                             x-html="text">
                         </div>
                         <x-icon
@@ -269,7 +271,7 @@
                     <div
                         x-cloak
                         x-show="!printStore.editFooter"
-                        class="text-left text-[12px] p-1"
+                        class="text-[12px] p-1"
                         x-html="text">
                     </div>
                 </div>
