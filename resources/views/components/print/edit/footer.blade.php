@@ -68,7 +68,7 @@
             <template
                 id="{{ $client->id }}"
                 x-ref="footer-client-{{ $client->id }}">
-                <address
+                <div
                     draggable="false"
                     data-type="container"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,'footer-client-{{ $client->id }}') : null"
@@ -76,27 +76,8 @@
                     class="absolute left-0 top-0 w-fit cursor-pointer select-none text-left not-italic"
                     :class="{'bg-gray-300' : footerStore.selectedElementId === 'footer-client-{{ $client->id }}'}"
                 >
-                    <div class="font-semibold">
-                        {{ $client->name ?? '' }}
-                    </div>
-                    <div>
-                        {{ $client->ceo ?? '' }}
-                    </div>
-                    <div>
-                        {{ $client->street ?? '' }}
-                    </div>
-                    <div>
-                        {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
-                    </div>
-                    <div>
-                        {{ $client->phone ?? '' }}
-                    </div>
-                    <div>
-                        <div>
-                            {{ $client->vat_id }}
-                        </div>
-                    </div>
-                </address>
+                    <x-flux::print.elements.client :client="$client"/>
+                </div>
             </template>
             <template
                 id="{{ $client->id }}"
@@ -116,11 +97,7 @@
                             x-on:mousedown.stop="footerStore.onMouseDownScale($event, 'footer-logo')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
                     </div>
-                    <img
-                        draggable="false"
-                        class="logo-small footer-logo max-h-full w-full"
-                        src="{{ $client->logo_small_url }}"
-                    />
+                    <x-flux::print.elements.footer-logo :client="$client"/>
                 </div>
             </template>
             @foreach ($client->bankConnections as $index => $bankConnection)
@@ -135,15 +112,7 @@
                         class="absolute left-0 top-0 w-fit cursor-pointer select-none text-left"
                         :class="{'bg-gray-300' : footerStore.selectedElementId === 'footer-bank-{{ $bankConnection->id }}'}"
                     >
-                        <div class="font-semibold">
-                            {{ $bankConnection->bank_name ?? '' }}
-                        </div>
-                        <div>
-                            {{ $bankConnection->iban ?? '' }}
-                        </div>
-                        <div>
-                            {{ $bankConnection->bic ?? '' }}
-                        </div>
+                        <x-flux::print.elements.bank-connection :bank-connection="$bankConnection"/>
                     </div>
                 </template>
             @endforeach

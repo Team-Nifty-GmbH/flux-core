@@ -19,53 +19,7 @@
     :first-page-header-layout="is_null($layout) ? null : $layout['first_page_header']"
 >
     <x-slot:right-block>
-        @section('first-page-right-block')
-        <table class="border-separate border-spacing-x-2">
-            <tbody class="align-text-top text-xs leading-none">
-                @section('first-page-right-block.rows')
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
-                        {{ __('Order no.') }}
-                    </td>
-                    <td class="py-0 text-right">
-                       {{ $model->order_number }}
-                    </td>
-                </tr>
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
-                        {{ __('Customer no.') }}
-                    </td>
-                    <td class="py-0 text-right">
-                        @if ($model instanceof Illuminate\Support\Fluent)
-                            {{ $model->customer_number }}
-                        @else
-                            {{ $model->contact()->withTrashed()->value('customer_number') }}
-                        @endif
-                    </td>
-                </tr>
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
-                        {{ __('Order Date') }}
-                    </td>
-                    <td class="py-0 text-right">
-                        {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                    </td>
-                </tr>
-                @if ($model->commission)
-                    <tr class="leading-none">
-                        <td class="py-0 text-left font-semibold">
-                            {{ __('Commission') }}
-                        </td>
-                        <td class="py-0 text-right">
-                            {{ $model->commission }}
-                        </td>
-                    </tr>
-                @endif
-
-                @show
-            </tbody>
-        </table>
-        @show
+        <x-flux::print.elements.first-page-header-right-block-order :model="$model" />
     </x-slot>
 </x-flux::print.first-page-header>
 @show

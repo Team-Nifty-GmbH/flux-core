@@ -1,12 +1,14 @@
 @props([
     'client',
     'firstPageHeaderLayout',
+    'model'
 ])
 
 @if($firstPageHeaderLayout)
 <div
     style="height:{{$firstPageHeaderLayout['height']}}cm"
-    class="relative w-full bg-purple-100">
+    class="relative w-full bg-white">
+{{--      elements--}}
     @foreach($firstPageHeaderLayout['elements'] as $element)
         @if($element['id'] === 'first-page-header-subject')
             <div
@@ -32,7 +34,29 @@
                 <x-flux::print.elements.first-page-header-client-name :client="$client" />
             </div>
         @endif
+        @if($element['id'] === 'first-page-header-right-block')
+            <div
+                style="left: {{ $element['x'] }}cm;
+                        top: {{ $element['y'] }}cm;"
+                class="absolute">
+                <x-flux::print.elements.first-page-header-right-block-order :model="$model" />
+            </div>
+        @endif
+        @if($element['id'] === 'first-page-header-address' && isset($address))
+            <div
+                style="left: {{ $element['x'] }}cm;
+                        top: {{ $element['y'] }}cm;"
+                class="absolute">
+                <x-flux::print.elements.first-page-header-address :address="$address" />
+            </div>
+        @endif
     @endforeach
+{{--      media--}}
+    @if($firstPageHeaderLayout['media'])
+        @foreach($firstPageHeaderLayout['media'] as $media)
+            <x-flux::print.elements.media :media="$media" />
+        @endforeach
+    @endif
 </div>
 @else
 <div class="cover-page z-10 h-auto overflow-auto bg-white">
@@ -55,7 +79,9 @@
                 @if ($slot->isNotEmpty())
                     {!! $slot !!}
                 @else
-{{--                    <x-flux::print.elements.first-page-header-address :client="$address" />--}}
+                    @isset($address)
+                    <x-flux::print.elements.first-page-header-address :address="$address" />
+                    @endisset
                 @endif
             </td>
             <td class="w-1/2 align-top">
