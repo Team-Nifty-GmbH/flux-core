@@ -182,6 +182,65 @@ export default function () {
                 throw new Error(`Element not selected`);
             }
         },
+        onMouseMoveResize(e) {
+            if (this._selectedElement.ref !== null) {
+                const deltaX = e.clientX - this._selectedElement.startX;
+                const deltaY = e.clientY - this._selectedElement.startY;
+                const { startHeight, startWidth } =
+                    this._startSizeOfSelectedElement();
+                if (deltaX >= 0 && deltaY >= 0) {
+                    // TODO: this.header.offsetWidth cache it in a variable - and restore on margin change
+                    const maxWidth = this.header.offsetWidth;
+                    const maxHeight = this._headerHeight * this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight < maxHeight && newWidth < maxWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX >= 0 && deltaY <= 0) {
+                    const maxWidth = this.header.offsetWidth;
+                    const minHeight = 10 ; // 9px - smallest font size
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight > minHeight && newWidth < maxWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX <= 0 && deltaY >= 0) {
+                    const minWidth = 3 * this.pxPerCm;
+                    const maxHeight = this._headerHeight * this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight < maxHeight && newWidth > minWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX <= 0 && deltaY <= 0) {
+                    const minWidth = 3 * this.pxPerCm;
+                    const minHeight = 10; // 9px - smallest font size in editor
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight > minHeight && newWidth > minWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                }
+
+                this._selectedElement.startX = e.clientX;
+                this._selectedElement.startY = e.clientY;
+            } else {
+                throw new Error(`Element not selected - resize`);
+            }
+        },
         toggleElement($ref, id) {
             if (this.header === null) {
                 throw new Error(`Header Elelement not initialized`);
