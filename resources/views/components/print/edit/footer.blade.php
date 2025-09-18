@@ -192,7 +192,7 @@
                             x-show="footerStore.snippetEditorXData === null"
                             dragable="false"
                             x-on:mousedown="toggleEditor()"
-                            name="pencil" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
+                            name="pencil" class="absolute cursor-pointer left-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
                         <template x-if="footerStore.snippetEditorXData?.elementObj.id === objId">
                             <x-flux::editor
                                 x-editable="footerStore.snippetEditorXData?.elementObj.id === objId"
@@ -201,13 +201,14 @@
                                 x-model="text"
                                 :full-height="true"
                                 :tooltip-dropdown="true"
+                                :show-editor-padding="false"
                                 :text-align="true"
                                 :transparent="true" />
                         </template>
                         <div
                             x-cloak
                             x-show="footerStore.snippetEditorXData === null"
-                            class="text-left text-[12px] p-1"
+                            class="text-left p-1"
                             x-html="text">
                         </div>
                         <x-icon
@@ -243,7 +244,7 @@
                             x-show="footerStore.snippetEditorXData === null"
                             dragable="false"
                             x-on:mousedown="toggleEditor()"
-                            name="pencil" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
+                            name="pencil" class="absolute cursor-pointer left-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
                         <template x-if="footerStore.snippetEditorXData?.elementObj.id === objId">
                             <x-flux::editor
                                 x-editable="footerStore.snippetEditorXData?.elementObj.id === objId"
@@ -253,12 +254,12 @@
                                 :full-height="true"
                                 :text-align="true"
                                 :tooltip-dropdown="true"
+                                :show-editor-padding="false"
                                 :transparent="true" />
                         </template>
                         <div
                             x-cloak
                             x-show="footerStore.snippetEditorXData === null"
-                            class="text-[12px] p-1"
                             x-html="text">
                         </div>
                         <x-icon
@@ -271,7 +272,6 @@
                     <div
                         x-cloak
                         x-show="!printStore.editFooter"
-                        class="text-[12px] p-1"
                         x-html="text">
                     </div>
                 </div>

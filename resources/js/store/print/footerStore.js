@@ -132,7 +132,7 @@ export default function () {
                     }
                 } else if (deltaX >= 0 && deltaY <= 0) {
                     const maxWidth = this.footer.offsetWidth;
-                    const minHeight = this.pyPerCm;
+                    const minHeight = 10 ; // 9px - smallest font size
                     const newHeight = startHeight + deltaY;
                     const newWidth = startWidth + deltaX;
                     if (newHeight > minHeight && newWidth < maxWidth) {
@@ -154,7 +154,7 @@ export default function () {
                     }
                 } else if (deltaX <= 0 && deltaY <= 0) {
                     const minWidth = 3 * this.pxPerCm;
-                    const minHeight = this.pyPerCm;
+                    const minHeight = 10; // 9px - smallest font size in editor
                     const newHeight = startHeight + deltaY;
                     const newWidth = startWidth + deltaX;
                     if (newHeight > minHeight && newWidth > minWidth) {

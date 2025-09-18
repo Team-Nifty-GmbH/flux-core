@@ -126,7 +126,8 @@
 
     @media print {
         body {
-            margin-bottom: 30px;
+            /*margin-bottom: 30px;*/
+            padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 20 . 'mm' }};
         }
 
         header {
