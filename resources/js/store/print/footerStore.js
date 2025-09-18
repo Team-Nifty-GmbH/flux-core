@@ -451,6 +451,7 @@ export default function () {
                 ? resizableElementHeights.push(...tempSnippetBoxes)
                 : resizableElementHeights.push(0);
 
+            // snippet boxes
             const visibleSnippetBoxes = this.visibleSnippetBoxes.map((item) => {
                 return roundToTwoDecimals((item.height || 0) / this.pyPerCm);
             });
@@ -666,7 +667,7 @@ export default function () {
 
             if (indexTemp === -1 && indexSnippet === -1) {
                 throw new Error(
-                    `Snippet box or Temporary Snippet box with id ${id} not found`,
+                    `Footer - Snippet box or Temporary Snippet box with id ${id} not found`,
                 );
             }
         },
@@ -677,6 +678,7 @@ export default function () {
                         await item.upload(this.component);
                     }
                 }
+
                 if (this.temporarySnippetBoxes.length > 0) {
                     const footerSnippets = this.temporarySnippetBoxes.map(
                         (item) => {
