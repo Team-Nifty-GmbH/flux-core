@@ -36,6 +36,7 @@ class CreatePrintLayout extends FluxAction
         // header
         $header = $this->getData('header', []);
         $this->addMedia($header,$temporaryMedia,$printLayout->id);
+        $this->addSnippets($header,$this->getData('temporary_snippets.header', []),$printLayout->id);
 
         // first page header
         $firstPageHeader = $this->getData('first_page_header', []);

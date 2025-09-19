@@ -3,7 +3,7 @@
     class="h-[1.7cm] w-full bg-white text-center relative"
     x-on:mouseup.window="headerStore.onMouseUp()"
     x-on:mousemove.window="
-        headerStore.selectedElementId !== null && !headerStore.isImgResizeClicked
+        headerStore.selectedElementId !== null && !headerStore.isResizeOrScaleActive
             ? headerStore.onMouseMove($event)
             : null
     "
@@ -67,7 +67,7 @@
         class="header-content relative h-full w-full">
     </div>
     <div
-        x-on:mousemove.window="headerStore.isImgResizeClicked ? headerStore.onMouseMoveScale($event) : null"
+        x-on:mousemove.window="headerStore.isImgResizeClicked ? headerStore.onMouseMoveScale($event) : headerStore.isSnippetResizeClicked ? headerStore.onMouseMoveResize($event) : null"
     ></div>
     <template
         id="{{ $client->id }}"

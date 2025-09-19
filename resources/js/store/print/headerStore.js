@@ -59,6 +59,27 @@ export default function () {
             }
             return this._component();
         },
+        get isResizeOrScaleActive() {
+            return this.isImgResizeClicked || this.isSnippetResizeClicked;
+        },
+        get snippetNames() {
+            const savedNames = this.visibleSnippetBoxes.map((item) => {
+                return { name: `box-${item.snippetId}`, ref: item };
+            });
+
+            const maxId = Math.max(
+                ...this.visibleSnippetBoxes.map((item) => item.snippetId),
+                0,
+            );
+
+            const temporaryNames = this.temporarySnippetBoxes.map(
+                (item, index) => {
+                    return { name: `box-${maxId + index + 1}`, ref: item };
+                },
+            );
+
+            return [...savedNames, ...temporaryNames];
+        },
         async register($wire, $refs) {
             this._component = () => $wire;
             this.header = $refs['header'];
@@ -364,11 +385,11 @@ export default function () {
                 });
 
                 this.temporarySnippetBoxes.forEach((item) => {
-                    this.footer.removeChild(item.element);
+                    this.header.removeChild(item.element);
                 });
 
                 this.visibleSnippetBoxes.forEach((item) => {
-                    this.footer.removeChild(item.element);
+                    this.header.removeChild(item.element);
                 });
             }
 

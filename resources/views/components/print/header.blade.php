@@ -45,6 +45,12 @@
                     <x-flux::print.elements.media :media="$media" />
                 @endforeach
             @endif
+        {{--  snippets    --}}
+        @if($headerLayout['snippets'])
+            @foreach($headerLayout['snippets'] as $snippet)
+                <x-flux::print.elements.snippet :snippet="$snippet" />
+            @endforeach
+        @endif
     </header>
 @else
 {{-- default header if no changes are made--}}

@@ -60,6 +60,7 @@
             class="flex h-full flex-col justify-end"
         >
             <x-flux::print.controll-panel.footer />
+            <x-flux::print.controll-panel.header />
             <div
                 x-cloak
                 x-show="!printStore.anyEdiorOpen"

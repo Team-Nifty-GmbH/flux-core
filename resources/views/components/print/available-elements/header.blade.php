@@ -75,4 +75,25 @@
             x-on:click="$refs.headerImageInput.click()"
         />
     </label>
+    <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
+    <div class="pb-4 text-lg text-gray-600">Additional Snippet</div>
+    <div class="flex flex-col gap-4"
+         :class="{'pb-4': headerStore.temporarySnippetBoxes.length > 0 || headerStore.visibleSnippetBoxes.length > 0 }"
+    >
+        <template x-for="(snippet, index) in headerStore.snippetNames" :key="index">
+            <div class="flex items-center justify-between">
+                <div class="text-gray-400 text-[12px]" x-text="snippet.name"></div>
+                <x-button.circle
+                    x-bind:disabled="headerStore.snippetEditorXData !== null"
+                    x-on:click="headerStore.deleteSnippet(snippet.ref.id)"
+                    icon="trash"
+                />
+            </div>
+        </template>
+    </div>
+    <x-button
+        color="primary"
+        text="Add Snippet"
+        x-on:click="headerStore.addToTemporarySnippet($refs)"
+    />
 </div>
