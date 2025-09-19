@@ -2,7 +2,9 @@
     'model',
 ])
 
-<table>
+<table
+    draggable="false"
+>
     <tbody class="align-text-top text-xs leading-none">
     <tr class="leading-none">
         <td class="text-left font-semibold">

@@ -6,6 +6,7 @@
 
 @if($firstPageHeaderLayout)
 <div
+    draggable="false"
     style="height:{{$firstPageHeaderLayout['height']}}cm"
     class="relative w-full bg-white">
 {{--      elements--}}

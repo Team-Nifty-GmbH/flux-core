@@ -127,15 +127,18 @@
     @media print {
         body {
             /*margin-bottom: 30px;*/
+            margin: 0 auto !important;
             padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 20 . 'mm' }};
         }
+    }
 
+    @page {
         header {
-            position: fixed;
+            display: fixed;
         }
 
         footer {
-            position: fixed;
+            display: fixed;
         }
     }
 </style>

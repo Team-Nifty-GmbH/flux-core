@@ -3,28 +3,7 @@
     <div
         style="font-family: Montserrat"
         class="flex items-center justify-between">
-        <address class="not-italic">
-            <div class="font-semibold">
-                {{ $client->name ?? '' }}
-            </div>
-            <div>
-                {{ $client->ceo ?? '' }}
-            </div>
-            <div>
-                {{ $client->street ?? '' }}
-            </div>
-            <div>
-                {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
-            </div>
-            <div>
-                {{ $client->phone ?? '' }}
-            </div>
-            <div>
-                <div>
-                    {{ $client->vat_id }}
-                </div>
-            </div>
-        </address>
+        <x-flux::print.elements.client :client="$client" />
         <x-toggle
             x-on:change="footerStore.toggleElement($refs,'footer-client-{{$client->id}}')"
             x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-client-{{$client->id}}')" />
@@ -36,17 +15,7 @@
         class="flex flex-col gap-4">
         @foreach ($this->client?->bankConnections ?? [] as $bankConnection)
             <div class="flex items-center justify-between">
-                <div>
-                    <div class="font-semibold">
-                        {{ $bankConnection->bank_name ?? '' }}
-                    </div>
-                    <div>
-                        {{ $bankConnection->iban ?? '' }}
-                    </div>
-                    <div>
-                        {{ $bankConnection->bic ?? '' }}
-                    </div>
-                </div>
+                <x-flux::print.elements.bank-connection :bank-connection="$bankConnection"  />
                 <x-toggle
                     x-on:change="footerStore.toggleElement($refs,'footer-bank-{{$bankConnection->id}}')"
                     x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-bank-{{$bankConnection->id}}')" />
@@ -58,7 +27,9 @@
         <div x-cloak x-show="printStore.editFooter">
             <div class="pb-4 text-lg text-gray-600">Logo</div>
             <div class="flex items-center justify-between">
-                <img class="h-[1.7cm]" src="{{ $this->client->logo_small_url }}" />
+                <div class="h-[1.7cm]">
+                    <x-flux::print.elements.footer-logo :client="$client" />
+                </div>
                 <x-toggle
                     x-on:change="footerStore.toggleElement($refs,'footer-logo')"
                     x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-logo')" />

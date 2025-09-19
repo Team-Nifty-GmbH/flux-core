@@ -1,7 +1,10 @@
 @props([
     'address'
     ])
-<address class="text-xs not-italic">
+
+<address
+    draggable="false"
+    class="text-xs not-italic">
     <div class="font-semibold">
         {{ $address->company ?? '' }}
     </div>
