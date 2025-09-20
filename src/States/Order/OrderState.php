@@ -17,6 +17,7 @@ abstract class OrderState extends EndableState implements HasFrontendFormatter
             ->allowTransitions([
                 [
                     [
+                        Aborted::class,
                         Draft::class,
                         Canceled::class,
                     ],
@@ -49,6 +50,13 @@ abstract class OrderState extends EndableState implements HasFrontendFormatter
                         InReview::class,
                     ],
                     Canceled::class,
+                ],                [
+                    [
+                        Open::class,
+                        InProgress::class,
+                        InReview::class,
+                    ],
+                    Aborted::class,
                 ],
                 [
                     [
