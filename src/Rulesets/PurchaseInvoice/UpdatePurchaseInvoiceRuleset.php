@@ -80,6 +80,12 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => PaymentType::class]),
             ],
             'invoice_date' => 'date',
+            'payment_target_date' => 'nullable|date',
+            'payment_discount_target_date' => 'nullable|date',
+            'payment_discount_percent' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
             'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'invoice_number' => 'nullable|string|max:255',
