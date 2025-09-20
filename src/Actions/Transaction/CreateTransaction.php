@@ -6,6 +6,7 @@ use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Transaction;
 use FluxErp\Rulesets\Transaction\CreateTransactionRuleset;
+use Illuminate\Support\Str;
 
 class CreateTransaction extends FluxAction
 {
@@ -33,5 +34,16 @@ class CreateTransaction extends FluxAction
         }
 
         return $transaction->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['counterpart_iban'] = is_string($this->getData('counterpart_iban'))
+            ? Str::of($this->getData('counterpart_iban'))->upper()->remove(' ')->toString()
+            : $this->getData('counterpart_iban');
+
+        $this->data['counterpart_bic'] = is_string($this->getData('counterpart_bic'))
+            ? Str::of($this->getData('counterpart_bic'))->upper()->remove(' ')->toString()
+            : $this->getData('counterpart_bic');
     }
 }
