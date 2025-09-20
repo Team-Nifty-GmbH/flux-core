@@ -50,7 +50,8 @@ abstract class OrderState extends EndableState implements HasFrontendFormatter
                         InReview::class,
                     ],
                     Canceled::class,
-                ],                [
+                ],
+                [
                     [
                         Open::class,
                         InProgress::class,
