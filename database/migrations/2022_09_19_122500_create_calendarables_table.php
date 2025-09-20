@@ -18,7 +18,7 @@ return new class() extends Migration
             $table->foreign('calendar_id')
                 ->references('id')
                 ->on('calendars')
-                ->onDelete('cascade');
+                ->cascadeOnDelete();
 
             $table->unique(['calendar_id', 'calendarable_id', 'calendarable_type'], 'calendarable_unique');
         });
