@@ -19,9 +19,17 @@
                         '=',
                         $this->userId
                     ],
-                    'whereBetween' => [
-                        'start_date', [$this->start, $this->end],
-                        'end_date', [$this->start, $this->end]
+                    'where' => [
+                        [
+                            'start_date',
+                            '<=',
+                            $this->end,
+                        ],
+                        [
+                            'end_date',
+                            '>=',
+                            $this->start,
+                        ],
                     ],
                 ],
             ]"
