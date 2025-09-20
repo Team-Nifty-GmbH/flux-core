@@ -53,9 +53,9 @@ class UserEdit extends Component
     {
         return view('flux::livewire.settings.user-edit',
             [
-                'permissions' => Permission::search($this->searchPermission)
+                'permissions' => resolve_static(Permission::class, 'search', [$this->searchPermission])
                     ->query(fn ($query) => $query->where('guard_name', '!=', 'address'))
-                    ->paginate(null, 'permissionsPage'),
+                    ->paginate(pageName: 'permissionsPage'),
                 'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name', 'client_code']),
                 'roles' => resolve_static(Role::class, 'query')
