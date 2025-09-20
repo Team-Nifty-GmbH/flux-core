@@ -356,6 +356,8 @@ class Order extends Component
         $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
         $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderVariable}->language_id = $contact?->mainAddress?->language_id
+            ?? resolve_static(Language::class, 'default')->getKey();
         $this->{$orderVariable}->price_list_id = $contact?->price_list_id;
         $this->{$orderVariable}->payment_type_id = $contact?->payment_type_id;
 
@@ -364,7 +366,12 @@ class Order extends Component
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
                 ->first()
-                ?->toArray();
+                ?->postal_address;
+            $this->order->address_delivery = resolve_static(Address::class, 'query')
+                ->whereKey($this->order->address_delivery_id)
+                ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
+                ->first()
+                ?->postal_address;
         }
     }
 

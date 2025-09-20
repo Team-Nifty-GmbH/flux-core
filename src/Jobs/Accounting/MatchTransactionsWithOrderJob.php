@@ -96,7 +96,8 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
                     'JSON_CONTAINS(LOWER(search_aliases), LOWER(?))',
                     [json_encode($transaction->counterpart_name)]
                 )
-                ->sole('contact_id');
+                ->sole('contact_id')
+                ->value('contact_id');
         } catch (ModelNotFoundException|MultipleRecordsFoundException) {
         }
 
