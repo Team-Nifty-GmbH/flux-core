@@ -22,6 +22,8 @@ class TargetForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public bool $is_group_target = false;
+
     public ?string $model_type = null;
 
     public ?string $name = null;
@@ -38,7 +40,9 @@ class TargetForm extends FluxForm
 
     public ?string $timeframe_column = null;
 
-    public ?array $users = null;
+    public array $user_shares = [];
+
+    public array $users = [];
 
     public function fill($values): void
     {
@@ -46,7 +50,16 @@ class TargetForm extends FluxForm
             $values->loadMissing('users:id');
 
             $values = $values->toArray();
+            $values['user_shares'] = array_map(
+                fn (array $user) => [
+                    'id' => data_get($user, 'id'),
+                    'target_share' => data_get($user, 'pivot.target_share'),
+                ],
+                $values['users'] ?? []
+            );
             $values['users'] = array_column($values['users'] ?? [], 'id');
+
+            return;
         }
 
         parent::fill($values);
