@@ -1,3 +1,12 @@
+@php
+    // padding-bottom to take in account for footer height in pdf
+    $paddingBottom = null;
+
+    if($hasFooter && $generatePdf && $layout['footer']) {
+            $paddingBottom = $layout['footer']['height'] + 0.5 . 'cm';
+        }
+@endphp
+
 <html
     class="h-full text-sm"
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
@@ -25,20 +34,22 @@
         />
         @show
         @section('head.style')
-        <x-flux::print.style :page-css="$pageCss ?? []" />
-        @show
+        <x-flux::print.style :page-css="$pageCss ?? []" :is-preview="$generatePdf" />
+            @show
         @show
     </head>
-    <body class="text-xs">
+    <body class="text-xs" style="{{ is_null($paddingBottom) ? '' : 'padding-bottom:' . $paddingBottom . ';' }};">
+        {{ $bodyStyle ?? '' }}
         @if ($hasHeader ?? true)
             <x-flux::print.header :header-layout="is_array($layout) ? $layout['header'] : null"/>
         @endif
 
-        {!! $slot !!}
-
         @if ($hasFooter ?? true)
             <x-flux::print.footer :footer-layout="is_array($layout) ? $layout['footer'] : null" />
         @endif
+
+        {!! $slot !!}
+
         @if ($signaturePath)
             <div class="mt-10 flex justify-end">
                 <div>

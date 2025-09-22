@@ -34,46 +34,18 @@
         background-color: white;
     }
 
-    .border-black {
-        border-color: black;
-    }
-
-    .line-through {
-        text-decoration: line-through;
-    }
-
-    .black-bar {
-        background-color: black;
-        width: 1.75rem;
-        height: 0.25rem;
-    }
-
-    @section('style.header')
-        /*header {*/
-        /*    top: -20mm;*/
-        /*}*/
-    @show
-
-    @section('style.footer')
-        /*footer {*/
-        /*    bottom: -30mm;*/
-        /*    padding-bottom: 10mm;*/
-        /*}*/
-    @show
-
-    /*.logo{*/
-    /*    height:70px;*/
+    /*.border-black {*/
+    /*    border-color: black;*/
     /*}*/
 
-    /*.logo-small{*/
-    /*    height:50px;*/
+    /*.line-through {*/
+    /*    text-decoration: line-through;*/
     /*}*/
 
-    /*.footer-logo {*/
-    /*    transform: translateY(-50%);*/
-    /*    background-color: white;*/
-    /*    padding-left: 3mm;*/
-    /*    padding-right: 3mm;*/
+    /*.black-bar {*/
+    /*    background-color: black;*/
+    /*    width: 1.75rem;*/
+    /*    height: 0.25rem;*/
     /*}*/
 
     .bg-even-children >:nth-child(even){
@@ -105,10 +77,7 @@
             margin-top: 0;
         }
 
-        footer {
-            /*display: none;*/
-        }
-
+        @if(!$isPreview)
         body {
             width: 21cm;
             margin: 0 auto !important;
@@ -118,27 +87,44 @@
             border-radius: 10px;
         }
 
+        footer {
+            display: none;
+        }
+
+        header {
+            display: none;
+        }
+        @else
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        footer {
+            display: block;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        @endif
+
         html {
             background: #f5f5f5;
             overflow-y: auto;
         }
+
     }
 
-    @media print {
-        body {
-            /*margin-bottom: 30px;*/
-            margin: 0 auto !important;
-            padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 20 . 'mm' }};
-        }
-    }
 
-    @page {
-        header {
-            display: fixed;
-        }
 
-        footer {
-            display: fixed;
-        }
-    }
 </style>

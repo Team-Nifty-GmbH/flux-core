@@ -5,7 +5,7 @@
 @if($headerLayout)
     <header
         style="height: {{ $headerLayout['height'] ?? '1.7' }}cm"
-        class="relative w-full bg-white font-light">
+        class="w-full bg-white font-light">
         @foreach($headerLayout['elements'] as $element)
             {{--  subject    --}}
             @if($element['id'] === 'header-subject')

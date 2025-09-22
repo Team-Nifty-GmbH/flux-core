@@ -129,7 +129,7 @@ abstract class PrintableView extends Component
         $this->hydrateSharedData();
         File::ensureDirectoryExists(storage_path('fonts'));
 
-        $this->pdf = PdfFacade::loadHTML($this->renderWithLayout())
+        $this->pdf = PdfFacade::loadHTML($this->renderWithLayout(true))
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
             ->setOption('isRemoteEnabled', true)
@@ -311,7 +311,7 @@ abstract class PrintableView extends Component
         return true;
     }
 
-    protected function renderWithLayout(): \Illuminate\View\View
+    protected function renderWithLayout(bool $generatePdf = false): \Illuminate\View\View
     {
         return is_null(static::$layout)
             ? $this->render()
@@ -323,6 +323,7 @@ abstract class PrintableView extends Component
                     'hasHeader' => $this->renderHeader(),
                     'hasFooter' => $this->renderFooter(),
                     'layout' => $this->getPrintLayout(),
+                    'generatePdf' => $generatePdf,
                 ]
             );
     }
