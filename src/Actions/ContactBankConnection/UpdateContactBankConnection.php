@@ -43,16 +43,12 @@ class UpdateContactBankConnection extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if ($this->getData('iban')) {
-            $this->data['iban'] = is_string($this->getData('iban'))
-                ? Str::of($this->getData('iban'))->upper()->remove(' ')->toString()
-                : $this->getData('iban');
+        if (is_string($this->getData('iban'))) {
+            $this->data['iban'] = Str::of($this->getData('iban'))->upper()->remove(' ')->toString();
         }
 
-        if ($this->getData('bic')) {
-            $this->data['bic'] = is_string($this->getData('bic'))
-                ? Str::of($this->getData('bic'))->upper()->remove(' ')->toString()
-                : $this->getData('bic');
+        if (is_string($this->getData('bic'))) {
+            $this->data['bic'] = Str::of($this->getData('bic'))->upper()->remove(' ')->toString();
         }
     }
 }

@@ -4,6 +4,7 @@ namespace FluxErp\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Str;
 
 class Bic implements ValidationRule
 {
@@ -262,7 +263,7 @@ class Bic implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $value = str_replace(' ', '', strtoupper($value));
+        $value = Str::of($value)->upper()->remove(' ')->toString();
 
         if (! $this->isValidBic($value)) {
             $fail('The sent BIC is not valid')->translate();

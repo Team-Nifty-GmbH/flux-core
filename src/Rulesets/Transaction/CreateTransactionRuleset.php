@@ -62,7 +62,6 @@ class CreateTransactionRuleset extends FluxRuleset
             ],
             'counterpart_bic' => [
                 'string',
-                'max:255',
                 'nullable',
                 app(Bic::class),
             ],

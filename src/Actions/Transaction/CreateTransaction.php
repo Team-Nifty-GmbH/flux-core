@@ -38,12 +38,18 @@ class CreateTransaction extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['counterpart_iban'] = is_string($this->getData('counterpart_iban'))
-            ? Str::of($this->getData('counterpart_iban'))->upper()->remove(' ')->toString()
-            : $this->getData('counterpart_iban');
+        if (is_string($this->getData('counterpart_iban'))) {
+            $this->data['counterpart_iban'] = Str::of($this->getData('counterpart_iban'))
+                ->upper()
+                ->remove(' ')
+                ->toString();
+        }
 
-        $this->data['counterpart_bic'] = is_string($this->getData('counterpart_bic'))
-            ? Str::of($this->getData('counterpart_bic'))->upper()->remove(' ')->toString()
-            : $this->getData('counterpart_bic');
+        if (is_string($this->getData('counterpart_bic'))) {
+            $this->data['counterpart_bic'] = Str::of($this->getData('counterpart_bic'))
+                ->upper()
+                ->remove(' ')
+                ->toString();
+        }
     }
 }

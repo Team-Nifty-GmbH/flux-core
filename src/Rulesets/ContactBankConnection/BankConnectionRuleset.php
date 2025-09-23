@@ -24,7 +24,6 @@ class BankConnectionRuleset extends FluxRuleset
             'bic' => [
                 'string',
                 'nullable',
-                'max:255',
                 app(Bic::class),
             ],
         ];
