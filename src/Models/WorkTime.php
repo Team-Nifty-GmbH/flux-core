@@ -217,8 +217,8 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $id = base64_decode(data_get($info, 'id') ?? '');

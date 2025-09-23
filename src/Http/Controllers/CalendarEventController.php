@@ -2,13 +2,13 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Http\Requests\CalendarEventRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Livewire\Livewire;
 
 class CalendarEventController extends Controller
 {
-    public function getEvents(Request $request): JsonResponse
+    public function getEvents(CalendarEventRequest $request): JsonResponse
     {
         $info = $request->input('info');
         $calendarAttributes = $request->input('calendar');

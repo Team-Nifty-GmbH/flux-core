@@ -216,15 +216,18 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->whereValueBetween($start, ['start_date', 'due_date'])
-                ->orWhereValueBetween($end, ['start_date', 'due_date'])
-                ->orWhereBetween('start_date', [$start, $end])
+            $query
+                ->whereBetween('start_date', [$start, $end])
                 ->orWhereBetween('due_date', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start_date', '<=', $start)
+                        ->where('due_date', '>=', $end);
+                })
                 ->orWhere(function (Builder $query) use ($start, $end): void {
                     $query->whereNull('start_date')
                         ->whereNull('due_date')

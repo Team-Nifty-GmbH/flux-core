@@ -217,8 +217,8 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {

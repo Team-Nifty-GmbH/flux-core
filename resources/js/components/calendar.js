@@ -288,13 +288,6 @@ const calendar = () => {
                                 response.data.map(this.mapDatesToUtc),
                             );
                         })
-                        .catch((error) => {
-                            console.error(
-                                'Error loading calendar events:',
-                                error,
-                            );
-                            failureCallback(error);
-                        })
                         .finally(() => {
                             calendar.isLoading = false;
                         });
