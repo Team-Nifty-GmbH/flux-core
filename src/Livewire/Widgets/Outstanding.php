@@ -126,7 +126,7 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->whereNotState('payment_state', Paid::class)
             ->whereNotNull('invoice_number')
             ->whereNotNull('invoice_date')
-            ->whereDate('payment_reminder_next_date', '<=', now()->endOfDay()->toDate())
+            ->whereDate('payment_reminder_next_date', '<=', now()->endOfDay())
             ->whereIntegerInRaw(
                 'order_type_id',
                 $this->orderTypeIds
