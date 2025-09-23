@@ -23,6 +23,13 @@ trait IsTimeFrameAwareWidget
 
     abstract public function calculateByTimeFrame(): void;
 
+    public function mountIsTimeFrameAwareWidget(): void
+    {
+        if ($this->timeFrame !== data_get($this->timeParams, 'timeFrame')) {
+            $this->updatedTimeParams();
+        }
+    }
+
     public function updatedTimeParams(): void
     {
         $timeFrame = data_get($this->timeParams, 'timeFrame', TimeFrameEnum::ThisMonth);
