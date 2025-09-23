@@ -213,6 +213,18 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 $order->getSerialNumber('order_number');
             }
 
+            if ($order->isDirty('invoice_date') || $order->isDirty('payment_target')) {
+                $order->payment_target_date = ($order->invoice_date && ! is_null($order->payment_target))
+                    ? $order->invoice_date->copy()->addDays($order->payment_target)
+                    : null;
+            }
+
+            if ($order->isDirty('invoice_date') || $order->isDirty('payment_discount_target')) {
+                $order->payment_discount_target_date = ($order->invoice_date && ! is_null($order->payment_discount_target))
+                    ? $order->invoice_date->copy()->addDays($order->payment_discount_target)
+                    : null;
+            }
+
             if ($order->isDirty('invoice_number') && ! is_null($order->invoice_number)) {
                 $orderPositions = $order->orderPositions()
                     ->whereNotNull('credit_account_id')
@@ -262,6 +274,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                         $order->payment_reminder_days_1
                     );
                 }
+            }
+
+            if ($order->isDirty('payment_discount_percent')) {
+                $order->calculateBalanceDueDiscount();
             }
 
             if ($order->isDirty('iban')
@@ -345,6 +361,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             'payment_reminder_next_date' => 'date',
             'order_date' => 'date',
             'invoice_date' => 'date',
+            'payment_target_date' => 'date',
+            'payment_discount_target_date' => 'date',
             'system_delivery_date' => 'date',
             'system_delivery_date_end' => 'date',
             'customer_delivery_date' => 'date',
@@ -399,6 +417,21 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ),
             2
         );
+
+        return $this;
+    }
+
+    public function calculateBalanceDueDiscount(): static
+    {
+        if (! is_null($this->balance)
+            && ! is_null($this->payment_discount_percent)
+            && bccomp($this->payment_discount_percent, 0) > 0
+        ) {
+            $discountAmount = bcmul($this->balance, $this->payment_discount_percent);
+            $this->balance_due_discount = bcsub($this->balance, $discountAmount);
+        } else {
+            $this->balance_due_discount = null;
+        }
 
         return $this;
     }
