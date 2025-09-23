@@ -26,6 +26,8 @@ class TaskForm extends FluxForm
 
     public ?string $due_date = null;
 
+    public ?string $due_time = null;
+
     #[Locked]
     public ?int $id = null;
 
@@ -49,6 +51,8 @@ class TaskForm extends FluxForm
 
     public ?string $start_date = null;
 
+    public ?string $start_time = null;
+
     public string $state = 'open';
 
     public array $tags = [];
@@ -60,6 +64,8 @@ class TaskForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Task) {
+            $timezone = auth()->user()->timezone ?? config('app.timezone', 'UTC');
+
             $values->loadMissing(['tags:id', 'categories:id', 'users:id']);
 
             $values = $values->toArray();
@@ -70,8 +76,25 @@ class TaskForm extends FluxForm
 
         $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
             Carbon::parse($values['start_date'])->toDateString() : null;
+
         $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
             Carbon::parse($values['due_date'])->toDateString() : null;
+
+        if (! empty($values['start_time'])) {
+            $values['start_time'] = Carbon::createFromFormat('H:i:s', $values['start_time'], $timezone)
+                ->setTimezone($timezone)
+                ->format('H:i');
+        } else {
+            $values['start_time'] = null;
+        }
+
+        if (! empty($values['due_time'])) {
+            $values['due_time'] = Carbon::createFromFormat('H:i:s', $values['due_time'], $timezone)
+                ->setTimezone($timezone)
+                ->format('H:i');
+        } else {
+            $values['due_time'] = null;
+        }
 
         parent::fill($values);
     }
@@ -87,8 +110,22 @@ class TaskForm extends FluxForm
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
+        $timezone = auth()->user()->timezone ?? config('app.timezone', 'UTC');
+
         if (! is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
             $this->time_budget = $this->time_budget . ':00';
+        }
+
+        if (! is_null($this->start_time)) {
+            $this->start_time = Carbon::createFromFormat('H:i', $this->start_time, $timezone)
+                ->utc()
+                ->format('H:i');
+        }
+
+        if (! is_null($this->due_time)) {
+            $this->due_time = Carbon::createFromFormat('H:i', $this->due_time, $timezone)
+                ->utc()
+                ->format('H:i');
         }
 
         if (is_null($data)) {

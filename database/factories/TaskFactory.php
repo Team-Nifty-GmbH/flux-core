@@ -19,13 +19,20 @@ class TaskFactory extends Factory
             now()->addMonths()->endOfMonth()
         );
 
+        /** @var DateTime|null $dueDate */
+        $dueDate = fake()->boolean(75)
+            ? Carbon::instance($startDate)->addDays(rand(1, 3))->toDateTime()
+            : null;
+
         return [
             'name' => fake()->jobTitle(),
             'description' => fake()->realText(),
             'start_date' => $startDate->format('Y-m-d H:i:s'),
-            'due_date' => fake()->boolean(75)
-                ? Carbon::instance($startDate)->addDays(rand(1, 3))->format('Y-m-d H:i:s')
-                : null,
+            'start_timestamp' => $startDate->getTimestamp(),
+            'due_date' => $dueDate?->format('Y-m-d H:i:s'),
+            'due_timestamp' => $dueDate?->getTimestamp(),
+            'start_time' => $startDate->format('H:i:s'),
+            'due_time' => $dueDate?->format('H:i:s'),
             'priority' => rand(0, 5),
             'time_budget' => rand(0, 1000) . ':' . rand(0, 59),
             'budget' => fake()->randomFloat(),
