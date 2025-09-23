@@ -79,16 +79,6 @@ class Accounting extends OrderTransactionList
         }
     }
 
-    public function getReturnKeys(): array
-    {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'currency_iso',
-            ]
-        );
-    }
-
     #[Renderless]
     public function saveTransaction(): bool
     {
@@ -99,8 +89,6 @@ class Accounting extends OrderTransactionList
 
             return false;
         }
-
-        $this->loadData();
 
         try {
             CreateOrderTransaction::make([
@@ -131,6 +119,16 @@ class Accounting extends OrderTransactionList
                 'transaction',
                 'transaction.currency:id,iso,symbol',
             ]);
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'currency_iso',
+            ]
+        );
     }
 
     protected function getTableActionsDataTableHasFormEdit(): array
