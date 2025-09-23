@@ -40,7 +40,7 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
     {
         $orderTypes = resolve_static(OrderType::class, 'query')
             ->where('is_active', true)
-            ->get();
+            ->get('id');
 
         $this->series = [];
         $metrics = [];
@@ -92,12 +92,12 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
     public function options(): array
     {
         $options = [];
-        foreach ($this->series as $serie) {
-            if (data_get($serie, 'orderTypeId')) {
+        foreach ($this->series as $series) {
+            if (data_get($series, 'orderTypeId')) {
                 $options[] = [
-                    'label' => data_get($serie, 'name'),
+                    'label' => data_get($series, 'name'),
                     'method' => 'showByOrderType',
-                    'params' => data_get($serie, 'orderTypeId'),
+                    'params' => data_get($series, 'orderTypeId'),
                 ];
             }
         }
@@ -110,7 +110,10 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
     {
         $orderType = resolve_static(OrderType::class, 'query')
             ->where('id', $orderTypeId)
-            ->first();
+            ->first([
+                'id',
+                'name',
+            ]);
 
         if (! $orderType) {
             return;

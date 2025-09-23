@@ -91,12 +91,12 @@ class OrderMediaChart extends LineChart implements HasWidgetOptions
     public function options(): array
     {
         $options = [];
-        foreach ($this->series as $serie) {
-            if (data_get($serie, 'collection')) {
+        foreach ($this->series as $series) {
+            if (data_get($series, 'collection')) {
                 $options[] = [
-                    'label' => data_get($serie, 'name'),
+                    'label' => data_get($series, 'name'),
                     'method' => 'showByCollection',
-                    'params' => data_get($serie, 'collection'),
+                    'params' => data_get($series, 'collection'),
                 ];
             }
         }
@@ -120,8 +120,8 @@ class OrderMediaChart extends LineChart implements HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query->whereIn('id', $orderIds),
-            __('Orders with :collection media', ['collection' => $this->getCollectionLabel($collection)]) . ' ' .
-            __('between :start and :end', ['start' => $start->toDateString(), 'end' => $end->toDateString()]),
+            __('Orders with :collection media', ['collection' => $this->getCollectionLabel($collection)]) . ' '
+            . __('between :start and :end', ['start' => $start->toDateString(), 'end' => $end->toDateString()]),
         )
             ->store();
 
