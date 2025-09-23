@@ -96,6 +96,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start',
             'end',
+            'closed_at',
             'created_at',
             'updated_at',
         ];
@@ -125,10 +126,28 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
                 : 0;
 
-            if ($lead->isDirty('lead_state_id')
-                && ! is_null(($probability = $lead->leadState()->value('probability_percentage')))
-            ) {
-                $lead->probability_percentage = $probability;
+            if ($lead->isDirty('lead_state_id')) {
+                if (! is_null(($probability = $lead->leadState()->value('probability_percentage')))) {
+                    $lead->probability_percentage = $probability;
+                }
+
+                $isClosed = $lead->leadState()
+                    ->where(
+                        fn (Builder $query) => $query
+                            ->where('is_won', true)
+                            ->orWhere('is_lost', true)
+                    )
+                    ->exists();
+
+                if ($isClosed && is_null($lead->closed_at)) {
+                    $lead->closed_at = now();
+                    $lead->closed_by = auth()->user()
+                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
+                        : null;
+                } elseif (! $isClosed) {
+                    $lead->closed_at = null;
+                    $lead->closed_by = null;
+                }
             }
 
             if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_gross_profit')) {
@@ -146,6 +165,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start' => 'date:Y-m-d',
             'end' => 'date:Y-m-d',
+            'closed_at' => 'datetime',
             'expected_revenue' => Money::class,
             'expected_gross_profit' => Money::class,
         ];

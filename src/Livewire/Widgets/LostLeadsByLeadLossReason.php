@@ -47,10 +47,10 @@ class LostLeadsByLeadLossReason extends CircleChart implements HasWidgetOptions
             ->whereNotNull('lead_loss_reason_id')
             ->whereHas('leadLossReason', fn (Builder $query) => $query->where('is_active', true))
             ->whereBetween(
-                'created_at',
+                'closed_at',
                 [
-                    $this->getStart()->toDateTimeString(),
-                    $this->getEnd()->toDateTimeString(),
+                    $this->getStart(),
+                    $this->getEnd(),
                 ]
             )
             ->groupBy('lead_loss_reason_id')
@@ -89,14 +89,14 @@ class LostLeadsByLeadLossReason extends CircleChart implements HasWidgetOptions
     #[Renderless]
     public function show(array $leadLossReason): void
     {
-        $start = $this->getStart()->toDateTimeString();
-        $end = $this->getEnd()->toDateTimeString();
+        $start = $this->getStart();
+        $end = $this->getEnd();
 
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('lead_loss_reason_id', data_get($leadLossReason, 'id'))
-                ->whereBetween('created_at', [$start, $end]),
+                ->whereBetween('closed_at', [$start, $end]),
             __(
                 'Leads with lead loss reason: :lead-loss-reason',
                 [
