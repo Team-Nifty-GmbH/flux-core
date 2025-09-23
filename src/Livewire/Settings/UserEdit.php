@@ -62,7 +62,6 @@ class UserEdit extends Component
                 )
                     ->query(fn ($query) => $query->where('guard_name', '!=', 'address'))
                     ->paginate(pageName: 'permissionsPage'),
-
                 'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name', 'client_code']),
                 'roles' => resolve_static(Role::class, 'query')
