@@ -15,12 +15,14 @@ class TicketList extends BaseDataTable
         'state',
         'ticket_type.name',
         'created_at',
+        'users.name',
     ];
 
     public array $availableRelations = [];
 
     public array $columnLabels = [
         'ticket_type.name' => 'Ticket type',
+        'users.name' => 'Assigned to',
     ];
 
     public array $enabledCols = [
@@ -28,6 +30,7 @@ class TicketList extends BaseDataTable
         'title',
         'state',
         'ticket_type.name',
+        'users.name',
         'created_at',
     ];
 
