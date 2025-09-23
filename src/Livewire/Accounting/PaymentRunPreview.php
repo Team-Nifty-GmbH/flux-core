@@ -85,8 +85,8 @@ class PaymentRunPreview extends Component
         }
 
         data_set(
-            $this->orders[$orderId],
-            'amount',
+            $this->orders,
+            $orderId . '.amount',
             bcabs(
                 bcround(
                     data_get($this->orders, $orderId . '.balance') ?? 0,
@@ -94,7 +94,7 @@ class PaymentRunPreview extends Component
                 )
             )
         );
-        data_set($this->orders[$orderId], 'uses_discount', false);
+        data_set($this->orders, $orderId . '.uses_discount', false);
     }
 
     #[Renderless]
@@ -108,8 +108,8 @@ class PaymentRunPreview extends Component
         }
 
         data_set(
-            $this->orders[$orderId],
-            'amount',
+            $this->orders,
+            $orderId . '.amount',
             bcabs(
                 bcround(
                     data_get($this->orders, $orderId . '.balance_due_discount'),
@@ -117,7 +117,7 @@ class PaymentRunPreview extends Component
                 )
             )
         );
-        data_set($this->orders[$orderId], 'uses_discount', true);
+        data_set($this->orders, $orderId . '.uses_discount', true);
     }
 
     #[Renderless]

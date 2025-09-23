@@ -7,13 +7,13 @@
             }
 
             return (
-                '(' +
-                window.formatters.date(
+                '('
+                + window.formatters.date(
                     dayjs($wire.$parent.order.payment_target_date)
                         .add(days, 'day')
                         .toDate(),
-                ) +
-                ')'
+                )
+                + ')'
             )
         },
     }"
@@ -46,9 +46,9 @@
                     <span
                         x-show="$wire.$parent.order.payment_discount_target_date"
                         x-text="
-                            '(' +
-                                window.formatters.date($wire.$parent.order.payment_discount_target_date) +
-                                ')'
+                            '('
+                            + window.formatters.date($wire.$parent.order.payment_discount_target_date)
+                            + ')'
                         "
                         class="text-xs"
                     ></span>
