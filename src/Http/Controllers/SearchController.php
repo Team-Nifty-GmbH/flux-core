@@ -180,7 +180,7 @@ class SearchController extends Controller
                 return array_merge(
                     [
                         'id' => $item->getKey(),
-                        'label' => $item->getLabel(),
+                        'label' => $item->getLabel() ?? '-',
                         'description' => $item->getDescription(),
                         'image' => $item->getAvatarUrl(),
                     ],
