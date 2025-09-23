@@ -108,8 +108,9 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
     #[Renderless]
     public function showByOrderType(int $orderTypeId): void
     {
+        /** @var OrderType|null $orderType */
         $orderType = resolve_static(OrderType::class, 'query')
-            ->where('id', $orderTypeId)
+            ->whereKey($orderTypeId)
             ->first([
                 'id',
                 'name',
@@ -125,7 +126,7 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->where('order_type_id', $orderTypeId)
+                ->where('order_type_id', $orderType->getKey())
                 ->whereBetween('created_at', [$start, $end]),
             $orderType->name . ' ' . __(
                 'between :start and :end',
