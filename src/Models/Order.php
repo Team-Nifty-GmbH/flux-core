@@ -494,28 +494,31 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this
             ->calculateTotalNetPrice()
             ->calculateDiscounts()
+            ->calculateTotalVats()
             ->calculateTotalGrossPrice()
             ->calculateMargin()
-            ->calculateTotalVats()
             ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
     }
 
     public function calculateTotalGrossPrice(): static
     {
+        $totalVat = array_reduce(
+            $this->total_vats ?? [],
+            fn (string $carry, array $item): string => bcadd($carry, data_get($item, 'total_vat_price', 0)),
+            0
+        );
+
+        $this->total_gross_price = bcround(
+            bcadd($this->total_net_price, $totalVat),
+            2
+        );
+
         $totalBaseGross = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_gross_price = discount(
-            bcround(
-                bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
-                2
-            ),
-            $this->total_discount_percentage
-        );
-
         $this->total_base_gross_price = bcround(
-            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
+            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0),
             2
         );
         $this->total_base_discounted_gross_price = $this->total_gross_price;
@@ -594,8 +597,14 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->map(function (OrderPosition $item): array {
                 return [
                     'vat_rate_percentage' => $item->vat_rate_percentage,
-                    'total_vat_price' => bcround(bcmul($item->total_net_price, $item->vat_rate_percentage, 9), 2),
-                    'total_net_price' => bcround($item->total_net_price, 2),
+                    'total_vat_price' => bcround(
+                        bcmul(
+                            $item->total_net_price ?? 0,
+                            $item->vat_rate_percentage,
+                            9),
+                        2
+                    ),
+                    'total_net_price' => bcround($item->total_net_price ?? 0, 2),
                 ];
             })
             ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
