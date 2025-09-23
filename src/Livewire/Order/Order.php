@@ -500,6 +500,7 @@ class Order extends Component
                 'currency_id',
                 'order_type_id',
                 'price_list_id',
+                'invoice_number',
             ]);
 
         $order->calculatePrices()->save();

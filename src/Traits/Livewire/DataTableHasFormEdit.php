@@ -54,7 +54,7 @@ trait DataTableHasFormEdit
 
         $this->{$this->formAttributeName()}->reset();
 
-        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
+        foreach ($this->getSelectedModelsQuery()->pluck($this->modelKeyName ?? 'id') as $id) {
             try {
                 $this->{$this->formAttributeName()}->id = $id;
                 $this->{$this->formAttributeName()}->delete();
@@ -153,7 +153,7 @@ trait DataTableHasFormEdit
                 ->color('indigo')
                 ->when($this->{$this->formAttributeName()}->canAction('update'))
                 ->attributes([
-                    'wire:click' => 'edit(record.id)',
+                    'wire:click' => 'edit(record.' . ($this->modelKeyName ?? 'id') . ')',
                 ]),
             DataTableButton::make()
                 ->text(__('Delete'))
@@ -161,7 +161,7 @@ trait DataTableHasFormEdit
                 ->icon('trash')
                 ->when($this->{$this->formAttributeName()}->canAction('delete'))
                 ->attributes([
-                    'wire:click' => 'delete(record.id)',
+                    'wire:click' => 'delete(record.' . ($this->modelKeyName ?? 'id') . ')',
                     'wire:flux-confirm.type.error' => __(
                         'wire:confirm.delete',
                         ['model' => __(Str::headline(morph_alias($this->getModel())))]

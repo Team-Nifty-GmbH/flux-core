@@ -62,13 +62,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Traits\Conditionable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
         HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
@@ -495,7 +496,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->calculateDiscounts()
             ->calculateTotalVats()
             ->calculateTotalGrossPrice()
-            ->calculateMargin();
+            ->calculateMargin()
+            ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
     }
 
     public function calculateTotalGrossPrice(): static
