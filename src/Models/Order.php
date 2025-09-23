@@ -426,7 +426,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             && ! is_null($this->payment_discount_percent)
             && bccomp($this->payment_discount_percent, 0) > 0
         ) {
-            $discountAmount = bcmul(bcabs($this->balance), $this->payment_discount_percent);
+            $discountAmount = bcmul($this->balance, $this->payment_discount_percent);
             $this->balance_due_discount = bcsub($this->balance, $discountAmount);
         } else {
             $this->balance_due_discount = null;
