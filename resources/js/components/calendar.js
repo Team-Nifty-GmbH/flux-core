@@ -274,10 +274,14 @@ const calendar = () => {
                 calendar.events = (info, successCallback, failureCallback) => {
                     calendar.isLoading = true;
 
+                    const componentSnapshot =
+                        this.$wire.__instance?.snapshot || null;
+
                     axios
                         .post('/calendar-events', {
                             info: info,
                             calendar: calendar,
+                            componentSnapshot: componentSnapshot,
                         })
                         .then((response) => {
                             successCallback(

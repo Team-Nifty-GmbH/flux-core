@@ -10,6 +10,7 @@ use FluxErp\Models\CalendarEvent;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\Calendar\StoresCalendarSettings;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -283,6 +284,62 @@ class Calendar extends Component
         );
     }
 
+    public function getEvents(array $info, array $calendarAttributes): array
+    {
+        if (data_get($calendarAttributes, 'hasNoEvents')) {
+            return [];
+        }
+
+        if (($calendarAttributes['modelType'] ?? false)
+            && data_get($calendarAttributes, 'isVirtual', false)
+        ) {
+            return $this->getCalendarEventsFromModelTypeQuery(
+                $calendarAttributes['modelType'],
+                $info['start'],
+                $info['end'],
+                $calendarAttributes
+            )
+                ->get()
+                ->map(fn (Model $model) => $model->toCalendarEvent($info))
+                ->toArray();
+        }
+
+        $calendar = resolve_static(CalendarModel::class, 'query')
+            ->whereKey($calendarAttributes['id'])
+            ->first();
+
+        if (! $calendar) {
+            return [];
+        }
+
+        $calendarEvents = $calendar->calendarEvents()
+            ->whereNull('repeat')
+            ->where(function (Builder $query) use ($info): void {
+                $query->where('start', '<=', Carbon::parse($info['end']))
+                    ->where('end', '>=', Carbon::parse($info['start']));
+            })
+            ->with('invited', fn (Builder $query): Builder => $query->withPivot('status'))
+            ->get()
+            ->merge(
+                $calendar->invitesCalendarEvents()
+                    ->addSelect('calendar_events.*')
+                    ->addSelect('inviteables.status')
+                    ->addSelect('inviteables.model_calendar_id AS calendar_id')
+                    ->whereIn('inviteables.status', ['accepted', 'maybe'])
+                    ->get()
+                    ->each(fn (Model $event) => $event->is_invited = true)
+            );
+
+        return $calendarEvents->map(function (Model $event) use ($calendarAttributes, $calendar): array {
+            return $event->toCalendarEventObject([
+                'is_editable' => data_get($calendarAttributes, 'permission') !== 'reader',
+                'invited' => $this->getInvited($event),
+                'is_repeatable' => data_get($calendar, 'has_repeatable_events', false),
+                'has_repeats' => ! is_null(data_get($event, 'repeat')),
+            ]);
+        })->toArray();
+    }
+
     #[Renderless]
     public function getInvites(): ?array
     {
@@ -359,6 +416,29 @@ class Calendar extends Component
     {
         $this->calendar->reset();
         $this->calendar->fill($this->calendarObject ?? []);
+    }
+
+    protected function getCalendarEventsFromModelTypeQuery(
+        string $modelType,
+        string $start,
+        string $end,
+        array $calendarAttributes
+    ): Builder {
+        return resolve_static(morphed_model($modelType), 'query')
+            ->inTimeframe($start, $end, $calendarAttributes);
+    }
+
+    protected function getInvited(Model $event): array
+    {
+        return $event->invitedModels()
+            ->map(function (Model $inviteable) {
+                return [
+                    'id' => $inviteable->getKey(),
+                    'label' => $inviteable->getLabel(),
+                    'pivot' => $inviteable->pivot,
+                ];
+            })
+            ->toArray();
     }
 
     protected function getViews(): array
