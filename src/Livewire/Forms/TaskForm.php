@@ -92,7 +92,7 @@ class TaskForm extends FluxForm
         }
 
         if (is_null($data)) {
-            $data = $this->toArray();
+            $data = $this->toActionData();
             $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
         }
 
