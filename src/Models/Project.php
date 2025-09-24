@@ -161,14 +161,23 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->where('start_date', '<=', $end)
-                ->where('end_date', '>=', $start)
-                ->orWhereBetween('created_at', [$start, $end]);
+            $query
+                ->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('end_date', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start_date', '<=', $start)
+                        ->where('end_date', '>=', $end);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start_date')
+                        ->whereNull('end_date')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
         });
     }
 
@@ -190,6 +199,8 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
             ],
             'allDay' => true,
             'is_editable' => true,

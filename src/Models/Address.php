@@ -558,8 +558,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $start = $start ? Carbon::parse($start) : null;

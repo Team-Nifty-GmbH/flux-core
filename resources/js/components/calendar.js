@@ -271,16 +271,26 @@ const calendar = () => {
                     this.calendarItem = calendar;
                 }
 
-                // Assign the `events` function
-                calendar.events = async (info) => {
+                calendar.events = (info, successCallback, failureCallback) => {
                     calendar.isLoading = true;
-                    try {
-                        return (await this.$wire.getEvents(info, calendar)).map(
-                            this.mapDatesToUtc,
-                        );
-                    } finally {
-                        calendar.isLoading = false;
-                    }
+
+                    const componentSnapshot =
+                        this.$wire.__instance?.snapshot || null;
+
+                    axios
+                        .post('/calendar-events', {
+                            info: info,
+                            calendar: calendar,
+                            componentSnapshot: componentSnapshot,
+                        })
+                        .then((response) => {
+                            successCallback(
+                                response.data.map(this.mapDatesToUtc),
+                            );
+                        })
+                        .finally(() => {
+                            calendar.isLoading = false;
+                        });
                 };
             });
 
@@ -376,6 +386,8 @@ const calendar = () => {
                 selectMirror: true,
                 dayMaxEvents: true,
                 eventSources: [],
+                lazyFetching: true,
+                progressiveEventRendering: true,
                 select: (selectionInfo) => {
                     this.dispatchCalendarEvents('select', selectionInfo);
                 },
@@ -510,12 +522,27 @@ const calendar = () => {
                     if (info.event.extendedProps.appendTitle) {
                         let statusBadges = document.createElement('div');
                         statusBadges.className = 'flex-shrink-0 mr-1';
-                        statusBadges.innerHTML =
+
+                        const appendTitle =
                             info.event.extendedProps.appendTitle;
+                        if (typeof appendTitle === 'string') {
+                            statusBadges.innerHTML = appendTitle;
+                        } else if (
+                            typeof appendTitle === 'object' &&
+                            appendTitle.text
+                        ) {
+                            const badge = document.createElement('span');
+                            badge.className = `inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium`;
+                            badge.style.backgroundColor =
+                                appendTitle.color || '#6b7280';
+                            badge.style.color = '#ffffff';
+                            badge.textContent = appendTitle.text;
+                            statusBadges.appendChild(badge);
+                        }
+
                         rightContent.appendChild(statusBadges);
                     }
 
-                    // Add time if not all day event
                     if (!info.event.allDay && info.timeText) {
                         let timeNode = document.createElement('div');
                         timeNode.className =
@@ -542,24 +569,21 @@ const calendar = () => {
                 ...filteredConfig,
             });
 
-            this.traverseCalendars(
-                this.getCalendarEventSources(),
-                (calendar) => {
-                    if (
-                        this.config.activeCalendars &&
-                        !this.config.activeCalendars.includes(
-                            String(calendar.id),
-                        )
-                    ) {
-                        return; // Skip inactive calendars
-                    }
-
-                    this.showEventSource(calendar);
-                },
-            );
-
             this.changedHeight();
             this.calendar.render();
+
+            const allEventSources = this.getCalendarEventSources();
+
+            this.traverseCalendars(allEventSources, (calendar) => {
+                const shouldShow =
+                    !this.config.activeCalendars ||
+                    this.config.activeCalendars.includes(String(calendar.id));
+
+                if (shouldShow) {
+                    this.showEventSource(calendar);
+                }
+            });
+
             this.$dispatch('calendar-initialized', this.calendar);
         },
         traverseCalendars(calendars, callback) {
