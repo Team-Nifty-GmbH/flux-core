@@ -93,6 +93,11 @@ class FinalInvoice extends Invoice
 
         $this->model->total_net_price = $totalNetPrice;
         $this->model->total_gross_price = $totalGrossPrice;
-        $this->model->total_vats = array_values($totalVats);
+        $this->model->total_vats = array_values(
+            array_filter(
+                $totalVats,
+                fn (array $vat) => bccomp(data_get($vat, 'total_net_price') ?? 0, 0) !== 0
+            )
+        );
     }
 }
