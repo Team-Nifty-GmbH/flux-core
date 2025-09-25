@@ -4,7 +4,7 @@
 
 @if($headerLayout)
     <header
-        style="height: {{ $headerLayout['height'] ?? '1.7' }}cm"
+        style="height: {{ $headerLayout['height'] ?? '1.7' }}cm;"
         class="w-full bg-white font-light">
         @foreach($headerLayout['elements'] as $element)
             {{--  subject    --}}

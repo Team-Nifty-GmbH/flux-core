@@ -7,7 +7,7 @@
 @if($firstPageHeaderLayout)
 <div
     draggable="false"
-    style="height:{{$firstPageHeaderLayout['height']}}cm"
+    style="height:{{$firstPageHeaderLayout['height']}}cm;margin-top: 0.5cm"
     class="relative w-full bg-white">
 {{--      elements--}}
     @foreach($firstPageHeaderLayout['elements'] as $element)

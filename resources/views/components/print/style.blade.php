@@ -29,23 +29,9 @@
         padding-right: 10px;
     }
 
-    .cover-page{
-        margin-top: -90px;
-        background-color: white;
-    }
-
-    /*.border-black {*/
-    /*    border-color: black;*/
-    /*}*/
-
-    /*.line-through {*/
-    /*    text-decoration: line-through;*/
-    /*}*/
-
-    /*.black-bar {*/
-    /*    background-color: black;*/
-    /*    width: 1.75rem;*/
-    /*    height: 0.25rem;*/
+    /*.cover-page{*/
+    /*    margin-top: -90px;*/
+    /*    background-color: white;*/
     /*}*/
 
     .bg-even-children >:nth-child(even){
@@ -66,6 +52,12 @@
         @endforeach
     }
 
+    @page :first {
+        margin: 0cm 0.5cm 5.5cm 0.5cm;
+
+    }
+
+
     @page {
         .page-count:after {
             content: "{{ __('Page') }} " counter(page) " {{ __('of') }} DOMPDF_PAGE_COUNT_PLACEHOLDER";
@@ -78,43 +70,44 @@
         }
 
         @if(!$isPreview)
-        body {
-            width: 21cm;
-            margin: 0 auto !important;
-            padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 20 . 'mm' }};
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            border-radius: 10px;
-        }
+            body {
+                width: 21cm;
+                margin: 0 auto !important;
+                padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 20 . 'mm' }};
+                background: white;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                border-radius: 10px;
+            }
 
-        footer {
-            display: none;
-        }
+            footer {
+                display: none;
+            }
 
-        header {
-            display: none;
-        }
+            header {
+                display: none;
+            }
         @else
-        body {
-            margin: 0;
-            padding: 0;
-        }
+            {{-- print related --}}
+            body {
+                margin: 0;
+                padding: 0;
+            }
 
-        header {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-        }
+            header {
+                display: block;
+                position: fixed;
+                top: -{{ $headerHeight ? ($headerHeight + 0.1) . 'cm' : '1.7cm' }};
+                left: 0;
+                right: 0;
+            }
 
-        footer {
-            display: block;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
+            footer {
+                display: block;
+                position: fixed;
+                bottom: -{{ $footerHeight ? $footerHeight . 'cm' : '1.7cm' }};
+                left: 0;
+                right: 0;
+            }
 
         @endif
 

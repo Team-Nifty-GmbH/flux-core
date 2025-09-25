@@ -3,7 +3,7 @@
     $paddingBottom = null;
 
     if($hasFooter && $generatePdf && $layout['footer']) {
-            $paddingBottom = $layout['footer']['height'] + 0.5 . 'cm';
+            $paddingBottom = $layout['footer']['height'] . 'cm';
         }
 @endphp
 
@@ -34,12 +34,14 @@
         />
         @show
         @section('head.style')
-        <x-flux::print.style :page-css="$pageCss ?? []" :is-preview="$generatePdf" />
+        <x-flux::print.style :page-css="$pageCss ?? []"
+                             :header-height="$layout['header']['height'] ?? null"
+                             :footer-height="$layout['footer']['height'] ?? null"
+                             :is-preview="$generatePdf" />
             @show
         @show
     </head>
-    <body class="text-xs" style="{{ is_null($paddingBottom) ? '' : 'padding-bottom:' . $paddingBottom . ';' }};">
-        {{ $bodyStyle ?? '' }}
+    <body class="text-xs">
         @if ($hasHeader ?? true)
             <x-flux::print.header :header-layout="is_array($layout) ? $layout['header'] : null"/>
         @endif

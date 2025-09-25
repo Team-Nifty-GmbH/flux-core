@@ -233,21 +233,25 @@ abstract class PrintableView extends Component
 
     protected function getPageCss(): array
     {
+        // add margin for first page - to avoid header on first page
         $model = $this->getModel();
         if($model?->client_id) {
             $layout = resolve_static(PrintLayout::class,'query')
                 ->where('client_id', $model->client_id)
                 ->where('model_type', morph_alias($model::class))
                 ->first()?->toArray();
-            if($layout && $layout['margin']) {
+
+            if($layout && $layout['margin'] && $layout['header'] && $layout['footer']) {
                 $margin = $layout['margin'];
+
                 return ['margin' => [
-                    ($margin['marginTop'] ?? 3.2) . 'cm',
-                    ($margin['marginRight'] ?? 2.0) . 'cm',
-                    ($margin['marginBottom'] ?? 2.8) . 'cm',
-                    ($margin['marginLeft'] ?? 1.8) . 'cm',
+                    ($margin['marginTop'] + $layout['header']['height']) . 'cm',
+                    $margin['marginRight'] . 'cm',
+                    ($margin['marginBottom'] + $layout['footer']['height']) . 'cm',
+                    $margin['marginLeft'] . 'cm',
                 ]];
             }
+
         }
 
         return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
