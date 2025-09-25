@@ -76,8 +76,6 @@ class TaskList extends BaseTaskList
             resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
             null
         );
-        $this->task->responsible_user_id ??= auth()?->id();
-        $this->task->users = array_filter([auth()?->id()]);
 
         $this->js(<<<'JS'
             $modalOpen('new-task-modal');
