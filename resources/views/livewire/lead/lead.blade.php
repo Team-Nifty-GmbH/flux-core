@@ -36,6 +36,24 @@
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             <x-button
+                color="secondary"
+                light
+                icon="clock"
+                :text="__('Track Time')"
+                x-on:click="
+                    $dispatch(
+                        'start-time-tracking',
+                        {
+                            trackable_type: 'FluxErp\\\Models\\\Lead',
+                            trackable_id: {{ $leadForm->id }},
+                            contact_id: {{ resolve_static(\FluxErp\Models\Address::class, 'query')->whereKey($leadForm->address_id)->value('contact_id') ?? 'null' }},
+                            name: {{ json_encode($leadForm->name) }},
+                            description: null
+                        }
+                    )
+                "
+            />
+            <x-button
                 :text="__('Edit')"
                 color="indigo"
                 x-cloak
