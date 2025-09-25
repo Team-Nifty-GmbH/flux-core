@@ -47,7 +47,7 @@ class Ticket extends Component
     #[Renderless]
     public function assignToMe(): void
     {
-        $this->ticket->users = array_merge($this->ticket->users, [auth()->id()]);
+        $this->ticket->users = array_unique(array_merge($this->ticket->users, [auth()->id()]));
         $this->save();
     }
 
