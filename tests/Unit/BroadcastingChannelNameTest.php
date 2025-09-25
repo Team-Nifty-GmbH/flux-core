@@ -7,7 +7,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Product;
 use Illuminate\Support\Str;
 
-it('uses morph alias for model broadcast channel', function (): void {
+test('uses morph alias for model broadcast channel', function (): void {
     $order = new Order();
     $order->id = 123;
 
@@ -17,7 +17,7 @@ it('uses morph alias for model broadcast channel', function (): void {
     expect($broadcastChannel)->toBe($expectedChannel);
 });
 
-it('uses class_to_broadcast_channel helper for action broadcast channel', function (): void {
+test('uses class_to_broadcast_channel helper for action broadcast channel', function (): void {
     $testClass = CreateOrder::class;
 
     $expectedChannel = 'action.' . Str::of(morph_alias($testClass))
@@ -30,7 +30,7 @@ it('uses class_to_broadcast_channel helper for action broadcast channel', functi
     expect($actualChannel)->toBe($expectedChannel);
 });
 
-it('uses morph alias in class_to_broadcast_channel without param', function (): void {
+test('uses morph alias in class_to_broadcast_channel without param', function (): void {
     $testClass = Product::class;
 
     $channel = class_to_broadcast_channel($testClass, false);
@@ -42,7 +42,7 @@ it('uses morph alias in class_to_broadcast_channel without param', function (): 
     expect($channel)->toBe($expected);
 });
 
-it('appends camelCase class basename with param', function (): void {
+test('appends camelCase class basename with param', function (): void {
     $testClass = Product::class;
 
     $channel = class_to_broadcast_channel($testClass, true);
@@ -54,7 +54,7 @@ it('appends camelCase class basename with param', function (): void {
     expect($channel)->toBe($expected);
 });
 
-it('handles different models with param correctly', function (): void {
+test('handles different models with param correctly', function (): void {
     $orderClass = Order::class;
 
     $orderChannelWithParam = class_to_broadcast_channel($orderClass, true);
@@ -76,7 +76,7 @@ it('handles different models with param correctly', function (): void {
     expect($bankChannelWithParam)->toBe($expectedBank);
 });
 
-it('handles actions with param correctly', function (): void {
+test('handles actions with param correctly', function (): void {
     $actionClass = CreateOrder::class;
 
     $channelWithParam = class_to_broadcast_channel($actionClass, true);
