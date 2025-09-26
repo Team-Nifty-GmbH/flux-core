@@ -188,7 +188,7 @@
                     </tr>
                 @endforeach
 
-                @if ($model->discounts->isNotEmpty() && bccomp($model->total_position_discount_percentage ?? '0', '0', 10) !== 0 && bccomp($model->total_discount_percentage ?? '0', '0', 10) !== 0)
+                @if ($model->discounts->isNotEmpty() && bccomp($model->total_position_discount_percentage ?? 0, 0) !== 0 && bccomp($model->total_discount_percentage ?? 0, 0) !== 0)
                     <tr>
                         <td class="text-right">
                             <span>{{ __('Total discount') }}</span>
