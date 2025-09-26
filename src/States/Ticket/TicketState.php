@@ -64,6 +64,12 @@ abstract class TicketState extends EndableState implements HasFrontendFormatter
                     ],
                     Closed::class,
                 ],
+                [
+                    [
+                        Closed::class,
+                    ],
+                    Done::class,
+                ],
             ]);
     }
 
