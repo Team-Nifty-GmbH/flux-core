@@ -49,6 +49,24 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
+            <x-button
+                color="secondary"
+                light
+                icon="clock"
+                :text="__('Track Time')"
+                x-on:click="
+                    $dispatch(
+                        'start-time-tracking',
+                        {
+                            trackable_type: '{{ morph_alias(\FluxErp\Models\Project::class) }}',
+                            trackable_id: {{ $project->id }},
+                            contact_id: {{ $project->contact_id ?? 'null' }},
+                            name: {{ json_encode($project->name) }},
+                            description: null
+                        }
+                    )
+                "
+            />
             @canAction(\FluxErp\Actions\Project\DeleteProject::class)
                 <x-button
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"

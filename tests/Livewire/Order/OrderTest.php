@@ -286,7 +286,7 @@ test('get tabs structure', function (): void {
     $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
     $tabs = $component->instance()->getTabs();
 
-    expect($tabs)->toHaveCount(7);
+    expect($tabs)->toHaveCount(8);
 
     $expectedTabs = [
         'order.order-positions',
@@ -294,6 +294,7 @@ test('get tabs structure', function (): void {
         'order.texts',
         'order.accounting',
         'order.comments',
+        'order.communications',
         'order.related',
         'order.activities',
     ];

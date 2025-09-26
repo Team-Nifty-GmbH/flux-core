@@ -40,7 +40,7 @@
                             $dispatch(
                                 'start-time-tracking',
                                 {
-                                    trackable_type: 'FluxErp\\\Models\\\Ticket',
+                                    trackable_type: '{{ morph_alias(\FluxErp\Models\Ticket::class) }}',
                                     trackable_id: {{ $ticket->id }},
                                     name: {{ json_encode($ticket->title) }},
                                     description: {{ json_encode(strip_tags($ticket->description ?? '')) }}

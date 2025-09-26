@@ -21,6 +21,7 @@ use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,7 +36,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 {
     use Categorizable, Commentable, Communicatable, HasCalendarEvents, HasFrontendAttributes, HasPackageFactory,
         HasRecordOrigin, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable,
-        SoftDeletes;
+        SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',
