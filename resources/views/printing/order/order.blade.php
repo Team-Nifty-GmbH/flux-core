@@ -188,20 +188,6 @@
                     </tr>
                 @endforeach
 
-                @if ($model->discounts->isNotEmpty() && bccomp($model->total_position_discount_percentage ?? 0, 0) !== 0 && bccomp($model->total_discount_percentage ?? 0, 0) !== 0)
-                    <tr>
-                        <td class="text-right">
-                            <span>{{ __('Total discount') }}</span>
-                            <span>
-                                {{ Number::percentage(bcmul($model->total_discount_percentage ?? 0, 100)) }}
-                            </span>
-                        </td>
-                        <td class="w-0 whitespace-nowrap pl-12 text-right">
-                            {{ Number::currency(bcmul($model->total_discount_flat ?? 0, -1)) }}
-                        </td>
-                    </tr>
-                @endif
-
                 <tr class="border-b"></tr>
             @endif
 
