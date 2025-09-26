@@ -44,7 +44,7 @@
                     $dispatch(
                         'start-time-tracking',
                         {
-                            trackable_type: 'FluxErp\\\Models\\\Lead',
+                            trackable_type: '{{ morph_alias(\FluxErp\Models\Lead::class) }}',
                             trackable_id: {{ $leadForm->id }},
                             contact_id: {{ resolve_static(\FluxErp\Models\Address::class, 'query')->whereKey($leadForm->address_id)->value('contact_id') ?? 'null' }},
                             name: {{ json_encode($leadForm->name) }},
