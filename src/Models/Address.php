@@ -399,7 +399,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'category_id',
             'contact_id',
             'id'
-        )->wherePivot('categorizable_type', morph_alias(Contact::class));
+        )
+            ->wherePivot('categorizable_type', morph_alias(Contact::class));
     }
 
     public function client(): BelongsTo
