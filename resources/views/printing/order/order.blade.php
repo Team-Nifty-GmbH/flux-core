@@ -138,7 +138,7 @@
                 </td>
             </tr>
             @section('total.discounts')
-            @if (bccomp($model->total_base_net_price ?? '0', $model->total_net_price ?? '0', 10) !== 0)
+            @if (bccomp($model->total_base_net_price ?? 0, $model->total_net_price ?? 0) !== 0)
                 <tr>
                     <td class="text-right">
                         {{ __('Sum net without discount') }}
