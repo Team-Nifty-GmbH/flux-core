@@ -7,8 +7,8 @@
 @if($firstPageHeaderLayout)
 <div
     draggable="false"
-    style="height:{{$firstPageHeaderLayout['height']}}cm;margin-top: 0.5cm"
-    class="relative w-full bg-white">
+    style="height:{{$firstPageHeaderLayout['height']}}cm;"
+    class="relative w-full bg-white first-page-header-margin-top">
 {{--      elements--}}
     @foreach($firstPageHeaderLayout['elements'] as $element)
         @if($element['id'] === 'first-page-header-subject')
@@ -60,7 +60,7 @@
     @endif
 </div>
 @else
-<div class="cover-page z-10 h-auto overflow-auto bg-white">
+<div class="cover-page z-10 h-auto overflow-auto bg-white first-page-header-margin-top">
     <div class="grid h-32 content-center">
         <div class="m-auto max-h-72 text-center">
             <x-flux::print.elements.first-page-header-client-name :client="$client" />

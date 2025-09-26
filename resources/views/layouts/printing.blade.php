@@ -1,12 +1,3 @@
-@php
-    // padding-bottom to take in account for footer height in pdf
-    $paddingBottom = null;
-
-    if($hasFooter && $generatePdf && $layout['footer']) {
-            $paddingBottom = $layout['footer']['height'] . 'cm';
-        }
-@endphp
-
 <html
     class="h-full text-sm"
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
@@ -35,8 +26,6 @@
         @show
         @section('head.style')
         <x-flux::print.style :page-css="$pageCss ?? []"
-                             :header-height="$layout['header']['height'] ?? null"
-                             :footer-height="$layout['footer']['height'] ?? null"
                              :is-preview="$generatePdf" />
             @show
         @show

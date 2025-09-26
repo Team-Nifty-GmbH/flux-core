@@ -244,17 +244,41 @@ abstract class PrintableView extends Component
             if($layout && $layout['margin'] && $layout['header'] && $layout['footer']) {
                 $margin = $layout['margin'];
 
-                return ['margin' => [
-                    ($margin['marginTop'] + $layout['header']['height']) . 'cm',
-                    $margin['marginRight'] . 'cm',
-                    ($margin['marginBottom'] + $layout['footer']['height']) . 'cm',
-                    $margin['marginLeft'] . 'cm',
+                // due to rounding issues -> px to cm -> add 0.1cm to header height
+                return [
+                    'header_height' => ($layout['header']['height'] + 0.1) . 'cm',
+                    'footer_height' => $layout['footer']['height'] . 'cm',
+                    'first_page_header_margin_top' => $margin['marginTop'] . 'cm',
+                    'margin_preview_view' => [
+                        $margin['marginTop'] . 'cm',
+                        $margin['marginRight'] . 'cm',
+                        $margin['marginBottom'] . 'cm',
+                        $margin['marginLeft'] . 'cm'
+                    ],
+                    'margin_first_page' => [
+                        '0cm',
+                        $margin['marginRight'] . 'cm',
+                        ($margin['marginBottom'] + $layout['footer']['height']) . 'cm',
+                        $margin['marginLeft'] . 'cm',
+                    ],
+                    'margin' => [
+                        ($margin['marginTop'] + $layout['header']['height']) . 'cm',
+                        $margin['marginRight'] . 'cm',
+                        ($margin['marginBottom'] + $layout['footer']['height']) . 'cm',
+                        $margin['marginLeft'] . 'cm',
                 ]];
             }
 
         }
 
-        return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
+        return [
+            'header_height' => '18mm',
+            'footer_height' => '17mm',
+            'first_page_header_margin_top' => '32mm',
+            'margin_preview_view' => ['32mm', '20mm', '28mm', '18mm'],
+            'margin_first_page' => ['0mm', '20mm', '28mm', '18mm'],
+            'margin' => ['50mm', '20mm', '45mm', '18mm']
+        ];
     }
 
     protected function getPaperOrientation(): string

@@ -5,9 +5,6 @@
         }
     @show
 
-    p {
-        margin-bottom: 2px;
-    }
 
     li {
         list-style-type: disc;
@@ -29,11 +26,6 @@
         padding-right: 10px;
     }
 
-    /*.cover-page{*/
-    /*    margin-top: -90px;*/
-    /*    background-color: white;*/
-    /*}*/
-
     .bg-even-children >:nth-child(even){
         background: #F2F4F7;
     }
@@ -47,33 +39,27 @@
     }
 
     @page {
-        @foreach($pageCss as $key => $css)
-            {{ $key }}: {{ is_array($css) ? implode(' ', $css) : $css }};
-        @endforeach
+      {{ 'margin: ' . implode(' ', $pageCss['margin']) . ';' }}
     }
 
     @page :first {
-        margin: 0cm 0.5cm 5.5cm 0.5cm;
-
+        {{ 'margin: ' . implode(' ', $pageCss['margin_first_page']) . ';' }}
     }
-
 
     @page {
-        .page-count:after {
-            content: "{{ __('Page') }} " counter(page) " {{ __('of') }} DOMPDF_PAGE_COUNT_PLACEHOLDER";
-        }
+    .page-count:before {
+        content: counter(page);
     }
+    }
+    {{-- without this pdf generation would crash --}}
 
     @media screen {
-        .cover-page{
-            margin-top: 0;
-        }
-
         @if(!$isPreview)
+        {{-- preview related --}}
             body {
                 width: 21cm;
                 margin: 0 auto !important;
-                padding: {{ is_array($pageCss['margin']) ? implode(' ', $pageCss['margin']) : 20 . 'mm' }};
+                padding: {{ implode(' ', $pageCss['margin_preview_view']) }};
                 background: white;
                 box-shadow: 0 0 10px rgba(0,0,0,0.5);
                 border-radius: 10px;
@@ -96,7 +82,7 @@
             header {
                 display: block;
                 position: fixed;
-                top: -{{ $headerHeight ? ($headerHeight + 0.1) . 'cm' : '1.7cm' }};
+                top: -{{ $pageCss['header_height'] }};
                 left: 0;
                 right: 0;
             }
@@ -104,9 +90,19 @@
             footer {
                 display: block;
                 position: fixed;
-                bottom: -{{ $footerHeight ? $footerHeight . 'cm' : '1.7cm' }};
+                bottom: -{{ $pageCss['footer_height'] }};
                 left: 0;
                 right: 0;
+            }
+
+            {{-- due to 0 margin for on first page --}}
+            {{-- it is needed to add margin-top on first-page-header --}}
+            .first-page-header-margin-top {
+                margin-top: {{ $pageCss['first_page_header_margin_top'] }};
+            }
+
+            .page-count:before {
+                content: counter(page);
             }
 
         @endif
@@ -117,7 +113,6 @@
         }
 
     }
-
 
 
 </style>
