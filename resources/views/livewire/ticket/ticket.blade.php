@@ -232,6 +232,7 @@
                             ]"
                         />
                         <x-button
+                            x-bind:class="$wire.ticket.users?.includes({{ auth()->id() }}) && 'hidden'"
                             class="w-full"
                             color="secondary"
                             loading="assignToMe"
