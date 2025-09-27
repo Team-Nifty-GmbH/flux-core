@@ -25,7 +25,11 @@
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST'
+                    'method' => 'POST',
+                    'params' => [
+                        'whereDoesntHave' => 'employee',
+                        'with' => 'media',
+                    ],
                 ]"
             />
             <x-date
@@ -50,6 +54,7 @@
              <x-select.styled
                 :label="__('Work Time Model')"
                 wire:model="employeeForm.work_time_model_id"
+                required
                 select="label:name|value:id"
                 unfiltered
                 :request="[

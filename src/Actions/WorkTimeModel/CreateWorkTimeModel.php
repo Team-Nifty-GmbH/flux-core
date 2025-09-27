@@ -23,6 +23,6 @@ class CreateWorkTimeModel extends FluxAction
         $workTimeModel = app(WorkTimeModel::class, ['attributes' => $this->getData()]);
         $workTimeModel->save();
 
-        return $workTimeModel->fresh();
+        return $workTimeModel->refresh();
     }
 }

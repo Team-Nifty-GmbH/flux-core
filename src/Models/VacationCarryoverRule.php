@@ -8,19 +8,15 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class VacationCarryOverRule extends FluxModel
+class VacationCarryoverRule extends FluxModel
 {
     use HasDefault, HasUserModification, HasUuid, SoftDeletes;
 
     protected function casts(): array
     {
         return [
-            'effective_year' => 'integer',
-            'cutoff_month' => 'integer',
-            'cutoff_day' => 'integer',
-            'max_carryover_days' => 'integer',
-            'expiry_date' => 'date',
             'is_active' => 'boolean',
+            'is_default' => 'boolean',
         ];
     }
 

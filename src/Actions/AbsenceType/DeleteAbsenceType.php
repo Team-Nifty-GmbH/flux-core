@@ -22,7 +22,7 @@ class DeleteAbsenceType extends FluxAction
     {
         return resolve_static(AbsenceType::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first()
+            ->firstOrFail()
             ->delete();
     }
 }

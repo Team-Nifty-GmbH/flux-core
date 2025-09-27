@@ -14,12 +14,11 @@ return new class() extends Migration
 
             $table->string('name');
             $table->unsignedInteger('cycle_weeks')->default(1);
-            $table->decimal('weekly_hours', 5);
-            $table->decimal('weekly_break_minutes', 5)->default(0);
-            $table->decimal('annual_vacation_days', 4, 1);
-            $table->unsignedInteger('work_days_per_week')->nullable();
-            $table->decimal('max_overtime_hours', 6)->nullable();
-            $table->string('overtime_compensation')->default('time_off');
+            $table->decimal('weekly_hours', 5, 2);
+            $table->decimal('annual_vacation_days', 5, 2);
+            $table->unsignedTinyInteger('work_days_per_week')->nullable();
+            $table->decimal('max_overtime_hours', 8, 2)->nullable();
+            $table->string('overtime_compensation_enum');
 
             $table->boolean('is_active')->default(true);
 

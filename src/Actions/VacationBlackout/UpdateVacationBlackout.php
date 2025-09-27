@@ -23,28 +23,28 @@ class UpdateVacationBlackout extends FluxAction
     {
         $vacationBlackout = resolve_static(VacationBlackout::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $data = $this->getData();
-        $employeeIds = Arr::pull($data, 'employee_ids');
-        $employeeDepartmentIds = Arr::pull($data, 'employee_department_ids');
-        $locationIds = Arr::pull($data, 'location_ids');
+        $employees = Arr::pull($data, 'employees');
+        $employeeDepartments = Arr::pull($data, 'employee_departments');
+        $locations = Arr::pull($data, 'locations');
 
         $vacationBlackout->fill($data);
         $vacationBlackout->save();
 
-        if (! is_null($employeeIds)) {
-            $vacationBlackout->employees()->sync($employeeIds);
+        if (! is_null($employees)) {
+            $vacationBlackout->employees()->sync($employees);
         }
 
-        if (! is_null($employeeDepartmentIds)) {
-            $vacationBlackout->employeeDepartments()->sync($employeeDepartmentIds);
+        if (! is_null($employeeDepartments)) {
+            $vacationBlackout->employeeDepartments()->sync($employeeDepartments);
         }
 
-        if (! is_null($locationIds)) {
-            $vacationBlackout->locations()->sync($locationIds);
+        if (! is_null($locations)) {
+            $vacationBlackout->locations()->sync($locations);
         }
 
-        return $vacationBlackout->fresh()->load(['employees', 'employeeDepartments', 'locations']);
+        return $vacationBlackout->withoutRelations()->fresh();
     }
 }

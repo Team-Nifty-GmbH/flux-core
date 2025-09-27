@@ -5,7 +5,7 @@ namespace FluxErp\Actions\Employee;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 use FluxErp\Models\Employee;
-use FluxErp\Models\VacationCarryOverRule;
+use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rulesets\Employee\CreateEmployeeRuleset;
 use Illuminate\Support\Arr;
 
@@ -23,9 +23,10 @@ class CreateEmployee extends FluxAction
 
     public function performAction(): Employee
     {
-        $workTimeModel = Arr::pull($this->data, 'work_time_model_id');
+        $data = $this->getData();
+        $workTimeModel = Arr::pull($data, 'work_time_model_id');
 
-        $employee = app(Employee::class, ['attributes' => $this->getData()]);
+        $employee = app(Employee::class, ['attributes' => $data]);
         $employee->save();
 
         if ($workTimeModel) {
@@ -37,14 +38,15 @@ class CreateEmployee extends FluxAction
                 ->execute();
         }
 
-        return $employee->fresh();
+        return $employee->refresh();
     }
 
     public function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= resolve_static(Client::class, 'default')->getKey();
-        $this->data['vacation_carry_over_rule_id'] ??= resolve_static(
-            VacationCarryOverRule::class,
+        $this->data['client_id'] ??= resolve_static(Client::class, 'default')
+            ?->getKey();
+        $this->data['vacation_carryover_rule_id'] ??= resolve_static(
+            VacationCarryoverRule::class,
             'default'
         )
             ?->getKey();

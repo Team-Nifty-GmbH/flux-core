@@ -10,11 +10,9 @@ class HolidayLocation extends FluxPivot
 {
     public $incrementing = true;
 
-    public $primaryKey = 'pivot_id';
-
     public $timestamps = false;
 
-    protected $table = 'holiday_location';
+    protected $primaryKey = 'pivot_id';
 
     public function holiday(): BelongsTo
     {

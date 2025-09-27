@@ -1,5 +1,5 @@
 <div>
-    <x-modal :id="$vacationBlackoutForm->modalName()">
+    <x-modal :id="$vacationBlackoutForm->modalName()" :title="__('Vacation Blackout')">
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="vacationBlackoutForm.name"
@@ -28,7 +28,7 @@
             />
 
             <x-select.styled
-                wire:model="vacationBlackoutForm.employee_ids"
+                wire:model="vacationBlackoutForm.employees"
                 :label="__('Applies to Employees')"
                 :placeholder="__('Select Employees')"
                 :hint="__('Select specific employees for this blackout period')"
@@ -42,7 +42,7 @@
             />
 
             <x-select.styled
-                wire:model="vacationBlackoutForm.employee_department_ids"
+                wire:model="vacationBlackoutForm.employee_departments"
                 :label="__('Applies to Departments')"
                 :placeholder="__('Select Departments')"
                 :hint="__('Select departments for this blackout period')"
@@ -59,7 +59,7 @@
             />
 
             <x-select.styled
-                wire:model="vacationBlackoutForm.location_ids"
+                wire:model="vacationBlackoutForm.locations"
                 :label="__('Applies to Locations')"
                 :placeholder="__('Select Locations')"
                 :hint="__('Select locations for this blackout period')"

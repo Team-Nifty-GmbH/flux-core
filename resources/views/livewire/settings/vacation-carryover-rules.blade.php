@@ -1,22 +1,6 @@
 <div>
-    <x-modal :id="$vacationCarryoverRuleForm->modalName()">
+    <x-modal :id="$vacationCarryoverRuleForm->modalName()" :title="__('Vacation Carryover Rule')">
     <div class="flex flex-col gap-4">
-        @if(resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
-            <x-select.styled
-                wire:model="vacationCarryoverRuleForm.client_id"
-                :label="__('Client')"
-                select="label:name|value:id"
-                unfiltered
-                :request="[
-                    'url' => route('search', \FluxErp\Models\Client::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'searchFields' => ['name', 'client_code']
-                    ]
-                ]"
-            />
-        @endif
-
         <x-input
             wire:model="vacationCarryoverRuleForm.name"
             :label="__('Name')"
@@ -42,6 +26,10 @@
         <x-toggle
             wire:model="vacationCarryoverRuleForm.is_active"
             :label="__('Is Active')"
+        />
+        <x-toggle
+            wire:model="vacationCarryoverRuleForm.is_default"
+            :label="__('Is Default')"
         />
     </div>
 

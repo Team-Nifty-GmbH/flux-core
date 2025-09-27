@@ -11,11 +11,11 @@ class EmployeeDayList extends BaseDataTable
         'date',
         'target_hours',
         'actual_hours',
-        'vacation_hours_used',
-        'sick_hours_used',
+        'vacation_days_used',
+        'sick_days_used',
         'plus_minus_overtime_hours',
         'plus_minus_absence_hours',
     ];
 
-    public string $model = EmployeeDay::class;
+    protected string $model = EmployeeDay::class;
 }

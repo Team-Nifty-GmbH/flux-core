@@ -7,7 +7,7 @@
                     {{ $workTimeModelForm->name ?? __('New Work Time Model') }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('Configure the work schedule and settings for this time model') }}
+                    {{ __('Configure the work schedule and settings for this work time model') }}
                 </p>
             </div>
             <div class="flex items-center gap-3">
@@ -43,7 +43,7 @@
                     wire:model.live="workTimeModelForm.cycle_weeks"
                     x-on:change="$wire.dispatch('cycle-weeks-updated')"
                     :label="__('Cycle Weeks')"
-                    :hint="__('Number of weeks in the rotation cycle')"
+                    :hint="__('Number of weeks before the schedule repeats')"
                     min="1"
                     max="12"
                     required
@@ -71,7 +71,7 @@
 
                 <x-number
                     wire:model="workTimeModelForm.work_days_per_week"
-                    :label="__('Work Days per Week')"
+                    :label="__('Work Days Per Week')"
                     :hint="__('Number of working days in a standard week')"
                     min="1"
                     max="7"
@@ -86,14 +86,10 @@
                 />
 
                 <x-select.styled
-                    wire:model="workTimeModelForm.overtime_compensation"
+                    wire:model="workTimeModelForm.overtime_compensation_enum"
                     :label="__('Overtime Compensation')"
-                    :options="[
-                        ['label' => __('Time Off'), 'value' => 'time_off'],
-                        ['label' => __('Payment'), 'value' => 'payment'],
-                        ['label' => __('Mixed'), 'value' => 'mixed'],
-                    ]"
                     select="label:label|value:value"
+                    :options="\FluxErp\Enums\OvertimeCompensationEnum::valuesLocalized()"
                 />
 
                 <div class="sm:col-span-2">

@@ -17,7 +17,7 @@ return new class() extends Migration
                 ->cascadeOnDelete();
 
             $table->string('type');
-            $table->decimal('amount', 10);
+            $table->decimal('amount', 10, 2);
             $table->date('effective_date');
             $table->string('reason');
             $table->text('description')->nullable();
@@ -29,8 +29,7 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->index(['employee_id', 'type', 'effective_date'], 'emp_bal_adj_emp_type_date_idx');
-            $table->index(['effective_date']);
+            $table->index(['type', 'effective_date']);
         });
     }
 

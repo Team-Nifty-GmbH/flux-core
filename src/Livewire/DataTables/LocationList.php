@@ -9,9 +9,8 @@ class LocationList extends BaseDataTable
     public array $enabledCols = [
         'name',
         'street',
-        'house_number',
-        'zip',
         'city',
+        'zip',
         'country.name',
         'is_active',
     ];

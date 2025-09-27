@@ -6,6 +6,7 @@ use FluxErp\Models\Employee;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateEmployeeWorkTimeModelRuleset extends FluxRuleset
@@ -15,7 +16,6 @@ class CreateEmployeeWorkTimeModelRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'nullable|string|uuid|unique:employee_work_time_models,uuid',
             'employee_id' => [
                 'required',
                 'integer',
@@ -28,6 +28,11 @@ class CreateEmployeeWorkTimeModelRuleset extends FluxRuleset
             ],
             'valid_from' => 'required|date',
             'valid_until' => 'nullable|date|after:valid_from',
+            'annual_vacation_days' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 365]),
+            ],
+            'note' => 'nullable|string',
         ];
     }
 }

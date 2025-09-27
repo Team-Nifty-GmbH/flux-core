@@ -3,12 +3,15 @@
 namespace FluxErp\Rulesets\Employee;
 
 use FluxErp\Enums\SalutationEnum;
+use FluxErp\Models\Country;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Location;
 use FluxErp\Models\User;
-use FluxErp\Models\VacationCarryOverRule;
+use FluxErp\Models\VacationCarryoverRule;
+use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
 
@@ -22,14 +25,11 @@ class UpdateEmployeeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
             ],
-            'name' => 'nullable|string|max:255',
-            'firstname' => 'nullable|string|max:255',
-            'lastname' => 'nullable|string|max:255',
-            'salutation' => [
+            'country_id' => [
                 'nullable',
-                Rule::enum(SalutationEnum::class),
+                'integer',
+                app(ModelExists::class, ['model' => Country::class]),
             ],
-            'employee_number' => 'nullable|string|max:255',
             'employee_department_id' => [
                 'nullable',
                 'integer',
@@ -40,46 +40,72 @@ class UpdateEmployeeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Location::class]),
             ],
+            'supervisor_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Employee::class]),
+            ],
             'user_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class])
+                    ->whereDoesntHave('employee'),
             ],
-            'vacation_carry_over_rule_id' => [
+            'vacation_carryover_rule_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => VacationCarryOverRule::class]),
+                app(ModelExists::class, ['model' => VacationCarryoverRule::class]),
             ],
+            'salutation' => [
+                'nullable',
+                Rule::enum(SalutationEnum::class),
+            ],
+            'firstname' => 'sometimes|required|string|max:255',
+            'lastname' => 'sometimes|required|string|max:255',
             'date_of_birth' => 'nullable|date',
-            'nationality' => 'nullable|string|max:255',
             'place_of_birth' => 'nullable|string|max:255',
+            'nationality' => 'nullable|string|max:255',
             'confession' => 'nullable|string|max:255',
-            'street' => 'nullable|string|max:255',
             'zip' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:255',
+            'street' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
-            'mobile_phone' => 'nullable|string|max:255',
+            'phone_mobile' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'social_security_number' => 'nullable|string|max:255',
             'tax_identification_number' => 'nullable|string|max:255',
+            'employee_number' => 'nullable|string|max:255',
             'job_title' => 'nullable|string|max:255',
-            'employment_date' => 'nullable|date',
-            'termination_date' => 'nullable|date',
-            'probation_period_until' => 'nullable|date',
-            'fixed_term_contract_until' => 'nullable|date',
+            'employment_date' => 'sometimes|required|date',
+            'termination_date' => 'nullable|date|after:employment_date',
+            'probation_period_until' => 'nullable|date|after:employment_date',
+            'fixed_term_contract_until' => 'nullable|date|after:employment_date',
             'work_permit_until' => 'nullable|date',
             'residence_permit_until' => 'nullable|date',
-            'cost_per_hour' => 'nullable|numeric|min:0',
-            'base_salary' => 'nullable|numeric|min:0',
+            'base_salary' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'salary_type' => 'nullable|string|in:hourly,monthly,annual',
             'payment_interval' => 'nullable|string|in:weekly,biweekly,monthly,quarterly,annual',
-            'hourly_rate' => 'nullable|numeric|min:0',
+            'hourly_rate' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'health_insurance' => 'nullable|string|max:255',
             'health_insurance_member_number' => 'nullable|string|max:255',
-            'iban' => 'nullable|string|max:34',
+            'iban' => [
+                'nullable',
+                'string',
+                app(Iban::class),
+            ],
             'account_holder' => 'nullable|string|max:255',
             'bank_name' => 'nullable|string|max:255',
-            'bic' => 'nullable|string|max:11',
+            'bic' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'number_of_children' => 'integer|min:0',
             'is_active' => 'boolean',
         ];

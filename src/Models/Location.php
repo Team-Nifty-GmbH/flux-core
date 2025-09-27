@@ -4,9 +4,7 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use FluxErp\Models\Pivots\HolidayLocation;
-use FluxErp\Models\Pivots\VacationBlackoutEmployee;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Models\Pivots\LocationVacationBlackout;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -16,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Location extends FluxModel
 {
-    use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasUserModification, HasUuid, SoftDeletes;
 
     protected function casts(): array
     {
@@ -60,7 +58,7 @@ class Location extends FluxModel
 
     public function vacationBlackouts(): BelongsToMany
     {
-        return $this->belongsToMany(VacationBlackout::class, 'vacation_blackout_location')
-            ->using(VacationBlackoutEmployee::class);
+        return $this->belongsToMany(VacationBlackout::class, 'location_vacation_blackout')
+            ->using(LocationVacationBlackout::class);
     }
 }

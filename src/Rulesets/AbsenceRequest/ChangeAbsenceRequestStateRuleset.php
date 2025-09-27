@@ -6,7 +6,7 @@ use FluxErp\Models\AbsenceRequest;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
-class ChangeAbsenceRequestStatusRuleset extends FluxRuleset
+class ChangeAbsenceRequestStateRuleset extends FluxRuleset
 {
     public function rules(): array
     {

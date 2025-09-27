@@ -3,8 +3,6 @@
 namespace FluxErp\Livewire\Settings;
 
 use Exception;
-use FluxErp\Actions\WorkTimeModel\DeleteWorkTimeModel;
-use FluxErp\Actions\WorkTimeModel\UpdateWorkTimeModel;
 use FluxErp\Livewire\Forms\WorkTimeModelForm;
 use FluxErp\Models\WorkTimeModel as WorkTimeModelModel;
 use FluxErp\Traits\Livewire\Actions;
@@ -24,8 +22,8 @@ class WorkTimeModel extends Component
     public function mount(string $id): void
     {
         $model = resolve_static(WorkTimeModelModel::class, 'query')
-            ->with('schedules')
             ->whereKey($id)
+            ->with('schedules')
             ->firstOrFail();
 
         $this->workTimeModelForm->fill($model);
@@ -40,10 +38,7 @@ class WorkTimeModel extends Component
     public function delete(): void
     {
         try {
-            DeleteWorkTimeModel::make($this->workTimeModelForm->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->workTimeModelForm->delete();
 
             $this->redirect(route('settings.work-time-models'));
         } catch (Exception $e) {
@@ -95,22 +90,17 @@ class WorkTimeModel extends Component
     public function save(): void
     {
         try {
-            // Get all form data including schedules
-            $data = $this->workTimeModelForm->toArray();
-
-            // Update the work time model with schedules
-            $model = UpdateWorkTimeModel::make($data)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-
-            $this->toast()->success(__('Work Time Model saved successfully'))->send();
-
-            // Refresh the form data
-            $this->mount($model->id);
+            $this->workTimeModelForm->save();
+            $this->workTimeModelForm->loadSchedules($this->workTimeModelForm->getActionResult());
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
+
+            return;
         }
+
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Work Time Model')]))
+            ->send();
     }
 
     #[Renderless]
@@ -149,7 +139,7 @@ class WorkTimeModel extends Component
                 }
 
                 $hours = $endTime->diffInMinutes($startTime) / 60;
-                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['work_hours'] = round($hours, 2);
+                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['work_hours'] = bcround($hours, 2);
             } else {
                 // If either start or end time is not set, set work_hours to 0
                 $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['work_hours'] = 0;

@@ -26,7 +26,7 @@ class CreateEmployeeDayRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Holiday::class]),
             ],
-            'date' => 'required|date|unique:employee_days,date,NULL,id,employee_id,' . request('employee_id'),
+            'date' => 'required|date',
             'target_hours' => 'required|numeric|min:0|max:24',
             'actual_hours' => 'required|numeric|min:0|max:24',
             'break_minutes' => 'nullable|numeric|min:0|max:1440', // Max 24 hours in minutes
@@ -35,8 +35,8 @@ class CreateEmployeeDayRuleset extends FluxRuleset
             'absence_requests' => 'nullable|array',
             'work_times' => 'nullable|array',
             'notes' => 'nullable|string|max:1000',
-            'is_holiday' => 'nullable|boolean',
-            'is_work_day' => 'required|boolean',
+            'is_holiday' => 'boolean',
+            'is_work_day' => 'boolean',
         ];
     }
 }

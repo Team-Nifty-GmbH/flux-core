@@ -11,10 +11,8 @@
         id="edit-notification-settings-modal"
         wire="detailModal"
         x-on:close="$wire.closeModal()"
+        :title="__('Notification Settings')"
     >
-        <x-slot name="title">
-            {{ __('Notification Settings') }}
-        </x-slot>
         <template x-for="(notificationChannel, name) in notification">
             <div
                 class="space-y-2 pb-6"

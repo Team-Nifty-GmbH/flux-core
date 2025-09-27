@@ -1,9 +1,5 @@
 <div>
-    <x-modal :id="$workTimeModelForm->modalName()" size="xl">
-        <x-slot:title>
-            {{ $workTimeModelForm->id ? __('Edit Work Time Model') : __('Create Work Time Model') }}
-        </x-slot:title>
-
+    <x-modal :id="$workTimeModelForm->modalName()" size="xl" :title="__('Work Time Model')">
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="workTimeModelForm.name"
@@ -41,15 +37,11 @@
                 />
 
                 <x-select.styled
-                    wire:model="workTimeModelForm.overtime_compensation"
+                    wire:model="workTimeModelForm.overtime_compensation_enum"
                     :label="__('Overtime Compensation')"
-                    :options="[
-                        ['value' => 'time_off', 'label' => __('Time Off')],
-                        ['value' => 'payment', 'label' => __('Payment')],
-                        ['value' => 'both', 'label' => __('Both')]
-                    ]"
-                    select="label:label|value:value"
                     required
+                    select="label:label|value:value"
+                    :options="\FluxErp\Enums\OvertimeCompensationEnum::valuesLocalized()"
                 />
             </div>
 
@@ -66,11 +58,9 @@
                 :label="__('Is Active')"
             />
 
-            @if(!$workTimeModelForm->id)
-                <x-alert color="info">
-                    {{ __('After creating the work time model, you will be redirected to configure the detailed schedule.') }}
-                </x-alert>
-            @endif
+            <x-alert color="info">
+                {{ __('After creating the work time model, you will be redirected to configure the detailed schedule.') }}
+            </x-alert>
         </div>
 
         <x-slot:footer>
@@ -81,9 +71,9 @@
                 x-on:click="$modalClose('{{ $workTimeModelForm->modalName() }}')"
             />
             <x-button
-                :text="$workTimeModelForm->id ? __('Save') : __('Create and Configure Schedule')"
+                :text="__('Create and Configure Schedule')"
                 color="primary"
-                wire:click="save"
+                wire:click="save().then((success) => {if(success) $wire.editSchedule($wire.workTimeModelForm.id);})"
             />
         </x-slot:footer>
     </x-modal>

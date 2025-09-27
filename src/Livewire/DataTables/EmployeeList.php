@@ -10,7 +10,7 @@ class EmployeeList extends BaseDataTable
         'id',
         'name',
         'job_title',
-        'mobile_phone',
+        'phone_mobile',
         'email',
         'health_insurance',
         'probation_period_until',

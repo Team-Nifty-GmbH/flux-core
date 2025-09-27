@@ -1,4 +1,4 @@
-<x-modal id="edit-industry-modal">
+<x-modal id="edit-industry-modal" :title="__('Industry')">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="industryForm.name" :label="__('Name')" />
     </div>

@@ -22,15 +22,15 @@ class CreateHoliday extends FluxAction
     public function performAction(): Holiday
     {
         $data = $this->getData();
-        $locationIds = Arr::pull($data, 'location_ids');
+        $locations = Arr::pull($data, 'locations');
 
         $holiday = app(Holiday::class, ['attributes' => $data]);
         $holiday->save();
 
-        if ($locationIds) {
-            $holiday->locations()->sync($locationIds);
+        if ($locations) {
+            $holiday->locations()->attach($locations);
         }
 
-        return $holiday->fresh();
+        return $holiday->refresh();
     }
 }

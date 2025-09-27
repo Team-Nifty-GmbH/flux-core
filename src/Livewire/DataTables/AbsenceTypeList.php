@@ -10,10 +10,10 @@ class AbsenceTypeList extends BaseDataTable
         'name',
         'code',
         'color',
-        'employee_can_create',
+        'employee_can_create_enum',
         'affects_vacation',
+        'affects_sick_leave',
         'affects_overtime',
-        'affects_sick',
         'is_active',
     ];
 

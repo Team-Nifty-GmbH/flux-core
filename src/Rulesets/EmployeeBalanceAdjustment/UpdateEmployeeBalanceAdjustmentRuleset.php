@@ -4,7 +4,6 @@ namespace FluxErp\Rulesets\EmployeeBalanceAdjustment;
 
 use FluxErp\Enums\EmployeeBalanceAdjustmentReasonEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
-use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeBalanceAdjustment;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -20,12 +19,6 @@ class UpdateEmployeeBalanceAdjustmentRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(EmployeeBalanceAdjustment::class),
             ],
-            'employee_id' => [
-                'sometimes',
-                'required',
-                'integer',
-                new ModelExists(Employee::class),
-            ],
             'type' => [
                 'sometimes',
                 'required',
@@ -36,6 +29,7 @@ class UpdateEmployeeBalanceAdjustmentRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'numeric',
+                'not_in:0',
             ],
             'effective_date' => [
                 'sometimes',

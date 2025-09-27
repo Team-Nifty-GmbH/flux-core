@@ -12,16 +12,14 @@ return new class() extends Migration
             $table->id();
             $table->char('uuid', 36);
 
-            $table->foreignId('absence_policy_id')->nullable()->constrained()->nullOnDelete();
-
             $table->string('name');
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('color', 7);
             $table->decimal('percentage_deduction', 3, 2)->default(1.00);
-            $table->string('employee_can_create')->default('yes');
+            $table->string('employee_can_create_enum');
 
             $table->boolean('affects_overtime')->default(false);
-            $table->boolean('affects_sick')->default(false);
+            $table->boolean('affects_sick_leave')->default(false);
             $table->boolean('affects_vacation')->default(false);
             $table->boolean('is_active')->default(true);
 

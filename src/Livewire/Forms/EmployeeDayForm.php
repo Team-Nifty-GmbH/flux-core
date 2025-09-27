@@ -30,9 +30,9 @@ class EmployeeDayForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?float $plus_minus_overtime_hours = 0;
+    public ?float $plus_minus_absence_hours = 0;
 
-    public ?float $plus_minus_vacation_hours = 0;
+    public ?float $plus_minus_overtime_hours = 0;
 
     #[Locked]
     public ?float $sick_days_used = 0;

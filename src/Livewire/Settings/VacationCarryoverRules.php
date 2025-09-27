@@ -2,17 +2,17 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Livewire\DataTables\VacationCarryoverRuleList;
-use FluxErp\Livewire\Forms\VacationCarryoverRuleForm;
+use FluxErp\Livewire\DataTables\VacationCarryOverRuleList;
+use FluxErp\Livewire\Forms\VacationCarryOverRuleForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 
-class VacationCarryoverRules extends VacationCarryoverRuleList
+class VacationCarryoverRules extends VacationCarryOverRuleList
 {
     use DataTableHasFormEdit;
 
     #[DataTableForm]
-    public VacationCarryoverRuleForm $vacationCarryoverRuleForm;
+    public VacationCarryOverRuleForm $vacationCarryoverRuleForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.vacation-carryover-rules';
 }

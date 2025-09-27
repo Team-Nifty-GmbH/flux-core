@@ -23,6 +23,6 @@ class CreateEmployeeBalanceAdjustment extends FluxAction
         $employeeBalanceAdjustment = app(EmployeeBalanceAdjustment::class, ['attributes' => $this->data]);
         $employeeBalanceAdjustment->save();
 
-        return $employeeBalanceAdjustment->fresh();
+        return $employeeBalanceAdjustment->refresh();
     }
 }

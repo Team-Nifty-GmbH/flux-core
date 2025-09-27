@@ -17,17 +17,19 @@ class UpdateAbsenceRequestRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => AbsenceRequest::class]),
             ],
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'sometimes|required|date',
+            'end_date' => 'sometimes|required|date|after_or_equal:start_date',
             'sick_note_issued_date' => 'nullable|date',
-            'substitute_employee_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Employee::class]),
-            ],
             'substitute_note' => 'nullable|string|max:500',
             'reason' => 'nullable|string|max:500',
             'is_emergency' => 'boolean',
+
+            'substitutes' => 'nullable|array',
+            'substitutes.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Employee::class]),
+            ],
         ];
     }
 }

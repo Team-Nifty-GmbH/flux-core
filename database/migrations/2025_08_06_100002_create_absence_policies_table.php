@@ -13,14 +13,13 @@ return new class() extends Migration
             $table->char('uuid', 36);
 
             $table->string('name');
-            $table->integer('max_consecutive_days')->nullable();
-            $table->integer('min_notice_days')->nullable();
-            $table->integer('documentation_after_days')->nullable();
+            $table->unsignedInteger('max_consecutive_days')->nullable();
+            $table->unsignedInteger('min_notice_days')->nullable();
+            $table->unsignedInteger('documentation_after_days')->nullable();
 
             $table->boolean('can_select_substitute')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('requires_documentation')->default(false);
-            $table->boolean('requires_proof')->default(false);
             $table->boolean('requires_reason')->default(false);
             $table->boolean('requires_substitute')->default(false);
 

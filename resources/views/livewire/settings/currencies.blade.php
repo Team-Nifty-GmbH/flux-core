@@ -1,7 +1,7 @@
 <x-modal
     id="edit-currency-modal"
     wire="editModal"
-    :title="($selectedCurrency->id ?? false) ? __('Edit Currency') : __('Create Currency')"
+    :title="__('Currency')"
 >
     <div class="flex flex-col gap-1.5">
         <x-input

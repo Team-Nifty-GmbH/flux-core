@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\AbsenceRequest;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
-use FluxErp\Rulesets\AbsenceRequest\ChangeAbsenceRequestStatusRuleset;
+use FluxErp\Rulesets\AbsenceRequest\ChangeAbsenceRequestStateRuleset;
 use Illuminate\Support\Arr;
 
 class RejectAbsenceRequest extends FluxAction
@@ -17,7 +17,7 @@ class RejectAbsenceRequest extends FluxAction
 
     protected function getRulesets(): string|array
     {
-        return ChangeAbsenceRequestStatusRuleset::class;
+        return ChangeAbsenceRequestStateRuleset::class;
     }
 
     public function performAction(): AbsenceRequest
@@ -32,7 +32,7 @@ class RejectAbsenceRequest extends FluxAction
         $absenceRequest->fill(array_merge(
             $data,
             [
-                'status' => AbsenceRequestStatusEnum::Rejected,
+                'status' => AbsenceRequestStateEnum::Rejected,
             ]
         ));
         $absenceRequest->save();

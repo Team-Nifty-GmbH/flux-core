@@ -22,11 +22,11 @@ class UpdateEmployee extends FluxAction
     {
         $employee = resolve_static(Employee::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $employee->fill($this->getData());
         $employee->save();
 
-        return $employee->fresh();
+        return $employee->withoutRelations()->fresh();
     }
 }

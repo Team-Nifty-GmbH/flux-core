@@ -19,6 +19,10 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
+            $table->foreignId('employee_department_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
             $table->foreignId('location_id')
                 ->nullable()
                 ->constrained()
@@ -27,17 +31,13 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('employees')
                 ->nullOnDelete();
-            $table->foreignId('employee_department_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
-            $table->foreignId('vacation_carry_over_rule_id')
+            $table->foreignId('vacation_carryover_rule_id')
                 ->nullable()
-                ->constrained('vacation_carry_over_rules')
+                ->constrained('vacation_carryover_rules')
                 ->nullOnDelete();
 
             $table->string('name')->nullable();
@@ -45,16 +45,16 @@ return new class() extends Migration
             $table->string('firstname')->nullable();
             $table->string('lastname')->nullable();
             $table->date('date_of_birth')->nullable();
-            $table->string('nationality')->nullable();
             $table->string('place_of_birth')->nullable();
+            $table->string('nationality')->nullable();
             $table->string('confession')->nullable();
 
-            $table->string('street')->nullable();
             $table->string('zip')->nullable();
             $table->string('city')->nullable();
+            $table->string('street')->nullable();
 
             $table->string('phone')->nullable();
-            $table->string('mobile_phone')->nullable();
+            $table->string('phone_mobile')->nullable();
             $table->string('email')->nullable();
 
             $table->string('social_security_number')->nullable();
@@ -62,8 +62,8 @@ return new class() extends Migration
 
             $table->string('employee_number')->nullable();
             $table->string('job_title')->nullable();
-            $table->date('employment_date')->nullable();
-            $table->date('termination_date')->nullable();
+            $table->date('employment_date')->nullable()->index();
+            $table->date('termination_date')->nullable()->index();
             $table->date('probation_period_until')->nullable();
             $table->date('fixed_term_contract_until')->nullable();
             $table->date('work_permit_until')->nullable();
@@ -81,7 +81,7 @@ return new class() extends Migration
             $table->string('bank_name')->nullable();
             $table->string('bic')->nullable();
 
-            $table->integer('number_of_children')->default(0);
+            $table->unsignedInteger('number_of_children')->default(0);
 
             $table->boolean('is_active')->default(true);
 
@@ -91,9 +91,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->index('employment_date');
-            $table->index('termination_date');
         });
     }
 

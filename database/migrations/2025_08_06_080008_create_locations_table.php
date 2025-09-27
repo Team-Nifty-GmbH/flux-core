@@ -22,10 +22,9 @@ return new class() extends Migration
                 ->nullOnDelete();
 
             $table->string('name');
-            $table->string('street')->nullable();
-            $table->string('house_number')->nullable();
             $table->string('zip')->nullable();
             $table->string('city')->nullable();
+            $table->string('street')->nullable();
 
             $table->boolean('is_active')->default(true);
 

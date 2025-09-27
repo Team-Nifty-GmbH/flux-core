@@ -21,7 +21,7 @@ class DeleteAbsencePolicy extends FluxAction
     public function performAction(): ?bool
     {
         return resolve_static(AbsencePolicy::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->firstOrFail()
             ->delete();
     }

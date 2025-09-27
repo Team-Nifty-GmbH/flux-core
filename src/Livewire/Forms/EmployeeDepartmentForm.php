@@ -12,8 +12,6 @@ class EmployeeDepartmentForm extends FluxForm
 {
     use SupportsAutoRender;
 
-    public ?int $client_id = null;
-
     public ?string $code = null;
 
     public ?string $description = null;
@@ -30,16 +28,6 @@ class EmployeeDepartmentForm extends FluxForm
     public ?string $name = null;
 
     public ?int $parent_id = null;
-
-    public function getKey(): string
-    {
-        return 'id';
-    }
-
-    public function modalName(): string
-    {
-        return 'edit-employee-department';
-    }
 
     protected function getActions(): array
     {

@@ -3,14 +3,14 @@
 namespace FluxErp\Actions\VacationCarryoverRule;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\VacationCarryOverRule;
+use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rulesets\VacationCarryoverRule\CreateVacationCarryoverRuleRuleset;
 
 class CreateVacationCarryoverRule extends FluxAction
 {
     public static function models(): array
     {
-        return [VacationCarryOverRule::class];
+        return [VacationCarryoverRule::class];
     }
 
     protected function getRulesets(): string|array
@@ -18,11 +18,11 @@ class CreateVacationCarryoverRule extends FluxAction
         return CreateVacationCarryoverRuleRuleset::class;
     }
 
-    public function performAction(): VacationCarryOverRule
+    public function performAction(): VacationCarryoverRule
     {
-        $vacationCarryoverRule = app(VacationCarryOverRule::class, ['attributes' => $this->getData()]);
-        $vacationCarryoverRule->save();
+        $vacationCarryOverRule = app(VacationCarryoverRule::class, ['attributes' => $this->getData()]);
+        $vacationCarryOverRule->save();
 
-        return $vacationCarryoverRule->fresh();
+        return $vacationCarryOverRule->refresh();
     }
 }

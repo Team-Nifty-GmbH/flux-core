@@ -12,7 +12,7 @@ class EmployeeDays extends BaseEmployeeDays
     #[Modelable]
     public ?int $absenceRequestId = null;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereAttachedTo(
             resolve_static(AbsenceRequest::class, 'query')

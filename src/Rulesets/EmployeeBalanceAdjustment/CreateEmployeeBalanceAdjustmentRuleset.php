@@ -27,6 +27,7 @@ class CreateEmployeeBalanceAdjustmentRuleset extends FluxRuleset
             'amount' => [
                 'required',
                 'numeric',
+                'not_in:0',
             ],
             'effective_date' => [
                 'required',

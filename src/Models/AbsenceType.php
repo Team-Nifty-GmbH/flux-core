@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Enums\AbsenceRequestCreationTypeEnum;
+use FluxErp\Enums\EmployeeCanCreateEnum;
 use FluxErp\Models\Pivots\AbsencePolicyAbsenceType;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -20,10 +20,10 @@ class AbsenceType extends FluxModel implements InteractsWithDataTables
     protected function casts(): array
     {
         return [
-            'employee_can_create' => AbsenceRequestCreationTypeEnum::class,
+            'employee_can_create_enum' => EmployeeCanCreateEnum::class,
             'affects_overtime' => 'boolean',
+            'affects_sick_leave' => 'boolean',
             'affects_vacation' => 'boolean',
-            'affects_sick' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
@@ -39,26 +39,17 @@ class AbsenceType extends FluxModel implements InteractsWithDataTables
         return $this->hasMany(AbsenceRequest::class);
     }
 
-    public function getAbbreviation(): string
-    {
-        return Str::of($this->name)
-            ->replaceMatches('/[^A-Z]/', '')
-            ->trim()
-            ->limit(2, '')
-            ->toString();
-    }
-
     public function getAvatarUrl(): ?string
     {
         return route('avatar', [
-            'text' => $this->getAbbreviation(),
+            'text' => $this->code,
             'color' => Str::after($this->color, '#'),
         ]);
     }
 
     public function getDescription(): ?string
     {
-        return null;
+        return $this->code;
     }
 
     public function getLabel(): ?string

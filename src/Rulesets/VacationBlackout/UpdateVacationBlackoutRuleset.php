@@ -20,22 +20,28 @@ class UpdateVacationBlackoutRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => VacationBlackout::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
-            'start_date' => 'sometimes|required|date',
-            'end_date' => 'sometimes|required|date|after_or_equal:start_date',
             'description' => 'nullable|string',
+            'start_date' => 'required_with:end_date|date',
+            'end_date' => 'required_with:start_date|date|after_or_equal:start_date',
             'is_active' => 'boolean',
-            'employee_ids' => 'nullable|array',
-            'employee_ids.*' => [
+
+            'employees' => 'nullable|array',
+            'employees.*' => [
+                'required',
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
             ],
-            'employee_department_ids' => 'nullable|array',
-            'employee_department_ids.*' => [
+
+            'employee_departments' => 'nullable|array',
+            'employee_departments.*' => [
+                'required',
                 'integer',
                 app(ModelExists::class, ['model' => EmployeeDepartment::class]),
             ],
-            'location_ids' => 'nullable|array',
-            'location_ids.*' => [
+
+            'locations' => 'nullable|array',
+            'locations.*' => [
+                'required',
                 'integer',
                 app(ModelExists::class, ['model' => Location::class]),
             ],

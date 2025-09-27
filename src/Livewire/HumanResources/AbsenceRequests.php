@@ -7,7 +7,6 @@ use FluxErp\Livewire\Forms\AbsenceRequestForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 use Livewire\Attributes\Renderless;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AbsenceRequests extends AbsenceRequestList
 {
@@ -33,8 +32,8 @@ class AbsenceRequests extends AbsenceRequestList
     {
         if ($id) {
             $this->redirectRoute(
-                static::$detailRouteName,
-                ['id' => $id],
+                name: static::$detailRouteName,
+                parameters: ['id' => $id],
                 navigate: true
             );
 
@@ -51,20 +50,12 @@ class AbsenceRequests extends AbsenceRequestList
 
         if ($result) {
             $this->redirectRoute(
-                static::$detailRouteName,
-                ['id' => $this->absenceRequestForm->id],
-                navigate: true);
+                name: static::$detailRouteName,
+                parameters: ['id' => $this->absenceRequestForm->id],
+                navigate: true
+            );
         }
 
         return $result;
-    }
-
-    protected function getRowActionEditButton(): DataTableButton
-    {
-        return DataTableButton::make()
-            ->text(__('Edit'))
-            ->icon('pencil')
-            ->color('primary')
-            ->wireClick('editAbsenceRequest(record.id)');
     }
 }

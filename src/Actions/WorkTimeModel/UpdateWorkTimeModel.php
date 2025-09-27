@@ -23,7 +23,7 @@ class UpdateWorkTimeModel extends FluxAction
     {
         $workTimeModel = resolve_static(WorkTimeModel::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $data = $this->getData();
         $schedules = Arr::pull($data, 'schedules');

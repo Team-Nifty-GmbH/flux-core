@@ -7,20 +7,22 @@
                 <x-select.styled
                     wire:model="absenceRequestForm.employee_id"
                     :label="__('Employee')"
+                    required
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Employee::class),
                         'method' => 'POST',
                     ]"
-                    unfiltered
-                    required
                 />
             @endif
 
             <x-select.styled
                 wire:model="absenceRequestForm.absence_type_id"
                 :label="__('Absence Type')"
+                required
                 select="value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\AbsenceType::class),
                     'method' => 'POST',
@@ -28,18 +30,16 @@
                         'whereIn' => ! $this->canChooseEmployee() && ! \FluxErp\Actions\AbsenceRequest\ApproveAbsenceRequest::canPerformAction(false)
                             ? [
                                 [
-                                    'employee_can_create',
+                                    'employee_can_create_enum',
                                     [
-                                        \FluxErp\Enums\AbsenceRequestCreationTypeEnum::Yes->value,
-                                        \FluxErp\Enums\AbsenceRequestCreationTypeEnum::Approval_required->value,
+                                        \FluxErp\Enums\EmployeeCanCreateEnum::Yes->value,
+                                        \FluxErp\Enums\EmployeeCanCreateEnum::Approval_required->value,
                                     ]
                                 ]
                             ]
                             : [],
                     ],
                 ]"
-                unfiltered
-                required
             />
         </div>
 
@@ -70,14 +70,15 @@
         />
 
         <x-select.styled
-            wire:model="absenceRequestForm.substitute_employee_id"
+            wire:model="absenceRequestForm.substitutes"
             :label="__('Substitute')"
+            multiple
             select="label:label|value:id"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Employee::class),
                 'method' => 'POST',
             ]"
-            unfiltered
         />
 
         <x-textarea
@@ -93,15 +94,24 @@
 
         @if($this->canChooseEmployee())
             <x-select.styled
-                wire:model="absenceRequestForm.status"
+                wire:model="absenceRequestForm.state_enum"
                 :label="__('Status')"
-                :options="\FluxErp\Enums\AbsenceRequestStatusEnum::valuesLocalized()"
+                :options="\FluxErp\Enums\AbsenceRequestStateEnum::valuesLocalized()"
             />
         @endif
     </div>
 
     <x-slot:footer>
-        <x-button :text="__('Cancel')" color="secondary" flat x-on:click="$modalClose('{{ $absenceRequestForm->modalName() }}')" />
-        <x-button :text="__('Save')" color="primary" wire:click="save().then((success) => { if(success) $modalClose('{{ $absenceRequestForm->modalName() }}')})" />
+        <x-button
+            :text="__('Cancel')"
+            color="secondary"
+            flat
+            x-on:click="$modalClose('{{ $absenceRequestForm->modalName() }}')"
+        />
+        <x-button
+            :text="__('Save')"
+            color="primary"
+            wire:click="save().then((success) => { if(success) $modalClose('{{ $absenceRequestForm->modalName() }}')})"
+        />
     </x-slot:footer>
 </x-modal>

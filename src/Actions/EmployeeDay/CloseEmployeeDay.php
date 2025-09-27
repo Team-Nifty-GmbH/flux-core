@@ -4,7 +4,7 @@ namespace FluxErp\Actions\EmployeeDay;
 
 use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
@@ -36,7 +36,7 @@ class CloseEmployeeDay extends FluxAction
         $absenceRequestBaseQuery = resolve_static(AbsenceRequest::class, 'query')
             ->where('employee_id', $employee->getKey())
             ->whereValueBetween($date, ['start_date', 'end_date'])
-            ->where('status', AbsenceRequestStatusEnum::Approved)
+            ->where('status', AbsenceRequestStateEnum::Approved)
             ->with('absenceType:id,affects_sick,affects_vacation,affects_overtime');
 
         $wasPresent = false;

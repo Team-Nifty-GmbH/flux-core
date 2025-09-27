@@ -3,9 +3,10 @@
 namespace FluxErp\Actions\Location;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Location;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Location\UpdateLocationRuleset;
-use Illuminate\Support\Arr;
 
 class UpdateLocation extends FluxAction
 {
@@ -23,18 +24,25 @@ class UpdateLocation extends FluxAction
     {
         $location = resolve_static(Location::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
-        $data = $this->getData();
-        $holidayIds = Arr::pull($data, 'holiday_ids');
-
-        $location->fill($data);
+        $location->fill($this->getData());
         $location->save();
 
-        if (is_array($holidayIds)) {
-            $location->holidays()->sync($holidayIds);
-        }
+        return $location->withoutRelations()->fresh();
+    }
 
-        return $location->fresh();
+    protected function prepareForValidation(): void
+    {
+        if ($this->getData('country_region_id') && $this->getData('country_id')) {
+            $this->mergeRules([
+                'country_region_id' => [
+                    'nullable',
+                    'integer',
+                    app(ModelExists::class, ['model' => CountryRegion::class])
+                        ->where('country_id', $this->getData('country_id')),
+                ],
+            ]);
+        }
     }
 }

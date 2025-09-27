@@ -2,8 +2,7 @@
 
 namespace FluxErp\Livewire\AbsenceRequest;
 
-use Exception;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\AbsenceRequestForm;
 use FluxErp\Models\AbsenceRequest as AbsenceRequestModel;
@@ -48,7 +47,7 @@ class AbsenceRequest extends Component
     public function approve(): bool
     {
         try {
-            $this->absenceRequestForm->changeState(AbsenceRequestStatusEnum::Approved);
+            $this->absenceRequestForm->changeState(AbsenceRequestStateEnum::Approved);
         } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
@@ -64,21 +63,12 @@ class AbsenceRequest extends Component
         return true;
     }
 
-    #[Renderless]
-    public function delete(): void
-    {
-        try {
-            $this->absenceRequestForm->delete();
-
-            $this->redirectRoute('human-resources.absence-requests');
-        } catch (Exception $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
     public function getEmployeeUrl(): string
     {
-        return route('human-resources.employees.id', ['id' => $this->absenceRequestForm->employee_id]);
+        return route(
+            'human-resources.employees.id',
+            ['id' => $this->absenceRequestForm->employee_id]
+        );
     }
 
     #[Renderless]
@@ -139,7 +129,7 @@ class AbsenceRequest extends Component
     public function reject(): bool
     {
         try {
-            $this->absenceRequestForm->changeState(AbsenceRequestStatusEnum::Rejected);
+            $this->absenceRequestForm->changeState(AbsenceRequestStateEnum::Rejected);
         } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
@@ -170,7 +160,7 @@ class AbsenceRequest extends Component
     public function revoke(): bool
     {
         try {
-            $this->absenceRequestForm->changeState(AbsenceRequestStatusEnum::Revoked);
+            $this->absenceRequestForm->changeState(AbsenceRequestStateEnum::Revoked);
         } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 

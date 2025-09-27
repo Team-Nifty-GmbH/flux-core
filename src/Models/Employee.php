@@ -5,11 +5,11 @@ namespace FluxErp\Models;
 use Carbon\Carbon;
 use DateTime;
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Enums\SalutationEnum;
+use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
-use FluxErp\Models\Pivots\VacationBlackoutEmployee;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\HasClientAssignment;
@@ -51,35 +51,11 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             }
         });
 
-        static::saved(function (Employee $employee): void {
-            if ($employee->isDirty('user_id')) {
-                $oldUserId = $employee->getOriginal('user_id');
-                $newUserId = $employee->user_id;
-
-                if ($oldUserId) {
-                    resolve_static(WorkTime::class, 'query')
-                        ->withTrashed()
-                        ->where('user_id', $oldUserId)
-                        ->where('employee_id', $employee->getKey())
-                        ->update(['employee_id' => null]);
-                }
-
-                if ($newUserId) {
-                    resolve_static(WorkTime::class, 'query')
-                        ->withTrashed()
-                        ->where('user_id', $newUserId)
-                        ->whereNull('employee_id')
-                        ->update(['employee_id' => $employee->getKey()]);
-                }
-            }
-        });
-
         static::created(function (Employee $employee): void {
             if ($employee->user_id) {
                 resolve_static(WorkTime::class, 'query')
                     ->withTrashed()
                     ->where('user_id', $employee->user_id)
-                    ->whereNull('employee_id')
                     ->update(['employee_id' => $employee->getKey()]);
             }
         });
@@ -96,7 +72,6 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             'fixed_term_contract_until' => 'date',
             'work_permit_until' => 'date',
             'residence_permit_until' => 'date',
-            'number_of_children' => 'integer',
             'is_active' => 'boolean',
         ];
     }
@@ -133,9 +108,9 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('avatar', 'thumb') ?:
-               $this->user?->getAvatarUrl() ?:
-               static::icon()->getUrl();
+        return $this->getFirstMediaUrl('avatar', 'thumb')
+            ?: $this->user?->getAvatarUrl()
+                ?: static::icon()->getUrl();
     }
 
     public function getCurrentOvertimeBalance(bool $includeAdjustments = true): string
@@ -259,7 +234,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
         $this->absenceRequests()
             ->whereRelation('absenceType', 'affects_vacation', true)
-            ->where('status', AbsenceRequestStatusEnum::Approved)
+            ->where('status', AbsenceRequestStateEnum::Approved)
             ->whereValueNotBetween($cutoff, ['start_date', 'end_date'])
             ->when(
                 $start,
@@ -286,7 +261,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
         $this->absenceRequests()
             ->whereRelation('absenceType', 'affects_vacation', true)
-            ->where('status', AbsenceRequestStatusEnum::Approved)
+            ->where('status', AbsenceRequestStateEnum::Approved)
             ->whereValueBetween($cutoff, ['start_date', 'end_date'])
             ->when(
                 $start,
@@ -453,11 +428,6 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->hasMany(Employee::class, 'supervisor_id');
     }
 
-    public function substituteAbsenceRequests(): HasMany
-    {
-        return $this->hasMany(AbsenceRequest::class, 'substitute_employee_id');
-    }
-
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'supervisor_id');
@@ -470,13 +440,13 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
     public function vacationBlackouts(): BelongsToMany
     {
-        return $this->belongsToMany(VacationBlackout::class, 'vacation_blackout_employee')
-            ->using(VacationBlackoutEmployee::class);
+        return $this->belongsToMany(VacationBlackout::class, 'employee_vacation_blackout')
+            ->using(EmployeeVacationBlackout::class);
     }
 
     public function vacationCarryOverRule(): BelongsTo
     {
-        return $this->belongsto(VacationCarryOverRule::class);
+        return $this->belongsto(VacationCarryoverRule::class);
     }
 
     public function workTimeModelHistory(): HasMany

@@ -17,7 +17,7 @@ return new class() extends Migration
                 ->cascadeOnDelete();
 
             $table->unsignedInteger('week_number');
-            $table->unsignedInteger('weekday');
+            $table->unsignedTinyInteger('weekday');
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->decimal('break_minutes', 5, 2)->default(0);

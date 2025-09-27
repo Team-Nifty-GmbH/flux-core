@@ -22,7 +22,7 @@ class DeleteVacationBlackout extends FluxAction
     {
         return resolve_static(VacationBlackout::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first()
+            ->firstOrFail()
             ->delete();
     }
 }

@@ -16,9 +16,7 @@ class EmployeeWorkTimeModel extends FluxPivot
 
     public $incrementing = true;
 
-    public $primaryKey = 'pivot_id';
-
-    protected $table = 'employee_work_time_models';
+    protected $primaryKey = 'pivot_id';
 
     protected function casts(): array
     {

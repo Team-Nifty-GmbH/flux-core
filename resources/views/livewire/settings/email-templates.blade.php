@@ -29,7 +29,7 @@
         },
     }"
 >
-    <x-modal :id="$emailTemplateForm->modalName()">
+    <x-modal :id="$emailTemplateForm->modalName()" :title="__('Email Template')">
         <div class="flex flex-col gap-4">
             <x-input wire:model="emailTemplateForm.name" :label="__('Name')" />
             <x-select.styled

@@ -20,19 +20,19 @@ return new class() extends Migration
                 ->constrained()
                 ->nullOnDelete();
 
-            $table->date('date');
-            $table->decimal('target_hours')->default(0);
-            $table->decimal('actual_hours')->default(0);
-            $table->decimal('break_minutes')->default(0);
-            $table->decimal('vacation_hours_used')->default(0);
-            $table->decimal('vacation_days_used')->default(0);
-            $table->decimal('sick_hours_used')->default(0);
-            $table->decimal('sick_days_used')->default(0);
-            $table->decimal('plus_minus_overtime_hours')->default(0);
-            $table->decimal('plus_minus_absence_hours')->default(0);
+            $table->date('date')->index();
+            $table->decimal('target_hours', 8, 2)->default(0);
+            $table->decimal('actual_hours', 8, 2)->default(0);
+            $table->decimal('break_minutes', 8, 2)->default(0);
+            $table->decimal('vacation_hours_used', 8, 2)->default(0);
+            $table->decimal('vacation_days_used', 8, 2)->default(0);
+            $table->decimal('sick_hours_used', 8, 2)->default(0);
+            $table->decimal('sick_days_used', 8, 2)->default(0);
+            $table->decimal('plus_minus_overtime_hours', 8, 2)->default(0);
+            $table->decimal('plus_minus_absence_hours', 8, 2)->default(0);
 
-            $table->boolean('is_work_day')->default(false);
             $table->boolean('is_holiday')->default(false);
+            $table->boolean('is_work_day')->default(false);
 
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
@@ -40,8 +40,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->unique(['employee_id', 'date']);
         });
     }
 

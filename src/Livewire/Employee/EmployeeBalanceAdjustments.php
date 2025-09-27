@@ -23,15 +23,15 @@ class EmployeeBalanceAdjustments extends EmployeeBalanceAdjustmentList
 
     public ?string $includeBefore = 'flux::livewire.employee.employee-balance-adjustments';
 
-    public function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('employee_id', $this->employeeId);
-    }
-
     public function save(): bool
     {
         $this->employeeBalanceAdjustmentForm->employee_id = $this->employeeId;
 
         return $this->baseSave();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('employee_id', $this->employeeId);
     }
 }

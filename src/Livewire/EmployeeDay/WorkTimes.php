@@ -11,7 +11,7 @@ class WorkTimes extends BaseWorkTimes
     #[Modelable]
     public ?int $employeeDayId = null;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereHas('employeeDays', function (Builder $query): void {
             $query->whereKey($this->employeeDayId);

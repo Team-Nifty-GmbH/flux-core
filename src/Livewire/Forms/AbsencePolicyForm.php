@@ -12,6 +12,8 @@ class AbsencePolicyForm extends FluxForm
 {
     use SupportsAutoRender;
 
+    public bool $can_select_substitute = false;
+
     public ?int $documentation_after_days = null;
 
     #[Locked]
@@ -26,6 +28,8 @@ class AbsencePolicyForm extends FluxForm
     public ?string $name = null;
 
     public bool $requires_documentation = false;
+
+    public bool $requires_reason = false;
 
     public bool $requires_substitute = false;
 

@@ -13,12 +13,12 @@ return new class() extends Migration
             $table->char('uuid', 36);
 
             $table->string('name');
-            $table->date('date')->nullable();
-            $table->date('effective_from')->nullable();
-            $table->date('effective_until')->nullable();
-            $table->unsignedInteger('month')->nullable();
-            $table->unsignedInteger('day')->nullable();
-            $table->unsignedInteger('year')->nullable();
+            $table->date('date')->nullable()->index();
+            $table->year('effective_from')->nullable();
+            $table->year('effective_until')->nullable();
+            $table->unsignedTinyInteger('month')->nullable();
+            $table->unsignedTinyInteger('day')->nullable();
+            $table->string('day_part_enum');
 
             $table->boolean('is_active')->default(true);
             $table->boolean('is_half_day')->default(false);
@@ -31,7 +31,6 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->index('date');
             $table->index(['month', 'day']);
         });
     }

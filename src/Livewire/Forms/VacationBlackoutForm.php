@@ -13,13 +13,11 @@ class VacationBlackoutForm extends FluxForm
 {
     use SupportsAutoRender;
 
-    public ?int $client_id = null;
-
     public ?string $description = null;
 
-    public array $employee_department_ids = [];
+    public array $employeeDepartments = [];
 
-    public array $employee_ids = [];
+    public array $employees = [];
 
     public ?string $end_date = null;
 
@@ -28,7 +26,7 @@ class VacationBlackoutForm extends FluxForm
 
     public bool $is_active = true;
 
-    public array $location_ids = [];
+    public array $locations = [];
 
     public ?string $name = null;
 
@@ -37,10 +35,16 @@ class VacationBlackoutForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof VacationBlackout) {
+            $values->loadMissing([
+                'employeeDepartments:id',
+                'employees:id',
+                'locations:id',
+            ]);
+
             $valuesArray = $values->toArray();
-            $valuesArray['employee_department_ids'] = $values->employeeDepartments->pluck('id')->toArray();
-            $valuesArray['employee_ids'] = $values->employees->pluck('id')->toArray();
-            $valuesArray['location_ids'] = $values->locations->pluck('id')->toArray();
+            $valuesArray['employee_departments'] = $values->employeeDepartments->pluck('id')->toArray();
+            $valuesArray['employees'] = $values->employees->pluck('id')->toArray();
+            $valuesArray['locations'] = $values->locations->pluck('id')->toArray();
             $values = $valuesArray;
         }
 

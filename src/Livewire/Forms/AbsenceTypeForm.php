@@ -17,7 +17,7 @@ class AbsenceTypeForm extends FluxForm
 
     public bool $affects_overtime = false;
 
-    public bool $affects_sick = false;
+    public bool $affects_sick_leave = false;
 
     public bool $affects_vacation = false;
 
@@ -25,7 +25,7 @@ class AbsenceTypeForm extends FluxForm
 
     public ?string $color = '#000000';
 
-    public string $employee_can_create = 'yes';
+    public string $employee_can_create_enum = 'yes';
 
     #[Locked]
     public ?int $id = null;
@@ -50,7 +50,6 @@ class AbsenceTypeForm extends FluxForm
 
         parent::fill($values);
 
-        // Convert from decimal (0-1) to percentage (0-100) for display
         $this->percentage_deduction = ! is_null($this->percentage_deduction)
             ? bcmul($this->percentage_deduction, 100)
             : null;
@@ -59,7 +58,6 @@ class AbsenceTypeForm extends FluxForm
     public function toActionData(): array
     {
         $data = parent::toActionData();
-        // Convert from percentage (0-100) to decimal (0-1) for storage
         $data['percentage_deduction'] = ! is_null($this->percentage_deduction)
             ? bcdiv($this->percentage_deduction, 100)
             : null;

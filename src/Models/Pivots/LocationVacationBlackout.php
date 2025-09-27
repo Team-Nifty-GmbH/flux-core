@@ -6,15 +6,13 @@ use FluxErp\Models\Location;
 use FluxErp\Models\VacationBlackout;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VacationBlackoutLocation extends FluxPivot
+class LocationVacationBlackout extends FluxPivot
 {
     public $incrementing = true;
 
-    public $primaryKey = 'pivot_id';
-
     public $timestamps = false;
 
-    protected $table = 'vacation_blackout_location';
+    protected $primaryKey = 'pivot_id';
 
     public function location(): BelongsTo
     {

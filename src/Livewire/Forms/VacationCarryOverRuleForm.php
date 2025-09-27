@@ -5,31 +5,27 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\VacationCarryoverRule\CreateVacationCarryoverRule;
 use FluxErp\Actions\VacationCarryoverRule\DeleteVacationCarryoverRule;
 use FluxErp\Actions\VacationCarryoverRule\UpdateVacationCarryoverRule;
-use FluxErp\Models\VacationCarryOverRule;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
-class VacationCarryoverRuleForm extends FluxForm
+class VacationCarryOverRuleForm extends FluxForm
 {
     use SupportsAutoRender;
 
-    public ?int $client_id = null;
+    public ?int $expires_at_day = null;
 
-    public ?int $expires_after_months = null;
+    public ?int $expires_at_month = null;
 
     #[Locked]
     public ?int $id = null;
 
     public bool $is_active = true;
 
+    public bool $is_default = false;
+
     public ?int $max_days = null;
 
     public ?string $name = null;
-
-    protected static function getModel(): string
-    {
-        return VacationCarryOverRule::class;
-    }
 
     protected function getActions(): array
     {

@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Widgets\Employee;
 
 use Carbon\Carbon;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\AbsenceRequest;
@@ -82,7 +82,7 @@ class AttendanceOverview extends CircleChart
             ->whereHas('employeeDays', function (Builder $query) use ($startDate, $endDate): void {
                 $query->whereBetween('date', [$startDate, $endDate]);
             })
-            ->where('status', AbsenceRequestStatusEnum::Approved)
+            ->where('status', AbsenceRequestStateEnum::Approved)
             ->with(['absenceType', 'employeeDays'])
             ->get();
 
@@ -116,7 +116,7 @@ class AttendanceOverview extends CircleChart
             ->where('is_work_day', true)
             ->whereDoesntHave('workTimes')
             ->whereDoesntHave('absenceRequests', function (Builder $query): void {
-                $query->where('status', AbsenceRequestStatusEnum::Approved);
+                $query->where('status', AbsenceRequestStateEnum::Approved);
             })
             ->count();
 

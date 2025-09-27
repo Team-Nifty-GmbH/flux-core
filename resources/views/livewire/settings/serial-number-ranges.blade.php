@@ -1,4 +1,4 @@
-<x-modal id="edit-serial-number-range-modal">
+<x-modal id="edit-serial-number-range-modal" :title="__('Serial Number Range')">
     <div class="flex flex-col gap-1.5">
         <div
             class="flex flex-col gap-1.5"

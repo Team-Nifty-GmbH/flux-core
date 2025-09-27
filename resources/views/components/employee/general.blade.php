@@ -28,6 +28,11 @@
                 x-bind:disabled="!edit"
             />
             <x-input
+                :label="__('Phone Mobile')"
+                wire:model="employee.mobile_phone"
+                x-bind:disabled="!edit"
+            />
+            <x-input
                 :label="__('IBAN')"
                 wire:model="employee.iban"
                 x-bind:disabled="!edit"
@@ -82,16 +87,6 @@
                 step="0.5"
                 :label="__('Number Of Children')"
                 wire:model="employee.number_of_children"
-                x-bind:disabled="!edit"
-            />
-        </div>
-    </x-card>
-
-    <x-card :header="__('Contact Information')">
-        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-            <x-input
-                :label="__('Mobile Phone')"
-                wire:model="employee.mobile_phone"
                 x-bind:disabled="!edit"
             />
         </div>
@@ -161,7 +156,6 @@
                 x-bind:disabled="!edit"
             />
             <x-select.styled
-                x-bind:readonly="!edit"
                 :label="__('Client')"
                 wire:model="employee.client_id"
                 select="label:name|value:id"
@@ -174,6 +168,8 @@
             <x-select.styled
                 :label="__('Department')"
                 wire:model="employee.employee_department_id"
+                select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\EmployeeDepartment::class),
                     'method' => 'POST',
@@ -181,30 +177,50 @@
                         'searchFields' => ['name']
                     ]
                 ]"
-                select="label:label|value:id"
-                unfiltered
-                x-bind:disabled="!edit"
             />
             <x-select.styled
                 :label="__('Location')"
                 wire:model="employee.location_id"
+                select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Location::class),
                     'method' => 'POST',
                     'params' => [
-                        'searchFields' => ['name']
+                        'searchFields' => ['name'],
                     ]
                 ]"
-                select="label:name|value:id"
-                unfiltered
-                x-bind:disabled="!edit"
             />
         </div>
     </x-card>
 
     <x-card :header="__('Work Time Model')">
-        <livewire:employee.employee-work-time-model-assignment :employeeId="$this->employee->id" />
+        <livewire:employee.employee-work-time-model-assignment :employeeId="$this->employee->id"/>
     </x-card>
 
-
+    <x-card :header="__('Vacation Carryover Rule')">
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+            <x-select.styled
+                :label="__('Vacation Carryover Rule')"
+                wire:model="employee.vacation_carryover_rule_id"
+                required
+                select="label:name|value:id"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\VacationCarryoverRule::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['name'],
+                        'where' => [
+                            [
+                                'is_active',
+                                '=',
+                                true,
+                            ],
+                        ],
+                    ],
+                ]"
+            />
+        </div>
+    </x-card>
 </div>

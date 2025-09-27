@@ -4,7 +4,7 @@ namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
 
-enum AbsenceRequestCreationTypeEnum: string
+enum EmployeeCanCreateEnum: string
 {
     use EnumTrait;
 

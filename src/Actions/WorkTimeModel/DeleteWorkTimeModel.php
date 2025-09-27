@@ -22,7 +22,7 @@ class DeleteWorkTimeModel extends FluxAction
     {
         return resolve_static(WorkTimeModel::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first()
+            ->firstOrFail()
             ->delete();
     }
 }

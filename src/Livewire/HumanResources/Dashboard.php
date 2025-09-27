@@ -11,9 +11,7 @@ class Dashboard extends BaseDashboard
     public static function getDefaultWidgets(): array
     {
         return parent::mapDefaultWidgets(
-            static::$defaultWidgets ??
-            [
-            ]
+            static::$defaultWidgets ?? []
         );
     }
 }

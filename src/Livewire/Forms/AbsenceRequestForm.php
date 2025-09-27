@@ -9,8 +9,8 @@ use FluxErp\Actions\AbsenceRequest\RejectAbsenceRequest;
 use FluxErp\Actions\AbsenceRequest\RevokeAbsenceRequest;
 use FluxErp\Actions\AbsenceRequest\UpdateAbsenceRequest;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Enums\AbsenceRequestCreationTypeEnum;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
+use FluxErp\Enums\EmployeeCanCreateEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
@@ -60,14 +60,14 @@ class AbsenceRequestForm extends FluxForm
 
     public ?string $status = 'pending';
 
-    public ?int $substitute_employee_id = null;
-
     public ?string $substitute_note = null;
+
+    public array $substitutes = [];
 
     #[Locked]
     public ?string $updated_at = null;
 
-    public function changeState(AbsenceRequestStatusEnum $status): void
+    public function changeState(AbsenceRequestStateEnum $status): void
     {
         $action = $this->makeAction($status->value)
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
@@ -104,9 +104,9 @@ class AbsenceRequestForm extends FluxForm
                 resolve_static(AbsenceType::class, 'query')
                     ->whereKey($this->absence_type_id)
                     ->first()
-                    ?->employee_can_create === AbsenceRequestCreationTypeEnum::Yes
+                    ?->employee_can_create === EmployeeCanCreateEnum::Yes
             ) {
-                $this->status = AbsenceRequestStatusEnum::Approved->value;
+                $this->status = AbsenceRequestStateEnum::Approved->value;
                 $this->approved_at = now();
                 $this->approved_by_id = auth()->id();
             }

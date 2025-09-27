@@ -1,4 +1,4 @@
-<x-modal :id="$target->modalName()">
+<x-modal :id="$target->modalName()" :title="__('Target')">
     <div class="flex flex-col gap-4">
         <x-spinner />
         <x-input wire:model="target.name" :label="__('Title')" required />

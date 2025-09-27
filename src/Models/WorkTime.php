@@ -7,8 +7,8 @@ use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\Targetable;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
-use FluxErp\Models\Pivots\WorkTimeEmployeeDay;
+use FluxErp\Enums\AbsenceRequestStateEnum;
+use FluxErp\Models\Pivots\EmployeeDayWorkTime;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
@@ -154,11 +154,10 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
 
         static::saving(function (WorkTime $workTime): void {
             // Set employee_id if user has an employee relation
-            if ($workTime->user_id && ! $workTime->employee_id) {
-                $user = resolve_static(User::class, 'query')->find($workTime->user_id);
-                if ($user && $user->employee) {
-                    $workTime->employee_id = $user->employee->getKey();
-                }
+            if ($workTime->isDirty('user_id') && ! is_null($workTime->user_id)) {
+                $workTime->employee_id = resolve_static(Employee::class, 'query')
+                    ->where('user_id', $workTime->user_id)
+                    ->value('id');
             }
 
             // Calculate total_time_ms when started_at and ended_at are present
@@ -243,7 +242,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
     public function employeeDays(): BelongsToMany
     {
         return $this->belongsToMany(EmployeeDay::class, 'work_time_employee_day')
-            ->using(WorkTimeEmployeeDay::class)
+            ->using(EmployeeDayWorkTime::class)
             ->withPivot(['hours_contributed', 'break_minutes_contributed'])
             ->withTimestamps();
     }
@@ -347,7 +346,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         // Get all approved absences that count as target hours
         $absencesCountingAsTargetHours = resolve_static(AbsenceRequest::class, 'query')
             ->where('employee_id', $user->employee->getKey())
-            ->where('status', AbsenceRequestStatusEnum::Approved)
+            ->where('status', AbsenceRequestStateEnum::Approved)
             ->whereBetween('start_date', [$startDate, $endDate])
             ->with('absenceType')
             ->get()

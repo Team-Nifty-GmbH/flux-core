@@ -18,24 +18,20 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->foreignId('rejected_by_id')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->foreignId('employee_id')
-                ->constrained()
-                ->cascadeOnDelete();
-            $table->foreignId('substitute_employee_id')
-                ->nullable()
-                ->constrained('employees')
-                ->nullOnDelete();
 
-            $table->string('status')->default('pending');
+            $table->string('state_enum')->default('pending');
             $table->date('start_date');
             $table->date('end_date');
-            $table->decimal('days_requested', 5)->default(0);
-            $table->decimal('work_hours_affected')->default(0);
-            $table->decimal('work_days_affected', 10)->default(0);
+            $table->decimal('days_requested', 10, 2);
+            $table->decimal('work_hours_affected', 10, 2);
+            $table->decimal('work_days_affected', 10, 2);
             $table->date('sick_note_issued_date')->nullable();
             $table->text('reason')->nullable();
             $table->text('substitute_note')->nullable();

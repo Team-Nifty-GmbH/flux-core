@@ -8,22 +8,22 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('vacation_blackout_location', function (Blueprint $table): void {
+        Schema::create('employee_vacation_blackout', function (Blueprint $table): void {
             $table->id('pivot_id');
 
-            $table->foreignId('location_id')
+            $table->foreignId('employee_id')
                 ->constrained()
                 ->cascadeOnDelete();
             $table->foreignId('vacation_blackout_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->unique(['vacation_blackout_id', 'location_id'], 'vac_blackout_loc_unique');
+            $table->unique(['employee_id', 'vacation_blackout_id'], 'employee_vacation_blackout_unique');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('vacation_blackout_employee');
+        Schema::dropIfExists('employee_vacation_blackout');
     }
 };

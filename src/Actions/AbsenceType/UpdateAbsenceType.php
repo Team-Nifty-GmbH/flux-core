@@ -23,7 +23,7 @@ class UpdateAbsenceType extends FluxAction
     {
         $absenceType = resolve_static(AbsenceType::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $data = $this->getData();
         $absencePolicies = Arr::pull($data, 'absence_policies');
@@ -31,11 +31,11 @@ class UpdateAbsenceType extends FluxAction
         $absenceType->fill($data);
         $absenceType->save();
 
-        if (is_array($absencePolicies)) {
+        if (! is_null($absencePolicies)) {
             $absenceType->absencePolicies()->sync($absencePolicies);
         }
 
-        return $absenceType->fresh();
+        return $absenceType->withoutRelations()->fresh();
     }
 
     protected function prepareForValidation(): void
@@ -46,5 +46,12 @@ class UpdateAbsenceType extends FluxAction
                 'code' => $this->rules['code'] . ',' . ($this->data['id'] ?? 0),
             ]
         );
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        // TODO: Validate affects flags
     }
 }

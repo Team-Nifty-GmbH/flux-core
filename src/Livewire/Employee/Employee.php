@@ -40,9 +40,9 @@ class Employee extends Component
                     $query->whereNull('valid_until')
                         ->with('workTimeModel');
                 },
-                'employeeDepartment',
-                'location',
-                'supervisor',
+                'employeeDepartment:id',
+                'location:id',
+                'supervisor:id',
             ])
             ->firstOrFail();
 
@@ -98,7 +98,7 @@ class Employee extends Component
     }
 
     #[Renderless]
-    public function save(): array|bool
+    public function save(): bool
     {
         try {
             $this->employee->save();

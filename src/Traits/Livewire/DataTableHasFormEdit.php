@@ -144,30 +144,40 @@ trait DataTableHasFormEdit
         return $this->getAttributes()->first(fn ($attribute) => $attribute instanceof DataTableForm);
     }
 
+    protected function getRowActionDeleteButton(): ?DataTableButton
+    {
+        return DataTableButton::make()
+            ->text(__('Delete'))
+            ->color('red')
+            ->icon('trash')
+            ->when($this->{$this->formAttributeName()}->canAction('delete'))
+            ->attributes([
+                'wire:click' => 'delete(record.id)',
+                'wire:flux-confirm.type.error' => __(
+                    'wire:confirm.delete',
+                    ['model' => __(Str::headline(morph_alias($this->getModel())))]
+                ),
+            ]);
+    }
+
+    protected function getRowActionEditButton(): ?DataTableButton
+    {
+        return DataTableButton::make()
+            ->text(__('Edit'))
+            ->icon('pencil')
+            ->color('indigo')
+            ->when($this->{$this->formAttributeName()}->canAction('update'))
+            ->attributes([
+                'wire:click' => 'edit(record.id)',
+            ]);
+    }
+
     protected function getRowActionsDataTableHasFormEdit(): array
     {
-        return [
-            DataTableButton::make()
-                ->text(__('Edit'))
-                ->icon('pencil')
-                ->color('indigo')
-                ->when($this->{$this->formAttributeName()}->canAction('update'))
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ]),
-            DataTableButton::make()
-                ->text(__('Delete'))
-                ->color('red')
-                ->icon('trash')
-                ->when($this->{$this->formAttributeName()}->canAction('delete'))
-                ->attributes([
-                    'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.type.error' => __(
-                        'wire:confirm.delete',
-                        ['model' => __(Str::headline(morph_alias($this->getModel())))]
-                    ),
-                ]),
-        ];
+        return array_filter([
+            $this->getRowActionEditButton(),
+            $this->getRowActionDeleteButton(),
+        ]);
     }
 
     protected function getSelectedActionsDataTableHasFormEdit(): array
@@ -191,18 +201,23 @@ trait DataTableHasFormEdit
         ];
     }
 
+    protected function getTableActionNewButton(): ?DataTableButton
+    {
+        return DataTableButton::make()
+            ->text(__('New'))
+            ->icon('plus')
+            ->color('indigo')
+            ->when($this->{$this->formAttributeName()}->canAction('create'))
+            ->attributes([
+                'wire:click' => 'edit',
+            ]);
+    }
+
     protected function getTableActionsDataTableHasFormEdit(): array
     {
-        return [
-            DataTableButton::make()
-                ->text(__('New'))
-                ->icon('plus')
-                ->color('indigo')
-                ->when($this->{$this->formAttributeName()}->canAction('create'))
-                ->attributes([
-                    'wire:click' => 'edit',
-                ]),
-        ];
+        return array_filter([
+            $this->getTableActionNewButton(),
+        ]);
     }
 
     protected function modalName(): string

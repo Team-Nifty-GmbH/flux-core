@@ -16,7 +16,7 @@ class AbsenceRequests extends BaseAbsenceRequests
         return false;
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('employee_id', $this->employeeId);
     }

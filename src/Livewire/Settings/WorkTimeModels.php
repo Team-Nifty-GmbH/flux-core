@@ -24,12 +24,13 @@ class WorkTimeModels extends WorkTimeModelList
         $this->redirectRoute('settings.work-time-model', ['id' => $id], navigate: true);
     }
 
-    protected function getRowActionEditButton(): DataTableButton
+    protected function getRowActionEditButton(): ?DataTableButton
     {
         return DataTableButton::make()
             ->text(__('Edit'))
             ->icon('pencil')
-            ->color('primary')
+            ->color('indigo')
+            ->when($this->{$this->formAttributeName()}->canAction('update'))
             ->wireClick('editSchedule(record.id)');
     }
 }

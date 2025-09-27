@@ -42,7 +42,7 @@ class Employees extends BaseEmployeeList
         $result = $this->traitSave();
 
         if ($result) {
-            $this->editEmployee($this->employeeForm->id);
+            $this->edit($this->employeeForm->id);
         }
 
         return $result;

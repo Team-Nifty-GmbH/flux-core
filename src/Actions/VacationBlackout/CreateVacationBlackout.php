@@ -22,25 +22,25 @@ class CreateVacationBlackout extends FluxAction
     public function performAction(): VacationBlackout
     {
         $data = $this->getData();
-        $employeeIds = Arr::pull($data, 'employee_ids', []);
-        $employeeDepartmentIds = Arr::pull($data, 'employee_department_ids', []);
-        $locationIds = Arr::pull($data, 'location_ids', []);
+        $employees = Arr::pull($data, 'employees');
+        $employeeDepartments = Arr::pull($data, 'employee_departments');
+        $locations = Arr::pull($data, 'locations');
 
         $vacationBlackout = app(VacationBlackout::class, ['attributes' => $data]);
         $vacationBlackout->save();
 
-        if ($employeeIds) {
-            $vacationBlackout->employees()->sync($employeeIds);
+        if ($employees) {
+            $vacationBlackout->employees()->attach($employees);
         }
 
-        if ($employeeDepartmentIds) {
-            $vacationBlackout->employeeDepartments()->sync($employeeDepartmentIds);
+        if ($employeeDepartments) {
+            $vacationBlackout->employeeDepartments()->attach($employeeDepartments);
         }
 
-        if ($locationIds) {
-            $vacationBlackout->locations()->sync($locationIds);
+        if ($locations) {
+            $vacationBlackout->locations()->attach($locations);
         }
 
-        return $vacationBlackout->fresh()->load(['employees', 'employeeDepartments', 'locations']);
+        return $vacationBlackout->refresh();
     }
 }

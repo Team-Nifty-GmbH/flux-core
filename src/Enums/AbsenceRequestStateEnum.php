@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
-enum AbsenceRequestStatusEnum: string
+enum AbsenceRequestStateEnum: string
 {
     use EnumTrait;
 

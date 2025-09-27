@@ -22,11 +22,11 @@ class UpdateEmployeeBalanceAdjustment extends FluxAction
     {
         $employeeBalanceAdjustment = resolve_static(EmployeeBalanceAdjustment::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $employeeBalanceAdjustment->fill($this->getData());
         $employeeBalanceAdjustment->save();
 
-        return $employeeBalanceAdjustment->fresh();
+        return $employeeBalanceAdjustment->withoutRelations()->fresh();
     }
 }

@@ -71,25 +71,31 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\AbsencePolicyAbsenceType;
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
+use FluxErp\Models\Pivots\AbsenceRequestSubstitute;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
+use FluxErp\Models\Pivots\ClientPaymentType;
 use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
+use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Models\Pivots\EmployeeDayWorkTime;
+use FluxErp\Models\Pivots\EmployeeDepartmentVacationBlackout;
+use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Models\Pivots\JobBatchable;
+use FluxErp\Models\Pivots\LocationVacationBlackout;
+use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
-use FluxErp\Models\Pivots\VacationBlackoutEmployee;
-use FluxErp\Models\Pivots\VacationBlackoutEmployeeDepartment;
-use FluxErp\Models\Pivots\VacationBlackoutLocation;
+use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -123,7 +129,7 @@ use FluxErp\Models\Transaction;
 use FluxErp\Models\Unit;
 use FluxErp\Models\User;
 use FluxErp\Models\VacationBlackout;
-use FluxErp\Models\VacationCarryOverRule;
+use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\Widget;
@@ -139,6 +145,9 @@ class MorphMapServiceProvider extends ServiceProvider
     public function register(): void
     {
         Relation::enforceMorphMap([
+            'absence_policy' => AbsencePolicy::class,
+            'absence_request' => AbsenceRequest::class,
+            'absence_type' => AbsenceType::class,
             'activity' => Activity::class,
             'additional_column' => AdditionalColumn::class,
             'address' => Address::class,
@@ -166,7 +175,9 @@ class MorphMapServiceProvider extends ServiceProvider
             'discount_group' => DiscountGroup::class,
             'email_template' => EmailTemplate::class,
             'employee' => Employee::class,
+            'employee_balance_adjustment' => EmployeeBalanceAdjustment::class,
             'employee_day' => EmployeeDay::class,
+            'employee_department' => EmployeeDepartment::class,
             'event_subscription' => EventSubscription::class,
             'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
@@ -234,43 +245,43 @@ class MorphMapServiceProvider extends ServiceProvider
             'transaction' => Transaction::class,
             'unit' => Unit::class,
             'user' => User::class,
-            'employee_balance_adjustment' => EmployeeBalanceAdjustment::class,
-            'employee_department' => EmployeeDepartment::class,
             'vacation_blackout' => VacationBlackout::class,
-            'vacation_carryover_rule' => VacationCarryOverRule::class,
+            'vacation_carryover_rule' => VacationCarryoverRule::class,
             'vat_rate' => VatRate::class,
             'warehouse' => Warehouse::class,
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
-            'absence_request' => AbsenceRequest::class,
-            'absence_type' => AbsenceType::class,
-            'absence_policy' => AbsencePolicy::class,
-            'absence_policy_absence_type' => AbsencePolicyAbsenceType::class,
-
             'work_time_model' => WorkTimeModel::class,
             'work_time_model_schedule' => WorkTimeModelSchedule::class,
-            'employee_work_time_model' => EmployeeWorkTimeModel::class,
             'work_time_type' => WorkTimeType::class,
 
+            'absence_policy_absence_type' => AbsencePolicyAbsenceType::class,
             'absence_request_employee_day' => AbsenceRequestEmployeeDay::class,
+            'absence_request_substitute' => AbsenceRequestSubstitute::class,
             'address_address_type_order' => AddressAddressTypeOrder::class,
             'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
+            'client_payment_type' => ClientPaymentType::class,
             'client_product' => ClientProduct::class,
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
+            'contact_industry' => ContactIndustry::class,
+            'employee_day_work_time' => EmployeeDayWorkTime::class,
+            'employee_department_vacation_blackout' => EmployeeDepartmentVacationBlackout::class,
+            'employee_vacation_blackout' => EmployeeVacationBlackout::class,
+            'employee_work_time_model' => EmployeeWorkTimeModel::class,
             'holiday_location' => HolidayLocation::class,
             'job_batchable' => JobBatchable::class,
+            'location_vacation_blackout' => LocationVacationBlackout::class,
+            'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
             'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
             'queue_monitorable' => QueueMonitorable::class,
-            'vacation_blackout_employee_department' => VacationBlackoutEmployeeDepartment::class,
-            'vacation_blackout_employee' => VacationBlackoutEmployee::class,
-            'vacation_blackout_location' => VacationBlackoutLocation::class,
+            'target_user' => TargetUser::class,
         ]);
     }
 }

@@ -7,7 +7,7 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class WorkTimeEmployeeDay extends FluxPivot
+class EmployeeDayWorkTime extends FluxPivot
 {
     use HasPackageFactory;
 
@@ -16,8 +16,6 @@ class WorkTimeEmployeeDay extends FluxPivot
     public $timestamps = false;
 
     protected $primaryKey = 'pivot_id';
-
-    protected $table = 'work_time_employee_day';
 
     public function employeeDay(): BelongsTo
     {

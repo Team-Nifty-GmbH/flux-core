@@ -12,7 +12,7 @@
                     />
                 </div>
 
-                <div>
+                <div class="pointer-events-none">
                     <x-date
                         wire:model="employeeDayForm.date"
                         x-bind:disabled="true"

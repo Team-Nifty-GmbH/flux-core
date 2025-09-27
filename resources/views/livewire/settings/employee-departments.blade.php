@@ -1,26 +1,6 @@
 <div>
-    <x-modal :id="$employeeDepartmentForm->modalName()" size="2xl">
-        <x-slot:title>
-            {{ $employeeDepartmentForm->id ? __('Edit Department') : __('Create Department') }}
-        </x-slot:title>
-
+    <x-modal :id="$employeeDepartmentForm->modalName()" size="2xl" :title="__('Department')">
         <div class="flex flex-col gap-4">
-            @if(resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
-                <x-select.styled
-                    wire:model="employeeDepartmentForm.client_id"
-                    :label="__('Client')"
-                    select="label:name|value:id"
-                    unfiltered
-                    :request="[
-                        'url' => route('search', \FluxErp\Models\Client::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => ['name', 'client_code']
-                        ]
-                    ]"
-                />
-            @endif
-
             <x-input wire:model="employeeDepartmentForm.name" :label="__('Name')" required />
 
             <x-input

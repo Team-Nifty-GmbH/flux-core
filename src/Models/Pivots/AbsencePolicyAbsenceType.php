@@ -10,11 +10,9 @@ class AbsencePolicyAbsenceType extends FluxPivot
 {
     public $incrementing = true;
 
-    public $primaryKey = 'pivot_id';
-
     public $timestamps = false;
 
-    protected $table = 'absence_policy_absence_type';
+    protected $primaryKey = 'pivot_id';
 
     public function absencePolicy(): BelongsTo
     {

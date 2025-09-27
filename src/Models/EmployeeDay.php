@@ -3,10 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
-use FluxErp\Models\Pivots\WorkTimeEmployeeDay;
+use FluxErp\Models\Pivots\EmployeeDayWorkTime;
 use FluxErp\Traits\Commentable;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -17,7 +15,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class EmployeeDay extends FluxModel implements InteractsWithDataTables
 {
-    use Commentable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use Commentable, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected function casts(): array
     {
@@ -76,7 +74,7 @@ class EmployeeDay extends FluxModel implements InteractsWithDataTables
 
     public function workTimes(): BelongsToMany
     {
-        return $this->belongsToMany(WorkTime::class, 'work_time_employee_day')
-            ->using(WorkTimeEmployeeDay::class);
+        return $this->belongsToMany(WorkTime::class, 'employee_day_work_time')
+            ->using(EmployeeDayWorkTime::class);
     }
 }

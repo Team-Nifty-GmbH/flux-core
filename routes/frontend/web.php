@@ -110,7 +110,6 @@ use FluxErp\Livewire\Settings\VacationCarryoverRules;
 use FluxErp\Livewire\Settings\VatRates;
 use FluxErp\Livewire\Settings\Warehouses;
 use FluxErp\Livewire\Settings\WorkTimeModel;
-use FluxErp\Livewire\Settings\WorkTimeModelCreate;
 use FluxErp\Livewire\Settings\WorkTimeModels;
 use FluxErp\Livewire\Settings\WorkTimeTypes;
 use FluxErp\Livewire\Task\Task;
@@ -224,25 +223,32 @@ Route::middleware('web')
 
                 Route::name('human-resources.')->prefix('human-resources')
                     ->group(function (): void {
+                        Route::get('/absence-requests', AbsenceRequests::class)
+                            ->name('absence-requests');
+                        Route::get('/absence-requests/{id}', AbsenceRequest::class)
+                            ->name('absence-requests.show');
+
+                        Route::get('/attendance-overview', AttendanceOverview::class)
+                            ->name('attendance-overview');
+
                         Route::get('/dashboard', HrDashboard::class)->name('dashboard');
-                        Route::get('/work-times', WorkTimes::class)->name('work-times');
+
+                        Route::get('/employee-days', EmployeeDays::class)
+                            ->name('employee-days');
+                        Route::get('/employee-days/{id}', EmployeeDay::class)
+                            ->name('employee-days.show');
+
                         Route::get('/employees', Employees::class)->name('employees');
                         Route::get('/employees/{id}', Employee::class)->name('employees.id');
+
                         Route::get('/my-employee-profile', MyEmployeeProfile::class)
                             ->name('my-employee-profile');
                         Route::get('/my-employee-profile/employee-day/{id}', MyEmployeeDay::class)
                             ->name('my-employee-profile.my-employee-day');
                         Route::get('/my-employee-profile/absence-request/{id}', MyAbsenceRequest::class)
                             ->name('my-employee-profile.my-absence-request');
-                        Route::get('/employee-days', EmployeeDays::class)->name('employee-days');
-                        Route::get('/employee-days/{id}', EmployeeDay::class)
-                            ->name('employee-days.show');
-                        Route::get('/absence-requests', AbsenceRequests::class)
-                            ->name('absence-requests');
-                        Route::get('/absence-requests/{id}', AbsenceRequest::class)
-                            ->name('absence-requests.show');
-                        Route::get('/attendance-overview', AttendanceOverview::class)
-                            ->name('attendance-overview');
+
+                        Route::get('/work-times', WorkTimes::class)->name('work-times');
                     });
 
                 Route::name('accounting.')->prefix('accounting')
@@ -312,7 +318,6 @@ Route::middleware('web')
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
 
                         Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
-                        Route::get('/work-time-model/create', WorkTimeModelCreate::class)->name('work-time-model.create');
                         Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model');
                         Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
                         Route::get('/holidays', Holidays::class)->name('holidays');

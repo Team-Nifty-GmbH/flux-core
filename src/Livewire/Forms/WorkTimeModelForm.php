@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\WorkTimeModel\CreateWorkTimeModel;
 use FluxErp\Actions\WorkTimeModel\DeleteWorkTimeModel;
 use FluxErp\Actions\WorkTimeModel\UpdateWorkTimeModel;
-use FluxErp\Models\WorkTimeModel;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
@@ -14,8 +13,6 @@ class WorkTimeModelForm extends FluxForm
     use SupportsAutoRender;
 
     public ?float $annual_vacation_days = null;
-
-    public ?int $client_id = null;
 
     public ?int $cycle_weeks = 1;
 
@@ -28,20 +25,13 @@ class WorkTimeModelForm extends FluxForm
 
     public ?string $name = null;
 
-    public string $overtime_compensation = 'time_off';
+    public string $overtime_compensation_enum = 'time_off';
 
     public array $schedules = [];
-
-    public ?float $weekly_break_minutes = null;
 
     public ?float $weekly_hours = null;
 
     public ?int $work_days_per_week = null;
-
-    protected static function getModel(): string
-    {
-        return WorkTimeModel::class;
-    }
 
     public function fill($values): void
     {

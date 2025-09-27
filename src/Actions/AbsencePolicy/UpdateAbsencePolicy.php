@@ -21,12 +21,12 @@ class UpdateAbsencePolicy extends FluxAction
     public function performAction(): AbsencePolicy
     {
         $absencePolicy = resolve_static(AbsencePolicy::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->firstOrFail();
 
         $absencePolicy->fill($this->data);
         $absencePolicy->save();
 
-        return $absencePolicy->fresh();
+        return $absencePolicy->withoutRelations()->fresh();
     }
 }

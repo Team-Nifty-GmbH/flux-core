@@ -21,10 +21,17 @@ class UpdateAbsencePolicyRuleset extends FluxRuleset
             'name' => 'sometimes|required|string|max:255',
             'max_consecutive_days' => 'nullable|integer|min:1',
             'min_notice_days' => 'nullable|integer|min:0',
-            'requires_substitute' => 'boolean',
-            'requires_documentation' => 'boolean',
-            'documentation_after_days' => 'nullable|integer|min:1',
+            'documentation_after_days' => [
+                'required_if_accepted:requires_documentation',
+                'nullable',
+                'integer',
+                'min:1',
+            ],
+            'can_select_substitute' => 'boolean',
             'is_active' => 'boolean',
+            'requires_documentation' => 'boolean',
+            'requires_reason' => 'boolean',
+            'requires_substitute' => 'boolean',
         ];
     }
 }

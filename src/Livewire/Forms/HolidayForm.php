@@ -17,6 +17,8 @@ class HolidayForm extends FluxForm
 
     public ?int $day = null;
 
+    public string $day_part_enum = 'full_day';
+
     public ?string $effective_from = null;
 
     public ?string $effective_until = null;
@@ -30,7 +32,7 @@ class HolidayForm extends FluxForm
 
     public bool $is_recurring = false;
 
-    public ?int $location_id = null;
+    public array $locations = [];
 
     public ?int $month = null;
 
@@ -39,18 +41,6 @@ class HolidayForm extends FluxForm
     protected static function getModel(): string
     {
         return Holiday::class;
-    }
-
-    public function updatedDate(): void
-    {
-        if ($this->date) {
-            $dateObj = \Carbon\Carbon::parse($this->date);
-            $this->month = $dateObj->month;
-            $this->day = $dateObj->day;
-            if (! $this->effective_from) {
-                $this->effective_from = $this->date;
-            }
-        }
     }
 
     protected function getActions(): array

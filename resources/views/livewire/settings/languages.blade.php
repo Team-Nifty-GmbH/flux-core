@@ -1,7 +1,7 @@
 <x-modal
     id="edit-language-modal"
     wire="editModal"
-    :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')"
+    :title="__('Language')"
 >
     <div class="flex flex-col gap-1.5">
         <x-input

@@ -24,7 +24,7 @@ class CreateAbsenceRequest extends FluxAction
         $absenceRequest = app(AbsenceRequest::class, ['attributes' => $this->data]);
         $absenceRequest->save();
 
-        return $absenceRequest->fresh();
+        return $absenceRequest->refresh();
     }
 
     public function validateData(): void
@@ -43,15 +43,34 @@ class CreateAbsenceRequest extends FluxAction
         if (
             $absenceRequest->isInBlackoutPeriod()
             && ! $absenceRequest->is_emergency
-            && ! $absenceRequest->absenceType->affects_sick
+            && ! $absenceRequest->absenceType->affects_sick_leave
         ) {
-            $errors[] = __('Absence request falls within a blackout period.');
+            $errors += [
+                'vacation_blackout' => [__('Absence request falls within a blackout period.')],
+            ];
+        }
+
+        if (in_array($this->getData('employee_id'), $this->getData('substitutes') ?? [])) {
+            $errors += [
+                'substitute' => [__('Employee cannot be their own substitute.')],
+            ];
+        }
+
+        $employee = $absenceRequest->employee;
+        if ($employee?->employment_date?->greaterThan($absenceRequest->start_date)) {
+            $errors += [
+                'employment_date' => [__('Absence request starts before the employee\'s employment date.')],
+            ];
+        }
+
+        if ($employee?->termination_date?->lessThan($absenceRequest->end_date)) {
+            $errors += [
+                'termination_date' => [__('Absence request ends after the employee\'s termination date.')],
+            ];
         }
 
         if ($errors) {
-            throw ValidationException::withMessages([
-                'absence_policy' => $errors,
-            ]);
+            throw ValidationException::withMessages($errors);
         }
     }
 }

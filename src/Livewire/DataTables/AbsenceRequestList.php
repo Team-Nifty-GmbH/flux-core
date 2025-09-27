@@ -12,8 +12,8 @@ class AbsenceRequestList extends BaseDataTable
         'start_date',
         'end_date',
         'days_requested',
-        'status',
-        'substitute_employee.name',
+        'state_enum',
+        'substitutes.name',
         'is_emergency',
     ];
 

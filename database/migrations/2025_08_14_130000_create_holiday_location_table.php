@@ -17,6 +17,8 @@ return new class() extends Migration
             $table->foreignId('location_id')
                 ->constrained()
                 ->cascadeOnDelete();
+
+            $table->unique(['holiday_id', 'location_id']);
         });
     }
 

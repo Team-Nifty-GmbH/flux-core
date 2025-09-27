@@ -4,10 +4,9 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
 use FluxErp\Traits\Commentable;
-use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -17,16 +16,13 @@ use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, HasPackageFactory, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
+    use Commentable, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
 
     public ?string $statusChangeComment = null;
 
@@ -69,12 +65,13 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     protected function casts(): array
     {
         return [
+            'state_enum' => AbsenceRequestStateEnum::class,
             'start_date' => 'date',
             'end_date' => 'date',
             'sick_note_issued_date' => 'date',
             'approved_at' => 'datetime',
+            'rejected_at' => 'datetime',
             'is_emergency' => 'boolean',
-            'status' => AbsenceRequestStatusEnum::class,
         ];
     }
 
@@ -146,17 +143,14 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         return $this->absenceType
             ->absencePolicies
             ->map(fn (AbsencePolicy $policy) => $policy->validateRequest($this))
+            ->filter()
             ->toArray();
     }
 
     public function getAvatarUrl(): ?string
     {
         return route('avatar', [
-            'text' => Str::of($this->absenceType->name)
-                ->replaceMatches('/[^A-Z]/', '')
-                ->trim()
-                ->limit(2, '')
-                ->toString(),
+            'text' => $this->absenceType->code,
             'color' => Str::after($this->absenceType->color, '#'),
         ]);
     }
@@ -172,7 +166,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
             . ' - '
             . $this->employee->name
             . ' (' . $this->start_date->format('Y-m-d')
-            . ' to ' . $this->end_date->format('Y-m-d')
+            . ' ' . __('to') . ' ' . $this->end_date->format('Y-m-d')
             . ')';
     }
 
@@ -211,13 +205,8 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         return $this->belongsTo(User::class, 'rejected_by_id');
     }
 
-    public function substituteEmployee(): BelongsTo
+    public function substitutes(): BelongsToMany
     {
-        return $this->belongsTo(Employee::class, 'substitute_employee_id');
-    }
-
-    public function workTimes(): HasMany
-    {
-        return $this->hasMany(WorkTime::class, 'vacation_request_id');
+        return $this->belongsToMany(Employee::class, 'absence_request_substitute');
     }
 }

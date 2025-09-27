@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\HumanResources;
 
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Employee;
@@ -64,6 +64,7 @@ class AttendanceOverview extends Component
                     ->get([
                         'id',
                         'name',
+                        'code',
                         'color',
                         'percentage_deduction',
                         'affects_overtime',
@@ -73,7 +74,7 @@ class AttendanceOverview extends Component
                     ->map(fn (AbsenceType $type) => array_merge(
                         $type->toArray(),
                         [
-                            'icon' => $type->getAbbreviation(),
+                            'icon' => $type->code,
                         ]
                     ))
                     ->prepend([
@@ -222,7 +223,7 @@ class AttendanceOverview extends Component
                     ->whereDoesntHaveRelation(
                         'absenceRequests',
                         'status',
-                        AbsenceRequestStatusEnum::Approved
+                        AbsenceRequestStateEnum::Approved
                     ),
             ],
                 'target_hours'
@@ -238,7 +239,7 @@ class AttendanceOverview extends Component
                     ->whereBetween('date', [$startOfMonth, $endOfMonth])
                     ->where('is_work_day', true)
                     ->whereDoesntHave('absenceRequests', fn (Builder $query) => $query
-                        ->where('status', AbsenceRequestStatusEnum::Approved)
+                        ->where('status', AbsenceRequestStateEnum::Approved)
                     ),
             ],
                 'target_days'
@@ -269,7 +270,7 @@ class AttendanceOverview extends Component
                     ->whereBetween('date', [$startOfMonth, $endOfMonth])
                     ->with([
                         'absenceRequests' => fn (BelongsToMany $query) => $query
-                            ->where('status', AbsenceRequestStatusEnum::Approved)
+                            ->where('status', AbsenceRequestStateEnum::Approved)
                             ->select([
                                 'id',
                                 'employee_id',
@@ -296,7 +297,7 @@ class AttendanceOverview extends Component
                     ->whereValueBetween($startOfMonth->format('Y-m-d'), ['start_date', 'end_date'])
                     ->orWhereValueBetween($endOfMonth->format('Y-m-d'), ['start_date', 'end_date'])
                 )
-                    ->where('status', AbsenceRequestStatusEnum::Approved),
+                    ->where('status', AbsenceRequestStateEnum::Approved),
             ])
             ->employed($endOfMonth)
             ->get()

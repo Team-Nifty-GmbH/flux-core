@@ -20,10 +20,9 @@ class DeleteEmployeeBalanceAdjustment extends FluxAction
 
     public function performAction(): ?bool
     {
-        $employeeBalanceAdjustment = resolve_static(EmployeeBalanceAdjustment::class, 'query')
-            ->whereKey($this->data['id'])
-            ->firstOrFail();
-
-        return $employeeBalanceAdjustment->delete();
+        return resolve_static(EmployeeBalanceAdjustment::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->firstOrFail()
+            ->delete();
     }
 }

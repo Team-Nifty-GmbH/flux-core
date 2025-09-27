@@ -26,25 +26,39 @@
                 class="mt-1"
             />
 
+            <x-date
+                wire:model="absenceRequestForm.sick_note_issued_date"
+                :label="__('Sick Note Issued Date')"
+            />
+
             <div class="col-span-2">
                 <x-select.styled
-                    wire:model="absenceRequestForm.substitute_employee_id"
+                    wire:model="absenceRequestForm.substitutes"
                     :label="__('Substitute')"
+                    multiple
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Employee::class),
                         'method' => 'POST',
                     ]"
-                    unfiltered
                 />
             </div>
 
             <div class="col-span-2">
                 <x-textarea
-                    :label="__('Reason for Absence')"
+                    :label="__('Reason')"
                     wire:model="absenceRequestForm.reason"
                     class="mt-1"
                     rows="4"
+                />
+            </div>
+
+            <div class="col-span-2">
+                <x-textarea
+                    wire:model="absenceRequestForm.substitute_note"
+                    :label="__('Substitute Note')"
+                    rows="2"
                 />
             </div>
         </div>

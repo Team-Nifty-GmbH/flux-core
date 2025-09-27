@@ -23,18 +23,18 @@ class UpdateHoliday extends FluxAction
     {
         $holiday = resolve_static(Holiday::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $data = $this->getData();
-        $locationIds = Arr::pull($data, 'location_ids');
+        $locations = Arr::pull($data, 'locations');
 
         $holiday->fill($data);
         $holiday->save();
 
-        if (is_array($locationIds)) {
-            $holiday->locations()->sync($locationIds);
+        if (is_array($locations)) {
+            $holiday->locations()->sync($locations);
         }
 
-        return $holiday->fresh();
+        return $holiday->withoutRelations()->fresh();
     }
 }

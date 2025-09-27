@@ -1,5 +1,5 @@
 <div>
-    <x-modal :id="$absencePolicyForm->modalName()">
+    <x-modal :id="$absencePolicyForm->modalName()" :title="__('Absence Policy')">
         <div class="space-y-4">
             <x-input
                 wire:model="absencePolicyForm.name"
@@ -22,11 +22,6 @@
             />
 
             <x-toggle
-                wire:model="absencePolicyForm.requires_substitute"
-                :label="__('Requires Substitute')"
-            />
-
-            <x-toggle
                 wire:model="absencePolicyForm.requires_documentation"
                 :label="__('Requires Documentation')"
             />
@@ -39,6 +34,21 @@
                     :label="__('Documentation After Days')"
                 />
             </div>
+
+            <x-toggle
+                wire:model="absencePolicyForm.requires_reason"
+                :label="__('Requires Reason')"
+            />
+
+            <x-toggle
+                wire:model="absencePolicyForm.can_select_substitute"
+                :label="__('Can Select Substitute')"
+            />
+
+            <x-toggle
+                wire:model="absencePolicyForm.requires_substitute"
+                :label="__('Requires Substitute')"
+            />
 
             <x-toggle
                 wire:model="absencePolicyForm.is_active"

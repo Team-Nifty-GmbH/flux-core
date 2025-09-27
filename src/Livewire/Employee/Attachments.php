@@ -3,9 +3,9 @@
 namespace FluxErp\Livewire\Employee;
 
 use FluxErp\Livewire\Support\FolderTree;
-use FluxErp\Models\User;
+use FluxErp\Models\Employee;
 
 class Attachments extends FolderTree
 {
-    protected string $modelType = User::class;
+    protected string $modelType = Employee::class;
 }

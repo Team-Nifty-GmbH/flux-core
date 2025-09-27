@@ -14,8 +14,6 @@ class AbsenceRequestEmployeeDay extends FluxPivot
 
     protected $primaryKey = 'pivot_id';
 
-    protected $table = 'absence_request_employee_day';
-
     public function absenceRequest(): BelongsTo
     {
         return $this->belongsTo(AbsenceRequest::class);

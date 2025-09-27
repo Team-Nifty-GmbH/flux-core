@@ -8,17 +8,17 @@
                 <div class="flex items-center gap-4 mt-2">
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         <x-link
-                            :href="$this->getEmployeeUrl()"
-                            :text="__('Employee') . ': ' . data_get($absenceRequestForm, 'employee.name')"
+                                :href="$this->getEmployeeUrl()"
+                                :text="__('Employee') . ': ' . data_get($absenceRequestForm, 'employee.name')"
                         />
                     </div>
                     <div>
-                        {{ \FluxErp\Enums\AbsenceRequestStatusEnum::from($absenceRequestForm->status)->badge() }}
+                        {{ \FluxErp\Enums\AbsenceRequestStateEnum::from($absenceRequestForm->state_enum)->badge() }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <x-flux::tabs wire:model.live="tab" :$tabs />
+    <x-flux::tabs wire:model.live="tab" :$tabs/>
 </div>

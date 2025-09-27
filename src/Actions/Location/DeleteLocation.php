@@ -22,7 +22,7 @@ class DeleteLocation extends FluxAction
     {
         return resolve_static(Location::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first()
+            ->firstOrFail()
             ->delete();
     }
 }

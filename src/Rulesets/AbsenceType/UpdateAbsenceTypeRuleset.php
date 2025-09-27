@@ -2,7 +2,7 @@
 
 namespace FluxErp\Rulesets\AbsenceType;
 
-use FluxErp\Enums\AbsenceRequestCreationTypeEnum;
+use FluxErp\Enums\EmployeeCanCreateEnum;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Rules\ModelExists;
@@ -25,17 +25,18 @@ class UpdateAbsenceTypeRuleset extends FluxRuleset
             'color' => 'sometimes|required|hex_color',
             'percentage_deduction' => [
                 'sometimes',
-                'nullable',
+                'required',
                 app(Numeric::class, ['min' => 0, 'max' => 1]),
             ],
-            'affects_sick' => 'boolean',
-            'affects_vacation' => 'boolean',
-            'affects_overtime' => 'boolean',
-            'is_active' => 'boolean',
-            'employee_can_create' => [
+            'employee_can_create_enum' => [
                 'required',
-                Rule::enum(AbsenceRequestCreationTypeEnum::class),
+                Rule::enum(EmployeeCanCreateEnum::class),
             ],
+            'affects_overtime' => 'boolean',
+            'affects_sick_leave' => 'boolean',
+            'affects_vacation' => 'boolean',
+            'is_active' => 'boolean',
+
             'absence_policies' => 'nullable|array',
             'absence_policies.*' => [
                 'nullable',

@@ -2,10 +2,12 @@
 
 namespace FluxErp\Rulesets\Holiday;
 
+use FluxErp\Enums\DayPartEnum;
 use FluxErp\Models\Holiday;
 use FluxErp\Models\Location;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class UpdateHolidayRuleset extends FluxRuleset
 {
@@ -18,17 +20,35 @@ class UpdateHolidayRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Holiday::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
-            'date' => 'nullable|date',
-            'month' => 'nullable|integer|min:1|max:12',
-            'day' => 'nullable|integer|min:1|max:31',
-            'year' => 'nullable|integer|min:2000|max:2100',
-            'is_recurring' => 'boolean',
-            'is_half_day' => 'boolean',
-            'effective_from' => 'nullable|date',
-            'effective_until' => 'nullable|date|after_or_equal:effective_from',
+            'date' => 'required_if_declined:is_recurring|nullable|date',
+            'effective_from' => 'nullable|integer|min:1970',
+            'effective_until' => 'nullable|integer|gte:effective_from',
+            'month' => [
+                'required_if_accepted:is_recurring',
+                'nullable',
+                'integer',
+                'min:1',
+                'max:12',
+            ],
+            'day' => [
+                'required_if_accepted:is_recurring',
+                'nullable',
+                'integer',
+                'min:1',
+                'max:31',
+            ],
+            'day_part' => [
+                'sometimes',
+                'required',
+                'string',
+                Rule::enum(DayPartEnum::class),
+            ],
             'is_active' => 'boolean',
-            'location_ids' => 'nullable|array',
-            'location_ids.*' => [
+            'is_recurring' => 'boolean',
+
+            'locations' => 'nullable|array',
+            'locations.*' => [
+                'required',
                 'integer',
                 app(ModelExists::class, ['model' => Location::class]),
             ],

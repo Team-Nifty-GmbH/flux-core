@@ -1,4 +1,4 @@
-<x-modal id="edit-mail-folders" class="bg-gray-50">
+<x-modal id="edit-mail-folders" class="bg-gray-50" :title="__('Mail Folder')">
     <div class="grid grid-cols-2 gap-1.5">
         <x-card
             id="mail-folders"
@@ -65,10 +65,7 @@
         />
     </x-slot>
 </x-modal>
-<x-modal id="edit-mail-account">
-    <x-slot:title>
-        {{ __('Edit Mail Account') }}
-    </x-slot>
+<x-modal id="edit-mail-account" :title="__('Mail Account')">
     <div class="flex flex-col gap-1.5">
         <x-card
             :header="__('IMAP Settings')"

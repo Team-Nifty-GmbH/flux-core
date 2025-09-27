@@ -4,7 +4,6 @@ namespace FluxErp\Rulesets\Location;
 
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
-use FluxErp\Models\Holiday;
 use FluxErp\Models\Location;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -19,12 +18,8 @@ class UpdateLocationRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Location::class]),
             ],
-            'name' => 'sometimes|required|string|max:255',
-            'street' => 'nullable|string|max:255',
-            'house_number' => 'nullable|string|max:50',
-            'zip' => 'nullable|string|max:20',
-            'city' => 'nullable|string|max:255',
             'country_id' => [
+                'required_with:country_region_id',
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Country::class]),
@@ -34,14 +29,11 @@ class UpdateLocationRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => CountryRegion::class]),
             ],
-            'latitude' => 'nullable|numeric|min:-90|max:90',
-            'longitude' => 'nullable|numeric|min:-180|max:180',
+            'name' => 'sometimes|required|string|max:255',
+            'zip' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'street' => 'nullable|string|max:255',
             'is_active' => 'boolean',
-            'holiday_ids' => 'nullable|array',
-            'holiday_ids.*' => [
-                'integer',
-                app(ModelExists::class, ['model' => Holiday::class]),
-            ],
         ];
     }
 }

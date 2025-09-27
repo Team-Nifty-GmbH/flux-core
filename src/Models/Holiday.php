@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\DayPartEnum;
 use FluxErp\Models\Pivots\HolidayLocation;
-use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -11,18 +11,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Holiday extends FluxModel
 {
-    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasUserModification, HasUuid, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::saving(function (Holiday $model): void {
+            if ($model->isDirty('day_part_enum')) {
+                $model->is_half_day = $model->day_part_enum !== DayPartEnum::FullDay;
+            }
+        });
+    }
 
     protected function casts(): array
     {
         return [
             'date' => 'date',
-            'month' => 'integer',
-            'day' => 'integer',
-            'is_recurring' => 'boolean',
-            'effective_from' => 'integer',
-            'effective_until' => 'integer',
+            'effective_from' => 'date',
+            'effective_until' => 'date',
+            'day_part_enum' => DayPartEnum::class,
             'is_active' => 'boolean',
+            'is_half_day' => 'boolean',
+            'is_recurring' => 'boolean',
         ];
     }
 

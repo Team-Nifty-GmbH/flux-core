@@ -1,5 +1,5 @@
 <div>
-    <x-modal :id="$holidayForm->modalName()">
+    <x-modal :id="$holidayForm->modalName()" :title="__('Holiday')">
         <div class="flex flex-col gap-4">
             <x-input wire:model="holidayForm.name" :label="__('Name')" required />
 
@@ -40,7 +40,9 @@
             <x-select.styled
                 wire:model="holidayForm.location_id"
                 :label="__('Location')"
+                :hint="__('Leave empty for all locations')"
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Location::class),
                     'method' => 'POST',
@@ -48,8 +50,6 @@
                         'searchFields' => ['name']
                     ]
                 ]"
-                unfiltered
-                :hint="__('Leave empty for all locations')"
             />
 
             <div class="grid grid-cols-2 gap-4">
@@ -72,15 +72,11 @@
             </div>
 
             <x-select.styled
-                wire:model="holidayForm.day_part"
+                wire:model="holidayForm.day_part_enum"
                 :label="__('Day Part')"
-                :options="[
-                    ['value' => 'full', 'label' => __('Full Day')],
-                    ['value' => 'first_half', 'label' => __('First Half')],
-                    ['value' => 'second_half', 'label' => __('Second Half')]
-                ]"
-                select="label:label|value:value"
                 required
+                select="label:label|value:value"
+                :options="\FluxErp\Enums\DayPartEnum::valuesLocalized()"
             />
 
             <x-toggle

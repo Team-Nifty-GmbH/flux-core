@@ -3,14 +3,14 @@
 namespace FluxErp\Actions\VacationCarryoverRule;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\VacationCarryOverRule;
+use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rulesets\VacationCarryoverRule\UpdateVacationCarryoverRuleRuleset;
 
 class UpdateVacationCarryoverRule extends FluxAction
 {
     public static function models(): array
     {
-        return [VacationCarryOverRule::class];
+        return [VacationCarryoverRule::class];
     }
 
     protected function getRulesets(): string|array
@@ -18,15 +18,15 @@ class UpdateVacationCarryoverRule extends FluxAction
         return UpdateVacationCarryoverRuleRuleset::class;
     }
 
-    public function performAction(): VacationCarryOverRule
+    public function performAction(): VacationCarryoverRule
     {
-        $vacationCarryoverRule = resolve_static(VacationCarryOverRule::class, 'query')
+        $vacationCarryoverRule = resolve_static(VacationCarryoverRule::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $vacationCarryoverRule->fill($this->getData());
         $vacationCarryoverRule->save();
 
-        return $vacationCarryoverRule->fresh();
+        return $vacationCarryoverRule->withoutRelations()->fresh();
     }
 }

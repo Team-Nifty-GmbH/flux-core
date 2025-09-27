@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Widgets\Employee;
 
 use Carbon\Carbon;
-use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Models\AbsenceRequest;
@@ -99,7 +99,7 @@ class VacationYearlyOverview extends Component
             // Get requested vacation days (approved absence requests)
             $requestedDays = resolve_static(AbsenceRequest::class, 'query')
                 ->where('employee_id', $employee->getKey())
-                ->where('status', AbsenceRequestStatusEnum::Approved)
+                ->where('status', AbsenceRequestStateEnum::Approved)
                 ->whereHas('absenceType', function ($query): void {
                     $query->where('affects_vacation', true);
                 })

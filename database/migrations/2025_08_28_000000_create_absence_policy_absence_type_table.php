@@ -18,7 +18,7 @@ return new class() extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->unique(['absence_policy_id', 'absence_type_id'], 'absence_policy_type_unique');
+            $table->unique(['absence_policy_id', 'absence_type_id'], 'absence_policy_absence_type_unique');
         });
     }
 
