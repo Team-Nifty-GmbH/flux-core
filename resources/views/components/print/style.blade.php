@@ -18,14 +18,6 @@
         margin-bottom: 0;
     }
 
-    tr>td:first-child, tr>th:first-child {
-        padding-left: 10px;
-    }
-
-    tr>td:last-child, tr>th:last-child {
-        padding-right: 10px;
-    }
-
     .bg-even-children >:nth-child(even){
         background: #F2F4F7;
     }

@@ -4,9 +4,10 @@
 
 <table
     draggable="false"
+    class="w-[6cm]"
 >
     <tbody class="align-text-top text-xs leading-none">
-    <tr class="leading-none">
+    <tr class="leading-none pb-0">
         <td class="text-left font-semibold">
             {{ __('Order no.') }}
         </td>
@@ -14,7 +15,7 @@
             {{ $model->order_number }}
         </td>
     </tr>
-    <tr class="leading-none">
+    <tr class="leading-none pb-0">
         <td class="text-left font-semibold">
             {{ __('Customer no.') }}
         </td>

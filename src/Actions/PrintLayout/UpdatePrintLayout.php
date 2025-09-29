@@ -42,8 +42,11 @@ class UpdatePrintLayout extends FluxAction
         // first_page_header
         $firstPageHeader = $this->getData('first_page_header');
         $snapshotDBFirstPageHeaderMedia = $printLayout->first_page_header['media'] ?? [];
+        $snapshotDBFirstPageHeaderSnippets = $printLayout->first_page_header['snippets'] ?? [];
         $this->syncMedia($firstPageHeader['media'] ?? [], $snapshotDBFirstPageHeaderMedia);
+        $this->syncSnippets($firstPageHeader, $snapshotDBFirstPageHeaderSnippets);
         $this->addMedia($firstPageHeader,$temporaryMedia,$this->getData('id'));
+        $this->addSnippets($firstPageHeader,$this->getData('temporary_snippets.first_page_header', []),$this->getData('id'));
 
         // footer
         $snapshotDBFooterMedia = $printLayout->footer['media'] ?? [];

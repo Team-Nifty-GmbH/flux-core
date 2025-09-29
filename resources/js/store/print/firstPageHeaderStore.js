@@ -2,17 +2,19 @@ import baseStore from './baseStore.js';
 import {
     intersectionHandlerFactory,
     nextTick,
-    roundToOneDecimal,
-    STEP,
+    roundToOneDecimal, roundToTwoDecimals,
+    STEP
 } from '../../components/utils/print/utils.js';
 import PrintElement from '../../components/print/printElement.js';
 import MediaElement from '../../components/print/mediaElement.js';
 import TemporaryMediaElement from '../../components/print/temporaryMediaElement.js';
+import SnippetBoxElement from '../../components/print/snippetBoxElement.js';
+import TemporarySnippetBoxElement from '../../components/print/temporarySnippetBoxElement.js';
 
 export default function () {
     return {
         ...baseStore(),
-        firsPageHeader: null,
+        firstPageHeader: null,
         _minFirstPageHeaderHeight: 5,
         _maxFirstPageHeaderHeight: 12,
         _firstPageHeaderHeight: 7,
@@ -28,11 +30,11 @@ export default function () {
             return `${this._firstPageHeaderHeight}cm`;
         },
         get firstPageSize() {
-            if (this.firsPageHeader === null) {
+            if (this.firstPageHeader === null) {
                 throw new Error('First page header is empty');
             } else {
                 const { width, height } =
-                    this.firsPageHeader.getBoundingClientRect();
+                    this.firstPageHeader.getBoundingClientRect();
                 return { width, height };
             }
         },
@@ -50,6 +52,21 @@ export default function () {
                 };
             }
             return { x: 0, y: 0 };
+        },
+        get selectedElementSize() {
+            // x and y are values on store - since reactive
+            // observe changes on x and y of selected element to retrieve the size
+            if (
+                this._selectedElement.width === null ||
+                this._selectedElement.height === null
+            ) {
+                return { width: 0, height: 0 };
+            }
+
+            return {
+                width: this._selectedElement.width,
+                height: this._selectedElement.height,
+            };
         },
         onMouseDownFirstPageHeader(e) {
             this.isFirstPageHeaderClicked = true;
@@ -137,9 +154,88 @@ export default function () {
                 throw new Error(`Element not selected`);
             }
         },
+        onMouseMoveResize(e) {
+            if (this._selectedElement.ref !== null) {
+                const deltaX = e.clientX - this._selectedElement.startX;
+                const deltaY = e.clientY - this._selectedElement.startY;
+                const { startHeight, startWidth } =
+                    this._startSizeOfSelectedElement();
+                if (deltaX >= 0 && deltaY >= 0) {
+                    const maxWidth = this.firstPageHeader.offsetWidth;
+                    const maxHeight = this._firstPageHeaderHeight * this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight < maxHeight && newWidth < maxWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX >= 0 && deltaY <= 0) {
+                    const maxWidth = this.firstPageHeader.offsetWidth;
+                    const minHeight = 10 ; // 9px - smallest font size
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight > minHeight && newWidth < maxWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX <= 0 && deltaY >= 0) {
+                    const minWidth = 3 * this.pxPerCm;
+                    const maxHeight = this._firstPageHeaderHeight * this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight < maxHeight && newWidth > minWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX <= 0 && deltaY <= 0) {
+                    const minWidth = 3 * this.pxPerCm;
+                    const minHeight = 10; // 9px - smallest font size in editor
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight > minHeight && newWidth > minWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                }
+
+                this._selectedElement.startX = e.clientX;
+                this._selectedElement.startY = e.clientY;
+            } else {
+                throw new Error(`Element not selected - resize`);
+            }
+        },
+        get isResizeOrScaleActive() {
+            return this.isImgResizeClicked || this.isSnippetResizeClicked;
+        },
+        get snippetNames() {
+            const savedNames = this.visibleSnippetBoxes.map((item) => {
+                return { name: `box-${item.snippetId}`, ref: item };
+            });
+
+            const maxId = Math.max(
+                ...this.visibleSnippetBoxes.map((item) => item.snippetId),
+                0,
+            );
+
+            const temporaryNames = this.temporarySnippetBoxes.map(
+                (item, index) => {
+                    return { name: `box-${maxId + index + 1}`, ref: item };
+                },
+            );
+
+            return [...savedNames, ...temporaryNames];
+        },
         async register($wire, $refs) {
             this._component = () => $wire;
-            this.firsPageHeader = $refs['first-page-header'];
+            this.firstPageHeader = $refs['first-page-header'];
 
             const firstPageHeader = await $wire.get('form.first_page_header');
 
@@ -159,12 +255,12 @@ export default function () {
                 ];
 
                 elementIds.forEach((item) => {
-                    this.firsPageHeader.appendChild(
+                    this.firstPageHeader.appendChild(
                         $refs[item].content.cloneNode(true),
                     );
                 });
 
-                this.visibleElements = Array.from(this.firsPageHeader.children)
+                this.visibleElements = Array.from(this.firstPageHeader.children)
                     .filter((item) => item.id && true)
                     .map((item) => new PrintElement(item, this));
 
@@ -174,11 +270,11 @@ export default function () {
                 this._initOnEmptyJson(elementIds, parentWidth);
             }
 
-            if (this.firsPageHeader) {
+            if (this.firstPageHeader) {
                 this.observer = new IntersectionObserver(
                     intersectionHandlerFactory(this),
                     {
-                        root: this.firsPageHeader,
+                        root: this.firstPageHeader,
                         rootMargin: '0px',
                         threshold: 0.99,
                     },
@@ -188,6 +284,10 @@ export default function () {
                 });
 
                 this.visibleMedia.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
+
+                this.visibleSnippetBoxes.forEach((e) => {
                     this.observer.observe(e.element);
                 });
             }
@@ -200,14 +300,22 @@ export default function () {
             // if client is not changed - Livewire will not remove the cloned elements
             if (!isClientChange) {
                 this.visibleElements.forEach((item) => {
-                    this.firsPageHeader.removeChild(item.element);
+                    this.firstPageHeader.removeChild(item.element);
                 });
 
                 this.temporaryVisibleMedia.forEach((item) => {
-                    this.firsPageHeader.removeChild(item.element);
+                    this.firstPageHeader.removeChild(item.element);
                 });
                 this.visibleMedia.forEach((item) => {
-                    this.firsPageHeader.removeChild(item.element);
+                    this.firstPageHeader.removeChild(item.element);
+                });
+
+                this.temporarySnippetBoxes.forEach((item) => {
+                    this.firstPageHeader.removeChild(item.element);
+                });
+
+                this.visibleSnippetBoxes.forEach((item) => {
+                    this.firstPageHeader.removeChild(item.element);
                 });
             }
 
@@ -215,6 +323,8 @@ export default function () {
             this.elementsOutOfView = [];
             this.temporaryVisibleMedia = [];
             this.visibleMedia = [];
+            this.temporarySnippetBoxes = [];
+            this.visibleSnippetBoxes = [];
 
             const firstPageHeader = await this.component.get(
                 'form.first_page_header',
@@ -244,12 +354,12 @@ export default function () {
                 ];
 
                 elementIds.forEach((item) => {
-                    this.firsPageHeader.appendChild(
+                    this.firstPageHeader.appendChild(
                         $refs[item].content.cloneNode(true),
                     );
                 });
 
-                this.visibleElements = Array.from(this.firsPageHeader.children)
+                this.visibleElements = Array.from(this.firstPageHeader.children)
                     .filter((item) => item.id && true)
                     .map((item) => new PrintElement(item, this));
 
@@ -259,11 +369,11 @@ export default function () {
                 this._initOnEmptyJson(elementIds, parentWidth);
             }
 
-            if (this.firsPageHeader) {
+            if (this.firstPageHeader) {
                 this.observer = new IntersectionObserver(
                     intersectionHandlerFactory(this),
                     {
-                        root: this.firsPageHeader,
+                        root: this.firstPageHeader,
                         rootMargin: '0px',
                         threshold: 0.99,
                     },
@@ -275,10 +385,14 @@ export default function () {
                 this.visibleMedia.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleSnippetBoxes.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
             }
         },
         toggleElement($ref, id) {
-            if (this.firsPageHeader === null) {
+            if (this.firstPageHeader === null) {
                 throw new Error(`Footer Elelement not initialized`);
             }
 
@@ -289,17 +403,17 @@ export default function () {
                 // delete element
                 // remove the observer for the element
                 this.observer.unobserve(this.visibleElements[index].element);
-                this.firsPageHeader.removeChild(
+                this.firstPageHeader.removeChild(
                     this.visibleElements[index].element,
                 );
                 this.visibleElements.splice(index, 1);
             } else {
                 // add an element
-                this.firsPageHeader.appendChild(
+                this.firstPageHeader.appendChild(
                     $ref[id].content.cloneNode(true),
                 );
 
-                const element = Array.from(this.firsPageHeader.children)
+                const element = Array.from(this.firstPageHeader.children)
                     .filter((item) => item.id === id)
                     .pop();
 
@@ -320,6 +434,40 @@ export default function () {
                         await item.upload(this.component);
                     }
                 }
+
+                if (this.temporarySnippetBoxes.length > 0) {
+                    const firstPageHeaderSnippets = this.temporarySnippetBoxes.map(
+                        (item) => {
+                            return {
+                                content: item.content,
+                                x: roundToTwoDecimals(
+                                    item.position.x / this.pxPerCm,
+                                ),
+                                y: roundToTwoDecimals(
+                                    item.position.y / this.pyPerCm,
+                                ),
+                                width:
+                                    item.width !== null
+                                        ? roundToTwoDecimals(
+                                            item.width / this.pxPerCm,
+                                        )
+                                        : null,
+                                height:
+                                    item.height !== null
+                                        ? roundToTwoDecimals(
+                                            item.height / this.pyPerCm,
+                                        )
+                                        : null,
+                            };
+                        },
+                    );
+                    await this.component.set(
+                        'form.temporary_snippets',
+                        { first_page_header: firstPageHeaderSnippets },
+                        false,
+                    );
+                }
+
                 return {
                     height: this._firstPageHeaderHeight,
                     elements: this.visibleElements.map((item) => {
@@ -392,6 +540,33 @@ export default function () {
                                   };
                               })
                             : null,
+                    snippets:
+                        this.visibleSnippetBoxes.length > 0
+                            ? this.visibleSnippetBoxes.map((item) => {
+                                return {
+                                    id: item.snippetId,
+                                    content: item.content,
+                                    x: roundToTwoDecimals(
+                                        item.position.x / this.pxPerCm,
+                                    ),
+                                    y: roundToTwoDecimals(
+                                        item.position.y / this.pyPerCm,
+                                    ),
+                                    width:
+                                        item.width !== null
+                                            ? roundToTwoDecimals(
+                                                item.width / this.pxPerCm,
+                                            )
+                                            : null,
+                                    height:
+                                        item.height !== null
+                                            ? roundToTwoDecimals(
+                                                item.height / this.pyPerCm,
+                                            )
+                                            : null,
+                                };
+                            })
+                            : null
                 };
             } catch (e) {
                 throw new Error(
@@ -484,8 +659,8 @@ export default function () {
                 const element =
                     $refs[item.id] && $refs[item.id].content.cloneNode(true);
                 if (element) {
-                    this.firsPageHeader.appendChild(element);
-                    const children = Array.from(this.firsPageHeader.children);
+                    this.firstPageHeader.appendChild(element);
+                    const children = Array.from(this.firstPageHeader.children);
                     const index = children.findIndex((el) => el.id === item.id);
                     if (index !== -1) {
                         const child = children[index];
@@ -510,8 +685,8 @@ export default function () {
                 const element =
                     $refs['first-page-header-media']?.content.cloneNode(true);
                 if (element) {
-                    this.firsPageHeader.appendChild(element);
-                    const children = Array.from(this.firsPageHeader.children);
+                    this.firstPageHeader.appendChild(element);
+                    const children = Array.from(this.firstPageHeader.children);
                     const index = children.findIndex(
                         (el) => el.id === 'first-page-header-media',
                     );
@@ -537,6 +712,88 @@ export default function () {
                     }
                 }
             });
+
+            json.snippets?.map((item) => {
+                const element =
+                    $refs['first-page-header-snippet']?.content.cloneNode(true);
+                if (element) {
+                    this.firstPageHeader.appendChild(element);
+                    const children = Array.from(this.firstPageHeader.children);
+                    const index = children.findIndex(
+                        (el) => el.id === 'first-page-header-snippet',
+                    );
+                    if (index !== -1) {
+                        const child = children[index];
+                        this.visibleSnippetBoxes.push(
+                            new SnippetBoxElement(child, this, item.id).init({
+                                x: item.x * this.pxPerCm,
+                                y: item.y * this.pyPerCm,
+                                ...(item.width && {
+                                    width: item.width * this.pxPerCm,
+                                }),
+                                ...(item.height && {
+                                    height: item.height * this.pyPerCm,
+                                }),
+                            }),
+                        );
+                    }
+                }
+            });
+        },
+        addToTemporarySnippet($refs) {
+            if (this.firstPageHeader !== null) {
+                const cloneSnippetElement =
+                    $refs['first-page-header-additional-snippet']?.content.cloneNode(true);
+                if (cloneSnippetElement) {
+                    this.firstPageHeader.appendChild(cloneSnippetElement);
+                    const children = Array.from(this.firstPageHeader.children);
+                    const index = children.findIndex(
+                        (item) => item.id === 'first-page-header-snippet-placeholder',
+                    );
+                    if (index !== -1 && this.observer) {
+                        const element = children[index];
+                        this.temporarySnippetBoxes.push(
+                            new TemporarySnippetBoxElement(element, this).init(
+                                'start',
+                            ),
+                        );
+                        this.observer.observe(element);
+                    } else {
+                        throw new Error(
+                            'First Page Header additional snippet placeholder not found',
+                        );
+                    }
+                } else {
+                    throw new Error('First Page Header additional snippet not found');
+                }
+            }
+        },
+        deleteSnippet(id) {
+            const indexTemp = this.temporarySnippetBoxes.findIndex(
+                (item) => item.id === id,
+            );
+            if (indexTemp !== -1) {
+                const obj = this.temporarySnippetBoxes[indexTemp];
+                this.observer.unobserve(obj.element);
+                this.firstPageHeader.removeChild(obj.element);
+                this.temporarySnippetBoxes.splice(indexTemp, 1);
+            }
+
+            const indexSnippet = this.visibleSnippetBoxes.findIndex(
+                (item) => item.id === id,
+            );
+            if (indexSnippet !== -1) {
+                const obj = this.visibleSnippetBoxes[indexSnippet];
+                this.observer.unobserve(obj.element);
+                this.firstPageHeader.removeChild(obj.element);
+                this.visibleSnippetBoxes.splice(indexSnippet, 1);
+            }
+
+            if (indexTemp === -1 && indexSnippet === -1) {
+                throw new Error(
+                    `First Page Header - Snippet box or Temporary Snippet box with id ${id} not found`,
+                );
+            }
         },
         _adjustedMinFirstPageHeaderHeight() {
             // taking in account logo height, additional media (temp and saved) height, and free-text fields
@@ -561,18 +818,27 @@ export default function () {
                 ? resizableElementHeights.push(...visibleMedia)
                 : resizableElementHeights.push(0);
 
+            // snippet boxes
+            const visibleSnippetBoxes = this.visibleSnippetBoxes.map((item) => {
+                return roundToTwoDecimals((item.height || 0) / this.pyPerCm);
+            });
+
+            visibleSnippetBoxes.length > 0
+                ? resizableElementHeights.push(...visibleSnippetBoxes)
+                : resizableElementHeights.push(0);
+
             return Math.max(...resizableElementHeights);
         },
         async addToTemporaryMedia(event, $refs) {
             const file = event.target.files[0];
-            if (file !== undefined && this.firsPageHeader) {
+            if (file !== undefined && this.firstPageHeader) {
                 const cloneMediaElement =
                     $refs[
                         'first-page-header-additional-img'
                     ]?.content.cloneNode(true);
                 if (cloneMediaElement) {
-                    this.firsPageHeader.appendChild(cloneMediaElement);
-                    const children = Array.from(this.firsPageHeader.children);
+                    this.firstPageHeader.appendChild(cloneMediaElement);
+                    const children = Array.from(this.firstPageHeader.children);
                     const index = children.findIndex(
                         (item) =>
                             item.id === 'first-page-header-img-placeholder',
@@ -607,7 +873,7 @@ export default function () {
                 this.observer.unobserve(
                     this.temporaryVisibleMedia[index].element,
                 );
-                this.firsPageHeader.removeChild(
+                this.firstPageHeader.removeChild(
                     this.temporaryVisibleMedia[index].element,
                 );
                 this.temporaryVisibleMedia.splice(index, 1);
@@ -619,7 +885,7 @@ export default function () {
             const index = this.visibleMedia.findIndex((item) => item.id === id);
             if (index !== -1) {
                 this.observer.unobserve(this.visibleMedia[index].element);
-                this.firsPageHeader.removeChild(
+                this.firstPageHeader.removeChild(
                     this.visibleMedia[index].element,
                 );
                 this.visibleMedia.splice(index, 1);

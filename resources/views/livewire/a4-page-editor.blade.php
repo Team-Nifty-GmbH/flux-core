@@ -61,6 +61,7 @@
         >
             <x-flux::print.controll-panel.footer />
             <x-flux::print.controll-panel.header />
+            <x-flux::print.controll-panel.order.first-page-header />
             <div
                 x-cloak
                 x-show="!printStore.anyEdiorOpen"

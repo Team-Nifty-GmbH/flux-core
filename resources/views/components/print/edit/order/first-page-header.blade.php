@@ -1,7 +1,7 @@
 <div
     x-on:mouseup.window="firstPageHeaderStore.onMouseUp()"
     x-on:mousemove.window="
-        firstPageHeaderStore.selectedElementId !== null && !firstPageHeaderStore.isImgResizeClicked
+        firstPageHeaderStore.selectedElementId !== null && !firstPageHeaderStore.isResizeOrScaleActive
             ? firstPageHeaderStore.onMouseMove($event)
             : null
     "
@@ -18,7 +18,7 @@
         :style="`height: ${firstPageHeaderStore.height};`"
     >
         <div
-            x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveScale($event) : false"
+            x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveScale($event) : firstPageHeaderStore.isSnippetResizeClicked ? firstPageHeaderStore.onMouseMoveResize($event) : null"
             class="w-0 h-0"></div>
 
     </div>
@@ -61,6 +61,27 @@
         <div x-text="`${roundToOneDecimal(firstPageHeaderStore.selectedElementPos.y / firstPageHeaderStore.pyPerCm)}cm`"></div>
     </div>
     {{-- UI position of a selected element --}}
+    {{-- UI size of a snippet --}}
+    <div x-cloak x-show="firstPageHeaderStore.isSnippetResizeClicked && firstPageHeaderStore.selectedElementId !== null"
+         :style="{'transform': `translate(${firstPageHeaderStore.selectedElementPos.x -50}px,${firstPageHeaderStore.selectedElementPos.y}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`h:${roundToOneDecimal(firstPageHeaderStore.selectedElementSize.height / firstPageHeaderStore.pxPerCm)}cm`"></div>
+    </div>
+    <div x-cloak x-show="firstPageHeaderStore.isSnippetResizeClicked && firstPageHeaderStore.selectedElementId !== null"
+         :style="{'transform': `translate(${firstPageHeaderStore.selectedElementPos.x}px,${firstPageHeaderStore.selectedElementPos.y - 40}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`w: ${roundToOneDecimal(firstPageHeaderStore.selectedElementSize.width / firstPageHeaderStore.pyPerCm)}cm`"></div>
+    </div>
+    {{-- UI size of a snippet --}}
+    {{-- UI snippet box name --}}
+    <template x-for="(box,index) in firstPageHeaderStore.snippetNames" :key="`${box.ref.id}-${index}`">
+        <div
+            :style="{'transform': `translate(${box.ref.position.x}px,${box.ref.position.y - 15}px)` }"
+            class="absolute left-0 top-0">
+            <div class="text-gray-400 text-[12px]" x-text="box.name"></div>
+        </div>
+    </template>
+    {{-- UI snippet box name --}}
     <template
         id="{{ $client->id }}"
         x-ref="first-page-header-client-name"
@@ -69,11 +90,11 @@
                 id="first-page-header-client-name"
                 data-type="container"
                 draggable="false"
-                class="absolute left-0 top-0 text-5xl font-semibold select-none"
+                class="absolute left-0 top-0"
                 :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-client-name'}"
                 x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-client-name') : null"
             >
-                {{ $client->name }}
+                <x-flux::print.elements.first-page-header-client-name :client="$client" />
             </div>
     </template>
     <template
@@ -88,110 +109,53 @@
             :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-postal-address-one-line'}"
             x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-postal-address-one-line') : null"
         >
-            <div>
-                {{ $client->postal_address_one_line }}
-            </div>
-            <div class="w-full h-[1px] bg-black"></div>
+            <x-flux::print.elements.first-page-header-address-one-line :client="$client" />
         </div>
     </template>
     <template
         id="{{ $client->id }}"
         x-ref="first-page-header-address"
     >
-        <address
+        <div
             id="first-page-header-address"
             data-type="container"
             draggable="false"
-            class="absolute left-0 top-0 text-xs not-italic select-none"
+            class="absolute left-0 top-0"
             :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-address'}"
             x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-address') : null"
         >
-            <div class="font-semibold">
-                {{ $address->company ?? '' }}
-            </div>
-            <div>
-                {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
-            </div>
-            <div>
-                {{ $address->addition ?? '' }}
-            </div>
-            <div>
-                {{ $address->street ?? '' }}
-            </div>
-            <div>
-                {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
-            </div>
-        </address>
+            <x-flux::print.elements.first-page-header-address :address="$address" />
+        </div>
     </template>
-{{--    <template>--}}
-{{--        <div class="absolute left-0 top-0 text-xs">--}}
-{{--            {{ $rightBlock ?? '' }}--}}
-{{--        </div>--}}
-{{--    </template>--}}
     <template
         id="{{ $client->id }}"
         x-ref="first-page-header-subject"
     >
-        <h1
+        <div
             id="first-page-header-subject"
             data-type="container"
             draggable="false"
-            class="absolute left-0 top-0 text-xl font-semibold select-none"
+            class="absolute left-0 top-0"
             :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-subject'}"
             x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-subject') : null"
         >
-            {{ $subject ?? '' }}
-        </h1>
+            <x-flux::print.elements.first-page-header-subject :subject="$subject"/>
+        </div>
     </template>
     <template
         id="{{ $client->id }}"
         x-ref="first-page-header-right-block"
     >
-        <table
+        <div
             id="first-page-header-right-block"
             data-type="container"
             draggable="false"
-            class="absolute left-0 top-0 w-[7cm] select-none"
+            class="absolute left-0 top-0 select-none"
             :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
             x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-right-block') : null"
         >
-            <tbody class="align-text-top text-xs leading-none">
-                <tr class="leading-none">
-                    <td class="text-left font-semibold">
-                        {{ __('Order no.') }}
-                    </td>
-                    <td class="text-left">
-                        {{ $model->order_number }}
-                    </td>
-                </tr>
-                <tr class="leading-none">
-                    <td class="text-left font-semibold">
-                        {{ __('Customer no.') }}
-                    </td>
-                    <td class="text-left">
-                        {{ $model->customer_number }}
-                    </td>
-                </tr>
-                <tr class="leading-none">
-                    <td class="text-left font-semibold">
-                        {{ __('Order Date') }}
-                    </td>
-                    <td class="text-left">
-                        {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                    </td>
-                </tr>
-                @if ($model->commission)
-                    <tr class="leading-none">
-                        <td class="py-0 text-left font-semibold">
-                            {{ __('Commission') }}
-                        </td>
-                        <td class="py-0 text-left">
-                            {{ $model->commission }}
-                        </td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
+            <x-flux::print.elements.first-page-header-right-block-order :model="$model" />
+        </div>
     </template>
     <template
         id="{{ uniqid() }}"
@@ -242,6 +206,115 @@
                 class="max-h-full w-full"
                 src=""
             />
+        </div>
+    </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="first-page-header-additional-snippet"
+    >
+        <div
+            x-data="temporarySnippetEditor(firstPageHeaderStore,$el.id)"
+            x-init="onInit"
+            x-on:mousedown="printStore.editFirstPageHeader && firstPageHeaderStore.snippetEditorXData === null ? firstPageHeaderStore.onMouseDown($event,$el.id,'temporary-snippet') : null"
+            id="first-page-header-snippet-placeholder"
+            data-type="resizable"
+            draggable="false"
+            class="absolute w-[10cm] h-[1.7cm] border"
+            :class="{
+                    'border-primary-200': firstPageHeaderStore.isSnippetResizeClicked,
+                    'bg-gray-100' : !firstPageHeaderStore.isResizeOrScaleActive && firstPageHeaderStore.selectedElementId === $el.id
+                    }"
+        >
+            <div
+                draggable="false"
+                x-cloak x-show="printStore.editFirstPageHeader" class="relative w-full h-full">
+                <x-icon
+                    x-cloak
+                    x-show="firstPageHeaderStore.snippetEditorXData === null"
+                    dragable="false"
+                    x-on:mousedown="toggleEditor()"
+                    name="pencil" class="absolute cursor-pointer left-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
+                <template x-if="firstPageHeaderStore.snippetEditorXData?.elementObj.id === objId">
+                    <x-flux::editor
+                        x-editable="firstPageHeaderStore.snippetEditorXData?.elementObj.id === objId"
+                        class="absolute top-0 left-0 w-full p-0"
+                        x-modelable="content"
+                        x-model="text"
+                        :full-height="true"
+                        :tooltip-dropdown="true"
+                        :show-editor-padding="false"
+                        :text-align="true"
+                        :transparent="true" />
+                </template>
+                <div
+                    x-cloak
+                    x-show="firstPageHeaderStore.snippetEditorXData === null"
+                    class="text-left p-1"
+                    x-html="text">
+                </div>
+                <x-icon
+                    x-cloak
+                    x-show="firstPageHeaderStore.snippetEditorXData === null"
+                    dragable="false"
+                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary-snippet')"
+                    name="arrows-pointing-out" class="absolute cursor-pointer right-0 bottom-0 h-4 w-4 rounded-full"></x-icon>
+            </div>
+        </div>
+    </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="first-page-header-snippet">
+        <div
+            x-data="snippetEditor(firstPageHeaderStore,$el.id)"
+            x-init="onInit"
+            id="first-page-header-snippet"
+            x-on:mousedown="printStore.editFirstPageHeader && firstPageHeaderStore.snippetEditorXData === null ? firstPageHeaderStore.onMouseDown($event,$el.id,'snippet') : null"
+            data-type="resizable"
+            draggable="false"
+            class="absolute w-[10cm] h-[1.7cm] border"
+            :class="{
+                    'border-primary-200': firstPageHeaderStore.isSnippetResizeClicked,
+                    'bg-gray-100' : !firstPageHeaderStore.isResizeOrScaleActive && firstPageHeaderStore.selectedElementId === $el.id
+                    }"
+        >
+            <div
+                draggable="false"
+                x-cloak x-show="printStore.editFirstPageHeader" class="relative w-full h-full">
+                <x-icon
+                    x-cloak
+                    x-show="firstPageHeaderStore.snippetEditorXData === null"
+                    dragable="false"
+                    x-on:mousedown="toggleEditor()"
+                    name="pencil" class="absolute cursor-pointer left-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
+                <template x-if="firstPageHeaderStore.snippetEditorXData?.elementObj.id === objId">
+                    <x-flux::editor
+                        x-editable="firstPageHeaderStore.snippetEditorXData?.elementObj.id === objId"
+                        class="absolute top-0 left-0 w-full p-0"
+                        x-modelable="content"
+                        x-model="text"
+                        :full-height="true"
+                        :text-align="true"
+                        :tooltip-dropdown="true"
+                        :show-editor-padding="false"
+                        :transparent="true" />
+                </template>
+                <div
+                    x-cloak
+                    x-show="firstPageHeaderStore.snippetEditorXData === null"
+                    x-html="text">
+                </div>
+                <x-icon
+                    x-cloak
+                    x-show="firstPageHeaderStore.snippetEditorXData === null"
+                    dragable="false"
+                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'snippet')"
+                    name="arrows-pointing-out" class="absolute cursor-pointer right-0 bottom-0 h-4 w-4 rounded-full"></x-icon>
+            </div>
+            <div
+                x-cloak
+                x-show="!printStore.editFirstPageHeader"
+                x-html="text">
+            </div>
         </div>
     </template>
 </div>

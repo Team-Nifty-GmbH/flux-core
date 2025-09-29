@@ -11,18 +11,12 @@
         ->first()?->toArray();
 @endphp
 
-@section('first-page-header')
-<x-flux::print.first-page-header
+<x-flux::print.order.first-page-header
     :client="$client"
     :address="Fluent::make($model->address_invoice)"
     :$model
     :first-page-header-layout="is_null($layout) ? null : $layout['first_page_header']"
->
-    <x-slot:right-block>
-        <x-flux::print.elements.first-page-header-right-block-order :model="$model" />
-    </x-slot>
-</x-flux::print.first-page-header>
-@show
+/>
 <main>
     @section('header')
     <div class="prose-xs pb-4 pt-10">
