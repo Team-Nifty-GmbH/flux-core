@@ -2,6 +2,7 @@
     class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"
     x-data
 >
+    <x-toast z-index="z-50"></x-toast>
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <x-flux::logo fill="#0690FA" class="h-24" />
     </div>
@@ -11,6 +12,7 @@
                 @section('password-reset-dialog')
                 <x-modal id="password-reset" :title="__('Reset password')">
                     <x-input
+                        id="reset-email"
                         wire:model="email"
                         :label="__('Email')"
                         name="reset-email"
@@ -29,6 +31,7 @@
                 </x-modal>
                 @show
                 @section('login-form')
+
                 <form class="flex flex-col gap-6" wire:submit="login()">
                     <x-input
                         id="email"

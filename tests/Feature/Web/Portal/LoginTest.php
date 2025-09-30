@@ -1,26 +1,20 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web\Portal;
+test('login as authenticated user', function (): void {
+    $this->actingAs($this->address, 'address')->get(config('flux.portal_domain') . '/login')
+        ->assertFound()
+        ->assertRedirect(route('portal.dashboard'));
+});
 
-class LoginTest extends PortalSetup
-{
-    public function test_login_as_authenticated_user(): void
-    {
-        $this->actingAs($this->user, 'address')->get($this->portalDomain . '/login')
-            ->assertStatus(302)
-            ->assertRedirect(route('portal.dashboard'));
-    }
+test('login no path', function (): void {
+    $this->actingAsGuest();
+    $this->get(config('flux.portal_domain') . '/')
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
+});
 
-    public function test_login_no_path(): void
-    {
-        $this->get($this->portalDomain . '/')
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
-
-    public function test_login_page(): void
-    {
-        $this->get($this->portalDomain . '/login')
-            ->assertStatus(200);
-    }
-}
+test('login page', function (): void {
+    $this->actingAsGuest();
+    $this->get(config('flux.portal_domain') . '/login')
+        ->assertOk();
+});

@@ -12,8 +12,8 @@ class RecordOriginFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'is_active' => $this->faker->boolean(85),
+            'name' => fake()->name,
+            'is_active' => fake()->boolean(85),
         ];
     }
 }

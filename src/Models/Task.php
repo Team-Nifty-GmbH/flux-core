@@ -7,7 +7,9 @@ use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\Targetable;
+use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Categorizable;
@@ -34,11 +36,10 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
+class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, Targetable
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        SoftDeletes, Trackable;
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -215,14 +216,23 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->where('start_date', '<=', $end)
-                ->where('due_date', '>=', $start)
-                ->orWhereBetween('created_at', [$start, $end]);
+            $query
+                ->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('due_date', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start_date', '<=', $start)
+                        ->where('due_date', '>=', $end);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start_date')
+                        ->whereNull('due_date')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
         });
     }
 
@@ -239,6 +249,8 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
             ],
             'allDay' => false,
             'is_editable' => true,
@@ -257,6 +269,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'task_user');
+        return $this->belongsToMany(User::class, 'task_user')->using(TaskUser::class);
     }
 }

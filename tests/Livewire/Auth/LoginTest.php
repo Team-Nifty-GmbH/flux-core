@@ -1,64 +1,53 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Auth;
-
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Mail\MagicLoginLink;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
-class LoginTest extends BaseSetup
-{
-    protected function setUp(): void
-    {
-        // logout user
-        parent::setUp();
+beforeEach(function (): void {
+    $this->actingAsGuest();
+});
 
-        app('auth')->logout();
-    }
+test('login link', function (): void {
+    Mail::fake();
 
-    public function test_login_link(): void
-    {
-        Mail::fake();
+    Livewire::test(Login::class)
+        ->assertOk()
+        ->set('email', $this->user->email)
+        ->call('login')
+        ->assertNoRedirect()
+        ->assertDispatched('tallstackui:toast');
 
-        Livewire::test(Login::class)
-            ->set('email', $this->user->email)
-            ->call('login')
-            ->assertNoRedirect()
-            ->assertDispatched('tallstackui:toast');
+    $this->assertGuest();
 
-        $this->assertGuest();
+    Mail::assertQueued(MagicLoginLink::class);
+});
 
-        Mail::assertQueued(MagicLoginLink::class);
-    }
+test('login successful', function (): void {
+    Livewire::test(Login::class)
+        ->assertOk()
+        ->set('email', $this->user->email)
+        ->set('password', 'password')
+        ->call('login')
+        ->assertRedirect(route('dashboard'));
 
-    public function test_login_successful(): void
-    {
-        Livewire::test(Login::class)
-            ->set('email', $this->user->email)
-            ->set('password', 'password')
-            ->call('login')
-            ->assertRedirect(route('dashboard'));
+    $this->assertAuthenticatedAs($this->user);
+});
 
-        $this->assertAuthenticatedAs($this->user);
-    }
+test('login wrong password', function (): void {
+    Livewire::test(Login::class)
+        ->assertOk()
+        ->set('email', 'noexistingmail@example.com')
+        ->set('password', 'wrongpassword')
+        ->call('login')
+        ->assertNoRedirect()
+        ->assertDispatched('tallstackui:toast');
 
-    public function test_login_wrong_password(): void
-    {
-        Livewire::test(Login::class)
-            ->set('email', 'noexistingmail@example.com')
-            ->set('password', 'wrongpassword')
-            ->call('login')
-            ->assertNoRedirect()
-            ->assertDispatched('tallstackui:toast');
+    $this->assertGuest();
+});
 
-        $this->assertGuest();
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Login::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Login::class)
+        ->assertOk();
+});

@@ -91,7 +91,7 @@ class InstallAssets extends Command
                                     Arr::dot($decodedOldContent)
                                 )
                             ),
-                            JSON_PRETTY_PRINT
+                            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
                         )
                     );
 

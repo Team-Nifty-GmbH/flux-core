@@ -2,11 +2,15 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Actions\EventSubscription\CreateEventSubscription;
+use FluxErp\Actions\EventSubscription\DeleteEventSubscription;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\NotificationSetting;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\Notifiable as BaseNotifiable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 trait Notifiable
 {
@@ -49,5 +53,50 @@ trait Notifiable
     public function notificationSettings(): MorphMany
     {
         return $this->morphMany(NotificationSetting::class, 'notifiable');
+    }
+
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return $this->getMorphClass() . '.' . $this->getKey();
+    }
+
+    public function subscribeNotificationChannel(string $channel, string $event = '*'): ?EventSubscription
+    {
+        if ($this->eventSubscriptions()
+            ->where('channel', $channel)
+            ->where('event', $event)
+            ->where('is_notifiable', true)
+            ->exists()
+        ) {
+            return null;
+        }
+
+        return CreateEventSubscription::make([
+            'channel' => $channel,
+            'event' => $event,
+            'subscribable_id' => $this->getKey(),
+            'subscribable_type' => $this->getMorphClass(),
+            'is_broadcast' => false,
+            'is_notifiable' => true,
+        ])
+            ->validate()
+            ->execute();
+    }
+
+    public function unsubscribeNotificationChannel(string $channel, string $event = '*'): bool
+    {
+        try {
+            return DeleteEventSubscription::make([
+                'id' => $this->eventSubscriptions()
+                    ->where('channel', $channel)
+                    ->where('event', $event)
+                    ->where('is_notifiable', true)
+                    ->value('id'),
+            ])
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException) {
+            return false;
+        }
     }
 }

@@ -1,31 +1,25 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web\Portal;
-
 use FluxErp\Models\Permission;
 
-class FilesTest extends PortalSetup
-{
-    public function test_portal_files_no_user(): void
-    {
-        $this->get(route('portal.files'))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
+test('portal files no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_portal_files_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('files.get', 'address'));
+    $this->get(route('portal.files'))
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
+});
 
-        $this->actingAs($this->user, 'address')->get(route('portal.files'))
-            ->assertStatus(200);
-    }
+test('portal files page', function (): void {
+    $this->address->givePermissionTo(Permission::findOrCreate('files.get', 'address'));
 
-    public function test_portal_files_without_permission(): void
-    {
-        Permission::findOrCreate('files.get', 'address');
+    $this->actingAs($this->address, 'address')->get(route('portal.files'))
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'address')->get(route('portal.files'))
-            ->assertStatus(403);
-    }
-}
+test('portal files without permission', function (): void {
+    Permission::findOrCreate('files.get', 'address');
+
+    $this->actingAs($this->address, 'address')->get(route('portal.files'))
+        ->assertForbidden();
+});

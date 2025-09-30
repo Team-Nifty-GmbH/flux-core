@@ -12,7 +12,7 @@ class SerialNumberFactory extends Factory
     public function definition(): array
     {
         return [
-            'serial_number' => $this->faker->uuid(),
+            'serial_number' => fake()->uuid(),
         ];
     }
 }

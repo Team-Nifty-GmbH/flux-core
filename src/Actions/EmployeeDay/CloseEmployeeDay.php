@@ -37,13 +37,13 @@ class CloseEmployeeDay extends FluxAction
             ->where('employee_id', $employee->getKey())
             ->whereValueBetween($date, ['start_date', 'end_date'])
             ->where('state_enum', AbsenceRequestStateEnum::Approved)
-            ->with('absenceType:id,affects_sick,affects_vacation,affects_overtime');
+            ->with('absenceType:id,affects_overtime,affects_sick_leave,affects_vacation');
 
         $wasPresent = false;
         $actualHours = 0;
         $pauseTimes = 0;
         $wasSick = $absenceRequestBaseQuery->clone()
-            ->whereRelation('absenceType', 'affects_sick', true)
+            ->whereRelation('absenceType', 'affects_sick_leave', true)
             ->exists();
 
         if (! $wasSick) {
@@ -78,7 +78,7 @@ class CloseEmployeeDay extends FluxAction
         }
 
         foreach ($absenceRequestBaseQuery->get() as $absenceRequest) {
-            if (data_get($absenceRequest, 'absenceType.affects_sick')) {
+            if (data_get($absenceRequest, 'absenceType.affects_sick_leave')) {
                 $hours = $absenceRequest->calculateWorkHoursAffected($date);
                 if (bccomp($hours, 0) > 0) {
                     $usedAbsenceRequests->push($absenceRequest);

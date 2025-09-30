@@ -101,14 +101,14 @@ class OverallLeadWonLostRatio extends CircleChart implements HasWidgetOptions
         return function (Builder $query) use ($start, $end) {
             return $query
                 ->whereNotNull('lead_state_id')
-                ->whereBetween('created_at', [$start, $end]);
+                ->whereBetween('closed_at', [$start, $end]);
         };
     }
 
     protected function redirectWithFilter($filterCallback, string $label): void
     {
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        $start = $this->getStart();
+        $end = $this->getEnd();
 
         $base = $this->getBaseFilter($start, $end);
 

@@ -1,151 +1,130 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
 use FluxErp\Models\Permission;
 use FluxErp\Models\Setting;
 use FluxErp\Models\User;
-use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class SettingTest extends BaseSetup
-{
-    private array $permissions;
+beforeEach(function (): void {
+    $this->settings = Setting::factory()->create([
+        'key' => 'A' . Str::random(32),
+        'settings' => [
+            'string' => 'Key',
+            'integer' => 1,
+            'array' => [1, 2, 3],
+        ],
+    ]);
+    $this->settings2 = Setting::factory()->create([
+        'key' => 'Z' . Str::random(32),
+        'settings' => [
+            'settings' => 'settings',
+        ],
+    ]);
 
-    private Setting $settings;
+    $this->userSettings = Setting::factory()->create([
+        'model_id' => $this->user->id,
+        'model_type' => morph_alias(User::class),
+        'settings' => [
+            'profile' => 'bla',
+            'value' => 12,
+        ],
+    ]);
 
-    private Setting $settings2;
+    $this->permissions = [
+        'index' => Permission::findOrCreate('api.settings.get'),
+        'user-settings' => Permission::findOrCreate('api.user.settings.get'),
+        'update' => Permission::findOrCreate('api.settings.put'),
+    ];
+});
 
-    private Setting $userSettings;
+test('get settings', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->settings = Setting::factory()->create([
-            'key' => 'A' . Str::random(32),
-            'settings' => [
-                'string' => 'Key',
-                'integer' => 1,
-                'array' => [1, 2, 3],
-            ],
-        ]);
-        $this->settings2 = Setting::factory()->create([
-            'key' => 'Z' . Str::random(32),
-            'settings' => [
-                'settings' => 'settings',
-            ],
-        ]);
+    $response = $this->actingAs($this->user)->get('/api/settings');
+    $response->assertOk();
 
-        $this->userSettings = Setting::factory()->create([
-            'model_id' => $this->user->id,
-            'model_type' => morph_alias(User::class),
-            'settings' => [
-                'profile' => 'bla',
-                'value' => 12,
-            ],
-        ]);
+    $responseData = json_decode($response->getContent(), true)['data']['data'];
+    $count = count($responseData);
+    $count -= 3;
 
-        $this->permissions = [
-            'index' => Permission::findOrCreate('api.settings.get'),
-            'user-settings' => Permission::findOrCreate('api.user.settings.get'),
-            'update' => Permission::findOrCreate('api.settings.put'),
-        ];
-    }
+    expect($responseData[$count]['id'])->toEqual($this->settings->id);
+    expect($responseData[$count]['uuid'])->toEqual($this->settings->uuid);
+    expect($responseData[$count]['key'])->toEqual($this->settings->key);
+    expect($responseData[$count]['settings']['string'])->toEqual($this->settings->settings['string']);
+    expect($responseData[$count]['settings']['integer'])->toEqual($this->settings->settings['integer']);
+    expect($responseData[$count]['settings']['array'])->toEqual($this->settings->settings['array']);
+    expect($responseData[++$count]['id'])->toEqual($this->settings2->id);
+    expect($responseData[$count]['uuid'])->toEqual($this->settings2->uuid);
+    expect($responseData[$count]['key'])->toEqual($this->settings2->key);
+    expect($responseData[$count]['settings'])->toEqual($this->settings2->settings);
+});
 
-    public function test_get_settings(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
+test('get user settings', function (): void {
+    $this->user->givePermissionTo($this->permissions['user-settings']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/settings');
-        $response->assertStatus(200);
+    $response = $this->actingAs($this->user)->get('/api/user/settings');
+    $response->assertOk();
 
-        $responseData = json_decode($response->getContent(), true)['data']['data'];
-        $count = count($responseData);
-        $count -= 3;
+    $responseData = json_decode($response->getContent())->data;
+    expect(count($responseData))->toEqual(1);
+    expect($responseData[0]->id)->toEqual($this->userSettings->id);
+    expect($responseData[0]->uuid)->toEqual($this->userSettings->uuid);
+    expect($responseData[0]->key)->toEqual($this->userSettings->key);
+    expect($responseData[0]->settings)->toEqual((object) $this->userSettings->settings);
+});
 
-        $this->assertEquals($this->settings->id, $responseData[$count]['id']);
-        $this->assertEquals($this->settings->uuid, $responseData[$count]['uuid']);
-        $this->assertEquals($this->settings->key, $responseData[$count]['key']);
-        $this->assertEquals($this->settings->settings['string'], $responseData[$count]['settings']['string']);
-        $this->assertEquals($this->settings->settings['integer'], $responseData[$count]['settings']['integer']);
-        $this->assertEquals($this->settings->settings['array'], $responseData[$count]['settings']['array']);
-        $this->assertEquals($this->settings2->id, $responseData[++$count]['id']);
-        $this->assertEquals($this->settings2->uuid, $responseData[$count]['uuid']);
-        $this->assertEquals($this->settings2->key, $responseData[$count]['key']);
-        $this->assertEquals($this->settings2->settings, $responseData[$count]['settings']);
-    }
+test('update setting', function (): void {
+    $settings = [
+        'string' => 'Value',
+        'integer' => 9,
+        'array' => [9, 8, 6],
+    ];
 
-    public function test_get_user_settings(): void
-    {
-        $this->user->givePermissionTo($this->permissions['user-settings']);
-        Sanctum::actingAs($this->user, ['user']);
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/user/settings');
-        $response->assertStatus(200);
+    $response = $this->actingAs($this->user)->put('/api/settings', [
+        'id' => $this->settings->id,
+        'settings' => $settings,
+    ]);
+    $response->assertOk();
+    $setting = Setting::query()
+        ->where('key', $this->settings->key)
+        ->first();
 
-        $responseData = json_decode($response->getContent())->data;
-        $this->assertEquals(1, count($responseData));
-        $this->assertEquals($this->userSettings->id, $responseData[0]->id);
-        $this->assertEquals($this->userSettings->uuid, $responseData[0]->uuid);
-        $this->assertEquals($this->userSettings->key, $responseData[0]->key);
-        $this->assertEquals((object) $this->userSettings->settings, $responseData[0]->settings);
-    }
+    expect($setting->id)->toEqual($this->settings->id);
+    expect($setting->uuid)->toEqual($this->settings->uuid);
+    expect($setting->key)->toEqual($this->settings->key);
+    expect($setting->settings['string'])->toEqual($settings['string']);
+    expect($setting->settings['integer'])->toEqual($settings['integer']);
+    expect($setting->settings['array'])->toEqual($settings['array']);
+});
 
-    public function test_update_setting(): void
-    {
-        $settings = [
-            'string' => 'Value',
-            'integer' => 9,
-            'array' => [9, 8, 6],
-        ];
+test('update setting setting not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->put('/api/settings', [
+        'id' => ++$this->userSettings->id,
+        'settings' => ['Value'],
+    ]);
 
-        $response = $this->actingAs($this->user)->put('/api/settings', [
-            'id' => $this->settings->id,
-            'settings' => $settings,
-        ]);
-        $response->assertStatus(200);
-        $setting = Setting::query()
-            ->where('key', $this->settings->key)
-            ->first();
+    $response->assertUnprocessable();
+});
 
-        $this->assertEquals($this->settings->id, $setting->id);
-        $this->assertEquals($this->settings->uuid, $setting->uuid);
-        $this->assertEquals($this->settings->key, $setting->key);
-        $this->assertEquals($settings['string'], $setting->settings['string']);
-        $this->assertEquals($settings['integer'], $setting->settings['integer']);
-        $this->assertEquals($settings['array'], $setting->settings['array']);
-    }
+test('update setting validation error', function (): void {
+    $settings = 'string';
 
-    public function test_update_setting_setting_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/settings', [
-            'id' => ++$this->userSettings->id,
-            'settings' => ['Value'],
-        ]);
+    $response = $this->actingAs($this->user)->put('/api/settings', [
+        'id' => $this->settings->id,
+        'settings' => $settings,
+    ]);
 
-        $response->assertStatus(422);
-    }
-
-    public function test_update_setting_validation_error(): void
-    {
-        $settings = 'string';
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/settings', [
-            'id' => $this->settings->id,
-            'settings' => $settings,
-        ]);
-
-        $response->assertStatus(422);
-    }
-}
+    $response->assertUnprocessable();
+});

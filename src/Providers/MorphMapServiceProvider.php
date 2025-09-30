@@ -73,6 +73,7 @@ use FluxErp\Models\Pivots\AbsencePolicyAbsenceType;
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
 use FluxErp\Models\Pivots\AbsenceRequestSubstitute;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\Calendarable;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
 use FluxErp\Models\Pivots\ClientPaymentType;
@@ -86,6 +87,7 @@ use FluxErp\Models\Pivots\EmployeeDepartmentVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\HolidayLocation;
+use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\LocationVacationBlackout;
 use FluxErp\Models\Pivots\OrderSchedule;
@@ -96,6 +98,7 @@ use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Pivots\TargetUser;
+use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -109,6 +112,7 @@ use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\PushSubscription;
 use FluxErp\Models\QueueMonitor;
 use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
@@ -226,6 +230,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'project' => Project::class,
             'purchase_invoice' => PurchaseInvoice::class,
             'purchase_invoice_position' => PurchaseInvoicePosition::class,
+            'push_subscription' => PushSubscription::class,
             'queue_monitor' => QueueMonitor::class,
             'record_origin' => RecordOrigin::class,
             'role' => Role::class,
@@ -259,6 +264,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'absence_request_employee_day' => AbsenceRequestEmployeeDay::class,
             'absence_request_substitute' => AbsenceRequestSubstitute::class,
             'address_address_type_order' => AddressAddressTypeOrder::class,
+            'calendarable' => Calendarable::class,
             'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
             'client_payment_type' => ClientPaymentType::class,
@@ -272,6 +278,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'employee_vacation_blackout' => EmployeeVacationBlackout::class,
             'employee_work_time_model' => EmployeeWorkTimeModel::class,
             'holiday_location' => HolidayLocation::class,
+            'invitable' => Inviteable::class,
             'job_batchable' => JobBatchable::class,
             'location_vacation_blackout' => LocationVacationBlackout::class,
             'order_schedule' => OrderSchedule::class,
@@ -282,6 +289,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_product_option' => ProductProductOption::class,
             'queue_monitorable' => QueueMonitorable::class,
             'target_user' => TargetUser::class,
+            'task_user' => TaskUser::class,
         ]);
     }
 }

@@ -1,305 +1,225 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
 use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Permission;
-use FluxErp\Models\User;
-use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Support\Collection;
+use FluxErp\Models\Ticket;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class EventSubscriptionTest extends BaseSetup
-{
-    private Collection $comments;
+beforeEach(function (): void {
+    $this->tickets = Ticket::factory()->count(3)->create([
+        'authenticatable_type' => $this->user->getMorphClass(),
+        'authenticatable_id' => $this->user->getKey(),
+    ]);
 
-    private Collection $eventSubscriptions;
+    $this->comments = Comment::factory()->count(3)->create([
+        'model_type' => morph_alias(Ticket::class),
+        'model_id' => $this->tickets[0]->id,
+        'comment' => 'User Comment from a Test!',
+    ]);
 
-    private array $permissions;
+    $this->eventSubscriptions = EventSubscription::factory()->count(3)->create([
+        'channel' => $this->user->broadcastChannel(),
+        'event' => '*',
+        'subscribable_type' => $this->user->getMorphClass(),
+        'subscribable_id' => $this->user->id,
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.events.get'),
+        'index' => Permission::findOrCreate('api.event-subscriptions.get'),
+        'getUserSubscriptions' => Permission::findOrCreate('api.event-subscriptions.user.get'),
+        'create' => Permission::findOrCreate('api.event-subscriptions.post'),
+        'update' => Permission::findOrCreate('api.event-subscriptions.put'),
+        'delete' => Permission::findOrCreate('api.event-subscriptions.{id}.delete'),
+    ];
+});
 
-        $this->comments = Comment::factory()->count(3)->create([
-            'model_type' => morph_alias(User::class),
-            'model_id' => $this->user->id,
-            'comment' => 'User Comment from a Test!',
-        ]);
+test('create event subscription', function (): void {
+    $ticket = Ticket::factory()->create([
+        'authenticatable_type' => $this->user->getMorphClass(),
+        'authenticatable_id' => $this->user->getKey(),
+    ]);
+    $comment = Comment::factory()->create([
+        'model_type' => $ticket->getMorphClass(),
+        'model_id' => $ticket->getKey(),
+        'comment' => 'User Comment from a Test!',
+    ]);
 
-        $this->eventSubscriptions = EventSubscription::factory()->count(3)->create([
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => $this->comments[0]->id,
-        ]);
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.events.get'),
-            'index' => Permission::findOrCreate('api.event-subscriptions.get'),
-            'getUserSubscriptions' => Permission::findOrCreate('api.event-subscriptions.user.get'),
-            'create' => Permission::findOrCreate('api.event-subscriptions.post'),
-            'update' => Permission::findOrCreate('api.event-subscriptions.put'),
-            'delete' => Permission::findOrCreate('api.event-subscriptions.{id}.delete'),
-        ];
-    }
+    $subscription = [
+        'channel' => $comment->broadcastChannel(),
+        'event' => '*',
+        'subscribable_type' => $this->user->getMorphClass(),
+        'subscribable_id' => $this->user->id,
+        'is_broadcast' => true,
+        'is_notifiable' => false,
+    ];
 
-    public function test_create_event_subscription(): void
-    {
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
+    $response->assertCreated();
 
-        $subscription = [
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => $this->comments[2]->id,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
+    $eventSubscription = json_decode($response->getContent())->data;
+    $dbEventSubscription = EventSubscription::query()
+        ->whereKey($eventSubscription->id)
+        ->first();
 
-        $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(201);
+    expect($dbEventSubscription->subscribable_type)->toEqual($subscription['subscribable_type']);
+    expect($dbEventSubscription->subscribable_id)->toEqual($subscription['subscribable_id']);
+    expect($dbEventSubscription->channel)->toEqual($subscription['channel']);
+    expect($dbEventSubscription->is_broadcast)->toEqual($subscription['is_broadcast']);
+    expect($dbEventSubscription->is_notifiable)->toEqual($subscription['is_notifiable']);
+});
 
-        $eventSubscription = json_decode($response->getContent())->data;
-        $dbEventSubscription = EventSubscription::query()
-            ->whereKey($eventSubscription->id)
-            ->first();
+test('create event subscription already subscribed', function (): void {
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertEquals($subscription['subscribable_type'], $dbEventSubscription->subscribable_type);
-        $this->assertEquals($subscription['subscribable_id'], $dbEventSubscription->subscribable_id);
-        $this->assertEquals(class_basename($subscription['event']), class_basename($dbEventSubscription->event));
-        $this->assertEquals($subscription['model_type'], $dbEventSubscription->model_type);
-        $this->assertEquals($subscription['model_id'], $dbEventSubscription->model_id);
-        $this->assertEquals($subscription['is_broadcast'], $dbEventSubscription->is_broadcast);
-        $this->assertEquals($subscription['is_notifiable'], $dbEventSubscription->is_notifiable);
-    }
+    $subscription = [
+        'channel' => $this->user->broadcastChannel(),
+        'event' => '*',
+        'subscribable_type' => $this->user->getMorphClass(),
+        'subscribable_id' => $this->user->id,
+        'is_broadcast' => true,
+        'is_notifiable' => false,
+    ];
 
-    public function test_create_event_subscription_already_subscribed(): void
-    {
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $eventSubscription = new EventSubscription($subscription);
+    $eventSubscription->save();
 
-        $subscription = [
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => $this->comments[0]->id,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
+    $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
+    $response->assertUnprocessable();
+});
 
-        $eventSubscription = new EventSubscription($subscription);
-        $eventSubscription->save();
+test('create event subscription validation fails', function (): void {
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(422);
-    }
+    $subscription = [
+        'channel' => Str::random(),
+        'event' => '*',
+        'subscribable_type' => $this->user->getMorphClass(),
+        'subscribable_id' => $this->user->id,
+    ];
 
-    public function test_create_event_subscription_event_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
+    $response->assertUnprocessable();
+});
 
-        $subscription = [
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'InvalidEvent',
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => null,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
+test('delete event subscription', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(422);
-    }
+    $response = $this->actingAs($this->user)
+        ->delete('/api/event-subscriptions/' . $this->eventSubscriptions[0]->id);
 
-    public function test_create_event_subscription_model_id_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response->assertNoContent();
 
-        $subscription = [
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => ++$this->comments[2]->id,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
+    expect(EventSubscription::query()->whereKey($this->eventSubscriptions[0]->id)->exists())->toBeFalse();
+});
 
-        $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(422);
-    }
+test('delete event subscription event subscription not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_event_subscription_model_type_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)
+        ->delete('/api/event-subscriptions/' . ++$this->eventSubscriptions[2]->id);
 
-        $subscription = [
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => 'InvalidModelType',
-            'model_id' => $this->comments[2]->id,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
+    $response->assertNotFound();
+});
 
-        $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(422);
-    }
+test('get events', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_event_subscription_validation_fails(): void
-    {
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->get('/api/events');
+    $response->assertOk();
 
-        $subscription = [
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => $this->comments[0]->id,
-        ];
+    expect(in_array(
+        'eloquent.created: ' . Comment::class,
+        json_decode($response->getContent())->data
+    ))->toBeTrue();
+});
 
-        $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(422);
-    }
+test('get user subscriptions', function (): void {
+    $this->user->givePermissionTo($this->permissions['getUserSubscriptions']);
+    $this->user->eventSubscriptions()->whereKeyNot($this->eventSubscriptions->pluck('id'))->delete();
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_delete_event_subscription(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->get('/api/event-subscriptions/user');
+    $response->assertOk();
 
-        $response = $this->actingAs($this->user)
-            ->delete('/api/event-subscriptions/' . $this->eventSubscriptions[0]->id);
+    $dbUserSubscriptions = json_decode($response->getContent())->data;
+    expect($dbUserSubscriptions)->not->toBeEmpty();
+    expect($dbUserSubscriptions[0]->id)->toEqual($this->eventSubscriptions[0]->id);
+    expect($dbUserSubscriptions[0]->channel)->toEqual($this->eventSubscriptions[0]->channel);
+    expect($dbUserSubscriptions[0]->event)->toEqual($this->eventSubscriptions[0]->event);
+    expect($dbUserSubscriptions[0]->subscribable_type)->toEqual($this->eventSubscriptions[0]->subscribable_type);
+    expect($dbUserSubscriptions[0]->subscribable_id)->toEqual($this->eventSubscriptions[0]->subscribable_id);
+    expect($dbUserSubscriptions[0]->is_broadcast)->toEqual($this->eventSubscriptions[0]->is_broadcast);
+    expect($dbUserSubscriptions[0]->is_notifiable)->toEqual($this->eventSubscriptions[0]->is_notifiable);
+});
 
-        $response->assertStatus(204);
+test('update event subscription', function (): void {
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertFalse(EventSubscription::query()->whereKey($this->eventSubscriptions[0]->id)->exists());
-    }
+    $subscription = [
+        'id' => $this->eventSubscriptions[0]->id,
+        'channel' => $this->comments[2]->broadcastChannel(),
+        'subscribable_type' => $this->user->getMorphClass(),
+        'subscribable_id' => $this->user->id,
+        'is_broadcast' => true,
+        'is_notifiable' => false,
+    ];
 
-    public function test_delete_event_subscription_event_subscription_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
+    $response->assertOk();
 
-        $response = $this->actingAs($this->user)
-            ->delete('/api/event-subscriptions/' . ++$this->eventSubscriptions[2]->id);
+    $eventSubscription = json_decode($response->getContent())->data;
+    $dbEventSubscription = EventSubscription::query()
+        ->whereKey($eventSubscription->id)
+        ->first();
 
-        $response->assertStatus(404);
-    }
+    expect($dbEventSubscription->id)->toEqual($subscription['id']);
+    expect($dbEventSubscription->channel)->toEqual($subscription['channel']);
+    expect($dbEventSubscription->subscribable_type)->toEqual($subscription['subscribable_type']);
+    expect($dbEventSubscription->subscribable_id)->toEqual($subscription['subscribable_id']);
+    expect($dbEventSubscription->is_broadcast)->toEqual($subscription['is_broadcast']);
+    expect($dbEventSubscription->is_notifiable)->toEqual($subscription['is_notifiable']);
+});
 
-    public function test_get_events(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+test('update event subscription event subscription not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/events');
-        $response->assertStatus(200);
+    $subscription = [
+        'id' => ++$this->eventSubscriptions[2]->id,
+        'subscribable_type' => $this->user->getMorphClass(),
+        'subscribable_id' => $this->user->id,
+        'is_broadcast' => true,
+        'is_notifiable' => false,
+    ];
 
-        $this->assertTrue(in_array('eloquent.created: FluxErp\Models\Comment', json_decode($response->getContent())->data));
-    }
+    $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
+    $response->assertUnprocessable();
+});
 
-    public function test_get_user_subscriptions(): void
-    {
-        $this->user->givePermissionTo($this->permissions['getUserSubscriptions']);
-        Sanctum::actingAs($this->user, ['user']);
+test('update event subscription validation fails', function (): void {
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/event-subscriptions/user');
-        $response->assertStatus(200);
+    $subscription = [
+        'channel' => class_basename('eloquent.created: FluxErp\Models\Comment'),
+        'subscribable_type' => $this->user->getMorphClass(),
+        'subscribable_id' => $this->user->id,
+        'is_broadcast' => true,
+        'is_notifiable' => false,
+    ];
 
-        $dbUserSubscriptions = json_decode($response->getContent())->data;
-        $this->assertNotEmpty($dbUserSubscriptions);
-        $this->assertEquals($this->eventSubscriptions[0]->id, $dbUserSubscriptions[0]->id);
-        $this->assertEquals(
-            $this->eventSubscriptions[0]->subscribable_type,
-            $dbUserSubscriptions[0]->subscribable_type
-        );
-        $this->assertEquals($this->eventSubscriptions[0]->subscribable_id, $dbUserSubscriptions[0]->subscribable_id);
-        $this->assertEquals($this->eventSubscriptions[0]->event, $dbUserSubscriptions[0]->event);
-        $this->assertEquals($this->eventSubscriptions[0]->model_type, $dbUserSubscriptions[0]->model_type);
-        $this->assertEquals($this->eventSubscriptions[0]->model_id, $dbUserSubscriptions[0]->model_id);
-    }
-
-    public function test_update_event_subscription(): void
-    {
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $subscription = [
-            'id' => $this->eventSubscriptions[0]->id,
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => 'eloquent.deleted: FluxErp\Models\Comment',
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => $this->comments[1]->id,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
-
-        $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
-        $response->assertStatus(200);
-
-        $eventSubscription = json_decode($response->getContent())->data;
-        $dbEventSubscription = EventSubscription::query()
-            ->whereKey($eventSubscription->id)
-            ->first();
-
-        $this->assertEquals($subscription['id'], $dbEventSubscription->id);
-        $this->assertEquals($subscription['subscribable_type'], $dbEventSubscription->subscribable_type);
-        $this->assertEquals($subscription['subscribable_id'], $dbEventSubscription->subscribable_id);
-        $this->assertEquals(class_basename($subscription['event']), class_basename($dbEventSubscription->event));
-        $this->assertEquals($subscription['model_type'], $dbEventSubscription->model_type);
-        $this->assertEquals($subscription['model_id'], $dbEventSubscription->model_id);
-        $this->assertEquals($subscription['is_broadcast'], $dbEventSubscription->is_broadcast);
-        $this->assertEquals($subscription['is_notifiable'], $dbEventSubscription->is_notifiable);
-    }
-
-    public function test_update_event_subscription_event_subscription_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $subscription = [
-            'id' => ++$this->eventSubscriptions[2]->id,
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => $this->comments[1]->id,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
-
-        $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_event_subscription_validation_fails(): void
-    {
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $subscription = [
-            'subscribable_type' => $this->user->getMorphClass(),
-            'subscribable_id' => $this->user->id,
-            'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
-            'model_type' => morph_alias(Comment::class),
-            'model_id' => $this->comments[1]->id,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
-
-        $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
-        $response->assertStatus(422);
-    }
-}
+    $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
+    $response->assertUnprocessable();
+});

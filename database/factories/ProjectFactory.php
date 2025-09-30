@@ -13,12 +13,12 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->jobTitle(),
-            'start_date' => $this->faker->date(),
-            'description' => $this->faker->realText(),
+            'name' => fake()->jobTitle(),
+            'start_date' => fake()->date(),
+            'description' => fake()->realText(),
             'state' => ProjectState::all()->random()::$name,
             'time_budget' => rand(0, 1000) . ':' . rand(0, 59),
-            'budget' => $this->faker->randomFloat(),
+            'budget' => fake()->randomFloat(),
         ];
     }
 }

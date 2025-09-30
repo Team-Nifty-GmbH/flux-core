@@ -25,8 +25,9 @@ trait IsTimeFrameAwareWidget
 
     public function mountIsTimeFrameAwareWidget(): void
     {
-        $this->fill($this->timeParams);
-        $this->updatedTimeParams();
+        if ($this->timeFrame !== data_get($this->timeParams, 'timeFrame')) {
+            $this->updatedTimeParams();
+        }
     }
 
     public function updatedTimeParams(): void

@@ -31,7 +31,7 @@
             <div class="flex h-1/2 flex-col justify-between gap-1.5">
                 @section('title')
                 <div class="mt-3">
-                    <span class="text-secondary-400 text-xs">
+                    <span class="text-xs text-secondary-400">
                         {{ $productForm->product_number }}
                     </span>
                     <h3 class="font-semibold">

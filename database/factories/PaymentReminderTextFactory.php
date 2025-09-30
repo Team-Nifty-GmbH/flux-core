@@ -12,9 +12,9 @@ class PaymentReminderTextFactory extends Factory
     public function definition(): array
     {
         return [
-            'reminder_subject' => $this->faker->sentence(),
-            'reminder_body' => $this->faker->paragraph(),
-            'reminder_level' => $this->faker->unique()->numberBetween(1, 10),
+            'reminder_subject' => fake()->sentence(),
+            'reminder_body' => fake()->paragraph(),
+            'reminder_level' => fake()->unique()->numberBetween(1, 10),
         ];
     }
 }

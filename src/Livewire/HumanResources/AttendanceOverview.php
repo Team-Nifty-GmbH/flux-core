@@ -68,8 +68,8 @@ class AttendanceOverview extends Component
                         'color',
                         'percentage_deduction',
                         'affects_overtime',
+                        'affects_sick_leave',
                         'affects_vacation',
-                        'affects_sick',
                     ])
                     ->map(fn (AbsenceType $type) => array_merge(
                         $type->toArray(),
