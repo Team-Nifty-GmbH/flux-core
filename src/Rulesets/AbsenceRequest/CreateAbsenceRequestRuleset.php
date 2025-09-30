@@ -26,7 +26,6 @@ class CreateAbsenceRequestRuleset extends FluxRuleset
             ],
             'state_enum' => [
                 'nullable',
-                'string',
                 Rule::enum(AbsenceRequestStateEnum::class),
             ],
             'start_date' => 'required|date',

@@ -21,7 +21,6 @@ class CreateEmployeeBalanceAdjustmentRuleset extends FluxRuleset
             ],
             'type' => [
                 'required',
-                'string',
                 Rule::enum(EmployeeBalanceAdjustmentTypeEnum::class),
             ],
             'amount' => [
@@ -35,7 +34,6 @@ class CreateEmployeeBalanceAdjustmentRuleset extends FluxRuleset
             ],
             'reason' => [
                 'required',
-                'string',
                 Rule::enum(EmployeeBalanceAdjustmentReasonEnum::class),
             ],
             'description' => [
