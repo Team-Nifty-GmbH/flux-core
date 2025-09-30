@@ -104,6 +104,10 @@
             overflow-y: auto;
         }
 
+        table {
+            width: 6cm;
+        }
+
     }
 
 

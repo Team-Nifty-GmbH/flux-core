@@ -48,11 +48,14 @@ abstract class PrintableView extends Component
 
     public function getPrintLayout() : array | null
     {
+        // TODO: add name of a print view in a query
+        // TODO: fix preview flag
         $model = $this->getModel();
         if($model?->client_id) {
            return  resolve_static(PrintLayout::class, 'query')
                 ->where('client_id', $model->client_id)
                 ->where('model_type', morph_alias($model::class))
+                ->where('name', static::getLayout())
                ->first()?->toArray();
         }
         return null;
@@ -134,6 +137,7 @@ abstract class PrintableView extends Component
             ->setOption('isPhpEnabled', true)
             ->setOption('isRemoteEnabled', true)
             ->setOption('defaultMediaType', 'print')
+            ->setOption('fontHeightRatio', 0.8)
             ->setPaper($this->getPaperSize(), $this->getPaperOrientation());
 
         if (! config('dompdf.options.allowed_remote_hosts')) {
@@ -236,11 +240,7 @@ abstract class PrintableView extends Component
         // add margin for first page - to avoid header on first page
         $model = $this->getModel();
         if($model?->client_id) {
-            $layout = resolve_static(PrintLayout::class,'query')
-                ->where('client_id', $model->client_id)
-                ->where('model_type', morph_alias($model::class))
-                ->first()?->toArray();
-
+            $layout = $this->getPrintLayout();
             if($layout && $layout['margin'] && $layout['header'] && $layout['footer']) {
                 $margin = $layout['margin'];
 

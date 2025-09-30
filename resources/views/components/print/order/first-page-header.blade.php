@@ -75,8 +75,10 @@
         </div>
         <table class="w-full">
             <tr>
-                <td colspan="2" class="w-full pb-1 pt-6 text-2xs">
-                    <x-flux::print.elements.first-page-header-address-one-line :client="$client" />
+                <td class="pb-1 pt-6 text-2xs">
+                    <span class="inline-block">
+                        <x-flux::print.elements.first-page-header-address-one-line :client="$client" />
+                    </span>
                 </td>
             </tr>
             <tr class="h-4">

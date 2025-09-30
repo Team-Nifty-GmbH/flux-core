@@ -1,6 +1,6 @@
-{{-- TODO: add page count position as a default element --}}
 <header
     class="h-[1.7cm] w-full bg-white text-center relative"
+    :class="{'z-[100]': headerStore.snippetEditorXData !== null}"
     x-on:mouseup.window="headerStore.onMouseUp()"
     x-on:mousemove.window="
         headerStore.selectedElementId !== null && !headerStore.isResizeOrScaleActive
@@ -13,7 +13,7 @@
     <div
         x-on:mousedown="headerStore.onMouseDownHeader($event)"
         x-cloak
-        x-show="printStore.editHeader"
+        x-show="printStore.editHeader && headerStore.snippetEditorXData === null "
         class="absolute left-1/2 bottom-0 z-[100] h-6 w-6 -translate-x-1/2 translate-y-1/2 cursor-pointer select-none rounded-full bg-flux-primary-400"
     >
         <div class="bottom-0 relative flex h-full w-full items-center justify-center">
@@ -192,7 +192,8 @@
             class="absolute w-[10cm] h-[1.7cm] border"
             :class="{
                     'border-primary-200': headerStore.isSnippetResizeClicked,
-                    'bg-gray-100' : !headerStore.isResizeOrScaleActive && headerStore.selectedElementId === $el.id
+                    'bg-gray-100' : !headerStore.isResizeOrScaleActive && headerStore.selectedElementId === $el.id,
+                    'z-[-10]': headerStore.snippetEditorXData !== null && headerStore.snippetEditorXData?.elementObj.id !== objId
                     }"
         >
             <div
@@ -244,7 +245,8 @@
             class="absolute w-[10cm] h-[1.7cm] border"
             :class="{
                     'border-primary-200': headerStore.isSnippetResizeClicked,
-                    'bg-gray-100' : !headerStore.isResizeOrScaleActive && headerStore.selectedElementId === $el.id
+                    'bg-gray-100' : !headerStore.isResizeOrScaleActive && headerStore.selectedElementId === $el.id,
+                    'z-[-10]': headerStore.snippetEditorXData !== null && headerStore.snippetEditorXData?.elementObj.id !== objId
                     }"
         >
             <div

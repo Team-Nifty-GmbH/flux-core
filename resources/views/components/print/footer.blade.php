@@ -63,8 +63,10 @@
 @else
 {{--  default footer if no layout saved --}}
 <footer class="h-auto w-full bg-white text-center">
-    <div class="footer-content text-2xs leading-3">
-            <div class="absolute left-0 right-0 h-[1.7cm] w-fit m-auto px-6">
+    <div class="text-2xs leading-3">
+            <div
+                style="transform: translateX(-50%)"
+                class="absolute left-1/2 top-0 h-[1.7cm]">
                 @if($client->logo_small)
                     <x-flux::print.elements.footer-logo :client="$client" />
                 @endif

@@ -5,38 +5,24 @@
             ? firstPageHeaderStore.onMouseMove($event)
             : null
     "
-    class="relative w-full box-border">
-    <div
-        x-on:mouseup.window="firstPageHeaderStore.onMouseUpFirstPageHeader($event)"
-        x-on:mousemove.window="
-            firstPageHeaderStore.isFirstPageHeaderClicked
-                ? firstPageHeaderStore.onMouseMoveFirstPageHeader($event)
-                : null
-        "
-        x-ref="first-page-header"
-        class="h-[7cm] box-border"
-        :style="`height: ${firstPageHeaderStore.height};`"
-    >
-        <div
-            x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveScale($event) : firstPageHeaderStore.isSnippetResizeClicked ? firstPageHeaderStore.onMouseMoveResize($event) : null"
-            class="w-0 h-0"></div>
-
-    </div>
+    class="relative w-full box-border"
+    :class="{'z-[100]': firstPageHeaderStore.snippetEditorXData !== null}"
+>
     {{-- UI - first page header - height related --}}
     <div
         x-cloak
-        x-show="printStore.editFirstPageHeader"
+        x-show="printStore.editFirstPageHeader && firstPageHeaderStore.snippetEditorXData === null"
         class="absolute bottom-0 w-full border-t border-t-gray-200"
     ></div>
     <div
         x-cloak
-        x-show="printStore.editFirstPageHeader"
+        x-show="printStore.editFirstPageHeader && firstPageHeaderStore.snippetEditorXData === null"
         class="absolute top-0 w-full border-b border-b-gray-200"
     ></div>
     <div
         x-on:mousedown="firstPageHeaderStore.onMouseDownFirstPageHeader($event)"
         x-cloak
-        x-show="printStore.editFirstPageHeader"
+        x-show="printStore.editFirstPageHeader && firstPageHeaderStore.snippetEditorXData === null"
         class="absolute bottom-0 left-1/2 z-[100] h-6 w-6 -translate-x-1/2 translate-y-1/2 cursor-pointer select-none rounded-full bg-flux-primary-400"
     >
         <div
@@ -82,6 +68,22 @@
         </div>
     </template>
     {{-- UI snippet box name --}}
+    <div
+        x-on:mouseup.window="firstPageHeaderStore.onMouseUpFirstPageHeader($event)"
+        x-on:mousemove.window="
+            firstPageHeaderStore.isFirstPageHeaderClicked
+                ? firstPageHeaderStore.onMouseMoveFirstPageHeader($event)
+                : null
+        "
+        x-ref="first-page-header"
+        class="h-[7cm] box-border"
+        :style="`height: ${firstPageHeaderStore.height};`"
+    >
+        <div
+            x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveScale($event) : firstPageHeaderStore.isSnippetResizeClicked ? firstPageHeaderStore.onMouseMoveResize($event) : null"
+            class="w-0 h-0"></div>
+
+    </div>
     <template
         id="{{ $client->id }}"
         x-ref="first-page-header-client-name"
@@ -222,7 +224,8 @@
             class="absolute w-[10cm] h-[1.7cm] border"
             :class="{
                     'border-primary-200': firstPageHeaderStore.isSnippetResizeClicked,
-                    'bg-gray-100' : !firstPageHeaderStore.isResizeOrScaleActive && firstPageHeaderStore.selectedElementId === $el.id
+                    'bg-gray-100' : !firstPageHeaderStore.isResizeOrScaleActive && firstPageHeaderStore.selectedElementId === $el.id,
+                    'z-[-10]': firstPageHeaderStore.snippetEditorXData !== null && firstPageHeaderStore.snippetEditorXData?.elementObj.id !== objId
                     }"
         >
             <div
@@ -274,7 +277,8 @@
             class="absolute w-[10cm] h-[1.7cm] border"
             :class="{
                     'border-primary-200': firstPageHeaderStore.isSnippetResizeClicked,
-                    'bg-gray-100' : !firstPageHeaderStore.isResizeOrScaleActive && firstPageHeaderStore.selectedElementId === $el.id
+                    'bg-gray-100' : !firstPageHeaderStore.isResizeOrScaleActive && firstPageHeaderStore.selectedElementId === $el.id,
+                    'z-[-10]': firstPageHeaderStore.snippetEditorXData !== null && firstPageHeaderStore.snippetEditorXData?.elementObj.id !== objId
                     }"
         >
             <div

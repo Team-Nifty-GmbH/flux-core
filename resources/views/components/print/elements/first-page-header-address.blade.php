@@ -4,7 +4,7 @@
 
 <address
     draggable="false"
-    class="text-xs not-italic select-none">
+    class="text-xs not-italic select-none pb-0 mb-0">
     <div class="font-semibold">
         {{ $address->company ?? '' }}
     </div>

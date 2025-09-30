@@ -1,5 +1,6 @@
 @props([
     'headerLayout' => null,
+    'isPreview' => false,
 ])
 
 @if($headerLayout)
@@ -35,7 +36,7 @@
                         top: {{ $element['y'] }}cm;"
                     class="absolute"
                 >
-                    <x-flux::print.elements.header-page-count :preview="true" />
+                    <x-flux::print.elements.header-page-count :preview="$isPreview" />
                 </div>
             @endif
         @endforeach
@@ -59,9 +60,9 @@
         <div>
                 <div class="float-left inline-block text-left">
                     <x-flux::print.elements.header-subject :subject="$subject ?? ''" />
-                    <x-flux::print.elements.header-page-count :preview="true" />
+                    <x-flux::print.elements.header-page-count :preview="$isPreview" />
                 </div>
-                <div class="float-right inline-block max-h-72 w-44 text-right">
+                <div class="float-right inline-block w-fit  h-[1.7cm]">
                     @if($client->logo_small)
                         <x-flux::print.elements.header-logo :client="$client" />
                     @endif

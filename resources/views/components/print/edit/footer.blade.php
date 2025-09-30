@@ -11,7 +11,7 @@
     <div
         x-on:mousedown="footerStore.onMouseDownFooter($event)"
         x-cloak
-        x-show="printStore.editFooter"
+        x-show="printStore.editFooter && footerStore.snippetEditorXData === null"
         class="absolute left-1/2 top-0 z-[100] h-6 w-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer select-none rounded-full bg-flux-primary-400"
     >
         <div class="relative flex h-full w-full items-center justify-center">
@@ -181,7 +181,8 @@
                     class="absolute w-[10cm] h-[1.7cm] border"
                     :class="{
                     'border-primary-200': footerStore.isSnippetResizeClicked,
-                    'bg-gray-100' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id
+                    'bg-gray-100' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id,
+                    'z-[-10]': footerStore.snippetEditorXData !== null && footerStore.snippetEditorXData?.elementObj.id !== objId
                     }"
                 >
                     <div
@@ -233,12 +234,13 @@
                     class="absolute w-[10cm] h-[1.7cm] border"
                     :class="{
                     'border-primary-200': footerStore.isSnippetResizeClicked,
-                    'bg-gray-100' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id
+                    'bg-gray-100' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id,
+                    'z-[-10]': footerStore.snippetEditorXData !== null && footerStore.snippetEditorXData?.elementObj.id !== objId
                     }"
                 >
                     <div
                         draggable="false"
-                        x-cloak x-show="printStore.editFooter" class="relative w-full h-full">
+                        x-cloak x-show="printStore.editFooter" class="w-full h-full">
                         <x-icon
                             x-cloak
                             x-show="footerStore.snippetEditorXData === null"
