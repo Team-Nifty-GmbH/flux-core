@@ -222,7 +222,7 @@ class AttendanceOverview extends Component
                     ->whereBetween('date', [$startOfMonth, $endOfMonth->endOfDay()])
                     ->whereDoesntHaveRelation(
                         'absenceRequests',
-                        'status',
+                        'state_enum',
                         AbsenceRequestStateEnum::Approved
                     ),
             ],
@@ -239,7 +239,7 @@ class AttendanceOverview extends Component
                     ->whereBetween('date', [$startOfMonth, $endOfMonth])
                     ->where('is_work_day', true)
                     ->whereDoesntHave('absenceRequests', fn (Builder $query) => $query
-                        ->where('status', AbsenceRequestStateEnum::Approved)
+                        ->where('state_enum', AbsenceRequestStateEnum::Approved)
                     ),
             ],
                 'target_days'
@@ -270,14 +270,14 @@ class AttendanceOverview extends Component
                     ->whereBetween('date', [$startOfMonth, $endOfMonth])
                     ->with([
                         'absenceRequests' => fn (BelongsToMany $query) => $query
-                            ->where('status', AbsenceRequestStateEnum::Approved)
+                            ->where('state_enum', AbsenceRequestStateEnum::Approved)
                             ->select([
                                 'id',
                                 'employee_id',
                                 'absence_type_id',
                                 'start_date',
                                 'end_date',
-                                'status',
+                                'state_enum',
                             ]),
                     ])
                     ->select([
@@ -297,7 +297,7 @@ class AttendanceOverview extends Component
                     ->whereValueBetween($startOfMonth->format('Y-m-d'), ['start_date', 'end_date'])
                     ->orWhereValueBetween($endOfMonth->format('Y-m-d'), ['start_date', 'end_date'])
                 )
-                    ->where('status', AbsenceRequestStateEnum::Approved),
+                    ->where('state_enum', AbsenceRequestStateEnum::Approved),
             ])
             ->employed($endOfMonth)
             ->get()

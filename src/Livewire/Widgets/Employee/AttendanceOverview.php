@@ -82,7 +82,7 @@ class AttendanceOverview extends CircleChart
             ->whereHas('employeeDays', function (Builder $query) use ($startDate, $endDate): void {
                 $query->whereBetween('date', [$startDate, $endDate]);
             })
-            ->where('status', AbsenceRequestStateEnum::Approved)
+            ->where('state_enum', AbsenceRequestStateEnum::Approved)
             ->with(['absenceType', 'employeeDays'])
             ->get();
 
@@ -116,7 +116,7 @@ class AttendanceOverview extends CircleChart
             ->where('is_work_day', true)
             ->whereDoesntHave('workTimes')
             ->whereDoesntHave('absenceRequests', function (Builder $query): void {
-                $query->where('status', AbsenceRequestStateEnum::Approved);
+                $query->where('state_enum', AbsenceRequestStateEnum::Approved);
             })
             ->count();
 

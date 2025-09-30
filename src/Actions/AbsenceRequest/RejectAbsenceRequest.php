@@ -27,12 +27,12 @@ class RejectAbsenceRequest extends FluxAction
             ->first();
 
         $data = $this->getData();
-        $absenceRequest->statusChangeComment = Arr::pull($data, 'comment');
+        $absenceRequest->stateChangeComment = Arr::pull($data, 'comment');
 
         $absenceRequest->fill(array_merge(
             $data,
             [
-                'status' => AbsenceRequestStateEnum::Rejected,
+                'state_enum' => AbsenceRequestStateEnum::Rejected,
             ]
         ));
         $absenceRequest->save();

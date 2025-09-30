@@ -28,12 +28,12 @@ class ApproveAbsenceRequest extends FluxAction
             ->first();
 
         $data = $this->getData();
-        $absenceRequest->statusChangeComment = Arr::pull($data, 'comment');
+        $absenceRequest->stateChangeComment = Arr::pull($data, 'comment');
 
         $absenceRequest->fill(array_merge(
             $data,
             [
-                'status' => AbsenceRequestStateEnum::Approved,
+                'state_enum' => AbsenceRequestStateEnum::Approved,
             ]
         ));
         $absenceRequest->save();

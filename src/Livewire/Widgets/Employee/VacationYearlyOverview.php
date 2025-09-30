@@ -99,7 +99,7 @@ class VacationYearlyOverview extends Component
             // Get requested vacation days (approved absence requests)
             $requestedDays = resolve_static(AbsenceRequest::class, 'query')
                 ->where('employee_id', $employee->getKey())
-                ->where('status', AbsenceRequestStateEnum::Approved)
+                ->where('state_enum', AbsenceRequestStateEnum::Approved)
                 ->whereHas('absenceType', function ($query): void {
                     $query->where('affects_vacation', true);
                 })

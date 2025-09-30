@@ -346,7 +346,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         // Get all approved absences that count as target hours
         $absencesCountingAsTargetHours = resolve_static(AbsenceRequest::class, 'query')
             ->where('employee_id', $user->employee->getKey())
-            ->where('status', AbsenceRequestStateEnum::Approved)
+            ->where('state_enum', AbsenceRequestStateEnum::Approved)
             ->whereBetween('start_date', [$startDate, $endDate])
             ->with('absenceType')
             ->get()

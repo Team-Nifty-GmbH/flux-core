@@ -234,7 +234,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
         $this->absenceRequests()
             ->whereRelation('absenceType', 'affects_vacation', true)
-            ->where('status', AbsenceRequestStateEnum::Approved)
+            ->where('state_enum', AbsenceRequestStateEnum::Approved)
             ->whereValueNotBetween($cutoff, ['start_date', 'end_date'])
             ->when(
                 $start,
@@ -261,7 +261,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
         $this->absenceRequests()
             ->whereRelation('absenceType', 'affects_vacation', true)
-            ->where('status', AbsenceRequestStateEnum::Approved)
+            ->where('state_enum', AbsenceRequestStateEnum::Approved)
             ->whereValueBetween($cutoff, ['start_date', 'end_date'])
             ->when(
                 $start,

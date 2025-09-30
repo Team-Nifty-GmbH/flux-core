@@ -36,7 +36,7 @@ class CloseEmployeeDay extends FluxAction
         $absenceRequestBaseQuery = resolve_static(AbsenceRequest::class, 'query')
             ->where('employee_id', $employee->getKey())
             ->whereValueBetween($date, ['start_date', 'end_date'])
-            ->where('status', AbsenceRequestStateEnum::Approved)
+            ->where('state_enum', AbsenceRequestStateEnum::Approved)
             ->with('absenceType:id,affects_sick,affects_vacation,affects_overtime');
 
         $wasPresent = false;

@@ -58,7 +58,7 @@ class AbsenceRequestForm extends FluxForm
 
     public ?string $start_date = null;
 
-    public ?string $status = 'pending';
+    public ?string $state_enum = 'pending';
 
     public ?string $substitute_note = null;
 
@@ -106,7 +106,7 @@ class AbsenceRequestForm extends FluxForm
                     ->first()
                     ?->employee_can_create === EmployeeCanCreateEnum::Yes
             ) {
-                $this->status = AbsenceRequestStateEnum::Approved->value;
+                $this->state_enum = AbsenceRequestStateEnum::Approved->value;
                 $this->approved_at = now();
                 $this->approved_by_id = auth()->id();
             }
