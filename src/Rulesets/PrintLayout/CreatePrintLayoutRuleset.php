@@ -19,7 +19,7 @@ class CreatePrintLayoutRuleset extends FluxRuleset
             $fileNames = array_filter(scandir(flux_path('resources/views/printing') . "/" . $dir),
                 fn($item) => !str_starts_with($item, '.'));
             // remove extension from file names and add prefix
-            $fileNames = array_map(fn($item) => 'flux::printing' . '.' . $dir . '.' . str_replace('.blade.php', '', $item), $fileNames);
+            $fileNames = array_map(fn($item) => 'flux::layouts.printing' . '.' . $dir . '.' . str_replace('.blade.php', '', $item), $fileNames);
 
             return array_values($fileNames);
         }, $dirs)));

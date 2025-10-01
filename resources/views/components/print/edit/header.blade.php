@@ -206,6 +206,7 @@
                     x-on:mousedown="toggleEditor()"
                     name="pencil" class="absolute cursor-pointer left-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
                 <template x-if="headerStore.snippetEditorXData?.elementObj.id === objId">
+{{--                    TODO: remove backgorund color on text as option--}}
                     <x-flux::editor
                         x-editable="headerStore.snippetEditorXData?.elementObj.id === objId"
                         class="absolute top-0 left-0 w-full p-0"

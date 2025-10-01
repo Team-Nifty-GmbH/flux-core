@@ -48,16 +48,15 @@ abstract class PrintableView extends Component
 
     public function getPrintLayout() : array | null
     {
-        // TODO: add name of a print view in a query
-        // TODO: fix preview flag
         $model = $this->getModel();
         if($model?->client_id) {
            return  resolve_static(PrintLayout::class, 'query')
                 ->where('client_id', $model->client_id)
                 ->where('model_type', morph_alias($model::class))
-                ->where('name', static::getLayout())
+                ->where('name', static::getLayout() . '.' . morph_alias($model::class) . '.' . strtolower($model->orderType->name))
                ->first()?->toArray();
         }
+
         return null;
     }
 

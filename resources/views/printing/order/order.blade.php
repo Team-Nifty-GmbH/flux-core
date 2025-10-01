@@ -5,10 +5,10 @@
 @use(\Illuminate\Support\Fluent)
 @php
     $isNet = ($model->priceList ?? resolve_static(PriceList::class, 'default'))->is_net;
-    // TODO: fix this - load from printable view
     $layout = resolve_static(PrintLayout::class,'query')
         ->where('client_id', $model->client_id)
         ->where('model_type', morph_alias($model::class))
+        ->where('name', implode('.',['flux::layouts.printing.order', strtolower($model->orderType->name)]))
         ->first()?->toArray();
 @endphp
 

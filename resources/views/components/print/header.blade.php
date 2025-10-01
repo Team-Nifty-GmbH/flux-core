@@ -56,19 +56,14 @@
 @else
 {{-- default header if no changes are made--}}
 <header class="h-auto w-full bg-white text-center font-light">
-    <div class="header-content">
-        <div>
-                <div class="float-left inline-block text-left">
-                    <x-flux::print.elements.header-subject :subject="$subject ?? ''" />
-                    <x-flux::print.elements.header-page-count :preview="$isPreview" />
-                </div>
-                <div class="float-right inline-block w-fit  h-[1.7cm]">
-                    @if($client->logo_small)
-                        <x-flux::print.elements.header-logo :client="$client" />
-                    @endif
-                </div>
-            <div class="clear-both"></div>
-        </div>
+    <div class="float-left inline-block text-left">
+        <x-flux::print.elements.header-subject :subject="$subject ?? ''" />
+        <x-flux::print.elements.header-page-count :preview="$isPreview" />
+    </div>
+    <div class="float-right inline-block w-auto h-[1.7cm]">
+        @if($client->logo_small)
+            <x-flux::print.elements.header-logo :client="$client" />
+        @endif
     </div>
 </header>
 @endif

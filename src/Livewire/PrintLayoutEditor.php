@@ -94,7 +94,7 @@ class PrintLayoutEditor extends Component
             $this->selectedClientId = $this->client->id;
 
             $layout = PrintLayout::query()
-                ->where('name', 'flux::printing.' . $this->layoutModel . '.' . $this->name)
+                ->where('name', 'flux::layouts.printing.' . $this->layoutModel . '.' . $this->name)
                 ->where('client_id', $this->selectedClientId)
                 ->first();
 
@@ -103,7 +103,7 @@ class PrintLayoutEditor extends Component
             } else {
                 $this->form->fill([
                     'client_id' => $this->selectedClientId,
-                    'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
+                    'name' => 'flux::layouts.printing.' . $this->layoutModel . '.' . $this->name,
                     'model_type' => $this->layoutModel,
                 ]);
             }

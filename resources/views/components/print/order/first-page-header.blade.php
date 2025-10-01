@@ -24,7 +24,7 @@
                 <div
                     style="left: {{ $element['x'] }}cm;
                         top: {{ $element['y'] }}cm;"
-                    class="absolute">
+                    class="absolute text-2xs">
                     <x-flux::print.elements.first-page-header-address-one-line :client="$client" />
                 </div>
             @endif

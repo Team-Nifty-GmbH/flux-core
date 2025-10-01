@@ -66,7 +66,7 @@
     <div class="text-2xs leading-3">
             <div
                 style="transform: translateX(-50%)"
-                class="absolute left-1/2 top-0 h-[1.7cm]">
+                class="absolute left-1/2 top-0 h-[1.7cm] w-auto">
                 @if($client->logo_small)
                     <x-flux::print.elements.footer-logo :client="$client" />
                 @endif
