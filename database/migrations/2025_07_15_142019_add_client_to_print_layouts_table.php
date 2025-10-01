@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('print_layouts', function (Blueprint $table) {
+        Schema::table('print_layouts', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->after('id');
             $table->foreign('client_id')
                 ->references('id')->on('clients')
@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('print_layouts', function (Blueprint $table) {
+        Schema::table('print_layouts', function (Blueprint $table): void {
             $table->dropForeign(['client_id']);
             $table->dropColumn('client_id');
         });

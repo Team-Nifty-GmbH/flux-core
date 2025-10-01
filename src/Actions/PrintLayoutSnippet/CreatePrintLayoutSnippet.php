@@ -8,13 +8,13 @@ use FluxErp\Rulesets\PrintLayoutSnippet\CreatePrintLayoutSnippetRuleset;
 
 class CreatePrintLayoutSnippet extends FluxAction
 {
-
     public static function models(): array
     {
-        return  [PrintLayoutSnippet::class];
+        return [PrintLayoutSnippet::class];
     }
 
-    protected function getRulesets(): string|array {
+    protected function getRulesets(): string|array
+    {
         return CreatePrintLayoutSnippetRuleset::class;
     }
 

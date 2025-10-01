@@ -11,6 +11,7 @@ use FluxErp\Traits\Livewire\PrintLayout\SnippetHandler;
 class CreatePrintLayout extends FluxAction
 {
     use MediaHandler, SnippetHandler;
+
     public static function models(): array
     {
         return [PrintLayout::class];
@@ -33,21 +34,21 @@ class CreatePrintLayout extends FluxAction
             'model_type' => $this->getData('model_type'),
         ]);
         $printLayout->save();
+
         // header
         $header = $this->getData('header', []);
-        $this->addMedia($header,$temporaryMedia,$printLayout->id);
-        $this->addSnippets($header,$this->getData('temporary_snippets.header', []),$printLayout->id);
+        $this->addMedia($header, $temporaryMedia, $printLayout->id);
+        $this->addSnippets($header, $this->getData('temporary_snippets.header', []), $printLayout->id);
 
         // first page header
         $firstPageHeader = $this->getData('first_page_header', []);
-        $this->addMedia($firstPageHeader,$temporaryMedia,$printLayout->id);
-        $this->addSnippets($firstPageHeader,$this->getData('temporary_snippets.first_page_header', []),$printLayout->id);
+        $this->addMedia($firstPageHeader, $temporaryMedia, $printLayout->id);
+        $this->addSnippets($firstPageHeader, $this->getData('temporary_snippets.first_page_header', []), $printLayout->id);
 
         // footer
         $footer = $this->getData('footer', []);
-        $this->addMedia($footer,$temporaryMedia,$printLayout->id);
-        $this->addSnippets($footer,$this->getData('temporary_snippets.footer', []),$printLayout->id);
-
+        $this->addMedia($footer, $temporaryMedia, $printLayout->id);
+        $this->addSnippets($footer, $this->getData('temporary_snippets.footer', []), $printLayout->id);
 
         $printLayout->fill([
             'margin' => $this->getData('margin', []),

@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-
     public function up(): void
     {
         Schema::create('print_layouts', function (Blueprint $table): void {
@@ -22,7 +21,6 @@ return new class() extends Migration
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->string('updated_by')->nullable();
-
         });
     }
 

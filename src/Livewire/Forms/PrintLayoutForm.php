@@ -12,27 +12,26 @@ class PrintLayoutForm extends FluxForm
     #[Locked]
     public ?int $client_id = null;
 
-    #[Locked]
-    public ?string $name = null;
-
-    public array $margin = [];
-
-    public array $header = [];
+    public array $first_page_header = [];
 
     public array $footer = [];
 
-    public array $first_page_header = [];
+    public array $header = [];
 
     #[Locked]
     public ?int $id = null;
 
+    public array $margin = [];
+
     #[Locked]
     public ?string $model_type = null;
 
-    public array $temporaryMedia = [];
+    #[Locked]
+    public ?string $name = null;
 
     public array $temporary_snippets = [];
 
+    public array $temporaryMedia = [];
 
     public function fill($values): void
     {

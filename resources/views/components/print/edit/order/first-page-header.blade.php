@@ -245,6 +245,7 @@
                         x-model="text"
                         :full-height="true"
                         :tooltip-dropdown="true"
+                        :text-background-colors="[]"
                         :show-editor-padding="false"
                         :text-align="true"
                         :transparent="true" />
@@ -298,6 +299,7 @@
                         x-model="text"
                         :full-height="true"
                         :text-align="true"
+                        :text-background-colors="[]"
                         :tooltip-dropdown="true"
                         :show-editor-padding="false"
                         :transparent="true" />

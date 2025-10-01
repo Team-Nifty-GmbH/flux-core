@@ -21,7 +21,7 @@
         "@tailwindcss/typography": "^0.5.10",
         "@tiptap/core": "^3.0.7",
         "@tiptap/extension-mention": "^3.0.7",
-        "@tiptap/extension-text-style": "^3.0.7",
+        "@tiptap/extension-text-style": "^3.6.2",
         "@tiptap/extension-underline": "^3.0.7",
         "@tiptap/extension-text-align": "^3.4.4",
         "@tiptap/pm": "^3.0.7",

@@ -18,5 +18,4 @@ class DeletePrintLayoutRuleset extends FluxRuleset
             ],
         ];
     }
-
 }

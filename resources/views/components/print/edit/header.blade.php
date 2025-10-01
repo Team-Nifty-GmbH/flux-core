@@ -215,6 +215,7 @@
                         :full-height="true"
                         :tooltip-dropdown="true"
                         :show-editor-padding="false"
+                        :text-background-colors="[]"
                         :text-align="true"
                         :transparent="true" />
                 </template>
@@ -267,6 +268,7 @@
                         x-model="text"
                         :full-height="true"
                         :text-align="true"
+                        :text-background-colors="[]"
                         :tooltip-dropdown="true"
                         :show-editor-padding="false"
                         :transparent="true" />

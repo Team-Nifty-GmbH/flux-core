@@ -24,5 +24,4 @@ class UpdatePrintLayoutRuleset extends FluxRuleset
             'temporary_snippets' => 'array',
         ];
     }
-
 }

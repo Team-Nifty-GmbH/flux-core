@@ -10,9 +10,9 @@ use FluxErp\Models\PrintLayoutSnippet;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Fluent;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use Illuminate\Support\Fluent;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -21,73 +21,35 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class PrintLayoutEditor extends Component
 {
-
     use Actions,WithFileUploads;
 
     public array $availableClients = [];
 
     public Client $client;
 
-    public array $model = [];
-
-    public string $subject = '';
+    public PrintLayoutForm $form;
 
     #[Url]
     public string $layoutModel;
+
+    public array $model = [];
 
     #[Url]
     public string $name;
 
     public ?int $selectedClientId = null;
 
-    public PrintLayoutForm $form;
-
-    private function arrayToFluent(array $array): Fluent
-    {
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $array[$key] = array_is_list($value)
-                    ? array_map(fn($item) => is_array($item) ? $this->arrayToFluent($item) : $item, $value)
-                    : $this->arrayToFluent($value);
-            }
-        }
-        return new Fluent($array);
-    }
-
-    #[Renderless]
-    public function clientToJson (): array
-    {
-        $client = $this->client->toArray();
-        $bankConnections = $this->client->bankConnections->map(function ($bankConnection) {;
-            return [
-                'id' => $bankConnection->id,
-            ];
-        })->toArray();
-
-        return [
-            'client' => $client,
-            'bank_connections' => $bankConnections,
-        ];
-    }
-
-    #[Renderless]
-    public function snippetToJson(int $id): array
-    {
-        return resolve_static(PrintLayoutSnippet::class, 'query')
-            ->whereKey($id)
-            ->first()
-            ->toArray();
-    }
+    public string $subject = '';
 
     public function mount(): void
     {
         $this->subject = $this->name;
         $this->availableClients = resolve_static(Client::class, 'query')
             ->orderBy('name')
-            ->get(['id','name'])
+            ->get(['id', 'name'])
             ->toArray();
 
-        if($this->availableClients) {
+        if ($this->availableClients) {
             $this->client = resolve_static(Client::class, 'query')
                 ->whereKey(reset($this->availableClients)['id'])
                 ->first();
@@ -98,7 +60,7 @@ class PrintLayoutEditor extends Component
                 ->where('client_id', $this->selectedClientId)
                 ->first();
 
-            if($layout) {
+            if ($layout) {
                 $this->form->fill($layout->toArray());
             } else {
                 $this->form->fill([
@@ -107,13 +69,11 @@ class PrintLayoutEditor extends Component
                     'model_type' => $this->layoutModel,
                 ]);
             }
-
         }
-
 
         // depending on the print layout set the model data
         $this->model = [
-            'order_date'=> Carbon::make('2023-10-01'),
+            'order_date' => Carbon::make('2023-10-01'),
             'customer_number' => 'CUST123',
             'order_number' => 'ORD123456',
             'commission' => 5.00,
@@ -129,37 +89,31 @@ class PrintLayoutEditor extends Component
         ];
     }
 
-    public function getModelFluentProperty() : Fluent
+    #[Layout('flux::layouts.print-layout-editor')]
+    public function render(): View
     {
-        return $this->arrayToFluent($this->model);
+        return view('flux::livewire.a4-page-editor');
     }
 
-    public function selectClient(int $clientId): void
+    #[Renderless]
+    public function clientToJson(): array
     {
-        if($clientId !== $this->selectedClientId) {
-                $this->selectedClientId = $clientId;
+        $client = $this->client->toArray();
+        $bankConnections = $this->client->bankConnections->map(function ($bankConnection) {
+            return [
+                'id' => $bankConnection->id,
+            ];
+        })->toArray();
 
-                $this->client = resolve_static(Client::class, 'query')
-                ->whereKey($this->selectedClientId)
-                ->first();
+        return [
+            'client' => $client,
+            'bank_connections' => $bankConnections,
+        ];
+    }
 
-            $layout = PrintLayout::query()
-                ->where('name', 'flux::printing.' . $this->layoutModel . '.' . $this->name)
-                ->where('client_id', $this->selectedClientId)
-                ->first();
-
-            if($layout) {
-                $this->form->fill($layout->toArray());
-            } else {
-                $this->form->fill([
-                'id'=> null,
-                'client_id' => $this->selectedClientId,
-                'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
-                 // TODO: need to map the model type to the correct morph alias
-                'model_type' => $this->layoutModel,
-                ]);
-            }
-        }
+    public function getModelFluentProperty(): Fluent
+    {
+        return $this->arrayToFluent($this->model);
     }
 
     #[Renderless]
@@ -170,19 +124,63 @@ class PrintLayoutEditor extends Component
             // clean up temporary media and snippets after successful save
             $this->form->temporaryMedia = [];
             $this->form->temporary_snippets = [];
+
             return true;
-        } catch (ValidationException|UnauthorizedException $e)
-        {
+        } catch (ValidationException|UnauthorizedException $e) {
             // TODO: import the library for exception_to_notifications
             exception_to_notifications($e, $this);
+
             return false;
         }
     }
 
-    #[Layout('flux::layouts.print-layout-editor')]
-    public function render(): View
+    public function selectClient(int $clientId): void
     {
-        return view('flux::livewire.a4-page-editor');
+        if ($clientId !== $this->selectedClientId) {
+            $this->selectedClientId = $clientId;
+
+            $this->client = resolve_static(Client::class, 'query')
+                ->whereKey($this->selectedClientId)
+                ->first();
+
+            $layout = PrintLayout::query()
+                ->where('name', 'flux::printing.' . $this->layoutModel . '.' . $this->name)
+                ->where('client_id', $this->selectedClientId)
+                ->first();
+
+            if ($layout) {
+                $this->form->fill($layout->toArray());
+            } else {
+                $this->form->fill([
+                    'id' => null,
+                    'client_id' => $this->selectedClientId,
+                    'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
+                    // TODO: need to map the model type to the correct morph alias
+                    'model_type' => $this->layoutModel,
+                ]);
+            }
+        }
     }
 
+    #[Renderless]
+    public function snippetToJson(int $id): array
+    {
+        return resolve_static(PrintLayoutSnippet::class, 'query')
+            ->whereKey($id)
+            ->first()
+            ->toArray();
+    }
+
+    private function arrayToFluent(array $array): Fluent
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $array[$key] = array_is_list($value)
+                    ? array_map(fn ($item) => is_array($item) ? $this->arrayToFluent($item) : $item, $value)
+                    : $this->arrayToFluent($value);
+            }
+        }
+
+        return new Fluent($array);
+    }
 }

@@ -10,6 +10,7 @@ use Spatie\MediaLibrary\HasMedia;
 class PrintLayout extends FluxModel implements HasMedia
 {
     use HasUserModification, InteractsWithMedia;
+
     public function casts(): array
     {
         return [

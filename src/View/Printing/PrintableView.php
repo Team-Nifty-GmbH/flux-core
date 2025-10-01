@@ -46,20 +46,6 @@ abstract class PrintableView extends Component
         return static::$layout;
     }
 
-    public function getPrintLayout() : array | null
-    {
-        $model = $this->getModel();
-        if($model?->client_id) {
-           return  resolve_static(PrintLayout::class, 'query')
-                ->where('client_id', $model->client_id)
-                ->where('model_type', morph_alias($model::class))
-                ->where('name', static::getLayout() . '.' . morph_alias($model::class) . '.' . strtolower($model->orderType->name))
-               ->first()?->toArray();
-        }
-
-        return null;
-    }
-
     public static function setLayout(?string $layout): void
     {
         static::$layout = $layout;
@@ -113,6 +99,20 @@ abstract class PrintableView extends Component
             ->force()
             ->validate()
             ->execute();
+    }
+
+    public function getPrintLayout(): ?array
+    {
+        $model = $this->getModel();
+        if ($model?->client_id) {
+            return resolve_static(PrintLayout::class, 'query')
+                ->where('client_id', $model->client_id)
+                ->where('model_type', morph_alias($model::class))
+                ->where('name', static::getLayout() . '.' . morph_alias($model::class) . '.' . strtolower($model->orderType->name))
+                ->first()?->toArray();
+        }
+
+        return null;
     }
 
     public function preview(bool $preview = true): static
@@ -238,9 +238,9 @@ abstract class PrintableView extends Component
     {
         // add margin for first page - to avoid header on first page
         $model = $this->getModel();
-        if($model?->client_id) {
+        if ($model?->client_id) {
             $layout = $this->getPrintLayout();
-            if($layout && $layout['margin'] && $layout['header'] && $layout['footer']) {
+            if ($layout && $layout['margin'] && $layout['header'] && $layout['footer']) {
                 $margin = $layout['margin'];
 
                 // due to rounding issues -> px to cm -> add 0.1cm to header height
@@ -252,7 +252,7 @@ abstract class PrintableView extends Component
                         $margin['marginTop'] . 'cm',
                         $margin['marginRight'] . 'cm',
                         $margin['marginBottom'] . 'cm',
-                        $margin['marginLeft'] . 'cm'
+                        $margin['marginLeft'] . 'cm',
                     ],
                     'margin_first_page' => [
                         '0cm',
@@ -265,9 +265,8 @@ abstract class PrintableView extends Component
                         $margin['marginRight'] . 'cm',
                         ($margin['marginBottom'] + $layout['footer']['height']) . 'cm',
                         $margin['marginLeft'] . 'cm',
-                ]];
+                    ]];
             }
-
         }
 
         return [
@@ -276,7 +275,7 @@ abstract class PrintableView extends Component
             'first_page_header_margin_top' => '32mm',
             'margin_preview_view' => ['32mm', '20mm', '28mm', '18mm'],
             'margin_first_page' => ['0mm', '20mm', '28mm', '18mm'],
-            'margin' => ['50mm', '20mm', '45mm', '18mm']
+            'margin' => ['50mm', '20mm', '45mm', '18mm'],
         ];
     }
 

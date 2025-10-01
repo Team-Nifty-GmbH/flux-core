@@ -1,6 +1,6 @@
 import folders from './components/folders';
 import setupEditor from './components/tiptap';
-import editorFontSizeColorHandler from './components/tiptap-font-size-color-handler.js';
+import editorFontSizeColorHandler from './components/tiptap-font-size-line-height-color-handler.js';
 import workTime from './components/work-time.js';
 import calendar from './components/calendar.js';
 import dashboard from './components/dashboard';

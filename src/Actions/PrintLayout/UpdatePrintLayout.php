@@ -8,10 +8,10 @@ use FluxErp\Rulesets\PrintLayout\UpdatePrintLayoutRuleset;
 use FluxErp\Traits\Livewire\PrintLayout\MediaHandler;
 use FluxErp\Traits\Livewire\PrintLayout\SnippetHandler;
 
-
 class UpdatePrintLayout extends FluxAction
 {
     use MediaHandler,SnippetHandler;
+
     public static function models(): array
     {
         return [PrintLayout::class];
@@ -36,8 +36,8 @@ class UpdatePrintLayout extends FluxAction
         $snapshotDBHeaderSnippets = $printLayout->header['snippets'] ?? [];
         $this->syncMedia($header['media'] ?? [], $snapshotDBHeaderMedia);
         $this->syncSnippets($header, $snapshotDBHeaderSnippets);
-        $this->addMedia($header,$temporaryMedia,$this->getData('id'));
-        $this->addSnippets($header,$this->getData('temporary_snippets.header', []),$this->getData('id'));
+        $this->addMedia($header, $temporaryMedia, $this->getData('id'));
+        $this->addSnippets($header, $this->getData('temporary_snippets.header', []), $this->getData('id'));
 
         // first_page_header
         $firstPageHeader = $this->getData('first_page_header');
@@ -45,8 +45,8 @@ class UpdatePrintLayout extends FluxAction
         $snapshotDBFirstPageHeaderSnippets = $printLayout->first_page_header['snippets'] ?? [];
         $this->syncMedia($firstPageHeader['media'] ?? [], $snapshotDBFirstPageHeaderMedia);
         $this->syncSnippets($firstPageHeader, $snapshotDBFirstPageHeaderSnippets);
-        $this->addMedia($firstPageHeader,$temporaryMedia,$this->getData('id'));
-        $this->addSnippets($firstPageHeader,$this->getData('temporary_snippets.first_page_header', []),$this->getData('id'));
+        $this->addMedia($firstPageHeader, $temporaryMedia, $this->getData('id'));
+        $this->addSnippets($firstPageHeader, $this->getData('temporary_snippets.first_page_header', []), $this->getData('id'));
 
         // footer
         $snapshotDBFooterMedia = $printLayout->footer['media'] ?? [];
@@ -54,8 +54,8 @@ class UpdatePrintLayout extends FluxAction
         $footer = $this->getData('footer');
         $this->syncMedia($footer['media'] ?? [], $snapshotDBFooterMedia);
         $this->syncSnippets($footer, $snapshotDBFooterSnippets);
-        $this->addMedia($footer,$temporaryMedia,$this->getData('id'));
-        $this->addSnippets($footer,$this->getData('temporary_snippets.footer', []),$this->getData('id'));
+        $this->addMedia($footer, $temporaryMedia, $this->getData('id'));
+        $this->addSnippets($footer, $this->getData('temporary_snippets.footer', []), $this->getData('id'));
 
         $printLayout->fill([
             'margin' => $this->getData('margin', []),

@@ -6,17 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-
     public function up(): void
     {
-        Schema::table('print_layouts', function (Blueprint $table) {
+        Schema::table('print_layouts', function (Blueprint $table): void {
             $table->dropUnique(['name']);
         });
     }
 
     public function down(): void
     {
-        Schema::table('print_layouts', function (Blueprint $table) {
+        Schema::table('print_layouts', function (Blueprint $table): void {
             $table->unique(['name']);
         });
     }

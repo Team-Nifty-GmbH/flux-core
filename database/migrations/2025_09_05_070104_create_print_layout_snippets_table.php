@@ -4,11 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('print_layout_snippets', function (Blueprint $table) {
+        Schema::create('print_layout_snippets', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('print_layout_id');
             $table->foreign('print_layout_id')

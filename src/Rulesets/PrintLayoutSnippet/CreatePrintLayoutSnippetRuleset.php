@@ -11,7 +11,7 @@ class CreatePrintLayoutSnippetRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'print_layout_id'   => [
+            'print_layout_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => PrintLayout::class]),

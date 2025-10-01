@@ -10,21 +10,6 @@ use Illuminate\Support\Arr;
 
 class CreatePrintLayoutRuleset extends FluxRuleset
 {
-    private function fileNames(): string
-    {
-        $path = flux_path('resources/views/printing');
-        $dirs = array_filter(scandir($path), fn($item) => !str_starts_with($item, '.'));
-
-        return implode(',', Arr::collapse($printing  = array_map(function ($dir) {
-            $fileNames = array_filter(scandir(flux_path('resources/views/printing') . "/" . $dir),
-                fn($item) => !str_starts_with($item, '.'));
-            // remove extension from file names and add prefix
-            $fileNames = array_map(fn($item) => 'flux::layouts.printing' . '.' . $dir . '.' . str_replace('.blade.php', '', $item), $fileNames);
-
-            return array_values($fileNames);
-        }, $dirs)));
-    }
-
     public function rules(): array
     {
         return [
@@ -38,7 +23,6 @@ class CreatePrintLayoutRuleset extends FluxRuleset
                 'string',
                 'max:255',
                 'in:' . $this->fileNames(),
-
             ],
             'model_type' => [
                 'required',
@@ -53,5 +37,20 @@ class CreatePrintLayoutRuleset extends FluxRuleset
             'temporaryMedia' => 'array',
             'temporary_snippets' => 'array',
         ];
+    }
+
+    private function fileNames(): string
+    {
+        $path = flux_path('resources/views/printing');
+        $dirs = array_filter(scandir($path), fn ($item) => ! str_starts_with($item, '.'));
+
+        return implode(',', Arr::collapse($printing = array_map(function ($dir) {
+            $fileNames = array_filter(scandir(flux_path('resources/views/printing') . '/' . $dir),
+                fn ($item) => ! str_starts_with($item, '.'));
+            // remove extension from file names and add prefix
+            $fileNames = array_map(fn ($item) => 'flux::layouts.printing' . '.' . $dir . '.' . str_replace('.blade.php', '', $item), $fileNames);
+
+            return array_values($fileNames);
+        }, $dirs)));
     }
 }

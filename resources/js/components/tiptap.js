@@ -1,6 +1,6 @@
 import { Editor } from '@tiptap/core';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
-import { FontSizeColorConfig } from './tiptap-font-size-color-handler.js';
+import { FontSizeLineHeightColorConfig } from './tiptap-font-size-line-height-color-handler.js';
 import { TextAlignConfig } from './tiptap-text-align-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
@@ -61,7 +61,7 @@ export default function (
                     element: element,
                     extensions: [
                         StarterKit,
-                        FontSizeColorConfig,
+                        FontSizeLineHeightColorConfig,
                         LiteralTab,
                         TextAlignConfig,
                         MentionConfig(searchModel, element),

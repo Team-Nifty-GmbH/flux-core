@@ -13,7 +13,8 @@ class DeletePrintLayoutSnippet extends FluxAction
         return [PrintLayoutSnippet::class];
     }
 
-    protected function getRulesets(): string|array {
+    protected function getRulesets(): string|array
+    {
         return [DeletePrintLayoutSnippetRuleset::class];
     }
 

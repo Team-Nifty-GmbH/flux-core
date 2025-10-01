@@ -8,15 +8,14 @@ use FluxErp\Rulesets\PrintLayout\UpdatePrintLayoutRuleset;
 
 class DeletePrintLayout extends FluxAction
 {
+    public static function models(): array
+    {
+        return [PrintLayout::class];
+    }
 
     protected function getRulesets(): string|array
     {
         return UpdatePrintLayoutRuleset::class;
-    }
-
-    public static function models(): array
-    {
-        return [PrintLayout::class];
     }
 
     public function performAction(): bool
@@ -26,5 +25,4 @@ class DeletePrintLayout extends FluxAction
             ->first()
             ->delete();
     }
-
 }
