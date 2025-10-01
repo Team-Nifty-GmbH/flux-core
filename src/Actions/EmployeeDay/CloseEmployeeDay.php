@@ -183,7 +183,7 @@ class CloseEmployeeDay extends FluxAction
                     ->whereDate('started_at', $date)
                     ->pluck('id'),
                 'is_work_day' => $isWorkDay,
-                'is_holiday' => $employee->location?->isHoliday($date),
+                'is_holiday' => (bool) $employee->location?->isHoliday($date),
                 'holiday_id' => $employee->location?->holidays()
                     ->whereDate('date', $date)
                     ->value('holidays.id'),
@@ -211,7 +211,7 @@ class CloseEmployeeDay extends FluxAction
         $absenceRequests = $dayData->pull('absence_requests');
 
         if ($employeeDay) {
-            $employeeDay->update($dayData);
+            $employeeDay->update($dayData->toArray());
         } else {
             $employeeDay = app(
                 EmployeeDay::class,
