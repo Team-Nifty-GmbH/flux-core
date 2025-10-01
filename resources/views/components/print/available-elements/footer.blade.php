@@ -1,5 +1,5 @@
 <div x-show="printStore.editFooter" x-cloak>
-    <div class="pb-4 text-lg text-gray-600">Client</div>
+    <div class="pb-4 text-lg text-gray-600">{{ __('Client') }}</div>
     <div
         style="font-family: Montserrat"
         class="flex items-center justify-between">
@@ -9,7 +9,7 @@
             x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-client-{{$client->id}}')" />
     </div>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    <div class="pb-4 text-lg text-gray-600">Bank Connections</div>
+    <div class="pb-4 text-lg text-gray-600">{{ __('Bank Connections') }}</div>
     <div
         style="font-family: Montserrat"
         class="flex flex-col gap-4">
@@ -47,7 +47,7 @@
         </div>
     @endif
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    <div class="pb-4 text-lg text-gray-600">Additional Photos</div>
+    <div class="pb-4 text-lg text-gray-600">{{ __('Additional Media')  }}</div>
     <div
         :class="{'pb-4': footerStore.temporaryVisibleMedia.length > 0 || footerStore.visibleMedia.length > 0 }"
         class="flex flex-col gap-4">
@@ -95,12 +95,12 @@
         />
         <x-button
             color="primary"
-            text="Add Image"
+            text="{{ __('Add Image') }}"
             x-on:click="$refs.footerImageInput.click()"
         />
     </label>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    <div class="pb-4 text-lg text-gray-600">Additional Snippet</div>
+    <div class="pb-4 text-lg text-gray-600">{{ __('Additional Snippets') }}</div>
     <div class="flex flex-col gap-4"
          :class="{'pb-4': footerStore.temporarySnippetBoxes.length > 0 || footerStore.visibleSnippetBoxes.length > 0 }"
     >
@@ -117,7 +117,7 @@
     </div>
     <x-button
         color="primary"
-        text="Add Snippet"
+        text="{{ __('Add Snippet') }}"
         x-on:click="footerStore.addToTemporarySnippet($refs)"
     />
 </div>

@@ -1,13 +1,13 @@
 <div x-cloak x-show="printStore.editHeader">
     <div  class="pb-4 flex items-center justify-between">
-        <div class=" text-lg text-gray-600">Subject</div>
+        <div class=" text-lg text-gray-600">{{ __('Subject') }}</div>
         <x-toggle
             x-on:change="headerStore.toggleElement($refs,'header-subject')"
             x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-subject')"
         />
     </div>
     <div class=" flex items-center justify-between">
-        <div class=" text-lg text-gray-600">Page Count</div>
+        <div class=" text-lg text-gray-600">{{ __('Page Count') }}</div>
         <x-toggle
             x-on:change="headerStore.toggleElement($refs,'header-page-count')"
             x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-page-count')"
@@ -25,7 +25,7 @@
         </div>
     @endif
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    <div class="pb-4 text-lg text-gray-600">Additional Photos</div>
+    <div class="pb-4 text-lg text-gray-600">{{ __('Additional Media')  }}</div>
     <div
         :class="{'pb-4': headerStore.temporaryVisibleMedia.length > 0 || headerStore.visibleMedia.length > 0 }"
         class="flex flex-col gap-4">
@@ -71,12 +71,12 @@
         />
         <x-button
             color="primary"
-            text="Add Image"
+            text="{{__('Add Image')}}"
             x-on:click="$refs.headerImageInput.click()"
         />
     </label>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    <div class="pb-4 text-lg text-gray-600">Additional Snippet</div>
+    <div class="pb-4 text-lg text-gray-600">{{ __('Additional Snippets') }}</div>
     <div class="flex flex-col gap-4"
          :class="{'pb-4': headerStore.temporarySnippetBoxes.length > 0 || headerStore.visibleSnippetBoxes.length > 0 }"
     >
@@ -93,7 +93,7 @@
     </div>
     <x-button
         color="primary"
-        text="Add Snippet"
+        text="{{__('Add Snippet')}}"
         x-on:click="headerStore.addToTemporarySnippet($refs)"
     />
 </div>

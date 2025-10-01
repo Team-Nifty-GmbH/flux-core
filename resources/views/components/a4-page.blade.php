@@ -30,7 +30,7 @@
                     />
                 <div class="flex-1">
                     <div class="bg-gray-100 w-full h-full text-[48px] font-medium text-gray-300 flex items-center justify-center">
-                        Content
+                        {{ __('Content') }}
                     </div>
                 </div>
                 <x-flux::print.edit.footer :client="$this->client" />

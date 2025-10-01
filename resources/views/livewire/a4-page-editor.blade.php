@@ -8,10 +8,10 @@
     }"
     class="flex h-[29.7cm] items-center space-x-4"
 >
-    <div class="h-full w-[300px] rounded bg-white p-4 shadow">
+    <div class="h-full w-[300px] rounded bg-white p-4 shadow overflow-y-auto">
         @if ($this->availableClients)
             <x-select.native
-                label="Selected Client"
+                label="{{ __('Selected Client') }}"
                 x-bind:disabled="printStore.anyEdit || printStore.loading"
                 x-on:change="printStore.selectClient($event,$wire,$refs)"
                 select="label:name|value:id"
@@ -40,19 +40,32 @@
         </div>
     @endif
     <div class="h-full w-[300px] rounded bg-white p-4 shadow">
-        <div x-cloak x-show="!printStore.anyEdit" class="flex flex-col space-y-4">
+        <div x-cloak x-show="!printStore.anyEdit" class="h-full flex flex-col space-y-4">
             <x-button
                 x-bind:disabled="printStore.loading"
-                x-on:click="printStore.toggleEditMargin()" text="Edit Margin" />
+                x-on:click="printStore.toggleEditMargin()" text="{{ __('Edit Margin') }}" />
             <x-button
                 x-bind:disabled="printStore.loading"
-                x-on:click="printStore.toggleEditHeader()" text="Edit Header" />
+                x-on:click="printStore.toggleEditHeader()" text="{{ __('Edit Header') }}" />
             <x-button
                 x-bind:disabled="printStore.loading"
-                x-on:click="printStore.toggleEditFirstPageHeader()" text="Edit First Page Header" />
+                x-on:click="printStore.toggleEditFirstPageHeader()" text="{{ __('Edit First Page Header') }}" />
             <x-button
                 x-bind:disabled="printStore.loading"
-                x-on:click="printStore.toggleEditFooter()" text="Edit Footer" />
+                x-on:click="printStore.toggleEditFooter()" text="{{ __('Edit Footer') }}" />
+            <div class="flex-1"></div>
+            <div class="text-[16px] font-light text-gray-600 w-full border-b pb-2 border-gray-300">Navigation</div>
+            <div class="flex justify-between">
+                <x-button
+                    x-bind:disabled="printStore.loading"
+                    href="{{ route('settings',[
+                        'setting-entry' => 'settings.print-layouts'
+                        ]) }}"
+                    text="{{ __('Settings') }}" />
+                <x-button
+                    x-bind:disabled="printStore.loading"
+                    href="{{ route('dashboard') }}" text="{{__('Dashboard')}}" />
+            </div>
         </div>
         <div
             x-cloak
@@ -68,10 +81,10 @@
                 class="flex items-center justify-between">
                 <x-button
                     x-bind:disabled="printStore.loading"
-                    x-on:click="printStore.closeEditor($refs)" text="Cancel" />
+                    x-on:click="printStore.closeEditor($refs)" text="{{ __('Cancel') }}" />
                 <x-button
                     x-bind:disabled="printStore.loading"
-                    x-on:click="printStore.submit($wire,$refs)" text="Submit" />
+                    x-on:click="printStore.submit($wire,$refs)" text="{{ __('Submit') }}" />
             </div>
         </div>
     </div>
