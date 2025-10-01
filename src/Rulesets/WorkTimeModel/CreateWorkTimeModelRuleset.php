@@ -29,7 +29,6 @@ class CreateWorkTimeModelRuleset extends FluxRuleset
             ],
             'overtime_compensation_enum' => [
                 'required',
-                'string',
                 Rule::enum(OvertimeCompensationEnum::class),
             ],
             'is_active' => 'boolean',

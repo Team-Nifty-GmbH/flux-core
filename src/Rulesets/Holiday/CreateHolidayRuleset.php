@@ -33,7 +33,6 @@ class CreateHolidayRuleset extends FluxRuleset
             ],
             'day_part' => [
                 'required',
-                'string',
                 Rule::enum(DayPartEnum::class),
             ],
             'is_active' => 'boolean',

@@ -40,7 +40,6 @@ class UpdateHolidayRuleset extends FluxRuleset
             'day_part' => [
                 'sometimes',
                 'required',
-                'string',
                 Rule::enum(DayPartEnum::class),
             ],
             'is_active' => 'boolean',

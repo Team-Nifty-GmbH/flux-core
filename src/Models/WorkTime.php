@@ -153,10 +153,18 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         });
 
         static::saving(function (WorkTime $workTime): void {
-            // Set employee_id if user has an employee relation
             if ($workTime->isDirty('user_id') && ! is_null($workTime->user_id)) {
                 $workTime->employee_id = resolve_static(Employee::class, 'query')
                     ->where('user_id', $workTime->user_id)
+                    ->value('id');
+            }
+
+            if ($workTime->isDirty('employee_id')
+                && ! is_null($workTime->employee_id)
+                && is_null($workTime->user_id)
+            ) {
+                $workTime->user_id = resolve_static(User::class, 'query')
+                    ->whereRelation('employee', 'id', $workTime->employee_id)
                     ->value('id');
             }
 
