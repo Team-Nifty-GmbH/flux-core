@@ -104,6 +104,8 @@ class PaymentReminder extends OrderList
             }
         }
 
+        $this->reset('selected');
+
         $this->loadData();
     }
 
