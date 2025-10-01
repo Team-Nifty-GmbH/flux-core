@@ -168,7 +168,7 @@
             <x-select.styled
                 :label="__('Department')"
                 wire:model="employee.employee_department_id"
-                select="label:label|value:id"
+                select="label:name|value:id"
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\EmployeeDepartment::class),
