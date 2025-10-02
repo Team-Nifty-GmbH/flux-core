@@ -144,7 +144,7 @@ class PrintLayoutEditor extends Component
                 ->first();
 
             $layout = PrintLayout::query()
-                ->where('name', 'flux::printing.' . $this->layoutModel . '.' . $this->name)
+                ->where('name', 'flux::layouts.printing.' . $this->layoutModel . '.' . $this->name)
                 ->where('client_id', $this->selectedClientId)
                 ->first();
 
@@ -154,8 +154,7 @@ class PrintLayoutEditor extends Component
                 $this->form->fill([
                     'id' => null,
                     'client_id' => $this->selectedClientId,
-                    'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
-                    // TODO: need to map the model type to the correct morph alias
+                    'name' => 'flux::layouts.printing.' . $this->layoutModel . '.' . $this->name,
                     'model_type' => $this->layoutModel,
                 ]);
             }

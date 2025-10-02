@@ -40,10 +40,10 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
         _component: null,
         startPointVertical: null,
         startPointHorizontal: null,
-        _marginTop: 2,
-        _marginBottom: 2,
+        _marginTop: 3.2,
         _marginLeft: 2,
-        _marginRight: 2,
+        _marginRight: 2.8,
+        _marginBottom: 1.8,
         isTopClicked: false,
         isBottomClicked: false,
         isLeftClicked: false,
@@ -228,10 +228,10 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 this._marginLeft = margin.marginLeft;
                 this._marginRight = margin.marginRight;
             } else {
-                this._marginTop = 2;
+                this._marginTop = 3.2;
                 this._marginLeft = 2;
-                this._marginBottom = 2;
-                this._marginRight = 2;
+                this._marginRight = 2.8;
+                this._marginBottom = 1.8;
             }
         },
         async register($wire) {
