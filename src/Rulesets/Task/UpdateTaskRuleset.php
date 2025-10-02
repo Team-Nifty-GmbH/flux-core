@@ -53,6 +53,8 @@ class UpdateTaskRuleset extends FluxRuleset
             'description' => 'string|nullable',
             'start_date' => 'present|date|nullable',
             'due_date' => 'present|date|nullable|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i',
+            'due_time' => 'nullable|date_format:H:i',
             'priority' => 'sometimes|required|integer|min:0',
             'state' => [
                 'string',
