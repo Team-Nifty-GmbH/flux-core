@@ -4,7 +4,6 @@ namespace FluxErp\Livewire;
 
 use FluxErp\Livewire\Forms\PrintLayoutForm;
 use FluxErp\Models\Client;
-use FluxErp\Models\Media;
 use FluxErp\Models\PrintLayout;
 use FluxErp\Models\PrintLayoutSnippet;
 use FluxErp\Traits\Livewire\Actions;
@@ -120,6 +119,7 @@ class PrintLayoutEditor extends Component
     public function save(): bool
     {
         try {
+            throw new UnauthorizedException(494);
             $this->form->save();
             // clean up temporary media and snippets after successful save
             $this->form->temporaryMedia = [];
@@ -127,6 +127,7 @@ class PrintLayoutEditor extends Component
 
             return true;
         } catch (ValidationException|UnauthorizedException $e) {
+            // TODO: reset form to previous state
             // TODO: import the library for exception_to_notifications
             exception_to_notifications($e, $this);
 

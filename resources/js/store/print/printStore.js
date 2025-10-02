@@ -266,11 +266,11 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             ]);
 
             const response = await $wire.save();
+            this.editMargin = false;
+            this.editFooter = false;
+            this.editHeader = false;
+            this.editFirstPageHeader = false;
             if (response) {
-                this.editMargin = false;
-                this.editFooter = false;
-                this.editHeader = false;
-                this.editFirstPageHeader = false;
                 // due to nature of a file upload - it is not renderlless - Livewire will drive the re-render
                 // all the elements will disappear - hence stores need to be reloaded
                 // TODO: add condition if template snippet is added - to reload
@@ -301,6 +301,13 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                         await $firstPageHeaderStore.reload($refs, false);
                     }
                 }
+            } else {
+               // TODO: fix error handling - both toast and reload -> doesent return to previous state
+                // on error - reload all and discard changes
+                await this.reload();
+                await $footerStore.reload($refs,false);
+                await $headerStore.reload($refs, false);
+                await $firstPageHeaderStore.reload($refs,false);
             }
             this._loading = false;
         },

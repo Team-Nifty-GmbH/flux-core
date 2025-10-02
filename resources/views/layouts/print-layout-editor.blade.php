@@ -29,6 +29,19 @@
     <body
         class="flex h-screen w-screen items-center justify-center bg-gray-50 text-xs"
     >
+{{--    @persist('notifications')--}}
+{{--    @if (auth()->check() && auth()->id())--}}
+{{--        <div--}}
+{{--            id="{{ \Illuminate\Support\Str::uuid() }}"--}}
+{{--            x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)"--}}
+{{--        >--}}
+{{--            <x-toast z-index="z-50"></x-toast>--}}
+{{--        </div>--}}
+{{--    @endif--}}
+
+{{--    <x-dialog z-index="z-40" blur="md" align="center" />--}}
+{{--    @endpersist--}}
+
         {{ $slot }}
     </body>
 </html>
