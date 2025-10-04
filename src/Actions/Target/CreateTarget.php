@@ -23,30 +23,13 @@ class CreateTarget extends FluxAction
     public function performAction(): Target
     {
         $users = Arr::pull($this->data, 'users');
-        $userShares = Arr::pull($this->data, 'user_shares');
-        $targetValue = data_get($this->data, 'target_value');
 
         $target = app(Target::class, ['attributes' => $this->getData()]);
         $target->save();
 
-        if ($users) {
-            $pivotData = [];
-            foreach ($users as $id) {
-                $abs = data_get($userShares, $id . '.absolute');
-                $rel = data_get($userShares, $id . '.relative');
-                $pivotData[$id] = [
-                    'target_share' => is_null($rel)
-                    ? bcdiv($abs, $targetValue)
-                    : bcdiv($rel, 100),
-                    'target_share_is_percentage' => ! is_null($rel),
-                ];
-            }
-
-            $target->users()->attach($pivotData);
-
-            foreach ($target->children()->get() as $child) {
-                $child->users()->attach($pivotData);
-            }
+        $target->users()->attach($users);
+        foreach ($target->children()->get('id') as $child) {
+            $child->users()->attach($users);
         }
 
         return $target->refresh();
@@ -83,41 +66,6 @@ class CreateTarget extends FluxAction
 
         if (! in_array($this->getData('owner_column'), $modelClass::ownerColumns())) {
             $errors['owner_column'] = ['Owner column is not valid for the given model type.'];
-        }
-
-        $isGroup = $this->getData('is_group_target');
-        $users = $this->getData('users', []);
-        $shares = $this->getData('user_shares', []);
-
-        if ($isGroup && ! empty($users)) {
-            $hasRel = false;
-            $hasAbs = false;
-
-            foreach ($users as $uid) {
-                $rel = data_get($shares, "$uid.relative");
-                $abs = data_get($shares, "$uid.absolute");
-
-                if (! is_null($rel)) {
-                    $hasRel = true;
-                }
-                if (! is_null($abs)) {
-                    $hasAbs = true;
-                }
-            }
-
-            if ($hasRel && $hasAbs) {
-                $errors['user_shares'] = array_merge($errors['user_shares'] ?? [], [
-                    __('Relative and absolute shares are mutually exclusive'),
-                ]);
-            }
-
-            foreach ($users as $uid) {
-                $rel = data_get($shares, "$uid.relative");
-                $abs = data_get($shares, "$uid.absolute");
-                if (is_null($rel) && is_null($abs)) {
-                    $errors["user_shares.$uid"] = ['Provide relative or absolute share for each selected user'];
-                }
-            }
         }
 
         if ($errors) {

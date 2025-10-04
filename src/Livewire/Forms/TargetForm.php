@@ -40,26 +40,23 @@ class TargetForm extends FluxForm
 
     public ?string $timeframe_column = null;
 
-    public array $user_shares = [];
-
     public array $users = [];
 
     public function fill($values): void
     {
         if ($values instanceof Target) {
-            $values->loadMissing('users:id');
+            $values->loadMissing('users');
 
             $values = $values->toArray();
-            $values['user_shares'] = array_map(
-                fn (array $user) => [
-                    'id' => data_get($user, 'id'),
-                    'target_share' => data_get($user, 'pivot.target_share'),
-                ],
-                $values['users'] ?? []
-            );
-            $values['users'] = array_column($values['users'] ?? [], 'id');
 
-            return;
+            $values['users'] = array_map(function ($user) {
+                return [
+                    'user_id' => $user['id'],
+                    'label' => $user['name'],
+                    'target_share' => $user['pivot']['target_share'] ?? 0,
+                    'is_percentage' => (bool) ($user['pivot']['is_percentage'] ?? true),
+                ];
+            }, $values['users'] ?? []);
         }
 
         parent::fill($values);

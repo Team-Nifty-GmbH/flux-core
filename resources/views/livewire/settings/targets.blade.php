@@ -1,65 +1,31 @@
-<x-modal
-    size="3xl"
-    :id="$target->modalName()"
->
+<x-modal size="3xl" :id="$target->modalName()">
     <div
         x-data="{
-            users: @js($users),
-            selectedUsers: $wire.entangle('target.users'),
-            filteredUsers: [],
-            userShares: $wire.entangle('target.user_shares'),
+            users: {{ $users }},
+            filteredUsers: $wire.entangle('target.users'),
 
-            init() {
-                if (!this.userShares || typeof this.userShares !== 'object') {
-                    this.userShares = {};
+            addUser(user) {
+                if (! this.filteredUsers.find((u) => u.user_id === user.id)) {
+                    this.filteredUsers.push({
+                        user_id: user.id,
+                        label: user.label,
+                        target_share: 0,
+                        is_percentage: true,
+                    })
                 }
-
-                this.filterUsers();
-                this.$watch('selectedUsers', () => this.filterUsers());
+                console.log(this.filteredUsers)
             },
 
-            filterUsers() {
-                const selected = Array.isArray(this.selectedUsers) ? this.selectedUsers : [];
-                const selectedIds = selected.map(v => String(v));
-
-                this.filteredUsers = selectedIds.length === 0
-                    ? []
-                    : this.users.filter(u => selectedIds.includes(String(u.id)));
-
-                this.filteredUsers.forEach(u => {
-                    if (!this.userShares[String(u.id)]) {
-                        this.userShares[String(u.id)] = { relative: 0, absolute: 0 };
-                    } else {
-                        if (this.userShares[String(u.id)].relative === undefined) {
-                            this.userShares[String(u.id)].relative = 0;
-                        }
-                        if (this.userShares[String(u.id)].absolute === undefined) {
-                            this.userShares[String(u.id)].absolute = 0;
-                        }
-                    }
-                });
+            removeUser(user) {
+                this.filteredUsers = this.filteredUsers.filter(
+                    (u) => u.user_id !== user.id,
+                )
             },
-
-            updateUserShare(userId, key, value) {
-                const id = String(userId);
-                const num = value === '' ? 0 : Number(value);
-
-                if (!this.userShares[id]) this.userShares[id] = { relative: 0, absolute: 0 };
-
-                if (key === 'relative') {
-                    this.userShares[id].relative = isNaN(num) ? null : num;
-                    this.userShares[id].absolute = null;
-                } else {
-                    this.userShares[id].absolute = isNaN(num) ? null : num;
-                    this.userShares[id].relative = null;
-                }
-            }
         }"
         x-init="init()"
         class="flex flex-col gap-3"
     >
         <x-spinner />
-
         <x-input wire:model="target.name" :label="__('Title')" required />
         <x-date :label="__('Start')" wire:model="target.start_date" />
         <x-date :label="__('End')" wire:model="target.end_date" />
@@ -87,19 +53,28 @@
             :options="$aggregateColumns"
         />
 
-        <x-number :label="__('Target Value')" wire:model="target.target_value" />
-        <x-select.native :label="__('Owner Column')" wire:model="target.owner_column" :options="$ownerColumns" />
+        <x-number
+            :label="__('Target Value')"
+            wire:model="target.target_value"
+        />
+        <x-select.native
+            :label="__('Owner Column')"
+            wire:model="target.owner_column"
+            :options="$ownerColumns"
+        />
         <x-number :label="__('Priority')" wire:model="target.priority" />
-        <x-toggle :label="__('Is Group Target')" wire:model="target.is_group_target" />
+        <x-toggle
+            :label="__('Is Group Target')"
+            wire:model="target.is_group_target"
+        />
 
         <x-select.styled
             :label="__('Users')"
-            autocomplete="off"
             multiple
-            wire:model="target.users"
             select="label:label|value:id"
-            x-on:select="filterUsers()"
-            x-on:remove="filterUsers()"
+            wire:model="selectedUserIds"
+            x-on:select="addUser($event.detail.select)"
+            x-on:remove="removeUser($event.detail.select)"
             unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\User::class),
@@ -107,37 +82,22 @@
             ]"
         />
 
-        <x-toggle :label="__('Use absolute shares')" x-model="$wire.useAbsoluteShares" />
-
         <div class="space-y-2">
-            <template x-for="user in filteredUsers" :key="user.id">
+            <template
+                x-for="(user, index) in filteredUsers"
+                :key="user.user_id"
+            >
                 <x-card class="flex items-center">
                     <div class="flex flex-1 items-center">
-                        <span class="ml-2" x-text="user.name"></span>
+                        <span class="ml-2" x-text="user.label"></span>
                     </div>
 
-                    <div class="flex gap-2 w-1/3">
-                        <div x-cloak x-show="!$wire.useAbsoluteShares">
-                            <x-number
-                                class="flex-1"
-                                :label="__('Relative Target Share (%)')"
-                                step="1"
-                                min="0"
-                                max="100"
-                                x-model.number="userShares[String(user.id)].relative"
-                                x-on:change="updateUserShare(user.id, 'relative', $event.target.value)"
-                            />
-                        </div>
-                        <div x-cloak x-show="$wire.useAbsoluteShares">
-                            <x-number
-                                class="flex-1"
-                                :label="__('Absolute Target Share')"
-                                step="1"
-                                min="0"
-                                x-model.number="userShares[String(user.id)].absolute"
-                                x-on:change="updateUserShare(user.id, 'absolute', $event.target.value)"
-                            />
-                        </div>
+                    <div class="flex w-1/3 items-center gap-4">
+                        <x-toggle
+                            :label="__('Is Percentage')"
+                            x-model="user.is_percentage"
+                        />
+                        <x-number x-model.number="user.target_share" />
                     </div>
                 </x-card>
             </template>
