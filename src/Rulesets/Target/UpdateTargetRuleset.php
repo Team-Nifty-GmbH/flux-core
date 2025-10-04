@@ -34,12 +34,21 @@ class UpdateTargetRuleset extends FluxRuleset
             'aggregate_column' => 'sometimes|required_with:aggregate_type|string',
             'owner_column' => 'sometimes|required|string',
             'priority' => 'nullable|integer|min:0|max:255',
-
+            'is_group_target' => 'boolean',
             'users' => 'nullable|array',
-            'users.*' => [
+            'users.*.user_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => User::class]),
+            ],
+            'users.*.target_share' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+            'users.*.is_percentage' => [
+                'required',
+                'boolean',
             ],
         ];
     }
