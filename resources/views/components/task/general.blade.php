@@ -43,21 +43,14 @@
                 ]"
             >
                 <x-slot:label>
-                    <div class="flex items-center justify-between pb-1">
-                        <x-label :label="__('Project')" />
-                        <x-button
-                            class="pointer-events-auto"
-                            x-cloak
-                            x-show="task.project_id"
-                            color="secondary"
-                            light
-                            sm
-                            wire:navigate
-                            icon="eye"
-                            x-bind:href="'{{ route('projects.id', ':id') }}'.replace(':id', task.project_id)"
-                            href=""
-                        />
-                    </div>
+                    <x-link
+                        icon="link"
+                        :text="__('Project')"
+                        href="#"
+                        class="pointer-events-auto"
+                        wire:navigate
+                        x-bind:href="task.project_id ? '{{ route('projects.id', ':id') }}'.replace(':id', task.project_id) : '#'"
+                    />
                 </x-slot>
             </x-select.styled>
         </div>
@@ -223,7 +216,7 @@
     @section('task-additional-columns')
     <div class="space-y-2.5">
         <h3
-            class="text-md text-secondary-700 dark:text-secondary-400 mt-4 whitespace-normal font-medium"
+            class="text-md mt-4 whitespace-normal font-medium text-secondary-700 dark:text-secondary-400"
         >
             {{ __('Additional Columns') }}
         </h3>

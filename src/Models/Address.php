@@ -301,12 +301,15 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
             $contactUpdates = [];
             $addressUpdates = [];
+
+            $mainAddressId = $address->contact()
+                ->value('main_address_id');
             $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
-                ->orderByDesc('is_main_address')
+                ->orderByRaw('id = ' . ($mainAddressId ?? 0) . ' DESC')
                 ->first(['id', 'is_main_address', 'is_invoice_address', 'is_delivery_address']);
 
-            if (! $mainAddress->is_main_address) {
+            if ($mainAddress->getKey() !== $mainAddressId) {
                 $contactUpdates += [
                     'main_address_id' => $mainAddress->id,
                 ];
@@ -385,6 +388,19 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             new PrivateChannel($this->broadcastChannel()),
             new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
         ];
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Category::class,
+            'categorizables',
+            'categorizable_id',
+            'category_id',
+            'contact_id',
+            'id'
+        )
+            ->wherePivot('categorizable_type', morph_alias(Contact::class));
     }
 
     public function client(): BelongsTo
@@ -481,6 +497,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->detailRoute();
     }
 
+    public function industries(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Industry::class,
+            'contact_industry',
+            'contact_id',
+            'industry_id',
+            'contact_id',
+            'id'
+        );
+    }
+
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
@@ -555,8 +583,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $start = $start ? Carbon::parse($start) : null;

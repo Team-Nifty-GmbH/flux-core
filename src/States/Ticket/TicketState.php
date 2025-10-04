@@ -2,14 +2,12 @@
 
 namespace FluxErp\States\Ticket;
 
-use FluxErp\States\State;
+use FluxErp\States\EndableState;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class TicketState extends State implements HasFrontendFormatter
+abstract class TicketState extends EndableState implements HasFrontendFormatter
 {
-    public static bool $isEndState = false;
-
     abstract public function color(): string;
 
     public static function config(): StateConfig
@@ -65,6 +63,12 @@ abstract class TicketState extends State implements HasFrontendFormatter
                         Done::class,
                     ],
                     Closed::class,
+                ],
+                [
+                    [
+                        Closed::class,
+                    ],
+                    Done::class,
                 ],
             ]);
     }

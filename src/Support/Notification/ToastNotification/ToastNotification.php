@@ -124,7 +124,7 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
-    public function image(string $image): static
+    public function image(?string $image = null): static
     {
         $this->data['image'] = $image;
 
@@ -231,7 +231,10 @@ class ToastNotification extends Toast implements Arrayable
     public function toMail(): MailMessage
     {
         $mailMessage = (new MailMessage())
-            ->greeting(__('Hello') . ' ' . $this->notifiable?->name)
+            ->greeting(trim(
+                __('Hello')
+                . (property_exists($this->notifiable, 'name') ? ' ' . $this->notifiable->name : '')
+            ))
             ->subject($this->title ?? '')
             ->line(new HtmlString($this->description));
 
@@ -251,11 +254,25 @@ class ToastNotification extends Toast implements Arrayable
             return null;
         }
 
-        return (new WebPushMessage())
-            ->icon($this->img)
+        $webPush = (new WebPushMessage())
             ->title($this->title)
-            ->body($this->description)
-            ->data(['url' => $this->accept?->url ?? '']);
+            ->data($this->data)
+            ->badge(url('/pwa-icons/icons-vector.svg'))
+            ->body($this->description);
+
+        if ($this->accept) {
+            $webPush->action($this->accept->label ?? '', $this->accept->url ?? '');
+        }
+
+        if ($this->reject) {
+            $webPush->action($this->reject->label ?? '', $this->reject->url ?? '');
+        }
+
+        if (data_get($this->data, 'image')) {
+            $webPush->icon(data_get($this->data, 'image'));
+        }
+
+        return $webPush;
     }
 
     public function type(ToastType $type): static

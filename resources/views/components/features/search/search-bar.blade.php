@@ -5,7 +5,7 @@
         x-on:keydown.escape.window="show = false"
     >
         <x-input
-            :text="__('Products')"
+            :label="__('Products')"
             icon="magnifying-glass"
             x-on:click="show = true"
             onclick="this.setSelectionRange(0, this.value.length)"

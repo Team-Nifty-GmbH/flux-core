@@ -56,17 +56,20 @@ class ProjectTaskList extends BaseTaskList
     #[Renderless]
     public function edit(string|int|null $id = null): void
     {
-        $task = resolve_static(Task::class, 'query')
-            ->where('project_id', $this->projectId)
-            ->when($id, fn (Builder $query) => $query->whereKey($id))
-            ->firstOrFail();
+        if ($id) {
+            $task = resolve_static(Task::class, 'query')
+                ->whereKey($id)
+                ->where('project_id', $this->projectId)
+                ->firstOrFail();
+        } else {
+            $task = app(Task::class);
+        }
 
         $this->reset('taskTab');
-        $task->project_id = $this->projectId;
-
         $this->editForm($id);
 
-        $this->task->users = $task->users()->pluck('users.id')->toArray();
+        $this->task->project_id = $this->projectId;
+
         $this->task->additionalColumns = array_intersect_key(
             $task->toArray(),
             array_fill_keys(

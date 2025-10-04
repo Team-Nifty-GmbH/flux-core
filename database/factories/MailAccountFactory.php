@@ -12,13 +12,13 @@ class MailAccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => $this->faker->uuid(),
-            'email' => $this->faker->safeEmail(),
-            'password' => $this->faker->password(),
-            'host' => $this->faker->domainName(),
-            'smtp_email' => $this->faker->safeEmail(),
-            'smtp_password' => $this->faker->password(),
-            'smtp_host' => $this->faker->domainName(),
+            'uuid' => fake()->uuid(),
+            'email' => fake()->safeEmail(),
+            'password' => fake()->password(),
+            'host' => fake()->domainName(),
+            'smtp_email' => fake()->safeEmail(),
+            'smtp_password' => fake()->password(),
+            'smtp_host' => fake()->domainName(),
         ];
     }
 }

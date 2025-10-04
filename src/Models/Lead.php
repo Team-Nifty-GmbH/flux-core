@@ -21,8 +21,10 @@ use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -34,7 +36,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 {
     use Categorizable, Commentable, Communicatable, HasCalendarEvents, HasFrontendAttributes, HasPackageFactory,
         HasRecordOrigin, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable,
-        SoftDeletes;
+        SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',
@@ -95,6 +97,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start',
             'end',
+            'closed_at',
             'created_at',
             'updated_at',
         ];
@@ -124,10 +127,36 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
                 : 0;
 
-            if ($lead->isDirty('lead_state_id')
-                && ! is_null(($probability = $lead->leadState()->value('probability_percentage')))
-            ) {
-                $lead->probability_percentage = $probability;
+            if ($lead->isDirty('lead_state_id')) {
+                if (! is_null(($probability = $lead->leadState()->value('probability_percentage')))) {
+                    $lead->probability_percentage = $probability;
+                }
+
+                $isClosed = $lead->leadState()
+                    ->where(
+                        fn (Builder $query) => $query
+                            ->where('is_won', true)
+                            ->orWhere('is_lost', true)
+                    )
+                    ->exists();
+
+                if ($isClosed && is_null($lead->closed_at)) {
+                    $lead->closed_at = now();
+                    $lead->closed_by = auth()->user()
+                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
+                        : null;
+                } elseif (! $isClosed) {
+                    $lead->closed_at = null;
+                    $lead->closed_by = null;
+                }
+            }
+
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_gross_profit')) {
+                $lead->recalculateWeightedGrossProfit();
+            }
+
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
+                $lead->recalculateWeightedRevenue();
             }
         });
     }
@@ -137,6 +166,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start' => 'date:Y-m-d',
             'end' => 'date:Y-m-d',
+            'closed_at' => 'datetime',
             'expected_revenue' => Money::class,
             'expected_gross_profit' => Money::class,
         ];
@@ -187,16 +217,50 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->belongsTo(LeadState::class);
     }
 
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function recalculateWeightedGrossProfit(): void
+    {
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_gross_profit)) {
+            $this->weighted_gross_profit = bcmul(
+                $this->probability_percentage,
+                $this->expected_gross_profit
+            );
+        }
+    }
+
+    public function recalculateWeightedRevenue(): void
+    {
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_revenue)) {
+            $this->weighted_revenue = bcmul(
+                $this->probability_percentage,
+                $this->expected_revenue
+            );
+        }
+    }
+
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->where('start', '<=', $end)
-                ->where('end', '>=', $start)
-                ->orWhereBetween('created_at', [$start, $end]);
+            $query
+                ->whereBetween('start', [$start, $end])
+                ->orWhereBetween('end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start', '<=', $start)
+                        ->where('end', '>=', $end);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start')
+                        ->whereNull('end')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
         });
     }
 
@@ -211,6 +275,10 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'status' => $this->leadState()->value('name'),
             'invited' => [],
             'description' => $this->description,
+            'extendedProps' => [
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
+            ],
             'allDay' => true,
             'is_editable' => true,
             'is_invited' => false,

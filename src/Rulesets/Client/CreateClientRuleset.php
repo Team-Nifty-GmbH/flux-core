@@ -48,6 +48,7 @@ class CreateClientRuleset extends FluxRuleset
             'email' => 'email|max:255|nullable',
             'website' => 'string|max:255|nullable',
             'creditor_identifier' => 'string|max:255|nullable',
+            'tax_id' => 'string|max:255|nullable',
             'vat_id' => 'string|max:255|nullable',
             'sepa_text_basic' => 'string|nullable',
             'sepa_text_b2b' => 'string|nullable',

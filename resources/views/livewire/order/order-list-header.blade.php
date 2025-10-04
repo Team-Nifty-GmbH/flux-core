@@ -121,10 +121,21 @@
                         <x-input
                             :prefix="data_get($order->currency, 'symbol')"
                             type="number"
-                            :label="__('Unit price :type', ['type' => ($orderPosition->is_net ?? true) ? __('net') : __('gross')])"
                             wire:model="orderPosition.unit_price"
                             x-on:change="$el.value = parseNumber($el.value)"
-                        />
+                        >
+                            <x-slot:label>
+                                <x-label for="orderPosition.unit_price">
+                                    <span
+                                        x-text="
+                                            $wire.orderPosition.is_net
+                                                ? '{{ __('Unit price :type', ['type' => __('net')]) }}'
+                                                : '{{ __('Unit price :type', ['type' => __('gross')]) }}'
+                                        "
+                                    ></span>
+                                </x-label>
+                            </x-slot>
+                        </x-input>
                         <x-input
                             :prefix="data_get($order->currency, 'symbol')"
                             type="number"

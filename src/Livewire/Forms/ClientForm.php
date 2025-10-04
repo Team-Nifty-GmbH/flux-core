@@ -48,6 +48,8 @@ class ClientForm extends FluxForm
 
     public ?string $street = null;
 
+    public ?string $tax_id = null;
+
     public ?string $terms_and_conditions = null;
 
     public ?string $vat_id = null;

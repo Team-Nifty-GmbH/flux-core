@@ -104,6 +104,8 @@ class PaymentReminder extends OrderList
             }
         }
 
+        $this->reset('selected');
+
         $this->loadData();
     }
 
@@ -137,7 +139,6 @@ class PaymentReminder extends OrderList
             ->pluck('id');
 
         return $builder
-            ->whereRelation('paymentType', 'is_direct_debit', false)
             ->where('balance', '>', 0)
             ->whereNotState('payment_state', Paid::class)
             ->whereNotNull('invoice_number')

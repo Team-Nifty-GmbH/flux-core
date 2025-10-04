@@ -116,7 +116,7 @@
     <x-input
         id="new-group-name"
         x-model="newGroupName"
-        :text="__('Group Name')"
+        :label="__('Group Name')"
     />
 
     <x-slot:footer>

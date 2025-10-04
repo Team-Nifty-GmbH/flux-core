@@ -19,7 +19,7 @@
             'dark bg-secondary-800': darkTheme,
             'bg-slate-50': ! darkTheme,
         }"
-        class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
+        class="h-full text-secondary-600 transition duration-300 dark:text-secondary-50"
     >
         @section('wire.navigate.spinner')
         @persist('spinner')
@@ -30,7 +30,7 @@
             >
                 <div
                     id="loading-overlay-spinner"
-                    class="bg-secondary-400 dark:bg-secondary-700 fixed inset-0 flex items-center justify-center bg-opacity-60 opacity-0 transition-opacity duration-200 dark:bg-opacity-60"
+                    class="fixed inset-0 flex items-center justify-center bg-secondary-400 bg-opacity-60 opacity-0 transition-opacity duration-200 dark:bg-secondary-700 dark:bg-opacity-60"
                 >
                     <x-flux::spinner-svg />
                 </div>

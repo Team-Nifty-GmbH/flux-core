@@ -64,6 +64,11 @@
                     :placeholder="__('Vat Id')"
                     wire:model="client.vat_id"
                 />
+                <x-input
+                    :label="__('Tax Id')"
+                    :placeholder="__('Tax Id')"
+                    wire:model="client.tax_id"
+                />
                 <x-select.styled
                     :label="__('Bank Connections')"
                     multiple

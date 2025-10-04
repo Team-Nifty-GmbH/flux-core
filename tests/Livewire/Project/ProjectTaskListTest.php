@@ -1,32 +1,31 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Project;
-
 use FluxErp\Livewire\Project\ProjectTaskList;
-use FluxErp\Models\Client;
 use FluxErp\Models\Project;
-use FluxErp\Tests\TestCase;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
-class ProjectTaskListTest extends TestCase
-{
-    private Project $project;
+test('can add new task', function (): void {
+    $project = Project::factory()->create([
+        'client_id' => $this->dbClient->id,
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    Livewire::test(ProjectTaskList::class, ['projectId' => $project->id])
+        ->assertOk()
+        ->call('edit')
+        ->assertExecutesJs("\$modalOpen('task-form-modal');")
+        ->assertSet('task.project_id', $project->id)
+        ->assertSet('task.responsible_user_id', $this->user->getKey())
+        ->assertSet('task.users', [$this->user->getKey()])
+        ->set('task.name', $uuid = Str::uuid()->toString())
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertReturned(true);
 
-        $client = Client::factory()->create([
-            'is_default' => true,
-        ]);
-        $this->project = Project::factory()->create([
-            'client_id' => $client->id,
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ProjectTaskList::class, ['projectId' => $this->project->id])
-            ->assertStatus(200);
-    }
-}
+    $this->assertDatabaseHas('tasks', [
+        'name' => $uuid,
+        'project_id' => $project->id,
+        'responsible_user_id' => $this->user->getKey(),
+        'state' => 'open',
+    ]);
+});

@@ -12,8 +12,8 @@ class VatRateFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->randomElement(['Standard', 'Special', 'Reduced']),
-            'rate_percentage' => $this->faker->randomElement([0.19, 0.16, 0.07]),
+            'name' => fake()->randomElement(['Standard', 'Special', 'Reduced']),
+            'rate_percentage' => fake()->randomElement([0.19, 0.16, 0.07]),
         ];
     }
 }

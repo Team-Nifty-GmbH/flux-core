@@ -3,7 +3,6 @@
 namespace FluxErp\Tests;
 
 use Barryvdh\DomPDF\ServiceProvider;
-use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\EventServiceProvider;
@@ -33,16 +32,6 @@ abstract class TestCase extends BaseTestCase
     use CreatesApplication, RefreshDatabase;
 
     protected $loadEnvironmentVariables = true;
-
-    protected function setUp(): void
-    {
-        if (file_exists(__DIR__ . '/../../../.env')) {
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
-            $dotenv->load();
-        }
-
-        parent::setUp();
-    }
 
     public function getPackageProviders($app): array
     {

@@ -1,31 +1,25 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Models\Permission;
 
-class SettingsPermissionsTest extends BaseSetup
-{
-    public function test_settings_permissions_no_user(): void
-    {
-        $this->get('/settings/permissions')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('settings permissions no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_settings_permissions_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('settings.permissions.get', 'web'));
+    $this->get('/settings/permissions')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/permissions')
-            ->assertStatus(200);
-    }
+test('settings permissions page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('settings.permissions.get', 'web'));
 
-    public function test_settings_permissions_without_permission(): void
-    {
-        Permission::findOrCreate('settings.permissions.get', 'web');
+    $this->actingAs($this->user, 'web')->get('/settings/permissions')
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/permissions')
-            ->assertStatus(403);
-    }
-}
+test('settings permissions without permission', function (): void {
+    Permission::findOrCreate('settings.permissions.get', 'web');
+
+    $this->actingAs($this->user, 'web')->get('/settings/permissions')
+        ->assertForbidden();
+});

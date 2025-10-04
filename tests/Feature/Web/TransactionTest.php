@@ -1,50 +1,41 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Transaction;
 
-class TransactionTest extends BaseSetup
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function (): void {
+    $currencies = Currency::factory(5)->create();
 
-        $currencies = Currency::factory(5)->create();
+    $bankConnections = BankConnection::factory()->count(3)->create([
+        'currency_id' => $currencies->random()->id,
+    ]);
 
-        $bankConnections = BankConnection::factory()->count(3)->create([
-            'currency_id' => $currencies->random()->id,
-        ]);
+    Transaction::factory()->count(3)->create([
+        'bank_connection_id' => $bankConnections->random()->id,
+        'currency_id' => $currencies->random()->id,
+    ]);
+});
 
-        Transaction::factory()->count(3)->create([
-            'bank_connection_id' => $bankConnections->random()->id,
-            'currency_id' => $currencies->random()->id,
-        ]);
-    }
+test('transactions no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_transactions_no_user(): void
-    {
-        $this->get('/accounting/transactions')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->get('/accounting/transactions')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-    public function test_transactions_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('accounting.transactions.get', 'web'));
+test('transactions page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('accounting.transactions.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/accounting/transactions')
-            ->assertStatus(200);
-    }
+    $this->actingAs($this->user, 'web')->get('/accounting/transactions')
+        ->assertOk();
+});
 
-    public function test_transactions_without_permission(): void
-    {
-        Permission::findOrCreate('accounting.transactions.get', 'web');
+test('transactions without permission', function (): void {
+    Permission::findOrCreate('accounting.transactions.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/accounting/transactions')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/accounting/transactions')
+        ->assertForbidden();
+});

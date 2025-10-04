@@ -119,7 +119,7 @@
                                 {{ $summaryItem->name }}
                             </td>
                             <td class="float-right text-right">
-                                {{ Number::currency($summaryItem->total_net_price) }}
+                                {{ Number::currency($summaryItem->total_net_price ?? 0) }}
                             </td>
                         </tr>
                     @endforeach
@@ -138,7 +138,7 @@
                 </td>
             </tr>
             @section('total.discounts')
-            @if ($model->discounts->isNotEmpty())
+            @if (bccomp($model->total_base_net_price ?? 0, $model->total_net_price ?? 0) !== 0)
                 <tr>
                     <td class="text-right">
                         {{ __('Sum net without discount') }}
@@ -147,10 +147,37 @@
                         {{ Number::currency($model->total_base_net_price) }}
                     </td>
                 </tr>
+
+                @if (bccomp($model->total_position_discount_percentage ?? 0, 0) !== 0)
+                    <tr>
+                        <td class="text-right">
+                            <span>{{ __('Position discounts') }}</span>
+                            <span>
+                                {{ Number::percentage(bcmul($model->total_position_discount_percentage ?? 0, 100)) }}
+                            </span>
+                        </td>
+                        <td class="w-0 whitespace-nowrap pl-12 text-right">
+                            {{ Number::currency(bcmul($model->total_position_discount_flat ?? 0, -1)) }}
+                        </td>
+                    </tr>
+                    @if ($model->discounts->isNotEmpty())
+                        <tr>
+                            <td class="text-right">
+                                {{ __('Sum net discounted') }}
+                            </td>
+                            <td class="w-0 whitespace-nowrap pl-12 text-right">
+                                {{ Number::currency($model->total_base_discounted_net_price ?? 0) }}
+                            </td>
+                        </tr>
+                    @endif
+                @endif
+
                 @foreach ($model->discounts as $discount)
                     <tr>
                         <td class="text-right">
-                            <span>{{ data_get($discount, 'name') }}</span>
+                            <span>
+                                {{ data_get($discount, 'name', __('Head discount')) }}
+                            </span>
                             <span>
                                 {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
                             </span>

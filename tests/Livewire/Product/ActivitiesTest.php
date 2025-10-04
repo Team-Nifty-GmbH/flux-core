@@ -1,32 +1,18 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Product;
-
 use FluxErp\Livewire\Product\Activities;
 use FluxErp\Models\Product;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ActivitiesTest extends TestCase
-{
-    private Product $product;
+test('renders successfully', function (): void {
+    $product = Product::factory()->create();
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->product = Product::factory()->create();
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(
-            Activities::class,
-            [
-                'modelId' => $this->product->id,
-                'modelType' => $this->product->getMorphClass(),
-            ]
-        )
-            ->assertStatus(200);
-    }
-}
+    Livewire::test(
+        Activities::class,
+        [
+            'modelId' => $product->id,
+            'modelType' => $product->getMorphClass(),
+        ]
+    )
+        ->assertOk();
+});

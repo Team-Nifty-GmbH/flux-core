@@ -3,7 +3,7 @@
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
         >
-            {{ __('My Tasks') }}
+            {{ $this->getLabel() }}
         </h2>
     </div>
     <div class="flex-1 overflow-auto">
@@ -15,6 +15,20 @@
                 <x-slot:sub-value>
                     <div>
                         <div>{{ $task->project?->name }}</div>
+                        @if ($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
+                            <div>
+                                <x-link
+                                    sm
+                                    icon="link"
+                                    :href="$task->model->getUrl()"
+                                    wire:navigate
+                                >
+                                    {{ __(Str::headline($task->model->getMorphClass())) }}:
+                                    {{ $task->model->getLabel() }}
+                                </x-link>
+                            </div>
+                        @endif
+
                         @if ($task->due_date)
                             <x-badge
                                 :color="($diff = $task->due_date->diffInDays(now(), false)) > 0
@@ -45,10 +59,10 @@
                             $dispatch(
                                 'start-time-tracking',
                                 {
-                                    trackable_type: 'FluxErp\\\Models\\\Task',
+                                    trackable_type: '{{ morph_alias(\FluxErp\Models\Task::class) }}',
                                     trackable_id: {{ $task->id }},
                                     name: '{{ $task->name }}',
-                                    description: {{ json_encode($task->description) }}
+                                    description: {{ json_encode(strip_tags($task->description)) }}
                                 }
                             )"
                     >

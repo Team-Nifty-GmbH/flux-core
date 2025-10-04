@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import fluxConfig from '.{{ relative_path }}/tailwind.config.mjs';
+import fluxConfig from '.{{ relative_path }}/tailwind.base.config.mjs';
 import tallstackuiConfig from './vendor/tallstackui/tallstackui/tailwind.config.js';
 import dataTablesConfig from './vendor/team-nifty-gmbh/tall-datatables/tailwind.config.mjs';
 import forms from '@tailwindcss/forms';
