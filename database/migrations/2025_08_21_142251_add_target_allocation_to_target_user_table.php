@@ -10,14 +10,14 @@ return new class() extends Migration
     {
         Schema::table('target_user', function (Blueprint $table): void {
             $table->decimal('target_share', 40, 10)->nullable()->after('user_id');
-            $table->boolean('target_share_is_percentage')->default(true)->after('target_share');
+            $table->boolean('is_percentage')->default(true)->after('target_share');
         });
     }
 
     public function down(): void
     {
         Schema::table('target_user', function (Blueprint $table): void {
-            $table->dropColumn('target_share');
+            $table->dropColumn(['target_share', 'is_percentage']);
         });
     }
 };

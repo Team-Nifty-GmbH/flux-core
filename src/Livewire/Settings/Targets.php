@@ -31,13 +31,13 @@ class Targets extends TargetList
     #[Locked]
     public array $ownerColumns = [];
 
+    public array $selectedUserIds = [];
+
     #[DataTableForm]
     public TargetForm $target;
 
     #[Locked]
     public array $timeframeColumns = [];
-
-    public bool $useAbsoluteShares = false;
 
     #[Locked]
     public Collection $users;
@@ -47,7 +47,7 @@ class Targets extends TargetList
     public function mount(): void
     {
         parent::mount();
-        $this->users = User::all();
+        $this->users = User::query()->get(['id', 'name']);
     }
 
     public function edit(string|int|null $id = null): void
@@ -57,6 +57,7 @@ class Targets extends TargetList
         if ($id) {
             $this->updateAggregateColumnOptions($this->target->aggregate_type);
             $this->updateSelectableColumns($this->target->model_type);
+            $this->selectedUserIds = collect($this->target->users)->pluck('user_id')->all();
         }
     }
 

@@ -36,23 +36,20 @@ class CreateTargetRuleset extends FluxRuleset
             'owner_column' => 'required|string',
             'priority' => 'nullable|integer|min:0|max:255',
             'is_group_target' => 'boolean',
-
             'users' => 'nullable|array',
-            'users.*' => [
+            'users.*.user_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => User::class]),
             ],
-
-            'user_shares' => 'nullable|array',
-            'user_shares.*.relative' => [
-                'nullable',
-                app(Numeric::class, ['min' => 0]),
+            'users.*.target_share' => [
+                'required',
+                'numeric',
                 'min:0',
             ],
-            'user_shares.*.absolute' => [
-                'nullable',
-                app(Numeric::class),
+            'users.*.is_percentage' => [
+                'required',
+                'boolean',
             ],
         ];
     }
