@@ -1,7 +1,6 @@
 <x-modal size="3xl" :id="$target->modalName()">
     <div
         x-data="{
-            users: {{ $users }},
             filteredUsers: $wire.entangle('target.users'),
 
             addUser(user) {
@@ -29,7 +28,6 @@
         <x-input wire:model="target.name" :label="__('Title')" required />
         <x-date :label="__('Start')" wire:model="target.start_date" />
         <x-date :label="__('End')" wire:model="target.end_date" />
-
         <x-select.styled
             :label="__('Model Type')"
             wire:model="target.model_type"
@@ -52,7 +50,6 @@
             wire:model="target.aggregate_column"
             :options="$aggregateColumns"
         />
-
         <x-number
             :label="__('Target Value')"
             wire:model="target.target_value"
@@ -115,7 +112,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then(success => { if(success) $modalClose('{{ $target->modalName() }}') })"
+            wire:click="save().then(success => { if(success) $modalClose('{{ $target->modalName() }}')})"
         />
     </x-slot>
 </x-modal>
