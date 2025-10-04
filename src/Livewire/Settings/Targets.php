@@ -5,11 +5,9 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Livewire\DataTables\TargetList;
 use FluxErp\Livewire\Forms\TargetForm;
-use FluxErp\Models\User;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
@@ -39,16 +37,7 @@ class Targets extends TargetList
     #[Locked]
     public array $timeframeColumns = [];
 
-    #[Locked]
-    public Collection $users;
-
     protected ?string $includeBefore = 'flux::livewire.settings.targets';
-
-    public function mount(): void
-    {
-        parent::mount();
-        $this->users = User::query()->get(['id', 'name']);
-    }
 
     public function edit(string|int|null $id = null): void
     {

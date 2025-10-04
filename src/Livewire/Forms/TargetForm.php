@@ -46,7 +46,6 @@ class TargetForm extends FluxForm
     {
         if ($values instanceof Target) {
             $values->loadMissing('users');
-
             $values = $values->toArray();
 
             $values['users'] = array_map(function ($user) {
