@@ -33,6 +33,7 @@ class CreateEmployee extends FluxAction
             AssignWorkTimeModel::make([
                 'employee_id' => $employee->getKey(),
                 'work_time_model_id' => $workTimeModel,
+                'valid_from' => $employee->employment_date,
             ])
                 ->validate()
                 ->execute();

@@ -1,6 +1,29 @@
 <div>
-    <x-modal :id="$employeeForm->modalName()" xl :header="__('Create Employee')">
+    <x-modal :id="$employeeForm->modalName()" xl :title="__('Create Employee')">
         <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+                <x-select.styled
+                    :label="__('User')"
+                    wire:model="employeeForm.user_id"
+                    x-on:select="$wire.employeeForm.firstname = $event.detail.select?.firstname; $wire.employeeForm.lastname = $event.detail.select?.lastname; $wire.employeeForm.email = $event.detail.select?.email"
+                    select="value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'whereDoesntHave' => 'employee',
+                            'fields' => [
+                                'id',
+                                'firstname',
+                                'lastname',
+                                'email',
+                            ],
+                            'with' => 'media',
+                        ],
+                    ]"
+                />
+            </div>
             <x-input
                 :label="__('Firstname')"
                 wire:model="employeeForm.firstname"
@@ -17,20 +40,6 @@
             <x-input
                 :label="__('Employee Number')"
                 wire:model="employeeForm.employee_number"
-            />
-            <x-select.styled
-                :label="__('User')"
-                wire:model="employeeForm.user_id"
-                select="value:id"
-                unfiltered
-                :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'whereDoesntHave' => 'employee',
-                        'with' => 'media',
-                    ],
-                ]"
             />
             <x-date
                 :label="__('Employment Date')"

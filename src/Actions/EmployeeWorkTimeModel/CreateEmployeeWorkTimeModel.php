@@ -26,16 +26,14 @@ class CreateEmployeeWorkTimeModel extends FluxAction
     public function performAction(): EmployeeWorkTimeModel
     {
         // Close any existing open assignment for this employee
-        if ($this->getData('employee_id')) {
-            EmployeeWorkTimeModel::query()
-                ->where('employee_id', $this->getData('employee_id'))
-                ->whereNull('valid_until')
-                ->update(['valid_until' => now()]);
-        }
+        resolve_static(EmployeeWorkTimeModel::class, 'query')
+            ->where('employee_id', $this->getData('employee_id'))
+            ->whereNull('valid_until')
+            ->update(['valid_until' => now()]);
 
         $employeeWorkTimeModel = app(EmployeeWorkTimeModel::class, ['attributes' => $this->getData()]);
         $employeeWorkTimeModel->save();
 
-        return $employeeWorkTimeModel->fresh();
+        return $employeeWorkTimeModel->refresh();
     }
 }

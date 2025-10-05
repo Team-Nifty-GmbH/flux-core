@@ -45,12 +45,6 @@ class UpdateEmployeeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
             ],
-            'user_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => User::class])
-                    ->whereDoesntHave('employee'),
-            ],
             'vacation_carryover_rule_id' => [
                 'nullable',
                 'integer',

@@ -21,17 +21,4 @@ class MyEmployeeDay extends BaseEmployeeDay
     {
         return route('human-resources.my-employee-profile');
     }
-
-    public function getTabs(): array
-    {
-        return collect(parent::getTabs())
-            ->map(function (TabButton $tab) {
-                if ($tab->component === 'employee-day.absence-requests') {
-                    $tab->component = 'my-employee-profile.employee-day.absence-requests';
-                }
-
-                return $tab;
-            })
-            ->toArray();
-    }
 }

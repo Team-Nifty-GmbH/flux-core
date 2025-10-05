@@ -38,7 +38,11 @@ class WorkTimeModel extends FluxModel
             : null;
 
         return $scheduledHours
-            ?? ($this->work_days_per_week ? bcdiv($this->weekly_hours, $this->work_days_per_week) : null)
+            ?? (
+                $this->weekly_hours && $this->work_days_per_week
+                    ? bcdiv($this->weekly_hours, $this->work_days_per_week)
+                    : null
+            )
             ?? 0;
     }
 

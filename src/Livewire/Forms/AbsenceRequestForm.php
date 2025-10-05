@@ -67,9 +67,9 @@ class AbsenceRequestForm extends FluxForm
     #[Locked]
     public ?string $updated_at = null;
 
-    public function changeState(AbsenceRequestStateEnum $status): void
+    public function changeState(AbsenceRequestStateEnum $stateEnum): void
     {
-        $action = $this->makeAction($status->value)
+        $action = $this->makeAction($stateEnum->value)
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
             ->validate();
 

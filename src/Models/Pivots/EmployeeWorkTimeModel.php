@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeWorkTimeModel extends FluxPivot
 {
-    use HasUserModification, HasUuid, SoftDeletes;
+    use HasUserModification, SoftDeletes;
 
     public $incrementing = true;
 

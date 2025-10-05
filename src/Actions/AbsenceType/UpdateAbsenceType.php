@@ -47,11 +47,4 @@ class UpdateAbsenceType extends FluxAction
             ]
         );
     }
-
-    protected function validateData(): void
-    {
-        parent::validateData();
-
-        // TODO: Validate affects flags
-    }
 }

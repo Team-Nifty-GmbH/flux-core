@@ -271,6 +271,8 @@ Route::middleware('web')
                 Route::get('/settings', Settings::class)->name('settings');
                 Route::name('settings.')->prefix('settings')
                     ->group(function (): void {
+                        Route::get('/absence-policies', AbsencePolicies::class)->name('absence-policies');
+                        Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
                         Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
@@ -283,12 +285,15 @@ Route::middleware('web')
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
                         Route::get('/email-templates', EmailTemplates::class)->name('email-templates');
+                        Route::get('/employee-departments', EmployeeDepartments::class)->name('employee-departments');
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
+                        Route::get('/holidays', Holidays::class)->name('holidays');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
                         Route::get('/lead-loss-reasons', LeadLossReasons::class)->name('lead-loss-reasons');
                         Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
+                        Route::get('/locations', Locations::class)->name('locations');
                         Route::get('/logs', Logs::class)->name('logs');
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
                         Route::get('/notifications', Notifications::class)->name('notifications');
@@ -314,19 +319,14 @@ Route::middleware('web')
                         Route::get('/units', Units::class)->name('units');
                         Route::get('/users', Users::class)->name('users');
                         Route::get('/users/{user}', UserEdit::class)->name('users.edit');
+                        Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
+                        Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
+                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model');
+                        Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
 
-                        Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
-                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model');
-                        Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
-                        Route::get('/holidays', Holidays::class)->name('holidays');
-                        Route::get('/locations', Locations::class)->name('locations');
-                        Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
-                        Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
-                        Route::get('/employee-departments', EmployeeDepartments::class)->name('employee-departments');
-                        Route::get('/absence-policies', AbsencePolicies::class)->name('absence-policies');
                     });
 
                 Route::get('/media', MediaGrid::class)

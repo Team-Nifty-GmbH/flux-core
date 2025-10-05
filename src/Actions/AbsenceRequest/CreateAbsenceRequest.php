@@ -4,7 +4,9 @@ namespace FluxErp\Actions\AbsenceRequest;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AbsenceRequest;
+use FluxErp\Models\Employee;
 use FluxErp\Rulesets\AbsenceRequest\CreateAbsenceRequestRuleset;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class CreateAbsenceRequest extends FluxAction
@@ -21,8 +23,15 @@ class CreateAbsenceRequest extends FluxAction
 
     public function performAction(): AbsenceRequest
     {
-        $absenceRequest = app(AbsenceRequest::class, ['attributes' => $this->data]);
+        $data = $this->getData();
+        $substitutes = Arr::pull($data, 'substitutes');
+
+        $absenceRequest = app(AbsenceRequest::class, ['attributes' => $data]);
         $absenceRequest->save();
+
+        if ($substitutes) {
+            $absenceRequest->substitutes()->attach($substitutes);
+        }
 
         return $absenceRequest->refresh();
     }
@@ -32,12 +41,30 @@ class CreateAbsenceRequest extends FluxAction
         parent::validateData();
 
         /** @var AbsenceRequest $absenceRequest */
-        $absenceRequest = app(AbsenceRequest::class, ['attributes' => $this->data]);
+        $data = $this->getData();
+        $substitutes = Arr::pull($data, 'substitutes');
+
+        $absenceRequest = app(AbsenceRequest::class, ['attributes' => $data]);
+        $absenceRequest->setRelation('substitutes', $substitutes);
 
         $errors = [];
         $failedPolicies = $absenceRequest->failsAbsencePolicies();
         if ($failedPolicies && ! $absenceRequest->is_emergency) {
             $errors = array_merge($errors, $failedPolicies);
+        }
+
+        if ($absenceRequest->absenceType()
+            ->where('affects_vacation', true)
+            ->exists()
+        ) {
+            $employee = resolve_static(Employee::class, 'query')
+                ->whereKey(data_get($data, 'employee_id'))
+                ->first();
+            if ($employee->getCurrentVacationDaysBalance() < $absenceRequest->calculateWorkDaysAffected()) {
+                $errors += [
+                    'vacation_days' => [__('Employee does not have enough vacation days available.')],
+                ];
+            }
         }
 
         if (

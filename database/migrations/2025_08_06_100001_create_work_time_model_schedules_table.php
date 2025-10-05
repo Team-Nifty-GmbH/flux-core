@@ -20,7 +20,7 @@ return new class() extends Migration
             $table->unsignedTinyInteger('weekday');
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
-            $table->decimal('break_minutes', 5, 2)->default(0);
+            $table->unsignedInteger('break_minutes')->default(0);
             $table->decimal('work_hours', 4, 2)->default(0);
 
             $table->timestamp('created_at')->nullable();

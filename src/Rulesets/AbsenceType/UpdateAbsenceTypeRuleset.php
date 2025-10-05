@@ -32,9 +32,24 @@ class UpdateAbsenceTypeRuleset extends FluxRuleset
                 'required',
                 Rule::enum(EmployeeCanCreateEnum::class),
             ],
-            'affects_overtime' => 'boolean',
-            'affects_sick_leave' => 'boolean',
-            'affects_vacation' => 'boolean',
+            'affects_overtime' => [
+                'boolean',
+                'required_with:affects_sick_leave,affects_vacation',
+                'declined_if:affects_sick_leave,true',
+                'declined_if:affects_vacation,true',
+            ],
+            'affects_sick_leave' => [
+                'boolean',
+                'required_with:affects_overtime,affects_vacation',
+                'declined_if:affects_overtime,true',
+                'declined_if:affects_vacation,true',
+            ],
+            'affects_vacation' => [
+                'boolean',
+                'required_with:affects_overtime,affects_sick_leave',
+                'declined_if:affects_overtime,true',
+                'declined_if:affects_sick_leave,true',
+            ],
             'is_active' => 'boolean',
 
             'absence_policies' => 'nullable|array',

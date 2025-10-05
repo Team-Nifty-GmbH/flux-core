@@ -66,8 +66,8 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     {
         return [
             'state_enum' => AbsenceRequestStateEnum::class,
-            'start_date' => 'date',
-            'end_date' => 'date',
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
             'sick_note_issued_date' => 'date',
             'approved_at' => 'datetime',
             'rejected_at' => 'datetime',
@@ -180,8 +180,8 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         return resolve_static(VacationBlackout::class, 'query')
             ->where('is_active', true)
             ->where(function (Builder $query): void {
-                $query->whereValueBetween($this->start_date->format('Y-m-d'), ['start_date', 'end_date'])
-                    ->orWhereValueBetween($this->end_date->format('Y-m-d'), ['start_date', 'end_date']);
+                $query->where('start_date', '<=', $this->end_date)
+                    ->where('end_date', '>=', $this->start_date);
             })
             ->where(function (Builder $query): void {
                 $query->whereHas(

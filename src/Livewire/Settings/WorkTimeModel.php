@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Carbon\Carbon;
 use Exception;
 use FluxErp\Livewire\Forms\WorkTimeModelForm;
 use FluxErp\Models\WorkTimeModel as WorkTimeModelModel;
@@ -51,39 +52,26 @@ class WorkTimeModel extends Component
     public function handleCycleWeeksUpdate(): void
     {
         $currentWeeks = count($this->workTimeModelForm->schedules);
-        $newWeeks = (int) $this->workTimeModelForm->cycle_weeks ?: 1;
+        $cycleWeeks = (int) $this->workTimeModelForm->cycle_weeks ?: 1;
 
-        if ($newWeeks > $currentWeeks) {
+        if ($cycleWeeks > $currentWeeks) {
             // Add new weeks
-            for ($weekNum = $currentWeeks + 1; $weekNum <= $newWeeks; $weekNum++) {
+            for ($weekNumber = $currentWeeks + 1; $weekNumber <= $cycleWeeks; $weekNumber++) {
                 // Copy first week's schedule as template
                 $template = $this->workTimeModelForm->schedules[0] ?? null;
                 if ($template) {
                     $newWeek = $template;
-                    $newWeek['week_number'] = $weekNum;
+                    $newWeek['week_number'] = $weekNumber;
                     $this->workTimeModelForm->schedules[] = $newWeek;
                 } else {
                     // Create default week
-                    $weekData = [
-                        'week_number' => $weekNum,
-                        'days' => [],
-                    ];
-                    for ($day = 1; $day <= 7; $day++) {
-                        $isWorkDay = $day >= 1 && $day <= 5;
-                        $weekData['days'][$day] = [
-                            'weekday' => $day,
-                            'start_time' => $isWorkDay ? '08:00' : null,
-                            'end_time' => $isWorkDay ? '17:00' : null,
-                            'work_hours' => $isWorkDay ? 8 : 0,
-                            'break_minutes' => $isWorkDay ? 60 : 0,
-                        ];
-                    }
-                    $this->workTimeModelForm->schedules[] = $weekData;
+                    $this->workTimeModelForm->schedules[] = $this->workTimeModelForm
+                        ->getDefaultWeekSchedule($weekNumber);
                 }
             }
-        } elseif ($newWeeks < $currentWeeks) {
+        } elseif ($cycleWeeks < $currentWeeks) {
             // Remove extra weeks
-            $this->workTimeModelForm->schedules = array_slice($this->workTimeModelForm->schedules, 0, $newWeeks);
+            $this->workTimeModelForm->schedules = array_slice($this->workTimeModelForm->schedules, 0, $cycleWeeks);
         }
     }
 
@@ -104,18 +92,18 @@ class WorkTimeModel extends Component
     }
 
     #[Renderless]
-    public function updateSchedule(int $weekIndex, int $dayNum, string $field, $value): void
+    public function updateSchedule(int $weekIndex, int $dayNumber, string $property, $value): void
     {
-        if (! isset($this->workTimeModelForm->schedules[$weekIndex])) {
+        if (! data_get($this->workTimeModelForm->schedules, $weekIndex)) {
             $this->workTimeModelForm->schedules[$weekIndex] = [
                 'week_number' => $weekIndex + 1,
                 'days' => [],
             ];
         }
 
-        if (! isset($this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum])) {
-            $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum] = [
-                'weekday' => $dayNum,
+        if (! data_get($this->workTimeModelForm->schedules, $weekIndex . '.days.' . $dayNumber)) {
+            $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber] = [
+                'weekday' => $dayNumber,
                 'start_time' => null,
                 'end_time' => null,
                 'work_hours' => 0,
@@ -123,32 +111,32 @@ class WorkTimeModel extends Component
             ];
         }
 
-        $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum][$field] = $value;
+        $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber][$property] = $value;
 
         // Calculate work hours if start and end time are set
-        if ($field === 'start_time' || $field === 'end_time') {
-            $start = $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['start_time'] ?? null;
-            $end = $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['end_time'] ?? null;
+        if ($property === 'start_time' || $property === 'end_time') {
+            $start = $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['start_time'] ?? null;
+            $end = $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['end_time'] ?? null;
 
             if ($start && $end) {
-                $startTime = \Carbon\Carbon::parse($start);
-                $endTime = \Carbon\Carbon::parse($end);
+                $startTime = Carbon::parse($start);
+                $endTime = Carbon::parse($end);
 
                 if ($endTime->lessThan($startTime)) {
                     $endTime->addDay();
                 }
 
                 $hours = $endTime->diffInMinutes($startTime) / 60;
-                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['work_hours'] = bcround($hours, 2);
+                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['work_hours'] = bcround($hours, 2);
             } else {
                 // If either start or end time is not set, set work_hours to 0
-                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['work_hours'] = 0;
+                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['work_hours'] = 0;
             }
         }
 
         // Ensure work_hours is always numeric
-        if (! isset($this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['work_hours'])) {
-            $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNum]['work_hours'] = 0;
+        if (! data_get($this->workTimeModelForm->schedules, $weekIndex . '.days.' . $dayNumber . '.work_hours')) {
+            $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['work_hours'] = 0;
         }
     }
 }

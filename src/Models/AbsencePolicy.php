@@ -60,6 +60,12 @@ class AbsencePolicy extends FluxModel
             }
         }
 
+        if ($this->requires_reason && ! $request->reason) {
+            $errors += [
+                'requires_reason' => [__('A reason is required for this absence type')],
+            ];
+        }
+
         if ($this->requires_substitute && ! $request->substitutes) {
             $errors += [
                 'requires_substitute' => [__('A substitute is required for this absence type')],

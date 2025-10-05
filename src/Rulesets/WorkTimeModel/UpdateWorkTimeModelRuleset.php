@@ -44,8 +44,22 @@ class UpdateWorkTimeModelRuleset extends FluxRuleset
             'is_active' => 'boolean',
 
             'schedules' => 'nullable|array',
-            'schedules.*.week_number' => 'required_with:schedules|integer|min:1|max:52',
-            'schedules.*.days' => 'required_with:schedules|array',
+            'schedules.*.week_number' => 'required|integer|min:1|max:52',
+            'schedules.*.days' => 'required|array',
+            'schedules.*.days.*.weekday' => 'required|integer|min:1|max:7',
+            'schedules.*.days.*.start_time' => [
+                'nullable',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
+            'schedules.*.days.*.end_time' => [
+                'nullable',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
+            'schedules.*.days.*.break_minutes' => 'nullable|integer|min:0|max:1440',
+            'schedules.*.days.*.work_hours' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 24]),
+            ],
         ];
     }
 }

@@ -35,25 +35,19 @@ class UpdateWorkTimeModel extends FluxAction
             $workTimeModel->schedules()->delete();
 
             foreach ($schedules as $week) {
-                if (! isset($week['days']) || ! is_array($week['days'])) {
-                    continue;
-                }
-
-                foreach ($week['days'] as $day => $dayData) {
-                    if (! $dayData || ! is_array($dayData)) {
+                foreach (data_get($week, 'days') ?? [] as $day) {
+                    if (bccomp(data_get($day, 'work_hours'), 0) === 0) {
                         continue;
                     }
 
-                    if ($dayData['start_time'] && $dayData['end_time']) {
-                        $workTimeModel->schedules()->create([
-                            'week_number' => $week['week_number'] ?? 1,
-                            'weekday' => $dayData['weekday'] ?? $day,
-                            'start_time' => $dayData['start_time'],
-                            'end_time' => $dayData['end_time'],
-                            'work_hours' => abs((float) ($dayData['work_hours'] ?? 0)),
-                            'break_minutes' => abs((int) ($dayData['break_minutes'] ?? 0)),
-                        ]);
-                    }
+                    $workTimeModel->schedules()->create(
+                        array_merge(
+                            $day,
+                            [
+                                'week_number' => data_get($week, 'week_number') ?? 1,
+                            ]
+                        )
+                    );
                 }
             }
         }

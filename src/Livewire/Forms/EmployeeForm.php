@@ -91,7 +91,7 @@ class EmployeeForm extends FluxForm
 
     public ?int $user_id = null;
 
-    public ?int $vacation_carry_over_rule_id = null;
+    public ?int $vacation_carryover_rule_id = null;
 
     public ?string $work_permit_until = null;
 

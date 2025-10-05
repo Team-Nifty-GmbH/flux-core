@@ -105,7 +105,7 @@
         <x-card :header="__('Weekly Schedule')">
             <div x-data="{ activeWeek: 0 }">
                 @if($workTimeModelForm->cycle_weeks > 1)
-                    {{-- Tabs für mehrere Wochen --}}
+                    {{-- Tabs for multiple weeks --}}
                     <div class="mb-6">
                         <div class="border-b border-gray-200 dark:border-gray-700">
                             <nav class="-mb-px flex space-x-4">
@@ -126,7 +126,7 @@
                     </div>
                 @endif
 
-                {{-- Schedule Table für jede Woche --}}
+                {{-- Schedule Table for every single week --}}
                 @foreach($workTimeModelForm->schedules as $weekIndex => $week)
                     <div
                         x-show="activeWeek === {{ $weekIndex }}"
@@ -165,14 +165,14 @@
                                             4 => __('Thursday'),
                                             5 => __('Friday'),
                                             6 => __('Saturday'),
-                                            7 => __('Sunday'),
+                                            0 => __('Sunday'),
                                         ];
                                     @endphp
 
-                                    @foreach($days as $dayNum => $dayName)
+                                    @foreach($days as $dayNumber => $dayName)
                                         @php
-                                            $dayData = $week['days'][$dayNum] ?? [
-                                                'weekday' => $dayNum,
+                                            $dayData = data_get($week, 'days.' . $dayNumber) ?? [
+                                                'weekday' => $dayNumber,
                                                 'start_time' => null,
                                                 'end_time' => null,
                                                 'work_hours' => 0,
@@ -186,23 +186,23 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <x-input
                                                     type="time"
-                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNum }}.start_time"
-                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNum }}, 'start_time', $event.target.value)"
+                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.start_time"
+                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNumber }}, 'start_time', $event.target.value)"
                                                     class="!py-1"
                                                 />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <x-input
                                                     type="time"
-                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNum }}.end_time"
-                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNum }}, 'end_time', $event.target.value)"
+                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.end_time"
+                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNumber }}, 'end_time', $event.target.value)"
                                                     class="!py-1"
                                                 />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <x-number
-                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNum }}.break_minutes"
-                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNum }}, 'break_minutes', $event.target.value)"
+                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.break_minutes"
+                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNumber }}, 'break_minutes', $event.target.value)"
                                                     min="0"
                                                     max="480"
                                                     step="15"
