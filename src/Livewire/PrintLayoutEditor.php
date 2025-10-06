@@ -120,7 +120,6 @@ class PrintLayoutEditor extends Component
     public function save(): bool
     {
         try {
-            //            throw new UnauthorizedException(494);
             $this->form->save();
             // clean up temporary media and snippets after successful save
             $this->form->temporary_media = [];
@@ -137,7 +136,6 @@ class PrintLayoutEditor extends Component
                 $this->form->fill($layout->toArray());
             }
 
-            // TODO: import the library for exception_to_notifications
             exception_to_notifications($e, $this);
 
             return false;

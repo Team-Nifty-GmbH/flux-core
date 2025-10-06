@@ -23,17 +23,15 @@ window.setupEditor = setupEditor;
 // notification related
 window.$tallstackuiToast = toastComponent;
 
-document.addEventListener('alpine:init', () => {
-    console.log('Alpine init - setting up stores - print editor');
-    window.Alpine.store('footerStore', footerStore());
-    window.Alpine.store('headerStore', headerStore());
-    window.Alpine.store('firstPageHeaderStore', firstPageHeaderStore());
-    window.Alpine.store(
-        'printStore',
-        printStore(
-            window.Alpine.store('headerStore'),
-            window.Alpine.store('firstPageHeaderStore'),
-            window.Alpine.store('footerStore'),
-        ),
-    );
-});
+// generate stores
+window.Alpine.store('footerStore', footerStore());
+window.Alpine.store('headerStore', headerStore());
+window.Alpine.store('firstPageHeaderStore', firstPageHeaderStore());
+window.Alpine.store(
+    'printStore',
+    printStore(
+        window.Alpine.store('headerStore'),
+        window.Alpine.store('firstPageHeaderStore'),
+        window.Alpine.store('footerStore'),
+    ),
+);

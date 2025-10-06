@@ -14,7 +14,7 @@ return new class() extends Migration
             $table->foreign('print_layout_id')
                 ->references('id')->on('print_layouts')
                 ->onDelete('cascade');
-            $table->string('content');
+            $table->longText('content');
 
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
