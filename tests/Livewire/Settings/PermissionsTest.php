@@ -10,8 +10,8 @@ test('renders successfully', function (): void {
 });
 
 test('show only active users', function (): void {
-    User::factory(2)->create(['active' => true]);
-    User::factory(1)->create(['active' => false]);
+    User::factory(2)->create(['is_active' => true]);
+    User::factory(1)->create(['is_active' => false]);
 
     Livewire::test(Permissions::class)
         ->assertOk()
