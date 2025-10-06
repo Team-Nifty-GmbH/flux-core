@@ -4,7 +4,9 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-select.styled
                     :label="__('Work Time Model')"
-                    wire:model.live="employeeWorkTimeModelForm.work_time_model_id"
+                    wire:model="employeeWorkTimeModelForm.work_time_model_id"
+                    x-on:select="$wire.employeeWorkTimeModelForm.annual_vacation_days = parseFloat($event.detail.select?.annual_vacation_days ?? 0)"
+                    x-on:remove="$wire.employeeWorkTimeModelForm.annual_vacation_days = null"
                     select="label:name|value:id"
                     unfiltered
                     :request="[
@@ -12,6 +14,11 @@
                         'method' => 'POST',
                         'params' => [
                             'searchFields' => ['name'],
+                            'fields' => [
+                                'id',
+                                'name',
+                                'annual_vacation_days',
+                            ],
                             'where' => [
                                 [
                                     'is_active',

@@ -83,31 +83,61 @@ class AttendanceOverview extends CircleChart
                 $query->whereBetween('date', [$startDate, $endDate]);
             })
             ->where('state_enum', AbsenceRequestStateEnum::Approved)
-            ->with(['absenceType', 'employeeDays'])
+            ->with([
+                'absenceType:id,name,color',
+            ])
             ->get();
 
         $absenceByType = [];
-        foreach ($absenceRequests as $request) {
-            $typeId = $request->absence_type_id;
-            $startDate = max($request->start_date, Carbon::create($this->getStart()));
-            $endDate = min($request->end_date, $this->getEnd());
+        foreach ($absenceRequests as $absenceRequest) {
+            $absenceTypeId = $absenceRequest->absence_type_id;
+            $startDate = max($absenceRequest->start_date, $this->getStart());
+            $endDate = min($absenceRequest->end_date, $this->getEnd());
             $daysAffected = 0;
 
             while ($startDate <= $endDate) {
-                $daysAffected = bcadd($daysAffected, $request->calculateWorkDaysAffected($startDate));
+                $daysAffected = bcadd($daysAffected, $absenceRequest->calculateWorkDaysAffected($startDate));
 
                 $startDate->addDay();
             }
 
-            if (! data_get($absenceByType, $typeId)) {
-                $absenceByType[$typeId] = [
-                    'name' => $request->absenceType->name,
-                    'color' => $request->absenceType->color ?? '#6b7280',
+            if (! data_get($absenceByType, $absenceTypeId)) {
+                $absenceByType[$absenceTypeId] = [
+                    'name' => $absenceRequest->absenceType->name,
+                    'color' => $absenceRequest->absenceType->color ?? '#6b7280',
                     'days' => 0,
                 ];
             }
 
-            $absenceByType[$typeId]['days'] = bcadd(data_get($absenceByType, $typeId . '.days'), $daysAffected);
+            $absenceByType[$absenceTypeId]['days'] = bcadd(
+                data_get($absenceByType, $absenceTypeId . '.days'),
+                $daysAffected
+            );
+        }
+
+        $labels = [__('Remaining Vacation Days')];
+        $series = [Number::format(bcround($employee->getCurrentVacationDaysBalance(), 2), 2)];
+        $colors = ['#3b82f6'];
+
+        $attendanceDays = resolve_static(EmployeeDay::class, 'query')
+            ->where('employee_id', $employee->getKey())
+            ->whereBetween('date', [$startDate, $endDate])
+            ->where('is_work_day', true)
+            ->where('actual_hours', '>', 0)
+            ->count();
+
+        if (bccomp($attendanceDays, 0) > 0) {
+            $labels[] = __('Attendance');
+            $series[] = Number::format(bcround($attendanceDays, 2), 2);
+            $colors[] = '#10b981';
+        }
+
+        foreach ($absenceByType as $typeData) {
+            if (bccomp($typeData['days'], 0, 2) > 0) {
+                $labels[] = $typeData['name'];
+                $series[] = Number::format(bcround($typeData['days'], 2), 2);
+                $colors[] = $typeData['color'];
+            }
         }
 
         $unexcusedDays = resolve_static(EmployeeDay::class, 'query')
@@ -120,43 +150,9 @@ class AttendanceOverview extends CircleChart
             })
             ->count();
 
-        $attendanceDays = resolve_static(EmployeeDay::class, 'query')
-            ->where('employee_id', $employee->getKey())
-            ->whereBetween('date', [$startDate, $endDate])
-            ->where('is_work_day', true)
-            ->where('actual_hours', '>', 0)
-            ->count();
-
-        $attendanceDays = (string) $attendanceDays;
-        $unexcusedDays = (string) $unexcusedDays;
-
-        $labels = [];
-        $series = [];
-        $colors = [];
-
-        $labels[] = __('Remaining Vacation Days');
-        $series[] = Number::format(bcround($employee->getCurrentVacationDaysBalance(), 2), 2);
-        $colors[] = '#3b82f6';
-
-        if (bccomp($attendanceDays, 0) > 0) {
-            $labels[] = __('Attendance');
-            $series[] = Number::format(bcround($attendanceDays, 2), 2);
-            $colors[] = '#10b981';
-        }
-
-        foreach ($absenceByType as $typeData) {
-            if (bccomp($typeData['days'], '0', 2) > 0) {
-                $labels[] = $typeData['name'];
-                $roundedDays = bcround($typeData['days'], 2);
-                $series[] = Number::format($roundedDays, 2);
-                $colors[] = $typeData['color'];
-            }
-        }
-
-        if (bccomp($unexcusedDays, '0', 2) > 0) {
+        if (bccomp($unexcusedDays, 0, 2) > 0) {
             $labels[] = __('Unexcused Absence');
-            $roundedDays = bcround($unexcusedDays, 2);
-            $series[] = Number::format($roundedDays, 2);
+            $series[] = Number::format(bcround($unexcusedDays, 2), 2);
             $colors[] = '#dc2626';
         }
 

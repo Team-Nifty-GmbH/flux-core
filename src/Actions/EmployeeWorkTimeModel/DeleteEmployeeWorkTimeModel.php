@@ -25,10 +25,9 @@ class DeleteEmployeeWorkTimeModel extends FluxAction
 
     public function performAction(): ?bool
     {
-        $employeeWorkTimeModel = resolve_static(EmployeeWorkTimeModel::class, 'query')
+        return resolve_static(EmployeeWorkTimeModel::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
-
-        return $employeeWorkTimeModel->delete();
+            ->firstOrFail()
+            ->delete();
     }
 }

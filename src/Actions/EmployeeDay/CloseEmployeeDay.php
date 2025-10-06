@@ -195,8 +195,8 @@ class CloseEmployeeDay extends FluxAction
     {
         /** @var Employee $employee */
         $employee = resolve_static(Employee::class, 'query')
-            ->with(['workTimeModelHistory.workTimeModel.schedules'])
             ->whereKey($this->getData('employee_id'))
+            ->with(['workTimeModelHistory.workTimeModel.schedules'])
             ->first();
 
         $date = Carbon::parse($this->getData('date'));
@@ -211,7 +211,7 @@ class CloseEmployeeDay extends FluxAction
         $absenceRequests = $dayData->pull('absence_requests');
 
         if ($employeeDay) {
-            $employeeDay->update($dayData->toArray());
+            $employeeDay->fill($dayData->toArray());
         } else {
             $employeeDay = app(
                 EmployeeDay::class,
@@ -225,13 +225,13 @@ class CloseEmployeeDay extends FluxAction
                     ),
                 ]
             );
-
-            $employeeDay->save();
         }
+
+        $employeeDay->save();
 
         $employeeDay->workTimes()->sync($workTimes);
         $employeeDay->absenceRequests()->sync($absenceRequests);
 
-        return $employeeDay->fresh();
+        return $employeeDay->withoutRelations()->fresh();
     }
 }

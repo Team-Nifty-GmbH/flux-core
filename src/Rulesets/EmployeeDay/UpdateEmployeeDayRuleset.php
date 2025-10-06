@@ -2,10 +2,12 @@
 
 namespace FluxErp\Rulesets\EmployeeDay;
 
-use FluxErp\Models\Employee;
+use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\EmployeeDay;
 use FluxErp\Models\Holiday;
+use FluxErp\Models\WorkTime;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateEmployeeDayRuleset extends FluxRuleset
@@ -20,28 +22,66 @@ class UpdateEmployeeDayRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => EmployeeDay::class]),
             ],
-            'employee_id' => [
-                'sometimes',
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Employee::class]),
-            ],
             'holiday_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Holiday::class]),
             ],
             'date' => 'sometimes|required|date',
-            'target_hours' => 'sometimes|required|numeric|min:0|max:24',
-            'actual_hours' => 'sometimes|required|numeric|min:0|max:24',
-            'break_minutes' => 'nullable|numeric|min:0|max:1440',
-            'plus_minus_vacation_hours' => 'nullable|numeric|min:-365|max:365',
-            'plus_minus_overtime_hours' => 'nullable|numeric|min:-1000|max:1000',
+            'target_hours' => [
+                'sometimes',
+                'required',
+                app(Numeric::class, ['min' => 0, 'max' => 24]),
+            ],
+            'actual_hours' => [
+                'sometimes',
+                'required',
+                app(Numeric::class, ['min' => 0, 'max' => 24]),
+            ],
+            'break_minutes' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1440]),
+            ],
+            'sick_days_used' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
+            'sick_hours_used' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 24]),
+            ],
+            'vacation_days_used' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
+            'vacation_hours_used' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 24]),
+            ],
+            'plus_minus_absence_hours' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 24]),
+            ],
+            'plus_minus_overtime_hours' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 24]),
+            ],
+            'is_holiday' => 'boolean',
+            'is_work_day' => 'boolean',
+
             'absence_requests' => 'nullable|array',
+            'absence_requests.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => AbsenceRequest::class]),
+            ],
             'work_times' => 'nullable|array',
-            'notes' => 'nullable|string|max:1000',
-            'is_holiday' => 'nullable|boolean',
-            'is_work_day' => 'required|boolean',
+            'work_times.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => WorkTime::class])
+                    ->where('is_daily_work_time', true),
+            ],
         ];
     }
 }

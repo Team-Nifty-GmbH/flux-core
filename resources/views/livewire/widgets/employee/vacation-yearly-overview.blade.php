@@ -84,11 +84,11 @@
                 </td>
                 <td class="px-4 py-2 whitespace-nowrap text-right">
                     <div @class([
-                        'text-green-600 dark:text-green-400' => (float) str_replace(',', '', $year['cumulative_days']) > 0,
-                        'text-red-600 dark:text-red-400' => (float) str_replace(',', '', $year['cumulative_days']) < 0,
+                        'text-green-600 dark:text-green-400' => (float) str_replace(',', '', $year['remaining_days']) > 0,
+                        'text-red-600 dark:text-red-400' => (float) str_replace(',', '', $year['remaining_days']) < 0,
                         'font-semibold' => $year['is_current'],
                     ])>
-                        <span class="font-medium">{{ $year['cumulative_days'] }}</span>
+                        <span class="font-medium">{{ $year['remaining_days'] }}</span>
                         <span class="text-xs">{{ __('days') }}</span>
                     </div>
                 </td>
@@ -100,7 +100,7 @@
                 </td>
             </tr>
         @endforelse
-        
+
         @if(count($yearlyData) > 0)
             <x-slot:footer>
                 <tr class="bg-gray-50 dark:bg-gray-800 font-semibold">
@@ -147,7 +147,7 @@
                     </td>
                     <td class="px-4 py-3 text-right">
                         @php
-                            $currentBalanceDays = $yearlyData[0]['cumulative_days'] ?? '0';
+                            $currentBalanceDays = $yearlyData[0]['remaining_days'] ?? '0';
                             $currentBalanceFloat = (float) str_replace(',', '', $currentBalanceDays);
                         @endphp
                         <div @class([

@@ -79,16 +79,15 @@ class VacationYearlyOverview extends Component
 
         $this->yearlyData = [];
 
-        $tempData = [];
-        $cumulativeBalanceDays = 0;
-        $previousYearBalance = 0;
+        $data = [];
+        $remainingDays = 0;
 
         for ($year = $startYear; $year <= $currentYear; $year++) {
             $yearStart = Carbon::create($year);
             $yearEnd = Carbon::create($year, 12, 31);
 
             // Store the previous year balance before calculating current year
-            $carryoverDays = $cumulativeBalanceDays;
+            $carryoverDays = $remainingDays;
 
             // Use days methods directly
             $earnedDays = $employee->getTotalVacationDays($yearStart, $yearEnd, false);
@@ -100,21 +99,15 @@ class VacationYearlyOverview extends Component
             $requestedDays = resolve_static(AbsenceRequest::class, 'query')
                 ->where('employee_id', $employee->getKey())
                 ->where('state_enum', AbsenceRequestStateEnum::Approved)
+                ->where('start_date', '<=', $yearEnd)
+                ->where('end_date', '>=', $yearStart)
                 ->whereHas('absenceType', function ($query): void {
                     $query->where('affects_vacation', true);
                 })
-                ->where(function ($query) use ($yearStart, $yearEnd): void {
-                    $query->whereBetween('start_date', [$yearStart, $yearEnd])
-                        ->orWhereBetween('end_date', [$yearStart, $yearEnd])
-                        ->orWhere(function ($q) use ($yearStart, $yearEnd): void {
-                            $q->where('start_date', '<=', $yearStart)
-                                ->where('end_date', '>=', $yearEnd);
-                        });
-                })
                 ->get()
-                ->sum(function ($request) use ($yearStart, $yearEnd, $employee) {
-                    $start = $request->start_date->greaterThan($yearStart) ? $request->start_date : $yearStart;
-                    $end = $request->end_date->lessThan($yearEnd) ? $request->end_date : $yearEnd;
+                ->sum(function ($absenceRequest) use ($yearStart, $yearEnd, $employee) {
+                    $start = max($absenceRequest->start_date, $yearStart);
+                    $end = min($absenceRequest->end_date, $yearEnd);
 
                     $days = 0;
                     $current = $start->copy();
@@ -122,6 +115,7 @@ class VacationYearlyOverview extends Component
                         if ($employee->isWorkDay($current)) {
                             $days++;
                         }
+
                         $current->addDay();
                     }
 
@@ -134,12 +128,9 @@ class VacationYearlyOverview extends Component
                 ->sum('amount');
 
             $availableDays = bcadd(bcadd($carryoverDays, $earnedDays), $adjustmentsDays);
-
             $remainingDays = bcadd($availableDays, $usedDays);
 
-            $cumulativeBalanceDays = $remainingDays;
-
-            $tempData[] = [
+            $data[] = [
                 'year' => $year,
                 'carryover_days' => Number::format($carryoverDays, 1),
                 'earned_days' => Number::format($earnedDays, 1),
@@ -147,15 +138,23 @@ class VacationYearlyOverview extends Component
                 'available_days' => Number::format($availableDays, 1),
                 'requested_days' => Number::format($requestedDays, 1),
                 'used_days' => Number::format($usedDays, 1),
-                'cumulative_days' => Number::format($cumulativeBalanceDays, 2),
+                'remaining_days' => Number::format($remainingDays, 2),
                 'is_current' => $year === $currentYear,
-                'is_first_year' => $year === $startYear,
-                'is_last_year' => $endYear && $year === $endYear,
-                'employment_date' => $year === $startYear ? $employee->employment_date->format('d.m.Y') : null,
-                'termination_date' => $endYear && $year === $endYear ? $employee->termination_date->format('d.m.Y') : null,
+                'is_first_year' => $employmentYear = $year === $startYear,
+                'is_last_year' => $terminationYear = $endYear && $year === $endYear,
+                'employment_date' => $employmentYear
+                    ? $employee->employment_date
+                        ->locale(app()->getLocale())
+                        ->isoFormat('L')
+                    : null,
+                'termination_date' => $terminationYear
+                    ? $employee->termination_date
+                        ->locale(app()->getLocale())
+                        ->isoFormat('L')
+                    : null,
             ];
         }
 
-        $this->yearlyData = array_reverse($tempData);
+        $this->yearlyData = array_reverse($data);
     }
 }

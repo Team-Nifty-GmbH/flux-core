@@ -109,25 +109,30 @@ class WorkTimeOverview extends LineChart
             ->setStartingDate($startDate)
             ->sum('plus_minus_overtime_hours');
 
-        $actualHours = array_map(function ($hours) {
-            return bcround($hours, 2);
-        }, $actualWorkData->getData());
+        $actualHours = array_map(
+            function ($hours) {
+                return bcround($hours, 2);
+            },
+            $actualWorkData->getData()
+        );
 
         $effectiveTargetHours = [];
-        $targetRaw = $targetData->getData();
         $vacationRaw = $vacationData->getData();
         $sickRaw = $sickData->getData();
 
-        foreach ($targetRaw as $index => $target) {
+        foreach ($targetData->getData() as $index => $target) {
             $vacation = bcabs($vacationRaw[$index] ?? 0);
             $sick = bcabs($sickRaw[$index] ?? 0);
             $effective = bcsub($target, bcadd($vacation, $sick, 2), 2);
             $effectiveTargetHours[] = $effective;
         }
 
-        $overtimeHours = array_map(function ($hours) {
-            return bcround($hours, 2);
-        }, $overtimeData->getData());
+        $overtimeHours = array_map(
+            function ($hours) {
+                return bcround($hours, 2);
+            },
+            $overtimeData->getData()
+        );
 
         $this->xaxis = [
             'categories' => $actualWorkData->getLabels(),

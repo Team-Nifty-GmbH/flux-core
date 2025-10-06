@@ -32,6 +32,6 @@ class UpdateEmployeeWorkTimeModel extends FluxAction
         $employeeWorkTimeModel->fill($this->getData());
         $employeeWorkTimeModel->save();
 
-        return $employeeWorkTimeModel->fresh();
+        return $employeeWorkTimeModel->withoutRelations()->fresh();
     }
 }

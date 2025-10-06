@@ -91,7 +91,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         $totalDays = 0;
         $current = ($date ?? $this->start_date)->copy();
 
-        while ($current <= ($date ?? $this->end_date)) {
+        while ($current->lte($date ?? $this->end_date)) {
             if ($this->employee->isWorkDay($current)) {
                 // Apply the deduction rate to get the actual days affected
                 $totalDays = bcadd(
@@ -112,7 +112,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         $totalHours = 0;
         $current = ($date ?? $this->start_date)->copy();
 
-        while ($current <= ($date ?? $this->end_date)) {
+        while ($current->lte($date ?? $this->end_date)) {
             if ($this->employee->isWorkDay($current)) {
                 $dailyHours = $this->employee->getWorkTimeModel($current)->getDailyWorkHours($current);
                 $totalHours = bcadd(

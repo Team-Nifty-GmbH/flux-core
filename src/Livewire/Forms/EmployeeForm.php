@@ -99,39 +99,6 @@ class EmployeeForm extends FluxForm
 
     public ?string $zip = null;
 
-    public function fill($values): void
-    {
-        parent::fill($values);
-
-        if ($values->date_of_birth) {
-            $this->date_of_birth = $values->date_of_birth->format('Y-m-d');
-        }
-
-        if ($values->employment_date) {
-            $this->employment_date = $values->employment_date->format('Y-m-d');
-        }
-
-        if ($values->termination_date) {
-            $this->termination_date = $values->termination_date->format('Y-m-d');
-        }
-
-        if ($values->probation_period_until) {
-            $this->probation_period_until = $values->probation_period_until->format('Y-m-d');
-        }
-
-        if ($values->fixed_term_contract_until) {
-            $this->fixed_term_contract_until = $values->fixed_term_contract_until->format('Y-m-d');
-        }
-
-        if ($values->work_permit_until) {
-            $this->work_permit_until = $values->work_permit_until->format('Y-m-d');
-        }
-
-        if ($values->residence_permit_until) {
-            $this->residence_permit_until = $values->residence_permit_until->format('Y-m-d');
-        }
-    }
-
     protected function getActions(): array
     {
         return [

@@ -76,17 +76,4 @@ class EmployeeWorkTimeModelAssignment extends Component
             ])
             ->toArray();
     }
-
-    public function updatedEmployeeWorkTimeModelFormWorkTimeModelId(): void
-    {
-        $this->skipRender();
-
-        if (! $this->employeeWorkTimeModelForm->work_time_model_id) {
-            return;
-        }
-
-        $this->employeeWorkTimeModelForm->annual_vacation_days = resolve_static(WorkTimeModel::class, 'query')
-            ->whereKey($this->employeeWorkTimeModelForm->work_time_model_id)
-            ->value('annual_vacation_days');
-    }
 }

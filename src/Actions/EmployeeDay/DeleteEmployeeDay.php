@@ -13,11 +13,6 @@ class DeleteEmployeeDay extends FluxAction
         return [EmployeeDay::class];
     }
 
-    public static function name(): string
-    {
-        return 'employee-day.delete';
-    }
-
     protected function getRulesets(): string|array
     {
         return DeleteEmployeeDayRuleset::class;
@@ -25,10 +20,9 @@ class DeleteEmployeeDay extends FluxAction
 
     public function performAction(): ?bool
     {
-        $employeeDay = resolve_static(EmployeeDay::class, 'query')
+        return resolve_static(EmployeeDay::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
-
-        return $employeeDay->delete();
+            ->firstOrFail()
+            ->delete();
     }
 }

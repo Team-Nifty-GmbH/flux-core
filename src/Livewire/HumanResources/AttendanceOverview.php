@@ -124,6 +124,7 @@ class AttendanceOverview extends Component
             $this->month = 1;
             $this->year++;
         }
+
         $this->loadData();
     }
 
@@ -135,6 +136,7 @@ class AttendanceOverview extends Component
             $this->month = 12;
             $this->year--;
         }
+
         $this->loadData();
     }
 

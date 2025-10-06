@@ -86,11 +86,6 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(Client::class);
     }
 
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class);
-    }
-
     public function employeeBalanceAdjustments(): HasMany
     {
         return $this->hasMany(EmployeeBalanceAdjustment::class);
@@ -120,6 +115,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             $includeAdjustments
                 ? $this->employeeBalanceAdjustments()
                     ->where('type', EmployeeBalanceAdjustmentTypeEnum::Overtime)
+                    ->where('effective_date', '<=', now())
                     ->sum('amount')
                 : 0
         );
@@ -249,7 +245,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             ->each(function (AbsenceRequest $absenceRequest) use (&$vacationDays, $column): void {
                 $current = $absenceRequest->start_date;
 
-                while ($current <= $absenceRequest->end_date) {
+                while ($current->lte($absenceRequest->end_date)) {
                     $vacationDays[$current->toDateString()] ??= data_get(
                         CloseEmployeeDay::make()->calculateDayData($this, $current),
                         $column
@@ -284,7 +280,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
                     $endDate = $end->copy();
                 }
 
-                while ($current <= $endDate) {
+                while ($current->lte($endDate)) {
                     $vacationDays[$current->toDateString()] ??= data_get(
                         CloseEmployeeDay::make()->calculateDayData($this, $current),
                         $column
@@ -302,7 +298,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         $workDays = [];
         $current = $startDate->copy();
 
-        while ($current <= $endDate) {
+        while ($current->lte($endDate)) {
             if ($this->isWorkDay($current)) {
                 $workDays[] = $current;
             }
@@ -313,17 +309,12 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         return $workDays;
     }
 
-    public function getWorkDaysInPeriodCount(Carbon $startDate, Carbon $endDate): int
-    {
-        return count($this->getWorkDaysInPeriod($startDate, $endDate));
-    }
-
     public function getWorkHoursInPeriod(Carbon $startDate, Carbon $endDate): string|float|int
     {
         $workHours = 0;
         $current = $startDate->copy();
 
-        while ($current <= $endDate) {
+        while ($current->lte($endDate)) {
             if ($this->isWorkDay($current)) {
                 $workTimeModel = $this->getWorkTimeModel($current);
                 $workHours = bcadd($workHours, $workTimeModel->getDailyWorkHours($current));
@@ -366,21 +357,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             ->where('weekday', $weekday)
             ->first();
 
-        $targetDaysReached = false;
         if (! $schedule) {
-            $workDays = $this->employeeDays()
-                ->whereBetween('date', [
-                    $date->startOfWeek()->toDateString(),
-                    $date->endOfWeek()->toDateString(),
-                ])
-                ->where('actual_hours', '>', 0)
-                ->count();
-            $targetDays = $workTimeModel->work_days_per_week;
-
-            $targetDaysReached = $targetDays > $workDays;
-        }
-
-        if (! $schedule || ! $schedule->start_time || ! $schedule->end_time || $targetDaysReached) {
             return false;
         }
 
@@ -418,8 +395,9 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         $query->whereHas('workTimeModelHistory')
             ->where('is_active', true)
             ->where(function (Builder $query) use ($untilDate): void {
-                $query->whereNull('termination_date')
-                    ->orWhere('termination_date', '>=', $untilDate);
+                $query->where('employment_date', '<=', $untilDate)
+                    ->whereNull('termination_date')
+                    ->orWhereValueBetween($untilDate->startOfDay(), ['employment_date', 'termination_date']);
             });
     }
 

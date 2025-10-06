@@ -20,10 +20,9 @@ class DeleteEmployeeDepartment extends FluxAction
 
     public function performAction(): ?bool
     {
-        $employeeDepartment = resolve_static(EmployeeDepartment::class, 'query')
+        return resolve_static(EmployeeDepartment::class, 'query')
             ->whereKey($this->getData('id'))
-            ->firstOrFail();
-
-        return $employeeDepartment->delete();
+            ->firstOrFail()
+            ->delete();
     }
 }
