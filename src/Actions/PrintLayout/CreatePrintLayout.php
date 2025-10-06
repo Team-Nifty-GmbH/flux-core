@@ -24,7 +24,7 @@ class CreatePrintLayout extends FluxAction
 
     public function performAction(): PrintLayout
     {
-        $temporaryMedia = $this->getData('temporaryMedia', []);
+        $temporaryMedia = $this->getData('temporary_media', []);
 
         // save print layout to obtain its ID for media relation
         $printLayout = app(PrintLayout::class);

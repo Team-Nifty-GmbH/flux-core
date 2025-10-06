@@ -20,7 +20,7 @@ class UpdatePrintLayoutRuleset extends FluxRuleset
             'header' => 'nullable|array',
             'footer' => 'nullable|array',
             'first_page_header' => 'nullable|array',
-            'temporaryMedia' => 'array',
+            'temporary_media' => 'array',
             'temporary_snippets' => 'array',
         ];
     }

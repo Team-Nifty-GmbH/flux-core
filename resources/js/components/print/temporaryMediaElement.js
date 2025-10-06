@@ -52,7 +52,7 @@ export default class TemporaryMediaElement extends PrintElement {
         if (this._imgFile !== null) {
             return new Promise(async (resolve, reject) => {
                 await $component.upload(
-                    'form.temporaryMedia',
+                    'form.temporary_media',
                     $this._imgFile,
                     (tempFileName) => {
                         $this._temporaryFileName = tempFileName;

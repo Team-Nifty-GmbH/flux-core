@@ -16,6 +16,8 @@
 
 <div>
     @foreach ($printing as $folder => $files)
+        {{-- TODO: remove continut when other layout are build --}}
+        @continue($folder !== 'order')
         <div
             class="mb-4 flex w-full flex-col rounded-lg border border-gray-300"
         >

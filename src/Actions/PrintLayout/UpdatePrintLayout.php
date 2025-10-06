@@ -28,7 +28,7 @@ class UpdatePrintLayout extends FluxAction
             ->whereKey($this->getData('id'))
             ->firstOrFail();
 
-        $temporaryMedia = $this->getData('temporaryMedia', []);
+        $temporaryMedia = $this->getData('temporary_media', []);
 
         // header
         $header = $this->getData('header');

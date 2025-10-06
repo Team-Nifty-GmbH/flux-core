@@ -8,7 +8,7 @@
                 left: {{ $media['x'] ?? 0 }}cm;
                 top: {{ $media['y'] ?? 0 }}cm;">
     <img
-        class="logo-small footer-logo max-h-full w-full"
+        class="max-h-full max-w-full w-auto"
         src="{{ $media['src'] }}"
     />
 </div>

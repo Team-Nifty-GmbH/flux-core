@@ -393,7 +393,7 @@ export default function () {
         },
         toggleElement($ref, id) {
             if (this.firstPageHeader === null) {
-                throw new Error(`Footer Elelement not initialized`);
+                throw new Error(`First Page Header Element not initialized`);
             }
 
             const index = this.visibleElements.findIndex(
@@ -461,6 +461,7 @@ export default function () {
                             };
                         },
                     );
+
                     await this.component.set(
                         'form.temporary_snippets',
                         { first_page_header: firstPageHeaderSnippets },

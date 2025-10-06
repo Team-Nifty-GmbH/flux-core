@@ -309,6 +309,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 await $headerStore.reload($refs, false);
                 await $firstPageHeaderStore.reload($refs,false);
             }
+
             this._loading = false;
         },
     };

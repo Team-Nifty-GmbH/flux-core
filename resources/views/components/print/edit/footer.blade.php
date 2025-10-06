@@ -204,6 +204,7 @@
                                 :tooltip-dropdown="true"
                                 :show-editor-padding="false"
                                 :default-font-size="9.1"
+                                :line-height="true"
                                 :text-align="true"
                                 :text-background-colors="[]"
                                 :transparent="true" />
@@ -252,7 +253,7 @@
                         <template x-if="footerStore.snippetEditorXData?.elementObj.id === objId">
                             <x-flux::editor
                                 x-editable="footerStore.snippetEditorXData?.elementObj.id === objId"
-                                class="absolute top-0 left-0 w-full p-0 leading-0"
+                                class="absolute top-0 left-0 w-full p-0"
                                 x-modelable="content"
                                 x-model="text"
                                 :full-height="true"
@@ -262,7 +263,8 @@
                                 :line-height="true"
                                 :default-font-size="9.1"
                                 :show-editor-padding="false"
-                                :transparent="true" />
+                                :transparent="true"
+                            />
                         </template>
                         <div
                             x-cloak

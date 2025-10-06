@@ -6,7 +6,7 @@
 @if($headerLayout)
     <header
         style="height: {{ $headerLayout['height'] ?? '1.7' }}cm;"
-        class="w-full bg-white font-light">
+        class="w-full bg-white text-2xs leading-3">
         @foreach($headerLayout['elements'] as $element)
             {{--  subject    --}}
             @if($element['id'] === 'header-subject')
@@ -55,7 +55,7 @@
     </header>
 @else
 {{-- default header if no changes are made--}}
-<header class="h-auto w-full bg-white text-center font-light">
+<header class="h-auto w-full bg-white text-center text-2xs leading-3">
     <div class="float-left inline-block text-left">
         <x-flux::print.elements.header-subject :subject="$subject ?? ''" />
         <x-flux::print.elements.header-page-count :preview="$isPreview" />

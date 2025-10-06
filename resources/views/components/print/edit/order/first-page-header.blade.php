@@ -76,7 +76,7 @@
                 : null
         "
         x-ref="first-page-header"
-        class="h-[7cm] box-border"
+        class="h-[7cm] box-border text-2xs leading-3"
         :style="`height: ${firstPageHeaderStore.height};`"
     >
         <div
@@ -221,7 +221,7 @@
             id="first-page-header-snippet-placeholder"
             data-type="resizable"
             draggable="false"
-            class="absolute w-[10cm] h-[1.7cm] border"
+            class="absolute w-[10cm] h-[1.7cm] border text-2xs"
             :class="{
                     'border-primary-200': firstPageHeaderStore.isSnippetResizeClicked,
                     'bg-gray-100' : !firstPageHeaderStore.isResizeOrScaleActive && firstPageHeaderStore.selectedElementId === $el.id,
@@ -245,6 +245,8 @@
                         x-model="text"
                         :full-height="true"
                         :tooltip-dropdown="true"
+                        :default-font-size="9.1"
+                        :line-height="true"
                         :text-background-colors="[]"
                         :show-editor-padding="false"
                         :text-align="true"
@@ -299,6 +301,8 @@
                         x-model="text"
                         :full-height="true"
                         :text-align="true"
+                        :default-font-size="9.1"
+                        :line-height="true"
                         :text-background-colors="[]"
                         :tooltip-dropdown="true"
                         :show-editor-padding="false"

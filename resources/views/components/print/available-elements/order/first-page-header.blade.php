@@ -58,6 +58,7 @@ x-show="printStore.editFirstPageHeader"
                 />
                 @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                 <x-button.circle
+                    x-bind:disabled="firstPageHeaderStore.snippetEditorXData !== null"
                     x-on:click="firstPageHeaderStore.deleteMedia(image.id)"
                     icon="trash"
                 />
@@ -72,6 +73,7 @@ x-show="printStore.editFirstPageHeader"
                     x-bind:src=image.src
                 />
                 <x-button.circle
+                    x-bind:disabled="firstPageHeaderStore.snippetEditorXData !== null"
                     x-on:click="firstPageHeaderStore.deleteTemporaryMedia(image.id)"
                     icon="trash"
                 />

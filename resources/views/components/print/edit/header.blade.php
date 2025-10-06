@@ -64,7 +64,7 @@
         x-ref="header"
         x-on:mouseup.window="headerStore.onMouseUpHeader($event)"
         x-on:mousemove.window="headerStore.isHeaderClicked ? headerStore.onMouseMoveHeader($event) : null"
-        class="header-content relative h-full w-full">
+        class="header-content relative h-full w-full text-2xs leading-3">
     </div>
     <div
         x-on:mousemove.window="headerStore.isImgResizeClicked ? headerStore.onMouseMoveScale($event) : headerStore.isSnippetResizeClicked ? headerStore.onMouseMoveResize($event) : null"
@@ -213,11 +213,14 @@
                         x-modelable="content"
                         x-model="text"
                         :full-height="true"
-                        :tooltip-dropdown="true"
-                        :show-editor-padding="false"
-                        :text-background-colors="[]"
                         :text-align="true"
-                        :transparent="true" />
+                        :tooltip-dropdown="true"
+                        :text-background-colors="[]"
+                        :line-height="true"
+                        :default-font-size="9.1"
+                        :show-editor-padding="false"
+                        :transparent="true"
+                    />
                 </template>
                 <div
                     x-cloak
@@ -268,13 +271,17 @@
                         x-model="text"
                         :full-height="true"
                         :text-align="true"
-                        :text-background-colors="[]"
                         :tooltip-dropdown="true"
+                        :text-background-colors="[]"
+                        :line-height="true"
+                        :default-font-size="9.1"
                         :show-editor-padding="false"
-                        :transparent="true" />
+                        :transparent="true"
+                    />
                 </template>
                 <div
                     x-cloak
+                    class="text-[9.1px]"
                     x-show="headerStore.snippetEditorXData === null"
                     x-html="text">
                 </div>

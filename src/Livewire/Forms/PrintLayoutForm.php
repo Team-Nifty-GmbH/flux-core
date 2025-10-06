@@ -29,9 +29,9 @@ class PrintLayoutForm extends FluxForm
     #[Locked]
     public ?string $name = null;
 
-    public array $temporary_snippets = [];
+    public array $temporary_media = [];
 
-    public array $temporaryMedia = [];
+    public array $temporary_snippets = [];
 
     public function fill($values): void
     {

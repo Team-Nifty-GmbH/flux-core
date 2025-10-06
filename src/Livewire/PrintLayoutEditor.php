@@ -91,6 +91,7 @@ class PrintLayoutEditor extends Component
     #[Layout('flux::layouts.print-layout-editor')]
     public function render(): View
     {
+        // TODO: cover other page editors
         return view('flux::livewire.a4-page-editor');
     }
 
@@ -119,15 +120,23 @@ class PrintLayoutEditor extends Component
     public function save(): bool
     {
         try {
-            throw new UnauthorizedException(494);
+            //            throw new UnauthorizedException(494);
             $this->form->save();
             // clean up temporary media and snippets after successful save
-            $this->form->temporaryMedia = [];
+            $this->form->temporary_media = [];
             $this->form->temporary_snippets = [];
 
             return true;
         } catch (ValidationException|UnauthorizedException $e) {
-            // TODO: reset form to previous state
+            $layout = PrintLayout::query()
+                ->where('name', 'flux::layouts.printing.' . $this->layoutModel . '.' . $this->name)
+                ->where('client_id', $this->selectedClientId)
+                ->first();
+            $this->form->reset();
+            if ($layout) {
+                $this->form->fill($layout->toArray());
+            }
+
             // TODO: import the library for exception_to_notifications
             exception_to_notifications($e, $this);
 

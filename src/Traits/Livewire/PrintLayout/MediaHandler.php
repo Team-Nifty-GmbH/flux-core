@@ -41,7 +41,7 @@ trait MediaHandler
                     // add media to rootElement before submiting to db
                     $rootElement['media'][] = $imagePosition;
                 } else {
-                    throw new Error('Temporary image not found in temporary media - mismatch between footer and temporary media');
+                    throw new Error('Temporary image not found in temporary media - mismatch between root temporary media and temporary media');
                 }
             }
         }
