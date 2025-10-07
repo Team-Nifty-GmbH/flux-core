@@ -238,7 +238,7 @@ abstract class PrintableView extends Component
     {
         // add margin for first page - to avoid header on first page
         $model = $this->getModel();
-        if ($model &&  data_get($model, 'client_id')) {
+        if ($model && data_get($model, 'client_id')) {
             $layout = $this->getPrintLayout();
             if ($layout && data_get($layout, 'margin') && data_get($layout, 'header') && data_get($layout, 'footer')) {
                 $margin = data_get($layout, 'margin');
