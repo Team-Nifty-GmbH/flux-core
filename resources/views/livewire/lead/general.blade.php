@@ -169,6 +169,11 @@
                                     '=',
                                     morph_alias(\FluxErp\Models\Lead::class),
                                 ],
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
                             ],
                         ],
                     ]"
