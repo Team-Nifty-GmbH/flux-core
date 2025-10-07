@@ -1,6 +1,10 @@
 <div>
-    <x-modal :id="$employeeForm->modalName()" xl :title="__('Create Employee')">
-        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+    <x-modal
+        :id="$employeeForm->modalName()"
+        xl
+        :title="__('Create Employee')"
+    >
+        <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <div class="sm:col-span-2">
                 <x-select.styled
                     :label="__('User')"
@@ -60,7 +64,7 @@
                     wire:model="employeeForm.is_active"
                 />
             </div>
-             <x-select.styled
+            <x-select.styled
                 :label="__('Work Time Model')"
                 wire:model="employeeForm.work_time_model_id"
                 required
@@ -97,6 +101,6 @@
                     }
                 })"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 </div>

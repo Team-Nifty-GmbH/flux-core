@@ -51,10 +51,10 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
 
             $absenceRequest->stateChangeComment = null;
 
-            foreach ($absenceRequest->employeeDays()->get(['id', 'employee_id', 'date']) as $day) {
+            foreach ($absenceRequest->employeeDays()->get(['id', 'date']) as $employeeDay) {
                 CloseEmployeeDay::make([
                     'employee_id' => $absenceRequest->employee_id,
-                    'date' => $day->date,
+                    'date' => $employeeDay->date,
                 ])
                     ->validate()
                     ->execute();

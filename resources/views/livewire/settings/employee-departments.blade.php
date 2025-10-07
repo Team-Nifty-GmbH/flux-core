@@ -1,7 +1,15 @@
 <div>
-    <x-modal :id="$employeeDepartmentForm->modalName()" size="2xl" :title="__('Department')">
+    <x-modal
+        :id="$employeeDepartmentForm->modalName()"
+        size="2xl"
+        :title="__('Department')"
+    >
         <div class="flex flex-col gap-4">
-            <x-input wire:model="employeeDepartmentForm.name" :label="__('Name')" required />
+            <x-input
+                wire:model="employeeDepartmentForm.name"
+                :label="__('Name')"
+                required
+            />
 
             <x-input
                 wire:model="employeeDepartmentForm.code"
@@ -18,7 +26,9 @@
             <x-select.styled
                 wire:model="employeeDepartmentForm.parent_id"
                 :label="__('Parent Department')"
+                :clearable="true"
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\EmployeeDepartment::class),
                     'method' => 'POST',
@@ -29,14 +39,14 @@
                         ]
                     ]
                 ]"
-                unfiltered
-                :clearable="true"
             />
 
             <x-select.styled
                 wire:model="employeeDepartmentForm.location_id"
                 :label="__('Location')"
+                :clearable="true"
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Location::class),
                     'method' => 'POST',
@@ -44,14 +54,14 @@
                         'searchFields' => ['name']
                     ]
                 ]"
-                unfiltered
-                :clearable="true"
             />
 
             <x-select.styled
                 wire:model="employeeDepartmentForm.manager_employee_id"
                 :label="__('Department Manager')"
                 select="label:name|value:id"
+                :clearable="true"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Employee::class),
                     'method' => 'POST',
@@ -59,8 +69,6 @@
                         'searchFields' => ['name', 'email']
                     ]
                 ]"
-                unfiltered
-                :clearable="true"
             />
 
             <x-toggle
@@ -85,6 +93,6 @@
                     }
                 })"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 </div>

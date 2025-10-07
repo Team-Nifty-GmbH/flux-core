@@ -1,8 +1,4 @@
-<x-modal
-    id="edit-currency-modal"
-    wire="editModal"
-    :title="__('Currency')"
->
+<x-modal id="edit-currency-modal" wire="editModal" :title="__('Currency')">
     <div class="flex flex-col gap-1.5">
         <x-input
             wire:model="selectedCurrency.name"

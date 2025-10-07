@@ -1,7 +1,11 @@
 <div>
     <x-modal :id="$holidayForm->modalName()" :title="__('Holiday')">
         <div class="flex flex-col gap-4">
-            <x-input wire:model="holidayForm.name" :label="__('Name')" required />
+            <x-input
+                wire:model="holidayForm.name"
+                :label="__('Name')"
+                required
+            />
 
             <x-toggle
                 wire:model.live="holidayForm.is_recurring"
@@ -17,7 +21,11 @@
                 />
             </div>
 
-            <div class="grid grid-cols-2 gap-4" x-show="$wire.holidayForm.is_recurring" x-cloak>
+            <div
+                class="grid grid-cols-2 gap-4"
+                x-show="$wire.holidayForm.is_recurring"
+                x-cloak
+            >
                 <x-input
                     wire:model="holidayForm.month"
                     type="number"
@@ -38,9 +46,10 @@
             </div>
 
             <x-select.styled
-                wire:model="holidayForm.location_id"
+                wire:model="holidayForm.locations"
                 :label="__('Location')"
                 :hint="__('Leave empty for all locations')"
+                multiple
                 select="label:name|value:id"
                 unfiltered
                 :request="[
@@ -97,6 +106,6 @@
                 color="primary"
                 wire:click="save().then((success) => { if(success) $modalClose('{{ $holidayForm->modalName() }}') })"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 </div>

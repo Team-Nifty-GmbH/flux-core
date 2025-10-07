@@ -1,6 +1,6 @@
 <div>
     <div class="space-y-4">
-        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+        <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-select.styled
                     :label="__('Work Time Model')"
@@ -58,48 +58,88 @@
             </div>
         </div>
 
-        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <div
+            class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"
+        >
             <table class="min-w-full divide-y divide-gray-300">
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                        >
                             {{ __('Work Time Model') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                        >
                             {{ __('Valid From') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                        >
                             {{ __('Valid Until') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                        >
                             {{ __('Vacation Days') }}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                        >
                             {{ __('Note') }}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200">
+                <tbody
+                    class="divide-y divide-gray-200 bg-white dark:bg-gray-900"
+                >
                     <template x-for="assignment in $wire.assignments">
-                        <tr x-bind:class="assignment.is_current ? 'bg-green-50 dark:bg-green-900/20' : ''">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                                <span x-text="assignment.work_time_model"></span>
+                        <tr
+                            x-bind:class="assignment.is_current ? 'bg-green-50 dark:bg-green-900/20' : ''"
+                        >
+                            <td
+                                class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100"
+                            >
+                                <span
+                                    x-text="assignment.work_time_model"
+                                ></span>
                                 <template x-if="assignment.is_current">
-                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    <span
+                                        class="ml-2 inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+                                    >
                                         {{ __('Current') }}
                                     </span>
                                 </template>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                <span x-text="assignment.valid_from ? window.formatters.date(assignment.valid_from) : '-'"></span>
+                            <td
+                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                <span
+                                    x-text="assignment.valid_from ? window.formatters.date(assignment.valid_from) : '-'"
+                                ></span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                <span x-text="assignment.valid_until ? window.formatters.date(assignment.valid_until) : '-'"></span>
+                            <td
+                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                <span
+                                    x-text="assignment.valid_until ? window.formatters.date(assignment.valid_until) : '-'"
+                                ></span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                <span x-text="assignment.annual_vacation_days ? window.formatters.int(assignment.annual_vacation_days) : '-'"></span>
+                            <td
+                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                <span
+                                    x-text="
+                                        assignment.annual_vacation_days
+                                            ? window.formatters.int(assignment.annual_vacation_days)
+                                            : '-'
+                                    "
+                                ></span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                            <td
+                                class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+                            >
                                 <span x-text="assignment.note || '-'"></span>
                             </td>
                         </tr>

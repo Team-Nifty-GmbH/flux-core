@@ -1,18 +1,20 @@
 <div>
-    <x-modal :id="$locationForm->modalName()" size="2xl" :title="__('Location')">
+    <x-modal
+        :id="$locationForm->modalName()"
+        size="2xl"
+        :title="__('Location')"
+    >
         <div class="flex flex-col gap-4">
-            <x-input wire:model="locationForm.name" :label="__('Name')" required />
+            <x-input
+                wire:model="locationForm.name"
+                :label="__('Name')"
+                required
+            />
 
             <div class="grid grid-cols-3 gap-4">
-                <x-input
-                    wire:model="locationForm.zip"
-                    :label="__('Zip')"
-                />
+                <x-input wire:model="locationForm.zip" :label="__('Zip')" />
 
-                <x-input
-                    wire:model="locationForm.city"
-                    :label="__('City')"
-                />
+                <x-input wire:model="locationForm.city" :label="__('City')" />
 
                 <x-input
                     wire:model="locationForm.street"
@@ -75,6 +77,6 @@
                 color="primary"
                 wire:click="save().then((success) => { if(success) $modalClose('{{ $locationForm->modalName() }}') })"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 </div>

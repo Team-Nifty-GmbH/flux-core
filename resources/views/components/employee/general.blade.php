@@ -1,6 +1,4 @@
-<div
-    class="mx-auto md:flex md:items-center md:justify-end md:space-x-5"
->
+<div class="mx-auto md:flex md:items-center md:justify-end md:space-x-5">
     <div
         class="flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
     >
@@ -37,9 +35,9 @@
         />
     </div>
 </div>
-<div class="space-y-6 pt-4 pb-16">
+<div class="space-y-6 pb-16 pt-4">
     <x-card :header="__('Basic Information')">
-        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <x-input
                 :label="__('Firstname')"
                 wire:model="employee.firstname"
@@ -85,7 +83,7 @@
     </x-card>
 
     <x-card :header="__('Personal Information')">
-        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <x-date
                 :label="__('Date Of Birth')"
                 wire:model="employee.date_of_birth"
@@ -121,18 +119,19 @@
                 wire:model="employee.city"
                 x-bind:disabled="!edit"
             />
-            <x-number
-                min="0"
-                step="0.5"
-                :label="__('Number Of Children')"
-                wire:model="employee.number_of_children"
-                x-bind:disabled="!edit"
-            />
+            <div x-bind:class="!edit && 'pointer-events-none'">
+                <x-number
+                    min="0"
+                    step="0.5"
+                    :label="__('Number Of Children')"
+                    wire:model="employee.number_of_children"
+                />
+            </div>
         </div>
     </x-card>
 
     <x-card :header="__('Government & Insurance')">
-        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <x-input
                 :label="__('Social Security Number')"
                 wire:model="employee.social_security_number"
@@ -158,7 +157,10 @@
 
     {{-- Employment Information --}}
     <x-card :header="__('Employment Information')">
-        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+        <div
+            class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2"
+            x-bind:class="!edit && 'pointer-events-none'"
+        >
             <x-date
                 :label="__('Employment Date')"
                 wire:model="employee.employment_date"
@@ -234,32 +236,36 @@
     </x-card>
 
     <x-card :header="__('Work Time Model')">
-        <livewire:employee.employee-work-time-model-assignment :employeeId="$this->employee->id"/>
+        <livewire:employee.employee-work-time-model-assignment
+            :employeeId="$this->employee->id"
+        />
     </x-card>
 
     <x-card :header="__('Vacation Carryover Rule')">
-        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-            <x-select.styled
-                :label="__('Vacation Carryover Rule')"
-                wire:model="employee.vacation_carryover_rule_id"
-                required
-                select="label:name|value:id"
-                unfiltered
-                :request="[
-                    'url' => route('search', \FluxErp\Models\VacationCarryoverRule::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'searchFields' => ['name'],
-                        'where' => [
-                            [
-                                'is_active',
-                                '=',
-                                true,
+        <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+            <div x-bind:class="!edit && 'pointer-events-none'">
+                <x-select.styled
+                    :label="__('Vacation Carryover Rule')"
+                    wire:model="employee.vacation_carryover_rule_id"
+                    required
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\VacationCarryoverRule::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => ['name'],
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
                             ],
                         ],
-                    ],
-                ]"
-            />
+                    ]"
+                />
+            </div>
         </div>
     </x-card>
 </div>

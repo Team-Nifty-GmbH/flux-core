@@ -49,13 +49,6 @@ class Location extends FluxModel
             ->using(HolidayLocation::class);
     }
 
-    public function isHoliday(Carbon $date): bool
-    {
-        return $this->holidays()
-            ->whereDate('date', $date)
-            ->exists();
-    }
-
     public function vacationBlackouts(): BelongsToMany
     {
         return $this->belongsToMany(VacationBlackout::class, 'location_vacation_blackout')

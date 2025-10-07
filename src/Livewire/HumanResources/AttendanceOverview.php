@@ -111,7 +111,7 @@ class AttendanceOverview extends Component
         $this->monthName = Carbon::create($this->year, $this->month)
             ->locale(app()->getLocale())
             ->monthName;
-        $this->loadHolidays();
+
         $this->prepareCalendarDays();
         $this->loadAttendanceData();
     }
@@ -219,39 +219,45 @@ class AttendanceOverview extends Component
                 'employment_date',
                 'termination_date',
             ])
-            ->withSum([
-                'employeeDays as target_hours' => fn (Builder $query) => $query
-                    ->whereBetween('date', [$startOfMonth, $endOfMonth->endOfDay()])
-                    ->whereDoesntHaveRelation(
-                        'absenceRequests',
-                        'state_enum',
-                        AbsenceRequestStateEnum::Approved
-                    ),
-            ],
+            ->withSum(
+                [
+                    'employeeDays as target_hours' => fn (Builder $query) => $query
+                        ->whereBetween('date', [$startOfMonth, $endOfMonth->endOfDay()])
+                        ->whereDoesntHaveRelation(
+                            'absenceRequests',
+                            'state_enum',
+                            AbsenceRequestStateEnum::Approved
+                        ),
+                ],
                 'target_hours'
             )
-            ->withSum([
-                'employeeDays as actual_hours' => fn (Builder $query) => $query
-                    ->whereBetween('date', [$startOfMonth, $endOfMonth->endOfDay()]),
-            ],
+            ->withSum(
+                [
+                    'employeeDays as actual_hours' => fn (Builder $query) => $query
+                        ->whereBetween('date', [$startOfMonth, $endOfMonth->endOfDay()]),
+                ],
                 'actual_hours'
             )
-            ->withCount([
-                'employeeDays as target_days' => fn (Builder $query) => $query
-                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                    ->where('is_work_day', true)
-                    ->whereDoesntHave('absenceRequests', fn (Builder $query) => $query
-                        ->where('state_enum', AbsenceRequestStateEnum::Approved)
-                    ),
-            ],
+            ->withCount(
+                [
+                    'employeeDays as target_days' => fn (Builder $query) => $query
+                        ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                        ->where('is_work_day', true)
+                        ->whereDoesntHaveRelation(
+                            'absenceRequests',
+                            'state_enum',
+                            AbsenceRequestStateEnum::Approved
+                        ),
+                ],
                 'target_days'
             )
-            ->withCount([
-                'employeeDays as actual_days' => fn (Builder $query) => $query
-                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                    ->where('is_work_day', true)
-                    ->whereHas('workTimes'),
-            ],
+            ->withCount(
+                [
+                    'employeeDays as actual_days' => fn (Builder $query) => $query
+                        ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                        ->where('is_work_day', true)
+                        ->whereHas('workTimes'),
+                ],
                 'actual_days'
             )
             ->with([
@@ -310,7 +316,9 @@ class AttendanceOverview extends Component
                     ->keyBy(fn (array $day) => Carbon::parse(data_get($day, 'date'))->format('Y-m-d'))
                     ->toArray();
                 $activeWorkTimes = collect(Arr::pull($employeeArray, 'work_times'))
-                    ->keyBy(fn (array $workTime) => Carbon::parse(data_get($workTime, 'started_at'))->format('Y-m-d'))
+                    ->keyBy(fn (array $workTime) => Carbon::parse(data_get($workTime, 'started_at'))
+                        ->format('Y-m-d')
+                    )
                     ->toArray();
                 $employeeArray['hours_percentage'] = percentage_of(
                     data_get($employeeArray, 'target_hours'),
@@ -328,7 +336,14 @@ class AttendanceOverview extends Component
                     ->merge($activeWorkTimes)
                     ->mapWithKeys(function (array $data, string $day) use ($employee) {
                         $parsedDay = Carbon::parse($day);
-                        $dayData = CloseEmployeeDay::make()->calculateDayData($employee, $parsedDay);
+                        $dayData = resolve_static(
+                            CloseEmployeeDay::class,
+                            'calculateDayData',
+                            [
+                                'employee' => $employee,
+                                'date' => $parsedDay,
+                            ]
+                        );
 
                         if ($parsedDay->isFuture()) {
                             $dayData['plus_minus_overtime_hours'] = null;
@@ -349,25 +364,45 @@ class AttendanceOverview extends Component
 
     protected function loadHolidays(): void
     {
-        $this->holidays = resolve_static(Location::class, 'query')
-            ->with(['holidays' => fn (BelongsToMany $query) => $query->whereBetween(
-                'date',
-                [
-                    Carbon::create($this->year, $this->month)->startOfMonth(),
-                    Carbon::create($this->year, $this->month)->copy()->endOfMonth(),
-                ]
+        $this->holidays = resolve_static(Holiday::class, 'query')
+            ->where(fn (Builder $query) => $query
+                ->whereValueBetween($this->year, ['effective_from', 'effective_until'])
+                ->orWhere(fn (Builder $query) => $query
+                    ->whereNull('effective_from')
+                    ->where('effective_until', '>=', $this->year)
+                )
+                ->orWhere(fn (Builder $query) => $query
+                    ->whereNull('effective_until')
+                    ->where('effective_from', '<=', $this->year)
+                )
+                ->orWhere(fn (Builder $query) => $query
+                    ->whereNull('effective_from')
+                    ->whereNull('effective_until')
+                )
             )
-                ->select(['id', 'name', 'date']),
+            ->where(fn (Builder $query) => $query
+                ->where('month', $this->month)
+                ->whereBetween('day', [1, Carbon::create($this->year, $this->month)->daysInMonth])
+                ->orWhereBetween(
+                    'date',
+                    [
+                        Carbon::create($this->year, $this->month)->startOfMonth(),
+                        Carbon::create($this->year, $this->month)->endOfMonth(),
+                    ]
+                )
+            )
+            ->with([
+                'locations:id',
             ])
-            ->get(['id', 'name'])
-            ->keyBy('id')
-            ->map(fn (Location $location) => $location
-                ->holidays
-                ->keyBy(fn (Holiday $holiday) => Carbon::parse($holiday->date)->format('Y-m-d'))
-            )
-            ->toArray();
+            ->selectRaw('id, name, COALESCE(date, (CONCAT(?, \'-\', month, \'-\', day))) AS date', [$this->year])
+            ->get()
+            ->map(function (Holiday $holiday) {
+                $holidayArray = $holiday->toArray();
+                $holidayArray['locations'] = $holiday->locations->pluck('id')->toArray();
 
-        $this->holidays['no-location'] = [];
+                return $holidayArray;
+            })
+            ->toArray();
     }
 
     protected function prepareCalendarDays(): void

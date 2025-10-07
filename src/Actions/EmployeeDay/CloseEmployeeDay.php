@@ -8,6 +8,7 @@ use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
+use FluxErp\Models\Holiday;
 use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\EmployeeDay\CloseEmployeeDayRuleset;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,15 +26,16 @@ class CloseEmployeeDay extends FluxAction
         return CloseEmployeeDayRuleset::class;
     }
 
-    public function calculateDayData(Employee $employee, Carbon $date): Collection
+    public static function calculateDayData(Employee $employee, Carbon $date): Collection
     {
-        /** @var Builder $baseQuery */
-        $baseQuery = resolve_static(WorkTime::class, 'query')
+        /** @var Builder $workTimeQuery */
+        $workTimeQuery = resolve_static(WorkTime::class, 'query')
             ->where(function (Builder $query) use ($employee): void {
                 $query->where('employee_id', $employee->getKey());
             })
             ->where('is_daily_work_time', true);
-        $absenceRequestBaseQuery = resolve_static(AbsenceRequest::class, 'query')
+
+        $absenceRequestQuery = resolve_static(AbsenceRequest::class, 'query')
             ->where('employee_id', $employee->getKey())
             ->whereValueBetween($date, ['start_date', 'end_date'])
             ->where('state_enum', AbsenceRequestStateEnum::Approved)
@@ -42,15 +44,15 @@ class CloseEmployeeDay extends FluxAction
         $wasPresent = false;
         $actualHours = 0;
         $pauseTimes = 0;
-        $wasSick = $absenceRequestBaseQuery->clone()
+        $wasSick = $absenceRequestQuery->clone()
             ->whereRelation('absenceType', 'affects_sick_leave', true)
             ->exists();
 
         if (! $wasSick) {
-            $workTimes = $baseQuery->clone()
+            $workTimes = $workTimeQuery->clone()
                 ->whereDate('started_at', $date)
                 ->sum('total_time_ms');
-            $pauseTimes = $baseQuery->clone()
+            $pauseTimes = $workTimeQuery->clone()
                 ->whereDate('started_at', $date)
                 ->where('is_pause', true)
                 ->sum('total_time_ms');
@@ -74,10 +76,10 @@ class CloseEmployeeDay extends FluxAction
         $usedAbsenceRequests = collect();
 
         if ($wasSick || $wasPresent) {
-            $absenceRequestBaseQuery->whereRelation('absenceType', 'affects_vacation', false);
+            $absenceRequestQuery->whereRelation('absenceType', 'affects_vacation', false);
         }
 
-        foreach ($absenceRequestBaseQuery->get() as $absenceRequest) {
+        foreach ($absenceRequestQuery->get() as $absenceRequest) {
             if (data_get($absenceRequest, 'absenceType.affects_sick_leave')) {
                 $hours = $absenceRequest->calculateWorkHoursAffected($date);
                 if (bccomp($hours, 0) > 0) {
@@ -170,23 +172,25 @@ class CloseEmployeeDay extends FluxAction
             'plus_minus_absence_hours' => bcround(data_get($hoursUsed, 'plus_minus_absence_hours', 0), 2),
         ];
 
+        $holidayId = resolve_static(Holiday::class, 'query')
+            ->isHoliday($date, $employee->location_id)
+            ->value('id');
+
         return collect(array_merge(
             [
+                'holiday_id' => $holidayId,
                 'target_hours' => $targetHours,
                 'actual_hours' => bcround($actualHours, 2),
                 'break_minutes' => bcround(bcdiv($pauseTimes, 60000)),
             ],
             $formattedHours,
             [
+                'is_holiday' => (bool) $holidayId,
+                'is_work_day' => $isWorkDay,
                 'absence_requests' => $usedAbsenceRequests,
-                'work_times' => $baseQuery->clone()
+                'work_times' => $workTimeQuery->clone()
                     ->whereDate('started_at', $date)
                     ->pluck('id'),
-                'is_work_day' => $isWorkDay,
-                'is_holiday' => (bool) $employee->location?->isHoliday($date),
-                'holiday_id' => $employee->location?->holidays()
-                    ->whereDate('date', $date)
-                    ->value('holidays.id'),
             ]
         ));
     }
@@ -206,7 +210,7 @@ class CloseEmployeeDay extends FluxAction
             ->whereDate('date', $date)
             ->first();
 
-        $dayData = $this->calculateDayData($employee, $date);
+        $dayData = static::calculateDayData($employee, $date);
         $workTimes = $dayData->pull('work_times');
         $absenceRequests = $dayData->pull('absence_requests');
 

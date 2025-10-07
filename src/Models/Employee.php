@@ -65,13 +65,13 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
     {
         return [
             'salutation' => SalutationEnum::class,
-            'date_of_birth' => 'date',
-            'employment_date' => 'date',
-            'termination_date' => 'date',
-            'probation_period_until' => 'date',
-            'fixed_term_contract_until' => 'date',
-            'work_permit_until' => 'date',
-            'residence_permit_until' => 'date',
+            'date_of_birth' => 'date:Y-m-d',
+            'employment_date' => 'date:Y-m-d',
+            'termination_date' => 'date:Y-m-d',
+            'probation_period_until' => 'date:Y-m-d',
+            'fixed_term_contract_until' => 'date:Y-m-d',
+            'work_permit_until' => 'date:Y-m-d',
+            'residence_permit_until' => 'date:Y-m-d',
             'is_active' => 'boolean',
         ];
     }
@@ -247,7 +247,14 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
                 while ($current->lte($absenceRequest->end_date)) {
                     $vacationDays[$current->toDateString()] ??= data_get(
-                        CloseEmployeeDay::make()->calculateDayData($this, $current),
+                        resolve_static(
+                            CloseEmployeeDay::class,
+                            'calculateDayData',
+                            [
+                                'employee' => $this,
+                                'date' => $current,
+                            ]
+                        ),
                         $column
                     );
 
@@ -282,7 +289,14 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
                 while ($current->lte($endDate)) {
                     $vacationDays[$current->toDateString()] ??= data_get(
-                        CloseEmployeeDay::make()->calculateDayData($this, $current),
+                        resolve_static(
+                            CloseEmployeeDay::class,
+                            'calculateDayData',
+                            [
+                                'employee' => $this,
+                                'date' => $current,
+                            ]
+                        ),
                         $column
                     );
 
@@ -361,9 +375,9 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             return false;
         }
 
-        $holiday = $this->location?->isHoliday($date);
-
-        return ! $holiday;
+        return resolve_static(Holiday::class, 'query')
+            ->isHoliday($date, $this->location_id)
+            ->doesntExist();
     }
 
     public function location(): BelongsTo

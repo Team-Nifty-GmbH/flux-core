@@ -1,4 +1,7 @@
-<x-modal id="edit-payment-reminder-text-modal" :title="__('Payment Reminder Text')">
+<x-modal
+    id="edit-payment-reminder-text-modal"
+    :title="__('Payment Reminder Text')"
+>
     <div class="flex flex-col gap-1.5">
         <x-number
             :label="__('Minimum reminder level')"

@@ -23,14 +23,25 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
                         <div class="pl-2">
-                            <span>{{ $employee->firstname }} {{ $employee->lastname }}</span>
+                            <span>
+                                {{ $employee->firstname }}
+                                {{ $employee->lastname }}
+                            </span>
                         </div>
                     </div>
                 </h1>
-                <div class="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span x-show="$wire.employee.email">{{ $employee->email }}</span>
-                    <span x-show="$wire.employee.employee_number">#{{ $employee->employee_number }}</span>
-                    <span x-show="$wire.employee.job_title">{{ $employee->job_title }}</span>
+                <div
+                    class="flex gap-4 text-sm text-gray-500 dark:text-gray-400"
+                >
+                    <span x-show="$wire.employee.email">
+                        {{ $employee->email }}
+                    </span>
+                    <span x-show="$wire.employee.employee_number">
+                        #{{ $employee->employee_number }}
+                    </span>
+                    <span x-show="$wire.employee.job_title">
+                        {{ $employee->job_title }}
+                    </span>
                 </div>
             </div>
             @show

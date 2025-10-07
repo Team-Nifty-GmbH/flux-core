@@ -1,8 +1,4 @@
-<x-modal
-    id="edit-language-modal"
-    wire="editModal"
-    :title="__('Language')"
->
+<x-modal id="edit-language-modal" wire="editModal" :title="__('Language')">
     <div class="flex flex-col gap-1.5">
         <x-input
             wire:model="selectedLanguage.name"

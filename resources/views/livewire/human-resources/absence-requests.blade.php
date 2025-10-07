@@ -1,9 +1,7 @@
-<x-modal :id="$absenceRequestForm->modalName()" persistent size="3xl">
-    <x-slot:title>{{ __('Absence Request') }}</x-slot:title>
-
+<x-modal :id="$absenceRequestForm->modalName()" persistent size="3xl" :title="__('Absence Request')">
     <div class="flex flex-col gap-4">
         <div class="grid grid-cols-2 gap-4">
-            @if($this->canChooseEmployee())
+            @if ($this->canChooseEmployee())
                 <x-select.styled
                     wire:model="absenceRequestForm.employee_id"
                     :label="__('Employee')"
@@ -92,7 +90,7 @@
             :label="__('Is Emergency')"
         />
 
-        @if($this->canChooseEmployee())
+        @if ($this->canChooseEmployee())
             <x-select.styled
                 wire:model="absenceRequestForm.state_enum"
                 :label="__('Status')"
@@ -113,5 +111,5 @@
             color="primary"
             wire:click="save().then((success) => { if(success) $modalClose('{{ $absenceRequestForm->modalName() }}')})"
         />
-    </x-slot:footer>
+    </x-slot>
 </x-modal>

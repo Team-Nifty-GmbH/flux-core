@@ -1,5 +1,8 @@
 <div>
-    <x-modal :id="$absencePolicyForm->modalName()" :title="__('Absence Policy')">
+    <x-modal
+        :id="$absencePolicyForm->modalName()"
+        :title="__('Absence Policy')"
+    >
         <div class="space-y-4">
             <x-input
                 wire:model="absencePolicyForm.name"
@@ -26,7 +29,10 @@
                 :label="__('Requires Documentation')"
             />
 
-            <div x-show="$wire.absencePolicyForm.requires_documentation" x-cloak>
+            <div
+                x-show="$wire.absencePolicyForm.requires_documentation"
+                x-cloak
+            >
                 <x-input
                     wire:model="absencePolicyForm.documentation_after_days"
                     type="number"
@@ -68,6 +74,6 @@
                 color="primary"
                 wire:click="save().then((success) => { if(success) $modalClose('{{ $absencePolicyForm->modalName() }}') })"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 </div>

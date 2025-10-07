@@ -1,5 +1,8 @@
 <div>
-    <x-modal :id="$vacationBlackoutForm->modalName()" :title="__('Vacation Blackout')">
+    <x-modal
+        :id="$vacationBlackoutForm->modalName()"
+        :title="__('Vacation Blackout')"
+    >
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="vacationBlackoutForm.name"
@@ -34,11 +37,11 @@
                 :hint="__('Select specific employees for this blackout period')"
                 multiple
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Employee::class),
                     'method' => 'POST'
                 ]"
-                unfiltered
             />
 
             <x-select.styled
@@ -48,6 +51,7 @@
                 :hint="__('Select departments for this blackout period')"
                 multiple
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\EmployeeDepartment::class),
                     'method' => 'POST',
@@ -55,7 +59,6 @@
                         'searchFields' => ['name'],
                     ],
                 ]"
-                unfiltered
             />
 
             <x-select.styled
@@ -65,6 +68,7 @@
                 :hint="__('Select locations for this blackout period')"
                 multiple
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Location::class),
                     'method' => 'POST',
@@ -72,7 +76,6 @@
                         'searchFields' => ['name'],
                     ],
                 ]"
-                unfiltered
             />
 
             <x-toggle
@@ -97,6 +100,6 @@
                     }
                 })"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 </div>

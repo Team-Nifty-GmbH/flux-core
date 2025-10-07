@@ -1,4 +1,8 @@
-<x-modal id="bank-connection-modal" class="flex flex-col gap-4" :title="__('Bank Connection')">
+<x-modal
+    id="bank-connection-modal"
+    class="flex flex-col gap-4"
+    :title="__('Bank Connection')"
+>
     <div class="flex flex-col gap-4">
         <x-input wire:model="bankConnection.name" :label="__('Name')" />
         <x-select.styled

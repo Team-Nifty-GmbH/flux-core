@@ -1,5 +1,9 @@
 <div>
-    <x-modal :id="$workTimeModelForm->modalName()" size="xl" :title="__('Work Time Model')">
+    <x-modal
+        :id="$workTimeModelForm->modalName()"
+        size="xl"
+        :title="__('Work Time Model')"
+    >
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="workTimeModelForm.name"
@@ -75,6 +79,6 @@
                 color="primary"
                 wire:click="save().then((success) => {if(success) $wire.editSchedule($wire.workTimeModelForm.id);})"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 </div>

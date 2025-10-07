@@ -4,10 +4,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                    {{ $workTimeModelForm->name ?? __('New Work Time Model') }}
+                    {{ $workTimeModelForm->name ?? __("New Work Time Model") }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('Configure the work schedule and settings for this work time model') }}
+                    {{ __("Configure the work schedule and settings for this work time model") }}
                 </p>
             </div>
             <div class="flex items-center gap-3">
@@ -104,21 +104,25 @@
         {{-- Work Schedule Configuration --}}
         <x-card :header="__('Weekly Schedule')">
             <div x-data="{ activeWeek: 0 }">
-                @if($workTimeModelForm->cycle_weeks > 1)
+                @if ($workTimeModelForm->cycle_weeks > 1)
                     {{-- Tabs for multiple weeks --}}
                     <div class="mb-6">
-                        <div class="border-b border-gray-200 dark:border-gray-700">
+                        <div
+                            class="border-b border-gray-200 dark:border-gray-700"
+                        >
                             <nav class="-mb-px flex space-x-4">
-                                @for($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
+                                @for ($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
                                     <button
                                         type="button"
                                         x-on:click="activeWeek = {{ $i }}"
-                                        x-bind:class="activeWeek === {{ $i }}
-                                            ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                                        class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors"
+                                        x-bind:class="
+                                            activeWeek === {{ $i }}
+                                                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                                        "
+                                        class="whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium transition-colors"
                                     >
-                                        {{ __('Week :number', ['number' => $i + 1]) }}
+                                        {{ __("Week :number", ["number" => $i + 1]) }}
                                     </button>
                                 @endfor
                             </nav>
@@ -127,63 +131,82 @@
                 @endif
 
                 {{-- Schedule Table for every single week --}}
-                @foreach($workTimeModelForm->schedules as $weekIndex => $week)
+                @foreach ($workTimeModelForm->schedules as $weekIndex => $week)
                     <div
                         x-show="activeWeek === {{ $weekIndex }}"
                         x-cloak
-                        @if($workTimeModelForm->cycle_weeks === 1)
+                        @if ($workTimeModelForm->cycle_weeks === 1)
                             x-show="true"
                         @endif
                     >
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <table
+                                class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                            >
                                 <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            {{ __('Day') }}
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                        >
+                                            {{ __("Day") }}
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            {{ __('Start Time') }}
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                        >
+                                            {{ __("Start Time") }}
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            {{ __('End Time') }}
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                        >
+                                            {{ __("End Time") }}
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            {{ __('Break (Minutes)') }}
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                        >
+                                            {{ __("Break (Minutes)") }}
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            {{ __('Work Hours') }}
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                        >
+                                            {{ __("Work Hours") }}
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                <tbody
+                                    class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900"
+                                >
                                     @php
                                         $days = [
-                                            1 => __('Monday'),
-                                            2 => __('Tuesday'),
-                                            3 => __('Wednesday'),
-                                            4 => __('Thursday'),
-                                            5 => __('Friday'),
-                                            6 => __('Saturday'),
-                                            0 => __('Sunday'),
+                                            1 => __("Monday"),
+                                            2 => __("Tuesday"),
+                                            3 => __("Wednesday"),
+                                            4 => __("Thursday"),
+                                            5 => __("Friday"),
+                                            6 => __("Saturday"),
+                                            0 => __("Sunday"),
                                         ];
                                     @endphp
 
-                                    @foreach($days as $dayNumber => $dayName)
+                                    @foreach ($days as $dayNumber => $dayName)
                                         @php
-                                            $dayData = data_get($week, 'days.' . $dayNumber) ?? [
-                                                'weekday' => $dayNumber,
-                                                'start_time' => null,
-                                                'end_time' => null,
-                                                'work_hours' => 0,
-                                                'break_minutes' => 0,
+                                            $dayData = data_get($week, "days." . $dayNumber) ?? [
+                                                "weekday" => $dayNumber,
+                                                "start_time" => null,
+                                                "end_time" => null,
+                                                "work_hours" => 0,
+                                                "break_minutes" => 0,
                                             ];
                                         @endphp
+
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <td
+                                                class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100"
+                                            >
                                                 {{ $dayName }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td
+                                                class="whitespace-nowrap px-6 py-4"
+                                            >
                                                 <x-input
                                                     type="time"
                                                     wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.start_time"
@@ -191,7 +214,9 @@
                                                     class="!py-1"
                                                 />
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td
+                                                class="whitespace-nowrap px-6 py-4"
+                                            >
                                                 <x-input
                                                     type="time"
                                                     wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.end_time"
@@ -199,7 +224,9 @@
                                                     class="!py-1"
                                                 />
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
+                                            <td
+                                                class="whitespace-nowrap px-6 py-4"
+                                            >
                                                 <x-number
                                                     wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.break_minutes"
                                                     wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNumber }}, 'break_minutes', $event.target.value)"
@@ -209,9 +236,11 @@
                                                     class="!py-1"
                                                 />
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                            <td
+                                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100"
+                                            >
                                                 <span class="font-medium">
-                                                    {{ number_format($dayData['work_hours'] ?? 0, 2) }}
+                                                    {{ number_format($dayData["work_hours"] ?? 0, 2) }}
                                                 </span>
                                             </td>
                                         </tr>

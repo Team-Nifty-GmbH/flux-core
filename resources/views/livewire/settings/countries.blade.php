@@ -1,4 +1,8 @@
-<x-modal id="edit-country-modal" x-on:open="$focusOn('country.name')" :title="__('Country')">
+<x-modal
+    id="edit-country-modal"
+    x-on:open="$focusOn('country.name')"
+    :title="__('Country')"
+>
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="country.name" :label="__('Country Name')" />
         <x-select.styled
