@@ -37,13 +37,13 @@ class BankConnection extends FluxModel
         return $this->belongsToMany(Client::class, 'bank_connection_client');
     }
 
-    public function ledgerAccount(): BelongsTo
-    {
-        return $this->belongsTo(LedgerAccount::class);
-    }
-
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    public function ledgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class);
     }
 }
