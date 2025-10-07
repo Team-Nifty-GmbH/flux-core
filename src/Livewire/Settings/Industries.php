@@ -19,9 +19,9 @@ class Industries extends IndustryList
 
     public IndustryForm $industryForm;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.industries';
-
     public bool $isSelectable = true;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.industries';
 
     protected function getTableActions(): array
     {

@@ -11,14 +11,14 @@ use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 
 class RecordOrigins extends RecordOriginList
 {
-    use DataTableHasFormEdit, AllowRecordMerging;
+    use AllowRecordMerging, DataTableHasFormEdit;
+
+    public bool $isSelectable = true;
 
     #[DataTableForm]
     public RecordOriginForm $recordOriginForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.record-origins';
-
-    public bool $isSelectable = true;
 
     protected function getViewData(): array
     {
