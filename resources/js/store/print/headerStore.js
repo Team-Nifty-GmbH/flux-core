@@ -105,13 +105,13 @@ export default function () {
 
                 this.header.appendChild(
                     $refs['header-page-count'].content.cloneNode(true),
-                )
+                );
 
                 this.visibleElements = Array.from(this.header.children)
                     .filter((item) => item.id && true)
                     .map((item) => new PrintElement(item, this));
 
-                ['start', 'end','bottom-start'].forEach((position, index) => {
+                ['start', 'end', 'bottom-start'].forEach((position, index) => {
                     this.visibleElements[index] &&
                         this.visibleElements[index].init(position);
                 });
@@ -244,7 +244,7 @@ export default function () {
                     }
                 } else if (deltaX >= 0 && deltaY <= 0) {
                     const maxWidth = this.header.offsetWidth;
-                    const minHeight = 10 ; // 9px - smallest font size
+                    const minHeight = 10; // 9px - smallest font size
                     const newHeight = startHeight + deltaY;
                     const newWidth = startWidth + deltaX;
                     if (newHeight > minHeight && newWidth < maxWidth) {
@@ -427,7 +427,7 @@ export default function () {
 
                 this.header.appendChild(
                     $refs['header-page-count'].content.cloneNode(true),
-                )
+                );
 
                 this.visibleElements = Array.from(this.header.children)
                     .filter((item) => item.id && true)
@@ -682,14 +682,14 @@ export default function () {
                                 width:
                                     item.width !== null
                                         ? roundToTwoDecimals(
-                                            item.width / this.pxPerCm,
-                                        )
+                                              item.width / this.pxPerCm,
+                                          )
                                         : null,
                                 height:
                                     item.height !== null
                                         ? roundToTwoDecimals(
-                                            item.height / this.pyPerCm,
-                                        )
+                                              item.height / this.pyPerCm,
+                                          )
                                         : null,
                             };
                         },
@@ -700,7 +700,6 @@ export default function () {
                         false,
                     );
                 }
-
 
                 return {
                     height: this._headerHeight,
@@ -780,29 +779,29 @@ export default function () {
                     snippets:
                         this.visibleSnippetBoxes.length > 0
                             ? this.visibleSnippetBoxes.map((item) => {
-                                return {
-                                    id: item.snippetId,
-                                    content: item.content,
-                                    x: roundToTwoDecimals(
-                                        item.position.x / this.pxPerCm,
-                                    ),
-                                    y: roundToTwoDecimals(
-                                        item.position.y / this.pyPerCm,
-                                    ),
-                                    width:
-                                        item.width !== null
-                                            ? roundToTwoDecimals(
-                                                item.width / this.pxPerCm,
-                                            )
-                                            : null,
-                                    height:
-                                        item.height !== null
-                                            ? roundToTwoDecimals(
-                                                item.height / this.pyPerCm,
-                                            )
-                                            : null,
-                                };
-                            })
+                                  return {
+                                      id: item.snippetId,
+                                      content: item.content,
+                                      x: roundToTwoDecimals(
+                                          item.position.x / this.pxPerCm,
+                                      ),
+                                      y: roundToTwoDecimals(
+                                          item.position.y / this.pyPerCm,
+                                      ),
+                                      width:
+                                          item.width !== null
+                                              ? roundToTwoDecimals(
+                                                    item.width / this.pxPerCm,
+                                                )
+                                              : null,
+                                      height:
+                                          item.height !== null
+                                              ? roundToTwoDecimals(
+                                                    item.height / this.pyPerCm,
+                                                )
+                                              : null,
+                                  };
+                              })
                             : null,
                 };
             } catch (e) {

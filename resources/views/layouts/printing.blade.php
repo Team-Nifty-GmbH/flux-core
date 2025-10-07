@@ -25,18 +25,25 @@
         />
         @show
         @section('head.style')
-        <x-flux::print.style :page-css="$pageCss ?? []"
-                             :is-preview="$generatePdf" />
-            @show
+        <x-flux::print.style
+            :page-css="$pageCss ?? []"
+            :is-preview="$generatePdf"
+        />
+        @show
         @show
     </head>
     <body class="text-xs">
         @if ($hasHeader ?? true)
-            <x-flux::print.header :is-preview="$generatePdf" :header-layout="is_array($layout) ? $layout['header'] : null"/>
+            <x-flux::print.header
+                :is-preview="$generatePdf"
+                :header-layout="is_array($layout) ? $layout['header'] : null"
+            />
         @endif
 
         @if ($hasFooter ?? true)
-            <x-flux::print.footer :footer-layout="is_array($layout) ? $layout['footer'] : null" />
+            <x-flux::print.footer
+                :footer-layout="is_array($layout) ? $layout['footer'] : null"
+            />
         @endif
 
         {!! $slot !!}

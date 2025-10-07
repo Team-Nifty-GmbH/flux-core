@@ -2,8 +2,9 @@ import baseStore from './baseStore.js';
 import {
     intersectionHandlerFactory,
     nextTick,
-    roundToOneDecimal, roundToTwoDecimals,
-    STEP
+    roundToOneDecimal,
+    roundToTwoDecimals,
+    STEP,
 } from '../../components/utils/print/utils.js';
 import PrintElement from '../../components/print/printElement.js';
 import MediaElement from '../../components/print/mediaElement.js';
@@ -162,7 +163,8 @@ export default function () {
                     this._startSizeOfSelectedElement();
                 if (deltaX >= 0 && deltaY >= 0) {
                     const maxWidth = this.firstPageHeader.offsetWidth;
-                    const maxHeight = this._firstPageHeaderHeight * this.pyPerCm;
+                    const maxHeight =
+                        this._firstPageHeaderHeight * this.pyPerCm;
                     const newHeight = startHeight + deltaY;
                     const newWidth = startWidth + deltaX;
                     if (newHeight < maxHeight && newWidth < maxWidth) {
@@ -173,7 +175,7 @@ export default function () {
                     }
                 } else if (deltaX >= 0 && deltaY <= 0) {
                     const maxWidth = this.firstPageHeader.offsetWidth;
-                    const minHeight = 10 ; // 9px - smallest font size
+                    const minHeight = 10; // 9px - smallest font size
                     const newHeight = startHeight + deltaY;
                     const newWidth = startWidth + deltaX;
                     if (newHeight > minHeight && newWidth < maxWidth) {
@@ -184,7 +186,8 @@ export default function () {
                     }
                 } else if (deltaX <= 0 && deltaY >= 0) {
                     const minWidth = 3 * this.pxPerCm;
-                    const maxHeight = this._firstPageHeaderHeight * this.pyPerCm;
+                    const maxHeight =
+                        this._firstPageHeaderHeight * this.pyPerCm;
                     const newHeight = startHeight + deltaY;
                     const newWidth = startWidth + deltaX;
                     if (newHeight < maxHeight && newWidth > minWidth) {
@@ -436,8 +439,8 @@ export default function () {
                 }
 
                 if (this.temporarySnippetBoxes.length > 0) {
-                    const firstPageHeaderSnippets = this.temporarySnippetBoxes.map(
-                        (item) => {
+                    const firstPageHeaderSnippets =
+                        this.temporarySnippetBoxes.map((item) => {
                             return {
                                 content: item.content,
                                 x: roundToTwoDecimals(
@@ -449,18 +452,17 @@ export default function () {
                                 width:
                                     item.width !== null
                                         ? roundToTwoDecimals(
-                                            item.width / this.pxPerCm,
-                                        )
+                                              item.width / this.pxPerCm,
+                                          )
                                         : null,
                                 height:
                                     item.height !== null
                                         ? roundToTwoDecimals(
-                                            item.height / this.pyPerCm,
-                                        )
+                                              item.height / this.pyPerCm,
+                                          )
                                         : null,
                             };
-                        },
-                    );
+                        });
 
                     await this.component.set(
                         'form.temporary_snippets',
@@ -544,30 +546,30 @@ export default function () {
                     snippets:
                         this.visibleSnippetBoxes.length > 0
                             ? this.visibleSnippetBoxes.map((item) => {
-                                return {
-                                    id: item.snippetId,
-                                    content: item.content,
-                                    x: roundToTwoDecimals(
-                                        item.position.x / this.pxPerCm,
-                                    ),
-                                    y: roundToTwoDecimals(
-                                        item.position.y / this.pyPerCm,
-                                    ),
-                                    width:
-                                        item.width !== null
-                                            ? roundToTwoDecimals(
-                                                item.width / this.pxPerCm,
-                                            )
-                                            : null,
-                                    height:
-                                        item.height !== null
-                                            ? roundToTwoDecimals(
-                                                item.height / this.pyPerCm,
-                                            )
-                                            : null,
-                                };
-                            })
-                            : null
+                                  return {
+                                      id: item.snippetId,
+                                      content: item.content,
+                                      x: roundToTwoDecimals(
+                                          item.position.x / this.pxPerCm,
+                                      ),
+                                      y: roundToTwoDecimals(
+                                          item.position.y / this.pyPerCm,
+                                      ),
+                                      width:
+                                          item.width !== null
+                                              ? roundToTwoDecimals(
+                                                    item.width / this.pxPerCm,
+                                                )
+                                              : null,
+                                      height:
+                                          item.height !== null
+                                              ? roundToTwoDecimals(
+                                                    item.height / this.pyPerCm,
+                                                )
+                                              : null,
+                                  };
+                              })
+                            : null,
                 };
             } catch (e) {
                 throw new Error(
@@ -744,12 +746,15 @@ export default function () {
         addToTemporarySnippet($refs) {
             if (this.firstPageHeader !== null) {
                 const cloneSnippetElement =
-                    $refs['first-page-header-additional-snippet']?.content.cloneNode(true);
+                    $refs[
+                        'first-page-header-additional-snippet'
+                    ]?.content.cloneNode(true);
                 if (cloneSnippetElement) {
                     this.firstPageHeader.appendChild(cloneSnippetElement);
                     const children = Array.from(this.firstPageHeader.children);
                     const index = children.findIndex(
-                        (item) => item.id === 'first-page-header-snippet-placeholder',
+                        (item) =>
+                            item.id === 'first-page-header-snippet-placeholder',
                     );
                     if (index !== -1 && this.observer) {
                         const element = children[index];
@@ -765,7 +770,9 @@ export default function () {
                         );
                     }
                 } else {
-                    throw new Error('First Page Header additional snippet not found');
+                    throw new Error(
+                        'First Page Header additional snippet not found',
+                    );
                 }
             }
         },

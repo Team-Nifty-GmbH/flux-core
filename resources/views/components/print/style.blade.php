@@ -31,11 +31,11 @@
     }
 
     @page {
-      {{ 'margin: ' . implode(' ', $pageCss['margin']) . ';' }}
+      {{ 'margin: ' . implode(' ', data_get($pageCss,'margin',[])) . ';' }}
     }
 
     @page :first {
-        {{ 'margin: ' . implode(' ', $pageCss['margin_first_page']) . ';' }}
+        {{ 'margin: ' . implode(' ', data_get($pageCss,'margin_first_page',[])) . ';' }}
     }
 
     @page {
@@ -51,7 +51,7 @@
             body {
                 width: 21cm;
                 margin: 0 auto !important;
-                padding: {{ implode(' ', $pageCss['margin_preview_view']) }};
+                padding: {{ implode(' ', data_get($pageCss,'margin_preview_view',[])) }};
                 background: white;
                 box-shadow: 0 0 10px rgba(0,0,0,0.5);
                 border-radius: 10px;
@@ -74,7 +74,7 @@
             header {
                 display: block;
                 position: fixed;
-                top: -{{ $pageCss['header_height'] }};
+                top: -{{ data_get($pageCss,'header_height','0') }};
                 left: 0;
                 right: 0;
             }
@@ -82,7 +82,7 @@
             footer {
                 display: block;
                 position: fixed;
-                bottom: -{{ $pageCss['footer_height'] }};
+                bottom: -{{ data_get($pageCss,'footer_height','0') }};
                 left: 0;
                 right: 0;
             }
@@ -90,16 +90,14 @@
             {{-- due to 0 margin for on first page --}}
             {{-- it is needed to add margin-top on first-page-header --}}
             .first-page-header-margin-top {
-                margin-top: {{ $pageCss['first_page_header_margin_top'] }};
+                margin-top: {{ data_get($pageCss,'first_page_header_margin_top','0') }};
             }
 
             .page-count:before {
                 content: counter(page);
             }
 
-        @endif
-
-        html {
+        @endif        html {
             background: #f5f5f5;
             overflow-y: auto;
         }
@@ -109,6 +107,4 @@
         }
 
     }
-
-
 </style>

@@ -238,33 +238,33 @@ abstract class PrintableView extends Component
     {
         // add margin for first page - to avoid header on first page
         $model = $this->getModel();
-        if ($model?->client_id) {
+        if ($model &&  data_get($model, 'client_id')) {
             $layout = $this->getPrintLayout();
-            if ($layout && $layout['margin'] && $layout['header'] && $layout['footer']) {
-                $margin = $layout['margin'];
+            if ($layout && data_get($layout, 'margin') && data_get($layout, 'header') && data_get($layout, 'footer')) {
+                $margin = data_get($layout, 'margin');
 
                 // due to rounding issues -> px to cm -> add 0.1cm to header height
                 return [
-                    'header_height' => ($layout['header']['height'] + 0.1) . 'cm',
-                    'footer_height' => $layout['footer']['height'] . 'cm',
-                    'first_page_header_margin_top' => $margin['marginTop'] . 'cm',
+                    'header_height' => (data_get($layout, 'header.height', 0) + 0.1) . 'cm',
+                    'footer_height' => data_get($layout, 'footer.height') . 'cm',
+                    'first_page_header_margin_top' => data_get($margin, 'marginTop', '0') . 'cm',
                     'margin_preview_view' => [
-                        $margin['marginTop'] . 'cm',
-                        $margin['marginRight'] . 'cm',
-                        $margin['marginBottom'] . 'cm',
-                        $margin['marginLeft'] . 'cm',
+                        data_get($margin, 'marginTop', '0') . 'cm',
+                        data_get($margin, 'marginRight', '0') . 'cm',
+                        data_get($margin, 'marginBottom', '0') . 'cm',
+                        data_get($margin, 'marginLeft', '0') . 'cm',
                     ],
                     'margin_first_page' => [
                         '0cm',
-                        $margin['marginRight'] . 'cm',
-                        ($margin['marginBottom'] + $layout['footer']['height']) . 'cm',
-                        $margin['marginLeft'] . 'cm',
+                        data_get($margin, 'marginRight', '0') . 'cm',
+                        (data_get($margin, 'marginBottom', 0) + data_get($layout, 'footer.height', 0)) . 'cm',
+                        data_get($margin, 'marginLeft', '0') . 'cm',
                     ],
                     'margin' => [
-                        ($margin['marginTop'] + $layout['header']['height']) . 'cm',
-                        $margin['marginRight'] . 'cm',
-                        ($margin['marginBottom'] + $layout['footer']['height']) . 'cm',
-                        $margin['marginLeft'] . 'cm',
+                        (data_get($margin, 'marginTop', 0) + data_get($layout, 'header.height', 0)) . 'cm',
+                        data_get($margin, 'marginRight', '0') . 'cm',
+                        (data_get($margin, 'marginBottom', 0) + data_get($layout, 'footer.height', 0)) . 'cm',
+                        data_get($margin, 'marginLeft', '0') . 'cm',
                     ]];
             }
         }

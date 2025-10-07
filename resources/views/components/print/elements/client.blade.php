@@ -4,23 +4,23 @@
 
 <div>
     <div class="font-semibold">
-    {{ $client->name ?? '' }}
+        {{ data_get($client, 'name', '') }}
     </div>
     <div>
-        {{ $client->ceo ?? '' }}
+        {{ data_get($client, 'ceo', '') }}
     </div>
     <div>
-        {{ $client->street ?? '' }}
+        {{ data_get($client, 'street', '') }}
     </div>
     <div>
-        {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
+        {{ trim(data_get($client, 'postcode', '') . ' ' . data_get($client, 'city', '')) }}
     </div>
     <div>
-        {{ $client->phone ?? '' }}
+        {{ data_get($client, 'phone', '') }}
     </div>
     <div>
         <div>
-            {{ $client->vat_id }}
+            {{ data_get($client, 'vat_id', '') }}
         </div>
     </div>
 </div>

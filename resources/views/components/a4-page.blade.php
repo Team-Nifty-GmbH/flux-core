@@ -21,15 +21,17 @@
                     :client="$this->client"
                     :subject="$this->subject"
                 />
-                    <x-flux::print.edit.order.first-page-header
-                        :client="$this->client"
-                        :subject="$this->subject"
-                        :address="$this->getModelFluentProperty()->address_invoice"
-                        :model="$this->getModelFluentProperty()"
-                        right-block="test"
-                    />
+                <x-flux::print.edit.order.first-page-header
+                    :client="$this->client"
+                    :subject="$this->subject"
+                    :address="$this->getModelFluentProperty()->address_invoice"
+                    :model="$this->getModelFluentProperty()"
+                    right-block="test"
+                />
                 <div class="flex-1">
-                    <div class="bg-gray-100 w-full h-full text-[48px] font-medium text-gray-300 flex items-center justify-center">
+                    <div
+                        class="flex h-full w-full items-center justify-center bg-gray-100 text-[48px] font-medium text-gray-300"
+                    >
                         {{ __('Content') }}
                     </div>
                 </div>

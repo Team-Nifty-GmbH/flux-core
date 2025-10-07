@@ -73,7 +73,7 @@ export const FontSizeLineHeightColorConfig = TextStyle.extend({
                                 style: `line-height: ${attributes.lineHeight}`,
                             };
                         },
-                    }
+                    },
                 },
             },
         ];
@@ -109,18 +109,18 @@ export const FontSizeLineHeightColorConfig = TextStyle.extend({
                         .setMark('textStyle', { backgroundColor: null })
                         .run();
                 },
-            setLineHeight: (lineHeight) =>
+            setLineHeight:
+                (lineHeight) =>
                 ({ chain }) => {
-                return chain()
-                    .setMark('textStyle', { lineHeight })
-                    .run();
-            },
-            unsetLineHeight:() =>
+                    return chain().setMark('textStyle', { lineHeight }).run();
+                },
+            unsetLineHeight:
+                () =>
                 ({ chain }) => {
-                return chain()
-                    .setMark('textStyle', { lineHeight: null })
-                    .run();
-            }
+                    return chain()
+                        .setMark('textStyle', { lineHeight: null })
+                        .run();
+                },
         };
     },
 });

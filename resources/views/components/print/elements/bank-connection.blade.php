@@ -1,13 +1,15 @@
-@props(['bankConnection'])
+@props([
+    'bankConnection',
+])
 
 <div>
     <div class="font-semibold">
-        {{ $bankConnection->bank_name ?? '' }}
+        {{ data_get($bankConnection, 'bank_name', '') }}
     </div>
     <div>
-        {{ $bankConnection->iban ?? '' }}
+        {{ data_get($bankConnection, 'iban', '') }}
     </div>
     <div>
-        {{ $bankConnection->bic ?? '' }}
+        {{ data_get($bankConnection, 'bic', '') }}
     </div>
 </div>

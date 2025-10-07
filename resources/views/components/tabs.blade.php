@@ -12,9 +12,9 @@
     wire:ignore
 >
     <div class="pb-2.5">
-        <div class="dark:border-secondary-700 border-b border-gray-200">
+        <div class="border-b border-gray-200 dark:border-secondary-700">
             <nav
-                class="soft-scrollbar flex overflow-x-auto"
+                class="flex overflow-x-auto soft-scrollbar"
                 x-ref="tabButtons"
                 wire:loading.class="pointer-events-none"
             >

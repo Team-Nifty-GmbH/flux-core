@@ -132,7 +132,7 @@ export default function () {
                     }
                 } else if (deltaX >= 0 && deltaY <= 0) {
                     const maxWidth = this.footer.offsetWidth;
-                    const minHeight = 10 ; // 9px - smallest font size
+                    const minHeight = 10; // 9px - smallest font size
                     const newHeight = startHeight + deltaY;
                     const newWidth = startWidth + deltaX;
                     if (newHeight > minHeight && newWidth < maxWidth) {
@@ -554,7 +554,6 @@ export default function () {
                 this.visibleSnippetBoxes.forEach((e) => {
                     this.observer.observe(e.element);
                 });
-
             }
         },
         async addToTemporaryMedia(event, $refs) {

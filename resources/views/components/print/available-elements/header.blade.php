@@ -1,54 +1,69 @@
 <div x-cloak x-show="printStore.editHeader">
-    <div  class="pb-4 flex items-center justify-between">
-        <div class=" text-lg text-gray-600">{{ __('Subject') }}</div>
+    <div class="flex items-center justify-between pb-4">
+        <div class="text-lg text-gray-600">{{ __('Subject') }}</div>
         <x-toggle
             x-on:change="headerStore.toggleElement($refs,'header-subject')"
             x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-subject')"
         />
     </div>
-    <div class=" flex items-center justify-between">
-        <div class=" text-lg text-gray-600">{{ __('Page Count') }}</div>
+    <div class="flex items-center justify-between">
+        <div class="text-lg text-gray-600">{{ __('Page Count') }}</div>
         <x-toggle
             x-on:change="headerStore.toggleElement($refs,'header-page-count')"
             x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-page-count')"
         />
     </div>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    @if($this->client->logo_small_url)
-        <div class="pb-4 text-lg text-gray-600">Logo</div>
+    @if (data_get($this->client, 'logo_small_url'))
+        <div class="pb-4 text-lg text-gray-600">{{ __('Logo') }}</div>
         <div class="flex items-center justify-between">
-            <img class="h-[1.7cm]" src="{{ $this->client->logo_small_url }}" />
+            <img
+                class="h-[1.7cm]"
+                src="{{ data_get($this->client, 'logo_small_url', '') }}"
+            />
             <x-toggle
                 x-on:change="headerStore.toggleElement($refs,'header-logo')"
                 x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-logo')"
             />
         </div>
     @endif
+
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    <div class="pb-4 text-lg text-gray-600">{{ __('Additional Media')  }}</div>
+    <div class="pb-4 text-lg text-gray-600">{{ __('Additional Media') }}</div>
     <div
-        :class="{'pb-4': headerStore.temporaryVisibleMedia.length > 0 || headerStore.visibleMedia.length > 0 }"
-        class="flex flex-col gap-4">
-        <template x-for="(image, index) in headerStore.visibleMedia" :key="index">
+        x-bind:class="{
+            'pb-4':
+                headerStore.temporaryVisibleMedia.length > 0 ||
+                headerStore.visibleMedia.length > 0,
+        }"
+        class="flex flex-col gap-4"
+    >
+        <template
+            x-for="(image, index) in headerStore.visibleMedia"
+            :key="index"
+        >
             <div class="flex items-center justify-between">
                 <img
                     class="max-h-[1.7cm] select-none"
-                    x-bind:src=image.src
+                    x-bind:src="image.src"
                 />
                 @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
-                <x-button.circle
-                    x-on:click="headerStore.deleteMedia(image.id)"
-                    icon="trash"
-                />
+                    <x-button.circle
+                        x-on:click="headerStore.deleteMedia(image.id)"
+                        icon="trash"
+                    />
                 @endcanAction
             </div>
         </template>
         {{-- not submited --}}
-        <template x-for="(image, index) in headerStore.temporaryVisibleMedia" :key="index">
+        <template
+            x-for="(image, index) in headerStore.temporaryVisibleMedia"
+            :key="index"
+        >
             <div class="flex items-center justify-between">
                 <img
                     class="max-h-[1.7cm] select-none"
-                    x-bind:src=image.src
+                    x-bind:src="image.src"
                 />
                 <x-button.circle
                     x-on:click="headerStore.deleteTemporaryMedia(image.id)"
@@ -63,26 +78,31 @@
             type="file"
             accept="image/*"
             class="hidden"
-            x-on:change="
-                headerStore.addToTemporaryMedia(
-                    $event,
-                    $refs
-                )"
+            x-on:change="headerStore.addToTemporaryMedia($event, $refs)"
         />
         <x-button
             color="primary"
-            text="{{__('Add Image')}}"
+            :text="__('Add Image')"
             x-on:click="$refs.headerImageInput.click()"
         />
     </label>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-    <div class="pb-4 text-lg text-gray-600">{{ __('Additional Snippets') }}</div>
-    <div class="flex flex-col gap-4"
-         :class="{'pb-4': headerStore.temporarySnippetBoxes.length > 0 || headerStore.visibleSnippetBoxes.length > 0 }"
+    <div class="pb-4 text-lg text-gray-600">
+        {{ __('Additional Snippets') }}
+    </div>
+    <div
+        class="flex flex-col gap-4"
+        :class="{'pb-4': headerStore.temporarySnippetBoxes.length > 0 || headerStore.visibleSnippetBoxes.length > 0 }"
     >
-        <template x-for="(snippet, index) in headerStore.snippetNames" :key="index">
+        <template
+            x-for="(snippet, index) in headerStore.snippetNames"
+            :key="index"
+        >
             <div class="flex items-center justify-between">
-                <div class="text-gray-400 text-[12px]" x-text="snippet.name"></div>
+                <div
+                    class="text-[12px] text-gray-400"
+                    x-text="snippet.name"
+                ></div>
                 <x-button.circle
                     x-bind:disabled="headerStore.snippetEditorXData !== null"
                     x-on:click="headerStore.deleteSnippet(snippet.ref.id)"
@@ -93,7 +113,7 @@
     </div>
     <x-button
         color="primary"
-        text="{{__('Add Snippet')}}"
+        :text="__('Add Snippet')"
         x-on:click="headerStore.addToTemporarySnippet($refs)"
     />
 </div>

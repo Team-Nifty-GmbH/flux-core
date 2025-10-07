@@ -3,7 +3,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
     return {
         async onInit($wire, $refs) {
             this._loading = true;
-            const  {height, width} = $refs['scale'].getBoundingClientRect()
+            const { height, width } = $refs['scale'].getBoundingClientRect();
             this.pxPerCm = width;
             this.pyPerCm = height;
             $headerStore.onInit(this.pxPerCm, this.pyPerCm);
@@ -302,12 +302,12 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                     }
                 }
             } else {
-               // TODO: fix error handling - both toast and reload -> doesent return to previous state
+                // TODO: fix error handling - both toast and reload -> doesent return to previous state
                 // on error - reload all and discard changes
                 await this.reload();
-                await $footerStore.reload($refs,false);
+                await $footerStore.reload($refs, false);
                 await $headerStore.reload($refs, false);
-                await $firstPageHeaderStore.reload($refs,false);
+                await $firstPageHeaderStore.reload($refs, false);
             }
 
             this._loading = false;

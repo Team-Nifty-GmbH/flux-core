@@ -1,23 +1,21 @@
 @props([
-    'address'
-    ])
+    'address',
+])
 
-<address
-    draggable="false"
-    class="text-xs not-italic select-none pb-0 mb-0">
+<address draggable="false" class="mb-0 select-none pb-0 text-xs not-italic">
     <div class="font-semibold">
-        {{ $address->company ?? '' }}
+        {{ data_get($address, 'company', '') }}
     </div>
     <div>
         {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
     </div>
     <div>
-        {{ $address->addition ?? '' }}
+        {{ data_get($address, 'addition', '') }}
     </div>
     <div>
-        {{ $address->street ?? '' }}
+        {{ data_get($address, 'street', '') }}
     </div>
     <div>
-        {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
+        {{ trim(data_get($address, 'zip', '') . ' ' . data_get($address, 'city', '')) }}
     </div>
 </address>
