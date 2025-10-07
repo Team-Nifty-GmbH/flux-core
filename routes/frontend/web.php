@@ -3,6 +3,7 @@
 use FluxErp\Actions\Printing;
 use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
+use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\NoAuth;
@@ -295,6 +296,8 @@ Route::middleware('web')
                 ->name('search');
             Route::any('/calendar-search', CalendarSearchController::class)
                 ->name('calendar-search');
+            Route::post('/calendar-events', [CalendarEventController::class, 'getEvents'])
+                ->name('calendar-events');
             Route::match(['get', 'post'], '/print/render', Printing::class)
                 ->defaults('html', true)
                 ->defaults('preview', false)

@@ -213,7 +213,7 @@
                             :disabled="$ticket->id && ! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
                             multiple
                             :label="__('Assigned')"
-                            wire:model.live="ticket.users"
+                            wire:model="ticket.users"
                             select="label:label|value:id"
                             unfiltered
                             :request="[
@@ -230,6 +230,15 @@
                                     ],
                                 ],
                             ]"
+                        />
+                        <x-button
+                            x-cloak
+                            x-show="! $wire.ticket.users?.includes({{ auth()->id() }})"
+                            class="w-full"
+                            color="secondary"
+                            loading="assignToMe"
+                            :text="__('Assign to me')"
+                            wire:click="assignToMe"
                         />
                         <div>
                             <div class="mb-1 flex items-center justify-between">

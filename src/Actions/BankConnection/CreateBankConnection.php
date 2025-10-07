@@ -5,6 +5,7 @@ namespace FluxErp\Actions\BankConnection;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\BankConnection;
 use FluxErp\Rulesets\BankConnection\CreateBankConnectionRuleset;
+use Illuminate\Support\Str;
 
 class CreateBankConnection extends FluxAction
 {
@@ -29,7 +30,7 @@ class CreateBankConnection extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['iban'] = is_string($this->getData('iban'))
-            ? str_replace(' ', '', strtoupper($this->getData('iban')))
+            ? Str::of($this->getData('iban'))->upper()->remove(' ')->toString()
             : $this->getData('iban');
     }
 }

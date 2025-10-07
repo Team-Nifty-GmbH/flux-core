@@ -63,7 +63,7 @@ test('create contact bank connection maximum', function (): void {
         'iban' => $this->faker->iban('de'),
         'account_holder' => Str::random(),
         'bank_name' => Str::random(),
-        'bic' => Str::random(),
+        'bic' => 'FAKEDE22',
     ];
 
     $this->user->givePermissionTo($this->permissions['create']);
@@ -206,10 +206,10 @@ test('update contact bank connection maximum', function (): void {
     $bankConnection = [
         'id' => $this->contactBankConnections[0]->id,
         'contact_id' => $this->contactBankConnections[2]->contact_id,
-        'iban' => $this->faker->iban,
+        'iban' => $this->faker->iban(),
         'account_holder' => Str::random(),
         'bank_name' => Str::random(),
-        'bic' => Str::random(),
+        'bic' => 'FAKEDE22',
     ];
 
     $this->user->givePermissionTo($this->permissions['update']);

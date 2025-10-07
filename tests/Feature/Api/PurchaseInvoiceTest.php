@@ -102,7 +102,7 @@ beforeEach(function (): void {
     ];
 });
 
-test('create purchase invoice maximum', function (): void {
+test('can create purchase invoice with all fields', function (): void {
     $ledgerAccount = LedgerAccount::factory()->create([
         'client_id' => $this->dbClient->getKey(),
     ]);
@@ -119,6 +119,9 @@ test('create purchase invoice maximum', function (): void {
         'order_type_id' => $this->orderTypes->random()->id,
         'payment_type_id' => $this->paymentTypes->random()->id,
         'invoice_date' => Carbon::yesterday()->toDateString(),
+        'payment_target_date' => Carbon::now()->addDays(30)->toDateString(),
+        'payment_discount_target_date' => Carbon::now()->addDays(10)->toDateString(),
+        'payment_discount_percent' => 0.03,
         'invoice_number' => Str::random(),
         'is_net' => false,
         'media' => UploadedFile::fake()->image('test_purchase_invoice.jpeg'),
@@ -139,96 +142,100 @@ test('create purchase invoice maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
+
     $response->assertCreated();
 
-    $responsePurchaseInvoice = json_decode($response->getContent())->data;
     $dbPurchaseInvoice = PurchaseInvoice::query()
-        ->whereKey($responsePurchaseInvoice->id)
+        ->whereKey(json_decode($response->getContent())->data->id)
         ->first();
 
-    expect($dbPurchaseInvoice)->not->toBeEmpty();
-    expect($dbPurchaseInvoice->uuid)->toEqual($purchaseInvoice['uuid']);
-    expect($dbPurchaseInvoice->client_id)->toEqual($purchaseInvoice['client_id']);
-    expect($dbPurchaseInvoice->contact_id)->toEqual($purchaseInvoice['contact_id']);
-    expect($dbPurchaseInvoice->currency_id)->toEqual($purchaseInvoice['currency_id']);
-    expect($dbPurchaseInvoice->media_id)->not->toBeNull();
-    expect($dbPurchaseInvoice->order_id)->toBeNull();
-    expect($dbPurchaseInvoice->order_type_id)->toEqual($purchaseInvoice['order_type_id']);
-    expect($dbPurchaseInvoice->payment_type_id)->toEqual($purchaseInvoice['payment_type_id']);
-    expect(Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString())->toEqual($purchaseInvoice['invoice_date']);
-    expect($dbPurchaseInvoice->invoice_number)->toEqual($purchaseInvoice['invoice_number']);
-    expect($dbPurchaseInvoice->is_net)->toEqual($purchaseInvoice['is_net']);
-    expect($this->user->is($dbPurchaseInvoice->getCreatedBy()))->toBeTrue();
-    expect($this->user->is($dbPurchaseInvoice->getUpdatedBy()))->toBeTrue();
+    expect($dbPurchaseInvoice)
+        ->uuid->toEqual($purchaseInvoice['uuid'])
+        ->client_id->toEqual($purchaseInvoice['client_id'])
+        ->contact_id->toEqual($purchaseInvoice['contact_id'])
+        ->currency_id->toEqual($purchaseInvoice['currency_id'])
+        ->media_id->not->toBeNull()
+        ->order_id->toBeNull()
+        ->order_type_id->toEqual($purchaseInvoice['order_type_id'])
+        ->payment_type_id->toEqual($purchaseInvoice['payment_type_id'])
+        ->payment_discount_percent->toEqual($purchaseInvoice['payment_discount_percent'])
+        ->invoice_number->toEqual($purchaseInvoice['invoice_number'])
+        ->is_net->toEqual($purchaseInvoice['is_net']);
 
-    $dbPurchaseInvoicePositions = $dbPurchaseInvoice->purchaseInvoicePositions;
-    expect($dbPurchaseInvoicePositions)->toHaveCount(count($purchaseInvoice['purchase_invoice_positions']));
-    expect($dbPurchaseInvoicePositions[0]->ledger_account_id)->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['ledger_account_id']);
-    expect($dbPurchaseInvoicePositions[0]->product_id)->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['product_id']);
-    expect($dbPurchaseInvoicePositions[0]->vat_rate_id)->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['vat_rate_id']);
-    expect($dbPurchaseInvoicePositions[0]->name)->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['name']);
-    expect($dbPurchaseInvoicePositions[0]->amount)->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['amount']);
-    expect(bcround($dbPurchaseInvoicePositions[0]->unit_price, 2))->toEqual(bcround($purchaseInvoice['purchase_invoice_positions'][0]['unit_price'], 2));
-    expect(bcround($dbPurchaseInvoicePositions[0]->total_price, 2))->toEqual(bcround($purchaseInvoice['purchase_invoice_positions'][0]['total_price'], 2));
+    expect($dbPurchaseInvoice->invoice_date->toDateString())->toEqual($purchaseInvoice['invoice_date']);
+    expect($dbPurchaseInvoice->payment_target_date->toDateString())->toEqual($purchaseInvoice['payment_target_date']);
+    expect($dbPurchaseInvoice->payment_discount_target_date->toDateString())->toEqual($purchaseInvoice['payment_discount_target_date']);
+
+    expect($dbPurchaseInvoice->getCreatedBy()->is($this->user))->toBeTrue();
+    expect($dbPurchaseInvoice->getUpdatedBy()->is($this->user))->toBeTrue();
+
+    $position = $dbPurchaseInvoice->purchaseInvoicePositions->first();
+
+    expect($position)
+        ->ledger_account_id->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['ledger_account_id'])
+        ->product_id->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['product_id'])
+        ->vat_rate_id->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['vat_rate_id'])
+        ->name->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['name'])
+        ->amount->toEqual($purchaseInvoice['purchase_invoice_positions'][0]['amount']);
+
+    expect(bcround($position->unit_price, 2))->toEqual(bcround($purchaseInvoice['purchase_invoice_positions'][0]['unit_price'], 2));
+    expect(bcround($position->total_price, 2))->toEqual(bcround($purchaseInvoice['purchase_invoice_positions'][0]['total_price'], 2));
 });
 
-test('create purchase invoice minimum', function (): void {
-    $purchaseInvoice = [
-        'media' => UploadedFile::fake()->image('test_purchase_invoice.jpeg'),
-    ];
-
+test('can create purchase invoice with minimum fields', function (): void {
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
+    $response = $this->actingAs($this->user)->post('/api/purchase-invoices', [
+        'media' => UploadedFile::fake()->image('test_purchase_invoice.jpeg'),
+    ]);
+
     $response->assertCreated();
 
-    $responsePurchaseInvoice = json_decode($response->getContent())->data;
     $dbPurchaseInvoice = PurchaseInvoice::query()
-        ->whereKey($responsePurchaseInvoice->id)
+        ->whereKey(json_decode($response->getContent())->data->id)
         ->first();
 
-    expect($dbPurchaseInvoice)->not->toBeEmpty();
-    expect($dbPurchaseInvoice->client_id)->toEqual(Client::default()?->id);
-    expect($dbPurchaseInvoice->contact_id)->toBeNull();
-    expect($dbPurchaseInvoice->currency_id)->toBeNull();
-    expect($dbPurchaseInvoice->media_id)->not->toBeNull();
-    expect($dbPurchaseInvoice->order_id)->toBeNull();
-    expect($dbPurchaseInvoice->order_type_id)->toBeNull();
-    expect($dbPurchaseInvoice->payment_type_id)->toBeNull();
-    expect(Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString())->toEqual(Carbon::now()->toDateString());
-    expect($dbPurchaseInvoice->invoice_number)->toBeNull();
-    expect($dbPurchaseInvoice->is_net)->toBeFalse();
-    expect($this->user->is($dbPurchaseInvoice->getCreatedBy()))->toBeTrue();
-    expect($this->user->is($dbPurchaseInvoice->getUpdatedBy()))->toBeTrue();
-    expect($dbPurchaseInvoice->purchaseInvoicePositions)->toBeEmpty();
+    expect($dbPurchaseInvoice)
+        ->client_id->toEqual(Client::default()?->id)
+        ->contact_id->toBeNull()
+        ->currency_id->toBeNull()
+        ->media_id->not->toBeNull()
+        ->order_id->toBeNull()
+        ->order_type_id->toBeNull()
+        ->payment_type_id->toBeNull()
+        ->invoice_number->toBeNull()
+        ->is_net->toBeFalse()
+        ->purchaseInvoicePositions->toBeEmpty();
+
+    expect($dbPurchaseInvoice->invoice_date->toDateString())->toEqual(Carbon::now()->toDateString());
+    expect($dbPurchaseInvoice->getCreatedBy()->is($this->user))->toBeTrue();
+    expect($dbPurchaseInvoice->getUpdatedBy()->is($this->user))->toBeTrue();
 });
 
-test('create purchase invoice validation fails', function (): void {
-    $purchaseInvoice = [
+test('validates required fields on creation', function (): void {
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/purchase-invoices', [
         'client_id' => $this->dbClient->getKey(),
         'purchase_invoice_positions' => [],
-    ];
+    ]);
 
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['media'])
+        ->assertJsonMissingValidationErrors([
+            'purchase_invoice_positions.0.amount',
+            'purchase_invoice_positions.0.unit_price',
+            'purchase_invoice_positions.0.total_price',
+        ]);
+});
+
+test('validates position fields', function (): void {
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertUnprocessable();
-
-    $response->assertJsonValidationErrors([
-        'media',
-    ]);
-
-    $response->assertJsonMissingValidationErrors([
-        'purchase_invoice_positions.0.amount',
-        'purchase_invoice_positions.0.unit_price',
-        'purchase_invoice_positions.0.total_price',
-    ]);
-});
-
-test('create purchase invoice validation fails positions', function (): void {
-    $purchaseInvoice = [
+    $response = $this->actingAs($this->user)->post('/api/purchase-invoices', [
         'media' => UploadedFile::fake()->image('test_purchase_invoice.jpeg'),
         'purchase_invoice_positions' => [
             [
@@ -237,83 +244,87 @@ test('create purchase invoice validation fails positions', function (): void {
                 'total_price' => 'test',
             ],
         ],
-    ];
-
-    $this->user->givePermissionTo($this->permissions['create']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertUnprocessable();
-
-    $response->assertJsonMissingValidationErrors([
-        'media',
     ]);
 
-    $response->assertJsonValidationErrors([
-        'purchase_invoice_positions.0.amount',
-        'purchase_invoice_positions.0.unit_price',
-        'purchase_invoice_positions.0.total_price',
-    ]);
+    $response->assertUnprocessable()
+        ->assertJsonMissingValidationErrors(['media'])
+        ->assertJsonValidationErrors([
+            'purchase_invoice_positions.0.amount',
+            'purchase_invoice_positions.0.unit_price',
+            'purchase_invoice_positions.0.total_price',
+        ]);
 });
 
-test('delete purchase invoice', function (): void {
+test('can delete purchase invoice', function (): void {
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)
         ->delete('/api/purchase-invoices/' . $this->purchaseInvoices[1]->id);
+
     $response->assertNoContent();
 
     $purchaseInvoice = $this->purchaseInvoices[1]->fresh();
+
     expect($purchaseInvoice->deleted_at)->not->toBeNull();
-    expect($this->user->is($purchaseInvoice->getDeletedBy()))->toBeTrue();
+    expect($purchaseInvoice->getDeletedBy()->is($this->user))->toBeTrue();
 });
 
-test('delete purchase invoice purchase invoice not found', function (): void {
+test('returns 404 when deleting non-existent purchase invoice', function (): void {
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)
         ->delete('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
+
     $response->assertNotFound();
 });
 
-test('finish purchase invoice', function (): void {
+test('converts purchase invoice to order with payment fields', function (): void {
     ContactBankConnection::factory()->create([
         'contact_id' => $this->purchaseInvoices[0]->contact_id,
     ]);
 
-    $purchaseInvoice = [
-        'id' => $this->purchaseInvoices[0]->id,
-    ];
+    $this->purchaseInvoices[0]->update([
+        'invoice_date' => Carbon::now()->toDateString(),
+        'payment_target_date' => Carbon::now()->addDays(30)->toDateString(),
+        'payment_discount_target_date' => Carbon::now()->addDays(10)->toDateString(),
+        'payment_discount_percent' => 0.02,
+    ]);
 
     $this->user->givePermissionTo($this->permissions['finish']);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', $purchaseInvoice);
+    $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', [
+        'id' => $this->purchaseInvoices[0]->id,
+    ]);
+
     $response->assertCreated();
 
-    $responseOrder = json_decode($response->getContent())->data;
-
-    $dbOrder = Order::query()
-        ->whereKey($responseOrder->id)
-        ->first();
+    $dbOrder = Order::query()->whereKey(json_decode($response->getContent())->data->id)->first();
     $dbPurchaseInvoice = $this->purchaseInvoices[0]->fresh();
 
-    expect($dbOrder)->not->toBeEmpty();
-    expect($dbOrder->client_id)->toEqual($dbPurchaseInvoice->client_id);
-    expect($dbOrder->contact_id)->toEqual($dbPurchaseInvoice->contact_id);
-    expect($dbOrder->currency_id)->toEqual($dbPurchaseInvoice->currency_id);
+    expect($dbOrder)
+        ->client_id->toEqual($dbPurchaseInvoice->client_id)
+        ->contact_id->toEqual($dbPurchaseInvoice->contact_id)
+        ->currency_id->toEqual($dbPurchaseInvoice->currency_id)
+        ->order_type_id->toEqual($dbPurchaseInvoice->order_type_id)
+        ->payment_type_id->toEqual($dbPurchaseInvoice->payment_type_id)
+        ->invoice_number->toEqual($dbPurchaseInvoice->invoice_number)
+        ->payment_target->toEqual(30)
+        ->payment_discount_target->toEqual(10)
+        ->payment_discount_percent->toEqual($dbPurchaseInvoice->payment_discount_percent);
+
     expect($dbOrder->getFirstMedia('invoice')->id)->toEqual($dbPurchaseInvoice->media_id);
     expect($dbPurchaseInvoice->order_id)->toEqual($dbOrder->id);
-    expect($dbOrder->order_type_id)->toEqual($dbPurchaseInvoice->order_type_id);
-    expect($dbOrder->payment_type_id)->toEqual($dbPurchaseInvoice->payment_type_id);
-    expect($dbOrder->invoice_date->toDateString())->toEqual($dbPurchaseInvoice->invoice_date->toDateString());
-    expect($dbOrder->invoice_number)->toEqual($dbPurchaseInvoice->invoice_number);
     expect($dbPurchaseInvoice->total_gross_price)->toEqual($this->purchaseInvoices[0]->total_gross_price);
+
+    expect($dbOrder->invoice_date->toDateString())->toEqual($dbPurchaseInvoice->invoice_date->toDateString());
+    expect($dbOrder->payment_target_date->toDateString())->toEqual($dbPurchaseInvoice->payment_target_date->toDateString());
+    expect($dbOrder->payment_discount_target_date->toDateString())->toEqual($dbPurchaseInvoice->payment_discount_target_date->toDateString());
 });
 
-test('finish purchase invoice validation fails', function (): void {
+test('validates required fields when finishing purchase invoice', function (): void {
     $this->purchaseInvoices[1]->update([
         'client_id' => null,
         'contact_id' => null,
@@ -321,94 +332,108 @@ test('finish purchase invoice validation fails', function (): void {
         'invoice_number' => null,
     ]);
 
-    $purchaseInvoice = [
-        'id' => $this->purchaseInvoices[1]->id,
-    ];
-
     $this->user->givePermissionTo($this->permissions['finish']);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', $purchaseInvoice);
-
-    $response->assertUnprocessable();
-
-    $response->assertJsonValidationErrors([
-        'client_id',
-        'contact_id',
-        'order_type_id',
-        'invoice_number',
+    $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', [
+        'id' => $this->purchaseInvoices[1]->id,
     ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors([
+            'client_id',
+            'contact_id',
+            'order_type_id',
+            'invoice_number',
+        ]);
 });
 
-test('get purchase invoice', function (): void {
-    $this->purchaseInvoices[0] = $this->purchaseInvoices[0]->refresh();
+test('can get single purchase invoice', function (): void {
+    $this->purchaseInvoices[0]->refresh();
 
     $this->user->givePermissionTo($this->permissions['show']);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/purchase-invoices/' . $this->purchaseInvoices[0]->id);
+
     $response->assertOk();
 
     $purchaseInvoice = json_decode($response->getContent())->data;
-    expect($purchaseInvoice)->not->toBeEmpty();
-    expect($purchaseInvoice->id)->toEqual($this->purchaseInvoices[0]->id);
-    expect($purchaseInvoice->client_id)->toEqual($this->purchaseInvoices[0]->client_id);
-    expect($purchaseInvoice->contact_id)->toEqual($this->purchaseInvoices[0]->contact_id);
-    expect($purchaseInvoice->currency_id)->toEqual($this->purchaseInvoices[0]->currency_id);
-    expect($purchaseInvoice->media_id)->toEqual($this->purchaseInvoices[0]->media_id);
-    expect($purchaseInvoice->order_id)->toEqual($this->purchaseInvoices[0]->order_id);
-    expect($purchaseInvoice->order_type_id)->toEqual($this->purchaseInvoices[0]->order_type_id);
-    expect($purchaseInvoice->payment_type_id)->toEqual($this->purchaseInvoices[0]->payment_type_id);
-    expect(Carbon::parse($purchaseInvoice->invoice_date)->toDateString())->toEqual($this->purchaseInvoices[0]->invoice_date->toDateString());
-    expect($purchaseInvoice->invoice_number)->toEqual($this->purchaseInvoices[0]->invoice_number);
-    expect($purchaseInvoice->hash)->toEqual($this->purchaseInvoices[0]->hash);
-    expect($purchaseInvoice->is_net)->toEqual($this->purchaseInvoices[0]->is_net);
-    expect(Carbon::parse($purchaseInvoice->created_at))->toEqual(Carbon::parse($this->purchaseInvoices[0]->created_at));
-    expect(Carbon::parse($purchaseInvoice->updated_at))->toEqual(Carbon::parse($this->purchaseInvoices[0]->updated_at));
+
+    expect($purchaseInvoice)
+        ->id->toEqual($this->purchaseInvoices[0]->id)
+        ->client_id->toEqual($this->purchaseInvoices[0]->client_id)
+        ->contact_id->toEqual($this->purchaseInvoices[0]->contact_id)
+        ->currency_id->toEqual($this->purchaseInvoices[0]->currency_id)
+        ->media_id->toEqual($this->purchaseInvoices[0]->media_id)
+        ->order_id->toEqual($this->purchaseInvoices[0]->order_id)
+        ->order_type_id->toEqual($this->purchaseInvoices[0]->order_type_id)
+        ->payment_type_id->toEqual($this->purchaseInvoices[0]->payment_type_id)
+        ->invoice_number->toEqual($this->purchaseInvoices[0]->invoice_number)
+        ->hash->toEqual($this->purchaseInvoices[0]->hash)
+        ->is_net->toEqual($this->purchaseInvoices[0]->is_net);
+
+    expect(Carbon::parse($purchaseInvoice->invoice_date)->toDateString())
+        ->toEqual($this->purchaseInvoices[0]->invoice_date->toDateString());
+    expect(Carbon::parse($purchaseInvoice->created_at))
+        ->toEqual(Carbon::parse($this->purchaseInvoices[0]->created_at));
+    expect(Carbon::parse($purchaseInvoice->updated_at))
+        ->toEqual(Carbon::parse($this->purchaseInvoices[0]->updated_at));
 });
 
-test('get purchase invoice purchase invoice not found', function (): void {
+test('returns 404 when getting non-existent purchase invoice', function (): void {
     $this->user->givePermissionTo($this->permissions['show']);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
+
     $response->assertNotFound();
 });
 
-test('get purchase invoices', function (): void {
+test('can list purchase invoices', function (): void {
     $this->user->givePermissionTo($this->permissions['index']);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/purchase-invoices');
+
     $response->assertOk();
 
     $purchaseInvoices = json_decode($response->getContent())->data->data;
 
-    expect($purchaseInvoices)->not->toBeEmpty();
-    expect(count($purchaseInvoices))->toBeGreaterThanOrEqual(3);
-    $this->assertObjectHasProperty('id', $purchaseInvoices[0]);
+    expect($purchaseInvoices)
+        ->not->toBeEmpty()
+        ->and(count($purchaseInvoices))->toBeGreaterThanOrEqual(3);
+
+    expect($purchaseInvoices[0])->toHaveProperty('id');
+
     $referencePurchaseInvoice = PurchaseInvoice::query()
         ->whereKey($purchaseInvoices[0]->id)
         ->first();
 
     expect($referencePurchaseInvoice)->not->toBeNull();
-    expect($this->purchaseInvoices[0]->id)->toEqual($referencePurchaseInvoice->id);
-    expect($this->purchaseInvoices[0]->client_id)->toEqual($referencePurchaseInvoice->client_id);
-    expect($this->purchaseInvoices[0]->contact_id)->toEqual($referencePurchaseInvoice->contact_id);
-    expect($this->purchaseInvoices[0]->currency_id)->toEqual($referencePurchaseInvoice->currency_id);
-    expect($this->purchaseInvoices[0]->media_id)->toEqual($referencePurchaseInvoice->media_id);
-    expect($this->purchaseInvoices[0]->order_id)->toEqual($referencePurchaseInvoice->order_id);
-    expect($this->purchaseInvoices[0]->order_type_id)->toEqual($referencePurchaseInvoice->order_type_id);
-    expect($this->purchaseInvoices[0]->payment_type_id)->toEqual($referencePurchaseInvoice->payment_type_id);
-    expect(Carbon::parse($this->purchaseInvoices[0]->invoice_date)->toDateString())->toEqual($referencePurchaseInvoice->invoice_date->toDateString());
-    expect($this->purchaseInvoices[0]->invoice_number)->toEqual($referencePurchaseInvoice->invoice_number);
-    expect($this->purchaseInvoices[0]->hash)->toEqual($referencePurchaseInvoice->hash);
-    expect($this->purchaseInvoices[0]->is_net)->toEqual($referencePurchaseInvoice->is_net);
-    expect(Carbon::parse($purchaseInvoices[0]->created_at))->toEqual(Carbon::parse($referencePurchaseInvoice->created_at));
-    expect(Carbon::parse($purchaseInvoices[0]->updated_at))->toEqual(Carbon::parse($referencePurchaseInvoice->updated_at));
+
+    expect($this->purchaseInvoices[0])
+        ->id->toEqual($referencePurchaseInvoice->id)
+        ->client_id->toEqual($referencePurchaseInvoice->client_id)
+        ->contact_id->toEqual($referencePurchaseInvoice->contact_id)
+        ->currency_id->toEqual($referencePurchaseInvoice->currency_id)
+        ->media_id->toEqual($referencePurchaseInvoice->media_id)
+        ->order_id->toEqual($referencePurchaseInvoice->order_id)
+        ->order_type_id->toEqual($referencePurchaseInvoice->order_type_id)
+        ->payment_type_id->toEqual($referencePurchaseInvoice->payment_type_id)
+        ->invoice_number->toEqual($referencePurchaseInvoice->invoice_number)
+        ->hash->toEqual($referencePurchaseInvoice->hash)
+        ->is_net->toEqual($referencePurchaseInvoice->is_net);
+
+    expect($this->purchaseInvoices[0]->invoice_date->toDateString())
+        ->toEqual($referencePurchaseInvoice->invoice_date->toDateString());
+    expect(Carbon::parse($purchaseInvoices[0]->created_at))
+        ->toEqual(Carbon::parse($referencePurchaseInvoice->created_at));
+    expect(Carbon::parse($purchaseInvoices[0]->updated_at))
+        ->toEqual(Carbon::parse($referencePurchaseInvoice->updated_at));
 });
 
-test('update purchase invoice', function (): void {
+test('can update purchase invoice', function (): void {
     $purchaseInvoice = [
         'id' => $this->purchaseInvoices[0]->id,
         'contact_id' => $this->contacts->random()->id,
@@ -430,46 +455,43 @@ test('update purchase invoice', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/purchase-invoices', $purchaseInvoice);
+
     $response->assertOk();
 
-    $responsePurchaseInvoice = json_decode($response->getContent())->data;
     $dbPurchaseInvoice = PurchaseInvoice::query()
-        ->whereKey($responsePurchaseInvoice->id)
+        ->whereKey(json_decode($response->getContent())->data->id)
         ->first();
 
-    expect($dbPurchaseInvoice)->not->toBeEmpty();
-    expect($dbPurchaseInvoice->id)->toEqual($purchaseInvoice['id']);
-    expect($dbPurchaseInvoice->uuid)->toEqual($this->purchaseInvoices[0]->uuid);
-    expect($dbPurchaseInvoice->client_id)->toEqual($this->purchaseInvoices[0]->client_id);
-    expect($dbPurchaseInvoice->contact_id)->toEqual($purchaseInvoice['contact_id']);
-    expect($dbPurchaseInvoice->currency_id)->toEqual($purchaseInvoice['currency_id']);
-    expect($dbPurchaseInvoice->media_id)->toEqual($this->purchaseInvoices[0]->media_id);
-    expect($dbPurchaseInvoice->order_id)->toEqual($this->purchaseInvoices[0]->order_id);
-    expect($dbPurchaseInvoice->order_type_id)->toEqual($purchaseInvoice['order_type_id']);
-    expect($dbPurchaseInvoice->payment_type_id)->toEqual($purchaseInvoice['payment_type_id']);
-    expect(Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString())->toEqual($purchaseInvoice['invoice_date']);
-    expect($dbPurchaseInvoice->invoice_number)->toEqual($purchaseInvoice['invoice_number']);
-    expect($dbPurchaseInvoice->hash)->toEqual($this->purchaseInvoices[0]->hash);
-    expect($dbPurchaseInvoice->is_net)->toEqual($this->purchaseInvoices[0]->is_net);
-    expect($this->user->is($dbPurchaseInvoice->getUpdatedBy()))->toBeTrue();
-    expect($dbPurchaseInvoice->purchaseInvoicePositions)->toHaveCount(count($purchaseInvoice['purchase_invoice_positions']));
+    expect($dbPurchaseInvoice)
+        ->id->toEqual($purchaseInvoice['id'])
+        ->uuid->toEqual($this->purchaseInvoices[0]->uuid)
+        ->client_id->toEqual($this->purchaseInvoices[0]->client_id)
+        ->contact_id->toEqual($purchaseInvoice['contact_id'])
+        ->currency_id->toEqual($purchaseInvoice['currency_id'])
+        ->media_id->toEqual($this->purchaseInvoices[0]->media_id)
+        ->order_id->toEqual($this->purchaseInvoices[0]->order_id)
+        ->order_type_id->toEqual($purchaseInvoice['order_type_id'])
+        ->payment_type_id->toEqual($purchaseInvoice['payment_type_id'])
+        ->invoice_number->toEqual($purchaseInvoice['invoice_number'])
+        ->hash->toEqual($this->purchaseInvoices[0]->hash)
+        ->is_net->toEqual($this->purchaseInvoices[0]->is_net)
+        ->purchaseInvoicePositions->toHaveCount(count($purchaseInvoice['purchase_invoice_positions']));
+
+    expect($dbPurchaseInvoice->invoice_date->toDateString())->toEqual($purchaseInvoice['invoice_date']);
+    expect($dbPurchaseInvoice->getUpdatedBy()->is($this->user))->toBeTrue();
 });
 
-test('update purchase invoice validation fails invoice number', function (): void {
-    $purchaseInvoice = [
+test('validates unique invoice number on update', function (): void {
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->put('/api/purchase-invoices', [
         'id' => $this->purchaseInvoices[0]->id,
         'invoice_number' => $this->order->invoice_number,
         'contact_id' => $this->order->contact_id,
         'client_id' => $this->order->client_id,
-    ];
-
-    $this->user->givePermissionTo($this->permissions['update']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->put('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertUnprocessable();
-
-    $response->assertJsonValidationErrors([
-        'invoice_number',
     ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['invoice_number']);
 });

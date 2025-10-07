@@ -197,6 +197,8 @@ class Communication extends CommunicationList
         $this->attachments->reset();
         if ($communication->id) {
             $this->attachments->fill($communication->getMedia('attachments'));
+        } elseif ($this->modelType && $this->modelId) {
+            $this->addCommunicatable(morph_alias($this->modelType), $this->modelId);
         }
 
         $this->js(<<<'JS'

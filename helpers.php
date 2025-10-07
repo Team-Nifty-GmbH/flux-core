@@ -563,8 +563,17 @@ if (! function_exists('class_to_broadcast_channel')) {
             throw new InvalidArgumentException('Invalid class: ' . $class);
         }
 
-        return morph_alias($class)
-            . ($withParam ? '.{' . Illuminate\Support\Str::camel(morph_alias($class)) . '}' : '');
+        return Illuminate\Support\Str::of($morphAlias = morph_alias($class))
+            ->replace('\\', '.')
+            ->lower()
+            ->toString()
+            . (
+                $withParam
+                ? '.{'
+                    . Illuminate\Support\Str::camel(class_exists($morphAlias) ? class_basename($class) : $morphAlias)
+                    . '}'
+                : ''
+            );
     }
 }
 

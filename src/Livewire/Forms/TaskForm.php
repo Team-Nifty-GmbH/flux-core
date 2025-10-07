@@ -76,6 +76,14 @@ class TaskForm extends FluxForm
         parent::fill($values);
     }
 
+    public function reset(...$properties): void
+    {
+        parent::reset(...$properties);
+
+        $this->responsible_user_id ??= auth()?->id();
+        $this->users = $this->users ?: array_filter([auth()?->id()]);
+    }
+
     protected function getActions(): array
     {
         return [
@@ -92,7 +100,7 @@ class TaskForm extends FluxForm
         }
 
         if (is_null($data)) {
-            $data = $this->toArray();
+            $data = $this->toActionData();
             $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
         }
 

@@ -62,7 +62,7 @@ class RevenuePurchasesProfitChart extends LineChart implements HasWidgetOptions
 
         $profit = [];
         foreach ($revenue->getCombinedData() as $key => $value) {
-            $profit[$key] = (int) bcadd($value, data_get($purchasesData, $key, 0), 0);
+            $profit[$key] = (int) bcsub($value, data_get($purchasesData, $key, 0), 0);
         }
         $profit = Result::make(array_values($profit), array_keys($profit), null);
 
@@ -96,7 +96,7 @@ class RevenuePurchasesProfitChart extends LineChart implements HasWidgetOptions
                 'data' => $purchases->getData(),
             ],
             [
-                'name' => __('Profit'),
+                'name' => __('Gross Profit'),
                 'color' => 'indigo',
                 'data' => $profit->getData(),
             ],

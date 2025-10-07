@@ -69,7 +69,7 @@ class ProjectTaskList extends BaseTaskList
         $this->editForm($id);
 
         $this->task->project_id = $this->projectId;
-        $this->task->users = $task->users()->pluck('users.id')->toArray();
+
         $this->task->additionalColumns = array_intersect_key(
             $task->toArray(),
             array_fill_keys(

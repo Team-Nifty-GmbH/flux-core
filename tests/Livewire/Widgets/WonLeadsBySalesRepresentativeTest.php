@@ -43,35 +43,35 @@ beforeEach(function (): void {
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now(),
+                    'closed_at' => Carbon::now(),
                 ])
             )
             ->merge(
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfWeek(),
+                    'closed_at' => Carbon::now()->startOfWeek(),
                 ])
             )
             ->merge(
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfMonth(),
+                    'closed_at' => Carbon::now()->startOfMonth(),
                 ])
             )
             ->merge(
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfQuarter(),
+                    'closed_at' => Carbon::now()->startOfQuarter(),
                 ])
             )
             ->merge(
                 Lead::factory()->count($quantity)->create([
                     'user_id' => $user->id,
                     'lead_state_id' => $this->wonLeadState->id,
-                    'end' => Carbon::now()->startOfYear(),
+                    'closed_at' => Carbon::now()->startOfYear(),
                 ])
             );
     }
@@ -224,7 +224,7 @@ function getWonLeadCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame,
         ->filter(
             fn (Lead $lead) => $lead->user_id === $user->id
                 && $lead->leadState->is_won === true
-                && $lead->end->between(...$timeFrame->getRange())
+                && $lead->closed_at->between(...$timeFrame->getRange())
         )
         ->count();
 }

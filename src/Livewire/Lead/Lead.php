@@ -60,6 +60,10 @@ class Lead extends Component
                 ->isLivewireComponent()
                 ->wireModel('leadForm.id')
                 ->text(__('Attachments')),
+            TabButton::make('lead.communications')
+                ->isLivewireComponent()
+                ->wireModel('leadForm.id')
+                ->text(__('Communications')),
         ];
     }
 

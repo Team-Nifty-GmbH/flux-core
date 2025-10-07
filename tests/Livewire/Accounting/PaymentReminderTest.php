@@ -31,7 +31,7 @@ test('mark selected as paid', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
+        ->for(PaymentType::factory(), 'paymentType')
         ->for(
             OrderType::factory()
                 ->state([
@@ -59,7 +59,8 @@ test('mark selected as paid', function (): void {
         ->call('markAsPaid')
         ->assertOk()
         ->assertHasNoErrors()
-        ->assertCount('data.data', 1);
+        ->assertCount('data.data', 1)
+        ->assertCount('selected', 0);
 
     $this->assertDatabaseHas('orders', ['id' => $orders[0]->id, 'payment_state' => Paid::$name]);
     $this->assertDatabaseHas('orders', ['id' => $orders[1]->id, 'payment_state' => Paid::$name]);

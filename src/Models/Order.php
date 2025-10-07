@@ -62,13 +62,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Traits\Conditionable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
         HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
@@ -212,6 +213,18 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 $order->getSerialNumber('order_number');
             }
 
+            if ($order->isDirty('invoice_date') || $order->isDirty('payment_target')) {
+                $order->payment_target_date = ($order->invoice_date && ! is_null($order->payment_target))
+                    ? $order->invoice_date->copy()->addDays($order->payment_target)
+                    : null;
+            }
+
+            if ($order->isDirty('invoice_date') || $order->isDirty('payment_discount_target')) {
+                $order->payment_discount_target_date = ($order->invoice_date && ! is_null($order->payment_discount_target))
+                    ? $order->invoice_date->copy()->addDays($order->payment_discount_target)
+                    : null;
+            }
+
             if ($order->isDirty('invoice_number') && ! is_null($order->invoice_number)) {
                 $orderPositions = $order->orderPositions()
                     ->whereNotNull('credit_account_id')
@@ -261,6 +274,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                         $order->payment_reminder_days_1
                     );
                 }
+            }
+
+            if ($order->isDirty('payment_discount_percent')) {
+                $order->calculateBalanceDueDiscount();
             }
 
             if ($order->isDirty('iban')
@@ -344,6 +361,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             'payment_reminder_next_date' => 'date',
             'order_date' => 'date',
             'invoice_date' => 'date',
+            'payment_target_date' => 'date',
+            'payment_discount_target_date' => 'date',
             'system_delivery_date' => 'date',
             'system_delivery_date_end' => 'date',
             'customer_delivery_date' => 'date',
@@ -398,6 +417,21 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ),
             2
         );
+
+        return $this;
+    }
+
+    public function calculateBalanceDueDiscount(): static
+    {
+        if (! is_null($this->balance)
+            && ! is_null($this->payment_discount_percent)
+            && bccomp($this->payment_discount_percent, 0) > 0
+        ) {
+            $discountAmount = bcmul($this->balance, $this->payment_discount_percent);
+            $this->balance_due_discount = bcsub($this->balance, $discountAmount);
+        } else {
+            $this->balance_due_discount = null;
+        }
 
         return $this;
     }
@@ -493,27 +527,31 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this
             ->calculateTotalNetPrice()
             ->calculateDiscounts()
+            ->calculateTotalVats()
             ->calculateTotalGrossPrice()
             ->calculateMargin()
-            ->calculateTotalVats();
+            ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
     }
 
     public function calculateTotalGrossPrice(): static
     {
+        $totalVat = array_reduce(
+            $this->total_vats ?? [],
+            fn (string $carry, array $item): string => bcadd($carry, data_get($item, 'total_vat_price', 0)),
+            0
+        );
+
+        $this->total_gross_price = bcround(
+            bcadd($this->total_net_price, $totalVat),
+            2
+        );
+
         $totalBaseGross = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_gross_price = discount(
-            bcround(
-                bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
-                2
-            ),
-            $this->total_discount_percentage
-        );
-
         $this->total_base_gross_price = bcround(
-            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
+            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0),
             2
         );
         $this->total_base_discounted_gross_price = $this->total_gross_price;
@@ -592,8 +630,14 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->map(function (OrderPosition $item): array {
                 return [
                     'vat_rate_percentage' => $item->vat_rate_percentage,
-                    'total_vat_price' => bcround(bcmul($item->total_net_price, $item->vat_rate_percentage, 9), 2),
-                    'total_net_price' => bcround($item->total_net_price, 2),
+                    'total_vat_price' => bcround(
+                        bcmul(
+                            $item->total_net_price ?? 0,
+                            $item->vat_rate_percentage,
+                            9),
+                        2
+                    ),
+                    'total_net_price' => bcround($item->total_net_price ?? 0, 2),
                 ];
             })
             ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
@@ -773,6 +817,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
+    }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class);
     }
 
     public function newCollection(array $models = []): Collection

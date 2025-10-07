@@ -390,6 +390,19 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Category::class,
+            'categorizables',
+            'categorizable_id',
+            'category_id',
+            'contact_id',
+            'id'
+        )
+            ->wherePivot('categorizable_type', morph_alias(Contact::class));
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -484,6 +497,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->detailRoute();
     }
 
+    public function industries(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Industry::class,
+            'contact_industry',
+            'contact_id',
+            'industry_id',
+            'contact_id',
+            'id'
+        );
+    }
+
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
@@ -558,8 +583,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $start = $start ? Carbon::parse($start) : null;

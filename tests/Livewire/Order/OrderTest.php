@@ -286,7 +286,7 @@ test('get tabs structure', function (): void {
     $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
     $tabs = $component->instance()->getTabs();
 
-    expect($tabs)->toHaveCount(7);
+    expect($tabs)->toHaveCount(8);
 
     $expectedTabs = [
         'order.order-positions',
@@ -294,6 +294,7 @@ test('get tabs structure', function (): void {
         'order.texts',
         'order.accounting',
         'order.comments',
+        'order.communications',
         'order.related',
         'order.activities',
     ];
@@ -1169,6 +1170,103 @@ test('vat calculation with position discounts', function (): void {
     expect($vat19['total_vat_price'])->toEqual('9.50');
     expect($vat7['total_net_price'])->toEqual('100.00');
     expect($vat7['total_vat_price'])->toEqual('7.00');
+});
+
+test('order discount with mixed vat rates and position discounts', function (): void {
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $vatRate0 = VatRate::factory()->create(['rate_percentage' => 0.00]);
+
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 2650,
+                'unit_gross_price' => 3153.50,
+                'total_base_net_price' => 2650,
+                'total_base_gross_price' => 3153.50,
+                'total_net_price' => 2385,
+                'total_gross_price' => 2838.15,
+                'discount_percentage' => 0.10,
+                'vat_rate_percentage' => 0.19,
+                'vat_price' => 453.15,
+                'client_id' => $this->dbClient->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate7)
+            ->state([
+                'amount' => 2,
+                'unit_net_price' => 100,
+                'unit_gross_price' => 107,
+                'total_base_net_price' => 200,
+                'total_base_gross_price' => 214,
+                'total_net_price' => 160,
+                'total_gross_price' => 171.20,
+                'discount_percentage' => 0.20,
+                'vat_rate_percentage' => 0.07,
+                'vat_price' => 11.20,
+                'client_id' => $this->dbClient->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate0)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 500,
+                'unit_gross_price' => 500,
+                'total_base_net_price' => 500,
+                'total_base_gross_price' => 500,
+                'total_net_price' => 0,
+                'total_gross_price' => 0,
+                'discount_percentage' => 1.00,
+                'vat_rate_percentage' => 0.00,
+                'vat_price' => 0,
+                'client_id' => $this->dbClient->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'client_id' => $this->dbClient->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
+        ]);
+
+    $order->discounts()->create([
+        'discount' => 0.10,
+        'is_percentage' => true,
+        'order_column' => 1,
+    ]);
+
+    $order->calculatePrices()->save();
+
+    expect($order->total_net_price)->toEqual('2290.50');
+
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    $vat0 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0000000000');
+
+    expect($vat19['total_net_price'])->toEqual('2146.50');
+    expect($vat19['total_vat_price'])->toEqual('407.84');
+
+    expect($vat7['total_net_price'])->toEqual('144.00');
+    expect($vat7['total_vat_price'])->toEqual('10.08');
+
+    expect($vat0['total_net_price'])->toEqual('0.00');
+    expect($vat0['total_vat_price'])->toEqual('0.00');
+
+    expect($order->total_gross_price)->toEqual('2708.42');
 });
 
 test('vat calculation with repeating decimals', function (): void {
