@@ -8,6 +8,7 @@ use FluxErp\Actions\Tag\UpdateTag;
 use FluxErp\Livewire\DataTables\TagList;
 use FluxErp\Livewire\Forms\TagForm;
 use FluxErp\Models\Tag;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -18,6 +19,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Tags extends TagList
 {
+    use AllowRecordMerging;
+
     #[Locked]
     public bool $isSelectable = true;
 

@@ -6,16 +6,19 @@ use FluxErp\Livewire\DataTables\RecordOriginList;
 use FluxErp\Livewire\Forms\RecordOriginForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\HasRecordOrigin;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 
 class RecordOrigins extends RecordOriginList
 {
-    use DataTableHasFormEdit;
+    use DataTableHasFormEdit, AllowRecordMerging;
 
     #[DataTableForm]
     public RecordOriginForm $recordOriginForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.record-origins';
+
+    public bool $isSelectable = true;
 
     protected function getViewData(): array
     {
