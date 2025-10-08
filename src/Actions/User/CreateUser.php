@@ -60,7 +60,8 @@ class CreateUser extends FluxAction
         parent::validateData();
 
         if ($this->getData('default_mail_account_id')) {
-            $mailAccounts = $this->getData('mail_accounts', []);
+            $mailAccounts = $this->getData('mail_accounts') ?? [];
+
             if (! in_array($this->getData('default_mail_account_id'), $mailAccounts, true)) {
                 throw ValidationException::withMessages([
                     'default_mail_account_id' => [
