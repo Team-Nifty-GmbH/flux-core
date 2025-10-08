@@ -108,6 +108,7 @@
                 :options="collect($mailAccounts)->whereIn('id', $userForm->mail_accounts)->values()->toArray()"
             />
         @endif
+
         @show
         @section('user-edit.printers')
         <x-select.styled
