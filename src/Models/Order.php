@@ -596,8 +596,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         $vatGroups = $this->orderPositions()
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
-            ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage')
+            ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
+            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
             ->keyBy('vat_rate_percentage');
 
@@ -630,6 +630,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->map(function (OrderPosition $item): array {
                 return [
                     'vat_rate_percentage' => $item->vat_rate_percentage,
+                    'vat_rate_id' => $item->vat_rate_id,
                     'total_vat_price' => bcround(
                         bcmul(
                             $item->total_net_price ?? 0,
