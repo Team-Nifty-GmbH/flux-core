@@ -36,7 +36,7 @@ class Communication extends BaseCommunication
                 'id',
                 'main_address_id',
             ])
-            ->mainAddress;
+            ?->mainAddress;
 
         if ($address) {
             $this->addCommunicatable($address->getMorphClass(), $address->getKey());
@@ -57,7 +57,7 @@ class Communication extends BaseCommunication
                 'id',
                 'main_address_id',
             ])
-            ->mainAddress;
+            ?->mainAddress;
 
         if ($address) {
             $this->addCommunicatable($address->getMorphClass(), $address->getKey());
