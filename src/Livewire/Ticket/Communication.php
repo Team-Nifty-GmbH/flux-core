@@ -12,7 +12,7 @@ class Communication extends BaseCommunication
     protected ?string $modelType = Ticket::class;
 
     #[Renderless]
-    public function getMailAddress(): string|array
+    public function getMailAddress(): string|array|null
     {
         $ticket = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
@@ -33,7 +33,7 @@ class Communication extends BaseCommunication
     }
 
     #[Renderless]
-    public function getPostalAddress(): string
+    public function getPostalAddress(): ?string
     {
         $ticket = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)

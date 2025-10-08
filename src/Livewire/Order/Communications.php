@@ -13,7 +13,7 @@ class Communications extends BaseCommunication
     protected ?string $modelType = Order::class;
 
     #[Renderless]
-    public function getMailAddress(): string|array
+    public function getMailAddress(): string|array|null
     {
         $address = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
@@ -37,7 +37,7 @@ class Communications extends BaseCommunication
     }
 
     #[Renderless]
-    public function getPostalAddress(): string
+    public function getPostalAddress(): ?string
     {
         $address = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)

@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Address;
 use FluxErp\Livewire\Features\Communications\Communication as BaseCommunication;
 use FluxErp\Models\Address;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Arr;
 use Livewire\Attributes\Renderless;
 
 class Communication extends BaseCommunication
@@ -13,10 +12,10 @@ class Communication extends BaseCommunication
     protected ?string $modelType = Address::class;
 
     #[Renderless]
-    public function getMailAddress(): string|array
+    public function getMailAddress(): string|array|null
     {
         return resolve_static($this->modelType, 'query')
-            ->whereKey(data_get(Arr::first($this->communication->communicatables), 'communicatable_id'))
+            ->whereKey(data_get($this->communication->communicatables, '0.communicatable_id'))
             ->with([
                 'contactOptions' => fn (HasMany $query) => $query
                     ->where('type', 'email')
@@ -26,18 +25,18 @@ class Communication extends BaseCommunication
                 'id',
                 'email_primary',
             ])
-            ->mail_addresses;
+            ?->mail_addresses;
     }
 
     #[Renderless]
-    public function getPostalAddress(): string
+    public function getPostalAddress(): ?string
     {
         return implode(
             "\n",
             resolve_static($this->modelType, 'query')
-                ->whereKey(data_get(Arr::first($this->communication->communicatables), 'communicatable_id'))
+                ->whereKey(data_get($this->communication->communicatables, '0.communicatable_id'))
                 ->first()
-                ->postal_address
+                ?->postal_address
         );
     }
 }

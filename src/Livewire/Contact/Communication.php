@@ -37,7 +37,6 @@ class Communication extends BaseCommunication
                 'main_address_id',
             ])
             ->mainAddress;
-
         $this->addCommunicatable($address->getMorphClass(), $address->getKey());
 
         return $address->mail_addresses;

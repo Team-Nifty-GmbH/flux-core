@@ -215,24 +215,24 @@ abstract class Communication extends CommunicationList
     public function fillTo(): void
     {
         if ($this->communication->communication_type_enum === CommunicationTypeEnum::Mail->value) {
-            $this->communication->to = Arr::wrap($this->getMailAddress());
+            $this->communication->to = array_filter(Arr::wrap($this->getMailAddress()));
         } elseif ($this->communication->communication_type_enum === CommunicationTypeEnum::Letter->value) {
-            $this->communication->to = Arr::wrap($this->getPostalAddress());
+            $this->communication->to = array_filter(Arr::wrap($this->getPostalAddress()));
         } else {
             $this->communication->to = [];
         }
     }
 
     #[Renderless]
-    public function getMailAddress(): string|array
+    public function getMailAddress(): string|array|null
     {
-        return [];
+        return null;
     }
 
     #[Renderless]
-    public function getPostalAddress(): string
+    public function getPostalAddress(): ?string
     {
-        return '';
+        return null;
     }
 
     #[Renderless]
