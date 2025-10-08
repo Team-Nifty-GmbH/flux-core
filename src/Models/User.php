@@ -137,7 +137,9 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 
     public function defaultMailAccount(): ?MailAccount
     {
-        return $this->mailAccounts()->wherePivot('is_default', true)->first();
+        return $this->mailAccounts()
+            ->wherePivot('is_default', true)
+            ->first();
     }
 
     public function favorites(): MorphMany
