@@ -4,8 +4,54 @@ namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Features\Communications\Communication as BaseCommunication;
 use FluxErp\Models\Order;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Livewire\Attributes\Renderless;
 
 class Communications extends BaseCommunication
 {
     protected ?string $modelType = Order::class;
+
+    #[Renderless]
+    public function getMailAddress(): string|array
+    {
+        $address = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->with([
+                'addressInvoice' => fn (BelongsTo $query) => $query
+                    ->select('id', 'email_primary')
+                    ->with([
+                        'contactOptions' => fn (HasMany $query) => $query
+                            ->where('type', 'email')
+                            ->whereNotNull('value'),
+                    ]),
+            ])
+            ->first([
+                'id',
+                'address_invoice_id',
+            ])
+            ->addressInvoice;
+        $this->addCommunicatable($address->getMorphClass(), $address->getKey());
+
+        return $address->mail_addresses;
+    }
+
+    #[Renderless]
+    public function getPostalAddress(): string
+    {
+        $address = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->with('addressInvoice')
+            ->first([
+                'id',
+                'address_invoice_id',
+            ])
+            ->addressInvoice;
+        $this->addCommunicatable($address->getMorphClass(), $address->getKey());
+
+        return implode(
+            "\n",
+            $address->postal_address
+        );
+    }
 }

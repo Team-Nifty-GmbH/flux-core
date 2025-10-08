@@ -36,6 +36,10 @@ class CommunicationView extends PrintableView
     public function getSubject(): string
     {
         return $this->model->subject ?: __($this->model->communication_type_enum->name)
-            . ($this->model->date ? ' ' . __('from') . ' ' . $this->model->date->format('lll') : '');
+            . (
+                $this->model->date
+                    ? ' ' . __('from') . ' ' . $this->model->date->locale(app()->getLocale())->isoFormat('LLL')
+                    : ''
+            );
     }
 }
