@@ -108,7 +108,12 @@ abstract class PrintableView extends Component
             return resolve_static(PrintLayout::class, 'query')
                 ->where('client_id', $model->client_id)
                 ->where('model_type', morph_alias($model::class))
-                ->where('name', static::getLayout() . '.' . morph_alias($model::class) . '.' . strtolower($model->orderType->name))
+                ->where(
+                    'name',
+                    static::getLayout() .
+                    '.' . morph_alias($model::class) .
+                    '.' . data_get(array_flip($model->resolvePrintViews()), static::class)
+                )
                 ->first()?->toArray();
         }
 
@@ -322,6 +327,7 @@ abstract class PrintableView extends Component
         View::share('subject', $this->getSubject());
         View::share('printView', Str::kebab(class_basename($this)));
         View::share('printLayout', static::$layout);
+        View::share('layout', $this->getPrintLayout());
 
         $this->imagick?->clear();
         $this->imagick?->destroy();

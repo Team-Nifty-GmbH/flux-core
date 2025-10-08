@@ -1,23 +1,17 @@
 @use(\Illuminate\Support\Number)
 @use(\FluxErp\Models\PriceList)
-@use(\FluxErp\Models\PrintLayout)
-@use(\FluxErp\Models\Currency)
 @use(\Illuminate\Support\Fluent)
 @php
     $isNet = ($model->priceList ?? resolve_static(PriceList::class, 'default'))->is_net;
-    $layout = resolve_static(PrintLayout::class, 'query')
-        ->where('client_id', $model->client_id)
-        ->where('model_type', morph_alias($model::class))
-        ->where('name', implode('.', ['flux::layouts.printing.order', strtolower($model->orderType->name)]))
-        ->first()
-        ?->toArray();
 @endphp
 
-<x-flux::print.order.first-page-header
+<x-dynamic-component
+    :component="data_get($layout, 'first_page_header') ? 'flux::print.order.custom-first-page-header' : 'flux::print.order.first-page-header'"
     :client="$client"
     :address="Fluent::make($model->address_invoice)"
     :$model
-    :first-page-header-layout="is_null($layout) ? null : $layout['first_page_header']"
+    :subject="data_get($model, 'document_subject', __('Order')) . ' ' . ($model->order_number ?? $model->number ?? '')"
+    :first-page-header-layout="data_get($layout, 'first_page_header')"
 />
 <main>
     @section('header')
