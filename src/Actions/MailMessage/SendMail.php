@@ -6,6 +6,7 @@ use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Communication;
 use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\MailAccount;
 use FluxErp\Rulesets\MailMessage\SendMailRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
@@ -32,8 +33,18 @@ class SendMail extends DispatchableFluxAction
     {
         $mail = GenericMail::make($this->data, $this->getData('blade_parameters'));
 
+        if ($mailAccountId = $this->getData('mail_account_id')) {
+            $mailAccount = resolve_static(MailAccount::class, 'query')
+                ->whereKey($mailAccountId)
+                ->first();
+
+            $mailer = $mailAccount?->mailer();
+            $mail->from($mailAccount->smtp_email, auth()->user()?->name ?? $mailAccount->smtp_email);
+        }
+
         try {
-            $message = Mail::to($this->getData('to'))
+            $message = ($mailer ?? Mail::mailer())
+                ->to($this->getData('to'))
                 ->cc($this->getData('cc') ?? [])
                 ->bcc($this->getData('bcc') ?? []);
 
