@@ -36,7 +36,7 @@ class Communication extends BaseCommunication
             resolve_static($this->modelType, 'query')
                 ->whereKey(data_get($this->communication->communicatables, '0.communicatable_id'))
                 ->first()
-                ?->postal_address
+                ?->postal_address ?? []
         );
     }
 }

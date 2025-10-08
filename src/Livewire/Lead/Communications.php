@@ -31,9 +31,14 @@ class Communications extends BaseCommunication
                 'address_id',
             ])
             ->address;
-        $this->addCommunicatable($address->getMorphClass(), $address->getKey());
 
-        return $address->mail_addresses;
+        if ($address) {
+            $this->addCommunicatable($address->getMorphClass(), $address->getKey());
+
+            return $address->mail_addresses;
+        }
+
+        return null;
     }
 
     #[Renderless]
@@ -47,11 +52,16 @@ class Communications extends BaseCommunication
                 'address_id',
             ])
             ->address;
-        $this->addCommunicatable($address->getMorphClass(), $address->getKey());
 
-        return implode(
-            "\n",
-            $address->postal_address
-        );
+        if ($address) {
+            $this->addCommunicatable($address->getMorphClass(), $address->getKey());
+
+            return implode(
+                "\n",
+                $address->postal_address
+            );
+        }
+
+        return null;
     }
 }

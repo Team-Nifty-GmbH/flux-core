@@ -23,12 +23,12 @@ class Communication extends BaseCommunication
                 'authenticatable_id',
             ]);
 
-        if ($ticket->authenticatable_type === morph_alias(Address::class)) {
+        if ($ticket->authenticatable && $ticket->authenticatable_type === morph_alias(Address::class)) {
             $this->addCommunicatable($ticket->authenticatable->getMorphClass(), $ticket->authenticatable->getKey());
 
             return $ticket->authenticatable->mail_addresses;
         } else {
-            return $ticket->authenticatable->email;
+            return $ticket->authenticatable?->email;
         }
     }
 
@@ -44,15 +44,15 @@ class Communication extends BaseCommunication
                 'authenticatable_id',
             ]);
 
-        if ($ticket->authenticatable_type === morph_alias(Address::class)) {
+        if ($ticket->authenticatable && $ticket->authenticatable_type === morph_alias(Address::class)) {
             $this->addCommunicatable($ticket->authenticatable->getMorphClass(), $ticket->authenticatable->getKey());
 
             return implode(
                 "\n",
                 $ticket->authenticatable->postal_address
             );
-        } else {
-            return '';
         }
+
+        return null;
     }
 }
