@@ -251,6 +251,7 @@ class UserEdit extends Component
             ->toArray();
         $this->userForm->roles = $user->roles->pluck('id')->toArray();
         $this->userForm->mail_accounts = $user->mailAccounts->pluck('id')->toArray();
+        $this->userForm->default_mail_account_id = $user->defaultMailAccount()?->getKey();
         $this->userForm->clients = $user->clients->pluck('id')->toArray();
         $this->userForm->printers = $user->printers->pluck('id')->toArray();
 

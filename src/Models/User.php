@@ -135,6 +135,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->belongsTo(Currency::class);
     }
 
+    public function defaultMailAccount(): ?MailAccount
+    {
+        return $this->mailAccounts()->wherePivot('is_default', true)->first();
+    }
+
     public function favorites(): MorphMany
     {
         return $this->morphMany(Favorite::class, 'authenticatable');
@@ -185,7 +190,8 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 
     public function mailAccounts(): BelongsToMany
     {
-        return $this->belongsToMany(MailAccount::class, 'mail_account_user');
+        return $this->belongsToMany(MailAccount::class, 'mail_account_user')
+            ->withPivot('is_default');
     }
 
     /**

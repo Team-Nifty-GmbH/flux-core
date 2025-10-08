@@ -23,13 +23,20 @@ class CreateUser extends FluxAction
     public function performAction(): User
     {
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
+        $defaultMailAccountId = Arr::pull($this->data, 'default_mail_account_id');
         $printers = Arr::pull($this->data, 'printers');
 
         $user = app(User::class, ['attributes' => $this->data]);
         $user->save();
 
         if ($mailAccounts) {
-            $user->mailAccounts()->attach($mailAccounts);
+            $syncData = [];
+            foreach ($mailAccounts as $mailAccountId) {
+                $syncData[$mailAccountId] = [
+                    'is_default' => $mailAccountId === $defaultMailAccountId,
+                ];
+            }
+            $user->mailAccounts()->attach($syncData);
         }
 
         if ($printers) {

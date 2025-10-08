@@ -25,6 +25,7 @@ class UpdateUser extends FluxAction
     public function performAction(): Model
     {
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
+        $defaultMailAccountId = Arr::pull($this->data, 'default_mail_account_id');
         $printers = Arr::pull($this->data, 'printers');
 
         $user = resolve_static(User::class, 'query')
@@ -35,7 +36,13 @@ class UpdateUser extends FluxAction
         $user->save();
 
         if (! is_null($mailAccounts)) {
-            $user->mailAccounts()->sync($mailAccounts);
+            $syncData = [];
+            foreach ($mailAccounts as $mailAccountId) {
+                $syncData[$mailAccountId] = [
+                    'is_default' => $mailAccountId === $defaultMailAccountId,
+                ];
+            }
+            $user->mailAccounts()->sync($syncData);
         }
 
         if (! is_null($printers)) {
