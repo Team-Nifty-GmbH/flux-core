@@ -601,6 +601,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->get()
             ->keyBy('vat_rate_percentage');
 
+        $baseAmounts = $vatGroups->map(fn (OrderPosition $item) => $item->total_net_price);
+
         foreach ($this->discounts()->ordered()->get() as $discount) {
             if ($discount->is_percentage) {
                 $vatGroups->transform(function (OrderPosition $item) use ($discount): OrderPosition {
@@ -626,8 +628,16 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             }
         }
 
+        $discountAmounts = $vatGroups
+            ->map(fn (OrderPosition $item) => bcsub(
+                $baseAmounts->get($item->vat_rate_percentage) ?? 0,
+                $item->total_net_price,
+                9
+            )
+        );
+
         $this->total_vats = $vatGroups
-            ->map(function (OrderPosition $item): array {
+            ->map(function (OrderPosition $item) use ($discountAmounts): array {
                 return [
                     'vat_rate_percentage' => $item->vat_rate_percentage,
                     'vat_rate_id' => $item->vat_rate_id,
@@ -635,10 +645,12 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                         bcmul(
                             $item->total_net_price ?? 0,
                             $item->vat_rate_percentage,
-                            9),
+                            9
+                        ),
                         2
                     ),
                     'total_net_price' => bcround($item->total_net_price ?? 0, 2),
+                    'total_discount' => bcround($discountAmounts->get($item->vat_rate_percentage) ?? 0, 2),
                 ];
             })
             ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
