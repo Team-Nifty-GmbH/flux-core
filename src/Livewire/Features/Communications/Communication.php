@@ -34,7 +34,7 @@ use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class Communication extends CommunicationList
+abstract class Communication extends CommunicationList
 {
     use CreatesDocuments, WithFileUploads;
 
@@ -101,6 +101,11 @@ class Communication extends CommunicationList
             'label' => __(Str::headline($modelType)) . ': '
                 . (method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
         ];
+
+        $this->communication->communicatables = collect($this->communication->communicatables)
+            ->unique(fn (array $item) => data_get($item, 'communicatable_type') . '-' . data_get($item, 'communicatable_id'))
+            ->values()
+            ->toArray();
     }
 
     #[Renderless]
@@ -207,6 +212,30 @@ class Communication extends CommunicationList
     }
 
     #[Renderless]
+    public function fillTo(): void
+    {
+        if ($this->communication->communication_type_enum === CommunicationTypeEnum::Mail->value) {
+            $this->communication->to = array_filter(Arr::wrap($this->getMailAddress()));
+        } elseif ($this->communication->communication_type_enum === CommunicationTypeEnum::Letter->value) {
+            $this->communication->to = array_filter(Arr::wrap($this->getPostalAddress()));
+        } else {
+            $this->communication->to = [];
+        }
+    }
+
+    #[Renderless]
+    public function getMailAddress(): string|array|null
+    {
+        return null;
+    }
+
+    #[Renderless]
+    public function getPostalAddress(): ?string
+    {
+        return null;
+    }
+
+    #[Renderless]
     public function save(): bool
     {
         if (! $this->communication->communicatables && $this->modelType && $this->modelId) {
@@ -244,7 +273,14 @@ class Communication extends CommunicationList
     #[Renderless]
     public function send(): bool
     {
-        $this->communication->attachments = $this->attachments->uploadedFile ?? [];
+        if (! $this->save()) {
+            return false;
+        }
+
+        $this->communication->loadAttachments(resolve_static(CommunicationModel::class, 'query')
+            ->whereKey($this->communication->id)
+            ->first('id')
+        );
 
         if ($this->communication->mail_account_id) {
             $mailAccount = resolve_static(MailAccount::class, 'query')
@@ -351,6 +387,22 @@ class Communication extends CommunicationList
                 'communicationTypes' => array_map(
                     fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
                     CommunicationTypeEnum::values()
+                ),
+                'mailAccounts' => array_merge(
+                    auth()
+                        ->user()
+                        ->mailAccounts()
+                        ->whereNotNull([
+                            'smtp_email',
+                            'smtp_password',
+                            'smtp_host',
+                            'smtp_port',
+                        ])
+                        ->get(['mail_accounts.id', 'email'])
+                        ->toArray(),
+                    [
+                        ['id' => null, 'email' => __('Default')],
+                    ]
                 ),
             ]
         );
