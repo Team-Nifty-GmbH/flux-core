@@ -39,7 +39,10 @@ class SendMail extends DispatchableFluxAction
                 ->first();
 
             $mailer = $mailAccount?->mailer();
-            $mail->from($mailAccount->smtp_email, auth()->user()?->name ?? $mailAccount->smtp_email);
+            $mail->from(
+                $mailAccount->smtp_email ?? config('mail.from.address'),
+                auth()->user()?->name ?? $mailAccount->smtp_email ?? config('mail.from.address')
+            );
         }
 
         try {

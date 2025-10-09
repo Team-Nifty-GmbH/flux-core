@@ -196,7 +196,10 @@ abstract class Communication extends CommunicationList
     {
         $this->communication->reset();
         $this->communication->fill($communication);
-        $this->communication->mail_account_id = auth()->user()->defaultMailAccount()?->getKey();
+        $this->communication->mail_account_id ??= auth()
+            ->user()
+            ->defaultMailAccount()
+            ?->getKey();
 
         $this->attachments->reset();
         if ($communication->id) {
