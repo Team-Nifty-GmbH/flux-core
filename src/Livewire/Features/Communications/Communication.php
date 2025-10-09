@@ -6,16 +6,15 @@ use Exception;
 use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\Communication\DeleteCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
+use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Livewire\DataTables\CommunicationList;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
-use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Address;
 use FluxErp\Models\Communication as CommunicationModel;
-use FluxErp\Models\MailAccount;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Livewire\CreatesDocuments;
@@ -23,7 +22,6 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Scout\Searchable;
@@ -198,6 +196,10 @@ abstract class Communication extends CommunicationList
     {
         $this->communication->reset();
         $this->communication->fill($communication);
+        $this->communication->mail_account_id ??= auth()
+            ->user()
+            ->defaultMailAccount()
+            ?->getKey();
 
         $this->attachments->reset();
         if ($communication->id) {
@@ -282,32 +284,14 @@ abstract class Communication extends CommunicationList
             ->first('id')
         );
 
-        if ($this->communication->mail_account_id) {
-            $mailAccount = resolve_static(MailAccount::class, 'query')
-                ->whereKey($this->communication->mail_account_id)
-                ->first();
-
-            config([
-                'mail.default' => 'mail_account',
-                'mail.mailers.mail_account.transport' => $mailAccount->smtp_mailer,
-                'mail.mailers.mail_account.username' => $mailAccount->smtp_email,
-                'mail.mailers.mail_account.password' => $mailAccount->smtp_password,
-                'mail.mailers.mail_account.host' => $mailAccount->smtp_host,
-                'mail.mailers.mail_account.port' => $mailAccount->smtp_port,
-                'mail.mailers.mail_account.encryption' => $mailAccount->smtp_encryption,
-                'mail.from.address' => $mailAccount->smtp_email,
-                'mail.from.name' => auth()->user()->name,
-            ]);
-        }
-
         $this->communication->communicatable_type = morph_alias($this->modelType);
         $this->communication->communicatable_id = $this->modelId;
 
         try {
-            Mail::to($this->communication->to)
-                ->cc($this->communication->cc)
-                ->bcc($this->communication->bcc)
-                ->send(GenericMail::make($this->communication));
+            SendMail::make($this->communication->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (Exception $e) {
             exception_to_notifications($e, $this);
 

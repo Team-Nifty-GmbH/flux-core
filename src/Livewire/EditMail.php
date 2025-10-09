@@ -150,6 +150,11 @@ class EditMail extends Component
             $this->mailMessage = $values;
         }
 
+        $this->mailMessage->mail_account_id ??= auth()
+            ->user()
+            ->defaultMailAccount()
+            ?->getKey();
+
         $this->emailTemplates = resolve_static(EmailTemplate::class, 'query')
             ->when(
                 $this->templateModelType,
