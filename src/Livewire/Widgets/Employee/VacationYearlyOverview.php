@@ -139,7 +139,7 @@ class VacationYearlyOverview extends Component
                 ->sum('amount');
 
             $availableDays = bcadd(bcadd($carryoverDays, $earnedDays), $adjustmentsDays);
-            $remainingDays = bcadd($availableDays, $usedDays);
+            $remainingDays = bcsub($availableDays, $usedDays);
 
             $data[] = [
                 'year' => $year,
