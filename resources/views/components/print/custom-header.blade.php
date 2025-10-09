@@ -1,7 +1,7 @@
 @props([
     'headerLayout',
     'isPreview' => false,
-    'client'
+    'client',
 ])
 
 <header
@@ -13,9 +13,9 @@
         @if (data_get($element, 'id', '') === 'header-subject')
             <div
                 style="
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
                 class="absolute"
             >
                 <x-flux::print.elements.header-subject
@@ -28,11 +28,11 @@
         @if (data_get($element, 'id', '') === 'header-logo' && data_get($client, 'logo_small'))
             <div
                 style="
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        height: {{ data_get($element, 'height', '1.7') }}cm;
-                        width: {{ is_null(data_get($element, 'width')) ? 'auto' : data_get($element, 'width', '') . 'cm' }};
-                    "
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    height: {{ data_get($element, 'height', '1.7') }}cm;
+                    width: {{ is_null(data_get($element, 'width')) ? 'auto' : data_get($element, 'width', '') . 'cm' }};
+                "
                 class="absolute"
             >
                 <x-flux::print.elements.header-logo :client="$client" />
@@ -43,9 +43,9 @@
         @if (data_get($element, 'id', '') === 'header-page-count')
             <div
                 style="
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
                 class="absolute"
             >
                 <x-flux::print.elements.header-page-count

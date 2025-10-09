@@ -16,9 +16,9 @@
         @if (data_get($element, 'id', '') === 'first-page-header-subject')
             <div
                 style="
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
                 class="absolute"
             >
                 <x-flux::print.elements.first-page-header-subject
@@ -30,9 +30,9 @@
         @if (data_get($element, 'id', '') === 'first-page-header-postal-address-one-line')
             <div
                 style="
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
                 class="absolute text-2xs"
             >
                 <x-flux::print.elements.first-page-header-address-one-line
@@ -44,9 +44,9 @@
         @if (data_get($element, 'id', '') === 'first-page-header-client-name')
             <div
                 style="
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
                 class="absolute"
             >
                 <x-flux::print.elements.first-page-header-client-name
@@ -58,9 +58,9 @@
         @if (data_get($element, 'id', '0') === 'first-page-header-right-block')
             <div
                 style="
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
                 class="absolute"
             >
                 <x-flux::print.elements.first-page-header-right-block-order
@@ -72,9 +72,9 @@
         @if (data_get($element, 'id', '') === 'first-page-header-address' && isset($address))
             <div
                 style="
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
                 class="absolute"
             >
                 <x-flux::print.elements.first-page-header-address

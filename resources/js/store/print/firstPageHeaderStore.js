@@ -69,6 +69,17 @@ export default function () {
                 height: this._selectedElement.height,
             };
         },
+        async _loadComponentsIdBasedOnName() {
+            const name = await this.component.get('name');
+            switch (name) {
+                case 'final-invoice':
+                    return 'first-page-header-final-invoice';
+                case 'refund':
+                    return 'first-page-header-refund';
+                default:
+                    return 'first-page-header-right-block';
+            }
+        },
         onMouseDownFirstPageHeader(e) {
             this.isFirstPageHeaderClicked = true;
             this.startPointFirstPageHeaderVertical = e.clientY;
@@ -248,13 +259,14 @@ export default function () {
             ) {
                 this._mapFirstPageHeader($refs, firstPageHeader);
             } else {
+                const component = await this._loadComponentsIdBasedOnName();
                 // element order is important - since they are relatively ordered to each other
                 const elementIds = [
                     'first-page-header-client-name',
                     'first-page-header-postal-address-one-line',
                     'first-page-header-address',
                     'first-page-header-subject',
-                    'first-page-header-right-block',
+                    component,
                 ];
 
                 elementIds.forEach((item) => {
@@ -346,14 +358,14 @@ export default function () {
                 // IN OTHER STORES WE DON'T NEED nextTick, SINCE THERE FIRST THE  CLIENT RELATED DATA IS FETCHED
                 // HENCE REST OF THE CODE IS EXECUTED ON THE NEXT EVENT LOOP CYCLE - WHERE DOM IS SYNCED
                 await nextTick();
-
+                const component = await this._loadComponentsIdBasedOnName();
                 // element order is important - since they are relatively ordered to each other
                 const elementIds = [
                     'first-page-header-client-name',
                     'first-page-header-postal-address-one-line',
                     'first-page-header-address',
                     'first-page-header-subject',
-                    'first-page-header-right-block',
+                    component,
                 ];
 
                 elementIds.forEach((item) => {

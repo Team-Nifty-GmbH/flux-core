@@ -184,7 +184,7 @@
             data-type="container"
             draggable="false"
             class="absolute left-0 top-0"
-            :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-address'}"
+            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-address'}"
             x-on:mousedown="
                 printStore.editFirstPageHeader
                     ? firstPageHeaderStore.onMouseDown($event, 'first-page-header-address')
@@ -229,7 +229,7 @@
             data-type="container"
             draggable="false"
             class="absolute left-0 top-0 select-none"
-            :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
+            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
             x-on:mousedown="
                 printStore.editFirstPageHeader
                     ? firstPageHeaderStore.onMouseDown($event, 'first-page-header-right-block')
@@ -237,6 +237,38 @@
             "
         >
             <x-flux::print.elements.first-page-header-right-block-order
+                :model="$model"
+            />
+        </div>
+    </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="first-page-header-final-invoice"
+    >
+        <div
+            id="first-page-header-final-invoice"
+            data-type="container"
+            draggable="false"
+            class="absolute left-0 top-0 select-none"
+            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
+        >
+            <x-flux::print.elements.first-page-header-final-invoice
+                :model="$model"
+            />
+        </div>
+    </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="first-page-header-refund"
+    >
+        <div
+            id="first-page-header-refund"
+            data-type="container"
+            draggable="false"
+            class="absolute left-0 top-0 select-none"
+            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
+        >
+            <x-flux::print.elements.first-page-header-refund
                 :model="$model"
             />
         </div>
@@ -252,7 +284,7 @@
             data-type="resizable"
             draggable="false"
             class="absolute left-0 top-0 h-[1.7cm] select-none"
-            :class="{'bg-gray-300' : !firstPageHeaderStore.isImgResizeClicked && firstPageHeaderStore.selectedElementId === $el.id}"
+            x-bind:class="{'bg-gray-300' : !firstPageHeaderStore.isImgResizeClicked && firstPageHeaderStore.selectedElementId === $el.id}"
         >
             <div
                 draggable="false"

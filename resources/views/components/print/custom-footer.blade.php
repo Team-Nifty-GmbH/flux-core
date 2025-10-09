@@ -1,13 +1,12 @@
 @props([
     'footerLayout',
-    'client'
+    'client',
 ])
 
 @php
     $bankConnections = data_get($client, 'bankConnections');
     $bankIds = array_map(fn ($item) => 'footer-bank-' . data_get($item, 'id', uniqid()), is_null($bankConnections) ? [] : $bankConnections->toArray());
 @endphp
-
 
 <footer
     style="height: {{ data_get($footerLayout, 'height', 0) }}cm"
@@ -18,9 +17,9 @@
         @if (data_get($element, 'id', '') === 'footer-client-' . data_get($client, 'id', ''))
             <address
                 style="
-                        left: {{ data_get($element, 'x', 0) }}cm;
-                        top: {{ data_get($element, 'y', 0) }}cm;
-                    "
+                    left: {{ data_get($element, 'x', 0) }}cm;
+                    top: {{ data_get($element, 'y', 0) }}cm;
+                "
                 class="absolute not-italic"
             >
                 <x-flux::print.elements.client :client="$client" />
@@ -32,11 +31,11 @@
             <div
                 class="absolute"
                 style="
-                        height: {{ data_get($element, 'height', '1.7') }}cm;
-                        width: {{ is_null(data_get($element, 'width')) ? 'auto' : data_get($element, 'width') . 'cm' }};
-                        left: {{ data_get($element, 'x', '0') }}cm;
-                        top: {{ data_get($element, 'y', '0') }}cm;
-                    "
+                    height: {{ data_get($element, 'height', '1.7') }}cm;
+                    width: {{ is_null(data_get($element, 'width')) ? 'auto' : data_get($element, 'width') . 'cm' }};
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
             >
                 <x-flux::print.elements.footer-logo :client="$client" />
             </div>
@@ -52,9 +51,9 @@
             @if ($bank)
                 <div
                     style="
-                            left: {{ data_get($element, 'x', 0) }}cm;
-                            top: {{ data_get($element, 'y', 0) }}cm;
-                        "
+                        left: {{ data_get($element, 'x', 0) }}cm;
+                        top: {{ data_get($element, 'y', 0) }}cm;
+                    "
                     class="absolute"
                 >
                     <x-flux::print.elements.bank-connection
