@@ -52,7 +52,7 @@ class UpdateEmployeeDay extends FluxAction
             ) > 0
         ) {
             $errors += [
-                'days_used' => [__('Sick days used and vacation days used cannot exceed 1 day in total.')],
+                'days_used' => ['Sick days used and vacation days used cannot exceed 1 day in total.'],
             ];
         }
 
@@ -66,7 +66,7 @@ class UpdateEmployeeDay extends FluxAction
             ) > 0
         ) {
             $errors += [
-                'hours_used' => [__('Sick hours used and vacation hours used cannot exceed 24 hours in total.')],
+                'hours_used' => ['Sick hours used and vacation hours used cannot exceed 24 hours in total.'],
             ];
         }
 
@@ -77,7 +77,7 @@ class UpdateEmployeeDay extends FluxAction
                 ->count() !== count($this->getData('absence_requests'))
         ) {
             $errors += [
-                'absence_requests' => [__('One or more of the given absence requests are invalid.')],
+                'absence_requests' => ['One or more of the given absence requests are invalid.'],
             ];
         }
 
@@ -89,7 +89,7 @@ class UpdateEmployeeDay extends FluxAction
                 ->count() !== count($this->getData('work_times'))
         ) {
             $errors += [
-                'work_times' => [__('One or more of the given work times are invalid.')],
+                'work_times' => ['One or more of the given work times are invalid.'],
             ];
         }
 

@@ -169,7 +169,7 @@ class CreateOrderPosition extends FluxAction
 
         if ($order->is_locked) {
             $errors += [
-                'is_locked' => [__('Order is locked')],
+                'is_locked' => ['Order is locked'],
             ];
         }
 
@@ -201,7 +201,7 @@ class CreateOrderPosition extends FluxAction
                     ->exists()
                 ) {
                     $errors += [
-                        'origin_position_id' => [__('Order position does not exists in parent order.')],
+                        'origin_position_id' => ['Order position does not exists in parent order.'],
                     ];
                 }
 

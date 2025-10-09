@@ -16,7 +16,7 @@ return new class() extends Migration
             $table->string('code');
             $table->string('color', 7);
             $table->decimal('percentage_deduction', 3, 2)->default(1.00);
-            $table->string('employee_can_create_enum');
+            $table->string('employee_can_create');
 
             $table->boolean('affects_overtime')->default(false);
             $table->boolean('affects_sick_leave')->default(false);

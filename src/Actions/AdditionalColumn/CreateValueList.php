@@ -46,7 +46,7 @@ class CreateValueList extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'name_model' => [__('Name model combination already exists')],
+                'name_model' => ['Name model combination already exists'],
             ])->errorBag('createValueList');
         }
     }

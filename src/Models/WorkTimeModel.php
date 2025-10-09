@@ -18,7 +18,7 @@ class WorkTimeModel extends FluxModel
     protected function casts(): array
     {
         return [
-            'overtime_compensation_enum' => OvertimeCompensationEnum::class,
+            'overtime_compensation' => OvertimeCompensationEnum::class,
             'is_active' => 'boolean',
         ];
     }

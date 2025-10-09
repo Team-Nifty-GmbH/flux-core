@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use FluxErp\Models\Employee;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

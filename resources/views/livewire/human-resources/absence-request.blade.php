@@ -15,7 +15,13 @@
                         />
                     </div>
                     <div>
-                        {{ \FluxErp\Enums\AbsenceRequestStateEnum::from($absenceRequestForm->state_enum)->badge() }}
+                        {{ \FluxErp\Enums\AbsenceRequestStateEnum::from($absenceRequestForm->state)->badge() }}
+                    </div>
+                    <div
+                        x-cloak
+                        x-show="$wire.absenceRequestForm.is_emergency"
+                    >
+                        <x-badge :text="__('Emergency')" color="red" />
                     </div>
                 </div>
             </div>

@@ -79,7 +79,7 @@ class CreateEmployeeDay extends FluxAction
             ) > 0
         ) {
             $errors += [
-                'days_used' => [__('Sick days used and vacation days used cannot exceed 1 day in total.')],
+                'days_used' => ['Sick days used and vacation days used cannot exceed 1 day in total.'],
             ];
         }
 
@@ -93,7 +93,7 @@ class CreateEmployeeDay extends FluxAction
             ) > 0
         ) {
             $errors += [
-                'hours_used' => [__('Sick hours used and vacation hours used cannot exceed 24 hours in total.')],
+                'hours_used' => ['Sick hours used and vacation hours used cannot exceed 24 hours in total.'],
             ];
         }
 

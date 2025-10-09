@@ -18,7 +18,7 @@ return new class() extends Migration
             $table->year('effective_until')->nullable();
             $table->unsignedTinyInteger('month')->nullable();
             $table->unsignedTinyInteger('day')->nullable();
-            $table->string('day_part_enum');
+            $table->string('day_part');
 
             $table->boolean('is_active')->default(true);
             $table->boolean('is_half_day')->default(false);

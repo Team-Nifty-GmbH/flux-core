@@ -7,7 +7,6 @@ use FluxErp\Models\Country;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Location;
-use FluxErp\Models\User;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;

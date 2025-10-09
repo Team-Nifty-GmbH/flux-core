@@ -36,7 +36,7 @@ class UpdateWorkTimeModelRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class, ['min' => 0]),
             ],
-            'overtime_compensation_enum' => [
+            'overtime_compensation' => [
                 'sometimes',
                 'required',
                 Rule::enum(OvertimeCompensationEnum::class),
@@ -46,7 +46,7 @@ class UpdateWorkTimeModelRuleset extends FluxRuleset
             'schedules' => 'nullable|array',
             'schedules.*.week_number' => 'required|integer|min:1|max:52',
             'schedules.*.days' => 'required|array',
-            'schedules.*.days.*.weekday' => 'required|integer|min:1|max:7',
+            'schedules.*.days.*.weekday' => 'required|integer|min:0|max:6',
             'schedules.*.days.*.start_time' => [
                 'nullable',
                 Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),

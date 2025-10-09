@@ -21,7 +21,7 @@ class CreateAbsenceTypeRuleset extends FluxRuleset
                 'required',
                 app(Numeric::class, ['min' => 0, 'max' => 1]),
             ],
-            'employee_can_create_enum' => [
+            'employee_can_create' => [
                 'required',
                 Rule::enum(EmployeeCanCreateEnum::class),
             ],

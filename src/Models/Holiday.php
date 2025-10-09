@@ -18,8 +18,8 @@ class Holiday extends FluxModel
     protected static function booted(): void
     {
         static::saving(function (Holiday $model): void {
-            if ($model->isDirty('day_part_enum')) {
-                $model->is_half_day = $model->day_part_enum !== DayPartEnum::FullDay;
+            if ($model->isDirty('day_part')) {
+                $model->is_half_day = $model->day_part !== DayPartEnum::FullDay;
             }
         });
     }
@@ -28,7 +28,7 @@ class Holiday extends FluxModel
     {
         return [
             'date' => 'date:Y-m-d',
-            'day_part_enum' => DayPartEnum::class,
+            'day_part' => DayPartEnum::class,
             'is_active' => 'boolean',
             'is_half_day' => 'boolean',
             'is_recurring' => 'boolean',

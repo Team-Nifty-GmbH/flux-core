@@ -20,7 +20,7 @@ class AbsenceType extends FluxModel implements InteractsWithDataTables
     protected function casts(): array
     {
         return [
-            'employee_can_create_enum' => EmployeeCanCreateEnum::class,
+            'employee_can_create' => EmployeeCanCreateEnum::class,
             'affects_overtime' => 'boolean',
             'affects_sick_leave' => 'boolean',
             'affects_vacation' => 'boolean',

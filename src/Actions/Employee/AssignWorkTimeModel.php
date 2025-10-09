@@ -50,20 +50,26 @@ class AssignWorkTimeModel extends FluxAction
             ->whereNull('valid_until')
             ->first();
 
+        $errors = [];
         if ($this->currentWorkTimeModel
             && $this->getData('valid_from')->lte($this->currentWorkTimeModel->valid_from)
         ) {
-            throw ValidationException::withMessages([
-                'valid_from' => [__('New assignment must start after the current assignment start date')],
-            ]);
+            $errors += [
+                'valid_from' => ['New assignment must start after the current assignment start date'],
+            ];
         }
 
         if ($this->currentWorkTimeModel
             && $this->getData('work_time_model_id') === $this->currentWorkTimeModel->work_time_model_id
         ) {
-            throw ValidationException::withMessages([
-                'work_time_model_id' => [__('The employee is already assigned to this work time model')],
-            ]);
+            $errors += [
+                'work_time_model_id' => ['The employee is already assigned to this work time model'],
+            ];
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('assignWorkTimeModel');
         }
     }
 }

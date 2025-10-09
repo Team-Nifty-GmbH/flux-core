@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\MyEmployeeProfile;
 
-use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\EmployeeDay\EmployeeDay as BaseEmployeeDay;
 use FluxErp\Models\EmployeeDay;
 

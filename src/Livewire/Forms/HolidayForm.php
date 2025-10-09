@@ -17,7 +17,7 @@ class HolidayForm extends FluxForm
 
     public ?int $day = null;
 
-    public string $day_part_enum = 'full_day';
+    public string $day_part = 'full_day';
 
     public ?string $effective_from = null;
 

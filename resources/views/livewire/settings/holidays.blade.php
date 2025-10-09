@@ -81,7 +81,7 @@
             </div>
 
             <x-select.styled
-                wire:model="holidayForm.day_part_enum"
+                wire:model="holidayForm.day_part"
                 :label="__('Day Part')"
                 required
                 select="label:label|value:value"

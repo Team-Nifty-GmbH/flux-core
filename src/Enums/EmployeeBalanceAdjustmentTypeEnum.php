@@ -11,4 +11,6 @@ enum EmployeeBalanceAdjustmentTypeEnum: string
     case Overtime = 'overtime';
 
     case Vacation = 'vacation';
+
+    case VacationCarryover = 'vacation_carryover';
 }

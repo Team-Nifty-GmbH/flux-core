@@ -125,7 +125,7 @@ class SendMail extends DispatchableFluxAction
             && ! is_null($bladeParameters)
         ) {
             throw ValidationException::withMessages([
-                'blade_parameters' => [__('The blade parameters must be null, an array or a serialized closure.')],
+                'blade_parameters' => ['The blade parameters must be null, an array or a serialized closure.'],
             ])
                 ->errorBag('sendMail');
         }

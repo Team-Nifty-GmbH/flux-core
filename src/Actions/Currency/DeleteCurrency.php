@@ -44,7 +44,7 @@ class DeleteCurrency extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'country' => [__('Currency referenced by a country')],
+                'country' => ['Currency referenced by a country'],
             ])
                 ->errorBag('deleteCurrency')
                 ->status(423);

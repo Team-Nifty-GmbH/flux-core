@@ -127,7 +127,7 @@
             />
 
             <x-select.styled
-                wire:model="absenceTypeForm.employee_can_create_enum"
+                wire:model="absenceTypeForm.employee_can_create"
                 :label="__('Employee Can Create')"
                 required
                 select="label:label|value:value"

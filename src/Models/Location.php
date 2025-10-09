@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use Carbon\Carbon;
 use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Models\Pivots\LocationVacationBlackout;
 use FluxErp\Traits\HasUserModification;

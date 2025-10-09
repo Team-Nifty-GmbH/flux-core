@@ -26,6 +26,8 @@ class EmployeeForm extends FluxForm
 
     public ?string $confession = null;
 
+    public ?int $country_id = null;
+
     public ?string $date_of_birth = null;
 
     public ?string $email = null;

@@ -27,7 +27,7 @@ class CreateWorkTimeModelRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class, ['min' => 0]),
             ],
-            'overtime_compensation_enum' => [
+            'overtime_compensation' => [
                 'required',
                 Rule::enum(OvertimeCompensationEnum::class),
             ],

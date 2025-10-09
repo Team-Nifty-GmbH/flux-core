@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\MyEmployeeProfile;
 
-use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Models\AbsenceRequest as AbsenceRequestModel;
 

@@ -26,7 +26,7 @@ class WorkTimeModelForm extends FluxForm
 
     public ?string $name = null;
 
-    public string $overtime_compensation_enum = 'time_off';
+    public string $overtime_compensation = 'time_off';
 
     public array $schedules = [];
 
@@ -52,7 +52,7 @@ class WorkTimeModelForm extends FluxForm
         for ($day = 1; $day <= 7; $day++) {
             $isWorkDay = $day >= 1 && $day <= ($days ?? $this->work_days_per_week ?? 5);
             $defaultWeek['days'][$day] = [
-                'weekday' => $day,
+                'weekday' => $day % 7,
                 'start_time' => $isWorkDay ? '08:00' : null,
                 'end_time' => $isWorkDay ? '17:00' : null,
                 'work_hours' => $isWorkDay ? 8.0 : 0.0,
@@ -81,7 +81,7 @@ class WorkTimeModelForm extends FluxForm
                 for ($day = 1; $day <= 7; $day++) {
                     $schedule = $weekSchedules->firstWhere('weekday', $day);
                     $weekData['days'][$day] = [
-                        'weekday' => $day,
+                        'weekday' => $day % 7,
                         'start_time' => $schedule?->start_time ?? null,
                         'end_time' => $schedule?->end_time ?? null,
                         'work_hours' => (float) ($schedule?->work_hours ?? 0),

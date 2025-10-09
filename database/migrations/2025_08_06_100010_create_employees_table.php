@@ -15,6 +15,10 @@ return new class() extends Migration
             $table->foreignId('client_id')
                 ->constrained()
                 ->cascadeOnDelete();
+            $table->foreignId('country_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
             $table->foreignId('employee_department_id')
                 ->nullable()
                 ->constrained()

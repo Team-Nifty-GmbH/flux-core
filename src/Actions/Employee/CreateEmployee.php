@@ -5,9 +5,11 @@ namespace FluxErp\Actions\Employee;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rulesets\Employee\CreateEmployeeRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class CreateEmployee extends FluxAction
 {
@@ -51,5 +53,24 @@ class CreateEmployee extends FluxAction
             'default'
         )
             ?->getKey();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (
+            $this->getData('employee_department_id')
+            && $this->getData('location_id')
+            && resolve_static(EmployeeDepartment::class, 'query')
+                ->whereKey($this->getData('employee_department_id'))
+                ->where('location_id', $this->getData('location_id'))
+                ->doesntExist()
+        ) {
+            throw ValidationException::withMessages([
+                'employee_department_id' => ['The selected department is not available for the selected location.'],
+            ])
+                ->errorBag('createEmployee');
+        }
     }
 }

@@ -18,7 +18,7 @@ return new class() extends Migration
             $table->decimal('annual_vacation_days', 5, 2);
             $table->unsignedTinyInteger('work_days_per_week')->nullable();
             $table->decimal('max_overtime_hours', 8, 2)->nullable();
-            $table->string('overtime_compensation_enum');
+            $table->string('overtime_compensation');
 
             $table->boolean('is_active')->default(true);
 

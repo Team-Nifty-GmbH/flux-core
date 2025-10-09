@@ -26,9 +26,12 @@ return new class() extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
 
-            $table->string('state_enum')->default('pending');
+            $table->string('state')->default('pending');
+            $table->string('day_part');
             $table->date('start_date');
             $table->date('end_date');
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->decimal('days_requested', 10, 2);
             $table->decimal('work_hours_affected', 10, 2);
             $table->decimal('work_days_affected', 10, 2);

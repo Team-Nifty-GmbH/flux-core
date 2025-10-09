@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\AbsenceRequest;
 
+use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Employee;
@@ -17,19 +18,42 @@ class CreateAbsenceRequestRuleset extends FluxRuleset
             'absence_type_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => AbsenceType::class]),
+                app(ModelExists::class, ['model' => AbsenceType::class])
+                    ->where('is_active', true),
             ],
             'employee_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
             ],
-            'state_enum' => [
+            'state' => [
                 'nullable',
                 Rule::enum(AbsenceRequestStateEnum::class),
             ],
+            'day_part' => [
+                'required',
+                'string',
+                Rule::enum(AbsenceRequestDayPartEnum::class),
+            ],
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_date' => 'required|date|after_or_equal:start',
+            'start_time' => [
+                'required_if:day_part,time',
+                'exclude_unless:day_part,time',
+                Rule::anyOf([
+                    'date_format:H:i',
+                    'date_format:H:i:s',
+                ]),
+            ],
+            'end_time' => [
+                'required_if:day_part,time',
+                'exclude_unless:day_part,time',
+                'after:start_time',
+                Rule::anyOf([
+                    'date_format:H:i',
+                    'date_format:H:i:s',
+                ]),
+            ],
             'sick_note_issued_date' => 'nullable|date',
             'reason' => 'nullable|string',
             'substitute_note' => 'nullable|string',

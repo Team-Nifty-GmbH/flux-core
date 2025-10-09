@@ -7,6 +7,7 @@ use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Rulesets\AbsenceRequest\ChangeAbsenceRequestStateRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class ApproveAbsenceRequest extends FluxAction
 {
@@ -33,11 +34,32 @@ class ApproveAbsenceRequest extends FluxAction
         $absenceRequest->fill(array_merge(
             $data,
             [
-                'state_enum' => AbsenceRequestStateEnum::Approved,
+                'state' => AbsenceRequestStateEnum::Approved,
             ]
         ));
         $absenceRequest->save();
 
         return $absenceRequest->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        /** @var AbsenceRequest $absenceRequest */
+        $absenceRequest = resolve_static(AbsenceRequest::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
+
+        if ($absenceRequest->state !== AbsenceRequestStateEnum::Approved
+            && $absenceRequest->intersections()
+                ->where('state', AbsenceRequestStateEnum::Approved->value)
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'id' => ['An approved absence request already exists in the given time period.'],
+            ])
+                ->errorBag('approveAbsenceRequest');
+        }
     }
 }

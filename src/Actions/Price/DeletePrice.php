@@ -38,7 +38,7 @@ class DeletePrice extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'order_positions' => [__('Price has associated order positions')],
+                'order_positions' => ['Price has associated order positions'],
             ])->errorBag('deletePrice');
         }
     }

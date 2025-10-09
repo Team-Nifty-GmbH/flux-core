@@ -32,7 +32,7 @@ class RejectAbsenceRequest extends FluxAction
         $absenceRequest->fill(array_merge(
             $data,
             [
-                'state_enum' => AbsenceRequestStateEnum::Rejected,
+                'state' => AbsenceRequestStateEnum::Rejected,
             ]
         ));
         $absenceRequest->save();

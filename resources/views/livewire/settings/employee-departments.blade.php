@@ -26,7 +26,6 @@
             <x-select.styled
                 wire:model="employeeDepartmentForm.parent_id"
                 :label="__('Parent Department')"
-                :clearable="true"
                 select="label:name|value:id"
                 unfiltered
                 :request="[
@@ -44,7 +43,6 @@
             <x-select.styled
                 wire:model="employeeDepartmentForm.location_id"
                 :label="__('Location')"
-                :clearable="true"
                 select="label:name|value:id"
                 unfiltered
                 :request="[
@@ -60,7 +58,6 @@
                 wire:model="employeeDepartmentForm.manager_employee_id"
                 :label="__('Department Manager')"
                 select="label:name|value:id"
-                :clearable="true"
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Employee::class),

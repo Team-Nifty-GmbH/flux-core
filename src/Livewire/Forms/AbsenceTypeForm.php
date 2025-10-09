@@ -25,7 +25,7 @@ class AbsenceTypeForm extends FluxForm
 
     public ?string $color = '#000000';
 
-    public string $employee_can_create_enum = 'yes';
+    public string $employee_can_create = 'yes';
 
     #[Locked]
     public ?int $id = null;

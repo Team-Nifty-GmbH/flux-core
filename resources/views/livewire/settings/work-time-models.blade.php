@@ -41,7 +41,7 @@
                 />
 
                 <x-select.styled
-                    wire:model="workTimeModelForm.overtime_compensation_enum"
+                    wire:model="workTimeModelForm.overtime_compensation"
                     :label="__('Overtime Compensation')"
                     required
                     select="label:label|value:value"

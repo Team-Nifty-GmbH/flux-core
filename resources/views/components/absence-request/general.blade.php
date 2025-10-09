@@ -1,19 +1,27 @@
 <div>
     <x-card>
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div class="col-span-2">
-                <x-select.styled
-                    disabled
-                    wire:model="absenceRequestForm.absence_type_id"
-                    :label="__('Absence Type')"
-                    select="value:id"
-                    :request="[
-                        'url' => route('search', \FluxErp\Models\AbsenceType::class),
-                        'method' => 'POST',
-                    ]"
-                    unfiltered
-                />
-            </div>
+            <x-select.styled
+                disabled
+                wire:model="absenceRequestForm.absence_type_id"
+                :label="__('Absence Type')"
+                select="value:id"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\AbsenceType::class),
+                    'method' => 'POST',
+                ]"
+            />
+
+            <x-select.styled
+                wire:model="absenceRequestForm.day_part"
+                :label="__('Day Part')"
+                x-on:select="if ($event.detail.select.value !== '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time->value }}') { $wire.absenceRequestForm.start_time = null; $wire.absenceRequestForm.end_time = null; }"
+                required
+                select="label:label|value:value"
+                :options="\FluxErp\Enums\AbsenceRequestDayPartEnum::valuesLocalized()"
+            />
+
             <x-date
                 :label="__('Start Date')"
                 wire:model="absenceRequestForm.start_date"
@@ -26,10 +34,40 @@
                 class="mt-1"
             />
 
-            <x-date
-                wire:model="absenceRequestForm.sick_note_issued_date"
-                :label="__('Sick Note Issued Date')"
-            />
+            <div
+                x-cloak
+                x-show="
+                    $wire.absenceRequestForm.day_part ===
+                        '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time->value }}'
+                "
+            >
+                <x-time
+                    wire:model="absenceRequestForm.start_time"
+                    :label="__('Start Time')"
+                    :step-minute="15"
+                />
+            </div>
+
+            <div
+                x-cloak
+                x-show="
+                    $wire.absenceRequestForm.day_part ===
+                        '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time->value }}'
+                "
+            >
+                <x-time
+                    wire:model="absenceRequestForm.end_time"
+                    :label="__('End Time')"
+                    :step-minute="15"
+                />
+            </div>
+
+            <div x-cloak x-show="$wire.affectsSickLeave">
+                <x-date
+                    wire:model="absenceRequestForm.sick_note_issued_date"
+                    :label="__('Sick Note Issued Date')"
+                />
+            </div>
 
             <div class="col-span-2">
                 <x-select.styled

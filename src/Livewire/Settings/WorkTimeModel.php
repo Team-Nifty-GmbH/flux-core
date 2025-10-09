@@ -103,7 +103,7 @@ class WorkTimeModel extends Component
 
         if (! data_get($this->workTimeModelForm->schedules, $weekIndex . '.days.' . $dayNumber)) {
             $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber] = [
-                'weekday' => $dayNumber,
+                'weekday' => $dayNumber % 7,
                 'start_time' => null,
                 'end_time' => null,
                 'work_hours' => 0,
@@ -114,9 +114,9 @@ class WorkTimeModel extends Component
         $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber][$property] = $value;
 
         // Calculate work hours if start and end time are set
-        if ($property === 'start_time' || $property === 'end_time') {
-            $start = $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['start_time'] ?? null;
-            $end = $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['end_time'] ?? null;
+        if (in_array($property, ['start_time', 'end_time', 'break_minutes'])) {
+            $start = data_get($this->workTimeModelForm->schedules, $weekIndex . '.days.' . $dayNumber . '.start_time');
+            $end = data_get($this->workTimeModelForm->schedules, $weekIndex . '.days.' . $dayNumber . '.end_time');
 
             if ($start && $end) {
                 $startTime = Carbon::parse($start);
@@ -126,8 +126,20 @@ class WorkTimeModel extends Component
                     $endTime->addDay();
                 }
 
-                $hours = $endTime->diffInMinutes($startTime) / 60;
-                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['work_hours'] = bcround($hours, 2);
+                $workMinutes = $startTime->diffInMinutes($endTime);
+                $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['work_hours'] = bcround(
+                    bcdiv(
+                        bcsub(
+                            $workMinutes,
+                            data_get(
+                                $this->workTimeModelForm->schedules,
+                                $weekIndex . '.days.' . $dayNumber . '.break_minutes'
+                            ) ?? 0
+                        ),
+                        60
+                    ),
+                    2
+                );
             } else {
                 // If either start or end time is not set, set work_hours to 0
                 $this->workTimeModelForm->schedules[$weekIndex]['days'][$dayNumber]['work_hours'] = 0;

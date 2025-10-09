@@ -33,7 +33,7 @@ class RevokeAbsenceRequest extends FluxAction
         $absenceRequest->fill(array_merge(
             $data,
             [
-                'state_enum' => AbsenceRequestStateEnum::Revoked,
+                'state' => AbsenceRequestStateEnum::Revoked,
             ]
         ));
         $absenceRequest->save();

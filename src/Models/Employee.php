@@ -123,7 +123,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
     public function getCurrentVacationDaysBalance(): string
     {
-        return bcadd($this->getTotalVacationDays(), $this->getUsedVacationDays());
+        return $this->getVacationDaysBalance(now());
     }
 
     public function getDescription(): ?string
@@ -145,11 +145,12 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
     public function getTotalVacationDays(
         ?Carbon $start = null,
         ?Carbon $end = null,
-        bool $includeAdjustments = true
+        bool $includeAdjustments = true,
+        ?Carbon $maxEffectiveDate = null,
     ): string {
         $totalDays = 0;
         $employmentDate = $this->employment_date ?? now();
-        $periodStart = $start ?? $employmentDate;
+        $periodStart = max($start, $employmentDate);
         $periodEnd = $end ?? now()->endOfYear();
 
         if ($this->termination_date) {
@@ -177,10 +178,20 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         }
 
         if ($includeAdjustments) {
+            $maxEffectiveDate ??= $end;
             $adjustments = $this->employeeBalanceAdjustments()
-                ->where('type', EmployeeBalanceAdjustmentTypeEnum::Vacation)
+                ->whereIn(
+                    'type',
+                    [
+                        EmployeeBalanceAdjustmentTypeEnum::Vacation->value,
+                        EmployeeBalanceAdjustmentTypeEnum::VacationCarryover->value,
+                    ]
+                )
                 ->when($start, fn (Builder $query) => $query->whereDate('effective_date', '>=', $start))
-                ->when($end, fn (Builder $query) => $query->whereDate('effective_date', '<=', $end))
+                ->when(
+                    $maxEffectiveDate,
+                    fn (Builder $query) => $query->whereDate('effective_date', '<=', $maxEffectiveDate)
+                )
                 ->sum('amount');
         }
 
@@ -200,21 +211,21 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             ->reduce(fn (?string $carry, $item) => bcadd($carry, $item), 0);
     }
 
+    public function getVacationDaysBalance(Carbon $date): string
+    {
+        return bcsub(
+            $this->getTotalVacationDays(
+                start: $start = $date->copy()->startOfYear(),
+                end: $end = $date->copy()->endOfYear(),
+                maxEffectiveDate: $date
+            ),
+            $this->getUsedVacationDays($start, $end)
+        );
+    }
+
     public function getVacationList(?Carbon $start = null, ?Carbon $end = null, bool $calculateHours = true): Collection
     {
         $column = $calculateHours ? 'vacation_hours_used' : 'vacation_days_used';
-
-        $cutoff = $this->employeeDays()
-            ->when(
-                $start,
-                fn (Builder $query) => $query->whereDate('date', '>=', $start->toDateString())
-            )
-            ->when(
-                $end,
-                fn (Builder $query) => $query->whereDate('date', '<=', $end->toDateString())
-            )
-            ->orderBy('date', 'desc')
-            ->value('date') ?? now()->addYears(100);
 
         $vacationDays = $this->employeeDays()
             ->when(
@@ -230,23 +241,27 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
         $this->absenceRequests()
             ->whereRelation('absenceType', 'affects_vacation', true)
-            ->where('state_enum', AbsenceRequestStateEnum::Approved)
-            ->whereValueNotBetween($cutoff, ['start_date', 'end_date'])
+            ->where('state', AbsenceRequestStateEnum::Approved)
             ->when(
                 $start,
                 fn (Builder $query) => $query->whereDate('start_date', '>=', $start)
             )
             ->when(
                 $end,
-                fn (Builder $query) => $query->whereDate('end_date', '<=', $end)
+                fn (Builder $query) => $query->whereDate('start_date', '<=', $end)
             )
             ->whereDoesntHave('employeeDays')
-            ->get()
-            ->each(function (AbsenceRequest $absenceRequest) use (&$vacationDays, $column): void {
+            ->get([
+                'id',
+                'start_date',
+                'end_date',
+            ])
+            ->each(function (AbsenceRequest $absenceRequest) use (&$vacationDays, $column, $end): void {
                 $current = $absenceRequest->start_date;
+                $periodEnd = min($absenceRequest->end_date, $end ?? $absenceRequest->end_date);
 
-                while ($current->lte($absenceRequest->end_date)) {
-                    $vacationDays[$current->toDateString()] ??= data_get(
+                while ($current->lte($periodEnd)) {
+                    $vacationDuration = data_get(
                         resolve_static(
                             CloseEmployeeDay::class,
                             'calculateDayData',
@@ -256,55 +271,22 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
                             ]
                         ),
                         $column
-                    );
+                    ) ?? 0;
+
+                    if (bccomp($vacationDuration, 0) !== 0
+                        && bccomp(
+                            $vacationDuration,
+                            data_get($vacationDays, $current->toDateString()) ?? 0
+                        ) === 1
+                    ) {
+                        $vacationDays[$current->toDateString()] = $vacationDuration;
+                    }
 
                     $current = $current->addDay();
                 }
             });
 
-        $this->absenceRequests()
-            ->whereRelation('absenceType', 'affects_vacation', true)
-            ->where('state_enum', AbsenceRequestStateEnum::Approved)
-            ->whereValueBetween($cutoff, ['start_date', 'end_date'])
-            ->when(
-                $start,
-                fn (Builder $query) => $query->whereDate('start_date', '>=', $start)
-            )
-            ->when(
-                $end,
-                fn (Builder $query) => $query->whereDate('end_date', '<=', $end)
-            )
-            ->get()
-            ->each(function (AbsenceRequest $absenceRequest) use (&$vacationDays, $start, $end, $column): void {
-                $current = $absenceRequest->start_date->copy();
-                $endDate = $absenceRequest->end_date->copy();
-
-                if ($start && $current < $start) {
-                    $current = $start->copy();
-                }
-
-                if ($end && $endDate > $end) {
-                    $endDate = $end->copy();
-                }
-
-                while ($current->lte($endDate)) {
-                    $vacationDays[$current->toDateString()] ??= data_get(
-                        resolve_static(
-                            CloseEmployeeDay::class,
-                            'calculateDayData',
-                            [
-                                'employee' => $this,
-                                'date' => $current,
-                            ]
-                        ),
-                        $column
-                    );
-
-                    $current = $current->addDay();
-                }
-            });
-
-        return $vacationDays->filter(fn (string|int|float $used) => bccomp($used, 0) !== 0);
+        return $vacationDays;
     }
 
     public function getWorkDaysInPeriod(Carbon $startDate, Carbon $endDate): array
@@ -366,18 +348,30 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             return false;
         }
 
-        $weekday = $date->dayOfWeekIso;
-        $schedule = $workTimeModel->workTimeModel->schedules()
-            ->where('weekday', $weekday)
-            ->first();
-
-        if (! $schedule) {
+        if (
+            resolve_static(Holiday::class, 'query')
+                ->isHoliday($date, $this->location_id)
+                ->exists()
+        ) {
             return false;
         }
 
-        return resolve_static(Holiday::class, 'query')
-            ->isHoliday($date, $this->location_id)
-            ->doesntExist();
+        $weekday = $date->dayOfWeekIso;
+        $isWorkDay = $workTimeModel->workTimeModel->schedules()
+            ->where('weekday', $weekday)
+            ->exists();
+
+        // If no schedule exists default to work_days_per_week
+        if (! $isWorkDay) {
+            $workDaysPerWeek = $workTimeModel->work_days_per_week ?? ceil($workTimeModel->weekly_hours / 10);
+            for ($i = 1; $i <= $workDaysPerWeek; $i++) {
+                if ($weekday === $i) {
+                    return true;
+                }
+            }
+        }
+
+        return $isWorkDay;
     }
 
     public function location(): BelongsTo

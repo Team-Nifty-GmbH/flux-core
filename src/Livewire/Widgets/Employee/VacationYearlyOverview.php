@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Widgets\Employee;
 
 use Carbon\Carbon;
+use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Livewire\Employee\Dashboard;
@@ -80,14 +81,21 @@ class VacationYearlyOverview extends Component
         $this->yearlyData = [];
 
         $data = [];
-        $remainingDays = 0;
-
         for ($year = $startYear; $year <= $currentYear; $year++) {
             $yearStart = Carbon::create($year);
             $yearEnd = Carbon::create($year, 12, 31);
 
-            // Store the previous year balance before calculating current year
-            $carryoverDays = $remainingDays;
+            $carryoverDays = $employee->employeeBalanceAdjustments()
+                ->where('type', EmployeeBalanceAdjustmentTypeEnum::VacationCarryover)
+                ->whereYear('effective_date', $year)
+                ->where('amount', '>', 0)
+                ->sum('amount');
+
+            $expiredCarryoverDays = $employee->employeeBalanceAdjustments()
+                ->where('type', EmployeeBalanceAdjustmentTypeEnum::VacationCarryover)
+                ->whereYear('effective_date', $year)
+                ->where('amount', '<', 0)
+                ->sum('amount');
 
             // Use days methods directly
             $earnedDays = $employee->getTotalVacationDays($yearStart, $yearEnd, false);
@@ -98,14 +106,13 @@ class VacationYearlyOverview extends Component
             // Get requested vacation days (approved absence requests)
             $requestedDays = resolve_static(AbsenceRequest::class, 'query')
                 ->where('employee_id', $employee->getKey())
-                ->where('state_enum', AbsenceRequestStateEnum::Approved)
-                ->where('start_date', '<=', $yearEnd)
-                ->where('end_date', '>=', $yearStart)
+                ->where('state', AbsenceRequestStateEnum::Approved)
+                ->whereBetween('start_date', [$yearStart, $yearEnd])
                 ->whereHas('absenceType', function ($query): void {
                     $query->where('affects_vacation', true);
                 })
                 ->get()
-                ->sum(function ($absenceRequest) use ($yearStart, $yearEnd, $employee) {
+                ->sum(function (AbsenceRequest $absenceRequest) use ($yearStart, $yearEnd, $employee) {
                     $start = max($absenceRequest->start_date, $yearStart);
                     $end = min($absenceRequest->end_date, $yearEnd);
 
@@ -113,7 +120,11 @@ class VacationYearlyOverview extends Component
                     $current = $start->copy();
                     while ($current->lte($end)) {
                         if ($employee->isWorkDay($current)) {
-                            $days++;
+                            $days += match ($absenceRequest->day_part) {
+                                AbsenceRequestDayPartEnum::FullDay => 1,
+                                AbsenceRequestDayPartEnum::FirstHalf, AbsenceRequestDayPartEnum::SecondHalf => 0.5,
+                                default => 0,
+                            };
                         }
 
                         $current->addDay();
@@ -133,6 +144,7 @@ class VacationYearlyOverview extends Component
             $data[] = [
                 'year' => $year,
                 'carryover_days' => Number::format($carryoverDays, 1),
+                'expired_carryover_days' => Number::format($expiredCarryoverDays, 1),
                 'earned_days' => Number::format($earnedDays, 1),
                 'adjustments_days' => Number::format($adjustmentsDays, 1),
                 'available_days' => Number::format($availableDays, 1),

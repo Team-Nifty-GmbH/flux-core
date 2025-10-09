@@ -4,10 +4,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                    {{ $workTimeModelForm->name ?? __("New Work Time Model") }}
+                    {{ $workTimeModelForm->name ?? __('New Work Time Model') }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ __("Configure the work schedule and settings for this work time model") }}
+                    {{ __('Configure the work schedule and settings for this work time model') }}
                 </p>
             </div>
             <div class="flex items-center gap-3">
@@ -86,7 +86,7 @@
                 />
 
                 <x-select.styled
-                    wire:model="workTimeModelForm.overtime_compensation_enum"
+                    wire:model="workTimeModelForm.overtime_compensation"
                     :label="__('Overtime Compensation')"
                     select="label:label|value:value"
                     :options="\FluxErp\Enums\OvertimeCompensationEnum::valuesLocalized()"
@@ -103,7 +103,20 @@
 
         {{-- Work Schedule Configuration --}}
         <x-card :header="__('Weekly Schedule')">
-            <div x-data="{ activeWeek: 0 }">
+            <div
+                x-data="{
+                    activeWeek: 0,
+                    weekdays: {
+                        1: '{{ __('Monday') }}',
+                        2: '{{ __('Tuesday') }}',
+                        3: '{{ __('Wednesday') }}',
+                        4: '{{ __('Thursday') }}',
+                        5: '{{ __('Friday') }}',
+                        6: '{{ __('Saturday') }}',
+                        7: '{{ __('Sunday') }}',
+                    },
+                }"
+            >
                 @if ($workTimeModelForm->cycle_weeks > 1)
                     {{-- Tabs for multiple weeks --}}
                     <div class="mb-6">
@@ -122,7 +135,7 @@
                                         "
                                         class="whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium transition-colors"
                                     >
-                                        {{ __("Week :number", ["number" => $i + 1]) }}
+                                        {{ __('Week :number', ['number' => $i + 1]) }}
                                     </button>
                                 @endfor
                             </nav>
@@ -131,13 +144,13 @@
                 @endif
 
                 {{-- Schedule Table for every single week --}}
-                @foreach ($workTimeModelForm->schedules as $weekIndex => $week)
+                <template
+                    x-for="(week, weekIndex) in $wire.workTimeModelForm.schedules"
+                    :key="weekIndex"
+                >
                     <div
-                        x-show="activeWeek === {{ $weekIndex }}"
+                        x-show="activeWeek === weekIndex || $wire.workTimeModelForm.cycle_weeks === 1"
                         x-cloak
-                        @if ($workTimeModelForm->cycle_weeks === 1)
-                            x-show="true"
-                        @endif
                     >
                         <div class="overflow-x-auto">
                             <table
@@ -148,69 +161,49 @@
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                         >
-                                            {{ __("Day") }}
+                                            {{ __('Day') }}
                                         </th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                         >
-                                            {{ __("Start Time") }}
+                                            {{ __('Start Time') }}
                                         </th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                         >
-                                            {{ __("End Time") }}
+                                            {{ __('End Time') }}
                                         </th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                         >
-                                            {{ __("Break (Minutes)") }}
+                                            {{ __('Break (Minutes)') }}
                                         </th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
                                         >
-                                            {{ __("Work Hours") }}
+                                            {{ __('Work Hours') }}
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody
                                     class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900"
                                 >
-                                    @php
-                                        $days = [
-                                            1 => __("Monday"),
-                                            2 => __("Tuesday"),
-                                            3 => __("Wednesday"),
-                                            4 => __("Thursday"),
-                                            5 => __("Friday"),
-                                            6 => __("Saturday"),
-                                            0 => __("Sunday"),
-                                        ];
-                                    @endphp
-
-                                    @foreach ($days as $dayNumber => $dayName)
-                                        @php
-                                            $dayData = data_get($week, "days." . $dayNumber) ?? [
-                                                "weekday" => $dayNumber,
-                                                "start_time" => null,
-                                                "end_time" => null,
-                                                "work_hours" => 0,
-                                                "break_minutes" => 0,
-                                            ];
-                                        @endphp
-
+                                    <template
+                                        x-for="(dayName, dayNumber) in weekdays"
+                                        :key="dayNumber"
+                                    >
                                         <tr>
                                             <td
                                                 class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100"
-                                            >
-                                                {{ $dayName }}
-                                            </td>
+                                                x-text="dayName"
+                                            ></td>
                                             <td
                                                 class="whitespace-nowrap px-6 py-4"
                                             >
                                                 <x-input
                                                     type="time"
-                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.start_time"
-                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNumber }}, 'start_time', $event.target.value)"
+                                                    x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].start_time"
+                                                    x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'start_time', $event.target.value)"
                                                     class="!py-1"
                                                 />
                                             </td>
@@ -219,8 +212,8 @@
                                             >
                                                 <x-input
                                                     type="time"
-                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.end_time"
-                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNumber }}, 'end_time', $event.target.value)"
+                                                    x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].end_time"
+                                                    x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'end_time', $event.target.value)"
                                                     class="!py-1"
                                                 />
                                             </td>
@@ -228,8 +221,8 @@
                                                 class="whitespace-nowrap px-6 py-4"
                                             >
                                                 <x-number
-                                                    wire:model.lazy="workTimeModelForm.schedules.{{ $weekIndex }}.days.{{ $dayNumber }}.break_minutes"
-                                                    wire:change="updateSchedule({{ $weekIndex }}, {{ $dayNumber }}, 'break_minutes', $event.target.value)"
+                                                    x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].break_minutes"
+                                                    x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'break_minutes', $event.target.value)"
                                                     min="0"
                                                     max="480"
                                                     step="15"
@@ -239,17 +232,23 @@
                                             <td
                                                 class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100"
                                             >
-                                                <span class="font-medium">
-                                                    {{ number_format($dayData["work_hours"] ?? 0, 2) }}
-                                                </span>
+                                                <span
+                                                    class="font-medium"
+                                                    x-html="
+                                                        parseFloat(
+                                                            $wire.workTimeModelForm.schedules[weekIndex].days[dayNumber]?.work_hours ??
+                                                                '0.00',
+                                                        ).toFixed(2)
+                                                    "
+                                                ></span>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    </template>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                @endforeach
+                </template>
             </div>
         </x-card>
     </div>

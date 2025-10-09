@@ -37,7 +37,7 @@ class UpdateHolidayRuleset extends FluxRuleset
                 'min:1',
                 'max:31',
             ],
-            'day_part_enum' => [
+            'day_part' => [
                 'sometimes',
                 'required',
                 Rule::enum(DayPartEnum::class),

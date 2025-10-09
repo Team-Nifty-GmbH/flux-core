@@ -27,7 +27,6 @@
                     wire:model="locationForm.country_id"
                     :label="__('Country')"
                     :placeholder="__('Select')"
-                    :clearable="true"
                     select="label:name|value:id"
                     unfiltered
                     :request="[
@@ -43,7 +42,6 @@
                     wire:model="locationForm.country_region_id"
                     :label="__('State/Region')"
                     :placeholder="__('Select')"
-                    :clearable="true"
                     select="label:name|value:id"
                     unfiltered
                     :request="[

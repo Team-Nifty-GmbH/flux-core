@@ -326,7 +326,6 @@ Route::middleware('web')
                         Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model');
                         Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
-
                     });
 
                 Route::get('/media', MediaGrid::class)

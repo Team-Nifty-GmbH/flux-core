@@ -33,6 +33,8 @@ class AbsenceRequestForm extends FluxForm
 
     public ?string $comment = null;
 
+    public string $day_part = 'full_day';
+
     public ?float $days_requested = null;
 
     public ?array $employee = null;
@@ -40,6 +42,8 @@ class AbsenceRequestForm extends FluxForm
     public ?int $employee_id = null;
 
     public ?string $end_date = null;
+
+    public ?string $end_time = null;
 
     #[Locked]
     public ?int $id = null;
@@ -58,7 +62,9 @@ class AbsenceRequestForm extends FluxForm
 
     public ?string $start_date = null;
 
-    public ?string $state_enum = 'pending';
+    public ?string $start_time = null;
+
+    public ?string $state = 'pending';
 
     public ?string $substitute_note = null;
 
@@ -106,7 +112,7 @@ class AbsenceRequestForm extends FluxForm
                     ->first()
                     ?->employee_can_create === EmployeeCanCreateEnum::Yes
             ) {
-                $this->state_enum = AbsenceRequestStateEnum::Approved->value;
+                $this->state = AbsenceRequestStateEnum::Approved->value;
                 $this->approved_at = now();
                 $this->approved_by_id = auth()->id();
             }

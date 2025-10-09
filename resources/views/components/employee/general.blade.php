@@ -83,7 +83,7 @@
     </x-card>
 
     <x-card :header="__('Personal Information')">
-        <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+        <div class="grid grid-cols-2 gap-x-4 gap-y-6">
             <x-date
                 :label="__('Date Of Birth')"
                 wire:model="employee.date_of_birth"
@@ -94,11 +94,28 @@
                 wire:model="employee.place_of_birth"
                 x-bind:disabled="!edit"
             />
+        </div>
+        <div class="mt-4 grid grid-cols-3 gap-x-4 gap-y-6">
             <x-input
                 :label="__('Nationality')"
                 wire:model="employee.nationality"
                 x-bind:disabled="!edit"
             />
+            <div x-bind:class="!edit && 'pointer-events-none'">
+                <x-select.styled
+                    wire:model="employee.country_id"
+                    :label="__('Country')"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Country::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => ['name', 'iso_alpha2', 'iso_alpha3']
+                        ]
+                    ]"
+                />
+            </div>
             <x-input
                 :label="__('Confession')"
                 wire:model="employee.confession"

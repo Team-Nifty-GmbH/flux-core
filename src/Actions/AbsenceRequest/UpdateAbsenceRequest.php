@@ -3,9 +3,10 @@
 namespace FluxErp\Actions\AbsenceRequest;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Models\AbsenceRequest;
-use FluxErp\Models\Employee;
 use FluxErp\Rulesets\AbsenceRequest\UpdateAbsenceRequestRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
@@ -24,7 +25,7 @@ class UpdateAbsenceRequest extends FluxAction
     public function performAction(): AbsenceRequest
     {
         $absenceRequest = resolve_static(AbsenceRequest::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $absenceRequest->fill($this->getData());
@@ -54,16 +55,29 @@ class UpdateAbsenceRequest extends FluxAction
             $errors = array_merge($errors, $failedPolicies);
         }
 
-        if ($absenceRequest->absenceType()
-            ->where('affects_vacation', true)
-            ->exists()
+        $employee = $absenceRequest->employee;
+        if ($absenceType = $absenceRequest
+            ->absenceType()
+            ->where(
+                fn (Builder $query) => $query
+                    ->where('affects_sick_leave', true)
+                    ->orWhere('affects_vacation', true)
+            )
+            ->first(['id', 'affects_vacation'])
         ) {
-            $employee = resolve_static(Employee::class, 'query')
-                ->whereKey(data_get($data, 'employee_id'))
-                ->first();
-            if ($employee->getCurrentVacationDaysBalance() < $absenceRequest->calculateWorkDaysAffected()) {
+            if ($absenceRequest->day_part === AbsenceRequestDayPartEnum::Time) {
                 $errors += [
-                    'vacation_days' => [__('Employee does not have enough vacation days available.')],
+                    'day_part' => ['Cannot select \'Time\' on given absence type.'],
+                ];
+            }
+
+            if ($absenceType->affects_vacation
+                && $employee->getVacationDaysBalance(
+                    $absenceRequest->start_date
+                ) < $absenceRequest->calculateWorkDaysAffected()
+            ) {
+                $errors += [
+                    'vacation_days' => ['Not enough vacation days available.'],
                 ];
             }
         }
@@ -74,26 +88,25 @@ class UpdateAbsenceRequest extends FluxAction
             && ! $absenceRequest->absenceType->affects_sick_leave
         ) {
             $errors += [
-                'vacation_blackout' => [__('Absence request falls within a blackout period.')],
+                'vacation_blackout' => ['Absence request falls within a vacation blackout period.'],
             ];
         }
 
         if (in_array($this->getData('employee_id'), $this->getData('substitutes') ?? [])) {
             $errors += [
-                'substitute' => [__('Employee cannot be their own substitute.')],
+                'substitute' => ['Employee cannot be their own substitute.'],
             ];
         }
 
-        $employee = $absenceRequest->employee;
-        if ($employee?->employment_date?->greaterThan($absenceRequest->start_date)) {
+        if ($employee->employment_date?->greaterThan($absenceRequest->start_date)) {
             $errors += [
-                'employment_date' => [__('Absence request starts before the employee\'s employment date.')],
+                'employment_date' => ['Absence request starts before the employee\'s employment date.'],
             ];
         }
 
-        if ($employee?->termination_date?->lessThan($absenceRequest->end_date)) {
+        if ($employee->termination_date?->endOfDay()->lessThan($absenceRequest->end_date)) {
             $errors += [
-                'termination_date' => [__('Absence request ends after the employee\'s termination date.')],
+                'termination_date' => ['Absence request ends after the employee\'s termination date.'],
             ];
         }
 

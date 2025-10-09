@@ -15,6 +15,11 @@
                 <th
                     class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
                 >
+                    {{ __('Expired Carryover') }}
+                </th>
+                <th
+                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                >
                     {{ __('Earned') }}
                 </th>
                 <th
@@ -81,6 +86,18 @@
                     @if ($year['carryover_days'] != '0.0')
                         <span class="font-medium">
                             {{ $year['carryover_days'] }}
+                        </span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('days') }}
+                        </span>
+                    @else
+                        <span class="text-gray-400 dark:text-gray-600">-</span>
+                    @endif
+                </td>
+                <td class="whitespace-nowrap px-4 py-2 text-right">
+                    @if ($year['expired_carryover_days'] != '0.0')
+                        <span class="font-medium">
+                            {{ $year['expired_carryover_days'] }}
                         </span>
                         <span class="text-xs text-gray-500 dark:text-gray-400">
                             {{ __('days') }}
@@ -164,6 +181,9 @@
                 <tr class="bg-gray-50 font-semibold dark:bg-gray-800">
                     <td class="px-4 py-3 text-left">
                         {{ __('Summary') }}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <span class="text-gray-400 dark:text-gray-600">-</span>
                     </td>
                     <td class="px-4 py-3 text-right">
                         <span class="text-gray-400 dark:text-gray-600">-</span>

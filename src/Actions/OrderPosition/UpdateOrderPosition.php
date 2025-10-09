@@ -128,7 +128,7 @@ class UpdateOrderPosition extends FluxAction
 
             if ($orderPosition->order->is_locked) {
                 $errors += [
-                    'is_locked' => [__('Order is locked')],
+                    'is_locked' => ['Order is locked'],
                 ];
             }
 
@@ -137,7 +137,7 @@ class UpdateOrderPosition extends FluxAction
                 && Helper::checkCycle(OrderPosition::class, $orderPosition, $this->data['parent_id'])
             ) {
                 $errors += [
-                    'parent_id' => [__('Cycle detected')],
+                    'parent_id' => ['Cycle detected'],
                 ];
             }
 
@@ -154,7 +154,7 @@ class UpdateOrderPosition extends FluxAction
                     ->exists()
                 ) {
                     $errors += [
-                        'price_id' => [__('Price not found in price list')],
+                        'price_id' => ['Price not found in price list'],
                     ];
                 }
             }

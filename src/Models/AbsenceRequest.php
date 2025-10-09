@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
+use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
 use FluxErp\Traits\Commentable;
@@ -29,7 +30,21 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     protected static function booted(): void
     {
         static::saving(function (AbsenceRequest $absenceRequest): void {
-            if ($absenceRequest->isDirty(['start_date', 'end_date', 'employee_id'])) {
+            if ($absenceRequest->day_part !== AbsenceRequestDayPartEnum::Time) {
+                $absenceRequest->start_time = null;
+                $absenceRequest->end_time = null;
+            }
+
+            if ($absenceRequest
+                ->isDirty([
+                    'employee_id',
+                    'day_part',
+                    'start_date',
+                    'end_date',
+                    'start_time',
+                    'end_time',
+                ])
+            ) {
                 $absenceRequest->days_requested = $absenceRequest->start_date
                     ->diffInDays($absenceRequest->end_date, absolute: true) + 1;
                 $absenceRequest->work_hours_affected = $absenceRequest->calculateWorkHoursAffected();
@@ -38,26 +53,45 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         });
 
         static::saved(function (AbsenceRequest $absenceRequest): void {
-            if (! $absenceRequest->wasChanged('state_enum')) {
+            if (! $absenceRequest->wasChanged('state')) {
                 return;
             }
 
             activity()
                 ->performedOn($absenceRequest)
                 ->causedBy(auth()->user())
-                ->event($absenceRequest->state_enum->value)
+                ->event($absenceRequest->state->value)
                 ->useLog('absence_request_state_changes')
                 ->log($absenceRequest->stateChangeComment ?? '');
 
             $absenceRequest->stateChangeComment = null;
 
-            foreach ($absenceRequest->employeeDays()->get(['id', 'date']) as $employeeDay) {
+            $employeeDays = $absenceRequest->employeeDays()->pluck('date', 'id');
+            foreach ($employeeDays as $date) {
                 CloseEmployeeDay::make([
                     'employee_id' => $absenceRequest->employee_id,
-                    'date' => $employeeDay->date,
+                    'date' => $date,
                 ])
                     ->validate()
                     ->execute();
+            }
+
+            if ($absenceRequest->state === AbsenceRequestStateEnum::Approved) {
+                $current = $absenceRequest->start_date->copy();
+                while ($current->lte($absenceRequest->end_date)) {
+                    if ($employeeDays->doesntContain($current)
+                        && $absenceRequest->employee->isWorkDay($current)
+                    ) {
+                        CloseEmployeeDay::make([
+                            'employee_id' => $absenceRequest->employee_id,
+                            'date' => $current,
+                        ])
+                            ->validate()
+                            ->execute();
+                    }
+
+                    $current->addDay();
+                }
             }
         });
     }
@@ -65,9 +99,10 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     protected function casts(): array
     {
         return [
-            'state_enum' => AbsenceRequestStateEnum::class,
-            'start_date' => 'datetime',
-            'end_date' => 'datetime',
+            'state' => AbsenceRequestStateEnum::class,
+            'day_part' => AbsenceRequestDayPartEnum::class,
+            'start_date' => 'date',
+            'end_date' => 'date',
             'sick_note_issued_date' => 'date',
             'approved_at' => 'datetime',
             'rejected_at' => 'datetime',
@@ -88,15 +123,22 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     public function calculateWorkDaysAffected(?Carbon $date = null): string|float
     {
         $deductionRate = $this->absenceType->percentage_deduction ?? 1;
+        $dayPartFraction = match ($this->day_part) {
+            AbsenceRequestDayPartEnum::FullDay => 1,
+            AbsenceRequestDayPartEnum::FirstHalf, AbsenceRequestDayPartEnum::SecondHalf, => 0.5,
+            default => 0,
+        };
+
         $totalDays = 0;
         $current = ($date ?? $this->start_date)->copy();
-
         while ($current->lte($date ?? $this->end_date)) {
             if ($this->employee->isWorkDay($current)) {
+                $dayPartFraction = $this->getDayPartFractionByTime($current) ?? $dayPartFraction;
+
                 // Apply the deduction rate to get the actual days affected
                 $totalDays = bcadd(
                     $totalDays,
-                    bcmul(1, $deductionRate)
+                    bcround(bcmul($dayPartFraction, $deductionRate), 2)
                 );
             }
 
@@ -109,15 +151,26 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     public function calculateWorkHoursAffected(?Carbon $date = null): string|int|float
     {
         $deductionRate = $this->absenceType->percentage_deduction ?? 1;
+        $dayPartFraction = match ($this->day_part) {
+            AbsenceRequestDayPartEnum::FullDay => 1,
+            AbsenceRequestDayPartEnum::FirstHalf, AbsenceRequestDayPartEnum::SecondHalf, => 0.5,
+            default => 0,
+        };
+
         $totalHours = 0;
         $current = ($date ?? $this->start_date)->copy();
 
         while ($current->lte($date ?? $this->end_date)) {
             if ($this->employee->isWorkDay($current)) {
                 $dailyHours = $this->employee->getWorkTimeModel($current)->getDailyWorkHours($current);
+                $dayPartFraction = $this->getDayPartFractionByTime($current) ?? $dayPartFraction;
+
                 $totalHours = bcadd(
                     $totalHours,
-                    bcmul($dailyHours, $deductionRate)
+                    bcmul(
+                        bcmul($dailyHours, $dayPartFraction),
+                        $deductionRate
+                    )
                 );
             }
 
@@ -175,6 +228,29 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         return route('human-resources.absence-requests.show', $this->id);
     }
 
+    public function intersections(array $excludeStates = []): Builder
+    {
+        return static::query()
+            ->whereKeyNot($this->getKey())
+            ->where('employee_id', $this->employee_id)
+            ->when($excludeStates, fn (Builder $query) => $query->whereNotIn('state', $excludeStates))
+            ->where(function (Builder $query): void {
+                $query
+                    ->where('start_date', '<=', $this->end_date)
+                    ->where('end_date', '>=', $this->start_date)
+                    ->where(fn (Builder $query) => $query
+                        ->where('day_part', AbsenceRequestDayPartEnum::FullDay->value)
+                        ->orWhere('day_part', $this->day_part->value)
+                        ->when(
+                            $this->day_part === AbsenceRequestDayPartEnum::Time,
+                            fn (Builder $query) => $query
+                                ->where('start_time', '<=', $this->end_time)
+                                ->where('end_time', '>=', $this->start_time)
+                        )
+                    );
+            });
+    }
+
     public function isInBlackoutPeriod(): bool
     {
         return resolve_static(VacationBlackout::class, 'query')
@@ -208,5 +284,34 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     public function substitutes(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'absence_request_substitute');
+    }
+
+    protected function getDayPartFractionByTime(Carbon $date): ?string
+    {
+        if ($this->day_part === AbsenceRequestDayPartEnum::Time) {
+            $workTimeModel = $this->employee->getWorkTimeModel($date);
+
+            $workDay = $workTimeModel->schedules()
+                ->where('weekday', $date->dayOfWeek)
+                ->first([
+                    'id',
+                    'start_time',
+                    'end_time',
+                    'break_minutes',
+                    'work_hours',
+                ]);
+
+            $startTime = max($this->start_time, $workDay->start_time ?? '00:00:00');
+            $endTime = min($this->end_time, $workDay->end_time ?? '23:59:59');
+            $workHours = $workDay->work_hours ?? $workTimeModel->getDailyWorkHours($date);
+
+            if (bccomp($workHours, 0) === 1) {
+                $absenceHours = bcround(Carbon::parse($startTime)->diffInHours(Carbon::parse($endTime)), 2);
+
+                return bcdiv($absenceHours, $workHours);
+            }
+        }
+
+        return null;
     }
 }

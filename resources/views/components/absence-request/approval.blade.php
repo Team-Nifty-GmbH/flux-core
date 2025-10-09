@@ -12,7 +12,7 @@
                 @canAction(\FluxErp\Actions\AbsenceRequest\ApproveAbsenceRequest::class)
                     <x-button
                         x-cloak
-                        x-show="$wire.absenceRequestForm.state_enum !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Approved->value }}'"
+                        x-show="$wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Approved->value }}'"
                         :text="__('Approve')"
                         color="emerald"
                         wire:click="approve()"
@@ -23,7 +23,7 @@
                 @canAction(\FluxErp\Actions\AbsenceRequest\RejectAbsenceRequest::class)
                     <x-button
                         x-cloak
-                        x-show="$wire.absenceRequestForm.state_enum !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Rejected->value }}'"
+                        x-show="$wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Rejected->value }}'"
                         :text="__('Reject')"
                         color="red"
                         wire:click="reject()"
@@ -35,7 +35,7 @@
                 @canAction(\FluxErp\Actions\AbsenceRequest\RevokeAbsenceRequest::class)
                     <x-button
                         x-cloak
-                        x-show="$wire.absenceRequestForm.state_enum !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Revoked->value }}' && $wire.absenceRequestForm.state_enum !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Pending->value }}'"
+                        x-show="$wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Revoked->value }}' && $wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Pending->value }}'"
                         :text="__('Revoke')"
                         color="secondary"
                         wire:click="revoke()"

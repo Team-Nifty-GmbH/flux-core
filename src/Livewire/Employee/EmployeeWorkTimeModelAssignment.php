@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Employee;
 
 use FluxErp\Livewire\Forms\EmployeeWorkTimeModelForm;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
-use FluxErp\Models\WorkTimeModel;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;

@@ -6,6 +6,7 @@ use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\AbsenceRequestForm;
 use FluxErp\Models\AbsenceRequest as AbsenceRequestModel;
+use FluxErp\Models\AbsenceType;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
@@ -25,6 +26,9 @@ class AbsenceRequest extends Component
     #[Locked]
     public array $activities = [];
 
+    #[Locked]
+    public bool $affectsSickLeave = false;
+
     public array $queryString = [
         'tab' => ['except' => 'absence-request.general'],
     ];
@@ -36,6 +40,10 @@ class AbsenceRequest extends Component
         $this->absenceRequestForm->fill($id);
 
         $this->getStatusChanges();
+
+        $this->affectsSickLeave = resolve_static(AbsenceType::class, 'query')
+            ->whereKey($this->absenceRequestForm->absence_type_id)
+            ->value('affects_sick_leave');
     }
 
     public function render(): View

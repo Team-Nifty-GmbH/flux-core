@@ -36,7 +36,14 @@ class VacationBalanceBox extends ValueBox
             ->first();
 
         $currentBalance = bcround($employee->getCurrentVacationDaysBalance(), 2);
-        $baseVacation = bcround($employee->getTotalVacationDays(), 2);
+        $baseVacation = bcround(
+            $employee->getTotalVacationDays(
+                start: ($now = now())->copy()->startOfYear(),
+                end: $now->copy()->endOfYear(),
+                maxEffectiveDate: $now
+            ),
+            2
+        );
 
         $this->sum = __(':days days available', ['days' => Number::format($currentBalance, 2)]);
         $this->subValue = __('of :total days', ['total' => Number::format($baseVacation, 2)]);
