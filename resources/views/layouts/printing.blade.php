@@ -34,16 +34,25 @@
     </head>
     <body class="text-xs">
         @if ($hasHeader ?? true)
-            <x-flux::print.header
-                :is-preview="$generatePdf"
-                :header-layout="is_array($layout) ? $layout['header'] : null"
-            />
+            @if($layout)
+                <x-flux::print.custom-header
+                    :is-preview="$generatePdf"
+                    :header-layout="data_get($layout,'header')"
+                    :client="$client"
+                />
+            @else
+                <x-flux::print.header />
+            @endif
         @endif
 
         @if ($hasFooter ?? true)
-            <x-flux::print.footer
-                :footer-layout="is_array($layout) ? $layout['footer'] : null"
-            />
+            @if($layout)
+                <x-flux::print.custom-footer
+                    :footer-layout="data_get($layout,'footer')"
+                />
+            @else
+                <x-flux::print.footer/>
+            @endif
         @endif
 
         {!! $slot !!}

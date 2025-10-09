@@ -22,13 +22,13 @@
             class="mb-4 flex w-full flex-col rounded-lg border border-gray-300"
         >
             <div class="flex h-10 w-full items-center bg-gray-200 p-4">
-                {{ $folder }}
+                {{ __($folder) }}
             </div>
             @foreach ($files as $index => $file)
                 <div
                     class="{{ count($files) > 1 && $index < count($files) - 1 ? 'border-b border-gray-300' : '' }} flex min-h-10 w-full items-center justify-between p-4"
                 >
-                    <div>{{ $file }}</div>
+                    <div>{{ __($file) }}</div>
                     <x-button
                         href="{{ route('print-layout-editor',
                                 [

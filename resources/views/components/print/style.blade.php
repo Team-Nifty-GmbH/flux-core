@@ -26,8 +26,18 @@
         background: #F2F4F7;
     }
 
-    .border-semi-black {
-        border-color: #667085;
+    .black-bar {
+        background-color: black;
+        width: 1.75rem;
+        height: 0.25rem;
+    }
+
+    .logo{
+        height:70px;
+    }
+
+    .logo-small{
+        height:50px;
     }
 
     @page {
@@ -39,9 +49,9 @@
     }
 
     @page {
-    .page-count:before {
-        content: counter(page);
-    }
+        .page-count:before {
+            content: counter(page);
+        }
     }
     {{-- without this pdf generation would crash --}}
 
@@ -97,13 +107,11 @@
                 content: counter(page);
             }
 
-        @endif        html {
+        @endif
+
+        html {
             background: #f5f5f5;
             overflow-y: auto;
-        }
-
-        table {
-            width: 6cm;
         }
 
     }
