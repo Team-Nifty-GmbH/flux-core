@@ -13,6 +13,7 @@ use FluxErp\States\QueueMonitor\Failed;
 use FluxErp\States\QueueMonitor\QueueMonitorState;
 use FluxErp\States\QueueMonitor\Succeeded;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\MonitorsQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
@@ -27,7 +28,7 @@ use Throwable;
 
 class QueueMonitor extends FluxModel
 {
-    use HasFrontendAttributes, HasStates, MassPrunable;
+    use HasFrontendAttributes, HasPackageFactory, HasStates, MassPrunable;
 
     public static function booted(): void
     {

@@ -683,6 +683,23 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
+    protected function mailAddresses(): Attribute
+    {
+        return Attribute::get(
+            fn () => array_unique(
+                array_filter(
+                    array_merge(
+                        [$this->email_primary],
+                        $this->contactOptions
+                            ->where('type', 'email')
+                            ->pluck('value')
+                            ->toArray()
+                    )
+                )
+            )
+        );
+    }
+
     protected function password(): Attribute
     {
         return Attribute::set(

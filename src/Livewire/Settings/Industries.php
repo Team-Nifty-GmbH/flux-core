@@ -8,13 +8,18 @@ use FluxErp\Actions\Industry\UpdateIndustry;
 use FluxErp\Livewire\DataTables\IndustryList;
 use FluxErp\Livewire\Forms\IndustryForm;
 use FluxErp\Models\Industry;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Industries extends IndustryList
 {
+    use AllowRecordMerging;
+
     public IndustryForm $industryForm;
+
+    public bool $isSelectable = true;
 
     protected ?string $includeBefore = 'flux::livewire.settings.industries';
 

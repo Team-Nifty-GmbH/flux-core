@@ -153,7 +153,7 @@
                         <td class="text-right">
                             <span>{{ __('Position discounts') }}</span>
                             <span>
-                                {{ Number::percentage(bcmul($model->total_position_discount_percentage ?? 0, 100)) }}
+                                {{ Number::percentage(bcmul($model->total_position_discount_percentage ?? 0, 100), maxPrecision: 2) }}
                             </span>
                         </td>
                         <td class="w-0 whitespace-nowrap pl-12 text-right">
@@ -179,7 +179,7 @@
                                 {{ data_get($discount, 'name', __('Head discount')) }}
                             </span>
                             <span>
-                                {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
+                                {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100), maxPrecision: 2) }}
                             </span>
                         </td>
                         <td class="w-0 whitespace-nowrap pl-12 text-right">
@@ -208,7 +208,7 @@
                     <td class="text-right">
                         {{
                             __('Plus :percentage VAT from :total_net', [
-                                'percentage' => Number::percentage(bcmul($vat['vat_rate_percentage'], 100)),
+                                'percentage' => Number::percentage(bcmul($vat['vat_rate_percentage'], 100), maxPrecision: 2),
                                 'total_net' => Number::currency($vat['total_net_price']),
                             ])
                         }}

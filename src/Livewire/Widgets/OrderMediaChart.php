@@ -91,7 +91,7 @@ class OrderMediaChart extends LineChart implements HasWidgetOptions
     public function options(): array
     {
         $options = [];
-        foreach ($this->series as $series) {
+        foreach ($this->series ?? [] as $series) {
             if (data_get($series, 'collection')) {
                 $options[] = [
                     'label' => data_get($series, 'name'),

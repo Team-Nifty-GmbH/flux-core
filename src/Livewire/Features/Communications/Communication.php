@@ -6,16 +6,15 @@ use Exception;
 use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\Communication\DeleteCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
+use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Livewire\DataTables\CommunicationList;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
-use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Address;
 use FluxErp\Models\Communication as CommunicationModel;
-use FluxErp\Models\MailAccount;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Livewire\CreatesDocuments;
@@ -23,7 +22,6 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Scout\Searchable;
@@ -34,7 +32,7 @@ use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class Communication extends CommunicationList
+abstract class Communication extends CommunicationList
 {
     use CreatesDocuments, WithFileUploads;
 
@@ -101,6 +99,11 @@ class Communication extends CommunicationList
             'label' => __(Str::headline($modelType)) . ': '
                 . (method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
         ];
+
+        $this->communication->communicatables = collect($this->communication->communicatables)
+            ->unique(fn (array $item) => data_get($item, 'communicatable_type') . '-' . data_get($item, 'communicatable_id'))
+            ->values()
+            ->toArray();
     }
 
     #[Renderless]
@@ -193,6 +196,10 @@ class Communication extends CommunicationList
     {
         $this->communication->reset();
         $this->communication->fill($communication);
+        $this->communication->mail_account_id ??= auth()
+            ->user()
+            ->defaultMailAccount()
+            ?->getKey();
 
         $this->attachments->reset();
         if ($communication->id) {
@@ -204,6 +211,30 @@ class Communication extends CommunicationList
         $this->js(<<<'JS'
             $modalOpen('edit-communication');
         JS);
+    }
+
+    #[Renderless]
+    public function fillTo(): void
+    {
+        if ($this->communication->communication_type_enum === CommunicationTypeEnum::Mail->value) {
+            $this->communication->to = array_filter(Arr::wrap($this->getMailAddress()));
+        } elseif ($this->communication->communication_type_enum === CommunicationTypeEnum::Letter->value) {
+            $this->communication->to = array_filter(Arr::wrap($this->getPostalAddress()));
+        } else {
+            $this->communication->to = [];
+        }
+    }
+
+    #[Renderless]
+    public function getMailAddress(): string|array|null
+    {
+        return null;
+    }
+
+    #[Renderless]
+    public function getPostalAddress(): ?string
+    {
+        return null;
     }
 
     #[Renderless]
@@ -244,34 +275,23 @@ class Communication extends CommunicationList
     #[Renderless]
     public function send(): bool
     {
-        $this->communication->attachments = $this->attachments->uploadedFile ?? [];
-
-        if ($this->communication->mail_account_id) {
-            $mailAccount = resolve_static(MailAccount::class, 'query')
-                ->whereKey($this->communication->mail_account_id)
-                ->first();
-
-            config([
-                'mail.default' => 'mail_account',
-                'mail.mailers.mail_account.transport' => $mailAccount->smtp_mailer,
-                'mail.mailers.mail_account.username' => $mailAccount->smtp_email,
-                'mail.mailers.mail_account.password' => $mailAccount->smtp_password,
-                'mail.mailers.mail_account.host' => $mailAccount->smtp_host,
-                'mail.mailers.mail_account.port' => $mailAccount->smtp_port,
-                'mail.mailers.mail_account.encryption' => $mailAccount->smtp_encryption,
-                'mail.from.address' => $mailAccount->smtp_email,
-                'mail.from.name' => auth()->user()->name,
-            ]);
+        if (! $this->save()) {
+            return false;
         }
+
+        $this->communication->loadAttachments(resolve_static(CommunicationModel::class, 'query')
+            ->whereKey($this->communication->id)
+            ->first('id')
+        );
 
         $this->communication->communicatable_type = morph_alias($this->modelType);
         $this->communication->communicatable_id = $this->modelId;
 
         try {
-            Mail::to($this->communication->to)
-                ->cc($this->communication->cc)
-                ->bcc($this->communication->bcc)
-                ->send(GenericMail::make($this->communication));
+            SendMail::make($this->communication->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
@@ -351,6 +371,22 @@ class Communication extends CommunicationList
                 'communicationTypes' => array_map(
                     fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
                     CommunicationTypeEnum::values()
+                ),
+                'mailAccounts' => array_merge(
+                    auth()
+                        ->user()
+                        ->mailAccounts()
+                        ->whereNotNull([
+                            'smtp_email',
+                            'smtp_password',
+                            'smtp_host',
+                            'smtp_port',
+                        ])
+                        ->get(['mail_accounts.id', 'email'])
+                        ->toArray(),
+                    [
+                        ['id' => null, 'email' => __('Default')],
+                    ]
                 ),
             ]
         );

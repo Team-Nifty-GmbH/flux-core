@@ -3,6 +3,7 @@
 namespace FluxErp\Listeners;
 
 use FluxErp\Actions\Communication\CreateCommunication;
+use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
 use Illuminate\Contracts\Support\Arrayable;
@@ -49,7 +50,11 @@ class MessageSendingEventSubscriber
         );
 
         $communicationForm['communication_type_enum'] = CommunicationTypeEnum::Mail->value;
-        $communication = CreateCommunication::make($communicationForm)
+        $communicationAction = data_get($communicationForm, 'id')
+            ? UpdateCommunication::make($communicationForm)
+            : CreateCommunication::make($communicationForm);
+
+        $communication = $communicationAction
             ->validate()
             ->execute();
 

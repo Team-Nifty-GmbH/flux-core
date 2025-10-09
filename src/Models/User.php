@@ -7,7 +7,6 @@ use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendars;
 use FluxErp\Traits\HasCalendarUserSettings;
@@ -44,9 +43,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use CacheModelQueries, Commentable, Filterable, HasCalendars, HasCalendarUserSettings, HasCart,
-        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions,
-        HasRoles, HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+    use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -142,6 +141,13 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->belongsTo(Currency::class);
     }
 
+    public function defaultMailAccount(): ?MailAccount
+    {
+        return $this->mailAccounts()
+            ->wherePivot('is_default', true)
+            ->first();
+    }
+
     public function employee(): HasOne
     {
         return $this->hasOne(Employee::class);
@@ -197,7 +203,8 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 
     public function mailAccounts(): BelongsToMany
     {
-        return $this->belongsToMany(MailAccount::class, 'mail_account_user');
+        return $this->belongsToMany(MailAccount::class, 'mail_account_user')
+            ->withPivot('is_default');
     }
 
     /**

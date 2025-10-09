@@ -37,6 +37,8 @@ class UserForm extends FluxForm
 
     public ?string $date_of_birth = null;
 
+    public ?int $default_mail_account_id = null;
+
     public ?string $email = null;
 
     public ?string $emergency_contact_name = null;

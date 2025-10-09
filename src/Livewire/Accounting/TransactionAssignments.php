@@ -221,7 +221,7 @@ class TransactionAssignments extends Component
                 'bankConnection:id,name,bank_name,iban',
                 'orders.contact:id',
             ])
-            ->paginate()
+            ->paginate($this->perPage)
             ->through(function (Transaction $transaction) {
                 $avatarUrl = $transaction->contact?->getAvatarUrl()
                     ?? resolve_static(Contact::class, 'query')
@@ -250,6 +250,14 @@ class TransactionAssignments extends Component
         $this->js(<<<'JS'
             $modalClose('order-transaction-modal');
         JS);
+    }
+
+    #[Renderless]
+    public function setPerPage(int $perPage): void
+    {
+        $this->perPage = $perPage;
+        $this->resetPage();
+        $this->refreshTransactions();
     }
 
     #[Renderless]
@@ -324,14 +332,23 @@ class TransactionAssignments extends Component
 
     protected function updateCounts(): void
     {
-        $this->suggestionCount = resolve_static(Transaction::class, 'query')
+        $baseQuery = resolve_static(Transaction::class, 'query')
+            ->whereNull('contact_bank_connection_id')
+            ->when($this->range, fn (Builder $query) => $query->whereBetween('booking_date', $this->range))
+            ->where('is_ignored', false)
+            ->when(
+                $this->bankAccounts,
+                fn (Builder $query) => $query->whereHas('bankConnection', fn (Builder $query) => $query->whereKey($this->bankAccounts))
+            );
+
+        $this->suggestionCount = $baseQuery
+            ->clone()
             ->whereHas('orders', fn (Builder $query) => $query->where('order_transaction.is_accepted', false))
             ->count();
 
-        $this->unassignedCount = resolve_static(Transaction::class, 'query')
-            ->whereNull('contact_bank_connection_id')
-            ->where('is_ignored', false)
-            ->whereDoesntHave('orders')
+        $this->unassignedCount = $baseQuery
+            ->clone()
+            ->whereNot('balance', 0)
             ->count();
     }
 }

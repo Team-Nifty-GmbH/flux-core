@@ -3,7 +3,7 @@
         log: {},
     }"
     x-on:data-table-row-clicked="
-        $wire.loadLog($event.detail.id).then((result) => {
+        $wire.loadLog($event.detail.record.id).then((result) => {
             log = result
             $modalOpen('show-log-modal')
         })
