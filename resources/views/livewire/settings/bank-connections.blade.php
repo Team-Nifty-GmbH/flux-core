@@ -10,9 +10,22 @@
         />
         <x-select.styled
             :label="__('Ledger Account')"
-            wire:model="bankConnection.ledger_account_id"
-            select="label:name|value:id"
-            :options="$ledgerAccounts"
+            wire:model.number="position.ledger_account_id"
+            select="label:name|value:id|description:number"
+            unfiltered
+            :request="[
+                'url' => route('search', \FluxErp\Models\LedgerAccount::class),
+                'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'ledger_account_type_enum',
+                            '=',
+                            \FluxErp\Enums\LedgerAccountTypeEnum::Asset,
+                        ],
+                    ],
+                ],
+            ]"
         />
         <x-input
             wire:model="bankConnection.account_holder"
