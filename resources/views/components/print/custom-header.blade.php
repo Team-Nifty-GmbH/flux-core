@@ -1,6 +1,7 @@
 @props([
     'headerLayout',
     'isPreview' => false,
+    'client'
 ])
 
 <header

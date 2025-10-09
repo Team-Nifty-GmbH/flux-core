@@ -118,9 +118,7 @@
             }"
             x-on:mousedown="printStore.editHeader ? headerStore.onMouseDown($event, 'header-subject') : null"
         >
-            <h2 class="text-xl font-semibold">
-                {{ $subject ?? '' }}
-            </h2>
+            <x-flux::print.elements.header-subject :subject="$subject" />
         </div>
     </template>
     <template id="{{ data_get($client, 'id', uniqid()) }}" x-ref="header-logo">
@@ -148,12 +146,7 @@
                     class="absolute right-0 top-0 h-4 w-4 cursor-pointer rounded-full"
                 ></x-icon>
             </div>
-            <img
-                draggable="false"
-                class="logo-small max-h-full w-full"
-                alt="logo-small"
-                src="{{ data_get($client, 'logo_small_url', '') }}"
-            />
+            <x-flux::print.elements.header-logo :client="$client" />
         </div>
     </template>
     <template id="{{ uniqid() }}" x-ref="header-page-count">
@@ -173,7 +166,7 @@
                     headerStore.selectedElementId === 'header-page-count',
             }"
         >
-            <div class="text-xs">Page 1 of 1</div>
+            <x-flux::print.elements.header-page-count :preview="false" />
         </div>
     </template>
     <template id="{{ uniqid() }}" x-ref="header-additional-img">
