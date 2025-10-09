@@ -10,7 +10,7 @@
         />
         <x-select.styled
             :label="__('Ledger Account')"
-            wire:model.number="position.ledger_account_id"
+            wire:model="bankConnection.ledger_account_id"
             select="label:name|value:id|description:number"
             unfiltered
             :request="[
