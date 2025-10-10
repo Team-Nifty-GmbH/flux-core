@@ -342,8 +342,11 @@ class EditMail extends Component
                 $result = SendMail::make($data)
                     ->checkPermission()
                     ->validate()
-                    ->when(data_get($data, 'queue'), fn (SendMail $action) => $action->executeAsync())
-                    ->when(! data_get($data, 'queue'), fn (SendMail $action) => $action->execute());
+                    ->when(
+                        data_get($data, 'queue'),
+                        fn (SendMail $action) => $action->executeAsync(),
+                        fn (SendMail $action) => $action->execute()
+                    );
 
                 if (data_get($result, 'success') || data_get($data, 'queue')) {
                     $successCount++;

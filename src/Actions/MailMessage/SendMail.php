@@ -33,24 +33,35 @@ class SendMail extends DispatchableFluxAction
     {
         $mail = GenericMail::make($this->data, $this->getData('blade_parameters'));
 
+        $mailer = Mail::mailer();
+        $useDefaultMailer = true;
+
         if ($mailAccountId = $this->getData('mail_account_id')) {
             $mailAccount = resolve_static(MailAccount::class, 'query')
                 ->whereKey($mailAccountId)
                 ->first();
 
-            $mailer = $mailAccount?->mailer();
-            $mail->from(
-                $mailAccount->smtp_email ?? config('mail.from.address'),
-                auth()->user()?->name ?? $mailAccount->smtp_email ?? config('mail.from.address')
-            );
+            if ($mailAccount) {
+                $mailer = $mailAccount->mailer();
+                $mail->from(
+                    $mailAccount->smtp_email ?? config('mail.from.address'),
+                    auth()->user()?->name ?? $mailAccount->smtp_email ?? config('mail.from.address')
+                );
+                $useDefaultMailer = false;
+            }
         }
 
         try {
-            ($mailer ?? Mail::mailer())
+            $message = $mailer
                 ->to($this->getData('to'))
                 ->cc($this->getData('cc') ?? [])
-                ->bcc($this->getData('bcc') ?? [])
-                ->send($mail);
+                ->bcc($this->getData('bcc') ?? []);
+
+            if (data_get($this->data, 'queue', false) && $useDefaultMailer) {
+                $message->queue($mail);
+            } else {
+                $message->send($mail);
+            }
 
             return [
                 'success' => true,

@@ -386,7 +386,7 @@ test('send mail with custom mail account', function (): void {
     });
 });
 
-test('send mail with custom mail account and queue', function (): void {
+test('send mail with custom mail account and queue sends immediately', function (): void {
     $fakeMail = Mail::fake();
 
     $client = Client::factory()->create();
@@ -424,10 +424,14 @@ test('send mail with custom mail account and queue', function (): void {
 
     expect($result['success'])->toBeTrue();
 
-    $fakeMail->assertQueued(GenericMail::class, function ($mail) use ($mailAccount) {
+    // When mail_account_id is provided, mail should be sent immediately despite queue = true
+    $fakeMail->assertSent(GenericMail::class, function ($mail) use ($mailAccount) {
         return $mail->hasTo('test@example.com')
             && $mail->hasCc('cc@example.com')
             && $mail->hasBcc('bcc@example.com')
             && $mail->from[0]['address'] === $mailAccount->smtp_email;
     });
+
+    // Should NOT be queued
+    $fakeMail->assertNotQueued(GenericMail::class);
 });
