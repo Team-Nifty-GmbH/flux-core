@@ -95,7 +95,7 @@
             :label="__('Mail Accounts')"
             wire:model="userForm.mail_accounts"
             multiple
-            select="label:email|value:id"
+            select="label:name|value:id"
             :options="$mailAccounts"
         />
         @show
@@ -104,7 +104,7 @@
             <x-select.styled
                 :label="__('Default Mail Account')"
                 wire:model="userForm.default_mail_account_id"
-                select="label:email|value:id"
+                select="label:name|value:id"
                 :options="collect($mailAccounts)->whereIn('id', $userForm->mail_accounts)->values()->toArray()"
             />
         @endif

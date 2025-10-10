@@ -57,12 +57,7 @@ class EditMail extends Component
                 auth()
                     ->user()
                     ->mailAccounts()
-                    ->whereNotNull([
-                        'smtp_email',
-                        'smtp_password',
-                        'smtp_host',
-                        'smtp_port',
-                    ])
+                    ->whereNotNull('smtp_email')
                     ->get(['mail_accounts.id', 'email'])
                     ->toArray(),
                 [

@@ -25,4 +25,9 @@ class CreateMailAccount extends FluxAction
 
         return $mailAccount->refresh();
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['name'] ??= $this->getData('smtp_email') ?? $this->getData('email');
+    }
 }
