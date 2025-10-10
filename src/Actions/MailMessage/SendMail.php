@@ -46,16 +46,11 @@ class SendMail extends DispatchableFluxAction
         }
 
         try {
-            $message = ($mailer ?? Mail::mailer())
+            ($mailer ?? Mail::mailer())
                 ->to($this->getData('to'))
                 ->cc($this->getData('cc') ?? [])
-                ->bcc($this->getData('bcc') ?? []);
-
-            if ($this->getData('queue', false)) {
-                $message->queue($mail);
-            } else {
-                $message->send($mail);
-            }
+                ->bcc($this->getData('bcc') ?? [])
+                ->send($mail);
 
             return [
                 'success' => true,
