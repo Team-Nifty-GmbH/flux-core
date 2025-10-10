@@ -357,6 +357,10 @@ test('send mail with custom mail account', function (): void {
         'smtp_mailer' => 'smtp',
     ]);
 
+    Mail::shouldReceive('mailer')
+        ->once()
+        ->andReturn($fakeMail);
+
     Mail::shouldReceive('build')
         ->once()
         ->with(Mockery::on(function ($config) use ($mailAccount) {
@@ -398,6 +402,10 @@ test('send mail with custom mail account and queue sends immediately', function 
         'smtp_encryption' => 'ssl',
         'smtp_mailer' => 'smtp',
     ]);
+
+    Mail::shouldReceive('mailer')
+        ->once()
+        ->andReturn($fakeMail);
 
     Mail::shouldReceive('build')
         ->once()
