@@ -6,7 +6,11 @@
                 <h2 class="text-xl font-semibold">
                     {{ $subject ?? '' }}
                 </h2>
-                <div class="page-count text-xs"></div>
+                <div class="font-light">
+                    {{ __('Page') }}
+                    <span class="page-count"></span>
+                    {{ __('of') }} DOMPDF_PAGE_COUNT_PLACEHOLDER
+                </div>
             </div>
             @show
             @section('logo')

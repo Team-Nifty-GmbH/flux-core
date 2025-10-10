@@ -10,6 +10,7 @@ use Dompdf\Options;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Contracts\SignablePrintView;
 use FluxErp\Models\Client;
+use FluxErp\Models\PrintLayout;
 use FluxErp\Printing\Printable;
 use FluxErp\Traits\Makeable;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +101,25 @@ abstract class PrintableView extends Component
             ->execute();
     }
 
+    public function getPrintLayout(): ?array
+    {
+        $model = $this->getModel();
+        if ($model?->client_id) {
+            return resolve_static(PrintLayout::class, 'query')
+                ->where('client_id', $model->client_id)
+                ->where('model_type', morph_alias($model::class))
+                ->where(
+                    'name',
+                    static::getLayout() .
+                    '.' . morph_alias($model::class) .
+                    '.' . data_get(array_flip($model->resolvePrintViews()), static::class)
+                )
+                ->first()?->toArray();
+        }
+
+        return null;
+    }
+
     public function preview(bool $preview = true): static
     {
         $this->preview = $preview;
@@ -116,11 +136,12 @@ abstract class PrintableView extends Component
         $this->hydrateSharedData();
         File::ensureDirectoryExists(storage_path('fonts'));
 
-        $this->pdf = PdfFacade::loadHTML($this->renderWithLayout())
+        $this->pdf = PdfFacade::loadHTML($this->renderWithLayout(true))
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
             ->setOption('isRemoteEnabled', true)
             ->setOption('defaultMediaType', 'print')
+            ->setOption('fontHeightRatio', 0.8)
             ->setPaper($this->getPaperSize(), $this->getPaperOrientation());
 
         if (! config('dompdf.options.allowed_remote_hosts')) {
@@ -220,7 +241,47 @@ abstract class PrintableView extends Component
 
     protected function getPageCss(): array
     {
-        return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
+        // add margin for first page - to avoid header on first page
+        $model = $this->getModel();
+        if ($model && data_get($model, 'client_id')) {
+            $layout = $this->getPrintLayout();
+            if ($layout && data_get($layout, 'margin') && data_get($layout, 'header') && data_get($layout, 'footer')) {
+                $margin = data_get($layout, 'margin');
+
+                // due to rounding issues -> px to cm -> add 0.1cm to header height
+                return [
+                    'header_height' => (data_get($layout, 'header.height', 0) + 0.1) . 'cm',
+                    'footer_height' => data_get($layout, 'footer.height') . 'cm',
+                    'first_page_header_margin_top' => data_get($margin, 'marginTop', '0') . 'cm',
+                    'margin_preview_view' => [
+                        data_get($margin, 'marginTop', '0') . 'cm',
+                        data_get($margin, 'marginRight', '0') . 'cm',
+                        data_get($margin, 'marginBottom', '0') . 'cm',
+                        data_get($margin, 'marginLeft', '0') . 'cm',
+                    ],
+                    'margin_first_page' => [
+                        '0cm',
+                        data_get($margin, 'marginRight', '0') . 'cm',
+                        (data_get($margin, 'marginBottom', 0) + data_get($layout, 'footer.height', 0)) . 'cm',
+                        data_get($margin, 'marginLeft', '0') . 'cm',
+                    ],
+                    'margin' => [
+                        (data_get($margin, 'marginTop', 0) + data_get($layout, 'header.height', 0)) . 'cm',
+                        data_get($margin, 'marginRight', '0') . 'cm',
+                        (data_get($margin, 'marginBottom', 0) + data_get($layout, 'footer.height', 0)) . 'cm',
+                        data_get($margin, 'marginLeft', '0') . 'cm',
+                    ]];
+            }
+        }
+
+        return [
+            'header_height' => '18mm',
+            'footer_height' => '17mm',
+            'first_page_header_margin_top' => '32mm',
+            'margin_preview_view' => ['32mm', '20mm', '28mm', '18mm'],
+            'margin_first_page' => ['0mm', '20mm', '28mm', '18mm'],
+            'margin' => ['50mm', '20mm', '45mm', '18mm'],
+        ];
     }
 
     protected function getPaperOrientation(): string
@@ -266,6 +327,7 @@ abstract class PrintableView extends Component
         View::share('subject', $this->getSubject());
         View::share('printView', Str::kebab(class_basename($this)));
         View::share('printLayout', static::$layout);
+        View::share('layout', $this->getPrintLayout());
 
         $this->imagick?->clear();
         $this->imagick?->destroy();
@@ -281,7 +343,7 @@ abstract class PrintableView extends Component
         return true;
     }
 
-    protected function renderWithLayout(): \Illuminate\View\View
+    protected function renderWithLayout(bool $generatePdf = false): \Illuminate\View\View
     {
         return is_null(static::$layout)
             ? $this->render()
@@ -292,6 +354,8 @@ abstract class PrintableView extends Component
                     'pageCss' => $this->getPageCss(),
                     'hasHeader' => $this->renderHeader(),
                     'hasFooter' => $this->renderFooter(),
+                    'layout' => $this->getPrintLayout(),
+                    'generatePdf' => $generatePdf,
                 ]
             );
     }

@@ -147,10 +147,14 @@ class Editor extends Component
         public bool $orderedList = true,
         public bool $quote = true,
         public bool $codeBlock = true,
+        public bool $textAlign = false,
+        public bool $lineHeight = false,
 
         public bool $tooltipDropdown = false,
         public bool $transparent = false,
         public ?int $defaultFontSize = null,
+        public bool $fullHeight = false,
+        public bool $showEditorPadding = true,
         public array $availableFontSizes = [
             12,
             14,
@@ -162,8 +166,16 @@ class Editor extends Component
             32,
             36,
         ],
+        public array $availableLineHeights = [
+            1,
+            1.2,
+            1.5,
+            2,
+            2.5,
+            3,
+        ],
         public ?array $textColors = null,
-        public ?array $textBackgroundColors = null
+        public ?array $textBackgroundColors = null,
     ) {
         $this->id ??= Str::uuid()->toString();
         $this->textColors ??= static::$colorPalette;

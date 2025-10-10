@@ -1,4 +1,4 @@
-<div class="cover-page z-10 h-auto overflow-auto bg-white">
+<div class="first-page-header-margin-top z-10 h-auto overflow-auto bg-white">
     @section('first-page-logo')
     <div class="grid h-32 content-center">
         <div class="m-auto max-h-72 text-center">

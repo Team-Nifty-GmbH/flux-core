@@ -1,11 +1,11 @@
 @use('FluxErp\Enums\TimeFrameEnum')
 <div class="flex items-center gap-4">
     @if (in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)) && $canEdit)
-        <template x-for="group in allGroups">
+        <template x-for="in allGroups group">
             <div class="relative">
                 <x-button
                     wire:loading.attr="disabled"
-                    class="!text-secondary-600 !dark:text-secondary-400 border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
+                    class="!dark:text-secondary-400 border-b-2 border-b-transparent !text-secondary-600 focus:!ring-0 focus:!ring-offset-0"
                     flat
                     x-bind:class="{'!border-b-primary-600 !rounded-b-none': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
                     x-on:click="$wire.set('group', group)"

@@ -5,9 +5,6 @@
         }
     @show
 
-    p {
-        margin-bottom: 2px;
-    }
 
     li {
         list-style-type: disc;
@@ -21,25 +18,12 @@
         margin-bottom: 0;
     }
 
-    tr>td:first-child, tr>th:first-child {
-        padding-left: 10px;
+    .bg-even-children >:nth-child(even){
+        background: #F2F4F7;
     }
 
-    tr>td:last-child, tr>th:last-child {
-        padding-right: 10px;
-    }
-
-    .cover-page{
-        margin-top: -90px;
-        background-color: white;
-    }
-
-    .border-black {
-        border-color: black;
-    }
-
-    .line-through {
-        text-decoration: line-through;
+    .bg-uneven:nth-child(odd){
+        background: #F2F4F7;
     }
 
     .black-bar {
@@ -47,19 +31,6 @@
         width: 1.75rem;
         height: 0.25rem;
     }
-
-    @section('style.header')
-        header {
-            top: -20mm;
-        }
-    @show
-
-    @section('style.footer')
-        footer {
-            bottom: -30mm;
-            padding-bottom: 10mm;
-        }
-    @show
 
     .logo{
         height:70px;
@@ -69,61 +40,77 @@
         height:50px;
     }
 
-    .footer-logo {
-        transform: translateY(-50%);
-        background-color: white;
-        padding-left: 3mm;
-        padding-right: 3mm;
+    @page {
+      {{ 'margin: ' . implode(' ', data_get($pageCss,'margin',[])) . ';' }}
     }
 
-    .bg-even-children >:nth-child(even){
-        background: #F2F4F7;
-    }
-
-    .bg-uneven:nth-child(odd){
-        background: #F2F4F7;
-    }
-
-    .border-semi-black {
-        border-color: #667085;
+    @page :first {
+        {{ 'margin: ' . implode(' ', data_get($pageCss,'margin_first_page',[])) . ';' }}
     }
 
     @page {
-        @foreach($pageCss as $key => $css)
-            {{ $key }}: {{ is_array($css) ? implode(' ', $css) : $css }};
-        @endforeach
+        .page-count:before {
+            content: counter(page);
+        }
     }
-
-    .page-count:after {
-        content: "{{ __('Page') }} " counter(page) " {{ __('of') }} DOMPDF_PAGE_COUNT_PLACEHOLDER";
-    }
+    {{-- without this pdf generation would crash --}}
 
     @media screen {
-        .cover-page{
-            margin-top: 0;
-        }
+        @if(!$isPreview)
+        {{-- preview related --}}
+            body {
+                width: 21cm;
+                margin: 0 auto !important;
+                padding: {{ implode(' ', data_get($pageCss,'margin_preview_view',[])) }};
+                background: white;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                border-radius: 10px;
+            }
 
-        footer {
-            display: none;
-        }
+            footer {
+                display: none;
+            }
 
-        body {
-            max-width: 80rem;
-            margin: 0 auto !important;
-            padding: 20mm;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            border-radius: 10px;
-        }
+            header {
+                display: none;
+            }
+        @else
+            {{-- print related --}}
+            body {
+                margin: 0;
+                padding: 0;
+            }
 
-        html {
+            header {
+                display: block;
+                position: fixed;
+                top: -{{ data_get($pageCss,'header_height','0') }};
+                left: 0;
+                right: 0;
+            }
+
+            footer {
+                display: block;
+                position: fixed;
+                bottom: -{{ data_get($pageCss,'footer_height','0') }};
+                left: 0;
+                right: 0;
+            }
+
+            {{-- due to 0 margin for on first page --}}
+            {{-- it is needed to add margin-top on first-page-header --}}
+            .first-page-header-margin-top {
+                margin-top: {{ data_get($pageCss,'first_page_header_margin_top','0') }};
+            }
+
+            .page-count:before {
+                content: counter(page);
+            }
+
+        @endif        html {
             background: #f5f5f5;
+            overflow-y: auto;
         }
-    }
 
-    @media print {
-        body {
-            margin-bottom: 30px;
-        }
     }
 </style>

@@ -29,6 +29,12 @@ strong {
     color: inherit !important;
 }
 
+/* tiptatp - remove margin of the p element on demand */
+
+.no-margin p {
+    @apply m-0;
+}
+
 @layer components {
     .indent-icon {
         @apply after:content-['↳'];

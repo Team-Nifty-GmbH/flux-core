@@ -1,63 +1,73 @@
 @use(\Illuminate\Support\Number)
 @use(\FluxErp\Models\PriceList)
-@use(\FluxErp\Models\Currency)
 @use(\Illuminate\Support\Fluent)
 @php
     $isNet = ($model->priceList ?? resolve_static(PriceList::class, 'default'))->is_net;
 @endphp
 
-@section('first-page-header')
-<x-flux::print.first-page-header
-    :address="Fluent::make($model->address_invoice)"
-    :$model
->
-    <x-slot:right-block>
-        @section('first-page-right-block')
-        <table class="border-separate border-spacing-x-2">
-            <tbody class="align-text-top text-xs leading-none">
-                @section('first-page-right-block.rows')
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
-                        {{ __('Order no.') }}
-                    </td>
-                    <td class="py-0 text-right">
-                        {{ $model->order_number }}
-                    </td>
-                </tr>
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
-                        {{ __('Customer no.') }}
-                    </td>
-                    <td class="py-0 text-right">
-                        {{ $model->contact()->withTrashed()->value('customer_number') }}
-                    </td>
-                </tr>
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
-                        {{ __('Order Date') }}
-                    </td>
-                    <td class="py-0 text-right">
-                        {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                    </td>
-                </tr>
-                @if ($model->commission)
+@if ($layout)
+    <x-flux::print.order.custom-first-page-header
+        :layout="$layout"
+        :model="$model"
+        :client="$client"
+        :address="Fluent::make($model->address_invoice)"
+        :subject="data_get($model, 'document_subject', __('Order')) . ' ' . ($model->order_number ?? $model->number ?? '')"
+        :first-page-header-layout="data_get($layout, 'first_page_header')"
+    />
+@else
+    @section('first-page-header')
+    <x-flux::print.first-page-header
+        :address="Fluent::make($model->address_invoice)"
+        :$model
+    >
+        <x-slot:right-block>
+            @section('first-page-right-block')
+            <table class="ml-auto border-separate border-spacing-x-2">
+                <tbody class="align-text-top text-xs leading-none">
+                    @section('first-page-right-block.rows')
                     <tr class="leading-none">
                         <td class="py-0 text-left font-semibold">
-                            {{ __('Commission') }}
+                            {{ __('Order no.') }}
                         </td>
                         <td class="py-0 text-right">
-                            {{ $model->commission }}
+                            {{ $model->order_number }}
                         </td>
                     </tr>
-                @endif
+                    <tr class="leading-none">
+                        <td class="py-0 text-left font-semibold">
+                            {{ __('Customer no.') }}
+                        </td>
+                        <td class="py-0 text-right">
+                            {{ $model->contact()->withTrashed()->value('customer_number') }}
+                        </td>
+                    </tr>
+                    <tr class="leading-none">
+                        <td class="py-0 text-left font-semibold">
+                            {{ __('Order Date') }}
+                        </td>
+                        <td class="py-0 text-right">
+                            {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
+                        </td>
+                    </tr>
+                    @if ($model->commission)
+                        <tr class="leading-none">
+                            <td class="py-0 text-left font-semibold">
+                                {{ __('Commission') }}
+                            </td>
+                            <td class="py-0 text-right">
+                                {{ $model->commission }}
+                            </td>
+                        </tr>
+                    @endif
 
-                @show
-            </tbody>
-        </table>
-        @show
-    </x-slot>
-</x-flux::print.first-page-header>
-@show
+                    @show
+                </tbody>
+            </table>
+            @show
+        </x-slot>
+    </x-flux::print.first-page-header>
+    @show
+@endif
 <main>
     @section('header')
     <div class="prose-xs pb-4 pt-10">
