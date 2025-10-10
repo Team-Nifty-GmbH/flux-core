@@ -85,6 +85,9 @@ class PrintLayoutEditor extends Component
                 'zip' => '67890',
                 'city' => 'Another City',
             ],
+            'parent' => [
+                'invoice_number' => 'INV123456',
+            ]
         ];
     }
 

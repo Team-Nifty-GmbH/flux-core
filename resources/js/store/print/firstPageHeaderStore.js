@@ -71,6 +71,7 @@ export default function () {
         },
         async _loadComponentsIdBasedOnName() {
             const name = await this.component.get('name');
+            console.log(name);
             switch (name) {
                 case 'final-invoice':
                     return 'first-page-header-final-invoice';
@@ -359,6 +360,7 @@ export default function () {
                 // HENCE REST OF THE CODE IS EXECUTED ON THE NEXT EVENT LOOP CYCLE - WHERE DOM IS SYNCED
                 await nextTick();
                 const component = await this._loadComponentsIdBasedOnName();
+
                 // element order is important - since they are relatively ordered to each other
                 const elementIds = [
                     'first-page-header-client-name',
@@ -367,6 +369,8 @@ export default function () {
                     'first-page-header-subject',
                     component,
                 ];
+
+                console.log(elementIds);
 
                 elementIds.forEach((item) => {
                     this.firstPageHeader.appendChild(
@@ -381,6 +385,7 @@ export default function () {
                 const { width: parentWidth, height: parentHeight } =
                     this.firstPageSize;
 
+                await nextTick();
                 this._initOnEmptyJson(elementIds, parentWidth);
             }
 
@@ -648,7 +653,13 @@ export default function () {
                         }
                     }
 
-                    if (item.id === 'first-page-header-right-block') {
+                    if (
+                        [
+                            'first-page-header-right-block',
+                            'first-page-header-final-invoice',
+                            'first-page-header-refund',
+                        ].includes(item.id)
+                    ) {
                         const x = parentWidth - item.size.width;
                         const indexOfAddress = this.visibleElements.findIndex(
                             (i) =>

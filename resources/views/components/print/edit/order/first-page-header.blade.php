@@ -184,7 +184,10 @@
             data-type="container"
             draggable="false"
             class="absolute left-0 top-0"
-            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-address'}"
+            x-bind:class="{
+                'bg-gray-300':
+                    firstPageHeaderStore.selectedElementId === 'first-page-header-address',
+            }"
             x-on:mousedown="
                 printStore.editFirstPageHeader
                     ? firstPageHeaderStore.onMouseDown($event, 'first-page-header-address')
@@ -229,7 +232,11 @@
             data-type="container"
             draggable="false"
             class="absolute left-0 top-0 select-none"
-            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
+            x-bind:class="{
+                'bg-gray-300':
+                    firstPageHeaderStore.selectedElementId ===
+                    'first-page-header-right-block',
+            }"
             x-on:mousedown="
                 printStore.editFirstPageHeader
                     ? firstPageHeaderStore.onMouseDown($event, 'first-page-header-right-block')
@@ -241,36 +248,48 @@
             />
         </div>
     </template>
-    <template
-        id="{{ uniqid() }}"
-        x-ref="first-page-header-final-invoice"
-    >
+    <template id="{{ uniqid() }}" x-ref="first-page-header-final-invoice">
         <div
             id="first-page-header-final-invoice"
             data-type="container"
             draggable="false"
             class="absolute left-0 top-0 select-none"
-            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
+            x-bind:class="{
+                'bg-gray-300':
+                    firstPageHeaderStore.selectedElementId ===
+                    'first-page-header-final-invoice',
+            }"
+            x-on:mousedown="
+                printStore.editFirstPageHeader
+                    ? firstPageHeaderStore.onMouseDown(
+                          $event,
+                          'first-page-header-final-invoice',
+                      )
+                    : null
+            "
         >
             <x-flux::print.elements.first-page-header-final-invoice
                 :model="$model"
             />
         </div>
     </template>
-    <template
-        id="{{ uniqid() }}"
-        x-ref="first-page-header-refund"
-    >
+    <template id="{{ uniqid() }}" x-ref="first-page-header-refund">
         <div
             id="first-page-header-refund"
             data-type="container"
             draggable="false"
             class="absolute left-0 top-0 select-none"
-            x-bind:class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
+            x-bind:class="{
+                'bg-gray-300':
+                    firstPageHeaderStore.selectedElementId === 'first-page-header-refund',
+            }"
+            x-on:mousedown="
+                printStore.editFirstPageHeader
+                    ? firstPageHeaderStore.onMouseDown($event, 'first-page-header-refund')
+                    : null
+            "
         >
-            <x-flux::print.elements.first-page-header-refund
-                :model="$model"
-            />
+            <x-flux::print.elements.first-page-header-refund :model="$model" />
         </div>
     </template>
     <template id="{{ uniqid() }}" x-ref="first-page-header-additional-img">
@@ -284,7 +303,11 @@
             data-type="resizable"
             draggable="false"
             class="absolute left-0 top-0 h-[1.7cm] select-none"
-            x-bind:class="{'bg-gray-300' : !firstPageHeaderStore.isImgResizeClicked && firstPageHeaderStore.selectedElementId === $el.id}"
+            x-bind:class="{
+                'bg-gray-300':
+                    ! firstPageHeaderStore.isImgResizeClicked &&
+                    firstPageHeaderStore.selectedElementId === $el.id,
+            }"
         >
             <div
                 draggable="false"

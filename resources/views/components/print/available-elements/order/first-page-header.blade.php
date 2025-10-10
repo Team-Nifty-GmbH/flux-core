@@ -34,13 +34,31 @@
                 x-bind:value="firstPageHeaderStore.visibleElements.map(e => e.id).includes('first-page-header-address')"
             />
         </div>
-        <div class="flex items-center justify-between">
-            <div>{{ __('Order') }}</div>
-            <x-toggle
-                x-on:change="firstPageHeaderStore.toggleElement($refs,'first-page-header-right-block')"
-                x-bind:value="firstPageHeaderStore.visibleElements.map(e => e.id).includes('first-page-header-right-block')"
-            />
-        </div>
+        @if ($this->name === 'final-invoice')
+            <div class="flex items-center justify-between">
+                <div>{{ __('Order') }}</div>
+                <x-toggle
+                    x-on:change="firstPageHeaderStore.toggleElement($refs,'first-page-header-final-invoice')"
+                    x-bind:value="firstPageHeaderStore.visibleElements.map(e => e.id).includes('first-page-header-final-invoice')"
+                />
+            </div>
+        @elseif ($this->name === 'refund')
+            <div class="flex items-center justify-between">
+                <div>{{ __('Order') }}</div>
+                <x-toggle
+                    x-on:change="firstPageHeaderStore.toggleElement($refs,'first-page-header-refund')"
+                    x-bind:value="firstPageHeaderStore.visibleElements.map(e => e.id).includes('first-page-header-refund')"
+                />
+            </div>
+        @else
+            <div class="flex items-center justify-between">
+                <div>{{ __('Order') }}</div>
+                <x-toggle
+                    x-on:change="firstPageHeaderStore.toggleElement($refs,'first-page-header-right-block')"
+                    x-bind:value="firstPageHeaderStore.visibleElements.map(e => e.id).includes('first-page-header-right-block')"
+                />
+            </div>
+        @endif
     </div>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
     <div class="pb-4 text-lg text-gray-600">{{ __('Additional Media') }}</div>

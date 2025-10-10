@@ -69,6 +69,34 @@
             </div>
         @endif
 
+        @if (data_get($element, 'id', '0') === 'first-page-header-final-invoice')
+            <div
+                style="
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
+                class="absolute"
+            >
+                <x-flux::print.elements.first-page-header-final-invoice
+                    :model="$model"
+                />
+            </div>
+        @endif
+
+        @if (data_get($element, 'id', '0') === 'first-page-header-refund')
+            <div
+                style="
+                    left: {{ data_get($element, 'x', '0') }}cm;
+                    top: {{ data_get($element, 'y', '0') }}cm;
+                "
+                class="absolute"
+            >
+                <x-flux::print.elements.first-page-header-refund
+                    :model="$model"
+                />
+            </div>
+        @endif
+
         @if (data_get($element, 'id', '') === 'first-page-header-address' && isset($address))
             <div
                 style="

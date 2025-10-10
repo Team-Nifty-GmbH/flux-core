@@ -107,8 +107,7 @@
                 content: counter(page);
             }
 
-        @endif
-        html {
+        @endif        html {
             background: #f5f5f5;
             overflow-y: auto;
         }

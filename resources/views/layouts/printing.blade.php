@@ -34,7 +34,7 @@
     </head>
     <body class="text-xs">
         @if ($hasHeader ?? true)
-            @if($layout)
+            @if ($layout)
                 <x-flux::print.custom-header
                     :is-preview="$generatePdf"
                     :header-layout="data_get($layout,'header')"
@@ -46,12 +46,12 @@
         @endif
 
         @if ($hasFooter ?? true)
-            @if($layout)
+            @if ($layout)
                 <x-flux::print.custom-footer
                     :footer-layout="data_get($layout,'footer')"
                 />
             @else
-                <x-flux::print.footer/>
+                <x-flux::print.footer />
             @endif
         @endif
 

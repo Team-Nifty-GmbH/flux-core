@@ -27,7 +27,14 @@ export function intersectionHandlerFactory($store) {
     };
 }
 
-// TODO: maybe to change to requestAnimationFrame?
 export function nextTick() {
     return Promise.resolve();
+}
+// same as nextTick but waits for the next animation frame
+export function nextFrame() {
+    return new Promise((resolve) => {
+        requestAnimationFrame(() => {
+            resolve();
+        });
+    });
 }
