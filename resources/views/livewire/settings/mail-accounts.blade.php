@@ -1,4 +1,4 @@
-<x-modal id="edit-mail-folders" class="bg-gray-50">
+<x-modal id="edit-mail-folders" class="bg-gray-50" persistent>
     <div class="grid grid-cols-2 gap-1.5">
         <x-card
             id="mail-folders"
@@ -65,11 +65,19 @@
         />
     </x-slot>
 </x-modal>
-<x-modal id="edit-mail-account">
+<x-modal id="edit-mail-account" persistent x-on:open="$focusOn('mailAccount.name')">
     <x-slot:title>
         {{ __('Edit Mail Account') }}
     </x-slot>
     <div class="flex flex-col gap-1.5">
+        <x-card>
+            <div class="flex flex-col gap-1.5">
+                <x-input
+                    wire:model="mailAccount.name"
+                    :label="__('Name')"
+                />
+            </div>
+        </x-card>
         <x-card
             :header="__('IMAP Settings')"
             footer-classes="flex justify-end gap-1.5"
@@ -130,9 +138,22 @@
             footer-classes="flex justify-end gap-1.5"
         >
             <div class="flex flex-col gap-1.5">
+                <x-select.styled
+                    :label="__('Service')"
+                    wire:model="mailAccount.smtp_mailer"
+                    :options="\Illuminate\Support\Arr::except(array_keys(config('mail.mailers')), ['log', 'array', 'failover'])"
+                />
                 <x-input
                     wire:model="mailAccount.smtp_email"
                     :label="__('Email')"
+                />
+                <x-input
+                    wire:model="mailAccount.smtp_from_name"
+                    :label="__('From Name')"
+                />
+                <x-input
+                    wire:model="mailAccount.smtp_reply_to"
+                    :label="__('Reply-To')"
                 />
                 <x-password
                     wire:model="mailAccount.smtp_password"
@@ -163,12 +184,6 @@
                     :text="__('Send test mail')"
                     wire:flux-confirm.prompt="{{  __('Send test mail to') }}||{{  __('Cancel') }}|{{  __('Send') }}"
                     wire:click="sendTestMail($promptValue())"
-                />
-                <x-button
-                    loading
-                    color="indigo"
-                    :text="__('Test Connection')"
-                    x-on:click="$wire.testSmtpConnection()"
                 />
             </x-slot>
         </x-card>
