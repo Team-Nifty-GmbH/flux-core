@@ -28,6 +28,6 @@ class CreateMailAccount extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['name'] ??= $this->getData('smtp_email') ?? $this->getData('email');
+        $this->data['name'] ??= $this->getData('email') ?? $this->getData('smtp_email');
     }
 }

@@ -75,7 +75,6 @@
                 <x-input
                     wire:model="mailAccount.name"
                     :label="__('Name')"
-                    required
                 />
             </div>
         </x-card>
@@ -142,13 +141,11 @@
                 <x-select.styled
                     :label="__('Service')"
                     wire:model="mailAccount.smtp_mailer"
-                    required
                     :options="\Illuminate\Support\Arr::except(array_keys(config('mail.mailers')), ['log', 'array', 'failover'])"
                 />
                 <x-input
                     wire:model="mailAccount.smtp_email"
                     :label="__('Email')"
-                    required
                 />
                 <x-input
                     wire:model="mailAccount.smtp_from_name"
