@@ -10,7 +10,6 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        return;
         Schema::table('mail_accounts', function (Blueprint $table): void {
             $table->string('protocol')->nullable()->default('imap')->change();
             $table->string('email')->nullable()->change();
