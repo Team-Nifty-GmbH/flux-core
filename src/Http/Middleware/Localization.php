@@ -6,6 +6,7 @@ use Closure;
 use FluxErp\Models\Language;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Number;
 use Throwable;
 
 class Localization
@@ -25,6 +26,8 @@ class Localization
                 resolve_static(Language::class, 'default')?->language_code ??
                 config('app.locale')
             );
+
+            Number::useLocale(app()->getLocale());
         }
 
         return $next($request);
