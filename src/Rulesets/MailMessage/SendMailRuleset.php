@@ -6,10 +6,19 @@ use FluxErp\Models\Client;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\MailAccount;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\Communication\CommunicatablesRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 
 class SendMailRuleset extends FluxRuleset
 {
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(CommunicatablesRuleset::class, 'getRules'),
+        );
+    }
+
     public function rules(): array
     {
         return [

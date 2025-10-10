@@ -199,7 +199,7 @@ abstract class Communication extends CommunicationList
         $this->communication->mail_account_id ??= auth()
             ->user()
             ->defaultMailAccount()
-            ?->getKey();
+            ?->getKey() ?? 'default';
 
         $this->attachments->reset();
         if ($communication->id) {
@@ -275,6 +275,10 @@ abstract class Communication extends CommunicationList
     #[Renderless]
     public function send(): bool
     {
+        $this->communication->mail_account_id = $this->communication->mail_account_id === 'default'
+            ? null
+            : $this->communication->mail_account_id;
+
         if (! $this->save()) {
             return false;
         }
@@ -377,10 +381,10 @@ abstract class Communication extends CommunicationList
                         ->user()
                         ->mailAccounts()
                         ->whereNotNull('smtp_email')
-                        ->get(['mail_accounts.id', 'email'])
+                        ->get(['mail_accounts.id', 'name'])
                         ->toArray(),
                     [
-                        ['id' => null, 'email' => __('Default')],
+                        ['id' => 'default', 'name' => __('Default')],
                     ]
                 ),
             ]

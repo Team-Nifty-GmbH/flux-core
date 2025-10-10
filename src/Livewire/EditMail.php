@@ -58,10 +58,10 @@ class EditMail extends Component
                     ->user()
                     ->mailAccounts()
                     ->whereNotNull('smtp_email')
-                    ->get(['mail_accounts.id', 'email'])
+                    ->get(['mail_accounts.id', 'name'])
                     ->toArray(),
                 [
-                    ['id' => null, 'email' => __('Default')],
+                    ['id' => 'default', 'name' => __('Default')],
                 ]
             ),
         ]);
@@ -148,7 +148,7 @@ class EditMail extends Component
         $this->mailMessage->mail_account_id ??= auth()
             ->user()
             ->defaultMailAccount()
-            ?->getKey();
+            ?->getKey() ?? 'default';
 
         $this->emailTemplates = resolve_static(EmailTemplate::class, 'query')
             ->when(
@@ -335,12 +335,20 @@ class EditMail extends Component
                 }
 
                 $data['queue'] = ! $single;
+                $data['mail_account_id'] = data_get($data, 'mail_account_id') === 'default'
+                    ? null
+                    : data_get($data, 'mail_account_id');
 
                 $result = SendMail::make($data)
+                    ->checkPermission()
                     ->validate()
-                    ->execute();
+                    ->when(
+                        data_get($data, 'queue'),
+                        fn (SendMail $action) => $action->executeAsync(),
+                        fn (SendMail $action) => $action->execute()
+                    );
 
-                if (data_get($result, 'success')) {
+                if (data_get($result, 'success') || data_get($data, 'queue')) {
                     $successCount++;
                 } else {
                     $failedCount++;
