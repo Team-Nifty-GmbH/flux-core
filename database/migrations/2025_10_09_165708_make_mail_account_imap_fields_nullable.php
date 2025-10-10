@@ -10,6 +10,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        return;
         Schema::table('mail_accounts', function (Blueprint $table): void {
             $table->string('protocol')->nullable()->default('imap')->change();
             $table->string('email')->nullable()->change();
@@ -51,10 +52,10 @@ return new class() extends Migration
             $table->string('email')->nullable(false)->change();
             $table->text('password')->nullable(false)->change();
             $table->string('host')->nullable(false)->change();
-            $table->integer('port')->nullable(false)->change();
-            $table->string('encryption')->nullable(false)->change();
+            $table->integer('port')->nullable(false)->default(993)->change();
+            $table->string('encryption')->nullable(false)->default('ssl')->change();
 
-            $table->integer('smtp_port')->nullable(false)->change();
+            $table->integer('smtp_port')->nullable(false)->default(587)->change();
 
             $table->dropColumn(['name', 'smtp_from_name', 'smtp_reply_to']);
         });
