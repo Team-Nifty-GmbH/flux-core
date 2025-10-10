@@ -57,7 +57,7 @@ class SendMail extends DispatchableFluxAction
                 ->cc($this->getData('cc') ?? [])
                 ->bcc($this->getData('bcc') ?? []);
 
-            if ((data_get($this->data, 'queue') ?? false) && $useDefaultMailer) {
+            if (($this->getData('queue') ?? false) && $useDefaultMailer) {
                 $message->queue($mail);
             } else {
                 $message->send($mail);
