@@ -163,7 +163,7 @@ class MergeRecords extends FluxAction
                         ->where($relation->getQualifiedForeignPivotKeyName(), $mainRecord->getKey())
                         ->when(
                             $relation instanceof MorphToMany && $relation->getInverse() === false,
-                            fn ($query) => $query->where(
+                            fn (Builder $query) => $query->where(
                                 $relation->getQualifiedMorphTypeName(),
                                 $mainRecord->getMorphClass()
                             )
