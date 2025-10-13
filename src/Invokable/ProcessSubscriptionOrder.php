@@ -162,7 +162,7 @@ class ProcessSubscriptionOrder implements Repeatable
 
             $to = array_values(array_unique(array_filter($to)));
 
-            if (! blank($to)) {
+            if (! $to) {
                 $result = SendMail::make([
                     'template_id' => $emailTemplateId,
                     'to' => $to,
