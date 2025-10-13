@@ -181,7 +181,7 @@ class ProcessSubscriptionOrder implements Repeatable
                     ->validate()
                     ->execute();
 
-                if (data_get($result, 'success') ?? false) {
+                if (! data_get($result, 'success') ?? false) {
                     activity()
                         ->event('subscription_email_failed')
                         ->performedOn($order)
