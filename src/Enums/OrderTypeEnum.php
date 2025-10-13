@@ -41,6 +41,8 @@ enum OrderTypeEnum: string
         return self::getMultiplier($this);
     }
 
+    case Offer = 'offer';
+
     case Order = 'order';
 
     case Purchase = 'purchase';
