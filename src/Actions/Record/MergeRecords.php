@@ -158,9 +158,18 @@ class MergeRecords extends FluxAction
                         $relation instanceof MorphToMany ? [$relation->getMorphType()] : [],
                         $pivotColumns
                     );
+                    $wheres = array_filter(
+                        $relation->toBase()->wheres,
+                        fn (array $where) => str_starts_with(
+                            data_get($where, 'column') ?? '',
+                            $relation->getTable() . '.'
+                        )
+                            && data_get($where, 'column') !== $relation->getQualifiedForeignPivotKeyName()
+                    );
 
                     $existingRelatedIds = $relation->newPivotStatement()
                         ->where($relation->getQualifiedForeignPivotKeyName(), $mainRecord->getKey())
+                        ->when($wheres, fn (Builder $query) => $this->addWheresToQuery($query, $wheres))
                         ->when(
                             $relation instanceof MorphToMany && $relation->getInverse() === false,
                             fn (Builder $query) => $query->where(
@@ -191,6 +200,7 @@ class MergeRecords extends FluxAction
                                     $relation->getQualifiedForeignPivotKeyName(),
                                     $this->getData('merge_records.*.id')
                                 )
+                                ->when($wheres, fn (Builder $query) => $this->addWheresToQuery($query, $wheres))
                                 ->when(
                                     ! $pivotColumns,
                                     fn (Builder $query) => $query
@@ -216,6 +226,44 @@ class MergeRecords extends FluxAction
             ->each(fn (Model $model) => $model->delete());
 
         return $mainRecord->withoutRelations()->refresh();
+    }
+
+    protected function addWheresToQuery(Builder $query, array $wheres): void
+    {
+        foreach ($wheres as $where) {
+            $type = Arr::pull($where, 'type');
+
+            switch ($type) {
+                case 'Basic':
+                    $query->where(...$where);
+                    break;
+                case 'Null':
+                case 'NotNull':
+                    $query->whereNull(...array_merge($where, ['not' => $type === 'NotNull']));
+                    break;
+                case 'In':
+                case 'NotIn':
+                    $query->whereIn(...array_merge($where, ['not' => $type === 'NotIn']));
+                    break;
+                case 'InRaw':
+                case 'NotInRaw':
+                    $query->whereIntegerInRaw(
+                        ...array_merge($where, ['not' => $type === 'NotInRaw'])
+                    );
+                    break;
+                case 'Column':
+                    $query->whereColumn(...$where);
+                    break;
+                case 'betweenColumns':
+                    $query->whereBetweenColumns(...$where);
+                    break;
+                case 'Like':
+                    $query->whereLike(...$where);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     protected function validateData(): void
