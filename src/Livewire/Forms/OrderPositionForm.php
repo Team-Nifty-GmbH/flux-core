@@ -140,7 +140,10 @@ class OrderPositionForm extends FluxForm
         $this->purchase_price = $this->product->purchasePrice($this->amount)?->price ?? 0;
 
         $this->warehouse_id ??= resolve_static(Warehouse::class, 'default')?->getKey();
-        $this->description ??= $this->product->description;
+
+        if (! strip_tags($this->description ?? '')) {
+            $this->description = $this->product->description;
+        }
     }
 
     public function getProduct(): Product
