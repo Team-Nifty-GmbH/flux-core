@@ -460,7 +460,7 @@ class Order extends Component
             ->whereKey($orderTypeId)
             ->first();
 
-        if (! $orderType || ! $orderType->print_layouts) {
+        if (! $orderType->print_layouts) {
             return [];
         }
 
@@ -468,14 +468,12 @@ class Order extends Component
         $tempOrder->order_type_id = $orderTypeId;
         $tempOrder->orderType = $orderType;
 
-        $printViews = $tempOrder->resolvePrintViews();
-
         return array_map(
             fn (string $value) => [
                 'label' => __($value),
                 'value' => $value,
             ],
-            array_keys($printViews)
+            array_keys($tempOrder->resolvePrintViews())
         );
     }
 

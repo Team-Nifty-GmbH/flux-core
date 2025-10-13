@@ -49,7 +49,7 @@
                 <x-input
                     type="time"
                     :label="__('Time')"
-                    wire:model.live="schedule.cron.parameters.basic.0"
+                    wire:model="schedule.cron.parameters.basic.0"
                 />
             </div>
             <div
@@ -74,7 +74,7 @@
                 <x-input
                     type="time"
                     :label="__('Time')"
-                    wire:model.live="schedule.cron.parameters.basic.1"
+                    wire:model="schedule.cron.parameters.basic.1"
                 />
             </div>
             <div
@@ -91,7 +91,7 @@
                 <x-input
                     type="time"
                     :label="__('Time')"
-                    wire:model.live="schedule.cron.parameters.basic.1"
+                    wire:model="schedule.cron.parameters.basic.1"
                 />
             </div>
             <div
@@ -228,8 +228,8 @@
                             wire:model="schedule.parameters.printLayouts"
                             :label="__('Print Layouts')"
                             :hint="__('Select one or more print layouts to generate when the schedule runs')"
-                            select="label:label|value:value"
                             multiple
+                            select="label:label|value:value"
                             :options="$this->getPrintLayoutOptions()"
                         />
                     </div>
@@ -243,9 +243,16 @@
                             'url' => route('search', \FluxErp\Models\EmailTemplate::class),
                             'method' => 'POST',
                             'params' => [
-                                'searchFields' => ['name', 'subject'],
+                                'searchFields' => [
+                                    'name',
+                                    'subject',
+                                ],
                                 'where' => [
-                                    ['model_type', '=', morph_alias(\FluxErp\Models\Order::class)],
+                                    [
+                                        'model_type',
+                                        '=',
+                                        morph_alias(\FluxErp\Models\Order::class),
+                                    ],
                                 ],
                             ],
                         ]"
