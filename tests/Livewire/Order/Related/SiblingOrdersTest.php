@@ -1,9 +1,9 @@
 <?php
 
-use FluxErp\Livewire\Order\Projects;
+use FluxErp\Livewire\Order\Related\SiblingOrders;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
-    Livewire::test(Projects::class)
+    Livewire::test(SiblingOrders::class)
         ->assertOk();
 });

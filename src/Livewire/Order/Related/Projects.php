@@ -1,14 +1,14 @@
 <?php
 
-namespace FluxErp\Livewire\Order;
+namespace FluxErp\Livewire\Order\Related;
 
 use FluxErp\Livewire\DataTables\ProjectList;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Locked;
 
 class Projects extends ProjectList
 {
-    #[Modelable]
+    #[Locked]
     public int $orderId;
 
     protected function getBuilder(Builder $builder): Builder
