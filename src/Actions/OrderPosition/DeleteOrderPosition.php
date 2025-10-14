@@ -50,6 +50,12 @@ class DeleteOrderPosition extends FluxAction
             ];
         }
 
+        if ($orderPosition->descendants()->exists()) {
+            $errors += [
+                'has_descendants' => ['You cannot delete an order position that has descendants.'],
+            ];
+        }
+
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('deleteOrderPosition');
         }

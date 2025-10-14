@@ -392,6 +392,7 @@ class Order extends Component
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
             $this->schedule->parameters['orderTypeId'] = resolve_static(OrderType::class, 'query')
+                ->where('client_id', $this->order->client_id)
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
@@ -416,6 +417,7 @@ class Order extends Component
                             ])
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('client_id', $this->order->client_id)
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
                             ->exists();
@@ -423,6 +425,29 @@ class Order extends Component
                 ->attributes([
                     'class' => 'w-full',
                     'wire:click' => 'replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
+                ]),
+            DataTableButton::make()
+                ->text(__('Create Refund'))
+                ->color('red')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && $this->order->invoice_number
+                        && resolve_static(OrderType::class, 'query')
+                            ->whereKey($this->order->order_type_id)
+                            ->whereIn('order_type_enum', [
+                                OrderTypeEnum::Order->value,
+                                OrderTypeEnum::SplitOrder->value,
+                            ])
+                            ->exists()
+                        && resolve_static(OrderType::class, 'query')
+                            ->where('client_id', $this->order->client_id)
+                            ->where('order_type_enum', OrderTypeEnum::Refund->value)
+                            ->where('is_active', true)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'wire:click' => 'replicate(\'' . OrderTypeEnum::Refund->value . '\')',
                 ]),
             DataTableButton::make()
                 ->text(__('Create Split-Order'))
@@ -436,6 +461,7 @@ class Order extends Component
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('client_id', $this->order->client_id)
                             ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
                             ->where('is_active', true)
                             ->where('is_hidden', false)
@@ -558,6 +584,14 @@ class Order extends Component
 
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
+
+        if ($orderTypeEnum) {
+            $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
+                ->where('client_id', $this->order->client_id)
+                ->where('order_type_enum', $orderTypeEnum)
+                ->where('is_active', true)
+                ->value('id');
+        }
 
         $this->replicateOrder->order_positions = null;
 

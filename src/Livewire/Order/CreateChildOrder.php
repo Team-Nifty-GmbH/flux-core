@@ -71,6 +71,7 @@ class CreateChildOrder extends Component
         $this->replicateOrder->order_positions = [];
 
         $this->availableOrderTypes = resolve_static(OrderType::class, 'query')
+            ->where('client_id', $parentOrder->client_id)
             ->where('order_type_enum', $this->type)
             ->where('is_active', true)
             ->when(
@@ -155,18 +156,24 @@ class CreateChildOrder extends Component
                 $join->on('order_positions.id', '=', 'descendants.origin_position_id')
                     ->whereNull('descendants.deleted_at');
             })
+            ->leftJoin('order_positions AS subDescendants', function (JoinClause $join): void {
+                $join->on('descendants.id', '=', 'subDescendants.origin_position_id')
+                    ->whereNull('subDescendants.deleted_at');
+            })
             ->selectRaw(
-                'order_positions.id' .
-                ', order_positions.amount' .
-                ', order_positions.name' .
-                ', order_positions.description' .
-                ', order_positions.unit_net_price' .
-                ', order_positions.unit_gross_price' .
-                ', order_positions.total_net_price' .
-                ', order_positions.total_gross_price' .
-                ', order_positions.is_net' .
-                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
-                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
+                'order_positions.id'
+                . ', order_positions.amount'
+                . ', order_positions.name'
+                . ', order_positions.description'
+                . ', order_positions.unit_net_price'
+                . ', order_positions.unit_gross_price'
+                . ', order_positions.total_net_price'
+                . ', order_positions.total_gross_price'
+                . ', order_positions.is_net'
+                . ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount'
+                . ', SUM(COALESCE(subDescendants.amount, 0)) AS subDescendantAmount'
+                . ', order_positions.amount'
+                . ' - SUM(COALESCE(descendants.amount, 0)) + SUM(COALESCE(subDescendants.amount, 0)) AS totalAmount'
             )
             ->groupBy([
                 'order_positions.id',
@@ -180,7 +187,7 @@ class CreateChildOrder extends Component
                 'order_positions.is_net',
             ])
             ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > descendantAmount');
+            ->havingRaw('totalAmount > 0');
 
         if (! $takeAllWithPercentage) {
             $query->whereKey($positionIds);
@@ -190,10 +197,10 @@ class CreateChildOrder extends Component
 
         foreach ($orderPositions as $orderPosition) {
             $amount = $takeAllWithPercentage
-                ? round($orderPosition->totalAmount * ($this->percentage / 100), 2)
+                ? bcround($orderPosition->totalAmount * ($this->percentage / 100), 2)
                 : $orderPosition->totalAmount;
 
-            if ($amount > 0) {
+            if (bccomp($amount, 0) === 1) {
                 $this->replicateOrder->order_positions[] = [
                     'id' => $orderPosition->id,
                     'amount' => $amount,
