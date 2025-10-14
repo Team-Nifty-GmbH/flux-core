@@ -4,7 +4,7 @@
             <livewire:widgets.order :model-id="$order->parent_id" />
         </x-card>
         <x-card :header="__('Descending from the original order')">
-            <livewire:order.related.sibling-orders
+            <livewire:order.related.family-orders
                 :order-id="$order->id"
                 lazy
             />
