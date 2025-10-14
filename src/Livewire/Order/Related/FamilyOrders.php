@@ -30,6 +30,7 @@ class FamilyOrders extends OrderList
                     'parent_id',
                 ])
                 ?->descendantKeys()
-        );
+        )
+            ->whereKeyNot($this->orderId);
     }
 }
