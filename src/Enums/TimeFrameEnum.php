@@ -22,6 +22,8 @@ class TimeFrameEnum extends FluxEnum
 
     final public const string ThisYear = 'This Year';
 
+    final public const string LastMonth = 'Last Month';
+
     final public const string Custom = 'Custom';
 
     public static function getPreviousRange(string $case): ?array
@@ -52,6 +54,10 @@ class TimeFrameEnum extends FluxEnum
             TimeFrameEnum::ThisYear => [
                 $now->subYear()->startOfYear(),
                 $now->subYear(),
+            ],
+            TimeFrameEnum::LastMonth => [
+                $now->subMonthsWithoutOverflow(2)->startOfMonth(),
+                $now->subMonthsWithoutOverflow(2),
             ],
             default => null,
         };
@@ -86,6 +92,10 @@ class TimeFrameEnum extends FluxEnum
                 $now->startOfYear(),
                 $now,
             ],
+            TimeFrameEnum::LastMonth => [
+                $now->subMonth()->startOfMonth(),
+                $now->subMonth()->endOfMonth(),
+            ],
             default => null,
         };
     }
@@ -96,6 +106,7 @@ class TimeFrameEnum extends FluxEnum
             TimeFrameEnum::Today,
             TimeFrameEnum::Yesterday,
             TimeFrameEnum::ThisMonth,
+            TimeFrameEnum::LastMonth,
             TimeFrameEnum::ThisWeek => 'day',
             TimeFrameEnum::ThisQuarter => 'week',
             TimeFrameEnum::ThisYear => 'month',
