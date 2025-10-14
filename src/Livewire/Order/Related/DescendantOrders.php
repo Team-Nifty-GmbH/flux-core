@@ -12,7 +12,7 @@ class DescendantOrders extends OrderList
     #[Locked]
     public int $orderId;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereKey(
             resolve_static(Order::class, 'query')

@@ -7,12 +7,12 @@ use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
-class SiblingOrders extends OrderList
+class FamilyOrders extends OrderList
 {
     #[Locked]
     public int $orderId;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereKey(
             resolve_static(Order::class, 'query')
