@@ -135,7 +135,7 @@ test('create communication', function (): void {
 
 test('create communication maximum', function (): void {
     $communication = [
-        'communication_type_enum' => CommunicationTypeEnum::Mail->value,
+        'communication_type_enum' => CommunicationTypeEnum::Mail,
         'subject' => 'Full Test Email',
         'text_body' => 'This is the text body',
         'html_body' => '<p>This is the <strong>HTML</strong> body</p>',
