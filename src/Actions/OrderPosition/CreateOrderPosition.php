@@ -14,6 +14,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -207,15 +208,27 @@ class CreateOrderPosition extends FluxAction
 
                 $originPosition = resolve_static(OrderPosition::class, 'query')
                     ->whereKey($originPositionId)
-                    ->where('order_id', $order->parent_id)
-                    ->withSum('descendants as descendantsAmount', 'amount')
+                    ->where('order_positions.order_id', $order->parent_id)
+                    ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
+                        $join->on('order_positions.id', '=', 'descendants.origin_position_id')
+                            ->whereNull('descendants.deleted_at');
+                    })
+                    ->leftJoin('order_positions AS subDescendants', function (JoinClause $join): void {
+                        $join->on('descendants.id', '=', 'subDescendants.origin_position_id')
+                            ->whereNull('subDescendants.deleted_at');
+                    })
+                    ->selectRaw(
+                        'order_positions.id'
+                        . ', order_positions.amount'
+                        . ' - SUM(COALESCE(descendants.amount, 0))'
+                        . ' + SUM(COALESCE(subDescendants.amount, 0)) AS maxAmount'
+                    )
+                    ->groupBy('order_positions.id')
                     ->first();
-                $maxAmount = bcsub(
-                    $originPosition?->amount ?? 0,
-                    $originPosition?->descendantsAmount ?? 0,
-                );
 
-                if (bccomp($this->getData('amount') ?? 1, $maxAmount) > 0) {
+                $maxAmount = $originPosition->maxAmount ?? 0;
+
+                if (bccomp($this->getData('amount') ?? 1, $maxAmount) === 1) {
                     $errors += [
                         'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
                     ];

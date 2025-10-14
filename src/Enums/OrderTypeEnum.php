@@ -8,6 +8,8 @@ enum OrderTypeEnum: string
 {
     use EnumTrait;
 
+    case Offer = 'offer';
+
     case Order = 'order';
 
     case Purchase = 'purchase';

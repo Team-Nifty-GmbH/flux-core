@@ -267,7 +267,7 @@ test('get additional model actions', function (): void {
     $actions = $component->instance()->getAdditionalModelActions();
 
     expect($actions)->not->toBeEmpty();
-    expect($actions)->toHaveCount(2);
+    expect($actions)->toHaveCount(3);
 
     $this->order->update(['invoice_date' => null]);
 
