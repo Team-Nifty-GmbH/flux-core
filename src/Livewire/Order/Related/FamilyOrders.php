@@ -18,27 +18,18 @@ class FamilyOrders extends OrderList
             resolve_static(Order::class, 'query')
                 ->whereKey(
                     resolve_static(Order::class, 'query')
-                        ->whereKey(
-                            resolve_static(Order::class, 'query')
-                                ->whereKey($this->orderId)
-                                ->first([
-                                    'id',
-                                    'parent_id',
-                                ])
-                                ->ancestorKeys()
-                        )
-                        ->whereNull('parent_id')
+                        ->whereKey($this->orderId)
                         ->first([
                             'id',
                             'parent_id',
                         ])
-                        ->getKey()
+                        ->familyRootKey()
                 )
                 ->first([
                     'id',
                     'parent_id',
                 ])
-                ->descendantKeys()
+                ?->descendantKeys()
         );
     }
 }
