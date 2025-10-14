@@ -23,7 +23,7 @@ class FamilyOrders extends OrderList
                             'id',
                             'parent_id',
                         ])
-                        ->familyRootKey()
+                        ?->familyRootKey()
                 )
                 ->first([
                     'id',

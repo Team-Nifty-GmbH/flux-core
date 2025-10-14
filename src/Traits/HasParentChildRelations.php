@@ -81,7 +81,7 @@ trait HasParentChildRelations
             ->toArray();
     }
 
-    public function familyRootKey()
+    public function familyRootKey(): string|int|null
     {
         return is_null($this->{$this->getParentKeyAttribute()})
             ? $this->getKey()
