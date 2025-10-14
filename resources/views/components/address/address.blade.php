@@ -6,7 +6,6 @@
     'languages' => resolve_static(\FluxErp\Models\Language::class, 'query')
         ->get(['id', 'name'])
         ->toArray(),
-    'salutations' => resolve_static(\FluxErp\Enums\SalutationEnum::class, 'valuesLocalized'),
 ])
 <div class="table w-full table-auto gap-1.5" x-ref="address">
     @section('contact')
@@ -54,7 +53,7 @@
             <x-select.styled
                 x-bind:readonly="!$wire.edit"
                 wire:model="address.salutation"
-                :options="$salutations"
+                :options="resolve_static(\FluxErp\Enums\SalutationEnum::class, 'valuesLocalized')"
             />
         </div>
     </div>
