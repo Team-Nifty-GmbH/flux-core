@@ -92,7 +92,7 @@ abstract class Metric
             ];
         }
 
-        return $range->getPreviousRange();
+        return resolve_static(TimeFrameEnum::class, 'getPreviousRange', ['case' => $range]);
     }
 
     public function setDateColumn(string $dateColumn): static

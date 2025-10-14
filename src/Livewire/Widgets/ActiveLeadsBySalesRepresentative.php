@@ -113,7 +113,7 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
                     'name' => data_get($data, 'name'),
                 ],
             ],
-            $this->series
+            $this->series ?? []
         );
     }
 
