@@ -7,7 +7,6 @@ use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Macroable;
 
@@ -25,17 +24,9 @@ abstract class Metric
 
     protected Builder $query;
 
-    protected TimeFrameEnum|false|null $range = null;
+    protected ?string $range = null;
 
-    protected array $ranges = [
-        TimeFrameEnum::Today,
-        TimeFrameEnum::Yesterday,
-        TimeFrameEnum::ThisWeek,
-        TimeFrameEnum::ThisMonth,
-        TimeFrameEnum::ThisQuarter,
-        TimeFrameEnum::ThisYear,
-        TimeFrameEnum::Custom,
-    ];
+    protected array $ranges = [];
 
     protected ?CarbonImmutable $startingDate = null;
 
@@ -48,6 +39,8 @@ abstract class Metric
     public function __construct(Builder $query)
     {
         $this->query = $query->clone();
+
+        $this->ranges = resolve_static(TimeFrameEnum::class, 'values');
     }
 
     public static function make(Builder $query): static
@@ -66,12 +59,12 @@ abstract class Metric
             ];
         }
 
-        return $range instanceof TimeFrameEnum ? $range->getRange() : null;
+        return resolve_static(TimeFrameEnum::class, 'getRange', ['case' => $range]);
     }
 
-    public function getRange(): TimeFrameEnum|false
+    public function getRange(): ?string
     {
-        return $this->range ?? data_get($this->getRanges(), '0', TimeFrameEnum::ThisWeek);
+        return $this->range ?? data_get($this->getRanges(), '0') ?? TimeFrameEnum::ThisWeek;
     }
 
     public function getRanges(): array
@@ -123,12 +116,8 @@ abstract class Metric
         return $this;
     }
 
-    public function setRange(string|TimeFrameEnum $range): static
+    public function setRange(string $range): static
     {
-        if (! $range instanceof TimeFrameEnum) {
-            $range = TimeFrameEnum::tryFrom($range);
-        }
-
         if (in_array($range, $this->getRanges())) {
             $this->range = $range;
         }
@@ -138,12 +127,11 @@ abstract class Metric
 
     public function setRanges(array $ranges): static
     {
-        $this->ranges = array_filter(
-            Arr::map(
+        $this->ranges = array_values(
+            array_intersect(
                 $ranges,
-                fn ($range) => is_string($range) ? TimeFrameEnum::tryFrom($range) : $range
-            ),
-            fn ($range) => $range instanceof TimeFrameEnum
+                resolve_static(TimeFrameEnum::class, 'values')
+            )
         );
 
         return $this;

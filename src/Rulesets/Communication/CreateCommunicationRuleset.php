@@ -6,9 +6,9 @@ use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rule;
 
 class CreateCommunicationRuleset extends FluxRuleset
 {
@@ -46,7 +46,7 @@ class CreateCommunicationRuleset extends FluxRuleset
             'to' => 'nullable|array',
             'cc' => 'nullable|array',
             'bcc' => 'nullable|array',
-            'communication_type_enum' => Rule::enum(CommunicationTypeEnum::class),
+            'communication_type_enum' => app(EnumRule::class, ['type' => CommunicationTypeEnum::class]),
             'date' => 'nullable|date',
             'started_at' => 'required_with:ended_at|nullable|date:Y-m-d H:i:s',
             'ended_at' => 'nullable|date:Y-m-d H:i:s|after:started_at',

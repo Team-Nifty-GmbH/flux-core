@@ -3,21 +3,32 @@
 namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum SalutationEnum: string
+class SalutationEnum extends FluxEnum
 {
     use EnumTrait;
 
-    public function gender(): string
+    final public const string Company = 'company';
+
+    final public const string Family = 'family';
+
+    final public const string Mr = 'mr';
+
+    final public const string Mrs = 'mrs';
+
+    final public const string NoSalutation = 'no_salutation';
+
+    public static function gender(string $case): string
     {
-        return match ($this) {
-            SalutationEnum::MRS => 'female',
-            SalutationEnum::MR => 'male',
+        return match ($case) {
+            SalutationEnum::Mrs => 'female',
+            SalutationEnum::Mr => 'male',
             default => 'neutral',
         };
     }
 
-    public function salutation(object|array $address): string
+    public static function salutation(string $case, object|array $address): string
     {
         $parameter = [
             'firstname' => data_get($address, 'firstname'),
@@ -26,31 +37,21 @@ enum SalutationEnum: string
         ];
 
         if (data_get($address, 'has_formal_salutation')) {
-            return match ($this) {
-                SalutationEnum::MRS => __('salutation.formal.mrs', $parameter),
-                SalutationEnum::MR => __('salutation.formal.mr', $parameter),
-                SalutationEnum::COMPANY => __('salutation.formal.company', $parameter),
-                SalutationEnum::FAMILY => __('salutation.formal.family', $parameter),
+            return match ($case) {
+                SalutationEnum::Mrs => __('salutation.formal.mrs', $parameter),
+                SalutationEnum::Mr => __('salutation.formal.mr', $parameter),
+                SalutationEnum::Company => __('salutation.formal.company', $parameter),
+                SalutationEnum::Family => __('salutation.formal.family', $parameter),
                 default => __('salutation.formal.no_salutation', $parameter),
             };
         } else {
-            return match ($this) {
-                SalutationEnum::MRS => __('salutation.informal.mrs', $parameter),
-                SalutationEnum::MR => __('salutation.informal.mr', $parameter),
-                SalutationEnum::COMPANY => __('salutation.informal.company', $parameter),
-                SalutationEnum::FAMILY => __('salutation.informal.family', $parameter),
+            return match ($case) {
+                SalutationEnum::Mrs => __('salutation.informal.mrs', $parameter),
+                SalutationEnum::Mr => __('salutation.informal.mr', $parameter),
+                SalutationEnum::Company => __('salutation.informal.company', $parameter),
+                SalutationEnum::Family => __('salutation.informal.family', $parameter),
                 default => __('salutation.informal.no_salutation', $parameter),
             };
         }
     }
-
-    case COMPANY = 'company';
-
-    case FAMILY = 'family';
-
-    case MR = 'mr';
-
-    case MRS = 'mrs';
-
-    case NO_SALUTATION = 'no_salutation';
 }

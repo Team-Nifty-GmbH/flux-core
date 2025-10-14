@@ -64,8 +64,8 @@ test('communication date auto set', function (): void {
 test('communication enum casting', function (): void {
     $communication = $this->communications[0];
 
-    expect($communication->communication_type_enum)->toBeInstanceOf(CommunicationTypeEnum::class);
-    expect($communication->communication_type_enum)->toEqual(CommunicationTypeEnum::Mail);
+    expect($communication->communication_type_enum)->toBeObject();
+    expect($communication->communication_type_enum)->toEqual(CommunicationTypeEnum::from('mail'));
 });
 
 test('communication html to text conversion', function (): void {
@@ -108,7 +108,7 @@ test('communication timeframe columns', function (): void {
 
 test('create communication', function (): void {
     $communication = [
-        'communication_type_enum' => CommunicationTypeEnum::Mail->value,
+        'communication_type_enum' => CommunicationTypeEnum::Mail,
         'subject' => 'Test Email Subject',
         'text_body' => 'This is a test email body',
     ];

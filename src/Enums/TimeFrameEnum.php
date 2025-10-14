@@ -4,16 +4,31 @@ namespace FluxErp\Enums;
 
 use Carbon\CarbonImmutable;
 use FluxErp\Enums\Traits\EnumTrait;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum TimeFrameEnum: string
+class TimeFrameEnum extends FluxEnum
 {
     use EnumTrait;
 
-    public function getPreviousRange(): ?array
+    final public const string Today = 'Today';
+
+    final public const string Yesterday = 'Yesterday';
+
+    final public const string ThisWeek = 'This Week';
+
+    final public const string ThisMonth = 'This Month';
+
+    final public const string ThisQuarter = 'This Quarter';
+
+    final public const string ThisYear = 'This Year';
+
+    final public const string Custom = 'Custom';
+
+    public static function getPreviousRange(string $case): ?array
     {
         $now = CarbonImmutable::now();
 
-        return match ($this) {
+        return match ($case) {
             TimeFrameEnum::Today => [
                 $now->subDay()->startOfDay(),
                 $now->subDay(),
@@ -38,15 +53,15 @@ enum TimeFrameEnum: string
                 $now->subYear()->startOfYear(),
                 $now->subYear(),
             ],
-            TimeFrameEnum::Custom => null,
+            default => null,
         };
     }
 
-    public function getRange(): ?array
+    public static function getRange(string $case): ?array
     {
         $now = CarbonImmutable::now();
 
-        return match ($this) {
+        return match ($case) {
             TimeFrameEnum::Today => [
                 $now->startOfDay(),
                 $now,
@@ -71,31 +86,20 @@ enum TimeFrameEnum: string
                 $now->startOfYear(),
                 $now,
             ],
-            TimeFrameEnum::Custom => null,
+            default => null,
         };
     }
 
-    public function getUnit(): ?string
+    public static function getUnit(string $case): ?string
     {
-        return match ($this) {
-            TimeFrameEnum::Today, TimeFrameEnum::Yesterday, TimeFrameEnum::ThisMonth, TimeFrameEnum::ThisWeek => 'day',
+        return match ($case) {
+            TimeFrameEnum::Today,
+            TimeFrameEnum::Yesterday,
+            TimeFrameEnum::ThisMonth,
+            TimeFrameEnum::ThisWeek => 'day',
             TimeFrameEnum::ThisQuarter => 'week',
             TimeFrameEnum::ThisYear => 'month',
-            TimeFrameEnum::Custom => null,
+            default => null,
         };
     }
-
-    case Custom = 'Custom';
-
-    case ThisMonth = 'This Month';
-
-    case ThisQuarter = 'This Quarter';
-
-    case ThisWeek = 'This Week';
-
-    case ThisYear = 'This Year';
-
-    case Today = 'Today';
-
-    case Yesterday = 'Yesterday';
 }

@@ -56,7 +56,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use Throwable;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
@@ -572,13 +571,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function salutation(): ?string
     {
-        try {
-            $enum = SalutationEnum::from($this->salutation ?? '');
-        } catch (Throwable) {
-            $enum = SalutationEnum::NO_SALUTATION;
-        }
-
-        return $enum->salutation($this);
+        return resolve_static(
+            SalutationEnum::class,
+            'salutation',
+            [
+                'case' => resolve_static(
+                    SalutationEnum::class,
+                    'tryFrom',
+                    ['value' => $this->salutation]
+                ) ?? SalutationEnum::NoSalutation,
+                'address' => $this,
+            ]
+        );
     }
 
     public function scopeInTimeframe(

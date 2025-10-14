@@ -16,7 +16,7 @@ trait IsTimeFrameAwareWidget
 
     public ?string $start = null;
 
-    public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
+    public string $timeFrame = TimeFrameEnum::ThisMonth;
 
     #[Modelable]
     public array $timeParams = [];
@@ -32,11 +32,14 @@ trait IsTimeFrameAwareWidget
 
     public function updatedTimeParams(): void
     {
-        $timeFrame = data_get($this->timeParams, 'timeFrame', TimeFrameEnum::ThisMonth);
+        $this->timeFrame = resolve_static(
+            TimeFrameEnum::class,
+            'tryFrom',
+            ['value' => data_get($this->timeParams, 'timeFrame')]
+        )
+            ?->value
+            ?? TimeFrameEnum::ThisMonth;
 
-        $this->timeFrame = is_string($timeFrame)
-            ? TimeFrameEnum::tryFrom($timeFrame)
-            : $timeFrame;
         $this->start = $this->timeFrame === TimeFrameEnum::Custom
             ? Carbon::parse(data_get($this->timeParams, 'start'))->toDateString()
             : null;
@@ -55,7 +58,11 @@ trait IsTimeFrameAwareWidget
     {
         return $this->timeFrame === TimeFrameEnum::Custom && $this->end
             ? Carbon::parse($this->end)->endOfDay()
-            : data_get($this->timeFrame->getRange(), 1)?->endOfDay();
+            : data_get(
+                resolve_static(TimeFrameEnum::class, 'getRange', ['case' => $this->timeFrame]),
+                1
+            )
+                ?->endOfDay();
     }
 
     protected function getEndPrevious(): Carbon|CarbonImmutable|null
@@ -73,14 +80,22 @@ trait IsTimeFrameAwareWidget
             };
         }
 
-        return data_get($this->timeFrame->getPreviousRange(), 1)->endOfDay();
+        return data_get(
+            resolve_static(TimeFrameEnum::class, 'getPreviousRange', ['case' => $this->timeFrame]),
+            1
+        )
+            ->endOfDay();
     }
 
     protected function getStart(): Carbon|CarbonImmutable|null
     {
         return $this->timeFrame === TimeFrameEnum::Custom && $this->start
             ? Carbon::parse($this->start)->startOfDay()
-            : data_get($this->timeFrame->getRange(), 0)?->startOfDay();
+            : data_get(
+                resolve_static(TimeFrameEnum::class, 'getRange', ['case' => $this->timeFrame]),
+                0
+            )
+                ?->startOfDay();
     }
 
     protected function getStartPrevious(): Carbon|CarbonImmutable|null
@@ -98,6 +113,10 @@ trait IsTimeFrameAwareWidget
             };
         }
 
-        return data_get($this->timeFrame->getPreviousRange(), 0)->startOfDay();
+        return data_get(
+            resolve_static(TimeFrameEnum::class, 'getPreviousRange', ['case' => $this->timeFrame]),
+            0
+        )
+            ->startOfDay();
     }
 }

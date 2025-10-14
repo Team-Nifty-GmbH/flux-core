@@ -8,6 +8,22 @@ enum OrderTypeEnum: string
 {
     use EnumTrait;
 
+    case Order = 'order';
+
+    case Purchase = 'purchase';
+
+    case PurchaseRefund = 'purchase-refund';
+
+    case PurchaseSubscription = 'purchase-subscription';
+
+    case Refund = 'refund';
+
+    case Retoure = 'retoure';
+
+    case SplitOrder = 'split-order';
+
+    case Subscription = 'subscription';
+
     public static function getIsPurchase(self $value): bool
     {
         return in_array($value, [self::Purchase, self::PurchaseRefund, self::PurchaseSubscription]);
@@ -40,20 +56,4 @@ enum OrderTypeEnum: string
     {
         return self::getMultiplier($this);
     }
-
-    case Order = 'order';
-
-    case Purchase = 'purchase';
-
-    case PurchaseRefund = 'purchase-refund';
-
-    case PurchaseSubscription = 'purchase-subscription';
-
-    case Refund = 'refund';
-
-    case Retoure = 'retoure';
-
-    case SplitOrder = 'split-order';
-
-    case Subscription = 'subscription';
 }

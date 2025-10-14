@@ -3,54 +3,55 @@
 namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum ChartColorEnum: string
+class ChartColorEnum extends FluxEnum
 {
     use EnumTrait;
 
-    public static function forIndex(int $index): self
+    final public const string Amber = '#f59e0b';
+
+    final public const string Blue = '#3b82f6';
+
+    final public const string Cyan = '#06b6d4';
+
+    final public const string Emerald = '#10b981';
+
+    final public const string Fuchsia = '#d946ef';
+
+    final public const string Green = '#22c55e';
+
+    final public const string Indigo = '#6366f1';
+
+    final public const string Lime = '#84cc16';
+
+    final public const string Orange = '#f97316';
+
+    final public const string Pink = '#ec4899';
+
+    final public const string Purple = '#a855f7';
+
+    final public const string Red = '#ef4444';
+
+    final public const string Rose = '#f43f5e';
+
+    final public const string Sky = '#0ea5e9';
+
+    final public const string Slate = '#64748b';
+
+    final public const string Teal = '#14b8a6';
+
+    final public const string Violet = '#8b5cf6';
+
+    final public const string Yellow = '#eab308';
+
+    public static function forIndex(int $index): object
     {
-        return self::cases()[$index % count(self::cases())];
+        return static::cases()[$index % count(static::cases())];
     }
 
-    public static function forKey(string|int $key): self
+    public static function forKey(string|int $key): object
     {
-        return self::forIndex(abs(crc32((string) $key)));
+        return static::forIndex(abs(crc32((string) $key)));
     }
-
-    case Amber = '#f59e0b';
-
-    case Blue = '#3b82f6';
-
-    case Cyan = '#06b6d4';
-
-    case Emerald = '#10b981';
-
-    case Fuchsia = '#d946ef';
-
-    case Green = '#22c55e';
-
-    case Indigo = '#6366f1';
-
-    case Lime = '#84cc16';
-
-    case Orange = '#f97316';
-
-    case Pink = '#ec4899';
-
-    case Purple = '#a855f7';
-
-    case Red = '#ef4444';
-
-    case Rose = '#f43f5e';
-
-    case Sky = '#0ea5e9';
-
-    case Slate = '#64748b';
-
-    case Teal = '#14b8a6';
-
-    case Violet = '#8b5cf6';
-
-    case Yellow = '#eab308';
 }

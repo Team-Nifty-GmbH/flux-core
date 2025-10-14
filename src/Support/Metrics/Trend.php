@@ -40,7 +40,13 @@ class Trend extends Metric
 
     protected function getEndingDate(): CarbonImmutable
     {
-        if ($this->getRange() instanceof TimeFrameEnum && $timeFrameRange = $this->getRange()->getRange()) {
+        if (
+            $timeFrameRange = resolve_static(
+                TimeFrameEnum::class,
+                'getRange',
+                ['case' => $this->getRange()]
+            )
+        ) {
             return $timeFrameRange[1];
         }
 
@@ -114,7 +120,13 @@ class Trend extends Metric
 
     protected function getStartingDate(): CarbonImmutable
     {
-        if ($this->getRange() instanceof TimeFrameEnum && $timeFrameRange = $this->getRange()?->getRange()) {
+        if (
+            $timeFrameRange = resolve_static(
+                TimeFrameEnum::class,
+                'getRange',
+                ['case' => $this->getRange()]
+            )
+        ) {
             return $timeFrameRange[0];
         }
 
