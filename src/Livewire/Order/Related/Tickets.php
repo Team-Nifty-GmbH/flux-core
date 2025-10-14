@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Tickets extends TicketList
 {
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->where('model_id', $this->modelId)->where('model_type', morph_alias(Order::class));
+        return $builder->where('model_id', $this->modelId)
+            ->where('model_type', morph_alias(Order::class));
     }
 }
