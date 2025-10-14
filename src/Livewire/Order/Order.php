@@ -22,7 +22,7 @@ use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Forms\DiscountForm;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
-use FluxErp\Livewire\Forms\ScheduleForm;
+use FluxErp\Livewire\Forms\OrderScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
@@ -69,7 +69,7 @@ class Order extends Component
 
     public OrderReplicateForm $replicateOrder;
 
-    public ScheduleForm $schedule;
+    public OrderScheduleForm $schedule;
 
     public array $states = [];
 
@@ -474,6 +474,35 @@ class Order extends Component
         ];
     }
 
+    public function getPrintLayoutOptions(): array
+    {
+        $orderTypeId = $this->schedule->parameters['orderTypeId'] ?? $this->order->order_type_id;
+
+        if (! $orderTypeId) {
+            return [];
+        }
+
+        $orderType = resolve_static(OrderType::class, 'query')
+            ->whereKey($orderTypeId)
+            ->first();
+
+        if (! $orderType->print_layouts) {
+            return [];
+        }
+
+        $tempOrder = app(OrderModel::class);
+        $tempOrder->order_type_id = $orderTypeId;
+        $tempOrder->orderType = $orderType;
+
+        return array_map(
+            fn (string $value) => [
+                'label' => __($value),
+                'value' => $value,
+            ],
+            array_keys($tempOrder->resolvePrintViews())
+        );
+    }
+
     public function getTabs(): array
     {
         return [
@@ -593,6 +622,10 @@ class Order extends Component
                 ->value('id');
         }
 
+        if ($orderTypeEnum === OrderTypeEnum::Refund->value) {
+            $this->replicateOrder->parent_id = $this->order->id;
+        }
+
         $this->replicateOrder->order_positions = null;
 
         $this->js(<<<'JS'
@@ -669,6 +702,9 @@ class Order extends Component
         $this->schedule->parameters = [
             'orderId' => $this->order->id,
             'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
+            'printLayouts' => $this->schedule->parameters['printLayouts'] ?? null,
+            'autoPrintAndSend' => $this->schedule->parameters['autoPrintAndSend'] ?? false,
+            'emailTemplateId' => $this->schedule->parameters['emailTemplateId'] ?? null,
         ];
 
         try {
@@ -758,6 +794,18 @@ class Order extends Component
         }
 
         $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
+    }
+
+    public function updatedScheduleParametersOrderTypeId(): void
+    {
+        $this->skipRender();
+
+        $this->schedule->parameters['printLayouts'] = [];
+        $layouts = json_encode($this->getPrintLayoutOptions());
+
+        $this->js(<<<JS
+            \$tallstackuiSelect('schedule-print-layouts').setOptions(JSON.parse('{$layouts}'))
+        JS);
     }
 
     protected function fetchOrder(int $id): void

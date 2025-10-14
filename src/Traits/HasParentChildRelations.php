@@ -6,6 +6,7 @@ use FluxErp\Models\Scopes\FamilyTreeScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 trait HasParentChildRelations
@@ -78,6 +79,13 @@ trait HasParentChildRelations
         )
             ->pluck('id')
             ->toArray();
+    }
+
+    public function familyRootKey(): string|int|null
+    {
+        return is_null($this->{$this->getParentKeyAttribute()})
+            ? $this->getKey()
+            : Arr::last($this->ancestorKeys());
     }
 
     public function getAllAncestorsQuery(): Builder

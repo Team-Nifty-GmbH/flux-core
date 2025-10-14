@@ -724,6 +724,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this->morphMany(Discount::class, 'model');
     }
 
+    public function finalInvoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('final-invoice');
+    }
+
     /**
      * @throws Exception
      */
@@ -941,6 +946,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         ]);
 
         return $this;
+    }
+
+    public function refund(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('refund');
     }
 
     public function registerMediaCollections(): void
