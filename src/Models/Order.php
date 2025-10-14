@@ -69,9 +69,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns,
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel,
+        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

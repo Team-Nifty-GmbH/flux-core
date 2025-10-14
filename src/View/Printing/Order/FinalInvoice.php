@@ -43,6 +43,8 @@ class FinalInvoice extends Invoice
 
         $totalVats = Arr::keyBy($this->model->total_vats ?? [], 'vat_rate_percentage');
 
+        $this->model->setRelation('children', $this->model->getAllDescendantsQuery()->get());
+
         foreach ($this->model->children as $child) {
             $totalNetPrice = bcsub($totalNetPrice, $child->total_net_price);
             foreach ($child->total_vats ?? [] as $childVat) {
