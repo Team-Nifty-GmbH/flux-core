@@ -51,6 +51,7 @@ use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
+use FluxErp\Livewire\Settings\CoreSettings;
 use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\DiscountGroups;
@@ -242,6 +243,7 @@ Route::middleware('web')
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
                         Route::get('/notifications', Notifications::class)->name('notifications');
                         Route::get('/order-types', OrderTypes::class)->name('order-types');
+                        Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/payment-reminder-texts', PaymentReminderTexts::class)->name('payment-reminder-texts');
                         Route::get('/payment-types', PaymentTypes::class)->name('payment-types');
                         Route::get('/permissions', Permissions::class)->name('permissions');

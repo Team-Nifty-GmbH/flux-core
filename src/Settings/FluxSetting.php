@@ -11,11 +11,8 @@ abstract class FluxSetting extends Settings
 
     public static function label(): string
     {
-        return Str::of(class_basename(static::class))->headline()->toString();
-    }
-
-    public static function routeName(): string
-    {
-        return Str::kebab(class_basename(static::class));
+        return Str::of(class_basename(static::class))
+            ->headline()
+            ->toString();
     }
 }

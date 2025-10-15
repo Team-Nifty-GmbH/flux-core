@@ -10,7 +10,7 @@ class CoreSettingsForm extends SettingsForm
 
     public ?string $license_key = null;
 
-    protected function getSettingsClass(): string
+    public function getSettingsClass(): string
     {
         return CoreSettings::class;
     }

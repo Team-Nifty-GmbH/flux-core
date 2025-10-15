@@ -4,11 +4,11 @@ namespace FluxErp\Actions\Setting;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
+use FluxErp\Settings\FluxSetting;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionType;
 use ReflectionUnionType;
-use Spatie\LaravelSettings\Settings;
 use Spatie\LaravelSettings\SettingsConfig;
 
 class UpdateSetting extends FluxAction
@@ -23,10 +23,9 @@ class UpdateSetting extends FluxAction
         return UpdateSettingRuleset::class;
     }
 
-    public function performAction(): Settings
+    public function performAction(): FluxSetting
     {
-        $settingsClass = $this->data['settings_class'];
-        $settings = app($settingsClass);
+        $settings = app($this->getData('settings_class'));
 
         $properties = $settings->toCollection()->keys()->all();
         $updateData = collect($this->data)

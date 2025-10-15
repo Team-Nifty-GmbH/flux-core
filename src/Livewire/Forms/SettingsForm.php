@@ -11,12 +11,23 @@ abstract class SettingsForm extends FluxForm
     use SupportsAutoRender;
 
     #[Locked]
-    public ?string $group {
-        get => resolve_static($this->getSettingsClass(), 'group');
-        set => null;
+    public string $group;
+
+    abstract public function getSettingsClass(): string;
+
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        $this->group = resolve_static($this->getSettingsClass(), 'group');
     }
 
-    abstract protected function getSettingsClass(): string;
+    public function reset(...$properties): void
+    {
+        parent::reset(...$properties);
+
+        $this->group = resolve_static($this->getSettingsClass(), 'group');
+    }
 
     public function toActionData(): array
     {
