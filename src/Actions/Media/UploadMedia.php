@@ -57,6 +57,7 @@ class UploadMedia extends FluxAction
             $media = $fileAdder
                 ->setName($this->data['name'])
                 ->usingFileName($this->data['file_name'])
+                ->withCustomProperties($this->data['custom_properties'] ?? [])
                 ->withProperties(
                     Arr::except(
                         $this->data,

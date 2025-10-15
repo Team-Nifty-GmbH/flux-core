@@ -64,6 +64,7 @@ class ReplaceMedia extends FluxAction
         $media = $fileAdder
             ->setName($this->getData('name'))
             ->usingFileName($this->getData('file_name'))
+            ->withCustomProperties($this->data['custom_properties'] ?? [])
             ->withProperties(
                 Arr::except(
                     $this->data,
