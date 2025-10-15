@@ -1,6 +1,5 @@
 <!-- Static sidebar for desktop -->
 <div
-    style="{!! $background !!}"
     x-on:mouseover.away="closeMenu()"
     x-on:mouseover="showMenu()"
     x-bind:class="menuOpen && '!w-full md:!w-72'"

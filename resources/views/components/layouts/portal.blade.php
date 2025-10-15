@@ -92,7 +92,6 @@
             <div id="nav">
                 <livewire:navigation
                     :show-search-bar="false"
-                    :setting="$setting"
                 />
             </div>
         @endauth
