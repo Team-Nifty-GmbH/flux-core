@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Setting;
 
 use FluxErp\Rules\ClassExists;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Settings\FluxSettings;
 
 class UpdateSettingRuleset extends FluxRuleset
 {
@@ -13,7 +14,7 @@ class UpdateSettingRuleset extends FluxRuleset
             'settings_class' => [
                 'required',
                 'string',
-                app(ClassExists::class),
+                app(ClassExists::class, ['instanceOf' => FluxSettings::class]),
             ],
         ];
     }

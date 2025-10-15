@@ -229,6 +229,7 @@ Route::middleware('web')
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/clients', Clients::class)->name('clients');
                         Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
+                        Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/countries', Countries::class)->name('countries');
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
@@ -243,7 +244,6 @@ Route::middleware('web')
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
                         Route::get('/notifications', Notifications::class)->name('notifications');
                         Route::get('/order-types', OrderTypes::class)->name('order-types');
-                        Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/payment-reminder-texts', PaymentReminderTexts::class)->name('payment-reminder-texts');
                         Route::get('/payment-types', PaymentTypes::class)->name('payment-types');
                         Route::get('/permissions', Permissions::class)->name('permissions');

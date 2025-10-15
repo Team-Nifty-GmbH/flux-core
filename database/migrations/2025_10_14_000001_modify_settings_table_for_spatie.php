@@ -18,8 +18,7 @@ return new class() extends Migration
             $table->boolean('locked')->default(false);
             $table->json('payload');
 
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
 
             $table->unique(['group', 'name']);
         });

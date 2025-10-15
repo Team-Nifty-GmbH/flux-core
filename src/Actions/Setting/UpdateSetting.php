@@ -4,7 +4,7 @@ namespace FluxErp\Actions\Setting;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
-use FluxErp\Settings\FluxSetting;
+use FluxErp\Settings\FluxSettings;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionType;
@@ -23,7 +23,7 @@ class UpdateSetting extends FluxAction
         return UpdateSettingRuleset::class;
     }
 
-    public function performAction(): FluxSetting
+    public function performAction(): FluxSettings
     {
         $settings = app($this->getData('settings_class'));
 

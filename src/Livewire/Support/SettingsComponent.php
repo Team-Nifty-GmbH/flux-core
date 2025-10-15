@@ -19,6 +19,10 @@ abstract class SettingsComponent extends Component
     {
         $this->{$this->getFormPropertyName()}
             ->fill(app($this->{$this->getFormPropertyName()}->getSettingsClass())->toArray());
+        $this->{$this->getFormPropertyName()}->group = resolve_static(
+            $this->{$this->getFormPropertyName()}->getSettingsClass(),
+            'group'
+        );
     }
 
     public function render(): View
@@ -38,17 +42,7 @@ abstract class SettingsComponent extends Component
         }
 
         $this->toast()
-            ->success(
-                __(
-                    ':model saved',
-                    [
-                        'model' => resolve_static(
-                            $this->{$this->getFormPropertyName()}->getSettingsClass(),
-                            'label'
-                        ),
-                    ]
-                )
-            )
+            ->success(__(':model saved', ['model' => __('Settings')]))
             ->send();
 
         return true;

@@ -15,13 +15,6 @@ abstract class SettingsForm extends FluxForm
 
     abstract public function getSettingsClass(): string;
 
-    public function fill($values): void
-    {
-        parent::fill($values);
-
-        $this->group = resolve_static($this->getSettingsClass(), 'group');
-    }
-
     public function reset(...$properties): void
     {
         parent::reset(...$properties);

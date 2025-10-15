@@ -2,7 +2,7 @@
 
 namespace FluxErp\Settings;
 
-class CoreSettings extends FluxSetting
+class CoreSettings extends FluxSettings
 {
     public bool $install_done;
 
