@@ -17,7 +17,6 @@ use Maatwebsite\Excel\ExcelServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
-use Spatie\LaravelData\LaravelDataServiceProvider;
 use Spatie\LaravelSettings\LaravelSettingsServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
