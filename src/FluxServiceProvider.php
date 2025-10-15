@@ -7,6 +7,7 @@ use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\ProductType;
 use FluxErp\Facades\Repeatable;
+use FluxErp\Facades\Settings;
 use FluxErp\Facades\Widget;
 use FluxErp\Helpers\Composer;
 use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
@@ -22,6 +23,8 @@ use FluxErp\Models\Notification;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Settings\CoreSettings;
+use FluxErp\Support\Settings\SettingsManager;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
@@ -156,6 +159,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerMacros();
         $this->registerExtensions();
+        $this->registerSettings();
 
         Translatable::fallback(
             fallbackAny: true,
@@ -314,6 +318,14 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.queue-monitor');
                 Menu::register(route: 'settings.failed-jobs');
                 Menu::register(route: 'settings.plugins');
+
+                // Register settings from SettingsManager
+                foreach (Settings::all() as $setting) {
+                    Menu::register(
+                        route: 'settings.' . $setting['route_name'],
+                        label: $setting['label']
+                    );
+                }
             }
         );
     }
@@ -822,5 +834,14 @@ class FluxServiceProvider extends ServiceProvider
                 return $this->app->get(Composer::class);
             }
         );
+    }
+
+    private function registerSettings(): void
+    {
+        Settings::register(
+            settingsClass: CoreSettings::class
+        );
+
+        $this->app->booted(fn () => Settings::boot());
     }
 }

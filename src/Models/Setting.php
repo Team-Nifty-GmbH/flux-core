@@ -2,23 +2,24 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-
 class Setting extends FluxModel
 {
-    use HasPackageFactory, HasUuid;
+    public static function get(string $property)
+    {
+        [$group, $name] = explode('.', $property);
+
+        $setting = static::query()
+            ->where('group', $group)
+            ->where('name', $name)
+            ->first('payload');
+
+        return json_decode($setting->getAttribute('payload'));
+    }
 
     protected function casts(): array
     {
         return [
-            'settings' => 'array',
+            'locked' => 'boolean',
         ];
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
     }
 }

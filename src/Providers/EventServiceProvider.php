@@ -13,7 +13,6 @@ use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\Order\OrderStockSubscriber;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
-use FluxErp\Listeners\WebhookEventSubscriber;
 use FluxErp\Models\Comment;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Notifications\Order\DocumentSignedNotification;
@@ -57,7 +56,6 @@ class EventServiceProvider extends ServiceProvider
         BroadcastEventSubscriber::class,
         EloquentEventSubscriber::class,
         SnapshotEventSubscriber::class,
-        WebhookEventSubscriber::class,
         OrderStockSubscriber::class,
         OrderInvoiceAddedSubscriber::class,
         MessageSendingEventSubscriber::class,
