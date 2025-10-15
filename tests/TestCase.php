@@ -71,6 +71,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('cache.default', 'array');
         $app['config']->set('settings.auto_discover_settings', []);
         $app['config']->set('settings.discovered_settings_cache_path', null);
+        $app['config']->set('settings.migrations_paths', []);
     }
 
     protected function getPackageAliases($app): array
