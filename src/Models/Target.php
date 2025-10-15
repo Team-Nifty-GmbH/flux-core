@@ -8,12 +8,13 @@ use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Target extends FluxModel
 {
-    use HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
     protected static function booted(): void
     {
