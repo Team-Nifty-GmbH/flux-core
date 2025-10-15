@@ -17,7 +17,7 @@
                         'users',
                         'user_id',
                         '=',
-                        $this->userId
+                        $this->userId,
                     ],
                     'where' => [
                         [

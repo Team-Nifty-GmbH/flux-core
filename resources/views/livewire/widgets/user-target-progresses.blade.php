@@ -13,10 +13,10 @@
                     'with' => 'media',
                     'whereRelation' => [
                         'targets',
-                         'id',
-                         '=',
-                         $this->targetId
-                     ]
+                        'id',
+                        '=',
+                        $this->targetId,
+                    ],
                 ],
             ]"
         />
