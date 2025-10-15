@@ -169,7 +169,7 @@ test('timeframe today', function (): void {
     assertReferralSourceTimeframeResults($this->addresses, $this->leads, TimeFrameEnum::Today);
 });
 
-function assertReferralSourceTimeframeResults(Collection $addresses, Collection $leads, TimeFrameEnum $timeFrame): void
+function assertReferralSourceTimeframeResults(Collection $addresses, Collection $leads, string $timeFrame): void
 {
     $test = Livewire::test(LeadsByReferralSource::class)
         ->set('timeFrame', $timeFrame)
@@ -199,12 +199,12 @@ function assertReferralSourceTimeframeResults(Collection $addresses, Collection 
     }
 }
 
-function getReferralSourceLeadsCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame, Address $address): int
+function getReferralSourceLeadsCountInTimeFrame(Collection $leads, string $timeFrame, Address $address): int
 {
     return $leads
         ->filter(
             fn (Lead $lead) => $lead->recommended_by_address_id === $address->id
-                && $lead->created_at->between(...$timeFrame->getRange())
+                && $lead->created_at->between(...TimeFrameEnum::getRange($timeFrame))
         )
         ->count();
 }

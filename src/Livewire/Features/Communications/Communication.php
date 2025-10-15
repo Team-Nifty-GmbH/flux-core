@@ -216,9 +216,9 @@ abstract class Communication extends CommunicationList
     #[Renderless]
     public function fillTo(): void
     {
-        if ($this->communication->communication_type_enum === CommunicationTypeEnum::Mail->value) {
+        if ($this->communication->communication_type_enum === CommunicationTypeEnum::Mail) {
             $this->communication->to = array_filter(Arr::wrap($this->getMailAddress()));
-        } elseif ($this->communication->communication_type_enum === CommunicationTypeEnum::Letter->value) {
+        } elseif ($this->communication->communication_type_enum === CommunicationTypeEnum::Letter) {
             $this->communication->to = array_filter(Arr::wrap($this->getPostalAddress()));
         } else {
             $this->communication->to = [];
@@ -372,9 +372,9 @@ abstract class Communication extends CommunicationList
         return array_merge(
             parent::getViewData(),
             [
-                'communicationTypes' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
-                    CommunicationTypeEnum::values()
+                'communicationTypes' => resolve_static(
+                    CommunicationTypeEnum::class,
+                    'valuesLocalized'
                 ),
                 'mailAccounts' => array_merge(
                     auth()

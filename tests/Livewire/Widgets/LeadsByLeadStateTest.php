@@ -159,7 +159,7 @@ test('timeframe today', function (): void {
     assertLeadStateTimeframeResults($this->leadStates, $this->leads, TimeFrameEnum::Today);
 });
 
-function assertLeadStateTimeframeResults(Collection $leadStates, Collection $leads, TimeFrameEnum $timeFrame): void
+function assertLeadStateTimeframeResults(Collection $leadStates, Collection $leads, string $timeFrame): void
 {
     $test = Livewire::test(LeadsByLeadState::class)
         ->set('timeFrame', $timeFrame)
@@ -198,12 +198,12 @@ function assertLeadStateTimeframeResults(Collection $leadStates, Collection $lea
     }
 }
 
-function getLeadStateLeadsCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame, LeadState $leadState): int
+function getLeadStateLeadsCountInTimeFrame(Collection $leads, string $timeFrame, LeadState $leadState): int
 {
     return $leads
         ->filter(
             fn (Lead $lead) => $lead->lead_state_id === $leadState->id
-                && $lead->created_at->between(...$timeFrame->getRange())
+                && $lead->created_at->between(...TimeFrameEnum::getRange($timeFrame))
         )
         ->count();
 }

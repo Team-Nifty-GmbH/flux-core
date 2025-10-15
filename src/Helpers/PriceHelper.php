@@ -228,7 +228,7 @@ class PriceHelper
                     )?->toArray() ?? $this->price->toArray()
                 );
 
-            $this->price->price = match ($this->priceList->rounding_method_enum) {
+            $this->price->price = match ($this->priceList->rounding_method_enum?->value) {
                 RoundingMethodEnum::Round => Rounding::round($this->price->price, $this->priceList->rounding_precision),
                 RoundingMethodEnum::Ceil => Rounding::ceil($this->price->price, $this->priceList->rounding_precision),
                 RoundingMethodEnum::Floor => Rounding::floor($this->price->price, $this->priceList->rounding_precision),

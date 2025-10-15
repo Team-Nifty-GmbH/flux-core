@@ -98,7 +98,7 @@ class ExpectedRevenueByLeadState extends BarChart implements HasWidgetOptions
                     'name' => data_get($data, 'name'),
                 ],
             ],
-            $this->series
+            $this->series ?? []
         );
     }
 

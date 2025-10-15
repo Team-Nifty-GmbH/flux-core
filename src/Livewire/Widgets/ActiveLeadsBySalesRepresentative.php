@@ -81,7 +81,11 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
                 return [
                     'id' => $user->getKey(),
                     'name' => $user->getLabel(),
-                    'color' => $user->color ?: ChartColorEnum::forKey($user->getKey())->value,
+                    'color' => $user->color ?: resolve_static(
+                        ChartColorEnum::class,
+                        'forKey',
+                        ['key' => $user->getKey()]
+                    )->value,
                     'data' => [$user->total],
                 ];
             })
@@ -109,7 +113,7 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
                     'name' => data_get($data, 'name'),
                 ],
             ],
-            $this->series
+            $this->series ?? []
         );
     }
 

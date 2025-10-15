@@ -182,7 +182,7 @@ class ProductList extends BaseProductList
                 'vatRates' => resolve_static(VatRate::class, 'query')
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
-                'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
+                'roundingMethods' => resolve_static(RoundingMethodEnum::class, 'valuesLocalized'),
                 'roundingModes' => [
                     [
                         'label' => __('Round'),

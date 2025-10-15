@@ -77,7 +77,11 @@ class OrderMediaChart extends LineChart implements HasWidgetOptions
         $this->series = collect($metrics)
             ->map(fn (array $data): array => [
                 'name' => $this->getCollectionLabel(data_get($data, 'collection')),
-                'color' => ChartColorEnum::forIndex(data_get($data, 'colorIndex'))->value,
+                'color' => resolve_static(
+                    ChartColorEnum::class,
+                    'forIndex',
+                    ['index' => data_get($data, 'colorIndex')]
+                )->value,
                 'data' => data_get($data, 'metric')->getData(),
                 'collection' => data_get($data, 'collection'),
                 'hidden' => data_get($this->config, 'series.' . data_get($data, 'collection') . '.hidden', false),

@@ -181,11 +181,11 @@ test('timeframe today', function (): void {
         ->assertHasNoErrors();
 });
 
-function getContactsCountInTimeFrame(Collection $contacts, TimeFrameEnum $timeFrame, RecordOrigin $recordOrigin): int
+function getContactsCountInTimeFrame(Collection $contacts, string $timeFrame, RecordOrigin $recordOrigin): int
 {
     return $contacts
         ->filter(
-            fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
+            fn (Contact $contact) => $contact->created_at->between(...TimeFrameEnum::getRange($timeFrame))
                 && $contact->recordOrigin()
                     ->where('id', $recordOrigin->id)
                     ->where('is_active', true)

@@ -191,7 +191,7 @@ test('timeframe today', function (): void {
     assertTimeframeResults($this->users, $this->leads, TimeFrameEnum::Today);
 });
 
-function assertTimeframeResults(Collection $users, Collection $leads, TimeFrameEnum $timeFrame): void
+function assertTimeframeResults(Collection $users, Collection $leads, string $timeFrame): void
 {
     $test = Livewire::test(WonLeadsBySalesRepresentative::class)
         ->set('timeFrame', $timeFrame)
@@ -218,13 +218,13 @@ function assertTimeframeResults(Collection $users, Collection $leads, TimeFrameE
     }
 }
 
-function getWonLeadCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame, User $user): int
+function getWonLeadCountInTimeFrame(Collection $leads, string $timeFrame, User $user): int
 {
     return $leads
         ->filter(
             fn (Lead $lead) => $lead->user_id === $user->id
                 && $lead->leadState->is_won === true
-                && $lead->closed_at->between(...$timeFrame->getRange())
+                && $lead->closed_at->between(...TimeFrameEnum::getRange($timeFrame))
         )
         ->count();
 }
