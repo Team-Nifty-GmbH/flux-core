@@ -70,7 +70,6 @@
                     x-on:select="$wire.fillTo()"
                     wire:model="communication.communication_type_enum"
                     :label="__('Communication Type')"
-                    select="label:label|value:value"
                     :options="$communicationTypes"
                 />
             </div>

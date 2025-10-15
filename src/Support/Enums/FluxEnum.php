@@ -7,6 +7,7 @@ use FluxErp\Support\Enums\Traits\IsCastable;
 use Illuminate\Contracts\Database\Eloquent\SerializesCastableAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use ReflectionClass;
 use ReflectionClassConstant;
 use ValueError;
@@ -17,16 +18,21 @@ abstract class FluxEnum implements EnumInterface, SerializesCastableAttributes
 
     public static function cases(): array
     {
-        $reflection = new ReflectionClass(resolve_static(static::class, 'class'));
+        return Cache::rememberForever(
+            'flux.enums.' . resolve_static(static::class, 'class'),
+            function (): array {
+                $reflection = new ReflectionClass(resolve_static(static::class, 'class'));
 
-        return Arr::mapWithKeys(
-            $reflection->getConstants(ReflectionClassConstant::IS_FINAL),
-            fn (int|string $value, string $key) => [
-                $key => (object) [
-                    'name' => $key,
-                    'value' => $value,
-                ],
-            ],
+                return Arr::mapWithKeys(
+                    $reflection->getConstants(ReflectionClassConstant::IS_FINAL),
+                    fn (int|string $value, string $key) => [
+                        $key => (object) [
+                            'name' => $key,
+                            'value' => $value,
+                        ],
+                    ],
+                );
+            }
         );
     }
 

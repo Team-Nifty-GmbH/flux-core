@@ -47,7 +47,7 @@ class ChartColorEnum extends FluxEnum
 
     public static function forIndex(int $index): object
     {
-        return static::cases()[$index % count(static::cases())];
+        return array_values(static::cases())[$index % count(static::cases())];
     }
 
     public static function forKey(string|int $key): object
