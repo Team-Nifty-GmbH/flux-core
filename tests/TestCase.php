@@ -69,6 +69,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('flux.install_done', true);
         $app['config']->set('auth.defaults.guard', 'sanctum');
         $app['config']->set('cache.default', 'array');
+        $app['config']->set('settings.auto_discover_settings', []);
     }
 
     protected function getPackageAliases($app): array
