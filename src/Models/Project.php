@@ -171,8 +171,8 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
                 ->whereBetween('start_date', [$start, $end])
                 ->orWhereBetween('end_date', [$start, $end])
                 ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->where('start_date', '<=', $start)
-                        ->where('end_date', '>=', $end);
+                    $query->where('start_date', '<=', $end)
+                        ->where('end_date', '>=', $start);
                 })
                 ->orWhere(function (Builder $query) use ($start, $end): void {
                     $query->whereNull('start_date')
