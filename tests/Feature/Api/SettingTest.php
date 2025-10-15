@@ -11,7 +11,7 @@ beforeEach(function (): void {
     ]);
 
     $this->permissions = [
-        'update' => Permission::findOrCreate('api.settings.put'),
+        'update' => Permission::findOrCreate('api.settings.put', 'sanctum'),
     ];
 });
 
@@ -43,6 +43,7 @@ test('update setting validation error', function (): void {
 });
 
 test('update setting without permission', function (): void {
+    $this->user->revokePermissionTo($this->permissions['update']);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/settings', [
