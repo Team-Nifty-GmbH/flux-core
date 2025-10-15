@@ -39,8 +39,6 @@ class UploadMedia extends FluxAction
             ->whereKey($this->data['model_id'])
             ->first();
 
-        $customProperties = CustomProperties::get($this->data, $this->data['model_type']);
-
         $diskName = $this->data['disk'] ?? (
             $modelInstance->getRegisteredMediaCollections()
                 ->where('name', $this->data['collection_name'])
@@ -59,7 +57,6 @@ class UploadMedia extends FluxAction
             $media = $fileAdder
                 ->setName($this->data['name'])
                 ->usingFileName($this->data['file_name'])
-                ->withCustomProperties($customProperties)
                 ->withProperties(
                     Arr::except(
                         $this->data,
