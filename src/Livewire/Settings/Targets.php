@@ -46,7 +46,7 @@ class Targets extends TargetList
         if ($id) {
             $this->updateAggregateColumnOptions($this->target->aggregate_type);
             $this->updateSelectableColumns($this->target->model_type);
-            $this->selectedUserIds = collect($this->target->users)->pluck('user_id')->all();
+            $this->selectedUserIds = array_column($this->target->users, 'user_id');
         }
     }
 

@@ -27,9 +27,8 @@ class CreateTarget extends FluxAction
         $target = app(Target::class, ['attributes' => $this->getData()]);
         $target->save();
 
-        $target->users()->attach($users);
-        foreach ($target->children()->get('id') as $child) {
-            $child->users()->attach($users);
+        if ($users) {
+            $target->users()->attach($users);
         }
 
         return $target->refresh();
