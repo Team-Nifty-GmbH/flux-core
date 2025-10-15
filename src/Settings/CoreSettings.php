@@ -8,6 +8,8 @@ class CoreSettings extends FluxSettings
 
     public ?string $license_key;
 
+    public bool $formal_salutation;
+
     public static function group(): string
     {
         return 'flux';

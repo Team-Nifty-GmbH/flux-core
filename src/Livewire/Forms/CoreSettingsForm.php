@@ -10,6 +10,8 @@ class CoreSettingsForm extends SettingsForm
 
     public ?string $license_key = null;
 
+    public bool $formal_salutation = false;
+
     public function getSettingsClass(): string
     {
         return CoreSettings::class;
