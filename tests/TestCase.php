@@ -70,6 +70,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('auth.defaults.guard', 'sanctum');
         $app['config']->set('cache.default', 'array');
         $app['config']->set('settings.auto_discover_settings', []);
+        $app['config']->set('settings.discovered_settings_cache_path', null);
     }
 
     protected function getPackageAliases($app): array

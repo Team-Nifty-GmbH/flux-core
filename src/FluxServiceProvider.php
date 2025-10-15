@@ -24,7 +24,6 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Settings\CoreSettings;
-use FluxErp\Support\Settings\SettingsManager;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
@@ -46,7 +45,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
@@ -98,6 +96,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootCommands();
 
         $this->optimizes('flux:optimize', 'flux:optimize-clear');
+        $this->optimizes('settings:discover', 'settings:clear-cache');
 
         $this->bootRoutes();
         $this->registerLivewireComponents();
