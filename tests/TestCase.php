@@ -17,6 +17,7 @@ use Maatwebsite\Excel\ExcelServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
+use Spatie\LaravelSettings\LaravelSettingsServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
@@ -36,6 +37,7 @@ abstract class TestCase extends BaseTestCase
     public function getPackageProviders($app): array
     {
         return [
+            LaravelSettingsServiceProvider::class,
             TranslationServiceProvider::class,
             TranslatableServiceProvider::class,
             LivewireServiceProvider::class,

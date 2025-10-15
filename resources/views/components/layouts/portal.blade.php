@@ -1,11 +1,5 @@
 @php
-    $client = auth()->user()?->contact->client ?? app(\FluxErp\Models\Client::class)->first();
-    $setting =
-        $client
-            ?->settings()
-            ->where('key', 'customerPortal')
-            ->first()
-            ?->toArray() ?? [];
+    $client = auth()->user()?->contact->client ?? resolve_static(\FluxErp\Models\Client::class, 'default');
 @endphp
 
 <!DOCTYPE html>
@@ -19,9 +13,6 @@
             <x-slot:title>
                 {{ $client?->name . ' Portal' }}
             </x-slot>
-            <style>
-                {{ $setting['settings']['custom_css'] ?? '' }}
-            </style>
         </x-flux::layouts.head.head>
     </head>
     <body class="h-full bg-gray-50 text-xs dark:bg-secondary-900">

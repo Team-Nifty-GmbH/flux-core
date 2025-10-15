@@ -2,8 +2,12 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
+
 class Setting extends FluxModel
 {
+    use HasPackageFactory;
+
     public static function get(string $property)
     {
         [$group, $name] = explode('.', $property);
