@@ -1,27 +1,23 @@
 <x-modal size="3xl" :id="$target->modalName()">
     <div
         x-data="{
-            filteredUsers: $wire.entangle('target.users'),
-
             addUser(user) {
-                if (! this.filteredUsers.find((u) => u.user_id === user.id)) {
-                    this.filteredUsers.push({
+                if (! $wire.target.users.find((targetUser) => targetUser.user_id === user.id)) {
+                    $wire.target.users.push({
                         user_id: user.id,
                         label: user.label,
-                        target_share: 0,
-                        is_percentage: true,
+                        target_share: null,
+                        is_percentage: null,
                     })
                 }
-                console.log(this.filteredUsers)
             },
 
             removeUser(user) {
-                this.filteredUsers = this.filteredUsers.filter(
-                    (u) => u.user_id !== user.id,
+                $wire.target.users = $wire.target.users.filter(
+                    (targetUser) => targetUser.user_id !== user.id,
                 )
             },
         }"
-        x-init="init()"
         class="flex flex-col gap-3"
     >
         <x-spinner />
@@ -68,10 +64,10 @@
         <x-select.styled
             :label="__('Users')"
             multiple
-            select="label:label|value:id"
             wire:model="selectedUserIds"
             x-on:select="addUser($event.detail.select)"
             x-on:remove="removeUser($event.detail.select)"
+            select="label:label|value:id"
             unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\User::class),
@@ -81,7 +77,7 @@
 
         <div class="space-y-2">
             <template
-                x-for="(user, index) in filteredUsers"
+                x-for="user in $wire.target.users"
                 :key="user.user_id"
             >
                 <x-card class="flex items-center">
@@ -91,7 +87,7 @@
 
                     <div class="flex w-1/3 items-center gap-4">
                         <x-toggle
-                            :label="__('Is Percentage')"
+                            label="{{ __('Percent') }}"
                             x-model="user.is_percentage"
                         />
                         <x-number x-model.number="user.target_share" />
@@ -112,7 +108,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then(success => { if(success) $modalClose('{{ $target->modalName() }}')})"
+            wire:click="save().then((success) => { if(success) $modalClose('{{ $target->modalName() }}')})"
         />
     </x-slot>
 </x-modal>

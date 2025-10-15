@@ -10,7 +10,7 @@ return new class() extends Migration
     {
         Schema::table('target_user', function (Blueprint $table): void {
             $table->decimal('target_share', 40, 10)->nullable()->after('user_id');
-            $table->boolean('is_percentage')->default(true)->after('target_share');
+            $table->boolean('is_percentage')->nullable()->after('target_share');
         });
     }
 

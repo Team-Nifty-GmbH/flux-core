@@ -12,6 +12,13 @@ class TargetUser extends FluxPivot
 
     protected $table = 'target_user';
 
+    protected function casts(): array
+    {
+        return [
+            'is_percentage' => 'boolean',
+        ];
+    }
+
     public function target(): BelongsTo
     {
         return $this->belongsTo(Target::class);
