@@ -6,11 +6,18 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
+use FluxErp\Settings\CoreSettings;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 test('can reset password', function (): void {
+    CoreSettings::fake([
+        'install_done' => false,
+        'license_key' => null,
+        'formal_salutation' => false,
+    ]);
+
     /** @var Address $baseAddress */
     $baseAddress = Contact::factory()
         ->has(

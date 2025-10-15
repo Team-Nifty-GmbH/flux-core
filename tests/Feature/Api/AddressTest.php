@@ -9,10 +9,17 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Settings\CoreSettings;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
+    CoreSettings::fake([
+        'install_done' => false,
+        'license_key' => null,
+        'formal_salutation' => false,
+    ]);
+
     $dbClients = Client::factory()->count(2)->create();
 
     $this->languages = Language::factory()->count(2)->create();

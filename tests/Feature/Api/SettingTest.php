@@ -8,6 +8,7 @@ beforeEach(function (): void {
     CoreSettings::fake([
         'install_done' => false,
         'license_key' => null,
+        'formal_salutation' => false,
     ]);
 
     $this->permissions = [
