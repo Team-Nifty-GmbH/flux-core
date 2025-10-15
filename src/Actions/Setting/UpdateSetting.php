@@ -41,7 +41,9 @@ class UpdateSetting extends FluxAction
 
     public function setRulesFromRulesets(): static
     {
-        $this->mergeRules($this->validateSettingsProperties($this->getData('settings_class')));
+        if ($settingsClass = $this->getData('settings_class')) {
+            $this->mergeRules($this->validateSettingsProperties($settingsClass));
+        }
 
         return parent::setRulesFromRulesets();
     }
