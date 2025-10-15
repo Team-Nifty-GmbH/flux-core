@@ -90,9 +90,7 @@
         </div>
         @auth('address')
             <div id="nav">
-                <livewire:navigation
-                    :show-search-bar="false"
-                />
+                <livewire:navigation :show-search-bar="false" />
             </div>
         @endauth
 
