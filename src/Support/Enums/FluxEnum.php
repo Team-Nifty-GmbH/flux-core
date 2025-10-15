@@ -18,7 +18,7 @@ abstract class FluxEnum implements EnumInterface, SerializesCastableAttributes
 
     public static function cases(): array
     {
-        return Cache::rememberForever(
+        return Cache::memo()->rememberForever(
             'flux.enums.' . resolve_static(static::class, 'class'),
             function (): array {
                 $reflection = new ReflectionClass(resolve_static(static::class, 'class'));
