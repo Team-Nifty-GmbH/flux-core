@@ -2,7 +2,11 @@
     <div
         x-data="{
             addUser(user) {
-                if (! $wire.target.users.find((targetUser) => targetUser.user_id === user.id)) {
+                if (
+                    ! $wire.target.users.find(
+                        (targetUser) => targetUser.user_id === user.id,
+                    )
+                ) {
                     $wire.target.users.push({
                         user_id: user.id,
                         label: user.label,
@@ -76,10 +80,7 @@
         />
 
         <div class="space-y-2">
-            <template
-                x-for="user in $wire.target.users"
-                :key="user.user_id"
-            >
+            <template x-for="user in $wire.target.users" :key="user.user_id">
                 <x-card class="flex items-center">
                     <div class="flex flex-1 items-center">
                         <span class="ml-2" x-text="user.label"></span>
