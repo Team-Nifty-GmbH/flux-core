@@ -38,7 +38,7 @@ trait MediaHandler
                     unset($imagePosition['name']);
                     $imagePosition['id'] = $media->id;
                     $imagePosition['src'] = $media->original_url;
-                    // add media to rootElement before submiting to db
+                    // add media to rootElement before submitting to db
                     $rootElement['media'][] = $imagePosition;
                 } else {
                     throw new Error('Temporary image not found in temporary media - mismatch between root temporary media and temporary media');

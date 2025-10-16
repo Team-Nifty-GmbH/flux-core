@@ -3,7 +3,7 @@ export default class PrintElement {
         this.element = element;
         this._position = { x: 0, y: 0 };
         this.store = $store;
-        // cash the size to avoid recalculating it multiple times (bad performance)
+        // cache the size to avoid recalculating it multiple times (bad performance)
         this._elementSize = null;
         // only for resizable elements - otherwise leave at null
         this._height = null;
@@ -158,7 +158,6 @@ export default class PrintElement {
     }
 
     // 'start | 'middle' | 'end'
-
     init(startPosition) {
         if (typeof startPosition === 'string') {
             if (startPosition === 'middle') {

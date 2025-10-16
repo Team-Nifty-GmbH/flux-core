@@ -10,12 +10,8 @@ return new class() extends Migration
     {
         Schema::create('print_layout_snippets', function (Blueprint $table): void {
             $table->id();
-            $table->unsignedBigInteger('print_layout_id');
-            $table->foreign('print_layout_id')
-                ->references('id')->on('print_layouts')
-                ->onDelete('cascade');
+            $table->foreignId('print_layout_id')->constrained()->onDelete('cascade');
             $table->longText('content');
-
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();

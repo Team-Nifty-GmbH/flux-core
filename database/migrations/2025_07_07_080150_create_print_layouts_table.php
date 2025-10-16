@@ -10,10 +10,7 @@ return new class() extends Migration
     {
         Schema::create('print_layouts', function (Blueprint $table): void {
             $table->id();
-            $table->unsignedBigInteger('client_id');
-            $table->foreign('client_id')
-                ->references('id')->on('clients')
-                ->onDelete('cascade');
+            $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->string('model_type');
             $table->string('name');
             $table->json('margin')->nullable();
