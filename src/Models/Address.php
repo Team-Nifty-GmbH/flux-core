@@ -578,7 +578,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     SalutationEnum::class,
                     'tryFrom',
                     ['value' => $this->salutation]
-                ) ?? SalutationEnum::NoSalutation,
+                )
+                    ->value ?? SalutationEnum::NoSalutation,
                 'address' => $this,
             ]
         );
