@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Setting;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
 use FluxErp\Settings\FluxSettings;
+use Illuminate\Support\Arr;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionType;
@@ -27,12 +28,12 @@ class UpdateSetting extends FluxAction
     {
         $settings = app($this->getData('settings_class'));
 
-        $properties = $settings->toCollection()->keys()->all();
-        $updateData = collect($this->data)
-            ->only($properties)
+        $properties = $settings
+            ->toCollection()
+            ->keys()
             ->all();
 
-        $settings->fill($updateData);
+        $settings->fill(Arr::only($this->getData(), $properties));
         $settings->save();
 
         return $settings;
@@ -50,18 +51,24 @@ class UpdateSetting extends FluxAction
     protected function extractRulesFromType(?ReflectionType $type): array
     {
         if (! $type) {
-            return ['required'];
+            return [
+                'sometimes',
+                'required',
+            ];
         }
 
         $rules = match (true) {
             $type instanceof ReflectionUnionType => $this->getRulesForUnionType($type),
-            $type instanceof ReflectionIntersectionType => ['required', 'object'],
-            $type instanceof ReflectionNamedType => array_merge(['required'], $this->getRulesForNamedType($type)),
-            default => ['required'],
+            $type instanceof ReflectionIntersectionType => ['sometimes', 'required', 'object'],
+            $type instanceof ReflectionNamedType => array_merge(
+                ['sometimes', 'required'],
+                $this->getRulesForNamedType($type)
+            ),
+            default => ['sometimes', 'required'],
         };
 
         if ($type->allowsNull()) {
-            return array_merge(['nullable'], array_diff($rules, ['required']));
+            return array_merge(['nullable'], array_diff($rules, ['sometimes', 'required']));
         }
 
         return $rules;
@@ -98,7 +105,7 @@ class UpdateSetting extends FluxAction
 
     protected function validateSettingsProperties(string $settingsClass): array
     {
-        $config = new SettingsConfig($settingsClass);
+        $config = app(SettingsConfig::class, ['settingsClass' => $settingsClass]);
         $rules = [];
 
         foreach ($config->getReflectedProperties() as $propertyName => $reflectionProperty) {

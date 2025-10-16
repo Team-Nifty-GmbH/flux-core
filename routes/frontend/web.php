@@ -228,7 +228,6 @@ Route::middleware('web')
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/clients', Clients::class)->name('clients');
-                        Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/countries', Countries::class)->name('countries');
                         Route::get('/currencies', Currencies::class)->name('currencies');
@@ -254,6 +253,7 @@ Route::middleware('web')
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
+                        Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/system', System::class)->name('system');

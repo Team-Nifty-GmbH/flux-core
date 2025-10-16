@@ -31,16 +31,15 @@ return new class() extends Migration
         Schema::create('settings', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->string('key')->unique()->index();
+            $table->string('key');
             $table->string('model_type')->nullable();
             $table->unsignedBigInteger('model_id')->nullable();
             $table->json('settings')->nullable();
 
             $table->timestamps();
 
-            $table->unique(['model_id', 'model_type', 'key']);
-
             $table->index(['model_type', 'model_id']);
+            $table->unique(['model_id', 'model_type', 'key']);
         });
     }
 };
