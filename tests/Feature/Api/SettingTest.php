@@ -23,12 +23,14 @@ test('update setting', function (): void {
     $response = $this->actingAs($this->user)->put('/api/settings', [
         'settings_class' => CoreSettings::class,
         'install_done' => true,
+        'formal_salutation' => true,
     ]);
 
     $response->assertOk();
 
     $updatedSettings = app(CoreSettings::class);
-    expect($updatedSettings->install_done)->toBe(true);
+    expect($updatedSettings->install_done)->toBe(true)
+        ->and($updatedSettings->formal_salutation)->toBe(true);
 });
 
 test('update setting validation error', function (): void {
@@ -41,6 +43,7 @@ test('update setting validation error', function (): void {
     ]);
 
     $response->assertUnprocessable();
+    $response->assertJsonValidationErrors(['install_done']);
 });
 
 test('update setting without permission', function (): void {
@@ -64,4 +67,5 @@ test('update setting missing settings_class', function (): void {
     ]);
 
     $response->assertUnprocessable();
+    $response->assertJsonValidationErrors(['settings_class']);
 });
