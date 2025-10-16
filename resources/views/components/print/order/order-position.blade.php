@@ -1,4 +1,4 @@
-@use(Illuminate\Support\Number)
+@use(Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-2 pr-8 align-top">
@@ -21,10 +21,10 @@
                 {{ $position->product_number }}
             </p>
             <p class="font-semibold">
-                {{ $position->name }}
+                {!! Blade::render(html_entity_decode($position->name), ['position' => $position]) !!}
             </p>
             <div class="prose-xs">
-                {!! $position->description !!}
+                {!! Blade::render(html_entity_decode($position->description), ['position' => $position]) !!}
             </div>
         </td>
         <td class="py-2 pr-8 text-center align-top">
