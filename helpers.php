@@ -524,9 +524,13 @@ if (! function_exists('resolve_static')) {
 
         if ($binding) {
             $reflector = new Laravel\SerializableClosure\Support\ReflectionClosure($binding['concrete']);
-            $concrete = $reflector->getUseVariables()['concrete'] ?? null;
+            $concrete = Illuminate\Support\Arr::last($reflector->getUseVariables()) ?? null;
         } else {
             $concrete = $abstract;
+        }
+
+        if (is_null($concrete) && class_exists($class)) {
+            $concrete = $class;
         }
 
         if (! $concrete) {
