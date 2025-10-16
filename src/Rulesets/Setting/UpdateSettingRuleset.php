@@ -2,23 +2,20 @@
 
 namespace FluxErp\Rulesets\Setting;
 
-use FluxErp\Models\Setting;
-use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ClassExists;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Settings\FluxSettings;
 
 class UpdateSettingRuleset extends FluxRuleset
 {
-    protected static ?string $model = Setting::class;
-
     public function rules(): array
     {
         return [
-            'id' => [
+            'settings_class' => [
                 'required',
-                'integer',
-                app(ModelExists::class, ['model' => Setting::class]),
+                'string',
+                app(ClassExists::class, ['instanceOf' => FluxSettings::class]),
             ],
-            'settings' => 'required|array',
         ];
     }
 }

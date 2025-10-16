@@ -51,9 +51,9 @@ use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
+use FluxErp\Livewire\Settings\CoreSettings;
 use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
-use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\EmailTemplates;
 use FluxErp\Livewire\Settings\FailedJobs;
@@ -228,8 +228,7 @@ Route::middleware('web')
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/clients', Clients::class)->name('clients');
-                        Route::get('/clients/{client}/customer-portal', CustomerPortal::class)->name('customer-portal');
-                        Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
+                        Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/countries', Countries::class)->name('countries');
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
@@ -254,6 +253,7 @@ Route::middleware('web')
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
+                        Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/system', System::class)->name('system');

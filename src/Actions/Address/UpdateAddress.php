@@ -11,6 +11,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Address\UpdateAddressRuleset;
+use FluxErp\Settings\CoreSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -39,7 +40,7 @@ class UpdateAddress extends FluxAction
         $tags = Arr::pull($this->data, 'tags');
         $permissions = Arr::pull($this->data, 'permissions');
         $contactOptions = Arr::pull($this->data, 'contact_options');
-        $this->data['has_formal_salutation'] ??= config('flux.formal_salutation', true);
+        $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
 
         $canLogin = $address->can_login;
 

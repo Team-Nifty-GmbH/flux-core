@@ -4,7 +4,6 @@ namespace FluxErp\Database\Factories;
 
 use FluxErp\Models\Setting;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class SettingFactory extends Factory
 {
@@ -12,20 +11,11 @@ class SettingFactory extends Factory
 
     public function definition(): array
     {
-        $i = 0;
-        while (Setting::query()
-            ->where('key', $key = fake()->jobTitle())
-            ->exists() && $i < 100) {
-            $i++;
-        }
-
-        if ($i === 100) {
-            $key .= '_' . Str::uuid();
-        }
-
         return [
-            'key' => $key,
-            'settings' => fake()->randomElements(),
+            'group' => fake()->word(),
+            'name' => fake()->word(),
+            'locked' => fake()->boolean(10),
+            'payload' => json_encode(fake()->words(3)),
         ];
     }
 }

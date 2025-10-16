@@ -44,7 +44,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -634,11 +633,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function serialNumbers(): BelongsToMany
     {
         return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
     }
 
     public function toCalendarEvent(?array $info = null): array
