@@ -6,8 +6,8 @@
                 formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
             }"
         >
-            <div class="space-y-2.5">
-                <x-input wire:model="task.name" label="{{ __('Name') }}" />
+            <div class="space-y-2">
+                <x-input wire:model="task.name" :label="__('Name')" />
                 <x-select.styled
                     :label="__('Project')"
                     wire:model="task.project_id"
@@ -33,27 +33,25 @@
                     ]"
                 />
                 <div class="flex justify-between gap-x-4">
-                    <div class="flex flex-col gap-y-2">
+                    <div class="space-y-2">
                         <x-date
-                            :without-time="true"
+                            :label="__('Start Date')"
                             wire:model="task.start_date"
-                            label="{{ __('Start Date') }}"
                         />
-                        <x-time
+                        <x-input
+                            type="time"
                             :label="__('Start Time')"
-                            format="24"
                             wire:model="task.start_time"
                         />
                     </div>
-                    <div class="flex flex-col gap-y-2">
+                    <div class="space-y-2">
                         <x-date
-                            :without-time="true"
+                            :label="__('Due Date')"
                             wire:model="task.due_date"
-                            label="{{ __('Due Date') }}"
                         />
-                        <x-time
+                        <x-input
+                            type="time"
                             :label="__('Due Time')"
-                            format="24"
                             wire:model="task.due_time"
                         />
                     </div>

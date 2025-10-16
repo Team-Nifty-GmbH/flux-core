@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\Task;
 
+use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
@@ -9,6 +10,7 @@ use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\UpdateTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class UpdateTask extends FluxAction
 {
@@ -75,5 +77,40 @@ class UpdateTask extends FluxAction
         }
 
         return $task->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->getData('start_date')) {
+            $this->data['start_time'] ??= null;
+        }
+
+        if ($this->getData('due_date')) {
+            $this->data['due_time'] ??= null;
+        }
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (
+            $this->getData('start_date')
+            && $this->getData('due_date')
+        ) {
+            $start = Carbon::parse($this->getData('start_date'))
+                ->setTimeFromTimeString($this->getData('start_time') ?? '00:00:00');
+            $end = Carbon::parse($this->getData('due_date'))
+                ->setTimeFromTimeString($this->getData('due_time') ?? '23:59:59');
+
+            if ($end->lt($start)) {
+                throw ValidationException::withMessages([
+                    'due_datetime' => [
+                        __('validation.after', ['attribute' => 'due_time', 'date' => $start->toDateTimeString()]),
+                    ],
+                ])
+                    ->errorBag('updateTask');
+            }
+        }
     }
 }

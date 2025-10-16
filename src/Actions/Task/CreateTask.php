@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\Task;
 
+use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
@@ -9,6 +10,7 @@ use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\CreateTaskRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class CreateTask extends FluxAction
 {
@@ -64,5 +66,29 @@ class CreateTask extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['priority'] ??= 0;
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (
+            $this->getData('start_date')
+            && $this->getData('due_date')
+        ) {
+            $start = Carbon::parse($this->getData('start_date'))
+                ->setTimeFromTimeString($this->getData('start_time') ?? '00:00:00');
+            $end = Carbon::parse($this->getData('due_date'))
+                ->setTimeFromTimeString($this->getData('due_time') ?? '23:59:59');
+
+            if ($end->lt($start)) {
+                throw ValidationException::withMessages([
+                    'due_datetime' => [
+                        __('validation.after', ['attribute' => 'due_time', 'date' => $start->toDateTimeString()]),
+                    ],
+                ])
+                    ->errorBag('createTask');
+            }
+        }
     }
 }

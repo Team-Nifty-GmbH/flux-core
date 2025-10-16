@@ -53,27 +53,25 @@
                 ]"
             />
             <div class="flex justify-between">
-                <div>
+                <div class="space-y-2">
                     <x-date
-                        :without-time="true"
+                        :label="__('Start Date')"
                         wire:model="replica.start_date"
-                        label="{{ __('Start Date') }}"
                     />
-                    <x-time
+                    <x-input
+                        type="time"
                         :label="__('Start Time')"
-                        format="24"
                         wire:model="replica.start_time"
                     />
                 </div>
-                <div>
+                <div class="space-y-2">
                     <x-date
-                        :without-time="true"
+                        :label="__('Due Date')"
                         wire:model="replica.due_date"
-                        label="{{ __('Due Date') }}"
                     />
-                    <x-time
+                    <x-input
+                        type="time"
                         :label="__('Due Time')"
-                        format="24"
                         wire:model="replica.due_time"
                     />
                 </div>

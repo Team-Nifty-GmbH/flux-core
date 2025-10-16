@@ -7,9 +7,11 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Task\TaskState;
+use Illuminate\Validation\Rule;
 
 class UpdateTaskRuleset extends FluxRuleset
 {
@@ -52,16 +54,27 @@ class UpdateTaskRuleset extends FluxRuleset
             'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
             'start_date' => 'present|date|nullable',
+            'start_time' => [
+                'nullable',
+                'exclude_if:start_date,null',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
             'due_date' => 'present|date|nullable|after_or_equal:start_date',
-            'start_time' => 'nullable|date_format:H:i',
-            'due_time' => 'nullable|date_format:H:i',
+            'due_time' => [
+                'nullable',
+                'exclude_if:due_date,null',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
             'priority' => 'sometimes|required|integer|min:0',
             'state' => [
                 'string',
                 ValidStateRule::make(TaskState::class),
             ],
             'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
-            'budget' => 'numeric|nullable|min:0',
+            'budget' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
         ];
     }
 }

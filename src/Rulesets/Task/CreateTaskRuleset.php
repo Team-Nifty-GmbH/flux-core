@@ -9,9 +9,11 @@ use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Task\TaskState;
+use Illuminate\Validation\Rule;
 
 class CreateTaskRuleset extends FluxRuleset
 {
@@ -63,16 +65,27 @@ class CreateTaskRuleset extends FluxRuleset
             'name' => 'required|string|max:255',
             'description' => 'string|nullable',
             'start_date' => 'date|nullable',
+            'start_time' => [
+                'nullable',
+                'exclude_if:start_date,null',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
             'due_date' => 'date|nullable|after_or_equal:start_date',
-            'start_time' => 'nullable|date_format:H:i',
-            'due_time' => 'nullable|date_format:H:i',
+            'due_time' => [
+                'nullable',
+                'exclude_if:due_date,null',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
             'priority' => 'integer|nullable|min:0',
             'state' => [
                 'string',
                 ValidStateRule::make(TaskState::class),
             ],
             'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
-            'budget' => 'numeric|nullable|min:0',
+            'budget' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
         ];
     }
 }
