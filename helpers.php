@@ -529,7 +529,7 @@ if (! function_exists('resolve_static')) {
             $concrete = $abstract;
         }
 
-        if (is_null($concrete) && class_exists($concrete)) {
+        if (is_null($concrete) && class_exists($class)) {
             $concrete = $class;
         }
 
