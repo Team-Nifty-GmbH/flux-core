@@ -2,12 +2,14 @@
 
 namespace FluxErp\Actions\Task;
 
+use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\ReplicateTaskRuleset;
 use FluxErp\States\Task\Open;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class ReplicateTask extends FluxAction
 {
@@ -51,5 +53,29 @@ class ReplicateTask extends FluxAction
         }
 
         return $task->refresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (
+            $this->getData('start_date')
+            && $this->getData('due_date')
+        ) {
+            $start = Carbon::parse($this->getData('start_date'))
+                ->setTimeFromTimeString($this->getData('start_time') ?? '00:00:00');
+            $end = Carbon::parse($this->getData('due_date'))
+                ->setTimeFromTimeString($this->getData('due_time') ?? '23:59:59');
+
+            if ($end->lt($start)) {
+                throw ValidationException::withMessages([
+                    'due_datetime' => [
+                        __('validation.after', ['attribute' => 'due_time', 'date' => $start->toDateTimeString()]),
+                    ],
+                ])
+                    ->errorBag('replicateTask');
+            }
+        }
     }
 }

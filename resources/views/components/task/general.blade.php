@@ -80,18 +80,37 @@
             x-bind:class="!edit && 'pointer-events-none'"
         >
             @section('task-content.dates')
-            <x-date
-                x-bind:readonly="!edit"
-                :without-time="true"
-                wire:model="task.start_date"
-                label="{{ __('Start Date') }}"
-            />
-            <x-date
-                x-bind:readonly="!edit"
-                :without-time="true"
-                wire:model="task.due_date"
-                label="{{ __('Due Date') }}"
-            />
+            @section('task-content.start')
+            <div class="flex flex-row gap-x-4">
+                <x-date
+                    :label="__('Start Date')"
+                    wire:model="task.start_date"
+                    x-bind:readonly="!edit"
+                />
+                <x-input
+                    type="time"
+                    :label="__('Start Time')"
+                    wire:model="task.start_time"
+                    x-bind:readonly="!edit"
+                />
+            </div>
+            @show
+
+            @section('task-content.due')
+            <div class="flex flex-row gap-x-4">
+                <x-date
+                    :label="__('Due Date')"
+                    wire:model="task.due_date"
+                    x-bind:readonly="!edit"
+                />
+                <x-input
+                    type="time"
+                    :label="__('Due Time')"
+                    wire:model="task.due_time"
+                    x-bind:readonly="!edit"
+                />
+            </div>
+            @show
             @show
         </div>
         @section('task-content.multi-selects')

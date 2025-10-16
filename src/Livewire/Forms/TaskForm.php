@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
@@ -25,6 +24,8 @@ class TaskForm extends FluxForm
     public ?string $description = null;
 
     public ?string $due_date = null;
+
+    public ?string $due_time = null;
 
     #[Locked]
     public ?int $id = null;
@@ -49,6 +50,8 @@ class TaskForm extends FluxForm
 
     public ?string $start_date = null;
 
+    public ?string $start_time = null;
+
     public string $state = 'open';
 
     public array $tags = [];
@@ -67,11 +70,6 @@ class TaskForm extends FluxForm
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
             $values['users'] = array_column($values['users'] ?? [], 'id');
         }
-
-        $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
-            Carbon::parse($values['start_date'])->toDateString() : null;
-        $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
-            Carbon::parse($values['due_date'])->toDateString() : null;
 
         parent::fill($values);
     }
