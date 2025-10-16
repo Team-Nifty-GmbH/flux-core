@@ -529,6 +529,10 @@ if (! function_exists('resolve_static')) {
             $concrete = $abstract;
         }
 
+        if (is_null($concrete) && class_exists($concrete)) {
+            $concrete = $class;
+        }
+
         if (! $concrete) {
             throw new InvalidArgumentException('Invalid class: ' . $class);
         }
