@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
 use FluxErp\Settings\FluxSettings;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionType;
@@ -84,7 +85,7 @@ class UpdateSetting extends FluxAction
             'bool', 'boolean' => ['boolean'],
             'int', 'integer' => ['integer'],
             'float', 'double' => ['numeric'],
-            'string' => ['string', 'max:255'],
+            'string' => ['string'],
             'array' => ['array'],
             default => [],
         };
@@ -92,12 +93,17 @@ class UpdateSetting extends FluxAction
 
     protected function getRulesForUnionType(ReflectionUnionType $type): array
     {
-        $rules = ['required'];
+        $rules = ['sometimes', 'required'];
+        $types = [];
 
         foreach ($type->getTypes() as $unionType) {
             if ($unionType instanceof ReflectionNamedType) {
-                $rules = array_merge($rules, $this->getRulesForNamedType($unionType));
+                $types = array_merge($types, $this->getRulesForNamedType($unionType));
             }
+        }
+
+        if ($types) {
+            $rules[] = Rule::anyOf($types);
         }
 
         return array_values(array_unique($rules));
