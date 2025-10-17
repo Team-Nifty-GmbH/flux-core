@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\Accounting;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -53,7 +54,10 @@ beforeEach(function (): void {
 });
 
 test('renders successfully', function (): void {
-    Livewire::test(Accounting::class, ['orderId' => $this->order->id])
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
+
+    Livewire::test(Accounting::class, ['order' => $form])
         ->assertOk();
 });
 
@@ -64,7 +68,10 @@ test('can reset payment reminder level', function (): void {
         'invoice_number' => 'INV-123',
     ]);
 
-    Livewire::test(Accounting::class, ['orderId' => $this->order->id])
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
+
+    Livewire::test(Accounting::class, ['order' => $form])
         ->set('newPaymentReminderLevel', 0)
         ->call('resetPaymentReminderLevel')
         ->assertHasNoErrors()
@@ -80,7 +87,10 @@ test('can set payment reminder level to specific value', function (): void {
         'invoice_number' => 'INV-123',
     ]);
 
-    Livewire::test(Accounting::class, ['orderId' => $this->order->id])
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
+
+    Livewire::test(Accounting::class, ['order' => $form])
         ->set('newPaymentReminderLevel', 1)
         ->call('resetPaymentReminderLevel')
         ->assertOk();
