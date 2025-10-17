@@ -359,7 +359,10 @@
                             .chain()
                             .focus()
                             .insertContent([
-                                { type: 'bladeVariable', attrs: { label: variable.label, value: variable.value } },
+                                {
+                                    type: 'bladeVariable',
+                                    attrs: { label: variable.label, value: variable.value },
+                                },
                                 { type: 'text', text: ' ' },
                             ])
                             .run()
