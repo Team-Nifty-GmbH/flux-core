@@ -55,7 +55,9 @@
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
-            <span x-html="formatters.coloredMoney($wire.address.total_net)"></span>
+            <span
+                x-html="formatters.coloredMoney($wire.address.total_net)"
+            ></span>
         </div>
         <x-label :label="__('Invoices')" />
         <div
@@ -67,7 +69,9 @@
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
-            <span x-html="formatters.coloredMoney($wire.address.balance)"></span>
+            <span
+                x-html="formatters.coloredMoney($wire.address.balance)"
+            ></span>
         </div>
         <x-label :label="__('Revenue this year')" />
         <div
