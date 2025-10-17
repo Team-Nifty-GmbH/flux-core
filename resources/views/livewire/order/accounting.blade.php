@@ -193,7 +193,10 @@
         </x-modal>
     @endteleport
 
-    <x-modal id="reset-payment-reminder-level-modal" x-on:open="$focusOn('new-payment-reminder-level')">
+    <x-modal
+        id="reset-payment-reminder-level-modal"
+        x-on:open="$focusOn('new-payment-reminder-level')"
+    >
         <x-slot:title>
             {{ __('Set Payment Reminder Level') }}
         </x-slot>
