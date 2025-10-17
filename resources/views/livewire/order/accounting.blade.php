@@ -193,21 +193,16 @@
         </x-modal>
     @endteleport
 
-    <x-modal id="reset-payment-reminder-level-modal">
+    <x-modal id="reset-payment-reminder-level-modal" x-on:open="$focusOn('new-payment-reminder-level')">
         <x-slot:title>
             {{ __('Set Payment Reminder Level') }}
         </x-slot>
-        <x-select.styled
+        <x-number
+            id="new-payment-reminder-level"
             wire:model="newPaymentReminderLevel"
             :label="__('New Reminder Level')"
-            :options="[
-                ['label' => __('Reset to 0 (No Reminder)'), 'value' => 0],
-                ['label' => __('Set to Level 1'), 'value' => 1],
-                ['label' => __('Set to Level 2'), 'value' => 2],
-                ['label' => __('Set to Level 3'), 'value' => 3],
-            ]"
-            option-label="label"
-            option-value="value"
+            step="1"
+            min="0"
         />
         <x-slot:footer>
             <x-button

@@ -8,8 +8,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class ResetPaymentReminderLevelRuleset extends FluxRuleset
 {
-    protected static ?string $model = Order::class;
-
     public function rules(): array
     {
         return [
@@ -19,10 +17,9 @@ class ResetPaymentReminderLevelRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Order::class]),
             ],
             'payment_reminder_current_level' => [
-                'nullable',
+                'required',
                 'integer',
                 'min:0',
-                'max:3',
             ],
         ];
     }

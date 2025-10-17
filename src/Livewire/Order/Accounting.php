@@ -86,7 +86,7 @@ class Accounting extends OrderTransactionList
     public function resetPaymentReminderLevel(): bool
     {
         try {
-            ResetPaymentReminderLevel::make([
+            $result = ResetPaymentReminderLevel::make([
                 'id' => $this->order->id,
                 'payment_reminder_current_level' => $this->newPaymentReminderLevel,
             ])
@@ -99,7 +99,7 @@ class Accounting extends OrderTransactionList
             return false;
         }
 
-        $this->order->payment_reminder_current_level = $this->newPaymentReminderLevel;
+        $this->order->payment_reminder_current_level = $result->payment_reminder_current_level;
         $this->reset('newPaymentReminderLevel');
 
         $this->toast()

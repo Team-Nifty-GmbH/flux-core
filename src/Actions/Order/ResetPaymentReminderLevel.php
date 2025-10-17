@@ -19,14 +19,13 @@ class ResetPaymentReminderLevel extends FluxAction
         return ResetPaymentReminderLevelRuleset::class;
     }
 
-    public function performAction(): Model
+    public function performAction(): Order
     {
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->getData('id'))
             ->first(['id', 'payment_reminder_current_level']);
 
         $order->payment_reminder_current_level = $this->getData('payment_reminder_current_level');
-
         $order->save();
 
         return $order->withoutRelations()->fresh();
