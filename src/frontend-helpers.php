@@ -127,9 +127,10 @@ if (! function_exists('format_money')) {
         return Illuminate\Support\Number::currency(
             bcround($amount, 2),
             $currency?->iso
-                ?? resolve_static(FluxErp\Models\Currency::class, 'default')->iso,
+                ?? resolve_static(FluxErp\Models\Currency::class, 'default')?->iso,
             $language?->language_code
-                ?? resolve_static(FluxErp\Models\Language::class, 'default')->language_code
+                ?? resolve_static(FluxErp\Models\Language::class, 'default')?->language_code
+                ?? app()->getLocale()
         );
     }
 }

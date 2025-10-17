@@ -14,6 +14,7 @@ use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -28,6 +29,7 @@ class EmailTemplates extends EmailTemplateList
     #[DataTableForm]
     public EmailTemplateForm $emailTemplateForm;
 
+    #[Locked]
     public string $editorId;
 
     protected ?string $includeBefore = 'flux::livewire.settings.email-templates';

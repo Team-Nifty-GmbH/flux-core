@@ -104,6 +104,7 @@ export const MentionConfig = (searchModel, element) =>
                             if (suggestionPopup) {
                                 suggestionPopup.hide();
                             }
+
                             return true;
                         }
 
