@@ -84,7 +84,8 @@ strong {
         @apply z-0 h-96;
     }
 
-    .blade-variable, .mention {
+    .blade-variable,
+    .mention {
         @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700;
     }
 
