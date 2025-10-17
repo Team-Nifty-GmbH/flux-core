@@ -56,3 +56,34 @@ test('renders successfully', function (): void {
     Livewire::test(Accounting::class, ['orderId' => $this->order->id])
         ->assertOk();
 });
+
+test('can reset payment reminder level', function (): void {
+    $this->order->update([
+        'payment_reminder_current_level' => 2,
+        'payment_reminder_next_date' => now()->addDays(7),
+        'invoice_number' => 'INV-123',
+    ]);
+
+    Livewire::test(Accounting::class, ['orderId' => $this->order->id])
+        ->set('newPaymentReminderLevel', 0)
+        ->call('resetPaymentReminderLevel')
+        ->assertHasNoErrors()
+        ->assertOk();
+
+    expect($this->order->fresh()->payment_reminder_current_level)->toBe(0);
+});
+
+test('can set payment reminder level to specific value', function (): void {
+    $this->order->update([
+        'payment_reminder_current_level' => 3,
+        'payment_reminder_next_date' => now()->addDays(7),
+        'invoice_number' => 'INV-123',
+    ]);
+
+    Livewire::test(Accounting::class, ['orderId' => $this->order->id])
+        ->set('newPaymentReminderLevel', 1)
+        ->call('resetPaymentReminderLevel')
+        ->assertOk();
+
+    expect($this->order->fresh()->payment_reminder_current_level)->toBe(1);
+});
