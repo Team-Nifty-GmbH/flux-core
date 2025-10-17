@@ -1,6 +1,5 @@
 <div
     x-data="{
-        address: $wire.entangle('address', true),
         formatter: @js(resolve_static(\FluxErp\Models\Address::class, 'typeScriptAttributes')),
         hrefFromContactOption(type, value) {
             switch (type) {
@@ -56,26 +55,26 @@
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
-            <span x-html="formatters.coloredMoney(address.total_net)"></span>
+            <span x-html="formatters.coloredMoney($wire.address.total_net)"></span>
         </div>
         <x-label :label="__('Invoices')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
-            <span x-html="address.total_invoices"></span>
+            <span x-html="$wire.address.total_invoices"></span>
         </div>
         <x-label :label="__('Balance')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
-            <span x-html="formatters.coloredMoney(address.balance)"></span>
+            <span x-html="formatters.coloredMoney($wire.address.balance)"></span>
         </div>
         <x-label :label="__('Revenue this year')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="formatters.coloredMoney(address.revenue_this_year)"
+                x-html="formatters.coloredMoney($wire.address.revenue_this_year)"
             ></span>
         </div>
         <x-label :label="__('Revenue last year')" />
@@ -83,13 +82,13 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="formatters.coloredMoney(address.revenue_last_year)"
+                x-html="formatters.coloredMoney($wire.address.revenue_last_year)"
             ></span>
         </div>
         <hr class="col-span-2" />
         <div class="col-span-2 flex flex-col gap-2">
             <div class="pb-2 font-semibold uppercase">{{ __('Orders') }}</div>
-            <template x-for="order in address.orders" :key="order.id">
+            <template x-for="order in $wire.address.orders" :key="order.id">
                 <div class="grid grid-cols-2 gap-2">
                     <x-label>
                         <x-slot:word>
@@ -112,32 +111,32 @@
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Phone')" />
         <a
-            x-bind:href="'tel:' + address.phone"
+            x-bind:href="'tel:' + $wire.address.phone"
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="address.phone"
+            x-text="$wire.address.phone"
         ></a>
         <x-label :label="__('Phone Mobile')" />
         <a
-            x-bind:href="'tel:' + address.phone_mobile"
+            x-bind:href="'tel:' + $wire.address.phone_mobile"
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="address.phone_mobile"
+            x-text="$wire.address.phone_mobile"
         ></a>
         <x-label :label="__('E-mail')" />
         <a
-            x-bind:href="'mailto:' + address.email_primary"
+            x-bind:href="'mailto:' + $wire.address.email_primary"
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="address.email_primary"
+            x-text="$wire.address.email_primary"
         ></a>
         <x-label :label="__('Website')" />
         <a
-            x-bind:href="address.url"
+            x-bind:href="$wire.address.url"
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="address.url"
+            x-text="$wire.address.url"
         ></a>
     </div>
     <div class="flex flex-col gap-2 pt-2">
         <template
-            x-for="contactOption in address.contact_options"
+            x-for="contactOption in $wire.address.contact_options"
             :key="contactOption.id"
         >
             <div class="grid grid-cols-2 gap-2">
