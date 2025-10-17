@@ -350,7 +350,7 @@
     </template>
     <template x-ref="bladeVariablesDropdown-{{ $id }}">
         <div class="flex max-h-64 w-64 flex-col gap-1 overflow-y-auto p-2">
-            <template x-for="variable in bladeVariables">
+            <template x-for="variable in Object.values(bladeVariables)">
                 <button
                     type="button"
                     class="group inline-flex items-center justify-start gap-1 rounded px-2 py-1.5 text-xs text-slate-600 outline-none transition-all duration-150 ease-in hover:bg-slate-100 hover:shadow-sm focus:ring-2 focus:ring-slate-300 dark:text-slate-300 dark:hover:bg-slate-700 dark:focus:ring-slate-600"
