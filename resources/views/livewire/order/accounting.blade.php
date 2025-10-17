@@ -19,6 +19,26 @@
     }"
 >
     @include('flux::livewire.transactions.transactions')
+    <x-card :header="__('Payment Reminder')">
+        <div class="flex flex-col gap-4">
+            <div class="flex items-end gap-2">
+                <div class="flex-1">
+                    <x-date
+                        wire:model="order.payment_reminder_next_date"
+                        :label="__('Payment Reminder Next Date')"
+                    />
+                </div>
+                @canAction(\FluxErp\Actions\Order\ResetPaymentReminderLevel::class)
+                    <div>
+                        <x-button
+                            :text="__('Set Level')"
+                            x-on:click="$modalOpen('reset-payment-reminder-level-modal')"
+                        />
+                    </div>
+                @endcanAction
+            </div>
+        </div>
+    </x-card>
     <x-card :header="__('Payment Conditions')">
         <div class="flex flex-col gap-4">
             <div>
@@ -172,4 +192,31 @@
             </x-slot>
         </x-modal>
     @endteleport
+
+    <x-modal
+        id="reset-payment-reminder-level-modal"
+        x-on:open="$focusOn('new-payment-reminder-level')"
+    >
+        <x-slot:title>
+            {{ __('Set Payment Reminder Level') }}
+        </x-slot>
+        <x-number
+            id="new-payment-reminder-level"
+            wire:model="newPaymentReminderLevel"
+            :label="__('New Reminder Level')"
+            step="1"
+            min="0"
+        />
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="$modalClose('reset-payment-reminder-level-modal')"
+            />
+            <x-button
+                :text="__('Save')"
+                x-on:click="$wire.resetPaymentReminderLevel().then((success) => {if (success) $modalClose('reset-payment-reminder-level-modal');})"
+            />
+        </x-slot>
+    </x-modal>
 </div>

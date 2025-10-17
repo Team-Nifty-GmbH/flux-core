@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Actions\Order\ResetPaymentReminderLevel;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Livewire\DataTables\OrderTransactionList;
@@ -43,6 +44,8 @@ class Accounting extends OrderTransactionList
 
     public TransactionForm $transactionForm;
 
+    public ?int $newPaymentReminderLevel = null;
+
     protected ?string $includeBefore = 'flux::livewire.order.accounting';
 
     protected function getTableActions(): array
@@ -77,6 +80,33 @@ class Accounting extends OrderTransactionList
         if (! $transaction) {
             $this->transactionForm->amount = $this->order->balance;
         }
+    }
+
+    #[Renderless]
+    public function resetPaymentReminderLevel(): bool
+    {
+        try {
+            $result = ResetPaymentReminderLevel::make([
+                'id' => $this->order->id,
+                'payment_reminder_current_level' => $this->newPaymentReminderLevel,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->order->payment_reminder_current_level = $result->payment_reminder_current_level;
+        $this->reset('newPaymentReminderLevel');
+
+        $this->toast()
+            ->success(__('Payment Reminder Level set successfully'))
+            ->send();
+
+        return true;
     }
 
     #[Renderless]
