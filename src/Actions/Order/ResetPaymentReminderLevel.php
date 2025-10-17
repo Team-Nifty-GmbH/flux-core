@@ -22,7 +22,7 @@ class ResetPaymentReminderLevel extends FluxAction
     {
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first(['id', 'payment_reminder_current_level']);
+            ->firstOrFail(['id', 'payment_reminder_current_level']);
 
         $order->payment_reminder_current_level = $this->getData('payment_reminder_current_level');
         $order->save();
