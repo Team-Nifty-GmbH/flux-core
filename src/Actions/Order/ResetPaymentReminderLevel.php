@@ -5,7 +5,6 @@ namespace FluxErp\Actions\Order;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Order\ResetPaymentReminderLevelRuleset;
-use Illuminate\Database\Eloquent\Model;
 
 class ResetPaymentReminderLevel extends FluxAction
 {
