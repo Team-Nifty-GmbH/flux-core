@@ -88,9 +88,9 @@ class SendMail extends DispatchableFluxAction
         $renderedTextBody = html_entity_decode($template->text_body ?? '');
 
         if ($templateData) {
-            $renderedSubject = render_editor_blade($renderedSubject, $templateData);
-            $renderedHtmlBody = render_editor_blade($renderedHtmlBody, $templateData);
-            $renderedTextBody = render_editor_blade($renderedTextBody, $templateData);
+            $renderedSubject = (string) render_editor_blade($renderedSubject, $templateData);
+            $renderedHtmlBody = (string) render_editor_blade($renderedHtmlBody, $templateData);
+            $renderedTextBody = (string) render_editor_blade($renderedTextBody, $templateData);
         }
 
         $this->data['subject'] = $this->getData('subject') ?: $renderedSubject;
