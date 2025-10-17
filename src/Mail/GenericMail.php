@@ -15,7 +15,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Blade;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\HasMedia;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -111,24 +110,24 @@ class GenericMail extends Mailable
             data_set(
                 $this->mailMessageForm,
                 'subject',
-                Blade::render(
-                    html_entity_decode(data_get($this->mailMessageForm, 'subject', '')),
+                render_editor_blade(
+                    data_get($this->mailMessageForm, 'subject') ?? '',
                     $bladeParameters ?? []
                 )
             );
             data_set(
                 $this->mailMessageForm,
                 'html_body',
-                Blade::render(
-                    html_entity_decode(data_get($this->mailMessageForm, 'html_body', '')),
+                render_editor_blade(
+                    data_get($this->mailMessageForm, 'html_body') ?? '',
                     $bladeParameters ?? []
                 )
             );
             data_set(
                 $this->mailMessageForm,
                 'text_body',
-                Blade::render(
-                    html_entity_decode(data_get($this->mailMessageForm, 'text_body', '')) ?? '',
+                render_editor_blade(
+                    data_get($this->mailMessageForm, 'text_body') ?? '',
                     $bladeParameters ?? []
                 )
             );

@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Facades\EditorVariable;
 use FluxErp\Livewire\DataTables\EmailTemplateList;
 use FluxErp\Livewire\Forms\EmailTemplateForm;
 use FluxErp\Models\EmailTemplate;
@@ -21,12 +22,21 @@ class EmailTemplates extends EmailTemplateList
 {
     use DataTableHasFormEdit, WithFilePond {
         DataTableHasFormEdit::save as baseSave;
+        DataTableHasFormEdit::edit as baseEdit;
     }
 
     #[DataTableForm]
     public EmailTemplateForm $emailTemplateForm;
 
+    public string $editorId;
+
     protected ?string $includeBefore = 'flux::livewire.settings.email-templates';
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->editorId = 'editor-' . uniqid();
+    }
 
     public function getViewData(): array
     {
@@ -36,6 +46,29 @@ class EmailTemplates extends EmailTemplateList
                 'modelTypes' => $this->getModelTypes(),
             ]
         );
+    }
+
+    public function updatedEmailTemplateFormModelType(): void
+    {
+        $this->skipRender();
+        $variables = json_encode(EditorVariable::getTranslatedWithGlobals($this->emailTemplateForm->model_type));
+
+        $this->js(<<<JS
+            const editorElement = document.querySelector('[x-ref="editor-{$this->editorId}"]');
+            if (editorElement) {
+                const alpineData = Alpine.\$data(editorElement.closest('[x-data*="setupEditor"]'));
+                if (alpineData) {
+                    alpineData.bladeVariables = $variables;
+                }
+            }
+        JS);
+    }
+
+    public function edit(string|int|null $id = null): void
+    {
+        $this->baseEdit($id);
+
+        $this->updatedEmailTemplateFormModelType();
     }
 
     #[Renderless]

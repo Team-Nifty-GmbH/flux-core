@@ -1,3 +1,4 @@
+@php use FluxErp\Facades\EditorVariable;use FluxErp\Models\PaymentReminder; @endphp
 <x-modal id="edit-payment-reminder-text-modal">
     <div class="flex flex-col gap-1.5">
         <x-number
@@ -11,6 +12,7 @@
         <x-flux::editor
             :label="__('Payment Reminder Text')"
             wire:model="paymentReminderTextForm.reminder_body"
+            :blade-variables="EditorVariable::getTranslatedWithGlobals(PaymentReminder::class)"
         />
         <x-slot:footer>
             <x-button

@@ -238,6 +238,7 @@
                 <x-flux::editor
                     :label="__('Description')"
                     wire:model="orderPosition.description"
+                    :blade-variables="\FluxErp\Facades\EditorVariable::getTranslatedWithGlobals(\FluxErp\Models\OrderPosition::class)"
                 />
                 @show
             </div>

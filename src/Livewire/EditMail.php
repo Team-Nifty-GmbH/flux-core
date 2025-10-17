@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Blade;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -91,9 +90,9 @@ class EditMail extends Component
 
         if (! $this->multiple && $this->templateData) {
             try {
-                $renderedSubject = Blade::render($renderedSubject, $this->templateData);
-                $renderedHtmlBody = Blade::render($renderedHtmlBody, $this->templateData);
-                $renderedTextBody = Blade::render($renderedTextBody, $this->templateData);
+                $renderedSubject = render_editor_blade($renderedSubject, $this->templateData);
+                $renderedHtmlBody = render_editor_blade($renderedHtmlBody, $this->templateData);
+                $renderedTextBody = render_editor_blade($renderedTextBody, $this->templateData);
             } catch (Exception $e) {
                 $this->notification()
                     ->error(__('Template rendering failed: ') . $e->getMessage())
@@ -227,21 +226,21 @@ class EditMail extends Component
             $renderedData = [];
 
             if (! blank(data_get($data, 'subject'))) {
-                $renderedData['subject'] = Blade::render(
+                $renderedData['subject'] = render_editor_blade(
                     html_entity_decode(data_get($data, 'subject')),
                     $bladeParams
                 );
             }
 
             if (! blank(data_get($data, 'html_body'))) {
-                $renderedData['html_body'] = Blade::render(
+                $renderedData['html_body'] = render_editor_blade(
                     html_entity_decode(data_get($data, 'html_body')),
                     $bladeParams
                 );
             }
 
             if (! blank(data_get($data, 'text_body'))) {
-                $renderedData['text_body'] = Blade::render(
+                $renderedData['text_body'] = render_editor_blade(
                     html_entity_decode(data_get($data, 'text_body')),
                     $bladeParams
                 );

@@ -117,3 +117,19 @@ if (! function_exists('find_common_base_uri')) {
         return rtrim($basePath, '/') . '/';
     }
 }
+
+if (! function_exists('format_money')) {
+    function format_money(
+        string|int|float $amount,
+        ?FluxErp\Models\Currency $currency = null,
+        ?FluxErp\Models\Language $language = null
+    ): string {
+        return Illuminate\Support\Number::currency(
+            bcround($amount, 2),
+            $currency?->iso
+                ?? resolve_static(FluxErp\Models\Currency::class, 'default')->iso,
+            $language?->language_code
+                ?? resolve_static(FluxErp\Models\Language::class, 'default')->language_code
+        );
+    }
+}
