@@ -33,7 +33,7 @@
         <div class="flex flex-col gap-4">
             <x-input wire:model="emailTemplateForm.name" :label="__('Name')" />
             <x-select.styled
-                wire:model="emailTemplateForm.model_type"
+                wire:model.live="emailTemplateForm.model_type"
                 :label="__('Model Type')"
                 :options="$modelTypes"
             />
@@ -236,6 +236,7 @@
                 </div>
             </div>
             <x-flux::editor
+                :id="$editorId"
                 wire:model="emailTemplateForm.html_body"
                 :label="__('Html Body')"
             />

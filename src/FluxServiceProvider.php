@@ -4,6 +4,7 @@ namespace FluxErp;
 
 use Closure;
 use FluxErp\Facades\Action;
+use FluxErp\Facades\EditorVariable;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\ProductType;
 use FluxErp\Facades\Repeatable;
@@ -19,9 +20,12 @@ use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Notification;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Models\SepaMandate;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
@@ -137,6 +141,8 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
+
+        $this->registerEditorVariables();
     }
 
     public function register(): void
@@ -748,6 +754,54 @@ class FluxServiceProvider extends ServiceProvider
         Command::macro('removeLastLine', function (): void {
             $this->output->write("\x1b[1A\r\x1b[K");
         });
+    }
+
+    protected function registerEditorVariables(): void
+    {
+        EditorVariable::merge(
+            [
+                'Current User Name' => 'auth()->user()?->name',
+                'Current User Email' => 'auth()->user()?->email',
+                'Current Date' => 'now()->isoFormat(\'L\')',
+                'Current DateTime' => 'now()->isoFormat(\'L LT\')',
+            ]
+        );
+
+        EditorVariable::merge(
+            [
+                'Salutation' => '$paymentReminder->order->addressInvoice->salutation()',
+                'Total Gross Price' => 'format_money($paymentReminder->order->total_gross_price, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
+                'Balance' => 'format_money($paymentReminder->order->balance, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
+                'Last Payment Reminder Date' => '$paymentReminder->order->paymentReminders()->latest()->whereNot(\'id\', $paymentReminder->id)->first()?->created_at?->isoFormat(\'L\')',
+                'Invoice Number' => '$paymentReminder->order->invoice_number',
+                'Invoice Date' => '$paymentReminder->order->invoice_date->isoFormat(\'L\')',
+            ],
+            PaymentReminder::class
+        );
+
+        EditorVariable::merge(
+            [
+                'Salutation' => '$order->addressInvoice->salutation()',
+                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->addressInvoice->language)',
+                'Balance' => 'format_money($order->balance, $order->currency, $order->addressInvoice->language)',
+                'Invoice Number' => '$order->invoice_number',
+                'Invoice Date' => '$order->invoice_date->isoFormat(\'L\')',
+            ],
+            Order::class
+        );
+
+        EditorVariable::merge(
+            [
+                'Salutation' => '$sepaMandate->contact->addressInvoice?->salutation()',
+                'Customer IBAN' => '$sepaMandate->contactBankConnection?->iban',
+                'Customer BIC' => '$sepaMandate->contactBankConnection?->bic',
+                'Customer Bank Name' => '$sepaMandate->contactBankConnection?->bank_name',
+                'Customer Account Holder' => '$sepaMandate->contactBankConnection?->account_holder',
+                'Mandate Reference Number' => '$sepaMandate->mandate_reference_number',
+                'Sepa Mandate Type Enum' => '__($sepaMandate->sepa_mandate_type_enum->value)',
+            ],
+            SepaMandate::class
+        );
     }
 
     private function bootMiddleware(): void

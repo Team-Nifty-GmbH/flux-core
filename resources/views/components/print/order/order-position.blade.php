@@ -21,10 +21,10 @@
                 {{ $position->product_number }}
             </p>
             <p class="font-semibold">
-                {!! Blade::render(html_entity_decode($position->name), ['position' => $position]) !!}
+                {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>
             <div class="prose-xs">
-                {!! Blade::render(html_entity_decode($position->description), ['position' => $position]) !!}
+                {{ render_editor_blade($position->description, ['position' => $position]) }}
             </div>
         </td>
         <td class="py-2 pr-8 text-center align-top">

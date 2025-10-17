@@ -5,6 +5,6 @@
 />
 <main>
     <div>
-        {!! $text !!}
+        {{ render_editor_blade($text, ['paymentReminder' => $model]) }}
     </div>
 </main>

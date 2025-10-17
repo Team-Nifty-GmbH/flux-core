@@ -2,9 +2,11 @@
 
 namespace FluxErp\Http\Middleware;
 
+use Carbon\Carbon as BaseCarbon;
 use Closure;
 use FluxErp\Models\Language;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Number;
 use Throwable;
@@ -28,6 +30,8 @@ class Localization
             );
 
             Number::useLocale(app()->getLocale());
+            Carbon::setLocale(app()->getLocale());
+            BaseCarbon::setLocale(app()->getLocale());
         }
 
         return $next($request);

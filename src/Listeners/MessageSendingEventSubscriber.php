@@ -49,6 +49,10 @@ class MessageSendingEventSubscriber
         );
 
         $communicationForm['communication_type_enum'] = CommunicationTypeEnum::Mail;
+        $communicationForm['subject'] = (string) data_get($communicationForm, 'subject');
+        $communicationForm['text_body'] = (string) data_get($communicationForm, 'body');
+        $communicationForm['html_body'] = (string) data_get($communicationForm, 'html_body');
+
         $communicationAction = data_get($communicationForm, 'id')
             ? UpdateCommunication::make($communicationForm)
             : CreateCommunication::make($communicationForm);

@@ -9,7 +9,6 @@ use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\MailAccount;
 use FluxErp\Rulesets\MailMessage\SendMailRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -89,9 +88,9 @@ class SendMail extends DispatchableFluxAction
         $renderedTextBody = html_entity_decode($template->text_body ?? '');
 
         if ($templateData) {
-            $renderedSubject = Blade::render($renderedSubject, $templateData);
-            $renderedHtmlBody = Blade::render($renderedHtmlBody, $templateData);
-            $renderedTextBody = Blade::render($renderedTextBody, $templateData);
+            $renderedSubject = (string) render_editor_blade($renderedSubject, $templateData);
+            $renderedHtmlBody = (string) render_editor_blade($renderedHtmlBody, $templateData);
+            $renderedTextBody = (string) render_editor_blade($renderedTextBody, $templateData);
         }
 
         $this->data['subject'] = $this->getData('subject') ?: $renderedSubject;

@@ -3,6 +3,7 @@ import { LiteralTab } from './tiptap-literal-tab-handler.js';
 import { FontSizeColorConfig } from './tiptap-font-size-color-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
+import { BladeVariableConfig } from './tiptap-blade-variable.js';
 
 export default function (
     content,
@@ -61,6 +62,7 @@ export default function (
                         FontSizeColorConfig,
                         LiteralTab,
                         MentionConfig(searchModel, element),
+                        BladeVariableConfig(),
                     ],
                     timeout: null,
                     content: this.content,
