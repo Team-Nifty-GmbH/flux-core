@@ -15,6 +15,10 @@ return new class() extends Migration
             $table->foreignId('parent_id')->nullable()->constrained('mail_folders')->cascadeOnDelete();
             $table->string('name');
             $table->string('slug');
+            $table->boolean('can_create_lead')->default(false);
+            $table->boolean('can_create_purchase_invoice')->default(false);
+            $table->boolean('can_create_ticket')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
