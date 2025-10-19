@@ -26,11 +26,11 @@ class EmailTemplates extends EmailTemplateList
         DataTableHasFormEdit::edit as baseEdit;
     }
 
-    #[DataTableForm]
-    public EmailTemplateForm $emailTemplateForm;
-
     #[Locked]
     public string $editorId;
+
+    #[DataTableForm]
+    public EmailTemplateForm $emailTemplateForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.email-templates';
 
@@ -38,6 +38,13 @@ class EmailTemplates extends EmailTemplateList
     {
         parent::mount();
         $this->editorId = 'editor-' . uniqid();
+    }
+
+    public function edit(string|int|null $id = null): void
+    {
+        $this->baseEdit($id);
+
+        $this->updatedEmailTemplateFormModelType();
     }
 
     public function getViewData(): array
@@ -48,29 +55,6 @@ class EmailTemplates extends EmailTemplateList
                 'modelTypes' => $this->getModelTypes(),
             ]
         );
-    }
-
-    public function updatedEmailTemplateFormModelType(): void
-    {
-        $this->skipRender();
-        $variables = json_encode(EditorVariable::getTranslatedWithGlobals($this->emailTemplateForm->model_type));
-
-        $this->js(<<<JS
-            const editorElement = document.querySelector('[x-ref="editor-{$this->editorId}"]');
-            if (editorElement) {
-                const alpineData = Alpine.\$data(editorElement.closest('[x-data*="setupEditor"]'));
-                if (alpineData) {
-                    alpineData.bladeVariables = $variables;
-                }
-            }
-        JS);
-    }
-
-    public function edit(string|int|null $id = null): void
-    {
-        $this->baseEdit($id);
-
-        $this->updatedEmailTemplateFormModelType();
     }
 
     #[Renderless]
@@ -103,6 +87,22 @@ class EmailTemplates extends EmailTemplateList
         }
 
         return $result;
+    }
+
+    public function updatedEmailTemplateFormModelType(): void
+    {
+        $this->skipRender();
+        $variables = json_encode(EditorVariable::getTranslated($this->emailTemplateForm->model_type));
+
+        $this->js(<<<JS
+            const editorElement = document.querySelector('[x-ref="editor-{$this->editorId}"]');
+            if (editorElement) {
+                const alpineData = Alpine.\$data(editorElement.closest('[x-data*="setupEditor"]'));
+                if (alpineData) {
+                    alpineData.bladeVariables = $variables;
+                }
+            }
+        JS);
     }
 
     protected function getModelTypes(): array
