@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array all()
  * @method static void clear()
  * @method static string|array get(?string $modelClass = null, ?string $path = null, bool $withGlobals = true)
- * @method static string|array getTranslated(?string $modelClass = null, ?string $path = null, bool $withGlobals = true)
+ * @method static array getTranslated(?string $modelClass = null, ?string $path = null, bool $withGlobals = true)
  * @method static void merge(array $values, ?string $modelClass = null, ?string $path = null)
  * @method static void register(array $variables, ?string $modelClass = null)
  * @method static void registerVariable(string $key, string|array $value, ?string $modelClass = null)

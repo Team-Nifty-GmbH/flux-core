@@ -16,17 +16,12 @@ class EditorVariableManager
             data_set(static::$variables, $morphAlias, []);
         }
 
-        if (is_null($path)) {
-            $current = data_get(static::$variables, $morphAlias) ?? [];
-            $current[] = $value;
+        $variablePath = implode('.', array_filter([$morphAlias, $path]));
 
-            data_set(static::$variables, $morphAlias, $current);
-        } else {
-            $current = Arr::wrap(data_get(static::$variables, $morphAlias . '.' . $path) ?? []);
-            $current[] = $value;
+        $current = Arr::wrap(data_get(static::$variables, $variablePath) ?? []);
+        $current[] = $value;
 
-            data_set(static::$variables, $morphAlias . '.' . $path, $current);
-        }
+        data_set(static::$variables, $variablePath, $current);
     }
 
     public static function all(): array
@@ -41,41 +36,32 @@ class EditorVariableManager
 
     public static function get(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): string|array
     {
-        if (! $withGlobals) {
-            return data_get(
-                static::$variables,
-                static::getMorphAlias($modelClass) . (is_null($path) ? '' : '.' . $path),
-            ) ?? [];
+        $data = data_get(
+            static::$variables,
+            implode('.', array_filter([static::getMorphAlias($modelClass), $path])),
+        ) ?? [];
+
+        if (! $withGlobals || is_null($modelClass)) {
+            return $data;
         }
 
         $globals = data_get(
             static::$variables,
-            static::getMorphAlias(null) . (is_null($path) ? '' : '.' . $path),
+            implode('.', array_filter([static::getMorphAlias(null), $path])),
         ) ?? [];
 
-        $merged = $modelClass
-            ? array_merge(
-                data_get(
-                    static::$variables,
-                    static::getMorphAlias($modelClass) . (is_null($path) ? '' : '.' . $path),
-                ) ?? [],
-                $globals
-            )
-            : $globals;
-
-        if (is_null($path)) {
-            return $merged;
-        }
-
-        return data_get($merged, $path) ?? [];
+        return array_merge($data, $globals);
     }
 
     public static function getTranslated(
         ?string $modelClass = null,
         ?string $path = null,
         bool $withGlobals = true
-    ): string|array {
+    ): array {
         $variables = static::get($modelClass, $path, $withGlobals);
+        if (is_string($variables)) {
+            $variables = [$variables => $variables];
+        }
 
         return static::translate($variables);
     }
@@ -88,19 +74,12 @@ class EditorVariableManager
             data_set(static::$variables, $morphAlias, []);
         }
 
-        if (is_null($path)) {
-            data_set(
-                static::$variables,
-                $morphAlias,
-                array_merge(data_get(static::$variables, $morphAlias) ?? [], $values)
-            );
-        } else {
-            data_set(
-                static::$variables,
-                $morphAlias . '.' . $path,
-                array_merge(Arr::wrap(data_get(static::$variables, $morphAlias . '.' . $path) ?? []), $values)
-            );
-        }
+        $variablePath = implode('.', array_filter([$morphAlias, $path]));
+        data_set(
+            static::$variables,
+            $variablePath,
+            array_merge(Arr::wrap(data_get(static::$variables, $variablePath) ?? []), $values)
+        );
     }
 
     public static function register(array $variables, ?string $modelClass = null): void
@@ -127,11 +106,7 @@ class EditorVariableManager
             return;
         }
 
-        if (is_null($path)) {
-            data_forget(static::$variables, $morphAlias);
-        } else {
-            data_forget(static::$variables, $morphAlias . '.' . $path);
-        }
+        data_forget(static::$variables, implode('.', array_filter([$morphAlias, $path])));
     }
 
     public static function set(string|array $value, ?string $modelClass = null, ?string $path = null): void
