@@ -586,7 +586,10 @@ if (! function_exists('morph_alias')) {
     {
         $class = resolve_static($class, 'class');
 
-        if (in_array(FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
+        if (
+            class_exists($class)
+            && in_array(FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))
+        ) {
             return $class::getParentMorphClass();
         }
 
@@ -627,5 +630,33 @@ if (! function_exists('morph_to')) {
         $query = $model::query()->whereKey($id);
 
         return $returnBuilder ? $query : $query->first();
+    }
+}
+
+if (! function_exists('render_editor_blade')) {
+    function render_editor_blade(?string $html, array $data = []): Illuminate\Support\HtmlString
+    {
+        if (is_null($html)) {
+            return new Illuminate\Support\HtmlString('');
+        }
+
+        $converted = preg_replace_callback(
+            '/<span[^>]*data-type="blade-variable"[^>]*data-value="([^"]*)"[^>]*>.*?<\/span>/',
+            function (array $matches) use ($data): string {
+                $value = html_entity_decode($matches[1]);
+
+                preg_match('/\$(\w+)/', $value, $variableMatches);
+                $variableName = $variableMatches[1] ?? null;
+
+                if ($variableName && ! array_key_exists($variableName, $data)) {
+                    return $matches[0];
+                }
+
+                return '{{ ' . $value . ' }}';
+            },
+            $html
+        );
+
+        return new Illuminate\Support\HtmlString(Illuminate\Support\Facades\Blade::render($converted, $data));
     }
 }

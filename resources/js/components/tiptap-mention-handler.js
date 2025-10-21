@@ -20,10 +20,11 @@ function updateSuggestionItems(element, props) {
         div.appendChild(img);
         div.appendChild(span);
 
-        div.addEventListener('click', () => {
+        div.addEventListener('mousedown', (event) => {
+            event.preventDefault();
             props.command({ id: item.id, label: item.label });
-            suggestionPopup.hide();
         });
+
         element.appendChild(div);
     });
 }
@@ -78,6 +79,7 @@ export const MentionConfig = (searchModel, element) =>
                             interactive: true,
                             trigger: 'manual',
                             placement: 'bottom-start',
+                            getReferenceClientRect: props.clientRect,
                         });
 
                         updateSuggestionItems(suggestionElement, props);
@@ -90,14 +92,19 @@ export const MentionConfig = (searchModel, element) =>
 
                         updateSuggestionItems(suggestionElement, props);
 
-                        suggestionPopup.setProps({
-                            getReferenceClientRect: props.clientRect,
-                        });
+                        if (suggestionPopup) {
+                            suggestionPopup.setProps({
+                                getReferenceClientRect: props.clientRect,
+                            });
+                        }
                     },
 
                     onKeyDown: (props) => {
                         if (props.event.key === 'Escape') {
-                            suggestionPopup.hide();
+                            if (suggestionPopup) {
+                                suggestionPopup.hide();
+                            }
+
                             return true;
                         }
 
@@ -106,7 +113,10 @@ export const MentionConfig = (searchModel, element) =>
                     },
 
                     onExit: () => {
-                        suggestionPopup.destroy();
+                        if (suggestionPopup) {
+                            suggestionPopup.destroy();
+                            suggestionPopup = null;
+                        }
                     },
                 };
             },

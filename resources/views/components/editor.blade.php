@@ -12,7 +12,7 @@
         @else
             x-modelable="editable"
         @endif
-        x-data="setupEditor(
+        x-data="Object.assign({}, setupEditor(
                 @if ($attributes->wire("model")->value())
                     $wire.$entangle('{{ $attributes->wire("model")->value() }}',
                     @js($attributes->wire("model")->hasModifier("live"))
@@ -31,7 +31,7 @@
                             : 0
                     }}
                 @endif
-            )"
+            )(), { bladeVariables: @js($bladeVariables) })"
         x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
@@ -59,7 +59,7 @@
                 x-on:click="editor().chain().focus().toggleBold().run()"
                 class="font-bold"
                 text="B"
-            ></x-button>
+            />
         @endif
 
         @if ($italic)
@@ -69,7 +69,7 @@
                 x-on:click="editor().chain().focus().toggleItalic().run()"
                 class="font-italic"
                 text="I"
-            ></x-button>
+            />
         @endif
 
         @if ($underline)
@@ -79,7 +79,7 @@
                 x-on:click="editor().chain().focus().toggleUnderline().run()"
                 class="underline"
                 text="U"
-            ></x-button>
+            />
         @endif
 
         @if ($strike)
@@ -89,7 +89,7 @@
                 x-on:click="editor().chain().focus().toggleStrike().run()"
                 class="line-through"
                 text="S"
-            ></x-button>
+            />
         @endif
 
         @if ($code)
@@ -108,7 +108,7 @@
                 color="secondary"
                 x-on:click="editor().chain().focus().toggleHeading({ level: 1 }).run()"
                 text="H1"
-            ></x-button>
+            />
         @endif
 
         @if ($h2)
@@ -117,7 +117,7 @@
                 color="secondary"
                 x-on:click="editor().chain().focus().toggleHeading({ level: 2 }).run()"
                 text="H2"
-            ></x-button>
+            />
         @endif
 
         @if ($h3)
@@ -126,7 +126,7 @@
                 color="secondary"
                 x-on:click="editor().chain().focus().toggleHeading({ level: 3 }).run()"
                 text="H3"
-            ></x-button>
+            />
         @endif
 
         @if ($availableFontSizes && ! $tooltipDropdown)
@@ -151,7 +151,7 @@
                 icon="paint-brush"
                 x-data="editorFontSizeColorHandler($refs['tippyParent-color-{{ $id }}'], $refs['colorDropDown-{{$id}}'])"
                 color="secondary"
-            ></x-button>
+            />
         @endif
 
         @if ($textBackgroundColors && ! $tooltipDropdown)
@@ -162,8 +162,21 @@
                 icon="swatch"
                 x-data="editorFontSizeColorHandler($refs['tippyParent-background-color-{{ $id }}'], $refs['backgroundColorDropDown-{{ $id }}'])"
                 color="secondary"
-            ></x-button>
+            />
         @endif
+
+        <template
+            x-if="Object.values(bladeVariables).length > 0 && ! @js($tooltipDropdown)"
+        >
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent-blade-variables-{{ $id }}"
+                flat
+                icon="variable"
+                x-data="editorFontSizeColorHandler($refs['tippyParent-blade-variables-{{ $id }}'], $refs['bladeVariablesDropdown-{{ $id }}'])"
+                color="secondary"
+            />
+        </template>
 
         @if ($availableFontSizes && $tooltipDropdown)
             @foreach ($availableFontSizes as $size)
@@ -172,7 +185,7 @@
                     color="secondary"
                     :text="$size . 'px'"
                     x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
-                ></x-button>
+                />
             @endforeach
         @endif
 
@@ -182,7 +195,7 @@
                 color="secondary"
                 x-on:click="editor().chain().focus().setHorizontalRule().run()"
                 text="-"
-            ></x-button>
+            />
         @endif
 
         @if ($bulletList)
@@ -191,7 +204,7 @@
                 color="secondary"
                 icon="list-bullet"
                 x-on:click="editor().chain().focus().toggleBulletList().run()"
-            ></x-button>
+            />
         @endif
 
         @if ($orderedList)
@@ -200,7 +213,7 @@
                 color="secondary"
                 icon="list-bullet"
                 x-on:click="editor().chain().focus().toggleOrderedList().run()"
-            ></x-button>
+            />
         @endif
 
         @if ($quote)
@@ -209,7 +222,7 @@
                 color="secondary"
                 x-on:click="editor().chain().focus().toggleBlockquote().run()"
                 text="„“"
-            ></x-button>
+            />
         @endif
 
         @if ($codeBlock)
@@ -218,7 +231,7 @@
                 color="secondary"
                 icon="code-bracket-square"
                 x-on:click="editor().chain().focus().toggleCodeBlock().run()"
-            ></x-button>
+            />
         @endif
 
         @if ($tooltipDropdown && $textColors)
@@ -283,7 +296,7 @@
                     color="secondary"
                     :text="$size . 'px'"
                     x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
-                ></x-button>
+                />
             @endforeach
         </div>
     </template>
@@ -333,6 +346,34 @@
                     </div>
                 @endforeach
             </div>
+        </div>
+    </template>
+    <template x-ref="bladeVariablesDropdown-{{ $id }}">
+        <div class="flex max-h-64 w-64 flex-col gap-1 overflow-y-auto p-2">
+            <template x-for="variable in Object.values(bladeVariables)">
+                <button
+                    type="button"
+                    class="group inline-flex items-center justify-start gap-1 rounded px-2 py-1.5 text-xs text-slate-600 outline-none transition-all duration-150 ease-in hover:bg-slate-100 hover:shadow-sm focus:ring-2 focus:ring-slate-300 dark:text-slate-300 dark:hover:bg-slate-700 dark:focus:ring-slate-600"
+                    x-on:click="
+                        editor()
+                            .chain()
+                            .focus()
+                            .insertContent([
+                                {
+                                    type: 'bladeVariable',
+                                    attrs: { label: variable.label, value: variable.value },
+                                },
+                                { type: 'text', text: ' ' },
+                            ])
+                            .run()
+                    "
+                >
+                    <span
+                        class="inline-flex items-center rounded bg-indigo-100 px-1.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
+                        x-text="variable.label"
+                    ></span>
+                </button>
+            </template>
         </div>
     </template>
 </div>
