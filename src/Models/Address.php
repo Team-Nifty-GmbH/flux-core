@@ -594,19 +594,44 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         $start = $start ? Carbon::parse($start) : null;
         $end = $end ? Carbon::parse($end) : null;
 
-        if ($start && $end && $start->greaterThan($end)) {
-            $var = $start;
-            $start = $end;
-            $end = $var;
+        $yearEnd = null;
+        $yearStart = null;
+
+        if ($start && $end) {
+            if ($start->greaterThan($end)) {
+                $var = $start;
+                $start = $end;
+                $end = $var;
+            }
+
+            if ($start->year !== $end->year) {
+                $yearEnd = '1231';
+                $yearStart = '0101';
+            }
         }
 
         $builder
-            ->when($start && $end, function (Builder $builder) use ($start, $end): void {
-                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?", [
-                    $start->format('md'),
-                    $end->format('md'),
-                ]);
-            })
+            ->when($start && $end, fn (Builder $builder) => $builder
+                ->where(function (Builder $query) use ($start, $end, $yearEnd, $yearStart): void {
+                    $query
+                        ->whereRaw(
+                            "REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?",
+                            [
+                                $start->format('md'),
+                                $yearEnd ?? $end->format('md'),
+                            ]
+                        )
+                        ->when($yearStart, fn (Builder $query) => $query
+                            ->orWhereRaw(
+                                "REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?",
+                                [
+                                    $yearStart,
+                                    $end->format('md'),
+                                ]
+                            )
+                        );
+                })
+            )
             ->when($start && ! $end, function (Builder $builder) use ($start): void {
                 $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') >= ?", [
                     $start->format('md'),
