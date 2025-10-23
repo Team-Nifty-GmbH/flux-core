@@ -551,7 +551,7 @@ if (! function_exists('resolve_static')) {
             if ($reflectionClass->hasMethod($method)) {
                 $reflectionMethod = $reflectionClass->getMethod($method);
 
-                if (!$reflectionMethod->isStatic()) {
+                if (! $reflectionMethod->isStatic()) {
                     throw new InvalidArgumentException('Method is not static: ' . $method);
                 }
             }
@@ -559,7 +559,6 @@ if (! function_exists('resolve_static')) {
             return is_array($parameters) && $parameters
                 ? $concrete::$method(...$parameters)
                 : $concrete::$method();
-
         } catch (ReflectionException) {
             throw new InvalidArgumentException('Invalid method: ' . $method);
         }
