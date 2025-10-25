@@ -7,20 +7,12 @@ use Illuminate\Auth\RequestGuard;
 
 class SanctumServiceProvider extends \Laravel\Sanctum\SanctumServiceProvider
 {
-    public function register(): void
-    {
-        parent::register();
-    }
-
-    /**
-     * Register the guard.
-     */
     protected function createGuard($auth, $config): RequestGuard
     {
         return new RequestGuard(
-            new Guard($auth, config('sanctum.expiration'), $config['provider']),
+            new Guard($auth, config('sanctum.expiration'), data_get($config, 'provider')),
             request(),
-            $auth->createUserProvider($config['provider'] ?? null)
+            $auth->createUserProvider(data_get($config, 'provider') ?? null)
         );
     }
 }

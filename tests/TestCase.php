@@ -4,11 +4,6 @@ namespace FluxErp\Tests;
 
 use Barryvdh\DomPDF\ServiceProvider;
 use FluxErp\FluxServiceProvider;
-use FluxErp\Providers\BindingServiceProvider;
-use FluxErp\Providers\EventServiceProvider;
-use FluxErp\Providers\MorphMapServiceProvider;
-use FluxErp\Providers\SanctumServiceProvider;
-use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
@@ -42,7 +37,6 @@ abstract class TestCase extends BaseTestCase
             TranslatableServiceProvider::class,
             LivewireServiceProvider::class,
             TallStackUiServiceProvider::class,
-            ViewServiceProvider::class,
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
@@ -52,11 +46,7 @@ abstract class TestCase extends BaseTestCase
             ActivitylogServiceProvider::class,
             MediaLibraryServiceProvider::class,
             FluxServiceProvider::class,
-            BindingServiceProvider::class,
-            SanctumServiceProvider::class,
             WebPushServiceProvider::class,
-            MorphMapServiceProvider::class,
-            EventServiceProvider::class,
             ServiceProvider::class,
             ExcelServiceProvider::class,
         ];
