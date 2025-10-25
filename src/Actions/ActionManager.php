@@ -22,10 +22,6 @@ class ActionManager
     public function __construct()
     {
         $this->actions = Collection::make();
-
-        if (app()->bound('events')) {
-            FluxAction::setEventDispatcher(app('events'));
-        }
     }
 
     public function all(): Collection
