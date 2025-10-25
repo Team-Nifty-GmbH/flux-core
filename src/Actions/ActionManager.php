@@ -4,7 +4,6 @@ namespace FluxErp\Actions;
 
 use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
@@ -50,13 +49,17 @@ class ActionManager
             'namespace' => $namespace,
         ];
 
-        try {
-            $actions = Cache::get('flux.actions.' . $cacheKey);
-        } catch (Throwable) {
-            $actions = null;
+        // Check for PHP-File cache first
+        $cachePath = app()->bootstrapPath('cache/flux-actions.php');
+        $cachedActions = null;
+
+        if (file_exists($cachePath)) {
+            $allCachedActions = require $cachePath;
+            $cachedActions = $allCachedActions[$cacheKey] ?? null;
         }
 
-        if (! is_null($actions) && ! app()->runningInConsole()) {
+        if (! is_null($cachedActions) && ! app()->runningInConsole()) {
+            $actions = $cachedActions;
             $iterator = [];
         } else {
             $actions = [];
@@ -92,12 +95,6 @@ class ActionManager
             } catch (Throwable) {
                 // Ignore exceptions during auto-discovery
             }
-        }
-
-        try {
-            Cache::put('flux.actions.' . $cacheKey, $actions);
-        } catch (Throwable) {
-            // Ignore exceptions during cache put
         }
     }
 

@@ -10,12 +10,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Throwable;
 
 class RepeatableManager
 {
@@ -61,6 +59,12 @@ class RepeatableManager
             ];
         }
 
+        // Check for cached repeatables from flux:optimize
+        $cachePath = app()->bootstrapPath('cache/flux-repeatables.php');
+        $allRepeatables = file_exists($cachePath) && ! app()->runningInConsole()
+            ? require $cachePath
+            : [];
+
         foreach ($directories as $key => $directory) {
             if (! is_dir($directory)) {
                 continue;
@@ -73,15 +77,9 @@ class RepeatableManager
                 'namespaces' => $namespaces,
             ];
 
-            // try to obtain the repeatables from cache
-            // if the cache is not available, we will iterate over the directory
-            try {
-                $repeatables = Cache::get('flux.repeatable.' . $cacheKey);
-            } catch (Throwable) {
-                $repeatables = null;
-            }
-
-            if (! is_null($repeatables) && ! app()->runningInConsole()) {
+            // Use cached repeatables if available, otherwise discover
+            if (isset($allRepeatables[$cacheKey]) && ! app()->runningInConsole()) {
+                $repeatables = $allRepeatables[$cacheKey];
                 $iterator = [];
             } else {
                 $repeatables = [];
@@ -116,12 +114,6 @@ class RepeatableManager
                 } catch (InvalidArgumentException) {
                     // Ignore exceptions during auto-discovery
                 }
-            }
-
-            try {
-                Cache::put('flux.repeatable.' . $cacheKey, $repeatables);
-            } catch (Throwable) {
-                // Ignore exceptions during cache put
             }
         }
     }
