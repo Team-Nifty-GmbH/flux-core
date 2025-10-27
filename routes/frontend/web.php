@@ -45,6 +45,7 @@ use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumberList;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
+use FluxErp\Livewire\Settings\AccountingSettings;
 use FluxErp\Livewire\Settings\ActivityLogs;
 use FluxErp\Livewire\Settings\AdditionalColumns;
 use FluxErp\Livewire\Settings\AddressTypes;
@@ -222,6 +223,7 @@ Route::middleware('web')
                 Route::get('/settings', Settings::class)->name('settings');
                 Route::name('settings.')->prefix('settings')
                     ->group(function (): void {
+                        Route::get('/accounting-settings', AccountingSettings::class)->name('accounting-settings');
                         Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');

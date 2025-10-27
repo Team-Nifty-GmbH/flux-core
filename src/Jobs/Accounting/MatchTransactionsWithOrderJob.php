@@ -11,6 +11,7 @@ use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Transaction;
+use FluxErp\Settings\AccountingSettings;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -274,14 +275,47 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
                     ? min($order->balance, $transaction->balance)
                     : max($order->balance, $transaction->balance);
 
+                $isAccepted = $this->shouldAutoAccept($transaction, $order);
+
                 CreateOrderTransaction::make([
                     'transaction_id' => $transaction->getKey(),
                     'order_id' => $order->getKey(),
                     'amount' => $amount,
+                    'is_accepted' => $isAccepted,
                 ])
                     ->validate()
                     ->execute();
             }
         });
+    }
+
+    protected function shouldAutoAccept(Transaction $transaction, Order $order): bool
+    {
+        $settings = app(AccountingSettings::class);
+
+        if (! $settings->auto_accept_secure_transaction_matches) {
+            return false;
+        }
+
+        // Condition 1: Buchungsdatum ist NACH dem invoice_date der Rechnung
+        if (! $order->invoice_date || $transaction->booking_date->lessThanOrEqualTo($order->invoice_date)) {
+            return false;
+        }
+
+        // Condition 2: Die Rechnungsnummer taucht EXAKT im Verwendungszweck auf
+        if (! $order->invoice_number || ! $transaction->purpose) {
+            return false;
+        }
+
+        if (! str_contains($transaction->purpose, $order->invoice_number)) {
+            return false;
+        }
+
+        // Condition 3: Die Balance der Rechnung ist EXAKT der Überweisungsbetrag
+        if (bccomp((string) round($order->balance, 2), (string) $transaction->amount, 2) !== 0) {
+            return false;
+        }
+
+        return true;
     }
 }

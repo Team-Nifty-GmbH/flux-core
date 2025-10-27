@@ -151,7 +151,10 @@ class FluxServiceProvider extends ServiceProvider
             $this->offerPublishing();
         }
 
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadMigrationsFrom([
+            __DIR__ . '/../database/migrations',
+            __DIR__ . '/../database/migrations/settings',
+        ]);
         $this->app->bind(
             'path.lang',
             fn () => [__DIR__ . '/../lang', base_path('lang')]
@@ -276,6 +279,7 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Settings',
             order: 9999,
             closure: function (): void {
+                Menu::register(route: 'settings.accounting-settings');
                 Menu::register(route: 'settings.system');
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
