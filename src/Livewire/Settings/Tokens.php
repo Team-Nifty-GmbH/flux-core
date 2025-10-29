@@ -47,14 +47,6 @@ class Tokens extends TokenList
         ));
     }
 
-    #[Renderless]
-    public function modalClose(): void
-    {
-        $this->js(<<<'JS'
-            $modalClose('copy-token-modal')
-        JS);
-    }
-
     public function save(): bool
     {
         if ($result = $this->parentSave()) {
