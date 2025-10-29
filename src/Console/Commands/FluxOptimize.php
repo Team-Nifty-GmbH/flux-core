@@ -311,6 +311,9 @@ class FluxOptimize extends Command
     protected function discoverRepeatables(): array
     {
         $directories = [
+            flux_path('src/Console/Commands') => 'FluxErp\\Console\\Commands',
+            flux_path('src/Jobs') => 'FluxErp\\Jobs',
+            flux_path('src/Invokable') => 'FluxErp\\Invokable',
             app_path('Console/Commands') => 'App\\Console\\Commands',
             app_path('Jobs') => 'App\\Jobs',
             app_path('Invokable') => 'App\\Invokable',
