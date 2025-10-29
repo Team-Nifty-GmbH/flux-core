@@ -291,18 +291,16 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
 
     protected function shouldAutoAccept(Transaction $transaction, Order $order): bool
     {
-        $settings = app(AccountingSettings::class);
-
-        if (! $settings->auto_accept_secure_transaction_matches) {
+        if (! app(AccountingSettings::class)->auto_accept_secure_transaction_matches) {
             return false;
         }
 
-        // Condition 1: Buchungsdatum ist NACH dem invoice_date der Rechnung
+        // Condition 1: The invoice date of the order is not in the future
         if (! $order->invoice_date || $transaction->booking_date->lessThanOrEqualTo($order->invoice_date)) {
             return false;
         }
 
-        // Condition 2: Die Rechnungsnummer taucht EXAKT im Verwendungszweck auf
+        // Condition 2: The purpose of the transaction contains the invoice number of the order
         if (! $order->invoice_number || ! $transaction->purpose) {
             return false;
         }
@@ -311,8 +309,8 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             return false;
         }
 
-        // Condition 3: Die Balance der Rechnung ist EXAKT der Überweisungsbetrag
-        if (bccomp((string) round($order->balance, 2), (string) $transaction->amount, 2) !== 0) {
+        // Condition 3: The balance of the order is equal to the amount of the transaction
+        if (bccomp(bcround($order->balance), $transaction->amount) !== 0) {
             return false;
         }
 

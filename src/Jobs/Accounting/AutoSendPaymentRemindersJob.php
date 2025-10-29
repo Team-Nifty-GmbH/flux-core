@@ -3,7 +3,6 @@
 namespace FluxErp\Jobs\Accounting;
 
 use Cron\CronExpression;
-use Exception;
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Actions\Printing;
@@ -19,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Str;
+use Throwable;
 
 class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 {
@@ -103,7 +103,7 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
                 ->execute();
 
             $this->sendPaymentReminderEmail($paymentReminder);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             logger()->error('Failed to process payment reminder for order ' . $order->getKey(), [
                 'error' => $e->getMessage(),
                 'order_id' => $order->getKey(),
@@ -193,6 +193,7 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
         if (! data_get($result, 'success', false)) {
             activity()
                 ->event('payment_reminder_email_failed')
+                ->byAnonymous()
                 ->performedOn($order)
                 ->withProperties([
                     'error' => data_get($result, 'error'),
