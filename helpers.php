@@ -556,7 +556,7 @@ if (! function_exists('resolve_static')) {
                 }
             }
 
-            return is_array($parameters) && $parameters
+            return $parameters
                 ? $concrete::$method(...$parameters)
                 : $concrete::$method();
         } catch (ReflectionException) {
