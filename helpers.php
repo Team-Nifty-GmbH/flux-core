@@ -542,18 +542,23 @@ if (! function_exists('resolve_static')) {
         }
 
         try {
+            if (! is_callable([$concrete, $method])) {
+                throw new InvalidArgumentException('Invalid method: ' . $method);
+            }
+
             $reflectionClass = new ReflectionClass($concrete);
-            $reflectionMethod = $reflectionClass->getMethod($method);
 
-            if (! $reflectionMethod->isStatic()) {
-                throw new InvalidArgumentException('Method is not static: ' . $method);
+            if ($reflectionClass->hasMethod($method)) {
+                $reflectionMethod = $reflectionClass->getMethod($method);
+
+                if (! $reflectionMethod->isStatic()) {
+                    throw new InvalidArgumentException('Method is not static: ' . $method);
+                }
             }
 
-            if ($reflectionMethod->getParameters() && is_array($parameters)) {
-                return $concrete::$method(...$parameters);
-            } else {
-                return $concrete::$method();
-            }
+            return $parameters
+                ? $concrete::$method(...$parameters)
+                : $concrete::$method();
         } catch (ReflectionException) {
             throw new InvalidArgumentException('Invalid method: ' . $method);
         }
