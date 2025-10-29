@@ -7,13 +7,6 @@ use Illuminate\Support\ServiceProvider;
 
 class RepeatableServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        if (! $this->app->bound(RepeatableManager::class)) {
-            $this->app->singleton(RepeatableManager::class, fn (): RepeatableManager => new RepeatableManager());
-        }
-    }
-
     public function boot(): void
     {
         $manager = $this->app->make(RepeatableManager::class);
@@ -22,5 +15,12 @@ class RepeatableServiceProvider extends ServiceProvider
         $manager->autoDiscover(flux_path('src/Jobs'), 'FluxErp\Jobs');
         $manager->autoDiscover(flux_path('src/Invokable'), 'FluxErp\Invokable');
         $manager->autoDiscover();
+    }
+
+    public function register(): void
+    {
+        if (! $this->app->bound(RepeatableManager::class)) {
+            $this->app->singleton(RepeatableManager::class, fn (): RepeatableManager => new RepeatableManager());
+        }
     }
 }
