@@ -3,7 +3,9 @@
 namespace FluxErp\Providers;
 
 use FluxErp\Facades\EditorVariable;
-use FluxErp\Models;
+use FluxErp\Models\Order;
+use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\SepaMandate;
 use FluxErp\Support\EditorVariableManager;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,7 +29,7 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Invoice Number' => '$paymentReminder->order->invoice_number',
                 'Invoice Date' => '$paymentReminder->order->invoice_date->isoFormat(\'L\')',
             ],
-            Models\PaymentReminder::class
+            PaymentReminder::class
         );
 
         EditorVariable::merge(
@@ -38,7 +40,7 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Invoice Number' => '$order->invoice_number',
                 'Invoice Date' => '$order->invoice_date->isoFormat(\'L\')',
             ],
-            Models\Order::class
+            Order::class
         );
 
         EditorVariable::merge(
@@ -51,7 +53,7 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Mandate Reference Number' => '$sepaMandate->mandate_reference_number',
                 'Sepa Mandate Type Enum' => '__($sepaMandate->sepa_mandate_type_enum->value)',
             ],
-            Models\SepaMandate::class
+            SepaMandate::class
         );
     }
 
