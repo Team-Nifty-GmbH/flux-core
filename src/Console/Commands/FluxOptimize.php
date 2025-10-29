@@ -88,12 +88,16 @@ class FluxOptimize extends Command
             flux_path('src/Livewire/Widgets') => 'FluxErp\Livewire\Widgets',
         ];
 
-        $widgets = [];
+        $componentRegistry = app(\Livewire\Mechanisms\ComponentRegistry::class);
+        $allWidgets = [];
 
         foreach ($directories as $directory => $namespace) {
             if (! is_dir($directory)) {
                 continue;
             }
+
+            $cacheKey = md5($directory . $namespace);
+            $widgets = [];
 
             $iterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($directory)
@@ -119,11 +123,14 @@ class FluxOptimize extends Command
                     continue;
                 }
 
-                $widgets[] = $class;
+                $componentName = $componentRegistry->getName($class);
+                $widgets[$componentName] = $class;
             }
+
+            $allWidgets[$cacheKey] = $widgets;
         }
 
-        return $widgets;
+        return $allWidgets;
     }
 
     protected function findCommands(): array

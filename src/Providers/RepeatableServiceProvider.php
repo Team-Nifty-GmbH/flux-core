@@ -9,14 +9,18 @@ class RepeatableServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(RepeatableManager::class, function (): RepeatableManager {
-            $manager = new RepeatableManager();
-            $manager->autoDiscover(flux_path('src/Console/Commands'), 'FluxErp\Console\Commands');
-            $manager->autoDiscover(flux_path('src/Jobs'), 'FluxErp\Jobs');
-            $manager->autoDiscover(flux_path('src/Invokable'), 'FluxErp\Invokable');
-            $manager->autoDiscover();
+        if (! $this->app->bound(RepeatableManager::class)) {
+            $this->app->singleton(RepeatableManager::class, fn (): RepeatableManager => new RepeatableManager());
+        }
+    }
 
-            return $manager;
-        });
+    public function boot(): void
+    {
+        $manager = $this->app->make(RepeatableManager::class);
+
+        $manager->autoDiscover(flux_path('src/Console/Commands'), 'FluxErp\Console\Commands');
+        $manager->autoDiscover(flux_path('src/Jobs'), 'FluxErp\Jobs');
+        $manager->autoDiscover(flux_path('src/Invokable'), 'FluxErp\Invokable');
+        $manager->autoDiscover();
     }
 }

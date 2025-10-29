@@ -5,14 +5,12 @@ namespace FluxErp\Widgets;
 use Exception;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
-use Throwable;
 
 class WidgetManager
 {
@@ -37,13 +35,16 @@ class WidgetManager
 
         $cacheKey = md5($path . $namespace);
 
-        try {
-            $widgets = Cache::get('flux.widgets.' . $cacheKey);
-        } catch (Throwable) {
-            $widgets = null;
+        $cachePath = app()->bootstrapPath('cache/flux-widgets.php');
+        $cachedWidgets = null;
+
+        if (file_exists($cachePath)) {
+            $allCachedWidgets = require $cachePath;
+            $cachedWidgets = $allCachedWidgets[$cacheKey] ?? null;
         }
 
-        if (! is_null($widgets) && ! app()->runningInConsole()) {
+        if (! is_null($cachedWidgets) && ! app()->runningInConsole()) {
+            $widgets = $cachedWidgets;
             $iterator = [];
         } else {
             $widgets = [];
@@ -83,15 +84,9 @@ class WidgetManager
         foreach ($widgets as $name => $class) {
             try {
                 $this->register($name, $name);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Don't throw exceptions on auto discovery
             }
-        }
-
-        try {
-            Cache::put('flux.widgets.' . $cacheKey, $widgets);
-        } catch (Throwable) {
-            // Ignore exceptions during cache put
         }
     }
 

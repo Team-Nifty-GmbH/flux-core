@@ -9,13 +9,16 @@ class ActionServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(ActionManager::class, function (): ActionManager {
-            $manager = new ActionManager();
+        if (! $this->app->bound(ActionManager::class)) {
+            $this->app->singleton(ActionManager::class, fn (): ActionManager => new ActionManager());
+        }
+    }
 
-            $manager->autoDiscover(flux_path('src/Actions'), 'FluxErp\Actions');
-            $manager->autoDiscover();
+    public function boot(): void
+    {
+        $manager = $this->app->make(ActionManager::class);
 
-            return $manager;
-        });
+        $manager->autoDiscover(flux_path('src/Actions'), 'FluxErp\Actions');
+        $manager->autoDiscover();
     }
 }

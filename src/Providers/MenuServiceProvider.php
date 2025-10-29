@@ -10,6 +10,13 @@ use Illuminate\Support\ServiceProvider;
 
 class MenuServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        if (! $this->app->bound(MenuManager::class)) {
+            $this->app->singleton(MenuManager::class, fn (): MenuManager => new MenuManager());
+        }
+    }
+
     public function boot(): void
     {
         if (FluxServiceProvider::$registerFluxRoutes) {
@@ -19,13 +26,6 @@ class MenuServiceProvider extends ServiceProvider
         if (FluxServiceProvider::$registerPortalRoutes) {
             $this->bootPortalMenu();
         }
-    }
-
-    public function register(): void
-    {
-        $this->app->singleton(MenuManager::class, function () {
-            return new MenuManager();
-        });
     }
 
     protected function bootFluxMenu(): void

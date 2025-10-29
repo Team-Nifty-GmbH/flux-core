@@ -95,8 +95,6 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         $this->bootRoutes();
-        $this->registerLivewireComponents();
-        $this->registerBladeComponents();
 
         ProductType::register(
             name: 'product',
@@ -119,6 +117,8 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
+        $this->registerLivewireComponents();
+        $this->registerBladeComponents();
         $this->registerConfig();
         $this->registerExtensions();
 
