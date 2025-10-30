@@ -67,6 +67,7 @@ class SendMail extends DispatchableFluxAction
                 'message' => __('Email(s) sent successfully!'),
             ];
         } catch (Throwable $e) {
+            dd($e->getMessage(), $this->data);
             return [
                 'success' => false,
                 'message' => __('Failed to send email!'),
@@ -93,9 +94,15 @@ class SendMail extends DispatchableFluxAction
             $renderedTextBody = (string) render_editor_blade($renderedTextBody, $templateData);
         }
 
-        $this->data['subject'] = $this->getData('subject') ?: $renderedSubject;
-        $this->data['html_body'] = $this->getData('html_body') ?: $renderedHtmlBody;
-        $this->data['text_body'] = $this->getData('text_body') ?: $renderedTextBody;
+        $this->data['subject'] = $this->getData('subject')
+            ? html_entity_decode($this->getData('subject'))
+            : $renderedSubject;
+        $this->data['html_body'] = $this->getData('html_body')
+            ? html_entity_decode($this->getData('html_body'))
+            : $renderedHtmlBody;
+        $this->data['text_body'] = $this->getData('text_body')
+            ? html_entity_decode($this->getData('text_body'))
+            : $renderedTextBody;
         $this->data['to'] = $this->getData('to') ?: ($template->to ?? []);
         $this->data['cc'] = array_unique(array_merge($this->getData('cc') ?? [], $template->cc ?? []));
         $this->data['bcc'] = array_unique(array_merge($this->getData('bcc') ?? [], $template->bcc ?? []));
