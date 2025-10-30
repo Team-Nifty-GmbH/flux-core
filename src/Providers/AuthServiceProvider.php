@@ -2,31 +2,20 @@
 
 namespace FluxErp\Providers;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * The policy mappings for the application.
-     *
-     * @var array
-     */
-    protected $policies = [
-        // 'FluxErp\Models\Model' => 'FluxErp\Policies\ModelPolicy',
-    ];
-
-    /**
-     * Register any authentication / authorization services.
-     */
     public function boot(): void
     {
         $this->registerPolicies();
 
-        // Implicitly grant "Super Admin" role all permissions
-        // This works in the app by using gate-related functions like auth()->user->can() and @can()
-        Gate::before(function ($user, $ability) {
-            return $user->hasRole('Super Admin') ? true : null;
+        Gate::before(function (Authenticatable $user, $ability): ?true {
+            return method_exists($user, 'hasRole') && $user->hasRole('Super Admin')
+                ? true
+                : null;
         });
     }
 }

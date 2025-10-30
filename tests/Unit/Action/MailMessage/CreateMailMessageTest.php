@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Models\Address;
@@ -29,8 +28,7 @@ beforeEach(function (): void {
 });
 
 test('add comment to ticket from mail message', function (): void {
-    $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
-    FluxAction::setEventDispatcher($dispatcher);
+    Event::fake('action.executed: ' . CreateMailMessage::class);
     $ticket = Ticket::factory()->create([
         'authenticatable_type' => $this->address->getMorphClass(),
         'authenticatable_id' => $this->address->getKey(),
@@ -69,8 +67,7 @@ test('add comment to ticket from mail message', function (): void {
 });
 
 test('create ticket from mail message', function (): void {
-    $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
-    FluxAction::setEventDispatcher($dispatcher);
+    Event::fake('action.executed: ' . CreateMailMessage::class);
 
     $action = CreateMailMessage::make([
         'mail_account_id' => $this->mailAccount->id,

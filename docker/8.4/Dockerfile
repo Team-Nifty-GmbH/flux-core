@@ -57,6 +57,9 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN curl -L https://github.com/php/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /usr/local/bin/frankenphp \
+    && chmod +x /usr/local/bin/frankenphp
+
 RUN mkdir -p /etc/nginx/ssl
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx-selfsigned.key -out /etc/nginx/ssl/nginx-selfsigned.crt -subj "/C=US/ST=Default/L=Default/O=Default/CN=laravel.test"
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.4
