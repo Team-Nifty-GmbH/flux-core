@@ -99,10 +99,9 @@ class ComponentServiceProvider extends ServiceProvider
             foreach ($phpFiles as $phpFile) {
                 /** @var SplFileInfo $phpFile */
                 $relativePath = Str::of($phpFile->getRealPath())
-                    ->replace(flux_path('resources/views/components'), '')
                     ->replace(DIRECTORY_SEPARATOR, '.')
                     ->remove('.blade.php')
-                    ->afterLast('views.components');
+                    ->afterLast('views.components.');
 
                 $components[] = [
                     'view' => 'flux::components.' . $relativePath,
