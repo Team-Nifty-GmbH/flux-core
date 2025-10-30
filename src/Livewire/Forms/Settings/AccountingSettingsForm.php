@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Forms\Settings;
 
-use FluxErp\Livewire\Forms\SettingsForm;
 use FluxErp\Settings\AccountingSettings;
 use FluxErp\Support\Livewire\Attributes\RenderAs;
 
