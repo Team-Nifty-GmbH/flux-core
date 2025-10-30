@@ -51,11 +51,10 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
+use Symfony\Component\Finder\Finder;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -187,18 +186,19 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function findCommands(): array
     {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
-        );
+        $iterator = Finder::create()
+            ->in(flux_path('src/Console/Commands'))
+            ->files()
+            ->name('*.php')
+            ->sortByName();
+
         $commandClasses = [];
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
-                $classNamespace = '\\FluxErp\\';
-                $class = $classNamespace . str_replace('.php', '', $classPath);
-                $commandClasses[] = $class;
-            }
+            $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
+            $classNamespace = '\\FluxErp\\';
+            $class = $classNamespace . str_replace('.php', '', $classPath);
+            $commandClasses[] = $class;
         }
 
         return $commandClasses;

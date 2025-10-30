@@ -6,9 +6,8 @@ use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionClass;
+use Symfony\Component\Finder\Finder;
 use Throwable;
 
 class ActionManager
@@ -59,30 +58,29 @@ class ActionManager
             $iterator = [];
         } else {
             $actions = [];
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+            $iterator = Finder::create()
+                ->in($path)
+                ->files()
+                ->name('*.php')
+                ->sortByName();
         }
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
-                $subNameSpace = ! empty($relativePath)
-                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
-                    : '';
-                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+            $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
+            $subNameSpace = ! empty($relativePath)
+                ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                : '';
+            $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (
-                    ! class_exists($class)
-                    || ! is_a($class, FluxAction::class, true)
-                    || (new ReflectionClass($class))->isAbstract()
-                ) {
-                    continue;
-                }
-
-                $actions[$class::name()] = $class;
+            if (
+                ! class_exists($class)
+                || ! is_a($class, FluxAction::class, true)
+                || (new ReflectionClass($class))->isAbstract()
+            ) {
+                continue;
             }
+
+            $actions[$class::name()] = $class;
         }
 
         foreach ($actions as $name => $class) {

@@ -9,10 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionClass;
-use RegexIterator;
+use Symfony\Component\Finder\Finder;
 
 class FluxOptimize extends Command
 {
@@ -51,29 +49,28 @@ class FluxOptimize extends Command
             $cacheKey = md5($directory . $namespace);
             $actions = [];
 
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+            $iterator = Finder::create()
+                ->in($directory)
+                ->files()
+                ->name('*.php')
+                ->sortByName();
 
             foreach ($iterator as $file) {
-                if ($file->isFile() && $file->getExtension() === 'php') {
-                    $relativePath = ltrim(str_replace($directory, '', $file->getPath()), DIRECTORY_SEPARATOR);
-                    $subNameSpace = ! empty($relativePath)
-                        ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
-                        : '';
-                    $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+                $relativePath = ltrim(str_replace($directory, '', $file->getPath()), DIRECTORY_SEPARATOR);
+                $subNameSpace = ! empty($relativePath)
+                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                    : '';
+                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                    if (
-                        ! class_exists($class)
-                        || ! is_a($class, \FluxErp\Actions\FluxAction::class, true)
-                        || (new ReflectionClass($class))->isAbstract()
-                    ) {
-                        continue;
-                    }
-
-                    $actions[$class::name()] = $class;
+                if (
+                    ! class_exists($class)
+                    || ! is_a($class, \FluxErp\Actions\FluxAction::class, true)
+                    || (new ReflectionClass($class))->isAbstract()
+                ) {
+                    continue;
                 }
+
+                $actions[$class::name()] = $class;
             }
 
             $allActions[$cacheKey] = $actions;
@@ -99,15 +96,13 @@ class FluxOptimize extends Command
             $cacheKey = md5($directory . $namespace);
             $widgets = [];
 
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory)
-            );
+            $iterator = Finder::create()
+                ->in($directory)
+                ->files()
+                ->name('*.php')
+                ->sortByName();
 
             foreach ($iterator as $file) {
-                if ($file->isDir() || $file->getExtension() !== 'php') {
-                    continue;
-                }
-
                 $relativePath = str_replace($directory, '', $file->getPathname());
                 $class = $namespace . str_replace(['/', '.php'], ['\\', ''], $relativePath);
 
@@ -146,15 +141,13 @@ class FluxOptimize extends Command
                 continue;
             }
 
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory)
-            );
+            $iterator = Finder::create()
+                ->in($directory)
+                ->files()
+                ->name('*.php')
+                ->sortByName();
 
             foreach ($iterator as $file) {
-                if ($file->isDir() || $file->getExtension() !== 'php') {
-                    continue;
-                }
-
                 $relativePath = str_replace($directory, '', $file->getPathname());
                 $class = $namespace . str_replace(['/', '.php'], ['\\', ''], $relativePath);
 
@@ -187,15 +180,13 @@ class FluxOptimize extends Command
         }
 
         $components = [];
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directoryPath)
-        );
+        $iterator = Finder::create()
+            ->in($directoryPath)
+            ->files()
+            ->name('*.php')
+            ->sortByName();
 
         foreach ($iterator as $file) {
-            if ($file->isDir() || $file->getExtension() !== 'php') {
-                continue;
-            }
-
             $relativePath = str_replace($directoryPath, '', $file->getPathname());
             $class = $livewireNamespace . str_replace(['/', '.php'], ['\\', ''], $relativePath);
 
@@ -329,28 +320,27 @@ class FluxOptimize extends Command
             $cacheKey = md5($directory . $namespace);
             $repeatables = [];
 
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+            $iterator = Finder::create()
+                ->in($directory)
+                ->files()
+                ->name('*.php')
+                ->sortByName();
 
             foreach ($iterator as $file) {
-                if ($file->isFile() && $file->getExtension() === 'php') {
-                    $relativePath = ltrim(
-                        str_replace($directory, '', $file->getPath()),
-                        DIRECTORY_SEPARATOR
-                    );
-                    $subNameSpace = ! empty($relativePath)
-                        ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
-                        : '';
-                    $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+                $relativePath = ltrim(
+                    str_replace($directory, '', $file->getPath()),
+                    DIRECTORY_SEPARATOR
+                );
+                $subNameSpace = ! empty($relativePath)
+                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                    : '';
+                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                    if (! class_exists($class) || ! is_a($class, Repeatable::class, true)) {
-                        continue;
-                    }
-
-                    $repeatables[$class::name()] = $class;
+                if (! class_exists($class) || ! is_a($class, Repeatable::class, true)) {
+                    continue;
                 }
+
+                $repeatables[$class::name()] = $class;
             }
 
             $allRepeatables[$cacheKey] = $repeatables;
@@ -418,8 +408,12 @@ class FluxOptimize extends Command
             return;
         }
 
-        $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
-        $phpFiles = new RegexIterator($directoryIterator, '/\.php$/');
+        $phpFiles = Finder::create()
+            ->in($directoryPath)
+            ->files()
+            ->name('*.php')
+            ->sortByName();
+
         $components = [];
 
         foreach ($phpFiles as $phpFile) {
@@ -472,10 +466,11 @@ class FluxOptimize extends Command
         }
 
         $components = [];
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directoryPath)
-        );
-        $phpFiles = new RegexIterator($iterator, '/\.blade\.php$/');
+        $phpFiles = Finder::create()
+            ->in($directoryPath)
+            ->files()
+            ->name('*.blade.php')
+            ->sortByName();
 
         foreach ($phpFiles as $phpFile) {
             $relativePath = Str::replace($directoryPath . DIRECTORY_SEPARATOR, '', $phpFile->getRealPath());

@@ -7,10 +7,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionClass;
-use RegexIterator;
+use SplFileInfo;
+use Symfony\Component\Finder\Finder;
 use Throwable;
 
 class ComponentServiceProvider extends ServiceProvider
@@ -49,14 +48,20 @@ class ComponentServiceProvider extends ServiceProvider
         }
 
         return once(function () use ($namespace, $directoryPath) {
-            $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
-            $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
-            $phpFiles = new RegexIterator($directoryIterator, '/\.php$/');
+            $directoryPath = $directoryPath ?:
+                Str::replace(['\\', 'FluxErp'], ['/', flux_path('src')], $namespace);
             $components = [];
+            $phpFiles = Finder::create()
+                ->in($directoryPath)
+                ->name('*.php')
+                ->files();
 
             foreach ($phpFiles as $phpFile) {
-                $relativePath = Str::replace($directoryPath, '', $phpFile->getRealPath());
-                $relativePath = Str::replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
+                /** @var SplFileInfo $phpFile */
+                $relativePath = Str::of($phpFile->getRealPath())
+                    ->replace($directoryPath, '')
+                    ->replace(DIRECTORY_SEPARATOR, '\\');
+
                 $class = $namespace . str_replace(
                     '/',
                     '\\',
@@ -66,7 +71,7 @@ class ComponentServiceProvider extends ServiceProvider
                 if (class_exists($class)) {
                     $exploded = explode('\\', $relativePath);
                     array_walk($exploded, function (&$value): void {
-                        $value = Str::snake(Str::remove('.php', $value), '-');
+                        $value = Str::of($value)->remove('.php')->snake('-');
                     });
 
                     $alias = ltrim(implode('.', $exploded), '.');
@@ -85,16 +90,19 @@ class ComponentServiceProvider extends ServiceProvider
         if (file_exists($cachePath)) {
             $components = require $cachePath;
         } else {
-            $directoryIterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components')
-            );
-            $phpFiles = new RegexIterator($directoryIterator, '/\.blade\.php$/');
-
             $components = [];
+            $phpFiles = Finder::create()
+                ->in(flux_path('resources/views/components'))
+                ->name('*.blade.php')
+                ->files();
+
             foreach ($phpFiles as $phpFile) {
-                $relativePath = Str::replace(__DIR__ . '/../resources/views/components/', '', $phpFile->getRealPath());
-                $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove('.blade.php', $relativePath));
-                $relativePath = Str::afterLast($relativePath, 'views.components.');
+                /** @var SplFileInfo $phpFile */
+                $relativePath = Str::of($phpFile->getRealPath())
+                    ->replace(flux_path('resources/views/components'), '')
+                    ->replace(DIRECTORY_SEPARATOR, '.')
+                    ->remove('.blade.php')
+                    ->afterLast('views.components');
 
                 $components[] = [
                     'view' => 'flux::components.' . $relativePath,

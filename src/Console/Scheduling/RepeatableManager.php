@@ -2,7 +2,6 @@
 
 namespace FluxErp\Console\Scheduling;
 
-use FilesystemIterator;
 use FluxErp\Enums\RepeatableTypeEnum;
 use Illuminate\Bus\Queueable;
 use Illuminate\Console\Command;
@@ -12,8 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use Symfony\Component\Finder\Finder;
 
 class RepeatableManager
 {
@@ -83,29 +81,28 @@ class RepeatableManager
                 $iterator = [];
             } else {
                 $repeatables = [];
-                $iterator = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::SELF_FIRST
-                );
+                $iterator = Finder::create()
+                    ->in($directory)
+                    ->files()
+                    ->name('*.php')
+                    ->sortByName();
             }
 
             foreach ($iterator as $file) {
-                if ($file->isFile() && $file->getExtension() === 'php') {
-                    $relativePath = ltrim(
-                        str_replace($directory, '', $file->getPath()),
-                        DIRECTORY_SEPARATOR
-                    );
-                    $subNameSpace = ! empty($relativePath)
-                        ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
-                        : '';
-                    $class = $namespaces[$key] . '\\' . $subNameSpace . $file->getBasename('.php');
+                $relativePath = ltrim(
+                    str_replace($directory, '', $file->getPath()),
+                    DIRECTORY_SEPARATOR
+                );
+                $subNameSpace = ! empty($relativePath)
+                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                    : '';
+                $class = $namespaces[$key] . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                    if (! class_exists($class) || ! is_a($class, Repeatable::class, true)) {
-                        continue;
-                    }
-
-                    $repeatables[$class::name()] = $class;
+                if (! class_exists($class) || ! is_a($class, Repeatable::class, true)) {
+                    continue;
                 }
+
+                $repeatables[$class::name()] = $class;
             }
 
             foreach ($repeatables as $name => $class) {

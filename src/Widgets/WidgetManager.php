@@ -8,9 +8,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionClass;
+use Symfony\Component\Finder\Finder;
 
 class WidgetManager
 {
@@ -48,36 +47,35 @@ class WidgetManager
             $iterator = [];
         } else {
             $widgets = [];
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+            $iterator = Finder::create()
+                ->in($path)
+                ->files()
+                ->name('*.php')
+                ->sortByName();
         }
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
-                $subNameSpace = ! empty($relativePath)
-                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
-                    : '';
-                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+            $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
+            $subNameSpace = ! empty($relativePath)
+                ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                : '';
+            $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (! class_exists($class) || ! in_array(Widgetable::class, class_uses_recursive($class))) {
+            if (! class_exists($class) || ! in_array(Widgetable::class, class_uses_recursive($class))) {
+                continue;
+            }
+
+            $reflection = new ReflectionClass($class);
+
+            // Check if the class is a valid Livewire component
+            if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
+                if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), $namespace)) {
+                    $componentName = $componentRegistry->getName($class);
+                } else {
                     continue;
                 }
 
-                $reflection = new ReflectionClass($class);
-
-                // Check if the class is a valid Livewire component
-                if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
-                    if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), $namespace)) {
-                        $componentName = $componentRegistry->getName($class);
-                    } else {
-                        continue;
-                    }
-
-                    $widgets[$componentName] = $class;
-                }
+                $widgets[$componentName] = $class;
             }
         }
 
