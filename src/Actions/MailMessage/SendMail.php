@@ -67,7 +67,6 @@ class SendMail extends DispatchableFluxAction
                 'message' => __('Email(s) sent successfully!'),
             ];
         } catch (Throwable $e) {
-            dd($e->getMessage(), $this->data);
             return [
                 'success' => false,
                 'message' => __('Failed to send email!'),
