@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\Forms;
+namespace FluxErp\Livewire\Forms\Settings;
 
 use FluxErp\Settings\CoreSettings;
 

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Livewire\Forms\CoreSettingsForm;
+use FluxErp\Livewire\Forms\Settings\CoreSettingsForm;
 use FluxErp\Livewire\Support\SettingsComponent;
 
 class CoreSettings extends SettingsComponent
