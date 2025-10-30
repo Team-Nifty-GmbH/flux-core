@@ -295,7 +295,7 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             return false;
         }
 
-        // Condition 1: The invoice date of the order before or equal to the booking date of the transaction
+        // Condition 1: The invoice date of the order is before or equal to the booking date of the transaction
         if (! $order->invoice_date || $transaction->booking_date->lessThanOrEqualTo($order->invoice_date)) {
             return false;
         }
