@@ -59,8 +59,6 @@ class EditorVariableServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->singleton(EditorVariableManager::class, function (): EditorVariableManager {
-            return new EditorVariableManager();
-        });
+        $this->app->singleton(EditorVariableManager::class);
     }
 }

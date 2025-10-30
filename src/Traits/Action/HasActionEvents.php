@@ -72,11 +72,7 @@ trait HasActionEvents
     protected function fireActionEvent(string $event, bool $halt = true): mixed
     {
         if (is_null($this->dispatcher)) {
-            $this->dispatcher = app()->bound('events') ? app('events') : new NullDispatcher();
-        }
-
-        if ($this->dispatcher instanceof NullDispatcher) {
-            return null;
+            $this->dispatcher = app()->bound('events') ? app('events') : app(NullDispatcher::class);
         }
 
         $function = $halt ? 'until' : 'dispatch';

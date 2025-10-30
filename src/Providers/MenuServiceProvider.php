@@ -23,9 +23,7 @@ class MenuServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        if (! $this->app->bound(MenuManager::class)) {
-            $this->app->singleton(MenuManager::class, fn (): MenuManager => new MenuManager());
-        }
+        $this->app->singleton(MenuManager::class);
     }
 
     protected function bootFluxMenu(): void

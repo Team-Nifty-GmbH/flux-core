@@ -19,8 +19,6 @@ class RepeatableServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        if (! $this->app->bound(RepeatableManager::class)) {
-            $this->app->singleton(RepeatableManager::class, fn (): RepeatableManager => new RepeatableManager());
-        }
+        $this->app->singleton(RepeatableManager::class);
     }
 }

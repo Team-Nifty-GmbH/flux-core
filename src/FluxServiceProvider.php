@@ -22,6 +22,7 @@ use FluxErp\Providers\ActionServiceProvider;
 use FluxErp\Providers\AuthServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\BroadcastServiceProvider;
+use FluxErp\Providers\ComponentServiceProvider;
 use FluxErp\Providers\EditorVariableServiceProvider;
 use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MacroServiceProvider;
@@ -43,25 +44,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route as RouteFacade;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Livewire\Component;
-use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use ReflectionClass;
-use RegexIterator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
-use Throwable;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -117,8 +111,6 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-        $this->registerLivewireComponents();
-        $this->registerBladeComponents();
         $this->registerConfig();
         $this->registerExtensions();
 
@@ -130,9 +122,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->bind(DatabaseNotification::class, Notification::class);
 
         $this->app->singleton(AssetManager::class);
-        $this->app->singleton(ProductTypeManager::class, function (): ProductTypeManager {
-            return new ProductTypeManager();
-        });
+        $this->app->singleton(ProductTypeManager::class);
 
         // Register core providers in correct order
         $this->app->register(MorphMapServiceProvider::class);
@@ -140,9 +130,11 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
         $this->app->register(AuthServiceProvider::class);
         $this->app->register(SanctumServiceProvider::class);
+        $this->app->register(ComponentServiceProvider::class);
         $this->app->register(ViewServiceProvider::class);
         $this->app->register(BroadcastServiceProvider::class);
         $this->app->register(MacroServiceProvider::class);
+
         $this->app->register(ActionServiceProvider::class);
         $this->app->register(RepeatableServiceProvider::class);
         $this->app->register(WidgetServiceProvider::class);
@@ -237,38 +229,6 @@ class FluxServiceProvider extends ServiceProvider
         ], 'flux-docker');
     }
 
-    protected function registerBladeComponents(): void
-    {
-        $cachePath = $this->app->bootstrapPath('cache/flux-blade-components.php');
-
-        if (file_exists($cachePath)) {
-            $components = require $cachePath;
-        } else {
-            $directoryIterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components')
-            );
-            $phpFiles = new RegexIterator($directoryIterator, '/\.blade\.php$/');
-
-            $components = [];
-            foreach ($phpFiles as $phpFile) {
-                $relativePath = Str::replace(__DIR__ . '/../resources/views/components/', '', $phpFile->getRealPath());
-                $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove('.blade.php', $relativePath));
-                $relativePath = Str::afterLast($relativePath, 'views.components.');
-
-                $components[] = [
-                    'view' => 'flux::components.' . $relativePath,
-                    'alias' => Str::remove('.index', $relativePath),
-                ];
-            }
-        }
-
-        foreach ($components as $component) {
-            Blade::component($component['view'], $component['alias']);
-        }
-
-        Blade::componentNamespace('FluxErp\\View\\Components', 'flux');
-    }
-
     protected function registerConfig(): void
     {
         $this->booted(function (): void {
@@ -303,24 +263,7 @@ class FluxServiceProvider extends ServiceProvider
         }
     }
 
-    protected function registerLivewireComponents(): void
-    {
-        $livewireNamespace = 'FluxErp\\Livewire\\';
-
-        foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            try {
-                if (is_a($class, Component::class, true)
-                    && ! (new ReflectionClass($class))->isAbstract()
-                ) {
-                    Livewire::component($alias, $class);
-                }
-            } catch (Throwable) {
-                // Skip invalid components
-            }
-        }
-    }
-
-    private function bootMiddleware(): void
+    protected function bootMiddleware(): void
     {
         /** @var Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
@@ -339,47 +282,7 @@ class FluxServiceProvider extends ServiceProvider
         Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }
 
-    private function getViewClassAliasFromNamespace(string $namespace, ?string $directoryPath = null): array
-    {
-        if ($namespace === 'FluxErp\\Livewire\\') {
-            $cachePath = $this->app->bootstrapPath('cache/flux-livewire-components.php');
-
-            if (file_exists($cachePath)) {
-                return require $cachePath;
-            }
-        }
-
-        return once(function () use ($namespace, $directoryPath) {
-            $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
-            $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
-            $phpFiles = new RegexIterator($directoryIterator, '/\.php$/');
-            $components = [];
-
-            foreach ($phpFiles as $phpFile) {
-                $relativePath = Str::replace($directoryPath, '', $phpFile->getRealPath());
-                $relativePath = Str::replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
-                $class = $namespace . str_replace(
-                    '/',
-                    '\\',
-                    pathinfo($relativePath, PATHINFO_FILENAME)
-                );
-
-                if (class_exists($class)) {
-                    $exploded = explode('\\', $relativePath);
-                    array_walk($exploded, function (&$value): void {
-                        $value = Str::snake(Str::remove('.php', $value), '-');
-                    });
-
-                    $alias = ltrim(implode('.', $exploded), '.');
-                    $components[$alias] = $class;
-                }
-            }
-
-            return $components;
-        });
-    }
-
-    private function registerExtensions(): void
+    protected function registerExtensions(): void
     {
         $this->app->extend(
             Dispatcher::class,

@@ -17,8 +17,6 @@ class WidgetServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        if (! $this->app->bound(WidgetManager::class)) {
-            $this->app->singleton(WidgetManager::class, fn (): WidgetManager => new WidgetManager());
-        }
+        $this->app->singleton(WidgetManager::class);
     }
 }

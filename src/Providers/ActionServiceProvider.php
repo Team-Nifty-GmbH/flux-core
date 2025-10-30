@@ -17,8 +17,6 @@ class ActionServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        if (! $this->app->bound(ActionManager::class)) {
-            $this->app->singleton(ActionManager::class, fn (): ActionManager => new ActionManager());
-        }
+        $this->app->singleton(ActionManager::class);
     }
 }
