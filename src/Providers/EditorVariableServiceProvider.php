@@ -31,7 +31,7 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Order Date' => '$paymentReminder->order?->order_date?->isoFormat(\'L\')',
                 'Invoice Number' => '$paymentReminder->order?->invoice_number',
                 'Invoice Date' => '$paymentReminder->order?->invoice_date?->isoFormat(\'L\')',
-                'Client Name' => '$paymentReminder->order?->client-?>name',
+                'Client Name' => '$paymentReminder->order?->client?->name',
             ],
             PaymentReminder::class
         );
