@@ -57,6 +57,8 @@ class MailAccountForm extends FluxForm
 
     public ?string $smtp_reply_to = null;
 
+    public ?string $smtp_user = null;
+
     public function save(): void
     {
         $this->smtp_email = $this->smtp_email ?: $this->email;

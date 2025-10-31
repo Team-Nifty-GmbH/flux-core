@@ -155,6 +155,10 @@
                     wire:model="mailAccount.smtp_reply_to"
                     :label="__('Reply-To')"
                 />
+                <x-input
+                    wire:model="mailAccount.smtp_user"
+                    :label="__('Smtp User')"
+                />
                 <x-password
                     wire:model="mailAccount.smtp_password"
                     :label="__('Password')"
