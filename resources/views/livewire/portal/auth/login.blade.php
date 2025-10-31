@@ -29,9 +29,6 @@
     <x-slot:title>
         {{ $client?->name . ' Portal' }}
     </x-slot>
-    <style>
-        {{ $client?->settings()->first()['settings']['custom_css'] ?? '' }}
-    </style>
     <div class="md:text-portal-font-color absolute right-4 top-6 text-white">
         <a
             href="{{ $client?->website }}"

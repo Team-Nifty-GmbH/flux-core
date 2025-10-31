@@ -41,7 +41,7 @@ class Token extends FluxAuthenticatable
 
     public function hasExpired(): bool
     {
-        return ! ($this->expires_at === null) && now()->gt($this->expires_at);
+        return ! is_null($this->expires_at) && now()->gt($this->expires_at);
     }
 
     public function hasMaxUsageLimit(): bool
@@ -51,7 +51,7 @@ class Token extends FluxAuthenticatable
 
     public function hasUrlBinding(): bool
     {
-        return $this->url !== null;
+        return ! is_null($this->url);
     }
 
     public function isValid(): bool
@@ -61,8 +61,11 @@ class Token extends FluxAuthenticatable
 
     public function matchesUrlBinding(): bool
     {
-        return $this->hasUrlBinding()
-            && parse_url(request()->url(), PHP_URL_PATH) === parse_url($this->url, PHP_URL_PATH);
+        if (! $this->hasUrlBinding()) {
+            return true;
+        }
+
+        return parse_url(request()->url(), PHP_URL_PATH) === parse_url($this->url, PHP_URL_PATH);
     }
 
     public function prunable(): Builder
@@ -88,12 +91,12 @@ class Token extends FluxAuthenticatable
     public function scopeValid(Builder $query): Builder
     {
         return $query
-            ->where(function ($query) {
+            ->where(function (Builder $query) {
                 return $query
                     ->where('max_uses', '=', '0')
                     ->orWhereRaw('uses < max_uses');
             })
-            ->where(function ($query) {
+            ->where(function (Builder $query) {
                 return $query
                     ->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
@@ -102,7 +105,7 @@ class Token extends FluxAuthenticatable
 
     public function use(): bool
     {
-        if ($this->uses === null) {
+        if (is_null($this->uses)) {
             $this->uses = 1;
         } else {
             $this->increment('uses');

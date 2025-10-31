@@ -6,6 +6,7 @@ use FluxErp\Actions\Target\CreateTarget;
 use FluxErp\Actions\Target\DeleteTarget;
 use FluxErp\Actions\Target\UpdateTarget;
 use FluxErp\Models\Target;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 
@@ -21,6 +22,8 @@ class TargetForm extends FluxForm
 
     #[Locked]
     public ?int $id = null;
+
+    public bool $is_group_target = false;
 
     public ?string $model_type = null;
 
@@ -38,15 +41,33 @@ class TargetForm extends FluxForm
 
     public ?string $timeframe_column = null;
 
-    public ?array $users = null;
+    public array $users = [];
 
     public function fill($values): void
     {
         if ($values instanceof Target) {
-            $values->loadMissing('users:id');
-
+            $values->loadMissing([
+                'users' => fn (BelongsToMany $query) => $query
+                    ->select(['id', 'name'])
+                    ->orderBy('name'),
+            ]);
             $values = $values->toArray();
-            $values['users'] = array_column($values['users'] ?? [], 'id');
+
+            $values['users'] = array_map(
+                function ($user) {
+                    $isPercentage = data_get($user, 'pivot.is_percentage');
+
+                    return [
+                        'user_id' => data_get($user, 'id'),
+                        'label' => data_get($user, 'name'),
+                        'target_share' => ($targetShare = data_get($user, 'pivot.target_share'))
+                            ? bcmul($targetShare, $isPercentage ? 100 : 1)
+                            : null,
+                        'is_percentage' => $isPercentage,
+                    ];
+                },
+                $values['users'] ?? []
+            );
         }
 
         parent::fill($values);
@@ -55,6 +76,27 @@ class TargetForm extends FluxForm
     public function modalName(): ?string
     {
         return Str::kebab(class_basename($this)) . '-modal';
+    }
+
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+        $data['users'] = array_map(
+            function ($user) {
+                $isPercentage = data_get($user, 'is_percentage');
+
+                return [
+                    'user_id' => data_get($user, 'user_id'),
+                    'target_share' => ($targetShare = data_get($user, 'target_share'))
+                        ? bcdiv($targetShare, $isPercentage ? 100 : 1)
+                        : null,
+                    'is_percentage' => $isPercentage,
+                ];
+            },
+            $data['users']
+        );
+
+        return $data;
     }
 
     protected function getActions(): array

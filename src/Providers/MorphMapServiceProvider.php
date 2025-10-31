@@ -120,7 +120,6 @@ use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
-use FluxErp\Models\Setting;
 use FluxErp\Models\Snapshot;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
@@ -238,7 +237,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'sepa_mandate' => SepaMandate::class,
             'serial_number' => SerialNumber::class,
             'serial_number_range' => SerialNumberRange::class,
-            'setting' => Setting::class,
             'snapshot' => Snapshot::class,
             'stock_posting' => StockPosting::class,
             'tag' => Tag::class,

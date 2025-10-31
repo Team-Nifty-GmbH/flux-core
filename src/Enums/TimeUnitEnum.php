@@ -8,6 +8,20 @@ enum TimeUnitEnum: string
 {
     use EnumTrait;
 
+    case Second = 'Second';
+
+    case Minute = 'Minute';
+
+    case Hour = 'Hour';
+
+    case Day = 'Day';
+
+    case Week = 'Week';
+
+    case Month = 'Month';
+
+    case Year = 'Year';
+
     public function convertFromDays($days): string|float|int
     {
         return match ($this) {
@@ -90,18 +104,4 @@ enum TimeUnitEnum: string
             self::Year => $years,
         };
     }
-
-    case Day = 'Day';
-
-    case Hour = 'Hour';
-
-    case Minute = 'Minute';
-
-    case Month = 'Month';
-
-    case Second = 'Second';
-
-    case Week = 'Week';
-
-    case Year = 'Year';
 }

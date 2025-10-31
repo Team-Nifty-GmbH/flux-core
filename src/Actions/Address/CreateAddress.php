@@ -10,6 +10,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Country;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Address\CreateAddressRuleset;
+use FluxErp\Settings\CoreSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -112,7 +113,7 @@ class CreateAddress extends FluxAction
         $this->data['email'] = is_string($this->getData('email'))
             ? Str::between($this->getData('email'), '<', '>')
             : null;
-        $this->data['has_formal_salutation'] ??= config('flux.formal_salutation', true);
+        $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
         $this->data['client_id'] ??= resolve_static(Contact::class, 'query')
             ->whereKey($this->getData('contact_id'))
             ->value('client_id');

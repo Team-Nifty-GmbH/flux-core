@@ -11,12 +11,15 @@ class MailAccountFactory extends Factory
 
     public function definition(): array
     {
+        $email = fake()->safeEmail();
+
         return [
             'uuid' => fake()->uuid(),
-            'email' => fake()->safeEmail(),
+            'name' => $email,
+            'email' => $email,
             'password' => fake()->password(),
             'host' => fake()->domainName(),
-            'smtp_email' => fake()->safeEmail(),
+            'smtp_email' => $email,
             'smtp_password' => fake()->password(),
             'smtp_host' => fake()->domainName(),
         ];

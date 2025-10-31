@@ -9,7 +9,6 @@ use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\MailAccount;
 use FluxErp\Rulesets\MailMessage\SendMailRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -33,25 +32,31 @@ class SendMail extends DispatchableFluxAction
     {
         $mail = GenericMail::make($this->data, $this->getData('blade_parameters'));
 
+        $mailer = Mail::mailer();
+        $useDefaultMailer = true;
+
         if ($mailAccountId = $this->getData('mail_account_id')) {
             $mailAccount = resolve_static(MailAccount::class, 'query')
                 ->whereKey($mailAccountId)
                 ->first();
 
-            $mailer = $mailAccount?->mailer();
-            $mail->from(
-                $mailAccount->smtp_email ?? config('mail.from.address'),
-                auth()->user()?->name ?? $mailAccount->smtp_email ?? config('mail.from.address')
-            );
+            if ($mailAccount) {
+                $mailer = $mailAccount->mailer();
+                $mail->from(
+                    $mailAccount->smtp_email ?? config('mail.from.address'),
+                    auth()->user()?->name ?? $mailAccount->smtp_email ?? config('mail.from.address')
+                );
+                $useDefaultMailer = false;
+            }
         }
 
         try {
-            $message = ($mailer ?? Mail::mailer())
+            $message = $mailer
                 ->to($this->getData('to'))
                 ->cc($this->getData('cc') ?? [])
                 ->bcc($this->getData('bcc') ?? []);
 
-            if ($this->getData('queue', false)) {
+            if (($this->getData('queue') ?? false) && $useDefaultMailer) {
                 $message->queue($mail);
             } else {
                 $message->send($mail);
@@ -83,14 +88,20 @@ class SendMail extends DispatchableFluxAction
         $renderedTextBody = html_entity_decode($template->text_body ?? '');
 
         if ($templateData) {
-            $renderedSubject = Blade::render($renderedSubject, $templateData);
-            $renderedHtmlBody = Blade::render($renderedHtmlBody, $templateData);
-            $renderedTextBody = Blade::render($renderedTextBody, $templateData);
+            $renderedSubject = (string) render_editor_blade($renderedSubject, $templateData);
+            $renderedHtmlBody = (string) render_editor_blade($renderedHtmlBody, $templateData);
+            $renderedTextBody = (string) render_editor_blade($renderedTextBody, $templateData);
         }
 
-        $this->data['subject'] = $this->getData('subject') ?: $renderedSubject;
-        $this->data['html_body'] = $this->getData('html_body') ?: $renderedHtmlBody;
-        $this->data['text_body'] = $this->getData('text_body') ?: $renderedTextBody;
+        $this->data['subject'] = $this->getData('subject')
+            ? html_entity_decode($this->getData('subject'))
+            : $renderedSubject;
+        $this->data['html_body'] = $this->getData('html_body')
+            ? html_entity_decode($this->getData('html_body'))
+            : $renderedHtmlBody;
+        $this->data['text_body'] = $this->getData('text_body')
+            ? html_entity_decode($this->getData('text_body'))
+            : $renderedTextBody;
         $this->data['to'] = $this->getData('to') ?: ($template->to ?? []);
         $this->data['cc'] = array_unique(array_merge($this->getData('cc') ?? [], $template->cc ?? []));
         $this->data['bcc'] = array_unique(array_merge($this->getData('bcc') ?? [], $template->bcc ?? []));

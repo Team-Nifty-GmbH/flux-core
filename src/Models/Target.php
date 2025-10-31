@@ -8,12 +8,13 @@ use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Target extends FluxModel
 {
-    use HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -46,8 +47,8 @@ class Target extends FluxModel
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
-            'end_date' => 'date',
+            'start_date' => 'date:Y-m-d',
+            'end_date' => 'date:Y-m-d',
             'constraints' => 'array',
         ];
     }
@@ -70,6 +71,8 @@ class Target extends FluxModel
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'target_user')->using(TargetUser::class);
+        return $this->belongsToMany(User::class, 'target_user')
+            ->withPivot(['target_share', 'is_percentage'])
+            ->using(TargetUser::class);
     }
 }

@@ -22,7 +22,7 @@ use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Forms\DiscountForm;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
-use FluxErp\Livewire\Forms\ScheduleForm;
+use FluxErp\Livewire\Forms\OrderScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
@@ -69,7 +69,7 @@ class Order extends Component
 
     public OrderReplicateForm $replicateOrder;
 
-    public ScheduleForm $schedule;
+    public OrderScheduleForm $schedule;
 
     public array $states = [];
 
@@ -392,6 +392,7 @@ class Order extends Component
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
             $this->schedule->parameters['orderTypeId'] = resolve_static(OrderType::class, 'query')
+                ->where('client_id', $this->order->client_id)
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
@@ -416,6 +417,7 @@ class Order extends Component
                             ])
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('client_id', $this->order->client_id)
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
                             ->exists();
@@ -423,6 +425,29 @@ class Order extends Component
                 ->attributes([
                     'class' => 'w-full',
                     'wire:click' => 'replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
+                ]),
+            DataTableButton::make()
+                ->text(__('Create Refund'))
+                ->color('red')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && $this->order->invoice_number
+                        && resolve_static(OrderType::class, 'query')
+                            ->whereKey($this->order->order_type_id)
+                            ->whereIn('order_type_enum', [
+                                OrderTypeEnum::Order->value,
+                                OrderTypeEnum::SplitOrder->value,
+                            ])
+                            ->exists()
+                        && resolve_static(OrderType::class, 'query')
+                            ->where('client_id', $this->order->client_id)
+                            ->where('order_type_enum', OrderTypeEnum::Refund->value)
+                            ->where('is_active', true)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'wire:click' => 'replicate(\'' . OrderTypeEnum::Refund->value . '\')',
                 ]),
             DataTableButton::make()
                 ->text(__('Create Split-Order'))
@@ -436,6 +461,7 @@ class Order extends Component
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('client_id', $this->order->client_id)
                             ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
                             ->where('is_active', true)
                             ->where('is_hidden', false)
@@ -446,6 +472,35 @@ class Order extends Component
                     'wire:click' => 'replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
                 ]),
         ];
+    }
+
+    public function getPrintLayoutOptions(): array
+    {
+        $orderTypeId = $this->schedule->parameters['orderTypeId'] ?? $this->order->order_type_id;
+
+        if (! $orderTypeId) {
+            return [];
+        }
+
+        $orderType = resolve_static(OrderType::class, 'query')
+            ->whereKey($orderTypeId)
+            ->first();
+
+        if (! $orderType->print_layouts) {
+            return [];
+        }
+
+        $tempOrder = app(OrderModel::class);
+        $tempOrder->order_type_id = $orderTypeId;
+        $tempOrder->orderType = $orderType;
+
+        return array_map(
+            fn (string $value) => [
+                'label' => __($value),
+                'value' => $value,
+            ],
+            array_keys($tempOrder->resolvePrintViews())
+        );
     }
 
     public function getTabs(): array
@@ -559,6 +614,18 @@ class Order extends Component
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
 
+        if ($orderTypeEnum) {
+            $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
+                ->where('client_id', $this->order->client_id)
+                ->where('order_type_enum', $orderTypeEnum)
+                ->where('is_active', true)
+                ->value('id');
+        }
+
+        if ($orderTypeEnum === OrderTypeEnum::Refund->value) {
+            $this->replicateOrder->parent_id = $this->order->id;
+        }
+
         $this->replicateOrder->order_positions = null;
 
         $this->js(<<<'JS'
@@ -635,6 +702,9 @@ class Order extends Component
         $this->schedule->parameters = [
             'orderId' => $this->order->id,
             'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
+            'printLayouts' => $this->schedule->parameters['printLayouts'] ?? null,
+            'autoPrintAndSend' => $this->schedule->parameters['autoPrintAndSend'] ?? false,
+            'emailTemplateId' => $this->schedule->parameters['emailTemplateId'] ?? null,
         ];
 
         try {
@@ -724,6 +794,18 @@ class Order extends Component
         }
 
         $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
+    }
+
+    public function updatedScheduleParametersOrderTypeId(): void
+    {
+        $this->skipRender();
+
+        $this->schedule->parameters['printLayouts'] = [];
+        $layouts = json_encode($this->getPrintLayoutOptions());
+
+        $this->js(<<<JS
+            \$tallstackuiSelect('schedule-print-layouts').setOptions(JSON.parse('{$layouts}'))
+        JS);
     }
 
     protected function fetchOrder(int $id): void

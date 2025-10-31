@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Blade;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -57,16 +56,11 @@ class EditMail extends Component
                 auth()
                     ->user()
                     ->mailAccounts()
-                    ->whereNotNull([
-                        'smtp_email',
-                        'smtp_password',
-                        'smtp_host',
-                        'smtp_port',
-                    ])
-                    ->get(['mail_accounts.id', 'email'])
+                    ->whereNotNull('smtp_email')
+                    ->get(['mail_accounts.id', 'name'])
                     ->toArray(),
                 [
-                    ['id' => null, 'email' => __('Default')],
+                    ['id' => 'default', 'name' => __('Default')],
                 ]
             ),
         ]);
@@ -96,9 +90,9 @@ class EditMail extends Component
 
         if (! $this->multiple && $this->templateData) {
             try {
-                $renderedSubject = Blade::render($renderedSubject, $this->templateData);
-                $renderedHtmlBody = Blade::render($renderedHtmlBody, $this->templateData);
-                $renderedTextBody = Blade::render($renderedTextBody, $this->templateData);
+                $renderedSubject = render_editor_blade($renderedSubject, $this->templateData);
+                $renderedHtmlBody = render_editor_blade($renderedHtmlBody, $this->templateData);
+                $renderedTextBody = render_editor_blade($renderedTextBody, $this->templateData);
             } catch (Exception $e) {
                 $this->notification()
                     ->error(__('Template rendering failed: ') . $e->getMessage())
@@ -153,7 +147,7 @@ class EditMail extends Component
         $this->mailMessage->mail_account_id ??= auth()
             ->user()
             ->defaultMailAccount()
-            ?->getKey();
+            ?->getKey() ?? 'default';
 
         $this->emailTemplates = resolve_static(EmailTemplate::class, 'query')
             ->when(
@@ -232,21 +226,21 @@ class EditMail extends Component
             $renderedData = [];
 
             if (! blank(data_get($data, 'subject'))) {
-                $renderedData['subject'] = Blade::render(
+                $renderedData['subject'] = render_editor_blade(
                     html_entity_decode(data_get($data, 'subject')),
                     $bladeParams
                 );
             }
 
             if (! blank(data_get($data, 'html_body'))) {
-                $renderedData['html_body'] = Blade::render(
+                $renderedData['html_body'] = render_editor_blade(
                     html_entity_decode(data_get($data, 'html_body')),
                     $bladeParams
                 );
             }
 
             if (! blank(data_get($data, 'text_body'))) {
-                $renderedData['text_body'] = Blade::render(
+                $renderedData['text_body'] = render_editor_blade(
                     html_entity_decode(data_get($data, 'text_body')),
                     $bladeParams
                 );
@@ -340,12 +334,20 @@ class EditMail extends Component
                 }
 
                 $data['queue'] = ! $single;
+                $data['mail_account_id'] = data_get($data, 'mail_account_id') === 'default'
+                    ? null
+                    : data_get($data, 'mail_account_id');
 
                 $result = SendMail::make($data)
+                    ->checkPermission()
                     ->validate()
-                    ->execute();
+                    ->when(
+                        data_get($data, 'queue'),
+                        fn (SendMail $action) => $action->executeAsync(),
+                        fn (SendMail $action) => $action->execute()
+                    );
 
-                if (data_get($result, 'success')) {
+                if (data_get($result, 'success') || data_get($data, 'queue')) {
                     $successCount++;
                 } else {
                     $failedCount++;

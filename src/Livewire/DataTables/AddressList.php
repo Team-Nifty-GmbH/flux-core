@@ -46,6 +46,8 @@ class AddressList extends BaseDataTable
 
     public LeadForm $leadForm;
 
+    public bool $assignToAgent = true;
+
     public bool $showMap = false;
 
     protected ?string $includeBefore = 'flux::livewire.contact.address-list';
@@ -108,7 +110,12 @@ class AddressList extends BaseDataTable
         foreach ($this->getSelectedModelsQuery()->with('contact:id,agent_id')->get(['id', 'contact_id']) as $address) {
             $leadForm = clone $this->leadForm;
             $leadForm->address_id = $address->getKey();
-            $leadForm->user_id = $address->contact?->agent_id ?? auth()->id();
+
+            if ($this->assignToAgent && $address->contact?->agent_id) {
+                $leadForm->user_id = $address->contact->agent_id;
+            } else {
+                $leadForm->user_id = auth()->id();
+            }
 
             try {
                 $leadForm->save();
@@ -196,6 +203,7 @@ class AddressList extends BaseDataTable
     public function openLeadsModal(): void
     {
         $this->leadForm->reset();
+        $this->reset('assignToAgent');
         $this->leadForm->openModal();
     }
 

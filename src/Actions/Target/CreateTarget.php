@@ -29,10 +29,6 @@ class CreateTarget extends FluxAction
 
         if ($users) {
             $target->users()->attach($users);
-
-            foreach ($target->children()->get('id') as $child) {
-                $child->users()->attach($users);
-            }
         }
 
         return $target->refresh();

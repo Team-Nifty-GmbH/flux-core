@@ -70,7 +70,6 @@
                     x-on:select="$wire.fillTo()"
                     wire:model="communication.communication_type_enum"
                     :label="__('Communication Type')"
-                    select="label:label|value:name"
                     :options="$communicationTypes"
                 />
             </div>
@@ -289,7 +288,7 @@
                     required
                     wire:model="communication.mail_account_id"
                     :label="__('Send From')"
-                    select="label:email|value:id"
+                    select="label:name|value:id"
                     :options="$mailAccounts"
                 />
             </div>

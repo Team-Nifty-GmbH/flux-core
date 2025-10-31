@@ -77,7 +77,11 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
         $this->series = collect($metrics)
             ->map(fn (array $data): array => [
                 'name' => data_get($data, 'orderType.name'),
-                'color' => ChartColorEnum::forIndex(data_get($data, 'colorIndex'))->value,
+                'color' => resolve_static(
+                    ChartColorEnum::class,
+                    'forIndex',
+                    ['index' => data_get($data, 'colorIndex')]
+                )->value,
                 'data' => data_get($data, 'metric')->getData(),
                 'orderTypeId' => data_get($data, 'orderType')->getKey(),
                 'hidden' => data_get(

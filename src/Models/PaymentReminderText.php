@@ -6,6 +6,7 @@ use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasAttributeTranslations;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentReminderText extends FluxModel
 {
@@ -17,6 +18,11 @@ class PaymentReminderText extends FluxModel
             'mail_to' => 'array',
             'mail_cc' => 'array',
         ];
+    }
+
+    public function emailTemplate(): BelongsTo
+    {
+        return $this->belongsTo(EmailTemplate::class);
     }
 
     protected function translatableAttributes(): array

@@ -253,11 +253,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         Mail::to($this->email)->queue(MagicLoginLink::make($plaintext, $expires));
     }
 
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
-    }
-
     public function targets(): BelongsToMany
     {
         return $this->belongsToMany(Target::class, 'target_user')->using(TargetUser::class);

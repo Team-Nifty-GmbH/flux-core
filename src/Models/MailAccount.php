@@ -69,18 +69,30 @@ class MailAccount extends FluxModel
 
     public function mailer(): Mailer
     {
-        return Mail::build([
+        $fromName = $this->smtp_from_name
+            ?: auth()->user()?->name
+            ?: config('mail.from.name');
+
+        $config = [
             'transport' => $this->smtp_mailer,
-            'username' => $this->smtp_email,
+            'username' => $this->smtp_user ?? $this->smtp_email,
             'password' => $this->smtp_password,
             'host' => $this->smtp_host,
             'port' => $this->smtp_port,
             'encryption' => $this->smtp_encryption,
-            'from' => [
-                'address' => $this->smtp_email,
-                'name' => auth()->user()?->name,
-            ],
-        ]);
+            'from_address' => $this->smtp_email,
+            'from_name' => $fromName,
+        ];
+
+        $mailer = Mail::build($config);
+
+        $mailer->alwaysFrom($this->smtp_email, $fromName);
+
+        if ($this->smtp_reply_to) {
+            $mailer->alwaysReplyTo($this->smtp_reply_to);
+        }
+
+        return $mailer;
     }
 
     public function mailFolders(): HasMany

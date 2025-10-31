@@ -29,6 +29,8 @@ class Targets extends TargetList
     #[Locked]
     public array $ownerColumns = [];
 
+    public array $selectedUserIds = [];
+
     #[DataTableForm]
     public TargetForm $target;
 
@@ -44,6 +46,7 @@ class Targets extends TargetList
         if ($id) {
             $this->updateAggregateColumnOptions($this->target->aggregate_type);
             $this->updateSelectableColumns($this->target->model_type);
+            $this->selectedUserIds = array_column($this->target->users, 'user_id');
         }
     }
 

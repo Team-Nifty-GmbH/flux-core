@@ -7,26 +7,17 @@ use Illuminate\Support\Str;
 
 trait EnumTrait
 {
-    public static function fromName(string $name): ?static
-    {
-        $values = array_values(
-            array_filter(self::cases(), fn ($case) => $case->name === $name)
-        );
-
-        return array_shift($values);
-    }
-
     public static function toArray(): array
     {
         return Arr::mapWithKeys(
-            array_column(self::cases(), 'value'),
+            array_column(static::cases(), 'value'),
             fn ($value) => [$value => __(Str::headline($value))],
         );
     }
 
     public static function values(): array
     {
-        return array_column(self::cases(), 'value');
+        return array_column(static::cases(), 'value');
     }
 
     public static function valuesLocalized(): array
@@ -36,7 +27,7 @@ trait EnumTrait
                 'value' => $case->value,
                 'label' => __(Str::headline($case->value)),
             ],
-            self::cases()
+            static::cases()
         );
     }
 }

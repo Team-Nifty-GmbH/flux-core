@@ -69,9 +69,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns,
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel,
+        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -724,6 +724,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this->morphMany(Discount::class, 'model');
     }
 
+    public function finalInvoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('final-invoice');
+    }
+
     /**
      * @throws Exception
      */
@@ -825,7 +830,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
     {
-        return $this->getFirstMedia('invoice');
+        return $this->getFirstMedia('invoice')
+            ?? $this->getFirstMedia('final-invoice')
+            ?? $this->getFirstMedia('refund');
     }
 
     public function language(): BelongsTo
@@ -941,6 +948,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         ]);
 
         return $this;
+    }
+
+    public function refund(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('refund');
     }
 
     public function registerMediaCollections(): void

@@ -7,7 +7,6 @@ use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Email;
@@ -49,7 +48,11 @@ class MessageSendingEventSubscriber
             fn ($attachment) => ! is_null(data_get($attachment, 'media'))
         );
 
-        $communicationForm['communication_type_enum'] = CommunicationTypeEnum::Mail->value;
+        $communicationForm['communication_type_enum'] = CommunicationTypeEnum::Mail;
+        $communicationForm['subject'] = (string) data_get($communicationForm, 'subject');
+        $communicationForm['text_body'] = (string) data_get($communicationForm, 'body');
+        $communicationForm['html_body'] = (string) data_get($communicationForm, 'html_body');
+
         $communicationAction = data_get($communicationForm, 'id')
             ? UpdateCommunication::make($communicationForm)
             : CreateCommunication::make($communicationForm);

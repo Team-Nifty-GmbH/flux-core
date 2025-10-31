@@ -9,7 +9,9 @@ use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class ReplicateTaskRuleset extends FluxRuleset
 {
@@ -64,10 +66,23 @@ class ReplicateTaskRuleset extends FluxRuleset
             'name' => 'string|nullable|max:255',
             'description' => 'string|nullable',
             'start_date' => 'date|nullable',
+            'start_time' => [
+                'nullable',
+                'exclude_if:start_date,null',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
             'due_date' => 'date|nullable|after_or_equal:start_date',
+            'due_time' => [
+                'nullable',
+                'exclude_if:due_date,null',
+                Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
             'priority' => 'integer|nullable|min:0',
             'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
-            'budget' => 'numeric|nullable|min:0',
+            'budget' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
         ];
     }
 }

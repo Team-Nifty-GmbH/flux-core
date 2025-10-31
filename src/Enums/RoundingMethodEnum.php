@@ -4,36 +4,38 @@ namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
 use FluxErp\Support\Calculation\Rounding;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum RoundingMethodEnum: string
+class RoundingMethodEnum extends FluxEnum
 {
     use EnumTrait;
 
-    public function apply(
+    final public const string None = 'none';
+
+    final public const string Round = 'round';
+
+    final public const string Ceil = 'ceil';
+
+    final public const string Floor = 'floor';
+
+    final public const string Nearest = 'nearest';
+
+    final public const string End = 'end';
+
+    public static function apply(
+        string $case,
         string|float|int $value,
         ?int $precision = null,
         ?int $roundingNumber = null,
         ?string $roundingMode = null
     ): string {
-        return match ($this) {
-            self::None => $value,
-            self::Round => Rounding::round($value, $precision),
-            self::Ceil => Rounding::ceil($value, $precision),
-            self::Floor => Rounding::floor($value, $precision),
-            self::Nearest => Rounding::nearest($roundingNumber, $value, $precision, $roundingMode),
-            self::End => Rounding::nearest($roundingNumber, $value, $precision, $roundingMode ?? 'ceil'),
+        return match ($case) {
+            static::None => $value,
+            static::Round => Rounding::round($value, $precision),
+            static::Ceil => Rounding::ceil($value, $precision),
+            static::Floor => Rounding::floor($value, $precision),
+            static::Nearest => Rounding::nearest($roundingNumber, $value, $precision, $roundingMode),
+            static::End => Rounding::nearest($roundingNumber, $value, $precision, $roundingMode ?? 'ceil'),
         };
     }
-
-    case Ceil = 'ceil';
-
-    case End = 'end';
-
-    case Floor = 'floor';
-
-    case Nearest = 'nearest';
-
-    case None = 'none';
-
-    case Round = 'round';
 }

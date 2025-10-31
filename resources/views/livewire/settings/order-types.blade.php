@@ -62,6 +62,7 @@
                         :label="__('Email Template')"
                         wire:model="orderType.email_template_id"
                         select="label:label|value:id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\EmailTemplate::class),
                             'method' => 'POST',

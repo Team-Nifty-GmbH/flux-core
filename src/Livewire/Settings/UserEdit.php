@@ -69,7 +69,7 @@ class UserEdit extends Component
                     ->get(['id', 'name', 'guard_name'])
                     ->toArray(),
                 'mailAccounts' => resolve_static(MailAccount::class, 'query')
-                    ->get(['id', 'email'])
+                    ->get(['id', 'name'])
                     ->toArray(),
                 'printers' => resolve_static(Printer::class, 'query')
                     ->where('is_active', true)

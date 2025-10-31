@@ -141,7 +141,7 @@ class PriceLists extends PriceListList
                 ->toArray();
         } else {
             $this->discountedCategories = [];
-            $this->priceList->rounding_method_enum = RoundingMethodEnum::None->value;
+            $this->priceList->rounding_method_enum = RoundingMethodEnum::None;
 
             $this->newCategoryDiscount = [
                 'category_id' => null,
@@ -247,7 +247,7 @@ class PriceLists extends PriceListList
                 'priceLists' => resolve_static(PriceList::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
+                'roundingMethods' => resolve_static(RoundingMethodEnum::class, 'valuesLocalized'),
                 'roundingModes' => [
                     [
                         'label' => __('Round'),

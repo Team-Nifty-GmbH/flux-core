@@ -199,7 +199,7 @@ abstract class Communication extends CommunicationList
         $this->communication->mail_account_id ??= auth()
             ->user()
             ->defaultMailAccount()
-            ?->getKey();
+            ?->getKey() ?? 'default';
 
         $this->attachments->reset();
         if ($communication->id) {
@@ -216,9 +216,9 @@ abstract class Communication extends CommunicationList
     #[Renderless]
     public function fillTo(): void
     {
-        if ($this->communication->communication_type_enum === CommunicationTypeEnum::Mail->value) {
+        if ($this->communication->communication_type_enum === CommunicationTypeEnum::Mail) {
             $this->communication->to = array_filter(Arr::wrap($this->getMailAddress()));
-        } elseif ($this->communication->communication_type_enum === CommunicationTypeEnum::Letter->value) {
+        } elseif ($this->communication->communication_type_enum === CommunicationTypeEnum::Letter) {
             $this->communication->to = array_filter(Arr::wrap($this->getPostalAddress()));
         } else {
             $this->communication->to = [];
@@ -275,6 +275,10 @@ abstract class Communication extends CommunicationList
     #[Renderless]
     public function send(): bool
     {
+        $this->communication->mail_account_id = $this->communication->mail_account_id === 'default'
+            ? null
+            : $this->communication->mail_account_id;
+
         if (! $this->save()) {
             return false;
         }
@@ -368,24 +372,19 @@ abstract class Communication extends CommunicationList
         return array_merge(
             parent::getViewData(),
             [
-                'communicationTypes' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
-                    CommunicationTypeEnum::values()
+                'communicationTypes' => resolve_static(
+                    CommunicationTypeEnum::class,
+                    'valuesLocalized'
                 ),
                 'mailAccounts' => array_merge(
                     auth()
                         ->user()
                         ->mailAccounts()
-                        ->whereNotNull([
-                            'smtp_email',
-                            'smtp_password',
-                            'smtp_host',
-                            'smtp_port',
-                        ])
-                        ->get(['mail_accounts.id', 'email'])
+                        ->whereNotNull('smtp_email')
+                        ->get(['mail_accounts.id', 'name'])
                         ->toArray(),
                     [
-                        ['id' => null, 'email' => __('Default')],
+                        ['id' => 'default', 'name' => __('Default')],
                     ]
                 ),
             ]

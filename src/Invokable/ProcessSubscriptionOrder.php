@@ -3,7 +3,9 @@
 namespace FluxErp\Invokable;
 
 use Cron\CronExpression;
+use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\Order\ReplicateOrder;
+use FluxErp\Actions\Printing;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Order;
@@ -14,8 +16,13 @@ use Throwable;
 
 class ProcessSubscriptionOrder implements Repeatable
 {
-    public function __invoke(int|string $orderId, int|string $orderTypeId): bool
-    {
+    public function __invoke(
+        int|string $orderId,
+        int|string $orderTypeId,
+        ?array $printLayouts = null,
+        ?bool $autoPrintAndSend = false,
+        ?int $emailTemplateId = null
+    ): bool {
         $order = Order::query()
             ->whereKey($orderId)
             ->first();
@@ -55,7 +62,11 @@ class ProcessSubscriptionOrder implements Repeatable
         }
 
         try {
-            ReplicateOrder::make($order)->validate()->execute();
+            $newOrder = ReplicateOrder::make($order)->validate()->execute();
+
+            if ($autoPrintAndSend && $printLayouts && count($printLayouts) > 0) {
+                $this->processPrintAndSend($newOrder, $printLayouts, $emailTemplateId);
+            }
         } catch (Throwable $e) {
             $activity = activity()
                 ->event(static::class)
@@ -102,6 +113,89 @@ class ProcessSubscriptionOrder implements Repeatable
         return [
             'orderId' => null,
             'orderTypeId' => null,
+            'printLayouts' => null,
+            'autoPrintAndSend' => false,
+            'emailTemplateId' => null,
         ];
+    }
+
+    protected function processPrintAndSend(Order $order, array $printLayouts, ?int $emailTemplateId = null): array
+    {
+        $availableViews = $order->resolvePrintViews();
+        $attachments = [];
+        $result = [];
+
+        foreach ($printLayouts as $layoutName) {
+            if (! array_key_exists($layoutName, $availableViews)) {
+                continue;
+            }
+
+            $media = Printing::make([
+                'model_type' => $order->getMorphClass(),
+                'model_id' => $order->getKey(),
+                'view' => $layoutName,
+                'html' => false,
+                'preview' => false,
+            ])
+                ->validate()
+                ->execute()
+                ->attachToModel($order);
+
+            if ($media) {
+                $attachments[] = [
+                    'id' => $media->getKey(),
+                    'name' => $media->file_name,
+                ];
+            }
+        }
+
+        if ($emailTemplateId && count($attachments) > 0 && $order->contact) {
+            $address = in_array('invoice', $printLayouts) && $order->contact->invoiceAddress
+                ? $order->contact->invoiceAddress
+                : $order->contact->mainAddress;
+
+            $to = $address->mail_addresses ?? [];
+
+            if (array_diff($printLayouts, ['invoice'])) {
+                $to[] = $order->contact->mainAddress?->email_primary;
+            }
+
+            $to = array_values(array_unique(array_filter($to)));
+
+            if (! $to) {
+                $result = SendMail::make([
+                    'template_id' => $emailTemplateId,
+                    'to' => $to,
+                    'attachments' => $attachments,
+                    'blade_parameters' => [
+                        'order' => $order,
+                        'contact' => $order->contact,
+                    ],
+                    'communicatables' => [
+                        [
+                            'model_type' => $order->getMorphClass(),
+                            'model_id' => $order->getKey(),
+                        ],
+                    ],
+                ])
+                    ->validate()
+                    ->execute();
+
+                if (! data_get($result, 'success') ?? false) {
+                    activity()
+                        ->event('subscription_email_failed')
+                        ->performedOn($order)
+                        ->withProperties([
+                            'error' => data_get($result, 'error'),
+                            'message' => data_get($result, 'message'),
+                            'email_template_id' => $emailTemplateId,
+                            'to' => $to,
+                        ])
+                        ->log('Subscription email failed');
+                }
+            }
+        }
+
+        return $result;
     }
 }

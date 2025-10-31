@@ -193,7 +193,6 @@ use FluxErp\Actions\SerialNumber\UpdateSerialNumber;
 use FluxErp\Actions\SerialNumberRange\CreateSerialNumberRange;
 use FluxErp\Actions\SerialNumberRange\DeleteSerialNumberRange;
 use FluxErp\Actions\SerialNumberRange\UpdateSerialNumberRange;
-use FluxErp\Actions\Setting\CreateSetting;
 use FluxErp\Actions\Setting\UpdateSetting;
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Actions\StockPosting\DeleteStockPosting;
@@ -840,7 +839,6 @@ Route::prefix('api')
 
                 // Settings
                 Route::get('/settings', [BaseController::class, 'index'])->defaults('model', Setting::class);
-                Route::post('/settings', CreateSetting::class);
                 Route::put('/settings', UpdateSetting::class);
 
                 // Subscriptions

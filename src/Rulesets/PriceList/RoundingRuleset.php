@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\PriceList;
 
 use FluxErp\Enums\RoundingMethodEnum;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rule;
 
 class RoundingRuleset extends FluxRuleset
 {
@@ -14,7 +14,7 @@ class RoundingRuleset extends FluxRuleset
             'rounding_method_enum' => [
                 'string',
                 'nullable',
-                Rule::enum(RoundingMethodEnum::class),
+                app(EnumRule::class, ['type' => RoundingMethodEnum::class]),
             ],
             'rounding_precision' => 'required_unless:rounding_method_enum,none|integer|nullable',
             'rounding_number' => [

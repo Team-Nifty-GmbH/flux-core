@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Engines\Engine;
 use Spatie\MediaLibrary\HasMedia;
@@ -119,10 +118,5 @@ class Client extends FluxModel implements HasMedia
     public function searchableUsing(): Engine
     {
         return app(EngineManager::class)->engine('collection');
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
     }
 }
