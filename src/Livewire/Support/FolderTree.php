@@ -119,7 +119,7 @@ abstract class FolderTree extends Component
         ];
     }
 
-    public function getTree(): array
+    public function getTree(array $exclude = []): array
     {
         if (! $this->modelType || ! $this->modelId) {
             return [];
@@ -128,7 +128,7 @@ abstract class FolderTree extends Component
         return resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
             ->first()
-            ?->getMediaAsTree() ?? [];
+            ?->getMediaAsTree($exclude) ?? [];
     }
 
     #[Renderless]
@@ -208,9 +208,11 @@ abstract class FolderTree extends Component
             }
         }
 
-        $newCollectionName = $targetPath . '.' . Str::snake(
-            str_replace('.', '_', data_get($subject, 'name') ?? '')
-        );
+        $newCollectionName = $targetPath . '.'
+            . Str::of(data_get($subject, 'name') ?? '')
+                ->replace('.', '_')
+                ->snake()
+                ->toString();
         if ($subjectType === 'collection' && $targetType === 'collection') {
             if ($newCollectionName !== $subjectPath) {
                 resolve_static(Media::class, 'query')
@@ -280,9 +282,10 @@ abstract class FolderTree extends Component
     public function saveFolder(array $attributes): false|array
     {
         if (is_string(data_get($attributes, 'parent_id')) || is_string(data_get($attributes, 'id'))) {
-            $attributes['slug'] = Str::snake(
-                str_replace('.', '_', data_get($attributes, 'name') ?? '')
-            );
+            $attributes['slug'] = Str::of(data_get($attributes, 'name') ?? '')
+                ->replace('.', '_')
+                ->snake()
+                ->toString();
             $path = data_get($attributes, 'path') ?? '';
             $replace = Str::replaceLast(Str::afterLast($path, '.'), $attributes['slug'], $path);
 
@@ -317,6 +320,19 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        return $this->folder->getActionResult()->toArray();
+        return array_merge(
+            ['children' => []],
+            array_intersect_key(
+                $this->folder->getActionResult()->toArray(),
+                array_flip([
+                    'id',
+                    'name',
+                    'slug',
+                    'is_readonly',
+                    'is_static',
+                    'children',
+                ])
+            )
+        );
     }
 }

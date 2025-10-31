@@ -16,7 +16,7 @@ class CreateMediaFolderRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'nullable|string|uuid|unique:prices,uuid',
+            'uuid' => 'nullable|string|uuid|unique:media_folders,uuid',
             'parent_id' => [
                 'nullable',
                 'integer',

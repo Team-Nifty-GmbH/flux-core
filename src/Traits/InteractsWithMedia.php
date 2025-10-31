@@ -64,7 +64,10 @@ trait InteractsWithMedia
                         )
                     )
                     ->map(fn ($media) => [
-                        'name' => Str::headline(Str::afterLast($media, '.')),
+                        'name' => Str::of($media)
+                            ->afterLast('.')
+                            ->headline()
+                            ->toString(),
                         'slug' => $media,
                     ])
                     ->toArray(),
@@ -168,8 +171,9 @@ trait InteractsWithMedia
             $node[] = [
                 'id' => ($id = data_get($item, 'id')) ?? Str::uuid()->toString(),
                 'name' => data_get($item, 'name'),
-                'is_static' => data_get($item, 'is_static') ?? false,
                 'slug' => $slug = data_get($item, 'slug'),
+                'is_readonly' => data_get($item, 'is_readonly') ?? false,
+                'is_static' => data_get($item, 'is_static') ?? false,
                 'children' => array_merge(
                     $this->calculateTree(data_get($item, 'children') ?? []),
                     resolve_static(FluxMedia::class, 'query')

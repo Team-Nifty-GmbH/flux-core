@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Rulesets\MediaFolder\UpdateMediaFolderRuleset;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
 class UpdateMediaFolder extends FluxAction
@@ -21,7 +20,7 @@ class UpdateMediaFolder extends FluxAction
         return UpdateMediaFolderRuleset::class;
     }
 
-    public function performAction(): Model
+    public function performAction(): MediaFolder
     {
         $mediaFolder = resolve_static(MediaFolder::class, 'query')
             ->whereKey($this->getData('id'))

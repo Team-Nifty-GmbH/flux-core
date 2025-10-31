@@ -7,6 +7,7 @@ use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -17,14 +18,21 @@ class MediaFolder extends FluxModel implements HasMedia
     protected static function booted(): void
     {
         static::creating(function (MediaFolder $model): void {
-            $model->slug ??= Str::snake(str_replace('.', '_', $model->name));
+            $model->slug ??= Str::of($model->name)
+                ->replace('.', '_')
+                ->snake()
+                ->toString();
         });
 
         static::created(function (MediaFolder $model): void {
             $model->slug = implode('.',
                 array_filter([
                     $model->parent?->slug,
-                    Str::snake(str_replace('.', '_', $model->name)) . '|' . $model->getKey(),
+                    Str::of($model->name)
+                        ->replace('.', '_')
+                        ->snake()
+                        ->append('|' . $model->getKey())
+                        ->toString(),
                 ])
             );
 
@@ -32,23 +40,30 @@ class MediaFolder extends FluxModel implements HasMedia
         });
 
         static::updating(function (MediaFolder $model): void {
-            if ($model->isDirty('name')) {
+            if ($model->isDirty(['parent_id', 'name'])) {
                 $model->slug = implode('.',
                     array_filter([
                         $model->parent?->slug,
-                        Str::snake(str_replace('.', '_', $model->name)) . '|' . $model->getKey(),
+                        Str::of($model->name)
+                            ->replace('.', '_')
+                            ->snake()
+                            ->append('|' . $model->getKey())
+                            ->toString(),
                     ])
                 );
             }
         });
 
         static::saved(function (MediaFolder $model): void {
-            if ($model->wasChanged('slug')) {
-                foreach ($model->children ?? [] as $child) {
-                    $child->update([
-                        'slug' => $model->slug . '.' . Str::afterLast($child->slug, '.'),
+            if ($model->wasChanged(['parent_id', 'slug'])) {
+                $original = $model->getRawOriginal('slug');
+                $replace = $model->slug;
+                $model->getAllDescendantsQuery()
+                    ->update([
+                        'slug' => DB::raw('CONCAT(\'' . $replace
+                            . '\', SUBSTRING(slug, ' . strlen($original) + 1 . '))'
+                        ),
                     ]);
-                }
             }
         });
     }
