@@ -75,7 +75,7 @@ class MailAccount extends FluxModel
 
         $config = [
             'transport' => $this->smtp_mailer,
-            'username' => $this->smtp_email,
+            'username' => $this->smtp_user ?? $this->smtp_email,
             'password' => $this->smtp_password,
             'host' => $this->smtp_host,
             'port' => $this->smtp_port,
