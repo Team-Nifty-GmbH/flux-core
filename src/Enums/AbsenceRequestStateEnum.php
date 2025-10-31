@@ -11,6 +11,14 @@ enum AbsenceRequestStateEnum: string
 {
     use EnumTrait;
 
+    case Approved = 'approved';
+
+    case Pending = 'pending';
+
+    case Rejected = 'rejected';
+
+    case Revoked = 'revoked';
+
     public function badge(): HtmlString
     {
         return new HtmlString(
@@ -28,12 +36,4 @@ enum AbsenceRequestStateEnum: string
             )
         );
     }
-
-    case Approved = 'approved';
-
-    case Pending = 'pending';
-
-    case Rejected = 'rejected';
-
-    case Revoked = 'revoked';
 }
