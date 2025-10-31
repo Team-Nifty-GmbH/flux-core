@@ -72,6 +72,8 @@ class DownloadMultipleMedia extends FluxAction
 
                 $mediaFolders = array_diff($mediaFolders, $duplicates);
             }
+
+            $this->data['media_folders'] = array_values($mediaFolders);
         }
     }
 }
