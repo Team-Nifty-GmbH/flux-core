@@ -25,9 +25,13 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Salutation' => '$paymentReminder->order->addressInvoice->salutation()',
                 'Total Gross Price' => 'format_money($paymentReminder->order->total_gross_price, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
                 'Balance' => 'format_money($paymentReminder->order->balance, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
-                'Last Payment Reminder Date' => '$paymentReminder->order->paymentReminders()->latest()->whereNot(\'id\', $paymentReminder->id)->first()?->created_at?->isoFormat(\'L\')',
-                'Invoice Number' => '$paymentReminder->order->invoice_number',
-                'Invoice Date' => '$paymentReminder->order->invoice_date->isoFormat(\'L\')',
+                'Payment Reminder Dates' => '$paymentReminder->order?->paymentReminders()->pluck(\'created_at\')->map(fn ($date) => $date->isoFormat(\'L\'))->join(\', \')',
+                'Last Payment Reminder Date' => '$paymentReminder->order?->paymentReminders()->latest()->whereNot(\'id\', $paymentReminder->id)->first()?->created_at?->isoFormat(\'L\')',
+                'Order Number' => '$paymentReminder->order?->order_number',
+                'Order Date' => '$paymentReminder->order?->order_date?->isoFormat(\'L\')',
+                'Invoice Number' => '$paymentReminder->order?->invoice_number',
+                'Invoice Date' => '$paymentReminder->order?->invoice_date?->isoFormat(\'L\')',
+                'Client Name' => '$paymentReminder->order?->client-?>name',
             ],
             PaymentReminder::class
         );
@@ -37,8 +41,11 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Salutation' => '$order->addressInvoice->salutation()',
                 'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->addressInvoice->language)',
                 'Balance' => 'format_money($order->balance, $order->currency, $order->addressInvoice->language)',
+                'Order Number' => '$order->order_number',
+                'Order Date' => '$order->order_date?->isoFormat(\'L\')',
                 'Invoice Number' => '$order->invoice_number',
-                'Invoice Date' => '$order->invoice_date->isoFormat(\'L\')',
+                'Invoice Date' => '$order->invoice_date?->isoFormat(\'L\')',
+                'Client Name' => '$order->client?->name',
             ],
             Order::class
         );
@@ -52,6 +59,8 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Customer Account Holder' => '$sepaMandate->contactBankConnection?->account_holder',
                 'Mandate Reference Number' => '$sepaMandate->mandate_reference_number',
                 'Sepa Mandate Type Enum' => '__($sepaMandate->sepa_mandate_type_enum->value)',
+                'Client Name' => '$sepaMandate->client->name',
+                'Client Creditor Identifier' => '$sepaMandate->client->creditor_identifier',
             ],
             SepaMandate::class
         );
