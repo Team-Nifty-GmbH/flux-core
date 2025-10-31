@@ -29,8 +29,10 @@ export default function (
         async setCollection(collectionName, id = null) {
             if (collectionName !== null) {
                 //  on selected - check if collection is single file upload
-                this.multipleFileUpload =
-                    !(await $wire.hasSingleFile(id, collectionName));
+                this.multipleFileUpload = !(await $wire.hasSingleFile(
+                    id,
+                    collectionName,
+                ));
                 this.readOnly = await $wire.readOnly(id, collectionName);
                 //  check if collection is read-only - disable file upload if true
             } else {

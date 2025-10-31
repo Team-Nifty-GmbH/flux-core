@@ -71,11 +71,16 @@
                                         this.selectionProxy = level
                                         this.selection = JSON.parse(JSON.stringify(level))
                                         this.selected = true
-                                        this.setCollection(this.selection?.slug ?? this.selection?.collection_name, this.selection?.id)
+                                        this.setCollection(
+                                            this.selection?.slug ?? this.selection?.collection_name,
+                                            this.selection?.id,
+                                        )
 
-                                        if (!this.selection.file_name) {
+                                        if (! this.selection.file_name) {
                                             let path = this.getNodePath(this.selectionProxy, 'slug')
-                                            this.selection.path = path ? path[path.length - 1] : null
+                                            this.selection.path = path
+                                                ? path[path.length - 1]
+                                                : null
                                         }
                                     })
 
@@ -93,8 +98,11 @@
 
                             this.selectionProxy = level
                             this.selection = JSON.parse(JSON.stringify(level))
-                            this.setCollection(this.selection?.slug ?? this.selection?.collection_name, this.selection?.id)
-                            if (!this.selection.file_name) {
+                            this.setCollection(
+                                this.selection?.slug ?? this.selection?.collection_name,
+                                this.selection?.id,
+                            )
+                            if (! this.selection.file_name) {
                                 let path = this.getNodePath(this.selectionProxy, 'slug')
                                 this.selection.path = path ? path[path.length - 1] : null
                             }
