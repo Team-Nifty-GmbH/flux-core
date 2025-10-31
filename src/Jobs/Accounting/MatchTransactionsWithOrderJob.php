@@ -275,13 +275,11 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
                     ? min($order->balance, $transaction->balance)
                     : max($order->balance, $transaction->balance);
 
-                $isAccepted = $this->shouldAutoAccept($transaction, $order);
-
                 CreateOrderTransaction::make([
                     'transaction_id' => $transaction->getKey(),
                     'order_id' => $order->getKey(),
                     'amount' => $amount,
-                    'is_accepted' => $isAccepted,
+                    'is_accepted' => $this->shouldAutoAccept($transaction, $order),
                 ])
                     ->validate()
                     ->execute();
@@ -305,12 +303,12 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             return false;
         }
 
-        if (! str_contains($transaction->purpose, $order->invoice_number)) {
+        if (! str_contains(strtolower($transaction->purpose), strtolower($order->invoice_number))) {
             return false;
         }
 
         // Condition 3: The balance of the order is equal to the amount of the transaction
-        if (bccomp(bcround($order->balance), $transaction->amount) !== 0) {
+        if (bccomp(bcround($order->balance, 2), $transaction->amount, 2) !== 0) {
             return false;
         }
 
