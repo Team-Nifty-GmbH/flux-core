@@ -19,11 +19,18 @@ return new class() extends Migration
             $table->json('parameters')->nullable();
             $table->string('cron_expression')->nullable();
             $table->dateTime('due_at')->nullable();
+            $table->dateTime('ends_at')->nullable();
+            $table->unsignedInteger('recurrences')->nullable();
+            $table->unsignedInteger('current_recurrence')->nullable();
             $table->dateTime('last_success')->nullable();
             $table->dateTime('last_run')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->timestamps();
-            $table->softDeletes();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
         });
     }
 

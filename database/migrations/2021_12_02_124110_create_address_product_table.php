@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAddressProductTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
@@ -13,8 +13,8 @@ class CreateAddressProductTable extends Migration
             $table->unsignedBigInteger('product_id');
 
             $table->primary(['address_id', 'product_id']);
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('product_id')->references('id')->on('products');
+            $table->foreign('address_id')->references('id')->on('addresses')->cascadeOnDelete();
+            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
         });
     }
 
@@ -22,4 +22,4 @@ class CreateAddressProductTable extends Migration
     {
         Schema::dropIfExists('address_product');
     }
-}
+};
