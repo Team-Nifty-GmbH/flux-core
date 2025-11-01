@@ -3,31 +3,41 @@
 namespace FluxErp\Rulesets\Media;
 
 use FluxErp\Models\Media;
+use FluxErp\Models\MediaFolder;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class DownloadMultipleMediaRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
-    protected static ?string $model = Media::class;
-
     public function rules(): array
     {
         return [
             'file_name' => [
-                'string',
-                'nullable',
-            ],
-            'ids' => [
                 'required',
+                'string',
+            ],
+
+            'media' => [
+                'required_without:media_folders',
                 'array',
             ],
-            'ids.*' => [
+            'media.*' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Media::class]),
             ],
+
+            'media_folders' => [
+                'required_without:media',
+                'exclude_with:media',
+                'array',
+            ],
+            'media_folders.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => MediaFolder::class]),
+            ],
+            'with_subfolders' => 'required_with:media_folders|exclude_with:media|boolean',
         ];
     }
 }

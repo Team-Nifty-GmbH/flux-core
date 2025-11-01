@@ -6,11 +6,12 @@ use FluxErp\Actions\Media\DownloadMedia;
 use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
+use FluxErp\Models\MediaFolder;
+use FluxErp\Support\MediaLibrary\FluxMediaStream;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -40,24 +41,38 @@ trait WithFileUploads
         return null;
     }
 
-    public function downloadCollection(array|string $collection): ?MediaStream
+    public function downloadCollection(int|string $id, array|string $collection): ?FluxMediaStream
     {
-        $collection = is_array($collection) ? implode('.', $collection) : $collection;
-        $media = resolve_static(Media::class, 'query')
-            ->where('collection_name', 'like', $collection . '%')
-            ->when($this->modelType ?? false,
-                fn (Builder $query) => $query->where('model_type', morph_alias($this->modelType))
-                    ->when(
-                        $this->modelId ?? false,
-                        fn ($query) => $query->where('model_id', $this->modelId)
+        // If $id is an integer we assume it's a media folder
+        if (is_int($id)) {
+            $mediaFolder = resolve_static(MediaFolder::class, 'familyTree')
+                ->whereKey($id)
+                ->first();
+
+            $actionData = [
+                'file_name' => trim($mediaFolder->name),
+                'media_folders' => [$mediaFolder?->getKey()],
+            ];
+        } else {
+            $collection = is_array($collection) ? implode('.', $collection) : $collection;
+
+            $actionData = [
+                'media' => resolve_static(Media::class, 'query')
+                    ->where('collection_name', 'like', $collection . '%')
+                    ->when($this->modelType ?? false,
+                        fn (Builder $query) => $query->where('model_type', morph_alias($this->modelType))
+                            ->when(
+                                $this->modelId ?? false,
+                                fn ($query) => $query->where('model_id', $this->modelId)
+                            )
                     )
-            )
-            ->pluck('id');
+                    ->pluck('id')
+                    ->toArray(),
+            ];
+        }
 
         try {
-            return DownloadMultipleMedia::make([
-                'ids' => $media->toArray(),
-            ])
+            return DownloadMultipleMedia::make($actionData)
                 ->checkPermission()
                 ->validate()
                 ->execute();

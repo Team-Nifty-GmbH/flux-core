@@ -13,12 +13,8 @@ class Attachments extends FolderTree
 
     protected string $modelType = Product::class;
 
-    public function getTree(): array
+    public function getTree(array $exclude = []): array
     {
-        $collections = parent::getTree();
-
-        return array_filter($collections, function ($collection) {
-            return data_get($collection, 'collection_name') !== 'images';
-        });
+        return parent::getTree(array_merge($exclude, ['images']));
     }
 }

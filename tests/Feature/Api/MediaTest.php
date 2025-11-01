@@ -279,7 +279,7 @@ test('download multiple media', function (): void {
 
     $this->user->givePermissionTo($this->permissions['download-multiple']);
     Sanctum::actingAs($this->user, ['user']);
-    $queryParams = '?ids[]=' . implode('&ids[]=', $mediaIds);
+    $queryParams = '?media[]=' . implode('&media[]=', $mediaIds);
 
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
@@ -305,7 +305,7 @@ test('download multiple media mix public private', function (): void {
 
     $this->user->givePermissionTo($this->permissions['download-multiple']);
     Sanctum::actingAs($this->user, ['user']);
-    $queryParams = '?ids[]=' . $publicMedia->getKey() . '&ids[]=' . $privateMedia->getKey();
+    $queryParams = '?media[]=' . $publicMedia->getKey() . '&media[]=' . $privateMedia->getKey();
 
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
@@ -323,14 +323,14 @@ test('download multiple media private permissions', function (): void {
     );
 
     $this->actingAsGuest();
-    $response = $this->get('/api/media/download-multiple?ids[]=' . $media->getKey());
+    $response = $this->get('/api/media/download-multiple?media[]=' . $media->getKey());
     $response->assertFound();
     $response->assertRedirect('/login');
 
     $this->user->givePermissionTo($this->permissions['download-multiple']);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->actingAs($this->user)->get('/api/media/download-multiple?ids[]=' . $media->getKey());
+    $response = $this->actingAs($this->user)->get('/api/media/download-multiple?media[]=' . $media->getKey());
 
     $response->assertOk();
     $response->assertHeader('Content-Type', 'application/octet-stream');
@@ -368,7 +368,7 @@ test('download multiple media with custom filename', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $customFileName = 'custom-archive';
-    $queryParams = '?file_name=' . $customFileName . '&ids[]=' . implode('&ids[]=', $mediaIds);
+    $queryParams = '?file_name=' . $customFileName . '&media[]=' . implode('&media[]=', $mediaIds);
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
     $response->assertOk();
