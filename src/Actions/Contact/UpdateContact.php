@@ -101,7 +101,7 @@ class UpdateContact extends FluxAction
 
             if ($customerNumberExists) {
                 $errors += [
-                    'customer_number' => [__('Customer number already exists')],
+                    'customer_number' => ['Customer number already exists'],
                 ];
             }
         }

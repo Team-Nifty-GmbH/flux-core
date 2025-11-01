@@ -208,7 +208,7 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             ->sortBy([
                 fn (Order $order) => abs(
                     bcsub(
-                        round($order->balance ?? 0, 2),
+                        bcround($order->balance ?? 0, 2),
                         $transaction->amount
                     )
                 ) > 0.01 ? 1 : 0,

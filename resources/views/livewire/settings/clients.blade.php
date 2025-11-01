@@ -14,7 +14,7 @@
             @include('tall-datatables::livewire.data-table')
         </div>
     </div>
-    <x-modal size="6xl" id="edit-client">
+    <x-modal size="6xl" id="edit-client" :title="__('Client')">
         <x-flux::tabs :$tabs wire:model="tab" wire:loading>
             @includeWhen($tab === 'general', 'flux::components.settings.client.general')
         </x-flux::tabs>

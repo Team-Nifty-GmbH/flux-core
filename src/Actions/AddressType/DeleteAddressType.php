@@ -38,13 +38,13 @@ class DeleteAddressType extends FluxAction
 
         if ($addressType->is_lock) {
             $errors += [
-                'is_locked' => [__('Address type is locked')],
+                'is_locked' => ['Address type is locked'],
             ];
         }
 
         if ($addressType->addresses()->exists()) {
             $errors += [
-                'address' => [__('Address type has attached addresses')],
+                'address' => ['Address type has attached addresses'],
             ];
         }
         if ($errors) {

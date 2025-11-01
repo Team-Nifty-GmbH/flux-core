@@ -1,4 +1,4 @@
-<x-modal id="activity-log-detail">
+<x-modal id="activity-log-detail" :title="__('Activity Log')">
     <x-card class="flex flex-col gap-4">
         <x-input :label="__('Causer')" wire:model="activity.causer" disabled />
         <pre

@@ -40,7 +40,7 @@ class DeleteUser extends FluxAction
 
         if ($this->getData('id') == Auth::id()) {
             throw ValidationException::withMessages([
-                'id' => [__('Cannot delete yourself')],
+                'id' => ['Cannot delete yourself'],
             ])
                 ->status(403)
                 ->errorBag('deleteUser');

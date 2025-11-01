@@ -45,7 +45,7 @@ class UpdateAdditionalColumn extends FluxAction
             && $additionalColumn->modelValues()->whereNotIn('meta.value', $this->data['values'])->exists()
         ) {
             throw ValidationException::withMessages([
-                'values' => [__('Models with differing values exist')],
+                'values' => ['Models with differing values exist'],
             ]);
         }
     }

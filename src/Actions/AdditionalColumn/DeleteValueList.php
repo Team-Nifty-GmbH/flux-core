@@ -38,7 +38,7 @@ class DeleteValueList extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'model_has_values' => [__('Value list referenced by at least one model instance')],
+                'model_has_values' => ['Value list referenced by at least one model instance'],
             ])
                 ->errorBag('deleteValueList')
                 ->status(423);

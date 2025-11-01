@@ -1,4 +1,4 @@
-<x-modal id="edit-payment-type-modal">
+<x-modal id="edit-payment-type-modal" :title="__('Payment Type')">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="paymentType.name" :label="__('Name')" />
         <div class="mt-2">

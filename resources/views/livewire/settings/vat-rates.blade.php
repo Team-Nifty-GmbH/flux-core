@@ -1,4 +1,4 @@
-<x-modal id="edit-vat-rate-modal">
+<x-modal id="edit-vat-rate-modal" :title="__('Vat Rate')">
     <div class="flex flex-col gap-1.5">
         @section('settings.vat-rates.inputs')
         <x-input wire:model="vatRate.name" :label="__('Name')" />

@@ -38,7 +38,7 @@ class CreateProject extends FluxAction
 
             if (! $parentProject) {
                 throw ValidationException::withMessages([
-                    'parent_id' => [__('Parent project not found')],
+                    'parent_id' => ['Parent project not found'],
                 ])->errorBag('createProject');
             }
         }

@@ -1,0 +1,56 @@
+<?php
+
+namespace FluxErp\Models;
+
+use FluxErp\Models\Pivots\HolidayLocation;
+use FluxErp\Models\Pivots\LocationVacationBlackout;
+use FluxErp\Traits\HasUserModification;
+use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Location extends FluxModel
+{
+    use HasUserModification, HasUuid, SoftDeletes;
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function countryRegion(): BelongsTo
+    {
+        return $this->belongsTo(CountryRegion::class);
+    }
+
+    public function departments(): HasMany
+    {
+        return $this->hasMany(EmployeeDepartment::class);
+    }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    public function holidays(): BelongsToMany
+    {
+        return $this->belongsToMany(Holiday::class, 'holiday_location')
+            ->using(HolidayLocation::class);
+    }
+
+    public function vacationBlackouts(): BelongsToMany
+    {
+        return $this->belongsToMany(VacationBlackout::class, 'location_vacation_blackout')
+            ->using(LocationVacationBlackout::class);
+    }
+}

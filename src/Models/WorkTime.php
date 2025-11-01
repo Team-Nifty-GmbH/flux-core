@@ -6,21 +6,22 @@ use Carbon\Carbon;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\Targetable;
+use FluxErp\Models\Pivots\EmployeeDayWorkTime;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
 
 class WorkTime extends FluxModel implements Calendarable, Targetable
 {
-    use Filterable, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, SoftDeletes;
+    use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
 
     public static function aggregateColumns(string $type): array
     {
@@ -150,6 +151,35 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         });
 
         static::saving(function (WorkTime $workTime): void {
+            if ($workTime->isDirty('user_id') && ! is_null($workTime->user_id)) {
+                $workTime->employee_id = resolve_static(Employee::class, 'query')
+                    ->where('user_id', $workTime->user_id)
+                    ->value('id');
+            }
+
+            if ($workTime->isDirty('employee_id')
+                && ! is_null($workTime->employee_id)
+                && is_null($workTime->user_id)
+            ) {
+                $workTime->user_id = resolve_static(User::class, 'query')
+                    ->whereRelation('employee', 'id', $workTime->employee_id)
+                    ->value('id');
+            }
+
+            // Calculate total_time_ms when started_at and ended_at are present
+            if ($workTime->started_at && $workTime->ended_at) {
+                $workTime->total_time_ms = bcsub(
+                    $workTime->started_at->diffInMilliseconds($workTime->ended_at),
+                    $workTime->paused_time_ms ?? 0,
+                    0
+                );
+
+                // For pause entries, make the time negative
+                if ($workTime->is_pause) {
+                    $workTime->total_time_ms = bcmul($workTime->total_time_ms, -1, 0);
+                }
+            }
+
             if ($workTime->is_locked) {
                 $workTime->calculateTotalCost();
             }
@@ -203,6 +233,19 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function employeeDays(): BelongsToMany
+    {
+        return $this->belongsToMany(EmployeeDay::class, 'work_time_employee_day')
+            ->using(EmployeeDayWorkTime::class)
+            ->withPivot(['hours_contributed', 'break_minutes_contributed'])
+            ->withTimestamps();
     }
 
     public function model(): MorphTo
@@ -268,8 +311,8 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
             'invited' => [],
             'description' => $this->description,
             'allDay' => false,
-            'editable' => $this->is_locked ? false : true,
-            'is_editable' => $this->is_locked ? false : true,
+            'editable' => ! $this->is_locked,
+            'is_editable' => ! $this->is_locked,
             'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,

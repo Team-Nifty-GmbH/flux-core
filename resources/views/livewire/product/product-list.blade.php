@@ -75,7 +75,6 @@
                 <x-select.styled
                     :label="__('Use price from')"
                     wire:model="productPricesUpdate.base_price_list_id"
-                    :clearable="true"
                     select="label:name|value:id"
                     :options="$selectablePriceLists"
                 />

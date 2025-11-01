@@ -1,4 +1,4 @@
-<x-modal id="edit-warehouse-modal">
+<x-modal id="edit-warehouse-modal" :title="__('Warehouse')">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="warehouse.name" :label="__('Name')" />
         <div class="mt-2">

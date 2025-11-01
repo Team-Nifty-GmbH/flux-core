@@ -39,7 +39,7 @@ class DeleteComment extends FluxAction
         // only super admins can delete other users comments
         if (! Auth::user()->hasRole('Super Admin') && ! $comment->getCreatedBy()?->is(Auth::user())) {
             throw ValidationException::withMessages([
-                'comment' => [__('Cant delete other users comments.')],
+                'comment' => ['Cant delete other users comments.'],
             ])
                 ->status(403);
         }

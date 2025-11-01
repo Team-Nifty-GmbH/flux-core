@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\WorkTime;
 
 use FluxErp\Models\Contact;
+use FluxErp\Models\Employee;
 use FluxErp\Models\User;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
@@ -27,9 +28,18 @@ class CreateWorkTimeRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
             'user_id' => [
-                'required',
+                'required_without:employee_id',
+                'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class])->where('is_active', true),
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
+            ],
+            'employee_id' => [
+                'required_without:user_id',
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Employee::class])
+                    ->where('is_active', true),
             ],
             'parent_id' => [
                 'required_if:is_pause,true',

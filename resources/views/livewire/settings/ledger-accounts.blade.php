@@ -1,4 +1,4 @@
-<x-modal id="edit-ledger-account-modal">
+<x-modal id="edit-ledger-account-modal" :title="__('Ledger Account')">
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             x-bind:readonly="!edit"

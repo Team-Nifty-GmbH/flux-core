@@ -38,13 +38,13 @@ class DeleteOrder extends FluxAction
 
         if ($order->is_locked) {
             $errors += [
-                'is_locked' => [__('Order is locked')],
+                'is_locked' => ['Order is locked'],
             ];
         }
 
         if ($order->children()->count() > 0) {
             $errors += [
-                'children' => [__('Order has children')],
+                'children' => ['Order has children'],
             ];
         }
 

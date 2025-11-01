@@ -48,13 +48,13 @@ class DeleteCountry extends FluxAction
 
         if ($country->addresses()->exists()) {
             $errors += [
-                'address' => [__('Country referenced by an address')],
+                'address' => ['Country referenced by an address'],
             ];
         }
 
         if ($country->clients()->exists()) {
             $errors += [
-                'client' => [__('Country referenced by a client')],
+                'client' => ['Country referenced by a client'],
             ];
         }
 

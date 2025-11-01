@@ -38,7 +38,7 @@ class DeleteTicketType extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'tickets' => [__('The given ticket type has tickets')],
+                'tickets' => ['The given ticket type has tickets'],
             ])->errorBag('deleteTicketType');
         }
     }

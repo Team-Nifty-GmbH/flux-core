@@ -161,7 +161,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
         if (! $this->vatRateId) {
             $errors += [
-                'vat_rate_id' => [__('No default VAT rate found')],
+                'vat_rate_id' => ['No default VAT rate found'],
             ];
         }
 

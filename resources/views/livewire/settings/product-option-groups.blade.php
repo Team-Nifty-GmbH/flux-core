@@ -1,6 +1,6 @@
 <x-modal
     id="edit-product-option-group-modal"
-    :title="__('Edit Product Option Group')"
+    :title="__('Product Option Group')"
 >
     <div class="flex flex-col gap-1.5">
         <x-input

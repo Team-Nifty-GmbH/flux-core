@@ -5,10 +5,13 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\WorkTimeType\CreateWorkTimeType;
 use FluxErp\Actions\WorkTimeType\DeleteWorkTimeType;
 use FluxErp\Actions\WorkTimeType\UpdateWorkTimeType;
+use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class WorkTimeTypeForm extends FluxForm
 {
+    use SupportsAutoRender;
+
     #[Locked]
     public ?int $id = null;
 

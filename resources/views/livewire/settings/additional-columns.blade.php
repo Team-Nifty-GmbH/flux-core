@@ -2,7 +2,7 @@
     id="edit-additional-column-modal"
     z-index="z-30"
     wire="showAdditionalColumnModal"
-    :title="$create ? __('Create Additional Column') : __('Edit Additional Column')"
+    :title="__('Additional Column')"
 >
     <livewire:settings.additional-column-edit />
     <x-slot:footer>

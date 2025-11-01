@@ -1,5 +1,5 @@
 <div>
-    <x-modal id="edit-tag-modal">
+    <x-modal id="edit-tag-modal" :title="__('Tag')">
         <div class="flex flex-col gap-1.5">
             <x-input wire:model="tagForm.name" :label="__('Name')" />
             <x-color wire:model="tagForm.color" :label="__('Color')" />

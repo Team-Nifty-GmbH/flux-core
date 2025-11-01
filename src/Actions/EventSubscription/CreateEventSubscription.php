@@ -46,7 +46,7 @@ class CreateEventSubscription extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'subscription' => [__('Already subscribed')],
+                'subscription' => ['Already subscribed'],
             ])->errorBag('createEventSubscription');
         }
     }

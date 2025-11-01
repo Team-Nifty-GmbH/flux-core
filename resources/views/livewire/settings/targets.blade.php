@@ -1,4 +1,4 @@
-<x-modal size="3xl" :id="$target->modalName()">
+<x-modal size="3xl" :id="$target->modalName()" :title="__('Target')">
     <div
         x-data="{
             addUser(user) {
@@ -22,7 +22,7 @@
                 )
             },
         }"
-        class="flex flex-col gap-3"
+        class="flex flex-col gap-4"
     >
         <x-spinner />
         <x-input wire:model="target.name" :label="__('Title')" required />

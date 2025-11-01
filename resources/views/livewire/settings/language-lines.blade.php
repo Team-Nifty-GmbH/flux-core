@@ -1,4 +1,4 @@
-<x-modal id="edit-language-line-modal">
+<x-modal id="edit-language-line-modal" :title="__('Language Line')">
     <div class="flex flex-col gap-4">
         <x-input
             label="{{ __('Group') }}"

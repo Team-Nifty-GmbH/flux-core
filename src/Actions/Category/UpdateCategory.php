@@ -60,7 +60,7 @@ class UpdateCategory extends FluxAction
 
             if (Helper::checkCycle(Category::class, $category, $this->data['parent_id'])) {
                 throw ValidationException::withMessages([
-                    'parent_id' => [__('Cycle detected')],
+                    'parent_id' => ['Cycle detected'],
                 ])->errorBag('updateCategory');
             }
         }

@@ -132,7 +132,7 @@
         id="edit-ticket-type-modal"
         z-index="z-30"
         wire="showTicketTypeModal"
-        :title="$ticketTypeIndex === -1 ? __('Create Ticket Type') : __('Edit Ticket Type')"
+        :title="__('Ticket Type')"
     >
         <livewire:settings.ticket-type-edit />
         <x-slot:footer>

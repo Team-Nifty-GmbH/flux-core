@@ -5,13 +5,7 @@
         newCategoryDiscount: @entangle('newCategoryDiscount').live,
     }"
 >
-    <x-modal id="edit-price-list-modal">
-        <x-slot
-            name="title"
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
-        >
-            {{ __('Edit Price List') }}
-        </x-slot>
+    <x-modal id="edit-price-list-modal" :title="__('Price List')">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>

@@ -43,7 +43,7 @@ class UpdateSerialNumberRange extends FluxAction
                 ->exists()
         ) {
             throw ValidationException::withMessages([
-                'serial_numbers' => [__('Serial number range has serial numbers')],
+                'serial_numbers' => ['Serial number range has serial numbers'],
             ])
                 ->errorBag('updateSerialNumberRange')
                 ->status(423);

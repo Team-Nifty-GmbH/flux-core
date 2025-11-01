@@ -9,7 +9,7 @@
         })
     "
 >
-    <x-modal id="show-log-modal">
+    <x-modal id="show-log-modal" :title="__('Log')">
         <div class="flex w-full justify-between px-6 py-3">
             <span x-text="formatters.datetime(log?.created_at)"></span>
             <span

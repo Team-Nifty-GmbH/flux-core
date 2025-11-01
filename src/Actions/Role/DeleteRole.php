@@ -37,7 +37,7 @@ class DeleteRole extends FluxAction
             ->name === 'Super Admin'
         ) {
             throw ValidationException::withMessages([
-                'role' => [__('Cannot delete Super Admin role')],
+                'role' => ['Cannot delete Super Admin role'],
             ])
                 ->errorBag('deleteRole')
                 ->status(423);

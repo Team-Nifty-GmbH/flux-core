@@ -45,7 +45,7 @@ class CreatePaymentReminder extends FluxAction
             || $order->orderType->order_type_enum->isPurchase()
         ) {
             throw ValidationException::withMessages([
-                'order_id' => [__('Unable to create payment reminder for given order.')],
+                'order_id' => ['Unable to create payment reminder for given order.'],
             ])->errorBag('updatePaymentReminder');
         }
 

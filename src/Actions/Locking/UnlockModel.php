@@ -44,7 +44,7 @@ class UnlockModel extends FluxAction
 
         if (! in_array(Lockable::class, class_uses($this->data['model_type']) ?: [])) {
             throw ValidationException::withMessages([
-                'model' => [__('Model not lockable')],
+                'model' => ['Model not lockable'],
             ])->errorBag('unlockModel');
         }
 
@@ -53,13 +53,13 @@ class UnlockModel extends FluxAction
             ->first()
         ) {
             throw ValidationException::withMessages([
-                'id' => [__('Model instance not found')],
+                'id' => ['Model instance not found'],
             ])->errorBag('unlockModel');
         }
 
         if ($model->lock && $model->lock->created_by !== Auth::id()) {
             throw ValidationException::withMessages([
-                'model' => [__('Model is locked by another user')],
+                'model' => ['Model is locked by another user'],
             ])->errorBag('unlockModel');
         }
     }
