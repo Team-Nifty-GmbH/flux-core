@@ -233,6 +233,7 @@ use FluxErp\Http\Controllers\BaseController;
 use FluxErp\Http\Controllers\CommentController;
 use FluxErp\Http\Controllers\EventSubscriptionController;
 use FluxErp\Http\Controllers\LockController;
+use FluxErp\Http\Controllers\MobileController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
@@ -327,6 +328,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('api')
     ->middleware(['throttle:api', SetAcceptHeaders::class])
     ->group(function (): void {
+        Route::get('/health', [MobileController::class, 'health']);
+        Route::get('/mobile/config', [MobileController::class, 'config']);
+        Route::post('/mobile/device-token/delete', [MobileController::class, 'deleteDeviceToken']);
+
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
         Route::middleware(['auth:sanctum,token', 'ability:user,interface', 'localization', 'permission', 'api'])

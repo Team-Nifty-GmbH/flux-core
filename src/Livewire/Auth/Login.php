@@ -22,6 +22,8 @@ class Login extends Component
 
     public ?string $password = null;
 
+    public bool $remember = false;
+
     protected string $dashboardRoute = 'dashboard';
 
     protected string $guard = 'web';
@@ -108,6 +110,6 @@ class Login extends Component
             'email' => $this->email,
             'password' => $this->password,
             'is_active' => true,
-        ]);
+        ], $this->remember);
     }
 }

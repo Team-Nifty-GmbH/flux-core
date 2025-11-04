@@ -49,6 +49,10 @@
         'team-nifty-gmbh/flux-erp',
     ),
     \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+        'resources/js/nuxbe-bridge.js',
+        'team-nifty-gmbh/flux-erp',
+    ),
+    \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
         'resources/js/tall-datatables.js',
         'team-nifty-gmbh/tall-datatables',
     ),
