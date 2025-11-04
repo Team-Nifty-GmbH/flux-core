@@ -1,4 +1,4 @@
-<x-modal id="edit-address-type-modal">
+<x-modal id="edit-address-type-modal" :title="__('Address Type')">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="addressType.name" :label="__('Name')" required />
         <x-input

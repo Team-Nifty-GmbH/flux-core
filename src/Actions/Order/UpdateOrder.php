@@ -85,7 +85,7 @@ class UpdateOrder extends FluxAction
 
         if ($order->is_locked) {
             $errors += [
-                'is_locked' => [__('Order is locked')],
+                'is_locked' => ['Order is locked'],
             ];
         }
 
@@ -111,7 +111,7 @@ class UpdateOrder extends FluxAction
                 ->exists()
             ) {
                 $errors += [
-                    'invoice_number' => [__('Invoice number already exists')],
+                    'invoice_number' => ['Invoice number already exists'],
                 ];
             }
         }

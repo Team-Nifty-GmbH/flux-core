@@ -21,6 +21,8 @@ class MenuManager
 
     protected array $resolved = [];
 
+    protected bool $isResolved = false;
+
     public function all(): array
     {
         $this->resolve();
@@ -33,6 +35,7 @@ class MenuManager
         $this->resolved = [];
         $this->registered = [];
         $this->registeredGroups = [];
+        $this->isResolved = false;
     }
 
     public function forGuard(string $guard, ?string $group = null, bool $ignorePermissions = false): array
@@ -127,7 +130,11 @@ class MenuManager
 
     protected function resolve(): void
     {
-        foreach ($this->registeredGroups as $path => $group) {
+        if ($this->isResolved) {
+            return;
+        }
+
+        foreach ($this->registeredGroups as $path => &$group) {
             data_set($this->resolved, $path, array_merge(
                 data_get($this->resolved, $path) ?? [],
                 [
@@ -142,8 +149,11 @@ class MenuManager
                 foreach ($group['closure'] as $closure) {
                     $closure($this);
                 }
+                // Clear closures after execution to prevent re-execution
+                $group['closure'] = [];
             }
         }
+        unset($group); // Break the reference
 
         foreach ($this->registered as $item) {
             extract($item);
@@ -198,6 +208,8 @@ class MenuManager
                 ])
             );
         }
+
+        $this->isResolved = true;
     }
 
     private function sortMultiDimensional(array $array, ?Closure $filter = null): array

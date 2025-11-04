@@ -11,6 +11,7 @@ use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Transaction;
+use FluxErp\Settings\AccountingSettings;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -207,7 +208,7 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             ->sortBy([
                 fn (Order $order) => abs(
                     bcsub(
-                        round($order->balance ?? 0, 2),
+                        bcround($order->balance ?? 0, 2),
                         $transaction->amount
                     )
                 ) > 0.01 ? 1 : 0,
@@ -278,10 +279,39 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
                     'transaction_id' => $transaction->getKey(),
                     'order_id' => $order->getKey(),
                     'amount' => $amount,
+                    'is_accepted' => $this->shouldAutoAccept($transaction, $order),
                 ])
                     ->validate()
                     ->execute();
             }
         });
+    }
+
+    protected function shouldAutoAccept(Transaction $transaction, Order $order): bool
+    {
+        if (! app(AccountingSettings::class)->auto_accept_secure_transaction_matches) {
+            return false;
+        }
+
+        // Condition 1: The invoice date of the order is before or equal to the booking date of the transaction
+        if (! $order->invoice_date || $transaction->booking_date->lessThanOrEqualTo($order->invoice_date)) {
+            return false;
+        }
+
+        // Condition 2: The purpose of the transaction contains the invoice number of the order
+        if (! $order->invoice_number || ! $transaction->purpose) {
+            return false;
+        }
+
+        if (! str_contains(strtolower($transaction->purpose), strtolower($order->invoice_number))) {
+            return false;
+        }
+
+        // Condition 3: The balance of the order is equal to the amount of the transaction
+        if (bccomp(bcround($order->balance, 2), $transaction->amount, 2) !== 0) {
+            return false;
+        }
+
+        return true;
     }
 }

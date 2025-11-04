@@ -46,7 +46,7 @@ class UpdateSerialNumber extends FluxAction
             $serialNumber->product_id &&
             $serialNumber->product_id !== $this->data['product_id']
         ) {
-            $errors += ['product_id' => [__('Serial number already has a product_id')]];
+            $errors += ['product_id' => ['Serial number already has a product_id']];
         }
 
         if (
@@ -54,7 +54,7 @@ class UpdateSerialNumber extends FluxAction
             $serialNumber->order_position_id &&
             $serialNumber->order_position_id !== $this->data['order_position_id']
         ) {
-            $errors += ['order_position_id' => [__('Serial number already has an order_position_id')]];
+            $errors += ['order_position_id' => ['Serial number already has an order_position_id']];
         }
 
         if ($errors) {

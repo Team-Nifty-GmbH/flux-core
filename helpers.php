@@ -219,7 +219,7 @@ if (! function_exists('diff_percentage')) {
 }
 
 if (! function_exists('percentage_of')) {
-    function percentage_of(string|float|int|null $total, string|float|int|null $part): string
+    function percentage_of(string|float|int|null $total, string|float|int|null $part, int $precision = 4): string
     {
         $total ??= '0';
         $part ??= '0';
@@ -228,7 +228,7 @@ if (! function_exists('percentage_of')) {
             return '0';
         }
 
-        return bcround(bcmul(bcdiv($part, $total, 9), 100, 9), 4);
+        return bcround(bcmul(bcdiv($part, $total, 9), 100, 9), $precision);
     }
 }
 
@@ -542,18 +542,23 @@ if (! function_exists('resolve_static')) {
         }
 
         try {
+            if (! is_callable([$concrete, $method])) {
+                throw new InvalidArgumentException('Invalid method: ' . $method);
+            }
+
             $reflectionClass = new ReflectionClass($concrete);
-            $reflectionMethod = $reflectionClass->getMethod($method);
 
-            if (! $reflectionMethod->isStatic()) {
-                throw new InvalidArgumentException('Method is not static: ' . $method);
+            if ($reflectionClass->hasMethod($method)) {
+                $reflectionMethod = $reflectionClass->getMethod($method);
+
+                if (! $reflectionMethod->isStatic()) {
+                    throw new InvalidArgumentException('Method is not static: ' . $method);
+                }
             }
 
-            if ($reflectionMethod->getParameters() && is_array($parameters)) {
-                return $concrete::$method(...$parameters);
-            } else {
-                return $concrete::$method();
-            }
+            return $parameters
+                ? $concrete::$method(...$parameters)
+                : $concrete::$method();
         } catch (ReflectionException) {
             throw new InvalidArgumentException('Invalid method: ' . $method);
         }

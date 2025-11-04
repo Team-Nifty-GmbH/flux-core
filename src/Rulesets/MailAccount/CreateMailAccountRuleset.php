@@ -24,6 +24,7 @@ class CreateMailAccountRuleset extends FluxRuleset
             'smtp_email' => 'nullable|string',
             'smtp_from_name' => 'nullable|string|max:255',
             'smtp_reply_to' => 'nullable|string|email|max:255',
+            'smtp_user' => 'nullable|string|max:255',
             'smtp_password' => 'nullable|string|max:255',
             'smtp_host' => 'nullable|string|max:255',
             'smtp_port' => 'nullable|integer',

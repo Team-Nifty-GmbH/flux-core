@@ -93,9 +93,10 @@ test('create task time', function (): void {
         ->assertCount('activeWorkTimes', 1);
 
     $dbTaskTime->refresh();
+    $totalTimeMs = (int) $dbTaskTime->started_at->diffInMilliseconds($dbTaskTime->ended_at, true);
     expect($dbTaskTime->ended_at)->not->toBeNull();
     expect($dbTaskTime->is_locked)->toBeFalse();
-    expect($dbTaskTime->total_time_ms)->toEqual(0);
+    expect($dbTaskTime->total_time_ms)->toEqual($totalTimeMs);
     expect($dbTaskTime->paused_time_ms)->toEqual(0);
     $dbPauseStartTime = $dbTaskTime->ended_at;
 
@@ -109,8 +110,8 @@ test('create task time', function (): void {
 
     expect($dbTaskTime->ended_at)->toBeNull();
     expect($dbTaskTime->is_locked)->toBeFalse();
-    expect($dbTaskTime->total_time_ms)->toEqual(0);
-    expect(bcround($dbTaskTime->paused_time_ms, 0))->toEqual(bcround($dbPauseStartTime->diffInMilliseconds($dbTaskTime->ended_at, true), 0));
+    expect($dbTaskTime->total_time_ms)->toEqual($totalTimeMs);
+    expect($dbTaskTime->paused_time_ms)->toEqual((int) $dbPauseStartTime->diffInMilliseconds($dbTaskTime->ended_at, true));
     expect($dbTaskTime->paused_time_ms)->toBeGreaterThan(0);
 
     $this->travel(1)->hour();

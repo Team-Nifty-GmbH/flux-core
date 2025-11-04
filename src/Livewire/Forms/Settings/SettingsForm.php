@@ -1,8 +1,9 @@
 <?php
 
-namespace FluxErp\Livewire\Forms;
+namespace FluxErp\Livewire\Forms\Settings;
 
 use FluxErp\Actions\Setting\UpdateSetting;
+use FluxErp\Livewire\Forms\FluxForm;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 

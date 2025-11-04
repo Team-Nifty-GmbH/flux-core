@@ -5,14 +5,11 @@ namespace FluxErp\Widgets;
 use Exception;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionClass;
-use Throwable;
+use Symfony\Component\Finder\Finder;
 
 class WidgetManager
 {
@@ -37,61 +34,57 @@ class WidgetManager
 
         $cacheKey = md5($path . $namespace);
 
-        try {
-            $widgets = Cache::get('flux.widgets.' . $cacheKey);
-        } catch (Throwable) {
-            $widgets = null;
+        $cachePath = app()->bootstrapPath('cache/flux-widgets.php');
+        $cachedWidgets = null;
+
+        if (file_exists($cachePath)) {
+            $allCachedWidgets = require $cachePath;
+            $cachedWidgets = $allCachedWidgets[$cacheKey] ?? null;
         }
 
-        if (! is_null($widgets) && ! app()->runningInConsole()) {
+        if (! is_null($cachedWidgets) && ! app()->runningInConsole()) {
+            $widgets = $cachedWidgets;
             $iterator = [];
         } else {
             $widgets = [];
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+            $iterator = Finder::create()
+                ->in($path)
+                ->files()
+                ->name('*.php')
+                ->sortByName();
         }
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
-                $subNameSpace = ! empty($relativePath)
-                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
-                    : '';
-                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+            $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
+            $subNameSpace = ! empty($relativePath)
+                ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                : '';
+            $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (! class_exists($class) || ! in_array(Widgetable::class, class_uses_recursive($class))) {
+            if (! class_exists($class) || ! in_array(Widgetable::class, class_uses_recursive($class))) {
+                continue;
+            }
+
+            $reflection = new ReflectionClass($class);
+
+            // Check if the class is a valid Livewire component
+            if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
+                if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), $namespace)) {
+                    $componentName = $componentRegistry->getName($class);
+                } else {
                     continue;
                 }
 
-                $reflection = new ReflectionClass($class);
-
-                // Check if the class is a valid Livewire component
-                if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
-                    if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), $namespace)) {
-                        $componentName = $componentRegistry->getName($class);
-                    } else {
-                        continue;
-                    }
-
-                    $widgets[$componentName] = $class;
-                }
+                $widgets[$componentName] = $class;
             }
         }
 
         foreach ($widgets as $name => $class) {
             try {
                 $this->register($name, $name);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 // Don't throw exceptions on auto discovery
             }
-        }
-
-        try {
-            Cache::put('flux.widgets.' . $cacheKey, $widgets);
-        } catch (Throwable) {
-            // Ignore exceptions during cache put
         }
     }
 

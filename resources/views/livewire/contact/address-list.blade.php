@@ -39,6 +39,17 @@
                     </x-slot>
                 </x-range>
             @endif
+
+            <hr />
+            <div class="flex flex-col gap-2">
+                <x-toggle
+                    :label="__('Assign to Agent')"
+                    wire:model="assignToAgent"
+                />
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('Assign leads to the agent stored in the contact. If no agent is set, leads will be assigned to you.') }}
+                </div>
+            </div>
         </div>
         <x-slot:footer>
             <x-button

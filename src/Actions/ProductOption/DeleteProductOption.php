@@ -37,7 +37,7 @@ class DeleteProductOption extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'id' => [__('Product with given Product Option exists.')],
+                'id' => ['Product with given Product Option exists.'],
             ]);
         }
     }

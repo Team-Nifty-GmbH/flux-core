@@ -830,7 +830,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
     {
-        return $this->getFirstMedia('invoice');
+        return $this->getFirstMedia('invoice')
+            ?? $this->getFirstMedia('final-invoice')
+            ?? $this->getFirstMedia('refund');
     }
 
     public function language(): BelongsTo

@@ -130,8 +130,11 @@
     @endif
 
     @section('total')
-    <table class="w-full pb-16 text-xs">
-        <tbody class="break-inside-avoid">
+    <table
+        class="w-full break-inside-avoid pb-16 text-xs"
+        style="page-break-inside: avoid"
+    >
+        <tbody style="page-break-inside: avoid">
             <tr>
                 <td colspan="2" class="border-b-2 border-black font-semibold">
                     {{ __('Total') }}

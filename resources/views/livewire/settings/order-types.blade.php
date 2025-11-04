@@ -1,4 +1,4 @@
-<x-modal id="edit-order-type-modal">
+<x-modal id="edit-order-type-modal" :title="__('Order Type')">
     <div class="space-y-8 divide-y divide-gray-200">
         <div>
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
@@ -62,6 +62,7 @@
                         :label="__('Email Template')"
                         wire:model="orderType.email_template_id"
                         select="label:label|value:id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\EmailTemplate::class),
                             'method' => 'POST',
