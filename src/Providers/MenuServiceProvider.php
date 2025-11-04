@@ -81,7 +81,6 @@ class MenuServiceProvider extends ServiceProvider
             icon: 'banknotes',
             label: 'Accounting',
             closure: function (): void {
-                Menu::register(route: 'accounting.work-times');
                 Menu::register(route: 'accounting.commissions');
                 Menu::register(route: 'accounting.payment-reminders');
                 Menu::register(route: 'accounting.purchase-invoices');
@@ -103,6 +102,21 @@ class MenuServiceProvider extends ServiceProvider
             }
         );
 
+        Menu::group(
+            path: 'human-resources',
+            icon: 'users',
+            label: 'Human Resources',
+            closure: function (): void {
+                Menu::register(route: 'human-resources.my-employee-profile');
+                Menu::register(route: 'human-resources.dashboard');
+                Menu::register(route: 'human-resources.attendance-overview');
+                Menu::register(route: 'human-resources.employees');
+                Menu::register(route: 'human-resources.employee-days');
+                Menu::register(route: 'human-resources.work-times');
+                Menu::register(route: 'human-resources.absence-requests');
+            }
+        );
+
         Menu::register(route: 'mail', icon: 'envelope');
         Menu::register(route: 'calendars', icon: 'calendar');
 
@@ -115,52 +129,61 @@ class MenuServiceProvider extends ServiceProvider
             label: 'Settings',
             order: 9999,
             closure: function (): void {
+                Menu::register(route: 'settings.absence-policies');
+                Menu::register(route: 'settings.absence-types');
                 Menu::register(route: 'settings.accounting-settings');
-                Menu::register(route: 'settings.system');
+                Menu::register(route: 'settings.activity-logs');
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
-                Menu::register(route: 'settings.record-origins');
-                Menu::register(route: 'settings.industries');
-                Menu::register(route: 'settings.categories');
-                Menu::register(route: 'settings.tags');
-                Menu::register(route: 'settings.targets');
-                Menu::register(route: 'settings.lead-loss-reasons');
-                Menu::register(route: 'settings.lead-states');
-                Menu::register(route: 'settings.email-templates');
-                Menu::register(route: 'settings.tokens');
-                Menu::register(route: 'settings.product-option-groups');
-                Menu::register(route: 'settings.product-properties');
-                Menu::register(route: 'settings.clients');
                 Menu::register(route: 'settings.bank-connections');
+                Menu::register(route: 'settings.categories');
+                Menu::register(route: 'settings.clients');
+                Menu::register(route: 'settings.core-settings');
                 Menu::register(route: 'settings.countries');
                 Menu::register(route: 'settings.currencies');
                 Menu::register(route: 'settings.discount-groups');
+                Menu::register(route: 'settings.email-templates');
+                Menu::register(route: 'settings.employee-departments');
+                Menu::register(route: 'settings.failed-jobs');
+                Menu::register(route: 'settings.holidays');
+                Menu::register(route: 'settings.industries');
                 Menu::register(route: 'settings.languages');
+                Menu::register(route: 'settings.lead-loss-reasons');
+                Menu::register(route: 'settings.lead-states');
                 Menu::register(route: 'settings.ledger-accounts');
+                Menu::register(route: 'settings.locations');
                 Menu::register(route: 'settings.logs');
-                Menu::register(route: 'settings.activity-logs');
+                Menu::register(route: 'settings.mail-accounts');
                 Menu::register(route: 'settings.notifications');
                 Menu::register(route: 'settings.order-types');
+                Menu::register(route: 'settings.payment-types');
+                Menu::register(route: 'settings.payment-reminder-texts');
                 Menu::register(route: 'settings.permissions');
+                Menu::register(route: 'settings.plugins');
                 Menu::register(route: 'settings.price-lists');
                 Menu::register(route: 'settings.print-jobs');
                 Menu::register(route: 'settings.printers');
+                Menu::register(route: 'settings.product-option-groups');
+                Menu::register(route: 'settings.product-properties');
+                Menu::register(route: 'settings.queue-monitor');
+                Menu::register(route: 'settings.record-origins');
+                Menu::register(route: 'settings.salary-components');
+                Menu::register(route: 'settings.scheduling');
+                Menu::register(route: 'settings.serial-number-ranges');
+                Menu::register(route: 'settings.system');
+                Menu::register(route: 'settings.tags');
+                Menu::register(route: 'settings.targets');
                 Menu::register(route: 'settings.ticket-types');
+                Menu::register(route: 'settings.tokens');
                 Menu::register(route: 'settings.translations');
                 Menu::register(route: 'settings.units');
                 Menu::register(route: 'settings.users');
-                Menu::register(route: 'settings.mail-accounts');
-                Menu::register(route: 'settings.work-time-types');
+                Menu::register(route: 'settings.vacation-blackouts');
+                Menu::register(route: 'settings.vacation-carryover-rules');
                 Menu::register(route: 'settings.vat-rates');
-                Menu::register(route: 'settings.payment-types');
-                Menu::register(route: 'settings.payment-reminder-texts');
                 Menu::register(route: 'settings.warehouses');
-                Menu::register(route: 'settings.serial-number-ranges');
-                Menu::register(route: 'settings.scheduling');
-                Menu::register(route: 'settings.queue-monitor');
-                Menu::register(route: 'settings.failed-jobs');
-                Menu::register(route: 'settings.plugins');
-                Menu::register(route: 'settings.core-settings');
+                Menu::register(route: 'settings.work-time-models');
+                Menu::register(route: 'settings.work-time-types');
             }
         );
     }

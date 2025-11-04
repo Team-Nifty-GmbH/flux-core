@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -105,6 +106,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         ];
     }
 
+    public function absenceRequests(): HasMany
+    {
+        return $this->hasMany(AbsenceRequest::class);
+    }
+
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');
@@ -140,6 +146,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->mailAccounts()
             ->wherePivot('is_default', true)
             ->first();
+    }
+
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class);
     }
 
     public function favorites(): MorphMany

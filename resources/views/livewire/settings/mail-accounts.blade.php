@@ -1,4 +1,9 @@
-<x-modal id="edit-mail-folders" class="bg-gray-50" persistent>
+<x-modal
+    id="edit-mail-folders"
+    class="bg-gray-50"
+    :title="__('Mail Folder')"
+    persistent
+>
     <div class="grid grid-cols-2 gap-1.5">
         <x-card
             id="mail-folders"
@@ -65,10 +70,12 @@
         />
     </x-slot>
 </x-modal>
-<x-modal id="edit-mail-account" persistent x-on:open="$focusOn('mailAccount.name')">
-    <x-slot:title>
-        {{ __('Edit Mail Account') }}
-    </x-slot>
+<x-modal
+    id="edit-mail-account"
+    :title="__('Mail Account')"
+    persistent
+    x-on:open="$focusOn('mailAccount.name')"
+>
     <div class="flex flex-col gap-1.5">
         <x-card>
             <div class="flex flex-col gap-1.5">
@@ -134,7 +141,7 @@
             </x-slot>
         </x-card>
         <x-card
-            :header="__('SMTP Settings')"
+            :header="__('Smtp Settings')"
             footer-classes="flex justify-end gap-1.5"
         >
             <div class="flex flex-col gap-1.5">

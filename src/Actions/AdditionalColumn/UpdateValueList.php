@@ -44,11 +44,11 @@ class UpdateValueList extends FluxAction
         if ($this->data['values'] ?? false) {
             if (! array_is_list($this->data['values'])) {
                 $errors += [
-                    'values' => [__('Values array is no list')],
+                    'values' => ['Values array is no list'],
                 ];
             } elseif ($valueList->modelValues()->whereNotIn('meta.value', $this->data['values'])->exists()) {
                 $errors += [
-                    'values' => [__('Models with differing values exist')],
+                    'values' => ['Models with differing values exist'],
                 ];
             }
         }
@@ -63,7 +63,7 @@ class UpdateValueList extends FluxAction
             ->exists()
         ) {
             $errors += [
-                'name_model' => [__('Name model combination already exists')],
+                'name_model' => ['Name model combination already exists'],
             ];
         }
 

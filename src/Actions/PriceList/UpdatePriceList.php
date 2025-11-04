@@ -84,7 +84,7 @@ class UpdatePriceList extends FluxAction
             )
         ) {
             $errors += [
-                'parent_id' => [__('Cycle detected')],
+                'parent_id' => ['Cycle detected'],
             ];
         }
 

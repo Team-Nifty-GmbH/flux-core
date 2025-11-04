@@ -107,7 +107,7 @@
         id="edit-translation-modal"
         z-index="z-30"
         wire="showTranslationModal"
-        :title="$index === -1 ? __('Create Translation') : __('Edit Translation')"
+        :title="__('Translation')"
     >
         <livewire:settings.translation-edit />
         <x-slot:footer>
