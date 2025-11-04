@@ -58,6 +58,7 @@ use FluxErp\Models\Log;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
+use FluxErp\Models\MediaFolder;
 use FluxErp\Models\Meta;
 use FluxErp\Models\Notification;
 use FluxErp\Models\NotificationSetting;
@@ -90,6 +91,7 @@ use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\LocationVacationBlackout;
+use FluxErp\Models\Pivots\MediaFolderModel;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
@@ -204,6 +206,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
+            'media_folder' => MediaFolder::class,
             'meta' => Meta::class,
             'notification' => Notification::class,
             'database_notification' => Notification::class,
@@ -279,6 +282,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'invitable' => Inviteable::class,
             'job_batchable' => JobBatchable::class,
             'location_vacation_blackout' => LocationVacationBlackout::class,
+            'media_folder_model' => MediaFolderModel::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
             'printer_user' => PrinterUser::class,

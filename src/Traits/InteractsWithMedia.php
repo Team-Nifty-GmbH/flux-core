@@ -3,7 +3,10 @@
 namespace FluxErp\Traits;
 
 use FluxErp\Models\Media as FluxMedia;
+use FluxErp\Models\MediaFolder;
 use FluxErp\Support\MediaLibrary\MediaCollection;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\Image\Exceptions\InvalidManipulation;
@@ -22,35 +25,102 @@ trait InteractsWithMedia
         return $mediaCollection;
     }
 
-    public function getMediaAsTree(): array
+    public function getMediaAsTree(array $exclude = []): array
     {
-        $mediaCollections = array_unique(
+        $mediaFolders = resolve_static(MediaFolder::class, 'familyTree')
+            ->whereKey($this->mediaFolders()->pluck('id')->toArray())
+            ->get()
+            ->flatten();
+
+        $mediaCollections = collect(
             array_merge(
                 $registeredMediaCollections = $this->getRegisteredMediaCollections()
-                    ->pluck('name')
+                    ->map(fn ($mediaCollection) => [
+                        'name' => __(Str::headline($mediaCollection->name)),
+                        'slug' => $mediaCollection->name,
+                        'is_static' => true,
+                    ])
+                    ->filter(fn (array $mediaCollection) => ! in_array($mediaCollection['slug'], $exclude, true))
                     ->toArray(),
                 $this->media()
+                    ->when($exclude, function (Builder $query) use ($exclude): void {
+                        $query->where(function (Builder $query) use ($exclude): void {
+                            foreach ($exclude as $collection) {
+                                $query->where(
+                                    'collection_name',
+                                    'NOT LIKE',
+                                    $collection . '%',
+                                );
+                            }
+                        });
+                    })
                     ->groupBy('collection_name')
-                    ->select('collection_name')
                     ->pluck('collection_name')
-                    ->toArray()
+                    ->filter(
+                        fn ($collectionName) => ! in_array(
+                            $collectionName,
+                            data_get($registeredMediaCollections, '*.slug'),
+                            true
+                        )
+                    )
+                    ->map(fn ($media) => [
+                        'name' => Str::of($media)
+                            ->afterLast('.')
+                            ->headline()
+                            ->toString(),
+                        'slug' => $media,
+                    ])
+                    ->toArray(),
+                $mediaFolders->toArray()
             )
-        );
+        )
+            ->sortBy('slug')
+            ->toArray();
 
-        sort($mediaCollections);
+        $undotted = [];
+        foreach ($mediaCollections as $mediaCollection) {
+            $slug = data_get($mediaCollection, 'slug') ?? '';
+            if (
+                is_null(data_get($mediaCollection, 'id'))
+                && str_contains($slug, '.')
+            ) {
+                $path = '';
+                $childSlug = '';
+                foreach (explode('.', $slug) as $index => $part) {
+                    if ($index === 0 && array_key_exists($part, $undotted)) {
+                        $path = $childSlug = $part;
 
-        $mediaCollections = Arr::undot(array_flip($mediaCollections));
+                        continue;
+                    }
 
-        foreach ($registeredMediaCollections as $collection) {
-            data_set($mediaCollections, $collection . '.is_static', true);
+                    $childSlug .= ($childSlug ? '.' : '') . $part;
+                    $path .= ($path ? '.children.' : '') . $part;
+
+                    Arr::set(
+                        $undotted,
+                        $path,
+                        [
+                            'name' => Str::headline($part),
+                            'slug' => $childSlug,
+                        ],
+                    );
+                }
+            } else {
+                Arr::set($undotted, $slug, $mediaCollection);
+            }
         }
 
-        return $this->calculateTree($mediaCollections);
+        return $this->calculateTree($undotted);
     }
 
     public function getMediaModel(): string
     {
         return resolve_static(FluxMedia::class, 'class');
+    }
+
+    public function mediaFolders(): MorphToMany
+    {
+        return $this->morphToMany(MediaFolder::class, 'model', 'media_folder_model');
     }
 
     /**
@@ -94,39 +164,48 @@ trait InteractsWithMedia
             ->optimize();
     }
 
-    private function calculateTree(array $mediaCollections, ?string $prefix = null): array
+    protected function calculateTree(array $mediaCollections): array
     {
         $node = [];
-        foreach ($mediaCollections as $key => $item) {
-            $isStatic = $item['is_static'] ?? false;
-            if (is_array($item)) {
-                unset($item['is_static']);
-            }
-
+        foreach ($mediaCollections as $item) {
             $node[] = [
-                'name' => __($key),
-                'id' => Str::uuid()->toString(),
-                'is_static' => $isStatic,
-                'collection_name' => $prefix . $key,
-                'children' => is_array($item) ?
-                    array_merge(
-                        $this->calculateTree($item, $prefix . $key . '.'),
-                        $this->media()
-                            ->where('collection_name', $prefix . $key)
-                            ->orderBy('name', 'ASC')
-                            ->get()
-                            ->makeVisible(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
-                            ->toArray(),
-                    ) :
-                    $this->media()
-                        ->where('collection_name', $prefix . $key)
+                'id' => ($id = data_get($item, 'id')) ?? Str::uuid()->toString(),
+                'name' => data_get($item, 'name'),
+                'slug' => $slug = data_get($item, 'slug'),
+                'is_readonly' => data_get($item, 'is_readonly') ?? false,
+                'is_static' => data_get($item, 'is_static') ?? false,
+                'children' => array_merge(
+                    $this->calculateTree(data_get($item, 'children') ?? []),
+                    resolve_static(FluxMedia::class, 'query')
+                        ->when(
+                            $id,
+                            fn (Builder $query) => $query
+                                ->where('model_type', morph_alias(MediaFolder::class))
+                                ->where('model_id', $id),
+                            fn (Builder $query) => $query
+                                ->where('model_type', $this->getMorphClass())
+                                ->where('model_id', $this->getKey())
+                                ->where('collection_name', $slug)
+                        )
                         ->orderBy('name', 'ASC')
-                        ->get(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
+                        ->get([
+                            'id',
+                            'name',
+                            'file_name',
+                            'collection_name',
+                            'disk',
+                            'size',
+                            'mime_type',
+                            'created_at',
+                        ])
                         ->makeVisible(['name', 'collection_name'])
-                        ->toArray(),
+                        ->toArray()
+                ),
             ];
         }
 
-        return $node;
+        return collect($node)
+            ->sortBy('name')
+            ->toArray();
     }
 }

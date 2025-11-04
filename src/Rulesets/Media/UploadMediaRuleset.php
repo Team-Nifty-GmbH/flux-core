@@ -4,7 +4,6 @@ namespace FluxErp\Rulesets\Media;
 
 use FluxErp\Models\Media;
 use FluxErp\Rules\MediaUploadType;
-use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -28,11 +27,6 @@ class UploadMediaRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(MorphExists::class),
-            ],
-            'parent_id' => [
-                'integer',
-                'nullable',
-                app(ModelExists::class, ['model' => Media::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'file_name' => 'sometimes|required|string|max:255',
