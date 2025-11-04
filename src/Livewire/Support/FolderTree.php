@@ -188,8 +188,11 @@ abstract class FolderTree extends Component
             default => 'collection',
         };
 
-        if (($subjectType === 'folder' && $targetType !== 'folder')
+        if ($this->isReadonly
+            || ($subjectType === 'folder' && $targetType !== 'folder')
             || ($subjectType === 'collection' && $targetType !== 'collection')
+            || ($subjectType !== 'media' && $this->readOnly(data_get($subject, 'id'), $subjectPath))
+            || $this->readOnly(data_get($target, 'id'), $targetPath)
         ) {
             return;
         }
