@@ -25,6 +25,7 @@ use FluxErp\Models\ContactOption;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
+use FluxErp\Models\DeviceToken;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\EmailTemplate;
@@ -149,6 +150,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'country' => Country::class,
             'country_region' => CountryRegion::class,
             'currency' => Currency::class,
+            'device_token' => DeviceToken::class,
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
             'email_template' => EmailTemplate::class,

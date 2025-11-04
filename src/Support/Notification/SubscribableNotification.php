@@ -17,6 +17,7 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Kreait\Firebase\Messaging\Notification as FcmNotification;
 use NotificationChannels\WebPush\WebPushMessage;
 
 abstract class SubscribableNotification extends Notification implements HasToastNotification
@@ -94,6 +95,16 @@ abstract class SubscribableNotification extends Notification implements HasToast
         }
 
         return $this->toToastNotification($notifiable)->toWebPush();
+    }
+
+    public function toFcm(object $notifiable): ?FcmNotification
+    {
+        return $this->toToastNotification($notifiable)->toFcm();
+    }
+
+    public function toFcmData(object $notifiable): array
+    {
+        return $this->toToastNotification($notifiable)->toFcmData();
     }
 
     public function via(object $notifiable): array

@@ -83,6 +83,10 @@
                                 name="password"
                             />
                             <div class="flex items-center justify-between">
+                                <x-toggle
+                                    wire:model="remember"
+                                    :label="__('Remember me')"
+                                />
                                 <div class="text-sm">
                                     <a
                                         x-on:click="$modalOpen('password-reset')"

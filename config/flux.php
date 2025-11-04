@@ -29,4 +29,8 @@ return [
         'reverb_port' => env('VITE_REVERB_PORT', 443),
         'reverb_protocol' => env('VITE_REVERB_SCHEME', 'https'),
     ],
+
+    'fcm' => [
+        'credentials' => env('FCM_CREDENTIALS_PATH'),
+    ],
 ];
