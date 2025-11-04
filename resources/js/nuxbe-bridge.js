@@ -1,44 +1,51 @@
-const getBaseUrl = () => {
-    if (!window.Capacitor?.isNativePlatform?.()) return '/';
-    const platform = window.Capacitor.getPlatform();
-    return platform === 'android'
-        ? 'http://localhost'
-        : 'capacitor://localhost';
-};
+/**
+ * Nuxbe Mobile Bridge
+ * Provides native mobile functionality when running in Capacitor
+ */
 
 const initializeNativeBridge = async () => {
+    // Only initialize if Capacitor is available
+    if (!window.Capacitor) {
+        return null;
+    }
+
+    const bridge = {};
+
     try {
-        if (!window.Capacitor?.isNativePlatform?.()) {
-            return;
-        }
+        const { Capacitor } = window.Capacitor;
+        const { Camera } = window.CapacitorPlugins || {};
+        const { CapacitorBarcodeScanner } = window.CapacitorPlugins || {};
 
-        const { Preferences } = window.Capacitor.Plugins;
-        const { PushNotifications } = window.Capacitor.Plugins;
-        const { App } = window.Capacitor.Plugins;
-        const { Camera } = window.Capacitor.Plugins;
+        // Check if running in native app
+        bridge.isNative = () => Capacitor.isNativePlatform();
 
-        window.nativeBridge = {
-            isNative: () => window.Capacitor?.isNativePlatform?.() || false,
-            getPlatform: () => window.Capacitor?.getPlatform() || 'web',
+        // Get platform
+        bridge.getPlatform = () => Capacitor.getPlatform();
 
-            getPreference: async (key) => {
-                return await Preferences.get({ key });
-            },
+        // Server wechseln
+        bridge.changeServer = async () => {
+            try {
+                const { Preferences } = window.CapacitorPlugins || {};
+                if (Preferences) {
+                    await Preferences.remove({ key: 'server_url' });
+                    window.location.href = 'capacitor://localhost/index.html';
+                    return { success: true };
+                }
+                return {
+                    success: false,
+                    error: 'Preferences plugin not available',
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message,
+                };
+            }
+        };
 
-            setPreference: async (key, value) => {
-                await Preferences.set({ key, value });
-            },
-
-            removePreference: async (key) => {
-                await Preferences.remove({ key });
-            },
-
-            changeServer: async () => {
-                window.location.href = getBaseUrl() + '/?reset=1';
-                return { success: true };
-            },
-
-            capturePhoto: async () => {
+        // Camera - Foto aufnehmen
+        if (Camera) {
+            bridge.capturePhoto = async () => {
                 try {
                     const image = await Camera.getPhoto({
                         quality: 90,
@@ -53,15 +60,15 @@ const initializeNativeBridge = async () => {
                         format: image.format,
                     };
                 } catch (error) {
-                    console.error('Camera capture failed:', error);
                     return {
                         success: false,
                         error: error.message,
                     };
                 }
-            },
+            };
 
-            pickPhoto: async () => {
+            // Foto aus Galerie
+            bridge.pickPhoto = async () => {
                 try {
                     const image = await Camera.getPhoto({
                         quality: 90,
@@ -76,103 +83,51 @@ const initializeNativeBridge = async () => {
                         format: image.format,
                     };
                 } catch (error) {
-                    console.error('Photo picker failed:', error);
                     return {
                         success: false,
                         error: error.message,
                     };
                 }
-            },
-        };
+            };
+        }
 
-        await PushNotifications.addListener(
-            'pushNotificationActionPerformed',
-            async (notification) => {
-                const data = notification.notification?.data;
+        // Barcode Scanner
+        if (CapacitorBarcodeScanner) {
+            bridge.scanBarcode = async () => {
+                try {
+                    const result = await CapacitorBarcodeScanner.scanBarcode({
+                        hint: 'ALL',
+                        scanButton: false,
+                    });
 
-                if (data?.url && data?.path) {
-                    const targetUrl = data.url;
-                    const targetPath = data.path;
-                    const currentUrl = window.location.origin;
-
-                    if (currentUrl !== targetUrl) {
-                        await window.nativeBridge.setPreference(
-                            'server_url',
-                            targetUrl,
-                        );
-                        await window.nativeBridge.setPreference(
-                            'deep_link_target',
-                            targetPath,
-                        );
-                        window.location.href = getBaseUrl() + '/?reset=1';
-                    } else {
-                        navigateToPath(targetPath);
+                    if (result.ScanResult) {
+                        return {
+                            success: true,
+                            barcode: result.ScanResult,
+                            format: result.format || 'unknown',
+                        };
                     }
+
+                    return {
+                        success: false,
+                        error: 'No barcode detected',
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message,
+                    };
                 }
-            },
-        );
-
-        await App.addListener('resume', async () => {
-            await checkAndHandleDeepLink();
-        });
-
-        setTimeout(async () => {
-            await checkAndHandleDeepLink();
-        }, 500);
+            };
+        }
     } catch (error) {
-        console.error('[BRIDGE] Initialization failed:', error);
+        // Silent fail
     }
+
+    return bridge;
 };
 
-function navigateToPath(targetPath) {
-    const waitForLivewire = () => {
-        return new Promise((resolve) => {
-            if (window.Livewire?.navigate) {
-                resolve(true);
-            } else {
-                const checkInterval = setInterval(() => {
-                    if (window.Livewire?.navigate) {
-                        clearInterval(checkInterval);
-                        resolve(true);
-                    }
-                }, 50);
+// Initialize and export
+const nuxbeAppBridge = await initializeNativeBridge();
 
-                setTimeout(() => {
-                    clearInterval(checkInterval);
-                    resolve(false);
-                }, 5000);
-            }
-        });
-    };
-
-    waitForLivewire().then((livewireReady) => {
-        if (livewireReady) {
-            window.Livewire.navigate(targetPath);
-        } else {
-            window.location.href = targetPath;
-        }
-    });
-}
-
-async function checkAndHandleDeepLink() {
-    try {
-        const deepLinkResult =
-            await window.nativeBridge.getPreference('deep_link_target');
-
-        if (deepLinkResult?.value) {
-            await window.nativeBridge.removePreference('deep_link_target');
-
-            const targetPath = deepLinkResult.value;
-
-            navigateToPath(targetPath);
-        }
-    } catch (error) {
-        console.error('[DEEP LINK] Error checking for deep link:', error);
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeNativeBridge);
-} else {
-    initializeNativeBridge();
-}
+export default nuxbeAppBridge;

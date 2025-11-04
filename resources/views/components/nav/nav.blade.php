@@ -61,9 +61,9 @@
                             x-data="{
                                 get isNativeApp() {
                                     return (
-                                        window.nativeBridge &&
-                                        typeof window.nativeBridge.isNative === 'function' &&
-                                        window.nativeBridge.isNative()
+                                        window.nuxbeAppBridge &&
+                                        typeof window.nuxbeAppBridge.isNative === 'function' &&
+                                        window.nuxbeAppBridge.isNative()
                                     )
                                 },
                             }"

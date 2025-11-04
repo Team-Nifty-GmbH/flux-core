@@ -89,13 +89,12 @@
                 </form>
                 @show
 
-                {{-- Server wechseln Button (nur in nativer App) --}}
                 <div
                     x-cloak
                     x-show="
-                        window.nativeBridge &&
-                            window.nativeBridge.isNative &&
-                            window.nativeBridge.isNative()
+                        window.nuxbeAppBridge &&
+                            window.nuxbeAppBridge.isNative &&
+                            window.nuxbeAppBridge.isNative()
                     "
                     class="mt-4 text-center"
                 >
@@ -103,7 +102,7 @@
                         :text="__('Change Server')"
                         color="secondary"
                         flat
-                        x-on:click="window.nativeBridge.changeServer()"
+                        x-on:click="window.nuxbeAppBridge.changeServer()"
                     />
                 </div>
             </div>
