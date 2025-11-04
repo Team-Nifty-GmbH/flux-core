@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -35,6 +36,9 @@ abstract class FolderTree extends Component
 
     #[Modelable]
     public ?int $modelId = null;
+
+    #[Locked]
+    public bool $isReadonly = false;
 
     /** @var class-string<Model> */
     protected string $modelType;
