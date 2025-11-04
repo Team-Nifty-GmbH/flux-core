@@ -57,11 +57,17 @@
                             <x-dropdown.items :text="__('My profile')" />
                         </a>
 
-                        <div x-data="{
-                            get isNativeApp() {
-                                return window.nativeBridge && typeof window.nativeBridge.isNative === 'function' && window.nativeBridge.isNative();
-                            }
-                        }">
+                        <div
+                            x-data="{
+                                get isNativeApp() {
+                                    return (
+                                        window.nativeBridge &&
+                                        typeof window.nativeBridge.isNative === 'function' &&
+                                        window.nativeBridge.isNative()
+                                    )
+                                },
+                            }"
+                        >
                             <div x-show="isNativeApp" x-cloak>
                                 <x-dropdown.items
                                     x-on:click="async () => {

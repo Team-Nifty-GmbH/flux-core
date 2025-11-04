@@ -1,7 +1,9 @@
 const getBaseUrl = () => {
     if (!window.Capacitor?.isNativePlatform?.()) return '/';
     const platform = window.Capacitor.getPlatform();
-    return platform === 'android' ? 'http://localhost' : 'capacitor://localhost';
+    return platform === 'android'
+        ? 'http://localhost'
+        : 'capacitor://localhost';
 };
 
 const initializeNativeBridge = async () => {
@@ -42,19 +44,19 @@ const initializeNativeBridge = async () => {
                         quality: 90,
                         allowEditing: false,
                         resultType: 'base64',
-                        source: 'camera'
+                        source: 'camera',
                     });
 
                     return {
                         success: true,
                         base64: image.base64String,
-                        format: image.format
+                        format: image.format,
                     };
                 } catch (error) {
                     console.error('Camera capture failed:', error);
                     return {
                         success: false,
-                        error: error.message
+                        error: error.message,
                     };
                 }
             },
@@ -65,41 +67,50 @@ const initializeNativeBridge = async () => {
                         quality: 90,
                         allowEditing: false,
                         resultType: 'base64',
-                        source: 'photos'
+                        source: 'photos',
                     });
 
                     return {
                         success: true,
                         base64: image.base64String,
-                        format: image.format
+                        format: image.format,
                     };
                 } catch (error) {
                     console.error('Photo picker failed:', error);
                     return {
                         success: false,
-                        error: error.message
+                        error: error.message,
                     };
                 }
-            }
+            },
         };
 
-        await PushNotifications.addListener('pushNotificationActionPerformed', async (notification) => {
-            const data = notification.notification?.data;
+        await PushNotifications.addListener(
+            'pushNotificationActionPerformed',
+            async (notification) => {
+                const data = notification.notification?.data;
 
-            if (data?.url && data?.path) {
-                const targetUrl = data.url;
-                const targetPath = data.path;
-                const currentUrl = window.location.origin;
+                if (data?.url && data?.path) {
+                    const targetUrl = data.url;
+                    const targetPath = data.path;
+                    const currentUrl = window.location.origin;
 
-                if (currentUrl !== targetUrl) {
-                    await window.nativeBridge.setPreference('server_url', targetUrl);
-                    await window.nativeBridge.setPreference('deep_link_target', targetPath);
-                    window.location.href = getBaseUrl() + '/?reset=1';
-                } else {
-                    navigateToPath(targetPath);
+                    if (currentUrl !== targetUrl) {
+                        await window.nativeBridge.setPreference(
+                            'server_url',
+                            targetUrl,
+                        );
+                        await window.nativeBridge.setPreference(
+                            'deep_link_target',
+                            targetPath,
+                        );
+                        window.location.href = getBaseUrl() + '/?reset=1';
+                    } else {
+                        navigateToPath(targetPath);
+                    }
                 }
-            }
-        });
+            },
+        );
 
         await App.addListener('resume', async () => {
             await checkAndHandleDeepLink();
@@ -145,7 +156,8 @@ function navigateToPath(targetPath) {
 
 async function checkAndHandleDeepLink() {
     try {
-        const deepLinkResult = await window.nativeBridge.getPreference('deep_link_target');
+        const deepLinkResult =
+            await window.nativeBridge.getPreference('deep_link_target');
 
         if (deepLinkResult?.value) {
             await window.nativeBridge.removePreference('deep_link_target');

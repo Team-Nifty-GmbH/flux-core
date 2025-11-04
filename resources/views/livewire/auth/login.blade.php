@@ -92,7 +92,11 @@
                 {{-- Server wechseln Button (nur in nativer App) --}}
                 <div
                     x-cloak
-                    x-show="window.nativeBridge && window.nativeBridge.isNative && window.nativeBridge.isNative()"
+                    x-show="
+                        window.nativeBridge &&
+                            window.nativeBridge.isNative &&
+                            window.nativeBridge.isNative()
+                    "
                     class="mt-4 text-center"
                 >
                     <x-button
