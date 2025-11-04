@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
+use FluxErp\Enums\DayPartEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
@@ -41,25 +42,25 @@ class CloseEmployeeDay extends FluxAction
             ->whereRelation('absenceType', 'affects_sick_leave', true)
             ->get(['id', 'day_part'])
             ->reduce(
-                function (?AbsenceRequestDayPartEnum $carry, AbsenceRequest $item): ?AbsenceRequestDayPartEnum {
+                function (?string $carry, AbsenceRequest $item): ?string {
                     if (
-                        in_array(AbsenceRequestDayPartEnum::FullDay, [$carry, $item->day_part])
+                        in_array(DayPartEnum::FullDay, [$carry, $item->day_part?->value])
                         || ! array_diff(
                             [
-                                AbsenceRequestDayPartEnum::FirstHalf,
-                                AbsenceRequestDayPartEnum::SecondHalf,
+                                DayPartEnum::FirstHalf,
+                                DayPartEnum::SecondHalf,
                             ],
-                            [$carry, $item->day_part]
+                            [$carry, $item->day_part?->value]
                         )
                     ) {
-                        return AbsenceRequestDayPartEnum::FullDay;
+                        return DayPartEnum::FullDay;
                     }
 
-                    return $item->day_part;
+                    return $item->day_part?->value;
                 }
             );
 
-        if ($sickLeave !== AbsenceRequestDayPartEnum::FullDay) {
+        if ($sickLeave !== DayPartEnum::FullDay) {
             $workTimes = $workTimeQuery->clone()
                 ->whereDate('started_at', $date)
                 ->sum('total_time_ms');
@@ -106,8 +107,8 @@ class CloseEmployeeDay extends FluxAction
                 }
             } elseif (data_get($absenceRequest, 'absenceType.affects_vacation')) {
                 if ($wasPresent
-                    && $absenceRequest->day_part === AbsenceRequestDayPartEnum::FullDay
-                    || $sickLeave === $absenceRequest->day_part
+                    && $absenceRequest->day_part?->value === AbsenceRequestDayPartEnum::FullDay
+                    || $sickLeave === $absenceRequest->day_part?->value
                 ) {
                     continue;
                 }

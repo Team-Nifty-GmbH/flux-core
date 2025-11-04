@@ -6,6 +6,7 @@ use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
@@ -23,7 +24,7 @@ class UpdateAbsenceRequestRuleset extends FluxRuleset
             ],
             'day_part' => [
                 'required_with:start_time,end_time',
-                Rule::enum(AbsenceRequestDayPartEnum::class),
+                app(EnumRule::class, ['type' => AbsenceRequestDayPartEnum::class]),
             ],
             'start_date' => 'required_with:end_date|date',
             'end_date' => 'required_with:start_date|date|after_or_equal:start_date',

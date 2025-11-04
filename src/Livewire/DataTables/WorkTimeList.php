@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Models\WorkTime;
+
 class WorkTimeList extends BaseDataTable
 {
     public array $enabledCols = [
@@ -22,4 +24,6 @@ class WorkTimeList extends BaseDataTable
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
     ];
+
+    protected string $model = WorkTime::class;
 }

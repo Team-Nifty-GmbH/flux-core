@@ -3,22 +3,23 @@
 namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum EmployeeBalanceAdjustmentReasonEnum: string
+class EmployeeBalanceAdjustmentReasonEnum extends FluxEnum
 {
     use EnumTrait;
 
-    case Carryover = 'carryover';
+    final public const string Carryover = 'carryover';
 
-    case Compensation = 'compensation';
+    final public const string Compensation = 'compensation';
 
-    case Correction = 'correction';
+    final public const string Correction = 'correction';
 
-    case InitialBalance = 'initial_balance';
+    final public const string InitialBalance = 'initial_balance';
 
-    case Other = 'other';
+    final public const string Payout = 'payout';
 
-    case Payout = 'payout';
+    final public const string SpecialLeave = 'special_leave';
 
-    case SpecialLeave = 'special_leave';
+    final public const string Other = 'other';
 }

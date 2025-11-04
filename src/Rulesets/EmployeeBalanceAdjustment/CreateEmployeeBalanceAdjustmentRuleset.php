@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\EmployeeBalanceAdjustment;
 use FluxErp\Enums\EmployeeBalanceAdjustmentReasonEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Models\Employee;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
@@ -34,7 +35,7 @@ class CreateEmployeeBalanceAdjustmentRuleset extends FluxRuleset
             ],
             'reason' => [
                 'required',
-                Rule::enum(EmployeeBalanceAdjustmentReasonEnum::class),
+                app(EnumRule::class, ['type' => EmployeeBalanceAdjustmentReasonEnum::class]),
             ],
             'description' => [
                 'nullable',

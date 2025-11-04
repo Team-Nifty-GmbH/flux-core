@@ -8,9 +8,9 @@ enum EmployeeCanCreateEnum: string
 {
     use EnumTrait;
 
-    case Approval_required = 'approval_required';
-
-    case No = 'no';
+    case ApprovalRequired = 'approval_required';
 
     case Yes = 'yes';
+
+    case No = 'no';
 }

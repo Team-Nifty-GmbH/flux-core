@@ -16,7 +16,7 @@
             <x-select.styled
                 wire:model="absenceRequestForm.day_part"
                 :label="__('Day Part')"
-                x-on:select="if ($event.detail.select.value !== '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time->value }}') { $wire.absenceRequestForm.start_time = null; $wire.absenceRequestForm.end_time = null; }"
+                x-on:select="if ($event.detail.select.value !== '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time }}') { $wire.absenceRequestForm.start_time = null; $wire.absenceRequestForm.end_time = null; }"
                 required
                 select="label:label|value:value"
                 :options="\FluxErp\Enums\AbsenceRequestDayPartEnum::valuesLocalized()"
@@ -38,7 +38,7 @@
                 x-cloak
                 x-show="
                     $wire.absenceRequestForm.day_part ===
-                        '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time->value }}'
+                        '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time }}'
                 "
             >
                 <x-time
@@ -52,7 +52,7 @@
                 x-cloak
                 x-show="
                     $wire.absenceRequestForm.day_part ===
-                        '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time->value }}'
+                        '{{ \FluxErp\Enums\AbsenceRequestDayPartEnum::Time }}'
                 "
             >
                 <x-time

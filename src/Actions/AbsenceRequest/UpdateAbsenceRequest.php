@@ -65,7 +65,7 @@ class UpdateAbsenceRequest extends FluxAction
             )
             ->first(['id', 'affects_vacation'])
         ) {
-            if ($absenceRequest->day_part === AbsenceRequestDayPartEnum::Time) {
+            if ($absenceRequest->day_part?->value === AbsenceRequestDayPartEnum::Time) {
                 $errors += [
                     'day_part' => ['Cannot select \'Time\' on given absence type.'],
                 ];

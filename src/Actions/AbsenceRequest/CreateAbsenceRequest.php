@@ -67,7 +67,7 @@ class CreateAbsenceRequest extends FluxAction
             ]);
 
         if ($absenceType->affects_sick_leave || $absenceType->affects_vacation) {
-            if ($this->getData('day_part') === AbsenceRequestDayPartEnum::Time->value) {
+            if ($this->getData('day_part') === AbsenceRequestDayPartEnum::Time) {
                 $errors += [
                     'day_part' => ['Cannot select \'Time\' on given absence type.'],
                 ];

@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Widgets\Employee;
 use Carbon\Carbon;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
+use FluxErp\Enums\DayPartEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Models\AbsenceRequest;
@@ -120,9 +121,9 @@ class VacationYearlyOverview extends Component
                     $current = $start->copy();
                     while ($current->lte($end)) {
                         if ($employee->isWorkDay($current)) {
-                            $days += match ($absenceRequest->day_part) {
-                                AbsenceRequestDayPartEnum::FullDay => 1,
-                                AbsenceRequestDayPartEnum::FirstHalf, AbsenceRequestDayPartEnum::SecondHalf => 0.5,
+                            $days += match ($absenceRequest->day_part?->value) {
+                                DayPartEnum::FullDay => 1,
+                                DayPartEnum::FirstHalf, DayPartEnum::SecondHalf => 0.5,
                                 default => 0,
                             };
                         }

@@ -19,7 +19,7 @@ class Holiday extends FluxModel
     {
         static::saving(function (Holiday $model): void {
             if ($model->isDirty('day_part')) {
-                $model->is_half_day = $model->day_part !== DayPartEnum::FullDay;
+                $model->is_half_day = $model->day_part?->value !== DayPartEnum::FullDay;
             }
         });
     }

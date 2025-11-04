@@ -5,9 +5,9 @@ namespace FluxErp\Rulesets\Holiday;
 use FluxErp\Enums\DayPartEnum;
 use FluxErp\Models\Holiday;
 use FluxErp\Models\Location;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rule;
 
 class UpdateHolidayRuleset extends FluxRuleset
 {
@@ -40,7 +40,7 @@ class UpdateHolidayRuleset extends FluxRuleset
             'day_part' => [
                 'sometimes',
                 'required',
-                Rule::enum(DayPartEnum::class),
+                app(EnumRule::class, ['type' => DayPartEnum::class]),
             ],
             'is_active' => 'boolean',
             'is_recurring' => 'boolean',

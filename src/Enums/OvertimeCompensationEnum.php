@@ -8,11 +8,11 @@ enum OvertimeCompensationEnum: string
 {
     use EnumTrait;
 
-    case Mixed = 'mixed';
-
-    case None = 'none';
-
     case Payment = 'payment';
 
     case TimeOff = 'time_off';
+
+    case Mixed = 'mixed';
+
+    case None = 'none';
 }

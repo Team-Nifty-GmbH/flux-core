@@ -6,6 +6,7 @@ use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Employee;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
@@ -28,12 +29,11 @@ class CreateAbsenceRequestRuleset extends FluxRuleset
             ],
             'state' => [
                 'nullable',
-                Rule::enum(AbsenceRequestStateEnum::class),
+                app(EnumRule::class, ['type' => AbsenceRequestStateEnum::class]),
             ],
             'day_part' => [
                 'required',
-                'string',
-                Rule::enum(AbsenceRequestDayPartEnum::class),
+                app(EnumRule::class, ['type' => AbsenceRequestDayPartEnum::class]),
             ],
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start',

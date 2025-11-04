@@ -28,7 +28,7 @@ class CreateWorkTime extends FluxAction
 
         $workTime->save();
 
-        return $workTime->fresh();
+        return $workTime->refresh();
     }
 
     protected function prepareForValidation(): void

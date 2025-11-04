@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
+use FluxErp\Enums\DayPartEnum;
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasUserModification;
@@ -30,7 +31,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     protected static function booted(): void
     {
         static::saving(function (AbsenceRequest $absenceRequest): void {
-            if ($absenceRequest->day_part !== AbsenceRequestDayPartEnum::Time) {
+            if ($absenceRequest->day_part?->value !== AbsenceRequestDayPartEnum::Time) {
                 $absenceRequest->start_time = null;
                 $absenceRequest->end_time = null;
             }
@@ -123,9 +124,9 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     public function calculateWorkDaysAffected(?Carbon $date = null): string|float
     {
         $deductionRate = $this->absenceType->percentage_deduction ?? 1;
-        $dayPartFraction = match ($this->day_part) {
-            AbsenceRequestDayPartEnum::FullDay => 1,
-            AbsenceRequestDayPartEnum::FirstHalf, AbsenceRequestDayPartEnum::SecondHalf, => 0.5,
+        $dayPartFraction = match ($this->day_part?->value) {
+            DayPartEnum::FullDay => 1,
+            DayPartEnum::FirstHalf, DayPartEnum::SecondHalf, => 0.5,
             default => 0,
         };
 
@@ -151,9 +152,9 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
     public function calculateWorkHoursAffected(?Carbon $date = null): string|int|float
     {
         $deductionRate = $this->absenceType->percentage_deduction ?? 1;
-        $dayPartFraction = match ($this->day_part) {
-            AbsenceRequestDayPartEnum::FullDay => 1,
-            AbsenceRequestDayPartEnum::FirstHalf, AbsenceRequestDayPartEnum::SecondHalf, => 0.5,
+        $dayPartFraction = match ($this->day_part?->value) {
+            DayPartEnum::FullDay => 1,
+            DayPartEnum::FirstHalf, DayPartEnum::SecondHalf, => 0.5,
             default => 0,
         };
 
@@ -239,10 +240,10 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
                     ->where('start_date', '<=', $this->end_date)
                     ->where('end_date', '>=', $this->start_date)
                     ->where(fn (Builder $query) => $query
-                        ->where('day_part', AbsenceRequestDayPartEnum::FullDay->value)
-                        ->orWhere('day_part', $this->day_part->value)
+                        ->where('day_part', DayPartEnum::FullDay)
+                        ->orWhere('day_part', $this->day_part?->value)
                         ->when(
-                            $this->day_part === AbsenceRequestDayPartEnum::Time,
+                            $this->day_part?->value === AbsenceRequestDayPartEnum::Time,
                             fn (Builder $query) => $query
                                 ->where('start_time', '<=', $this->end_time)
                                 ->where('end_time', '>=', $this->start_time)
@@ -288,7 +289,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
 
     protected function getDayPartFractionByTime(Carbon $date): ?string
     {
-        if ($this->day_part === AbsenceRequestDayPartEnum::Time) {
+        if ($this->day_part?->value === AbsenceRequestDayPartEnum::Time) {
             $workTimeModel = $this->employee->getWorkTimeModel($date);
 
             $workDay = $workTimeModel->schedules()
