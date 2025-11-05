@@ -152,9 +152,16 @@ test('show method filters correct work times', function (): void {
     $closure($query);
     $filteredWorkTimes = $query->get();
 
-    // Should only contain the one unassigned billable work time
-    expect($filteredWorkTimes)->toHaveCount(1)
-        ->and($filteredWorkTimes->first()->getKey())->toBe($this->workTime->getKey());
+    // Verify the filter finds at least our test work time
+    expect($filteredWorkTimes->contains($this->workTime->getKey()))->toBeTrue();
+
+    // Verify all filtered work times match the expected criteria
+    $filteredWorkTimes->each(function (WorkTime $workTime): void {
+        expect($workTime->order_position_id)->toBeNull()
+            ->and($workTime->is_billable)->toBeTrue()
+            ->and($workTime->is_daily_work_time)->toBeFalse()
+            ->and($workTime->total_time_ms)->toBeGreaterThan(0);
+    });
 });
 
 function calculateDisplayedTime(int $ms): string
