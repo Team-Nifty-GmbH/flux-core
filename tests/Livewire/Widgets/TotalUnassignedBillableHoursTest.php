@@ -133,7 +133,7 @@ test('show method creates session filter', function (): void {
 
     $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
 
-    expect(session()->has('session-filters.' . $workTimeListCacheKey))->toBeTrue();
+    expect(session()->has($workTimeListCacheKey . '_query'))->toBeTrue();
 });
 
 test('show method filters correct work times', function (): void {
@@ -142,15 +142,17 @@ test('show method filters correct work times', function (): void {
     $component->call('show');
 
     $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
-    $sessionFilter = session('session-filters.' . $workTimeListCacheKey);
+    /** @var TeamNiftyGmbH\DataTable\Helpers\SessionFilter $sessionFilter */
+    $sessionFilter = session($workTimeListCacheKey . '_query');
 
-    expect($sessionFilter)->not->toBeNull()
-        ->and($sessionFilter['label'])->toBe(__(TotalUnassignedBillableHours::getLabel()));
+    expect($sessionFilter)->toBeInstanceOf(TeamNiftyGmbH\DataTable\Helpers\SessionFilter::class);
 
-    $filteredWorkTimes = WorkTime::query()
-        ->tap($sessionFilter['callback'])
-        ->get();
+    $query = WorkTime::query();
+    $closure = $sessionFilter->getClosure();
+    $closure($query);
+    $filteredWorkTimes = $query->get();
 
+    // Should only contain the one unassigned billable work time
     expect($filteredWorkTimes)->toHaveCount(1)
         ->and($filteredWorkTimes->first()->getKey())->toBe($this->workTime->getKey());
 });
