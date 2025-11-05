@@ -1,6 +1,6 @@
 import folders from './components/folders';
 import setupEditor from './components/tiptap';
-import editorFontSizeColorHandler from './components/tiptap-font-size-color-handler.js';
+import tippyDropdown from './components/tiptap-tippy-dropdown.js';
 import workTime from './components/work-time.js';
 import calendar from './components/calendar.js';
 import dashboard from './components/dashboard';
@@ -29,7 +29,7 @@ dayjs.extend(utc);
 window.dayjs = dayjs;
 window.calendar = calendar;
 window.setupEditor = setupEditor;
-window.editorFontSizeColorHandler = editorFontSizeColorHandler;
+window.tippyDropdown = tippyDropdown;
 window.workTime = workTime;
 window.dashboard = dashboard;
 window.addressMap = addressMap;
