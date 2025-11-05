@@ -1,23 +1,20 @@
 export default function (parentElement, dropdownElement) {
     let sideEffect = null;
     return {
-        popUpFontSize: null,
+        popUp: null,
         sideEffect() {
-            if (
-                this.popUpFontSize !== null &&
-                this.popUpFontSize.state.isVisible
-            ) {
-                this.popUpFontSize.hide();
+            if (this.popUp !== null && this.popUp.state.isVisible) {
+                this.popUp.hide();
             }
         },
         onClick() {
-            if (this.popUpFontSize === null) {
+            if (this.popUp === null) {
                 if (
                     dropdownElement !== undefined &&
                     parentElement !== undefined
                 ) {
                     const actions = dropdownElement.content.cloneNode(true);
-                    this.popUpFontSize = window.tippy(parentElement, {
+                    this.popUp = window.tippy(parentElement, {
                         content: actions ?? 'not defined',
                         showOnCreate: true,
                         interactive: true,
@@ -42,8 +39,8 @@ export default function (parentElement, dropdownElement) {
                 }
             }
 
-            if (!this.popUpFontSize.state.isVisible) {
-                this.popUpFontSize.show();
+            if (!this.popUp.state.isVisible) {
+                this.popUp.show();
             }
         },
     };
