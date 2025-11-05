@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Widgets\TotalUnassignedBillableHours;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -117,6 +118,41 @@ test('calculates correct sum of unassigned billable hours', function (): void {
 test('renders successfully', function (): void {
     Livewire::test(TotalUnassignedBillableHours::class)
         ->assertOk();
+});
+
+test('show method redirects to work times route', function (): void {
+    Livewire::test(TotalUnassignedBillableHours::class)
+        ->call('show')
+        ->assertRedirect(route('human-resources.work-times'));
+});
+
+test('show method creates session filter', function (): void {
+    $component = Livewire::test(TotalUnassignedBillableHours::class);
+
+    $component->call('show');
+
+    $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
+
+    expect(session()->has('session-filters.' . $workTimeListCacheKey))->toBeTrue();
+});
+
+test('show method filters correct work times', function (): void {
+    $component = Livewire::test(TotalUnassignedBillableHours::class);
+
+    $component->call('show');
+
+    $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
+    $sessionFilter = session('session-filters.' . $workTimeListCacheKey);
+
+    expect($sessionFilter)->not->toBeNull()
+        ->and($sessionFilter['label'])->toBe(__(TotalUnassignedBillableHours::getLabel()));
+
+    $filteredWorkTimes = WorkTime::query()
+        ->tap($sessionFilter['callback'])
+        ->get();
+
+    expect($filteredWorkTimes)->toHaveCount(1)
+        ->and($filteredWorkTimes->first()->getKey())->toBe($this->workTime->getKey());
 });
 
 function calculateDisplayedTime(int $ms): string
