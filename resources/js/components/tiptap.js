@@ -4,6 +4,7 @@ import { FontSizeLineHeightColorConfig } from './tiptap-font-size-line-height-co
 import { TextAlignConfig } from './tiptap-text-align-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
+import { BladeVariableConfig } from './tiptap-blade-variable.js';
 
 export default function (
     content,
@@ -66,6 +67,7 @@ export default function (
                         LiteralTab,
                         TextAlignConfig,
                         MentionConfig(searchModel, element),
+                        BladeVariableConfig(),
                     ],
                     timeout: null,
                     content: this.content,

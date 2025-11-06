@@ -1,5 +1,3 @@
-@use(\FluxErp\Enums\SalutationEnum)
-
 @props([
     'onlyPostal' => false,
     'countries' => resolve_static(\FluxErp\Models\Country::class, 'query')
@@ -53,9 +51,9 @@
         />
         <div class="col-span-2 w-full">
             <x-select.styled
-                :options="SalutationEnum::valuesLocalized()"
                 x-bind:readonly="!$wire.edit"
                 wire:model="address.salutation"
+                :options="resolve_static(\FluxErp\Enums\SalutationEnum::class, 'valuesLocalized')"
             />
         </div>
     </div>

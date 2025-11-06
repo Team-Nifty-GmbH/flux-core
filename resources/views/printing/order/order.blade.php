@@ -140,8 +140,11 @@
     @endif
 
     @section('total')
-    <table class="w-full pb-16 text-xs">
-        <tbody class="break-inside-avoid">
+    <table
+        class="w-full break-inside-avoid pb-16 text-xs"
+        style="page-break-inside: avoid"
+    >
+        <tbody style="page-break-inside: avoid">
             <tr>
                 <td colspan="2" class="border-b-2 border-black font-semibold">
                     {{ __('Total') }}
@@ -163,7 +166,7 @@
                         <td class="text-right">
                             <span>{{ __('Position discounts') }}</span>
                             <span>
-                                {{ Number::percentage(bcmul($model->total_position_discount_percentage ?? 0, 100)) }}
+                                {{ Number::percentage(bcmul($model->total_position_discount_percentage ?? 0, 100), maxPrecision: 2) }}
                             </span>
                         </td>
                         <td class="w-0 whitespace-nowrap pl-12 text-right">
@@ -189,7 +192,7 @@
                                 {{ data_get($discount, 'name', __('Head discount')) }}
                             </span>
                             <span>
-                                {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
+                                {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100), maxPrecision: 2) }}
                             </span>
                         </td>
                         <td class="w-0 whitespace-nowrap pl-12 text-right">
@@ -218,7 +221,7 @@
                     <td class="text-right">
                         {{
                             __('Plus :percentage VAT from :total_net', [
-                                'percentage' => Number::percentage(bcmul($vat['vat_rate_percentage'], 100)),
+                                'percentage' => Number::percentage(bcmul($vat['vat_rate_percentage'], 100), maxPrecision: 2),
                                 'total_net' => Number::currency($vat['total_net_price']),
                             ])
                         }}

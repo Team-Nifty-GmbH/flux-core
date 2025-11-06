@@ -8,16 +8,15 @@ use FluxErp\Models\MailAccount;
 use Illuminate\Support\Facades\Mail;
 
 test('handle mail failure', function (): void {
+    Mail::shouldReceive('mailer')->andReturnSelf();
     Mail::shouldReceive('to')->andReturnSelf();
     Mail::shouldReceive('cc')->andReturnSelf();
     Mail::shouldReceive('bcc')->andReturnSelf();
     Mail::shouldReceive('send')->andThrow(new Exception('Mail server error'));
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'to' => ['test@example.com'],
         'subject' => 'Test Subject',
@@ -68,11 +67,9 @@ test('handles null values correctly', function (): void {
 test('handles string email addresses', function (): void {
     Mail::fake();
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'to' => 'single@example.com',
         'cc' => 'cc@example.com',
@@ -121,11 +118,9 @@ test('provided data overrides template', function (): void {
 test('send mail queued', function (): void {
     Mail::fake();
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'to' => ['test@example.com'],
         'subject' => 'Queued Test',
@@ -145,7 +140,6 @@ test('send mail queued', function (): void {
 test('send mail with all validated keys', function (): void {
     Mail::fake();
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
     $template = EmailTemplate::factory()->create([
         'subject' => 'Template Subject',
@@ -154,7 +148,6 @@ test('send mail with all validated keys', function (): void {
     ]);
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'template_id' => $template->id,
         'to' => ['test@example.com', 'test2@example.com'],
@@ -190,11 +183,9 @@ test('send mail with all validated keys', function (): void {
 test('send mail with attachments', function (): void {
     Mail::fake();
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'to' => ['test@example.com'],
         'cc' => ['cc@example.com'],
@@ -220,7 +211,6 @@ test('send mail with attachments', function (): void {
 test('send mail with blade parameters', function (): void {
     Mail::fake();
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
     $template = EmailTemplate::factory()->create([
         'subject' => 'Hello {{ $name }}',
@@ -229,7 +219,6 @@ test('send mail with blade parameters', function (): void {
     ]);
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'to' => ['test@example.com'],
         'cc' => ['cc@example.com'],
@@ -252,11 +241,9 @@ test('send mail with blade parameters', function (): void {
 test('send mail with cc and bcc', function (): void {
     Mail::fake();
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'to' => ['test@example.com'],
         'cc' => ['cc@example.com'],
@@ -309,11 +296,9 @@ test('send mail with template', function (): void {
 test('send simple mail', function (): void {
     Mail::fake();
 
-    $mailAccount = MailAccount::factory()->create();
     $client = Client::factory()->create();
 
     $action = SendMail::make([
-        'mail_account_id' => $mailAccount->id,
         'client_id' => $client->id,
         'to' => ['test@example.com'],
         'cc' => [],
@@ -357,4 +342,104 @@ test('template overrides empty fields', function (): void {
     Mail::assertSent(GenericMail::class, function ($mail) {
         return $mail->hasTo('default@example.com');
     });
+});
+
+test('send mail with custom mail account', function (): void {
+    $fakeMail = Mail::fake();
+
+    $client = Client::factory()->create();
+    $mailAccount = MailAccount::factory()->create([
+        'smtp_email' => 'custom@example.com',
+        'smtp_password' => 'password123',
+        'smtp_host' => 'smtp.example.com',
+        'smtp_port' => 587,
+        'smtp_encryption' => 'tls',
+        'smtp_mailer' => 'smtp',
+    ]);
+
+    Mail::shouldReceive('mailer')
+        ->once()
+        ->andReturn($fakeMail);
+
+    Mail::shouldReceive('build')
+        ->once()
+        ->with(Mockery::on(function ($config) use ($mailAccount) {
+            return $config['username'] === $mailAccount->smtp_email
+                && $config['host'] === $mailAccount->smtp_host
+                && $config['port'] === $mailAccount->smtp_port
+                && $config['encryption'] === $mailAccount->smtp_encryption;
+        }))
+        ->andReturn($fakeMail);
+
+    $action = SendMail::make([
+        'client_id' => $client->id,
+        'mail_account_id' => $mailAccount->id,
+        'to' => ['test@example.com'],
+        'subject' => 'Custom Mail Test',
+        'html_body' => '<p>Test Body</p>',
+        'queue' => false,
+    ]);
+
+    $result = $action->validate()->execute();
+
+    expect($result['success'])->toBeTrue();
+
+    $fakeMail->assertSent(GenericMail::class, function ($mail) use ($mailAccount) {
+        return $mail->hasTo('test@example.com')
+            && $mail->from[0]['address'] === $mailAccount->smtp_email;
+    });
+});
+
+test('send mail with custom mail account and queue sends immediately', function (): void {
+    $fakeMail = Mail::fake();
+
+    $client = Client::factory()->create();
+    $mailAccount = MailAccount::factory()->create([
+        'smtp_email' => 'queued@example.com',
+        'smtp_password' => 'password456',
+        'smtp_host' => 'smtp.queue.com',
+        'smtp_port' => 465,
+        'smtp_encryption' => 'ssl',
+        'smtp_mailer' => 'smtp',
+    ]);
+
+    Mail::shouldReceive('mailer')
+        ->once()
+        ->andReturn($fakeMail);
+
+    Mail::shouldReceive('build')
+        ->once()
+        ->with(Mockery::on(function ($config) use ($mailAccount) {
+            return $config['username'] === $mailAccount->smtp_email
+                && $config['host'] === $mailAccount->smtp_host
+                && $config['port'] === $mailAccount->smtp_port
+                && $config['encryption'] === $mailAccount->smtp_encryption;
+        }))
+        ->andReturn($fakeMail);
+
+    $action = SendMail::make([
+        'client_id' => $client->id,
+        'mail_account_id' => $mailAccount->id,
+        'to' => ['test@example.com'],
+        'cc' => ['cc@example.com'],
+        'bcc' => ['bcc@example.com'],
+        'subject' => 'Queued Custom Mail',
+        'html_body' => '<p>Queued Test</p>',
+        'queue' => true,
+    ]);
+
+    $result = $action->validate()->execute();
+
+    expect($result['success'])->toBeTrue();
+
+    // When mail_account_id is provided, mail should be sent immediately despite queue = true
+    $fakeMail->assertSent(GenericMail::class, function ($mail) use ($mailAccount) {
+        return $mail->hasTo('test@example.com')
+            && $mail->hasCc('cc@example.com')
+            && $mail->hasBcc('bcc@example.com')
+            && $mail->from[0]['address'] === $mailAccount->smtp_email;
+    });
+
+    // Should NOT be queued
+    $fakeMail->assertNotQueued(GenericMail::class);
 });

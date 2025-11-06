@@ -262,7 +262,7 @@
         <div class="space-y-8">
             <div
                 id="order-position-table"
-                x-on:data-table-row-clicked="$wire.selectPosition($event.detail.id)"
+                x-on:data-table-row-clicked="$wire.selectPosition($event.detail.record.id)"
             >
                 <livewire:portal.data-tables.order-position-list
                     :order-id="$order['id']"

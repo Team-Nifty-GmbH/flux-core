@@ -1,4 +1,4 @@
-@use(Illuminate\Support\Number)
+@use(Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-2 pr-8 align-top">
@@ -21,10 +21,10 @@
                 {{ $position->product_number }}
             </p>
             <p class="font-semibold">
-                {{ $position->name }}
+                {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>
             <div class="prose-xs">
-                {!! $position->description !!}
+                {{ render_editor_blade($position->description, ['position' => $position]) }}
             </div>
         </td>
         <td class="py-2 pr-8 text-center align-top">
@@ -40,7 +40,7 @@
                         {{ Number::currency($isNet ? $position->total_base_net_price : $position->total_base_gross_price) }}
                     </div>
                     <div>
-                        -{{ Number::percentage(bcmul(diff_percentage($position->total_base_net_price, $position->total_net_price), 100)) }}
+                        -{{ Number::percentage(bcmul(diff_percentage($position->total_base_net_price, $position->total_net_price), 100), maxPrecision: 2) }}
                     </div>
                 </div>
             @endif

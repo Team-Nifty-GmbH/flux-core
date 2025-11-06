@@ -9,6 +9,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
+use FluxErp\Settings\CoreSettings;
 use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
@@ -45,6 +46,12 @@ pest()
         /** @var $this FluxErp\Tests\TestCase */
         config([
             'app.debug' => true,
+        ]);
+
+        CoreSettings::fake([
+            'install_done' => false,
+            'license_key' => null,
+            'formal_salutation' => false,
         ]);
 
         PriceList::default() ?? PriceList::factory()->create([

@@ -14,7 +14,7 @@
             showDetails($event) {
                 this.showDetail = false
                 const detailElement = $el.querySelector('#detail')
-                if ($event.detail.id === this.detailId) {
+                if ($event.detail.record.id === this.detailId) {
                     setTimeout(() => {
                         $el.querySelector('#detail-container').appendChild(
                             detailElement,
@@ -25,9 +25,9 @@
                     return
                 }
 
-                this.detailId = $event.detail.id
+                this.detailId = $event.detail.record.id
                 this.dataTableComponent.$wire
-                    .getDiscounts($event.detail.id)
+                    .getDiscounts($event.detail.record.id)
                     .then((response) => {
                         this.discounts = response
                         setTimeout(() => {

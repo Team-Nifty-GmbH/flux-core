@@ -95,9 +95,20 @@
             :label="__('Mail Accounts')"
             wire:model="userForm.mail_accounts"
             multiple
-            select="label:email|value:id"
+            select="label:name|value:id"
             :options="$mailAccounts"
         />
+        @show
+        @section('user-edit.default-mail-account')
+        @if ($userForm->mail_accounts)
+            <x-select.styled
+                :label="__('Default Mail Account')"
+                wire:model="userForm.default_mail_account_id"
+                select="label:name|value:id"
+                :options="collect($mailAccounts)->whereIn('id', $userForm->mail_accounts)->values()->toArray()"
+            />
+        @endif
+
         @show
         @section('user-edit.printers')
         <x-select.styled

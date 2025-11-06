@@ -1,4 +1,3 @@
-@use('FluxErp\Enums\TimeFrameEnum')
 <div class="flex items-center gap-4">
     @if (in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)) && $canEdit)
         <template x-for="in allGroups group">
@@ -51,7 +50,7 @@
                     class="p-2"
                     wire:model.live="params.timeFrame"
                     required
-                    :options="TimeFrameEnum::valuesLocalized()"
+                    :options="resolve_static(\FluxErp\Enums\TimeFrameEnum::class, 'valuesLocalized')"
                 />
             </div>
             <div

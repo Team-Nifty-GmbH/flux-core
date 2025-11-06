@@ -44,7 +44,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -56,7 +55,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use Throwable;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
@@ -572,13 +570,19 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function salutation(): ?string
     {
-        try {
-            $enum = SalutationEnum::from($this->salutation ?? '');
-        } catch (Throwable) {
-            $enum = SalutationEnum::NO_SALUTATION;
-        }
-
-        return $enum->salutation($this);
+        return resolve_static(
+            SalutationEnum::class,
+            'salutation',
+            [
+                'case' => resolve_static(
+                    SalutationEnum::class,
+                    'tryFrom',
+                    ['value' => $this->salutation]
+                )
+                    ->value ?? SalutationEnum::NoSalutation,
+                'address' => $this,
+            ]
+        );
     }
 
     public function scopeInTimeframe(
@@ -590,19 +594,44 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         $start = $start ? Carbon::parse($start) : null;
         $end = $end ? Carbon::parse($end) : null;
 
-        if ($start && $end && $start->greaterThan($end)) {
-            $var = $start;
-            $start = $end;
-            $end = $var;
+        $yearEnd = null;
+        $yearStart = null;
+
+        if ($start && $end) {
+            if ($start->greaterThan($end)) {
+                $var = $start;
+                $start = $end;
+                $end = $var;
+            }
+
+            if ($start->year !== $end->year) {
+                $yearEnd = '1231';
+                $yearStart = '0101';
+            }
         }
 
         $builder
-            ->when($start && $end, function (Builder $builder) use ($start, $end): void {
-                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?", [
-                    $start->format('md'),
-                    $end->format('md'),
-                ]);
-            })
+            ->when($start && $end, fn (Builder $builder) => $builder
+                ->where(function (Builder $query) use ($start, $end, $yearEnd, $yearStart): void {
+                    $query
+                        ->whereRaw(
+                            "REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?",
+                            [
+                                $start->format('md'),
+                                $yearEnd ?? $end->format('md'),
+                            ]
+                        )
+                        ->when($yearStart, fn (Builder $query) => $query
+                            ->orWhereRaw(
+                                "REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?",
+                                [
+                                    $yearStart,
+                                    $end->format('md'),
+                                ]
+                            )
+                        );
+                })
+            )
             ->when($start && ! $end, function (Builder $builder) use ($start): void {
                 $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') >= ?", [
                     $start->format('md'),
@@ -630,11 +659,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function serialNumbers(): BelongsToMany
     {
         return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -681,6 +705,23 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'is_invited' => false,
             'is_public' => false,
         ];
+    }
+
+    protected function mailAddresses(): Attribute
+    {
+        return Attribute::get(
+            fn () => array_unique(
+                array_filter(
+                    array_merge(
+                        [$this->email_primary],
+                        $this->contactOptions
+                            ->where('type', 'email')
+                            ->pluck('value')
+                            ->toArray()
+                    )
+                )
+            )
+        );
     }
 
     protected function password(): Attribute

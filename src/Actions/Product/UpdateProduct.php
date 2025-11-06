@@ -157,7 +157,7 @@ class UpdateProduct extends FluxAction
 
             if (Helper::checkCycle(Product::class, $product, $this->data['parent_id'])) {
                 throw ValidationException::withMessages([
-                    'parent_id' => [__('Cycle detected')],
+                    'parent_id' => ['Cycle detected'],
                 ])->errorBag('updateProduct');
             }
         }

@@ -2,7 +2,7 @@
     "name": "team-nifty-gmbh/flux-erp",
     "homepage": "https://flux-erp.com",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "ext-bcmath": "*",
         "ext-intl": "*",
         "ext-json": "*",
@@ -25,6 +25,7 @@
         "spatie/laravel-model-states": "^2.4",
         "spatie/laravel-permission": "^6.0",
         "spatie/laravel-query-builder": "^6.0",
+        "spatie/laravel-settings": "^3.4",
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
@@ -119,13 +120,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "FluxErp\\FluxServiceProvider",
-                "FluxErp\\Providers\\BindingServiceProvider",
-                "FluxErp\\Providers\\MorphMapServiceProvider",
-                "FluxErp\\Providers\\AuthServiceProvider",
-                "FluxErp\\Providers\\EventServiceProvider",
-                "FluxErp\\Providers\\BroadcastServiceProvider",
-                "FluxErp\\Providers\\ViewServiceProvider"
+                "FluxErp\\FluxServiceProvider"
             ]
         }
     },

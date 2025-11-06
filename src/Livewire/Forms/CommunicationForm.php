@@ -32,7 +32,7 @@ class CommunicationForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?int $mail_account_id = null;
+    public int|string|null $mail_account_id = null;
 
     public ?int $mail_folder_id = null;
 
@@ -94,18 +94,22 @@ class CommunicationForm extends FluxForm
                     ->whereKey($this->id)
                     ->with(['mailFolder:id,slug', 'mailAccount:id,email'])
                     ->first();
-
-            $this->attachments = $message
-                ->getMedia('attachments')
-                ->map(fn ($media) => [
-                    'id' => $media->id,
-                    'name' => $media->name,
-                ])
-                ->toArray();
+            $this->loadAttachments($message);
 
             $this->slug = $message->mailAccount ?
                 $message->mailAccount->email . ' -> ' . $message->mailFolder?->slug : null;
         }
+    }
+
+    public function loadAttachments(Communication $message): void
+    {
+        $this->attachments = $message
+            ->getMedia('attachments')
+            ->map(fn ($media) => [
+                'id' => $media->id,
+                'name' => $media->name,
+            ])
+            ->toArray();
     }
 
     protected function getActions(): array

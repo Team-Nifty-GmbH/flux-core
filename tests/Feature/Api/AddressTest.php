@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -119,7 +120,7 @@ test('create address maximum', function (): void {
         'country_id' => $this->countries[2]->id,
         'company' => Str::random(),
         'title' => Str::random(),
-        'salutation' => Str::random(),
+        'salutation' => SalutationEnum::Family,
         'firstname' => Str::random(),
         'lastname' => Str::random(),
         'addition' => Str::random(),
@@ -359,7 +360,7 @@ test('update address maximum', function (): void {
         'contact_id' => $this->contacts[0]->id,
         'company' => Str::random(),
         'title' => Str::random(),
-        'salutation' => Str::random(),
+        'salutation' => SalutationEnum::NoSalutation,
         'firstname' => Str::random(),
         'lastname' => Str::random(),
         'addition' => Str::random(),

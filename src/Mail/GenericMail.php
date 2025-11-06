@@ -5,7 +5,6 @@ namespace FluxErp\Mail;
 use FluxErp\Actions\Printing;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Client;
-use FluxErp\Models\MailAccount;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Makeable;
 use FluxErp\View\Printing\PrintableView;
@@ -16,7 +15,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Blade;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\HasMedia;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -104,24 +102,6 @@ class GenericMail extends Mailable
 
     public function build(): void
     {
-        if ($mailAccountId = data_get($this->mailMessageForm, 'mail_account_id')) {
-            $mailAccount = resolve_static(MailAccount::class, 'query')
-                ->whereKey($mailAccountId)
-                ->first();
-
-            config([
-                'mail.default' => 'mail_account',
-                'mail.mailers.mail_account.transport' => $mailAccount->smtp_mailer,
-                'mail.mailers.mail_account.username' => $mailAccount->smtp_email,
-                'mail.mailers.mail_account.password' => $mailAccount->smtp_password,
-                'mail.mailers.mail_account.host' => $mailAccount->smtp_host,
-                'mail.mailers.mail_account.port' => $mailAccount->smtp_port,
-                'mail.mailers.mail_account.encryption' => $mailAccount->smtp_encryption,
-                'mail.from.address' => $mailAccount->smtp_email,
-                'mail.from.name' => auth()->user()?->name,
-            ]);
-        }
-
         if ($this->bladeParameters) {
             $bladeParameters = $this->bladeParameters instanceof SerializableClosure
                 ? $this->bladeParameters->getClosure()()
@@ -130,24 +110,24 @@ class GenericMail extends Mailable
             data_set(
                 $this->mailMessageForm,
                 'subject',
-                Blade::render(
-                    html_entity_decode(data_get($this->mailMessageForm, 'subject', '')),
+                render_editor_blade(
+                    data_get($this->mailMessageForm, 'subject'),
                     $bladeParameters ?? []
                 )
             );
             data_set(
                 $this->mailMessageForm,
                 'html_body',
-                Blade::render(
-                    html_entity_decode(data_get($this->mailMessageForm, 'html_body', '')),
+                render_editor_blade(
+                    data_get($this->mailMessageForm, 'html_body'),
                     $bladeParameters ?? []
                 )
             );
             data_set(
                 $this->mailMessageForm,
                 'text_body',
-                Blade::render(
-                    html_entity_decode(data_get($this->mailMessageForm, 'text_body', '')) ?? '',
+                render_editor_blade(
+                    data_get($this->mailMessageForm, 'text_body'),
                     $bladeParameters ?? []
                 )
             );

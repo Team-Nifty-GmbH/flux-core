@@ -25,6 +25,7 @@ class UpdateUser extends FluxAction
     public function performAction(): Model
     {
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
+        $defaultMailAccountId = Arr::pull($this->data, 'default_mail_account_id');
         $printers = Arr::pull($this->data, 'printers');
 
         $user = resolve_static(User::class, 'query')
@@ -35,6 +36,14 @@ class UpdateUser extends FluxAction
         $user->save();
 
         if (! is_null($mailAccounts)) {
+            $mailAccounts = array_map(
+                fn (int|string $mailAccountId) => [
+                    'mail_account_id' => $mailAccountId,
+                    'is_default' => $mailAccountId === $defaultMailAccountId,
+                ],
+                $mailAccounts
+            );
+
             $user->mailAccounts()->sync($mailAccounts);
         }
 
@@ -88,6 +97,19 @@ class UpdateUser extends FluxAction
                 throw ValidationException::withMessages([
                     'parent_id' => ['Cycle detected'],
                 ])->errorBag('updateUser');
+            }
+        }
+
+        if ($this->getData('default_mail_account_id')) {
+            $mailAccountIds = $this->getData('mail_accounts') ?? [];
+
+            if (! in_array($this->getData('default_mail_account_id'), $mailAccountIds, true)) {
+                throw ValidationException::withMessages([
+                    'default_mail_account_id' => [
+                        'The default mail account must be one of the selected mail accounts.',
+                    ],
+                ])
+                    ->errorBag('updateUser');
             }
         }
     }

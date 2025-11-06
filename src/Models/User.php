@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -105,6 +106,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         ];
     }
 
+    public function absenceRequests(): HasMany
+    {
+        return $this->hasMany(AbsenceRequest::class);
+    }
+
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');
@@ -133,6 +139,18 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    public function defaultMailAccount(): ?MailAccount
+    {
+        return $this->mailAccounts()
+            ->wherePivot('is_default', true)
+            ->first();
+    }
+
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class);
     }
 
     public function favorites(): MorphMany
@@ -185,7 +203,8 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 
     public function mailAccounts(): BelongsToMany
     {
-        return $this->belongsToMany(MailAccount::class, 'mail_account_user');
+        return $this->belongsToMany(MailAccount::class, 'mail_account_user')
+            ->withPivot('is_default');
     }
 
     /**
@@ -232,11 +251,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         );
 
         Mail::to($this->email)->queue(MagicLoginLink::make($plaintext, $expires));
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
     }
 
     public function targets(): BelongsToMany

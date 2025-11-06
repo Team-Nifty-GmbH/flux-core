@@ -107,7 +107,11 @@ class ConversionRateByLeadOrigin extends BarChart
                 return [
                     'id' => $leadWithWonOrLostLeadState->getKey(),
                     'name' => $leadWithWonOrLostLeadState->name,
-                    'color' => ChartColorEnum::forKey($leadWithWonOrLostLeadState->getKey())->value,
+                    'color' => resolve_static(
+                        ChartColorEnum::class,
+                        'forKey',
+                        ['key' => $leadWithWonOrLostLeadState->getKey()]
+                    )->value,
                     'data' => [$conversionRate],
                 ];
             })

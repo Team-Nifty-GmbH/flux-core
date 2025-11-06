@@ -35,34 +35,32 @@ class UploadMedia extends FluxAction
 
     public function performAction(): Model
     {
-        $modelInstance = morphed_model($this->data['model_type'])::query()
-            ->whereKey($this->data['model_id'])
+        $modelInstance = morphed_model($this->getData('model_type'))::query()
+            ->whereKey($this->getData('model_id'))
             ->first();
 
-        $customProperties = CustomProperties::get($this->data, $this->data['model_type']);
-
-        $diskName = $this->data['disk'] ?? (
+        $diskName = $this->getData('disk') ?? (
             $modelInstance->getRegisteredMediaCollections()
-                ->where('name', $this->data['collection_name'])
+                ->where('name', $this->getData('collection_name'))
                 ->first()
                 ?->diskName ?: config('media-library.disk_name')
         );
-        $file = $this->data['media'];
+        $file = $this->getData('media');
 
-        if ($this->data['media_type'] ?? false) {
-            $fileAdder = $modelInstance->{'addMediaFrom' . $this->data['media_type']}($file);
+        if ($this->getData('media_type') ?? false) {
+            $fileAdder = $modelInstance->{'addMediaFrom' . $this->getData('media_type')}($file);
         } else {
             $fileAdder = $modelInstance->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
 
         try {
             $media = $fileAdder
-                ->setName($this->data['name'])
-                ->usingFileName($this->data['file_name'])
-                ->withCustomProperties($customProperties)
+                ->setName($this->getData('name'))
+                ->usingFileName($this->getData('file_name'))
+                ->withCustomProperties($this->getData('custom_properties') ?? [])
                 ->withProperties(
                     Arr::except(
-                        $this->data,
+                        $this->getData(),
                         [
                             'model_type',
                             'model_id',
@@ -84,15 +82,15 @@ class UploadMedia extends FluxAction
                     )
                 )
                 ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $this->data['collection_name'], diskName: $diskName);
+                ->toMediaCollection(collectionName: $this->getData('collection_name'), diskName: $diskName);
         } catch (FileUnacceptableForCollection $e) {
             throw ValidationException::withMessages([
                 'media' => [$e->getMessage()],
             ]);
         }
 
-        if (strtolower($this->data['media_type'] ?? false) === 'stream') {
-            fclose($this->data['media']);
+        if (strtolower($this->getData('media_type') ?? false) === 'stream') {
+            fclose($this->getData('media'));
         }
 
         return $media->withoutRelations();
@@ -116,14 +114,14 @@ class UploadMedia extends FluxAction
         // check if the media collection is read-only
         if (
             data_get(
-                morph_to($this->data['model_type'], $this->data['model_id'])
-                    ->getMediaCollection($this->data['collection_name']),
+                morph_to($this->getData('model_type'), $this->getData('model_id'))
+                    ->getMediaCollection($this->getData('collection_name')),
                 'readOnly'
             ) === true
             && ! $this->force
         ) {
             throw ValidationException::withMessages([
-                'collection_name' => [__('The media collection is read-only and cannot be modified.')],
+                'collection_name' => ['The media collection is read-only and cannot be modified.'],
             ]);
         }
     }

@@ -59,9 +59,10 @@ class ReplicateOrderPositionList extends OrderPositionList
     {
         return $builder
             ->where('order_id', $this->orderId)
-            ->withSum(['descendants as descendantsAmount' => function (Builder $query): void {
-                $query->whereNull('deleted_at');
-            }], 'amount')
+            ->with([
+                'descendants:id,amount,origin_position_id',
+                'descendants.descendants:id,amount,origin_position_id',
+            ])
             ->whereNull('parent_id')
             ->orderBy('sort_number');
     }
@@ -79,7 +80,20 @@ class ReplicateOrderPositionList extends OrderPositionList
         $returnKeys = $this->getReturnKeys();
 
         foreach ($tree as $key => &$item) {
-            $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
+            $descendantsAmount = array_reduce(
+                data_get($item, 'descendants') ?? [],
+                fn ($carry, $descendant) => bcadd($carry, $descendant['amount'] ?? 0, 2),
+                0
+            );
+            $subDescendantsAmount = array_reduce(
+                Arr::flatten(data_get($item, 'descendants.*.descendants') ?? [], 1),
+                fn ($carry, $descendant) => bcadd($carry, $descendant['amount'] ?? 0, 2),
+                0
+            );
+
+            // amount - descendantsAmount + subDescendantsAmount
+            $totalAmount = bcadd(bcsub($item['amount'], $descendantsAmount), $subDescendantsAmount, 2);
+
             if (bccomp($totalAmount, 0) !== 1 || in_array($item['id'], $this->alreadyTakenPositions)) {
                 unset($tree[$key]);
 

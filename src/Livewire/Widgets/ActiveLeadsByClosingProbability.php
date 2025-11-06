@@ -80,7 +80,7 @@ class ActiveLeadsByClosingProbability extends BarChart
 
         $this->series = [
             [
-                'color' => ChartColorEnum::Blue->value,
+                'color' => ChartColorEnum::Blue,
                 'data' => [],
             ],
         ];

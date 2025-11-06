@@ -60,14 +60,6 @@ class Clients extends ClientList
                     'wire:click' => 'show(record.id)',
                 ])
                 ->when(resolve_static(UpdateClient::class, 'canPerformAction', [false])),
-            DataTableButton::make()
-                ->text(__('Customer portal'))
-                ->color('indigo')
-                ->icon('user')
-                ->attributes([
-                    'wire:click' => 'showCustomerPortal(record.id)',
-                ])
-                ->when(resolve_static(UpdateClient::class, 'canPerformAction', [false])),
         ];
     }
 

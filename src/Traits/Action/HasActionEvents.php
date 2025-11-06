@@ -8,6 +8,8 @@ use Illuminate\Events\QueuedClosure;
 
 trait HasActionEvents
 {
+    protected ?Dispatcher $dispatcher = null;
+
     public static function booted(QueuedClosure|callable|array|string $callback): void
     {
         static::registerActionEvent('booted', $callback);
@@ -33,11 +35,6 @@ trait HasActionEvents
         static::registerActionEvent('preparingForValidation', $callback);
     }
 
-    public static function setEventDispatcher(?Dispatcher $dispatcher = null): void
-    {
-        static::$dispatcher = $dispatcher;
-    }
-
     public static function validated(QueuedClosure|callable|array|string $callback): void
     {
         static::registerActionEvent('validated', $callback);
@@ -50,35 +47,36 @@ trait HasActionEvents
 
     protected static function registerActionEvent($event, $callback): void
     {
-        if (isset(static::$dispatcher)) {
+        if (app()->bound('events')) {
+            $dispatcher = app('events');
             $name = static::class;
 
-            static::$dispatcher->listen('action.' . $event . ': ' . $name, $callback);
+            $dispatcher->listen('action.' . $event . ': ' . $name, $callback);
         }
     }
 
     final public function withEvents(): static
     {
-        static::setEventDispatcher(app('events'));
+        $this->dispatcher = app('events');
 
         return $this;
     }
 
     final public function withoutEvents(): static
     {
-        static::setEventDispatcher(app(NullDispatcher::class));
+        $this->dispatcher = app(NullDispatcher::class);
 
         return $this;
     }
 
     protected function fireActionEvent(string $event, bool $halt = true): mixed
     {
-        if (is_null(static::$dispatcher)) {
-            return null;
+        if (is_null($this->dispatcher)) {
+            $this->dispatcher = app()->bound('events') ? app('events') : app(NullDispatcher::class);
         }
 
         $function = $halt ? 'until' : 'dispatch';
 
-        return static::$dispatcher->{$function}('action.' . $event . ': ' . static::class, $this);
+        return $this->dispatcher->{$function}('action.' . $event . ': ' . static::class, $this);
     }
 }

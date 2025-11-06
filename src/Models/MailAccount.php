@@ -7,7 +7,9 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
+use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Mail;
 use Webklex\IMAP\Facades\Client as ImapClient;
 use Webklex\PHPIMAP\Client;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
@@ -63,6 +65,34 @@ class MailAccount extends FluxModel
         }
 
         return null;
+    }
+
+    public function mailer(): Mailer
+    {
+        $fromName = $this->smtp_from_name
+            ?: auth()->user()?->name
+            ?: config('mail.from.name');
+
+        $config = [
+            'transport' => $this->smtp_mailer,
+            'username' => $this->smtp_user ?? $this->smtp_email,
+            'password' => $this->smtp_password,
+            'host' => $this->smtp_host,
+            'port' => $this->smtp_port,
+            'encryption' => $this->smtp_encryption,
+            'from_address' => $this->smtp_email,
+            'from_name' => $fromName,
+        ];
+
+        $mailer = Mail::build($config);
+
+        $mailer->alwaysFrom($this->smtp_email, $fromName);
+
+        if ($this->smtp_reply_to) {
+            $mailer->alwaysReplyTo($this->smtp_reply_to);
+        }
+
+        return $mailer;
     }
 
     public function mailFolders(): HasMany

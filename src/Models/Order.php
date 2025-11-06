@@ -69,9 +69,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns,
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel,
+        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -593,51 +593,65 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function calculateTotalVats(): static
     {
-        $vatGroups = $this->orderPositions()
+        $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
-            ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage')
+            ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
+            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
             ->keyBy('vat_rate_percentage');
 
+        $baseAmounts = $positionsByVatRate->map(fn (OrderPosition $item) => $item->total_net_price);
+
         foreach ($this->discounts()->ordered()->get() as $discount) {
             if ($discount->is_percentage) {
-                $vatGroups->transform(function (OrderPosition $item) use ($discount): OrderPosition {
+                $positionsByVatRate->transform(function (OrderPosition $item) use ($discount): OrderPosition {
                     $item->total_net_price = discount($item->total_net_price, $discount->discount);
 
                     return $item;
                 });
             } else {
-                $total = $vatGroups->reduce(function (string $carry, OrderPosition $item): string {
-                    return bcadd($carry, $item->total_net_price, 9);
-                }, '0');
+                $total = $positionsByVatRate->reduce(
+                    fn (string $carry, OrderPosition $item) => bcadd($carry, $item->total_net_price, 9),
+                    0
+                );
 
                 if (bccomp($total, '0', 9) > 0) {
                     $remainingTotal = max(0, bcsub($total, $discount->discount, 9));
 
-                    $vatGroups->transform(function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
-                        $proportion = bcdiv($item->total_net_price, $total, 9);
-                        $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
+                    $positionsByVatRate->transform(
+                        function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
+                            $proportion = bcdiv($item->total_net_price, $total, 9);
+                            $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
 
-                        return $item;
-                    });
+                            return $item;
+                        });
                 }
             }
         }
 
-        $this->total_vats = $vatGroups
-            ->map(function (OrderPosition $item): array {
+        $this->total_vats = $positionsByVatRate
+            ->map(function (OrderPosition $item) use ($baseAmounts): array {
                 return [
                     'vat_rate_percentage' => $item->vat_rate_percentage,
+                    'vat_rate_id' => $item->vat_rate_id,
                     'total_vat_price' => bcround(
                         bcmul(
                             $item->total_net_price ?? 0,
                             $item->vat_rate_percentage,
-                            9),
+                            9
+                        ),
                         2
                     ),
                     'total_net_price' => bcround($item->total_net_price ?? 0, 2),
+                    'total_discount' => bcround(
+                        bcsub(
+                            $baseAmounts->get($item->vat_rate_percentage) ?? 0,
+                            $item->total_net_price,
+                            9
+                        ),
+                        2
+                    ),
                 ];
             })
             ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
@@ -708,6 +722,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function discounts(): MorphMany
     {
         return $this->morphMany(Discount::class, 'model');
+    }
+
+    public function finalInvoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('final-invoice');
     }
 
     /**
@@ -811,7 +830,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
     {
-        return $this->getFirstMedia('invoice');
+        return $this->getFirstMedia('invoice')
+            ?? $this->getFirstMedia('final-invoice')
+            ?? $this->getFirstMedia('refund');
     }
 
     public function language(): BelongsTo
@@ -927,6 +948,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         ]);
 
         return $this;
+    }
+
+    public function refund(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('refund');
     }
 
     public function registerMediaCollections(): void

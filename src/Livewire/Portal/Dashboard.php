@@ -2,22 +2,13 @@
 
 namespace FluxErp\Livewire\Portal;
 
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
-    public ?string $view = null;
-
-    public function render()
+    public function render(): View
     {
         return view('flux::livewire.portal.dashboard');
-    }
-
-    public function boot(): void
-    {
-        $client = auth()->user()?->contact?->client;
-        $setting = $client?->settings()->where('key', 'customerPortal')->first()?->toArray();
-
-        $this->view = $setting['settings']['dashboard_module'] ?? null;
     }
 }

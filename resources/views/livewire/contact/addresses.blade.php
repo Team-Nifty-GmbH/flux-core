@@ -133,6 +133,11 @@
                                     '=',
                                     morph_alias(\FluxErp\Models\Contact::class),
                                 ],
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
                             ],
                         ],
                     ]"

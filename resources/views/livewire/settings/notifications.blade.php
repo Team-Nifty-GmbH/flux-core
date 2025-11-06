@@ -3,6 +3,7 @@
         id="edit-notification-settings-modal"
         wire="detailModal"
         x-on:close="$wire.closeModal()"
+        :title="__('Notification Settings')"
     >
         <x-slot name="title">
             {{ __('Notification Settings') }}

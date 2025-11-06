@@ -40,7 +40,7 @@ class CreateSepaMandate extends FluxAction
 
         $errors = [];
         if (! $clientContactExists) {
-            $errors[] = ['contact_id' => [__('Client has no such contact')]];
+            $errors[] = ['contact_id' => ['Client has no such contact']];
         }
 
         if ($bankConnectionId = $this->getData('contact_bank_connection_id')) {
@@ -50,7 +50,7 @@ class CreateSepaMandate extends FluxAction
                 ->exists();
 
             if (! $contactBankConnectionExists) {
-                $errors[] = ['bank_connection_id' => [__('Contact has no such bank connection')]];
+                $errors[] = ['bank_connection_id' => ['Contact has no such bank connection']];
             }
         }
 

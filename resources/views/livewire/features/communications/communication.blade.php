@@ -61,15 +61,15 @@
         id="edit-communication"
         size="5xl"
         :title="__('Edit Communication')"
+        persistent
     >
         <div class="flex flex-col gap-1.5">
             <div>
                 <x-select.styled
                     required
-                    x-on:select="$event.detail.select.value === 'mail' ? $wire.communication.to = [] : null"
+                    x-on:select="$wire.fillTo()"
                     wire:model="communication.communication_type_enum"
                     :label="__('Communication Type')"
-                    select="label:label|value:name"
                     :options="$communicationTypes"
                 />
             </div>
@@ -279,6 +279,19 @@
                     x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
                 />
             </div>
+            <div
+                x-cloak
+                x-show="$wire.communication.communication_type_enum === 'mail'"
+                x-bind:class="$wire.communication.id && 'pointer-events-none'"
+            >
+                <x-select.styled
+                    required
+                    wire:model="communication.mail_account_id"
+                    :label="__('Send From')"
+                    select="label:name|value:id"
+                    :options="$mailAccounts"
+                />
+            </div>
             <x-flux::editor
                 wire:model="communication.html_body"
                 :label="__('Content')"
@@ -338,15 +351,18 @@
                 color="indigo"
                 wire:click="save().then((success) => { if(success) $modalClose('edit-communication'); })"
                 primary
+                loading="save"
                 :text="__('Save')"
             />
             <div
+                x-cloak
                 x-show="$wire.communication.communication_type_enum === 'mail' && !$wire.communication.id"
             >
                 <x-button
                     color="indigo"
                     wire:click="send().then((success) => { if(success) $modalClose('edit-communication'); })"
                     primary
+                    loading="send"
                     :text="__('Send')"
                 />
             </div>

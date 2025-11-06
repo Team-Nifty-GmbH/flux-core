@@ -176,6 +176,7 @@ class Editor extends Component
         ],
         public ?array $textColors = null,
         public ?array $textBackgroundColors = null,
+        public array $bladeVariables = [],
     ) {
         $this->id ??= Str::uuid()->toString();
         $this->textColors ??= static::$colorPalette;

@@ -219,7 +219,7 @@ if (! function_exists('diff_percentage')) {
 }
 
 if (! function_exists('percentage_of')) {
-    function percentage_of(string|float|int|null $total, string|float|int|null $part): string
+    function percentage_of(string|float|int|null $total, string|float|int|null $part, int $precision = 4): string
     {
         $total ??= '0';
         $part ??= '0';
@@ -228,7 +228,7 @@ if (! function_exists('percentage_of')) {
             return '0';
         }
 
-        return bcround(bcmul(bcdiv($part, $total, 9), 100, 9), 4);
+        return bcround(bcmul(bcdiv($part, $total, 9), 100, 9), $precision);
     }
 }
 
@@ -524,9 +524,13 @@ if (! function_exists('resolve_static')) {
 
         if ($binding) {
             $reflector = new Laravel\SerializableClosure\Support\ReflectionClosure($binding['concrete']);
-            $concrete = $reflector->getUseVariables()['concrete'] ?? null;
+            $concrete = Illuminate\Support\Arr::last($reflector->getUseVariables()) ?? null;
         } else {
             $concrete = $abstract;
+        }
+
+        if (is_null($concrete) && class_exists($class)) {
+            $concrete = $class;
         }
 
         if (! $concrete) {
@@ -538,18 +542,23 @@ if (! function_exists('resolve_static')) {
         }
 
         try {
+            if (! is_callable([$concrete, $method])) {
+                throw new InvalidArgumentException('Invalid method: ' . $method);
+            }
+
             $reflectionClass = new ReflectionClass($concrete);
-            $reflectionMethod = $reflectionClass->getMethod($method);
 
-            if (! $reflectionMethod->isStatic()) {
-                throw new InvalidArgumentException('Method is not static: ' . $method);
+            if ($reflectionClass->hasMethod($method)) {
+                $reflectionMethod = $reflectionClass->getMethod($method);
+
+                if (! $reflectionMethod->isStatic()) {
+                    throw new InvalidArgumentException('Method is not static: ' . $method);
+                }
             }
 
-            if ($reflectionMethod->getParameters() && is_array($parameters)) {
-                return $concrete::$method(...$parameters);
-            } else {
-                return $concrete::$method();
-            }
+            return $parameters
+                ? $concrete::$method(...$parameters)
+                : $concrete::$method();
         } catch (ReflectionException) {
             throw new InvalidArgumentException('Invalid method: ' . $method);
         }
@@ -582,7 +591,10 @@ if (! function_exists('morph_alias')) {
     {
         $class = resolve_static($class, 'class');
 
-        if (in_array(FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
+        if (
+            class_exists($class)
+            && in_array(FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))
+        ) {
             return $class::getParentMorphClass();
         }
 
@@ -623,5 +635,33 @@ if (! function_exists('morph_to')) {
         $query = $model::query()->whereKey($id);
 
         return $returnBuilder ? $query : $query->first();
+    }
+}
+
+if (! function_exists('render_editor_blade')) {
+    function render_editor_blade(?string $html, array $data = []): Illuminate\Support\HtmlString
+    {
+        if (is_null($html)) {
+            return new Illuminate\Support\HtmlString('');
+        }
+
+        $converted = preg_replace_callback(
+            '/<span[^>]*data-type="blade-variable"[^>]*data-value="([^"]*)"[^>]*>.*?<\/span>/',
+            function (array $matches) use ($data): string {
+                $value = html_entity_decode($matches[1]);
+
+                preg_match('/\$(\w+)/', $value, $variableMatches);
+                $variableName = $variableMatches[1] ?? null;
+
+                if ($variableName && ! array_key_exists($variableName, $data)) {
+                    return $matches[0];
+                }
+
+                return '{{ ' . $value . ' }}';
+            },
+            $html
+        );
+
+        return new Illuminate\Support\HtmlString(Illuminate\Support\Facades\Blade::render($converted, $data));
     }
 }

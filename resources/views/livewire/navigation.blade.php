@@ -1,26 +1,4 @@
 <div>
-    @if ($setting)
-        <style>
-            @if(($setting['nav']['active_item'] ?? false))
-                nav .nav-item-active {
-                background: {{ $setting['nav']['active_item'] }} !important;
-            }
-            @endif
-
-            @if(($setting['nav']['icon_size'] ?? false))
-                nav i {
-                font-size: {{ $setting['nav']['icon_size'] }}px !important;
-            }
-            @endif
-
-            @if(($setting['nav']['hover_item'] ?? false))
-                nav a:hover {
-                background: {{ $setting['nav']['hover_item'] }} !important;
-            }
-            @endif
-        </style>
-    @endif
-
     <div
         id="main-navigation"
         x-on:menu-force-open.window="menuOpen ? closeMenu(true) : showMenu(true)"
@@ -64,7 +42,7 @@
             favoritesOpen: false,
         }"
     >
-        <x-flux::nav.nav :background="$background">
+        <x-flux::nav.nav>
             <nav
                 class="flex flex-1 flex-col gap-6 space-y-2 overflow-x-hidden overflow-y-hidden px-2 py-4 hover:overflow-y-auto"
             >

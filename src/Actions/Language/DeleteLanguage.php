@@ -45,13 +45,13 @@ class DeleteLanguage extends FluxAction
         // Don't delete if in use.
         if ($language->addresses()->exists()) {
             $errors += [
-                'address' => [__('Language referenced by an address')],
+                'address' => ['Language referenced by an address'],
             ];
         }
 
         if ($language->users()->exists()) {
             $errors += [
-                'user' => [__('Language referenced by a user')],
+                'user' => ['Language referenced by a user'],
             ];
         }
 

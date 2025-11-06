@@ -1,4 +1,3 @@
-@use('\FluxErp\Enums\SalutationEnum')
 <div>
     @section('modals')
     @canAction(\FluxErp\Actions\Contact\CreateContact::class)
@@ -47,7 +46,7 @@
                         <x-select.styled
                             x-bind:readonly="!$wire.edit"
                             wire:model="contact.main_address.salutation"
-                            :options="SalutationEnum::valuesLocalized()"
+                            :options="resolve_static(\FluxErp\Enums\SalutationEnum::class, 'valuesLocalized')"
                         />
                     </div>
                 </div>
@@ -217,6 +216,11 @@
                                             'model_type',
                                             '=',
                                             morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
                                         ],
                                     ],
                                 ],
