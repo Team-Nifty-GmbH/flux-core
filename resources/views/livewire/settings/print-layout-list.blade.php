@@ -16,17 +16,17 @@
 
 <div>
     @foreach ($printing as $folder => $files)
-        {{-- TODO: remove continut when other layout are build --}}
+        {{-- TODO: remove continue when other layout are build --}}
         @continue($folder !== 'order')
         <div
-            class="mb-4 flex w-full flex-col rounded-lg border border-gray-300"
+            class="mb-4 flex w-full flex-col rounded-lg border dark:border-gray-500 border-gray-300"
         >
-            <div class="flex h-10 w-full items-center bg-gray-200 p-4">
+            <div class="flex h-10 w-full items-center bg-gray-200 dark:bg-secondary-600 p-4">
                 {{ __($folder) }}
             </div>
             @foreach ($files as $index => $file)
                 <div
-                    class="{{ count($files) > 1 && $index < count($files) - 1 ? 'border-b border-gray-300' : '' }} flex min-h-10 w-full items-center justify-between p-4"
+                    class="{{ count($files) > 1 && $index < count($files) - 1 ? 'border-b dark:border-gray-500 border-gray-300' : '' }} flex min-h-10 dark:text-gray-200 w-full items-center justify-between p-4"
                 >
                     <div>{{ __($file) }}</div>
                     <x-button
