@@ -3,10 +3,13 @@
 ])
 
 <div>
-    <div class="mb-1">
+    <div @if(!$tooltipDropdown) class="mb-1" @endif>
         <x-label :text="$label ?? ''" />
     </div>
     <div
+        @if ($fullHeight)
+            class="h-full"
+        @endif
         @if ($attributes->has("x-modelable"))
             x-modelable="{{ $attributes->get("x-modelable") }}"
         @else
@@ -35,7 +38,7 @@
                 showBladeVariables: false,
                 bladeVariables: @js($bladeVariables)
                 })"
-        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
+        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize),@json($defaultFontSize),@json($fullHeight), @json($showEditorPadding), @json($lineHeight))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
         {{-- add button for blade variable dropdown --}}
@@ -193,6 +196,17 @@
             />
         @endif
 
+        @if ($lineHeight && $availableLineHeights && ! $tooltipDropdown)
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent-line-height-{{ $id }}"
+                flat
+                icon="ellipsis-vertical"
+                x-data="tippyDropdown($refs['tippyParent-line-height-{{ $id }}'], $refs['lineHeightDropDown-{{ $id }}'])"
+                color="secondary"
+            ></x-button>
+        @endif
+
         <template
             x-if="Object.values(bladeVariables).length > 0 && ! @js($tooltipDropdown)"
         >
@@ -253,6 +267,27 @@
             />
         @endif
 
+        @if($textAlign)
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3-bottom-left"
+                x-on:click="editor().chain().focus().setTextAlign('left').run()" >
+            </x-button>
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3"
+                x-on:click="editor().chain().focus().setTextAlign('center').run()" >
+            </x-button>
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3-bottom-right"
+                x-on:click="editor().chain().focus().setTextAlign('right').run()" >
+            </x-button>
+        @endif
+
         @if ($codeBlock)
             <x-button
                 flat
@@ -260,6 +295,23 @@
                 icon="code-bracket-square"
                 x-on:click="editor().chain().focus().toggleCodeBlock().run()"
             />
+        @endif
+
+        @if($tooltipDropdown && $lineHeight && $availableLineHeights)
+            <x-button
+                flat
+                color="secondary"
+                :text=" 'L-0' "
+                x-on:click="editor().chain().focus().unsetLineHeight().run()"
+            ></x-button>
+            @foreach ($availableLineHeights as $lineHeightSize)
+                <x-button
+                    flat
+                    color="secondary"
+                    :text=" 'L-' . $lineHeightSize"
+                    x-on:click="editor().chain().focus().setLineHeight({{ json_encode($lineHeightSize) }}).run()"
+                ></x-button>
+            @endforeach
         @endif
 
         @if ($tooltipDropdown && $textColors)
@@ -373,6 +425,26 @@
                             ></div>
                         @endforeach
                     </div>
+                @endforeach
+            </div>
+        </div>
+    </template>
+    <template x-ref="lineHeightDropDown-{{ $id }}">
+        <div class="p-1">
+            <div class="flex flex-col">
+                <x-button
+                    flat
+                    color="secondary"
+                    :text="'L-0'"
+                    x-on:click="editor().chain().focus().unsetLineHeight().run()"
+                ></x-button>
+                @foreach ($availableLineHeights as $lineHeightSize)
+                    <x-button
+                        flat
+                        color="secondary"
+                        :text=" 'L-' . $lineHeightSize"
+                        x-on:click="editor().chain().focus().setLineHeight({{ json_encode($lineHeightSize) }}).run()"
+                    ></x-button>
                 @endforeach
             </div>
         </div>

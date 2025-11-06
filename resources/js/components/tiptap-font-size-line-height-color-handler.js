@@ -1,6 +1,6 @@
 import { TextStyle } from '@tiptap/extension-text-style';
 
-export const FontSizeColorConfig = TextStyle.extend({
+export const FontSizeLineHeightColorConfig = TextStyle.extend({
     addOptions() {
         return {
             types: ['textStyle'],
@@ -61,6 +61,19 @@ export const FontSizeColorConfig = TextStyle.extend({
                             };
                         },
                     },
+                    lineHeight: {
+                        default: null,
+                        parseHTML: (element) => element.style.lineHeight,
+                        renderHTML: (attributes) => {
+                            if (!attributes.lineHeight) {
+                                return {};
+                            }
+
+                            return {
+                                style: `line-height: ${attributes.lineHeight}`,
+                            };
+                        },
+                    },
                 },
             },
         ];
@@ -94,6 +107,18 @@ export const FontSizeColorConfig = TextStyle.extend({
                 ({ chain }) => {
                     return chain()
                         .setMark('textStyle', { backgroundColor: null })
+                        .run();
+                },
+            setLineHeight:
+                (lineHeight) =>
+                ({ chain }) => {
+                    return chain().setMark('textStyle', { lineHeight }).run();
+                },
+            unsetLineHeight:
+                () =>
+                ({ chain }) => {
+                    return chain()
+                        .setMark('textStyle', { lineHeight: null })
                         .run();
                 },
         };
