@@ -20,7 +20,7 @@ class CalendarEventRequest extends BaseFormRequest
             'calendar.isVirtual' => 'nullable|boolean',
             'calendar.permission' => 'nullable|string|in:owner,editor,reader',
 
-            'componentSnapshot' => 'required|array',
+            'componentSnapshot' => 'required|string',
         ];
     }
 }
