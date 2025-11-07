@@ -35,7 +35,7 @@
                                     ? 'red'
                                     : ($diff === 0 ? 'amber' : 'emerald')
                                 "
-                                :text="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
+                                :text="__('Due At') . ' ' . $task->due_datetime?->locale(app()->getLocale())->isoFormat('L LT') ?? $task->due_date->locale(app()->getLocale())->isoFormat('L')"
                             />
                         @endif
 

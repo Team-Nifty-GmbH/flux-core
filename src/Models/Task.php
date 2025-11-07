@@ -134,19 +134,39 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             }
 
             if ($task->start_date) {
-                $task->start_datetime = $task->start_time
+                $newStartDatetime = $task->start_time
                     ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
                     : $task->start_date->copy()->startOfDay();
+
+                if ($task->start_datetime?->timestamp !== $newStartDatetime->timestamp) {
+                    $task->start_reminder_sent_at = null;
+                }
+
+                $task->start_datetime = $newStartDatetime;
             } else {
+                if ($task->start_datetime !== null) {
+                    $task->start_reminder_sent_at = null;
+                }
+
                 $task->start_time = null;
                 $task->start_datetime = null;
             }
 
             if ($task->due_date) {
-                $task->due_datetime = $task->due_time
+                $newDueDatetime = $task->due_time
                     ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
                     : $task->due_date->copy()->endOfDay();
+
+                if ($task->due_datetime?->timestamp !== $newDueDatetime->timestamp) {
+                    $task->due_reminder_sent_at = null;
+                }
+
+                $task->due_datetime = $newDueDatetime;
             } else {
+                if ($task->due_datetime !== null) {
+                    $task->due_reminder_sent_at = null;
+                }
+
                 $task->due_time = null;
                 $task->due_datetime = null;
             }
