@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Events\Task\TaskDueReminderEvent;
+use FluxErp\Models\Language;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Task\TaskDueReminderNotification;
@@ -8,9 +9,11 @@ use Illuminate\Support\Facades\Notification;
 use function Livewire\invade;
 
 beforeEach(function (): void {
-    $this->user = User::factory()->create();
-    $this->responsibleUser = User::factory()->create();
-    $this->assignedUser = User::factory()->create();
+    $language = Language::factory()->create();
+
+    $this->user = User::factory()->create(['language_id' => $language->id]);
+    $this->responsibleUser = User::factory()->create(['language_id' => $language->id]);
+    $this->assignedUser = User::factory()->create(['language_id' => $language->id]);
 
     $this->task = Task::factory()->create([
         'name' => 'Test Task',
