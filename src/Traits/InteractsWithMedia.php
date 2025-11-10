@@ -29,6 +29,7 @@ trait InteractsWithMedia
     {
         $mediaFolders = resolve_static(MediaFolder::class, 'familyTree')
             ->whereKey($this->mediaFolders()->pluck('id')->toArray())
+            ->whereKeyNot($exclude)
             ->get()
             ->flatten();
 
