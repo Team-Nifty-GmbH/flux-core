@@ -43,6 +43,7 @@ jobs:
         ports:
           - 33306:3306/tcp
         options: >-
+          --privileged
           --tmpfs /var/lib/mysql
           --tmpfs /var/log/mysql
           --tmpfs /tmp
