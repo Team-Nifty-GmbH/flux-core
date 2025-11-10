@@ -58,7 +58,7 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
 
     protected static function booted(): void
     {
-        static::updating(function (CalendarEvent $model) {
+        static::updating(function (CalendarEvent $model): void {
             if ($model->isDirty(['start', 'excluded'])) {
                 $model->excluded = array_values(array_unique(array_map(
                     fn (string $item) => Carbon::parse($item)
