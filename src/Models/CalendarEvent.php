@@ -56,6 +56,20 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::updating(function (CalendarEvent $model) {
+            if ($model->isDirty(['start', 'excluded'])) {
+                $model->excluded = array_values(array_unique(array_map(
+                    fn (string $item) => Carbon::parse($item)
+                        ->setTimeFromTimeString($model->start->toTimeString())
+                        ->toDateTimeString(),
+                    $model->excluded ?? []
+                ))) ?: null;
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
