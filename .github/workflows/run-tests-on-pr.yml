@@ -43,7 +43,7 @@ jobs:
         ports:
           - 33306:3306/tcp
         options: >-
-          --privileged
+          --sysctl net.ipv4.ip_unprivileged_port_start=0
           --tmpfs /var/lib/mysql
           --tmpfs /var/log/mysql
           --tmpfs /tmp
