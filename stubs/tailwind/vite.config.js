@@ -13,6 +13,7 @@ export default defineConfig({
                 '.{{ relative_path }}/resources/js/alpine.js',
                 '.{{ relative_path }}/resources/js/sw.js',
                 '.{{ relative_path }}/resources/js/web-push.js',
+                '.{{ relative_path }}/resources/js/print-editor.js',
                 './vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
             ],
             refresh: false,

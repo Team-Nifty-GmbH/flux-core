@@ -1,6 +1,6 @@
 <div class="flex items-center gap-4">
     @if (in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)) && $canEdit)
-        <template x-for="group in allGroups">
+        <template x-for="in allGroups group">
             <div class="relative">
                 <x-button
                     wire:loading.attr="disabled"

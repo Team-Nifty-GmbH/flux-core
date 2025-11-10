@@ -162,6 +162,7 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.plugins');
                 Menu::register(route: 'settings.price-lists');
                 Menu::register(route: 'settings.print-jobs');
+                Menu::register(route: 'settings.print-layout-list');
                 Menu::register(route: 'settings.printers');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');
