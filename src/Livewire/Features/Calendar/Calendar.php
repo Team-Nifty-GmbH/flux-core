@@ -148,6 +148,7 @@ class Calendar extends Component
             try {
                 $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
                     ?? resolve_static(CalendarEvent::class, 'class');
+                $this->event->has_repeats = false;
                 $this->event->save();
 
                 $this->toast()
