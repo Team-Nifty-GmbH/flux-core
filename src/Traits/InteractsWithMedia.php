@@ -206,6 +206,7 @@ trait InteractsWithMedia
 
         return collect($node)
             ->sortBy('name')
+            ->values()
             ->toArray();
     }
 }
