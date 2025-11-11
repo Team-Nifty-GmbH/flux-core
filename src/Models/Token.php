@@ -105,12 +105,14 @@ class Token extends FluxAuthenticatable
 
     public function use(): bool
     {
-        if (is_null($this->uses)) {
-            $this->uses = 1;
-        } else {
-            $this->increment('uses');
-        }
+        return static::withoutBroadcasting(function () {
+            if (is_null($this->uses)) {
+                $this->uses = 1;
+            } else {
+                $this->increment('uses');
+            }
 
-        return $this->save();
+            return $this->save();
+        });
     }
 }
