@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Widgets\TotalUnassignedBillableHours;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -117,6 +118,50 @@ test('calculates correct sum of unassigned billable hours', function (): void {
 test('renders successfully', function (): void {
     Livewire::test(TotalUnassignedBillableHours::class)
         ->assertOk();
+});
+
+test('show method redirects to work times route', function (): void {
+    Livewire::test(TotalUnassignedBillableHours::class)
+        ->call('show')
+        ->assertRedirect(route('human-resources.work-times'));
+});
+
+test('show method creates session filter', function (): void {
+    $component = Livewire::test(TotalUnassignedBillableHours::class);
+
+    $component->call('show');
+
+    $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
+
+    expect(session()->has($workTimeListCacheKey . '_query'))->toBeTrue();
+});
+
+test('show method filters correct work times', function (): void {
+    $component = Livewire::test(TotalUnassignedBillableHours::class);
+
+    $component->call('show');
+
+    $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
+    /** @var TeamNiftyGmbH\DataTable\Helpers\SessionFilter $sessionFilter */
+    $sessionFilter = session($workTimeListCacheKey . '_query');
+
+    expect($sessionFilter)->toBeInstanceOf(TeamNiftyGmbH\DataTable\Helpers\SessionFilter::class);
+
+    $query = WorkTime::query();
+    $closure = $sessionFilter->getClosure();
+    $closure($query);
+    $filteredWorkTimes = $query->get();
+
+    // Verify the filter finds at least our test work time
+    expect($filteredWorkTimes->contains($this->workTime->getKey()))->toBeTrue();
+
+    // Verify all filtered work times match the expected criteria
+    $filteredWorkTimes->each(function (WorkTime $workTime): void {
+        expect($workTime->order_position_id)->toBeNull()
+            ->and($workTime->is_billable)->toBeTrue()
+            ->and($workTime->is_daily_work_time)->toBeFalse()
+            ->and($workTime->total_time_ms)->toBeGreaterThan(0);
+    });
 });
 
 function calculateDisplayedTime(int $ms): string

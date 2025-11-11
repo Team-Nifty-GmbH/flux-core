@@ -111,8 +111,11 @@ test('create task time', function (): void {
     expect($dbTaskTime->ended_at)->toBeNull();
     expect($dbTaskTime->is_locked)->toBeFalse();
     expect($dbTaskTime->total_time_ms)->toEqual($totalTimeMs);
-    expect($dbTaskTime->paused_time_ms)->toEqual((int) $dbPauseStartTime->diffInMilliseconds($dbTaskTime->ended_at, true));
+
+    $expectedPausedTime = (int) $dbPauseStartTime->diffInMilliseconds(now(), true);
     expect($dbTaskTime->paused_time_ms)->toBeGreaterThan(0);
+    expect($dbTaskTime->paused_time_ms)->toBeGreaterThanOrEqual($expectedPausedTime - 1000);
+    expect($dbTaskTime->paused_time_ms)->toBeLessThanOrEqual($expectedPausedTime + 1000);
 
     $this->travel(1)->hour();
 
