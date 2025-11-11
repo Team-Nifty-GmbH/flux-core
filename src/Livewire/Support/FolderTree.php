@@ -333,6 +333,7 @@ abstract class FolderTree extends Component
                 $this->folder->getActionResult()->toArray(),
                 array_flip([
                     'id',
+                    'parent_id',
                     'name',
                     'slug',
                     'is_readonly',
