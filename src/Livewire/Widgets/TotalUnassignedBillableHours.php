@@ -67,7 +67,7 @@ class TotalUnassignedBillableHours extends ValueBox implements HasWidgetOptions
         )
             ->store();
 
-        $this->redirectRoute('accounting.work-times', navigate: true);
+        $this->redirectRoute('human-resources.work-times', navigate: true);
     }
 
     protected function icon(): string

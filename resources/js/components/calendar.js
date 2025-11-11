@@ -275,7 +275,7 @@ const calendar = () => {
                     calendar.isLoading = true;
 
                     const componentSnapshot =
-                        this.$wire.__instance?.snapshot || null;
+                        this.$wire.__instance?.snapshotEncoded || null;
 
                     axios
                         .post('/calendar-events', {

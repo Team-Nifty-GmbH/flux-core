@@ -12,7 +12,7 @@ class CalendarEventController extends Controller
     {
         $info = $request->input('info');
         $calendarAttributes = $request->input('calendar');
-        $componentSnapshot = $request->input('componentSnapshot');
+        $componentSnapshot = json_decode($request->input('componentSnapshot'), true);
 
         [$component, $context] = Livewire::fromSnapshot($componentSnapshot);
 
