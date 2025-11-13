@@ -18,7 +18,7 @@ class CreateCalendarRuleset extends FluxRuleset
     {
         $rules = parent::getRules();
 
-        if (! auth()->user()?->can('action.' . resolve_static(CreatePublicCalendar::class, 'name'))) {
+        if (! resolve_static(CreatePublicCalendar::class, 'canPerformAction', [false])) {
             $rules = array_diff_key($rules, array_flip(['is_public']));
         }
 
