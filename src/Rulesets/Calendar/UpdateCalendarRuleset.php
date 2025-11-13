@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Calendar;
 
+use FluxErp\Actions\Calendar\CreatePublicCalendar;
 use FluxErp\Models\Calendar;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -10,6 +11,17 @@ use Illuminate\Validation\Rule;
 class UpdateCalendarRuleset extends FluxRuleset
 {
     protected static ?string $model = Calendar::class;
+
+    public static function getRules(): array
+    {
+        $rules = parent::getRules();
+
+        if (! resolve_static(CreatePublicCalendar::class, 'canPerformAction', [false])) {
+            $rules = array_diff_key($rules, array_flip(['is_public']));
+        }
+
+        return $rules;
+    }
 
     public function rules(): array
     {

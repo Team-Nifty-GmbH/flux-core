@@ -17,7 +17,7 @@ class SyncCalendarEventInvites extends FluxAction
 
     public static function name(): string
     {
-        return 'calendar-event.sync-invites';
+        return 'calendar_event.sync-invites';
     }
 
     protected function getRulesets(): string|array
