@@ -132,7 +132,7 @@
                     x-on:refresh-tree.window="
                         $wire.modelId = $event.detail.id
                         resetSelection()
-                        tree = $wire.getTree()
+                        tree = await $wire.getTree()
                     "
                 >
                     <div
