@@ -90,7 +90,7 @@
                             }
 
                             if (this.selection.id === level.id) {
-                                resetSelection()
+                                this.resetSelection()
 
                                 return
                             }
