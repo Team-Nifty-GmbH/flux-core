@@ -129,7 +129,11 @@
                         },
                     }"
                     x-on:folder-tree-select.window="treeSelect($event.detail)"
-                    x-on:refresh-tree.window="$wire.modelId = $event.detail.id; resetSelection(); tree = $wire.getTree()"
+                    x-on:refresh-tree.window="
+                        $wire.modelId = $event.detail.id
+                        resetSelection()
+                        tree = $wire.getTree()
+                    "
                 >
                     <div
                         class="flex w-full flex-col gap-3"
