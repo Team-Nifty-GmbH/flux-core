@@ -2,7 +2,7 @@
 
 namespace FluxErp\Notifications\Task;
 
-use FluxErp\Events\Task\TaskDueReminderEvent;
+use FluxErp\Events\Task\TaskReminderEvent;
 use FluxErp\Support\Notification\SubscribableNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use NotificationChannels\WebPush\WebPushChannel;
 
-class TaskDueReminderNotification extends SubscribableNotification implements ShouldQueue
+class TaskReminderNotification extends SubscribableNotification implements ShouldQueue
 {
     use Queueable;
 
@@ -25,7 +25,7 @@ class TaskDueReminderNotification extends SubscribableNotification implements Sh
     public function subscribe(): array
     {
         return [
-            resolve_static(TaskDueReminderEvent::class, 'class') => 'sendNotification',
+            resolve_static(TaskReminderEvent::class, 'class') => 'sendNotification',
         ];
     }
 
@@ -41,7 +41,9 @@ class TaskDueReminderNotification extends SubscribableNotification implements Sh
 
     protected function getNotificationIcon(): ?string
     {
-        return 'clock';
+        return $this->event->type === 'start'
+            ? 'play'
+            : 'clock';
     }
 
     protected function getSubscriptionsForEvent(object $event): Collection
@@ -52,6 +54,8 @@ class TaskDueReminderNotification extends SubscribableNotification implements Sh
 
     protected function getTitle(): string
     {
-        return __('Task :name is due soon', ['name' => $this->model->name]);
+        return $this->event->type === 'start'
+            ? __('Task :name is starting soon', ['name' => $this->getDescription() ?? __('Unknown')])
+            : __('Task :name is due soon', ['name' => $this->getDescription() ?? __('Unknown')]);
     }
 }

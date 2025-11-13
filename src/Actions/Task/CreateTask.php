@@ -66,6 +66,20 @@ class CreateTask extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['priority'] ??= 0;
+
+        if ($this->getData('start_date')) {
+            $this->data['start_time'] ??= null;
+        } else {
+            $this->data['has_start_reminder'] = false;
+            $this->data['start_reminder_minutes_before'] = null;
+        }
+
+        if ($this->getData('due_date')) {
+            $this->data['due_time'] ??= null;
+        } else {
+            $this->data['has_due_reminder'] = false;
+            $this->data['due_reminder_minutes_before'] = null;
+        }
     }
 
     protected function validateData(): void

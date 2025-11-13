@@ -65,6 +65,10 @@ class UpdateTaskRuleset extends FluxRuleset
                 'exclude_if:due_date,null',
                 Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
             ],
+            'has_start_reminder' => 'boolean',
+            'start_reminder_minutes_before' => 'nullable|integer|min:0',
+            'has_due_reminder' => 'boolean',
+            'due_reminder_minutes_before' => 'nullable|integer|min:0',
             'priority' => 'sometimes|required|integer|min:0',
             'state' => [
                 'string',

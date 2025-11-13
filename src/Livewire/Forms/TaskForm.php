@@ -27,6 +27,14 @@ class TaskForm extends FluxForm
 
     public ?string $due_time = null;
 
+    public bool $has_due_reminder = true;
+
+    public ?int $due_reminder_minutes_before = 15;
+
+    public bool $has_start_reminder = true;
+
+    public ?int $start_reminder_minutes_before = 15;
+
     #[Locked]
     public ?int $id = null;
 

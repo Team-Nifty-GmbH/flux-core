@@ -4,8 +4,7 @@ namespace FluxErp\Jobs;
 
 use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
-use FluxErp\Events\Task\TaskDueReminderEvent;
-use FluxErp\Events\Task\TaskStartReminderEvent;
+use FluxErp\Events\Task\TaskReminderEvent;
 use FluxErp\Models\Task;
 use FluxErp\States\Task\Canceled;
 use FluxErp\States\Task\Done;
@@ -27,7 +26,7 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
 
     public static function description(): ?string
     {
-        return __('Send reminders for tasks that are due or starting soon.');
+        return 'Send reminders for tasks that are due or starting soon.';
     }
 
     public static function isRepeatable(): bool
@@ -47,38 +46,42 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
 
     public function handle(): void
     {
-        $this->sendDueReminders();
         $this->sendStartReminders();
-    }
-
-    protected function sendDueReminders(): void
-    {
-        resolve_static(Task::class, 'query')
-            ->whereNotNull('due_datetime')
-            ->whereBetween('due_datetime', [now()->addHours(23), now()->addHours(25)])
-            ->whereNull('due_reminder_sent_at')
-            ->whereNotIn('state', [Done::class, Canceled::class])
-            ->with(['responsibleUser', 'users'])
-            ->each(function (Task $task): void {
-                event(app(TaskDueReminderEvent::class, ['task' => $task]));
-
-                $task->due_reminder_sent_at = now();
-                $task->saveQuietly();
-            });
+        $this->sendDueReminders();
     }
 
     protected function sendStartReminders(): void
     {
         resolve_static(Task::class, 'query')
+            ->where('has_start_reminder', true)
             ->whereNotNull('start_datetime')
-            ->whereBetween('start_datetime', [now()->addHours(23), now()->addHours(25)])
             ->whereNull('start_reminder_sent_at')
             ->whereNotIn('state', [Done::class, Canceled::class])
+            ->whereRaw('start_datetime > NOW()')
+            ->whereRaw('TIMESTAMPDIFF(MINUTE, NOW(), start_datetime) <= COALESCE(start_reminder_minutes_before, 0)')
             ->with(['responsibleUser', 'users'])
             ->each(function (Task $task): void {
-                event(app(TaskStartReminderEvent::class, ['task' => $task]));
+                event(app(TaskReminderEvent::class, ['task' => $task, 'type' => 'start']));
 
                 $task->start_reminder_sent_at = now();
+                $task->saveQuietly();
+            });
+    }
+
+    protected function sendDueReminders(): void
+    {
+        resolve_static(Task::class, 'query')
+            ->where('has_due_reminder', true)
+            ->whereNotNull('due_datetime')
+            ->whereNull('due_reminder_sent_at')
+            ->whereNotIn('state', [Done::class, Canceled::class])
+            ->whereRaw('due_datetime > NOW()')
+            ->whereRaw('TIMESTAMPDIFF(MINUTE, NOW(), due_datetime) <= COALESCE(due_reminder_minutes_before, 0)')
+            ->with(['responsibleUser', 'users'])
+            ->each(function (Task $task): void {
+                event(app(TaskReminderEvent::class, ['task' => $task, 'type' => 'due']));
+
+                $task->due_reminder_sent_at = now();
                 $task->saveQuietly();
             });
     }
