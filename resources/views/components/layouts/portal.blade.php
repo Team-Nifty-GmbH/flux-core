@@ -62,7 +62,16 @@
                 </x-slot>
             </x-modal>
         </div>
-        <div class="absolute right-4 top-6 flex gap-1.5">
+        <div
+            class="absolute right-4 top-6 flex items-center gap-1.5 max-md:w-full max-sm:w-full"
+        >
+            <div class="flex flex-1 items-center justify-start pl-4 md:hidden">
+                <x-button
+                    flat
+                    icon="bars-4"
+                    x-on:click="$dispatch('menu-force-open')"
+                />
+            </div>
             <a
                 href="{{ $client?->website }}"
                 target="_blank"
@@ -90,12 +99,6 @@
         </div>
         @auth('address')
             <div id="nav">
-                <x-button
-                    flat
-                    class="md:hidden"
-                    icon="bars-4"
-                    x-on:click="$dispatch('menu-force-open')"
-                />
                 <livewire:navigation :show-search-bar="false" />
             </div>
         @endauth
