@@ -134,21 +134,35 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             }
 
             if ($task->start_date) {
-                $task->start_datetime = $task->start_time
+                $newStartDatetime = $task->start_time
                     ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
                     : $task->start_date->copy()->startOfDay();
+
+                if ($task->start_datetime?->timestamp !== $newStartDatetime->timestamp) {
+                    $task->start_reminder_sent_at = null;
+                }
+
+                $task->start_datetime = $newStartDatetime;
             } else {
                 $task->start_time = null;
                 $task->start_datetime = null;
+                $task->start_reminder_sent_at = null;
             }
 
             if ($task->due_date) {
-                $task->due_datetime = $task->due_time
+                $newDueDatetime = $task->due_time
                     ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
                     : $task->due_date->copy()->endOfDay();
+
+                if ($task->due_datetime?->timestamp !== $newDueDatetime->timestamp) {
+                    $task->due_reminder_sent_at = null;
+                }
+
+                $task->due_datetime = $newDueDatetime;
             } else {
                 $task->due_time = null;
                 $task->due_datetime = null;
+                $task->due_reminder_sent_at = null;
             }
         });
 
@@ -161,10 +175,16 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         return [
             'start_date' => 'date:Y-m-d',
+            'start_reminder_sent_at' => 'datetime',
             'due_date' => 'date:Y-m-d',
+            'due_reminder_sent_at' => 'datetime',
+            'start_datetime' => 'datetime',
+            'due_datetime' => 'datetime',
             'state' => TaskState::class,
             'time_budget' => TimeDuration::class,
             'total_cost' => Money::class,
+            'has_due_reminder' => 'boolean',
+            'has_start_reminder' => 'boolean',
         ];
     }
 

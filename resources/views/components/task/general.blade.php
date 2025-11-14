@@ -1,6 +1,6 @@
-<div class="space-y-8 divide-y divide-gray-200">
+<div class="flex flex-col gap-4 divide-y divide-gray-200">
     <div
-        class="space-y-2.5"
+        class="flex flex-col gap-2"
         x-data="{
             formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
         }"
@@ -81,34 +81,80 @@
         >
             @section('task-content.dates')
             @section('task-content.start')
-            <div class="flex flex-row gap-x-4">
-                <x-date
-                    :label="__('Start Date')"
-                    wire:model="task.start_date"
-                    x-bind:readonly="!edit"
-                />
-                <x-input
-                    type="time"
-                    :label="__('Start Time')"
-                    wire:model="task.start_time"
-                    x-bind:readonly="!edit"
-                />
+            <div class="flex flex-col gap-2">
+                <div class="flex flex-row gap-x-4">
+                    <x-date
+                        :label="__('Start Date')"
+                        wire:model="task.start_date"
+                        x-bind:readonly="!edit"
+                    />
+                    <x-input
+                        type="time"
+                        :label="__('Start Time')"
+                        wire:model="task.start_time"
+                        x-bind:readonly="!edit"
+                    />
+                </div>
+                <div
+                    class="flex flex-col gap-2"
+                    x-cloak
+                    x-show="task.start_date"
+                    x-bind:class="!edit && 'pointer-events-none'"
+                >
+                    <x-toggle
+                        :label="__('Start Reminder')"
+                        wire:model="task.has_start_reminder"
+                        x-bind:disabled="!edit"
+                    />
+                    <div x-cloak x-show="$wire.task.has_start_reminder">
+                        <x-number
+                            :label="__('Remind Minutes Before')"
+                            wire:model="task.start_reminder_minutes_before"
+                            x-bind:readonly="!edit"
+                            min="0"
+                            :hint="__('Leave empty for reminder at start time')"
+                        />
+                    </div>
+                </div>
             </div>
             @show
 
             @section('task-content.due')
-            <div class="flex flex-row gap-x-4">
-                <x-date
-                    :label="__('Due Date')"
-                    wire:model="task.due_date"
-                    x-bind:readonly="!edit"
-                />
-                <x-input
-                    type="time"
-                    :label="__('Due Time')"
-                    wire:model="task.due_time"
-                    x-bind:readonly="!edit"
-                />
+            <div class="flex flex-col gap-2">
+                <div class="flex flex-row gap-x-4">
+                    <x-date
+                        :label="__('Due Date')"
+                        wire:model="task.due_date"
+                        x-bind:readonly="!edit"
+                    />
+                    <x-input
+                        type="time"
+                        :label="__('Due Time')"
+                        wire:model="task.due_time"
+                        x-bind:readonly="!edit"
+                    />
+                </div>
+                <div
+                    class="flex flex-col gap-2"
+                    x-cloak
+                    x-show="task.due_date"
+                    x-bind:class="!edit && 'pointer-events-none'"
+                >
+                    <x-toggle
+                        :label="__('Due Reminder')"
+                        wire:model="task.has_due_reminder"
+                        x-bind:disabled="!edit"
+                    />
+                    <div x-cloak x-show="$wire.task.has_due_reminder">
+                        <x-number
+                            :label="__('Remind Minutes Before')"
+                            wire:model="task.due_reminder_minutes_before"
+                            x-bind:readonly="!edit"
+                            min="0"
+                            :hint="__('Leave empty for reminder at due time')"
+                        />
+                    </div>
+                </div>
             </div>
             @show
             @show
@@ -233,7 +279,7 @@
         @show
     </div>
     @section('task-additional-columns')
-    <div class="space-y-2.5">
+    <div class="flex flex-col gap-2">
         <h3
             class="text-md mt-4 whitespace-normal font-medium text-secondary-700 dark:text-secondary-400"
         >

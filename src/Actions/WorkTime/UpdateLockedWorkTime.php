@@ -56,6 +56,17 @@ class UpdateLockedWorkTime extends FluxAction
     {
         parent::validateData();
 
+        if (array_key_exists('user_id', $this->data) &&
+            array_key_exists('employee_id', $this->data) &&
+            is_null($this->getData('user_id')) &&
+            is_null($this->getData('employee_id'))
+        ) {
+            throw ValidationException::withMessages([
+                'user_id' => ['At least one of the fields user_id or employee_id must be provided.'],
+            ])
+                ->errorBag('updateLockedWorkTime');
+        }
+
         if ($endedAt = $this->getData('ended_at')) {
             $workTime = resolve_static(WorkTime::class, 'query')
                 ->whereKey($this->getData('id'))

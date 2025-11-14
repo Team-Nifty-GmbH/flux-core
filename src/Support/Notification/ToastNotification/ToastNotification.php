@@ -9,6 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Traits\Macroable;
+use Kreait\Firebase\Messaging\Notification as FcmNotification;
 use NotificationChannels\WebPush\WebPushMessage;
 
 class ToastNotification extends Toast implements Arrayable
@@ -273,6 +274,36 @@ class ToastNotification extends Toast implements Arrayable
         }
 
         return $webPush;
+    }
+
+    public function toFcm(): ?FcmNotification
+    {
+        $fcmNotification = FcmNotification::create(
+            $this->title ?? '',
+            $this->description ?? ''
+        );
+
+        if ($imageUrl = data_get($this->data, 'image')) {
+            $fcmNotification = $fcmNotification->withImageUrl($imageUrl);
+        }
+
+        return $fcmNotification;
+    }
+
+    public function toFcmData(): array
+    {
+        $url = $this->accept?->url;
+
+        if (! $url) {
+            return [];
+        }
+
+        $parsedUrl = parse_url($url);
+
+        return [
+            'url' => ($parsedUrl['scheme'] ?? 'https') . '://' . ($parsedUrl['host'] ?? ''),
+            'path' => ($parsedUrl['path'] ?? '') . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : ''),
+        ];
     }
 
     public function type(ToastType $type): static
