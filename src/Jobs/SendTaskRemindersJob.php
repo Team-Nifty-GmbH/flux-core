@@ -6,8 +6,7 @@ use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Events\Task\TaskReminderEvent;
 use FluxErp\Models\Task;
-use FluxErp\States\Task\Canceled;
-use FluxErp\States\Task\Done;
+use FluxErp\States\Task\TaskState;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -46,18 +45,23 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
 
     public function handle(): void
     {
-        $this->sendStartReminders();
-        $this->sendDueReminders();
+        $endStates = TaskState::all()
+            ->filter(fn ($state) => $state::$isEndState)
+            ->keys()
+            ->toArray();
+
+        $this->sendStartReminders($endStates);
+        $this->sendDueReminders($endStates);
     }
 
-    protected function sendStartReminders(): void
+    protected function sendStartReminders(array $endStates): void
     {
         resolve_static(Task::class, 'query')
-            ->where('has_start_reminder', true)
-            ->whereNotNull('start_datetime')
             ->whereNull('start_reminder_sent_at')
-            ->whereNotIn('state', [Done::class, Canceled::class])
+            ->whereNotNull('start_datetime')
             ->whereRaw('start_datetime > NOW()')
+            ->whereNotIn('state', $endStates)
+            ->where('has_start_reminder', true)
             ->whereRaw('TIMESTAMPDIFF(MINUTE, NOW(), start_datetime) <= COALESCE(start_reminder_minutes_before, 0)')
             ->with(['responsibleUser', 'users'])
             ->each(function (Task $task): void {
@@ -68,14 +72,14 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
             });
     }
 
-    protected function sendDueReminders(): void
+    protected function sendDueReminders(array $endStates): void
     {
         resolve_static(Task::class, 'query')
-            ->where('has_due_reminder', true)
-            ->whereNotNull('due_datetime')
             ->whereNull('due_reminder_sent_at')
-            ->whereNotIn('state', [Done::class, Canceled::class])
+            ->whereNotNull('due_datetime')
             ->whereRaw('due_datetime > NOW()')
+            ->whereNotIn('state', $endStates)
+            ->where('has_due_reminder', true)
             ->whereRaw('TIMESTAMPDIFF(MINUTE, NOW(), due_datetime) <= COALESCE(due_reminder_minutes_before, 0)')
             ->with(['responsibleUser', 'users'])
             ->each(function (Task $task): void {

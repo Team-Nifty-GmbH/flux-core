@@ -144,12 +144,9 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
                 $task->start_datetime = $newStartDatetime;
             } else {
-                if ($task->start_datetime !== null) {
-                    $task->start_reminder_sent_at = null;
-                }
-
                 $task->start_time = null;
                 $task->start_datetime = null;
+                $task->start_reminder_sent_at = null;
             }
 
             if ($task->due_date) {
@@ -163,12 +160,9 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
                 $task->due_datetime = $newDueDatetime;
             } else {
-                if ($task->due_datetime !== null) {
-                    $task->due_reminder_sent_at = null;
-                }
-
                 $task->due_time = null;
                 $task->due_datetime = null;
+                $task->due_reminder_sent_at = null;
             }
         });
 

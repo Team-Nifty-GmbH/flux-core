@@ -9,26 +9,26 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table): void {
-            $table->boolean('has_start_reminder')
-                ->default(true)
-                ->after('due_datetime');
             $table->unsignedInteger('start_reminder_minutes_before')
                 ->nullable()
-                ->default(15)
-                ->after('has_start_reminder');
+                ->after('start_time');
             $table->dateTime('start_reminder_sent_at')
                 ->nullable()
                 ->after('start_reminder_minutes_before');
-            $table->boolean('has_due_reminder')
-                ->default(true)
-                ->after('start_reminder_sent_at');
+
             $table->unsignedInteger('due_reminder_minutes_before')
                 ->nullable()
-                ->default(15)
-                ->after('has_due_reminder');
+                ->after('due_time');
             $table->dateTime('due_reminder_sent_at')
                 ->nullable()
                 ->after('due_reminder_minutes_before');
+
+            $table->boolean('has_due_reminder')
+                ->default(false)
+                ->after('total_cost');
+            $table->boolean('has_start_reminder')
+                ->default(false)
+                ->after('has_due_reminder');
         });
     }
 

@@ -167,6 +167,7 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.product-properties');
                 Menu::register(route: 'settings.queue-monitor');
                 Menu::register(route: 'settings.record-origins');
+                Menu::register(route: 'settings.reminder-settings');
                 Menu::register(route: 'settings.salary-components');
                 Menu::register(route: 'settings.scheduling');
                 Menu::register(route: 'settings.serial-number-ranges');

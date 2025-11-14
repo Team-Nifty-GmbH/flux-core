@@ -8,6 +8,7 @@ use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\CreateTaskRuleset;
+use FluxErp\Settings\ReminderSettings;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -66,19 +67,36 @@ class CreateTask extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['priority'] ??= 0;
+        $reminderSettings = app(ReminderSettings::class);
 
         if ($this->getData('start_date')) {
             $this->data['start_time'] ??= null;
+
+            if (! array_key_exists('start_reminder_minutes_before', $this->data)) {
+                $this->data['start_reminder_minutes_before'] = $reminderSettings->start_reminder_minutes_before;
+            }
+
+            if (! array_key_exists('has_start_reminder', $this->data)) {
+                $this->data['has_start_reminder'] = $reminderSettings->has_start_reminder;
+            }
         } else {
-            $this->data['has_start_reminder'] = false;
             $this->data['start_reminder_minutes_before'] = null;
+            $this->data['has_start_reminder'] = false;
         }
 
         if ($this->getData('due_date')) {
             $this->data['due_time'] ??= null;
+
+            if (! array_key_exists('due_reminder_minutes_before', $this->data)) {
+                $this->data['due_reminder_minutes_before'] = $reminderSettings->end_reminder_minutes_before;
+            }
+
+            if (! array_key_exists('has_due_reminder', $this->data)) {
+                $this->data['has_due_reminder'] = $reminderSettings->has_end_reminder;
+            }
         } else {
-            $this->data['has_due_reminder'] = false;
             $this->data['due_reminder_minutes_before'] = null;
+            $this->data['has_due_reminder'] = false;
         }
     }
 

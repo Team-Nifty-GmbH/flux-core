@@ -106,16 +106,13 @@
                         wire:model="task.has_start_reminder"
                         x-bind:disabled="!edit"
                     />
-                    <div
-                        x-cloak
-                        x-show="$wire.task.has_start_reminder"
-                    >
+                    <div x-cloak x-show="$wire.task.has_start_reminder">
                         <x-number
                             :label="__('Remind Minutes Before')"
                             wire:model="task.start_reminder_minutes_before"
                             x-bind:readonly="!edit"
                             min="0"
-                            :hint="__('Leave empty for reminder at event time')"
+                            :hint="__('Leave empty for reminder at start time')"
                         />
                     </div>
                 </div>
@@ -148,16 +145,13 @@
                         wire:model="task.has_due_reminder"
                         x-bind:disabled="!edit"
                     />
-                    <div
-                        x-cloak
-                        x-show="$wire.task.has_due_reminder"
-                    >
+                    <div x-cloak x-show="$wire.task.has_due_reminder">
                         <x-number
                             :label="__('Remind Minutes Before')"
                             wire:model="task.due_reminder_minutes_before"
                             x-bind:readonly="!edit"
                             min="0"
-                            :hint="__('Leave empty for reminder at event time')"
+                            :hint="__('Leave empty for reminder at due time')"
                         />
                     </div>
                 </div>
