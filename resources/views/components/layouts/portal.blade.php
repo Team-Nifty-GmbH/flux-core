@@ -90,6 +90,12 @@
         </div>
         @auth('address')
             <div id="nav">
+                <x-button
+                    flat
+                    class="md:hidden"
+                    icon="bars-4"
+                    x-on:click="$dispatch('menu-force-open')"
+                />
                 <livewire:navigation :show-search-bar="false" />
             </div>
         @endauth
