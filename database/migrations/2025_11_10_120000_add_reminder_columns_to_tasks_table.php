@@ -37,11 +37,11 @@ return new class() extends Migration
         Schema::table('tasks', function (Blueprint $table): void {
             $table->dropColumn([
                 'has_start_reminder',
-                'start_reminder_minutes_before',
-                'start_reminder_sent_at',
                 'has_due_reminder',
-                'due_reminder_minutes_before',
                 'due_reminder_sent_at',
+                'due_reminder_minutes_before',
+                'start_reminder_sent_at',
+                'start_reminder_minutes_before',
             ]);
         });
     }

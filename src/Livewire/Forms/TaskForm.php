@@ -92,8 +92,8 @@ class TaskForm extends FluxForm
 
         $this->has_due_reminder = app(ReminderSettings::class)->has_end_reminder;
         $this->has_start_reminder = app(ReminderSettings::class)->has_start_reminder;
-        $this->due_reminder_minutes_before ??= app(ReminderSettings::class)->end_reminder_minutes_before;
-        $this->start_reminder_minutes_before ??= app(ReminderSettings::class)->start_reminder_minutes_before;
+        $this->due_reminder_minutes_before = app(ReminderSettings::class)->end_reminder_minutes_before;
+        $this->start_reminder_minutes_before = app(ReminderSettings::class)->start_reminder_minutes_before;
     }
 
     protected function getActions(): array

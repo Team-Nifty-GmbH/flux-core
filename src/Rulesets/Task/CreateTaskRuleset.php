@@ -98,8 +98,8 @@ class CreateTaskRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class, ['min' => 0]),
             ],
-            'has_start_reminder' => 'boolean',
             'has_due_reminder' => 'boolean',
+            'has_start_reminder' => 'boolean',
         ];
     }
 }

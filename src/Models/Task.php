@@ -175,14 +175,16 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         return [
             'start_date' => 'date:Y-m-d',
-            'start_datetime' => 'datetime',
             'start_reminder_sent_at' => 'datetime',
             'due_date' => 'date:Y-m-d',
-            'due_datetime' => 'datetime',
             'due_reminder_sent_at' => 'datetime',
+            'start_datetime' => 'datetime',
+            'due_datetime' => 'datetime',
             'state' => TaskState::class,
             'time_budget' => TimeDuration::class,
             'total_cost' => Money::class,
+            'has_due_reminder' => 'boolean',
+            'has_start_reminder' => 'boolean',
         ];
     }
 
