@@ -62,31 +62,40 @@
                 </x-slot>
             </x-modal>
         </div>
-        <div class="absolute right-4 top-6 flex gap-1.5">
-            <a
-                href="{{ $client?->website }}"
-                target="_blank"
-                class="flex items-center dark:text-gray-50"
-            >
-                <x-icon name="arrow-up-right" class="h-4 w-4" />
-                <div class="return-to-website pl-4 font-bold">
-                    {{ __('Return to website') }}
-                </div>
-            </a>
-            @auth('address')
-                @can(route_to_permission('portal.checkout'))
-                    <x-button
-                        color="secondary"
-                        light
-                        icon="heart"
-                        wire:navigate
-                        :href="route('portal.watchlists')"
-                    />
-                    @persist('cart')
-                        <livewire:portal.shop.cart />
-                    @endpersist
-                @endcan
-            @endauth
+        <div
+            class="flex w-full items-center justify-between gap-1.5 p-2 shadow"
+        >
+            <x-button
+                flat
+                icon="bars-4"
+                x-on:click="$dispatch('menu-force-open')"
+            />
+            <div class="flex gap-1.5">
+                <x-link
+                    icon="arrow-up-right"
+                    :href="$client?->website"
+                    target="_blank"
+                    :text="__('Return to website')"
+                    class="font-bold"
+                />
+                @auth('address')
+                    @can(route_to_permission('portal.watchlists'))
+                        <x-button
+                            color="secondary"
+                            light
+                            icon="heart"
+                            wire:navigate
+                            :href="route('portal.watchlists')"
+                        />
+                    @endcan
+
+                    @can(route_to_permission('portal.checkout'))
+                        @persist('cart')
+                            <livewire:portal.shop.cart />
+                        @endpersist
+                    @endcan
+                @endauth
+            </div>
         </div>
         @auth('address')
             <div id="nav">
