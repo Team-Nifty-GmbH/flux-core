@@ -330,7 +330,7 @@ Route::prefix('api')
     ->group(function (): void {
         Route::get('/health', [MobileController::class, 'health']);
         Route::get('/mobile/config', [MobileController::class, 'config']);
-        Route::post('/mobile/device-token/delete', [MobileController::class, 'deleteDeviceToken']);
+        Route::delete('/mobile/device-token/delete/{deviceId}', [MobileController::class, 'deleteDeviceToken']);
 
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 

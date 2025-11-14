@@ -23,10 +23,11 @@ return new class() extends Migration
 
             $table->boolean('is_active')->default(true);
 
-            $table->timestamps();
+            $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
             $table->string('updated_by')->nullable();
-            $table->softDeletes();
+            $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
             $table->unique(

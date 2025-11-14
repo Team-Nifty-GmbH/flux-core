@@ -35,10 +35,9 @@ class CreateDeviceTokenRuleset extends FluxRuleset
             'token' => 'required|string',
             'platform' => [
                 'required',
-                'string',
                 Rule::enum(DevicePlatformEnum::class),
             ],
-            'is_active' => 'sometimes|required|boolean',
+            'is_active' => 'boolean',
         ];
     }
 }

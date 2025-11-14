@@ -106,10 +106,14 @@ class Login extends Component
 
     protected function tryLogin(): bool
     {
-        return Auth::guard($this->guard)->attempt([
-            'email' => $this->email,
-            'password' => $this->password,
-            'is_active' => true,
-        ], $this->remember);
+        return Auth::guard($this->guard)
+            ->attempt(
+                [
+                    'email' => $this->email,
+                    'password' => $this->password,
+                    'is_active' => true,
+                ],
+                $this->remember
+            );
     }
 }

@@ -22,7 +22,7 @@ const initializeNativeBridge = async () => {
         // Get platform
         bridge.getPlatform = () => Capacitor.getPlatform();
 
-        // Server wechseln
+        // Change server
         bridge.changeServer = async () => {
             try {
                 const { Preferences } = window.CapacitorPlugins || {};
@@ -43,7 +43,7 @@ const initializeNativeBridge = async () => {
             }
         };
 
-        // Camera - Foto aufnehmen
+        // Camera - Capture new photo
         if (Camera) {
             bridge.capturePhoto = async () => {
                 try {
@@ -67,7 +67,7 @@ const initializeNativeBridge = async () => {
                 }
             };
 
-            // Foto aus Galerie
+            // Pick photo from gallery
             bridge.pickPhoto = async () => {
                 try {
                     const image = await Camera.getPhoto({

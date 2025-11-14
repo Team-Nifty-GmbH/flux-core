@@ -28,7 +28,6 @@ class UpdateDeviceTokenRuleset extends FluxRuleset
             'platform' => [
                 'sometimes',
                 'required',
-                'string',
                 Rule::enum(DevicePlatformEnum::class),
             ],
             'is_active' => 'sometimes|required|boolean',
