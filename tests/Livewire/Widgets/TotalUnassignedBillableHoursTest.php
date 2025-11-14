@@ -69,6 +69,7 @@ beforeEach(function (): void {
             'order_position_id' => null,
             'is_daily_work_time' => false,
             'is_billable' => true,
+            'is_pause' => false,
             'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
             'ended_at' => Carbon::now()->toDateTimeString(),
             'total_time_ms' => 7200000,
