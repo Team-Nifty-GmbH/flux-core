@@ -75,7 +75,7 @@
                                             await window.nativeBridge.changeServer();
                                         }
                                     }"
-                                    :text="__('Change server')"
+                                    :text="__('Change Server')"
                                 />
                             </div>
                         </div>
