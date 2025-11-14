@@ -20,10 +20,9 @@ class DeleteDeviceToken extends FluxAction
 
     public function performAction(): ?bool
     {
-        $deviceToken = resolve_static(DeviceToken::class, 'query')
+        return resolve_static(DeviceToken::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
-
-        return $deviceToken?->delete();
+            ->firstOrFail()
+            ->delete();
     }
 }

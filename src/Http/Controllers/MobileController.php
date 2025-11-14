@@ -9,6 +9,7 @@ use FluxErp\Models\DeviceToken;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
 use Throwable;
@@ -71,7 +72,7 @@ class MobileController extends Controller
             ]);
     }
 
-    public function deleteDeviceToken(string $deviceId): JsonResponse
+    public function deleteDeviceToken(string $deviceId): JsonResponse|Response
     {
         $deviceToken = resolve_static(DeviceToken::class, 'query')
             ->where('device_id', $deviceId)
@@ -82,7 +83,7 @@ class MobileController extends Controller
             return response()
                 ->json(
                     [
-                        'error' => 'Device token not found',
+                        'device_id' => ['Device token not found'],
                     ],
                     404
                 );
@@ -92,9 +93,6 @@ class MobileController extends Controller
             ->validate()
             ->execute();
 
-        return response()
-            ->json([
-                'success' => true,
-            ]);
+        return response()->noContent();
     }
 }

@@ -1966,7 +1966,7 @@
     "Serial numbers:": "Seriennummern:",
     "serial-numbers.get": "Seriennummern anzeigen",
     "SerialNumbers": "Seriennummern",
-    "Server wechseln": "Server wechseln",
+    "Change server": "Server wechseln",
     "Service request": "Serviceanfrage",
     "Service Workers support": "Service Worker Unterstützung",
     "service.{serialnumberid?}.get": "Serviceanfrage erstellen",
