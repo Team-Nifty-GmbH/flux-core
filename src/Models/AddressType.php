@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AddressType extends FluxModel
 {
-    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+    use CacheModelQueries, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;
 
     protected function casts(): array
@@ -30,9 +30,9 @@ class AddressType extends FluxModel
         return $this->belongsToMany(Address::class);
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function orders(): BelongsToMany

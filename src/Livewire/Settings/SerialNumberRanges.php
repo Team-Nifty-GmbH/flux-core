@@ -7,8 +7,8 @@ use FluxErp\Actions\SerialNumberRange\DeleteSerialNumberRange;
 use FluxErp\Actions\SerialNumberRange\UpdateSerialNumberRange;
 use FluxErp\Livewire\DataTables\SerialNumberRangeList;
 use FluxErp\Livewire\Forms\SerialNumberRangeForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\SerialNumberRange;
+use FluxErp\Models\Tenant;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Support\Str;
@@ -118,7 +118,7 @@ class SerialNumberRanges extends SerialNumberRangeList
                         'value' => $modelInfo->morphClass,
                     ])
                     ->toArray(),
-                'clients' => resolve_static(Client::class, 'query')
+                'tenants' => resolve_static(Tenant::class, 'query')
                     ->select('id', 'name')
                     ->get()
                     ->toArray(),

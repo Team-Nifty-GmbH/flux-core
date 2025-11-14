@@ -5,12 +5,12 @@ namespace FluxErp\Actions\OrderPosition;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
@@ -43,8 +43,8 @@ class CreateOrderPosition extends FluxAction
         $this->data['is_net'] ??= $this->getData('priceList.is_net')
             ?? data_get($order, 'priceList.is_net')
             ?? data_get(resolve_static(PriceList::class, 'default'), 'is_net');
-        $this->data['client_id'] ??= data_get($order, 'client_id')
-            ?? resolve_static(Client::class, 'default')?->getKey();
+        $this->data['tenant_id'] ??= data_get($order, 'tenant_id')
+            ?? resolve_static(Tenant::class, 'default')?->getKey();
         $this->data['price_list_id'] ??= data_get($order, 'price_list_id')
             ?? resolve_static(PriceList::class, 'default')?->getKey();
 
@@ -104,7 +104,7 @@ class CreateOrderPosition extends FluxAction
             $product->bundleProducts
                 ->map(function (Product $bundleProduct) use ($orderPosition) {
                     return [
-                        'client_id' => $orderPosition->client_id,
+                        'tenant_id' => $orderPosition->tenant_id,
                         'order_id' => $orderPosition->order_id,
                         'parent_id' => $orderPosition->id,
                         'product_id' => $bundleProduct->id,

@@ -18,7 +18,7 @@ class AddressTypeRuleset extends FluxRuleset
                 app(
                     ExistsWithForeign::class,
                     [
-                        'foreignAttribute' => 'client_id',
+                        'foreignAttribute' => 'tenant_id',
                         'table' => 'address_types',
                         'baseTable' => 'addresses',
                     ]

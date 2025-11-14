@@ -147,12 +147,12 @@
                 </div>
                 <div class="space-y-3 pt-4">
                     <x-select.styled
-                        :label="__('Client')"
+                        :label="__('Tenant')"
                         required
                         autocomplete="off"
-                        wire:model="replicateOrder.client_id"
+                        wire:model="replicateOrder.tenant_id"
                         select="label:name|value:id"
-                        :options="$clients"
+                        :options="$tenants"
                     />
                     <x-select.styled
                         :label="__('Price list')"
@@ -562,7 +562,7 @@
                             <livewire:order.additional-addresses
                                 lazy
                                 :order-id="$order->id"
-                                :client-id="$order->client_id"
+                                :tenant-id="$order->tenant_id"
                             />
                         </div>
                     </x-card>
@@ -571,15 +571,15 @@
                         minimize="mount"
                     >
                         <div class="space-y-3 px-2 py-5">
-                            @if (count($clients) > 1)
+                            @if (count($tenants) > 1)
                                 <x-select.styled
                                     disabled
-                                    :label="__('Client')"
+                                    :label="__('Tenant')"
                                     required
                                     autocomplete="off"
-                                    wire:model.live="order.client_id"
+                                    wire:model.live="order.tenant_id"
                                     select="label:name|value:id"
-                                    :options="$clients"
+                                    :options="$tenants"
                                 />
                             @endif
 

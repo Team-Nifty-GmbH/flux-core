@@ -2,12 +2,12 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductProperty;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Seeder;
@@ -18,7 +18,7 @@ class ProductTableSeeder extends Seeder
     {
         $units = Unit::all(['id']);
         $vatRates = VatRate::all(['id']);
-        $clients = Client::all(['id']);
+        $tenants = Tenant::all(['id']);
         $products = Product::all(['id']);
         $priceLists = PriceList::query()
             ->whereNull('parent_id')
@@ -28,7 +28,7 @@ class ProductTableSeeder extends Seeder
         for ($i = 0; $i < 20; $i++) {
             $createdProducts->push(Product::factory()->create([
                 'unit_id' => $units->random()?->id,
-                'client_id' => $clients->random()?->id,
+                'tenant_id' => $tenants->random()?->id,
                 'purchase_unit_id' => $units->random()?->id,
                 'reference_unit_id' => $units->random()?->id,
                 'vat_rate_id' => $vatRates->random()?->id,

@@ -1,12 +1,12 @@
 <?php
 
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Settings\CoreSettings;
@@ -17,7 +17,7 @@ use Pest\Browser\Api\PendingAwaitablePage;
 
 pest()
     ->beforeEach(function (): void {
-        $this->dbClient = Client::default() ?? Client::factory()->create([
+        $this->dbTenant = Tenant::default() ?? Tenant::factory()->create([
             'is_default' => true,
         ]);
         $this->defaultLanguage = Language::default() ?? Language::factory()->create([
@@ -25,11 +25,11 @@ pest()
         ]);
 
         $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
         ]);
         $this->address = Address::factory()->create([
             'contact_id' => $this->contact->getKey(),
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->getKey(),
             'can_login' => true,
             'is_active' => true,
@@ -58,7 +58,7 @@ pest()
             'is_default' => true,
         ]);
 
-        $this->dbClient = Client::default() ?? Client::factory()->create([
+        $this->dbTenant = Tenant::default() ?? Tenant::factory()->create([
             'is_default' => true,
         ]);
 
@@ -71,7 +71,7 @@ pest()
         ]);
 
         PaymentType::default() ?? PaymentType::factory()
-            ->hasAttached($this->dbClient, relationship: 'clients')
+            ->hasAttached($this->dbTenant, relationship: 'tenants')
             ->create([
                 'is_active' => true,
                 'is_default' => true,

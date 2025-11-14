@@ -38,10 +38,10 @@ class UpdateOrderPosition extends FluxAction
 
         $order = resolve_static(Order::class, 'query')
             ->whereKey(data_get($this->data, 'order_id', $orderPosition->order_id))
-            ->select(['id', 'client_id', 'price_list_id'])
+            ->select(['id', 'tenant_id', 'price_list_id'])
             ->first();
 
-        $this->data['client_id'] ??= $order->client_id;
+        $this->data['tenant_id'] ??= $order->tenant_id;
         $this->data['price_list_id'] ??= $order->price_list_id;
 
         $orderPosition->fill($this->data);
@@ -81,7 +81,7 @@ class UpdateOrderPosition extends FluxAction
                     $sortNumber++;
 
                     return [
-                        'client_id' => $orderPosition->client_id,
+                        'tenant_id' => $orderPosition->tenant_id,
                         'order_id' => $orderPosition->order_id,
                         'parent_id' => $orderPosition->id,
                         'product_id' => $bundleProduct->id,

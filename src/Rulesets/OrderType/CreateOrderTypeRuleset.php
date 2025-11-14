@@ -3,9 +3,9 @@
 namespace FluxErp\Rulesets\OrderType;
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
@@ -18,10 +18,10 @@ class CreateOrderTypeRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:order_types,uuid',
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'name' => 'required|string|max:255',
             'description' => 'string|nullable',

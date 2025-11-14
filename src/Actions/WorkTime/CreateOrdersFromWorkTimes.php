@@ -55,7 +55,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     );
             })
             ->with('invoiceAddress.language:id,language_code')
-            ->get(['id', 'client_id', 'invoice_address_id']);
+            ->get(['id', 'tenant_id', 'invoice_address_id']);
 
         foreach ($contacts as $contact) {
             if ($contact->workTimes->isEmpty()) {
@@ -63,7 +63,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
             }
 
             $order = CreateOrder::make([
-                'client_id' => $contact->client_id,
+                'tenant_id' => $contact->tenant_id,
                 'contact_id' => $contact->getKey(),
                 'order_type_id' => $this->getData('order_type_id'),
             ])

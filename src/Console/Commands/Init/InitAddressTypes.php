@@ -3,7 +3,7 @@
 namespace FluxErp\Console\Commands\Init;
 
 use FluxErp\Models\AddressType;
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use Illuminate\Console\Command;
 
 class InitAddressTypes extends Command
@@ -25,17 +25,17 @@ class InitAddressTypes extends Command
             $jsonAddressTypes = $json['data'];
 
             if ($jsonAddressTypes) {
-                foreach (app(Client::class)->all() as $client) {
+                foreach (app(Tenant::class)->all() as $tenant) {
                     foreach ($jsonAddressTypes as $jsonAddressType) {
                         $data = array_map(function ($value) {
                             return __($value);
                         }, $jsonAddressType);
-                        $data['client_id'] = $client->id;
+                        $data['tenant_id'] = $tenant->id;
 
                         // Gather necessary foreign keys.
                         $addressType = resolve_static(AddressType::class, 'query')
                             ->where('address_type_code', $data['address_type_code'])
-                            ->where('client_id', $client->id)
+                            ->where('tenant_id', $tenant->id)
                             ->firstOrNew();
 
                         if (! $addressType->exists) {

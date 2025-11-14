@@ -10,8 +10,8 @@ use FluxErp\Facades\ProductType;
 use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Livewire\Forms\ProductPricesUpdateForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
@@ -116,7 +116,7 @@ class ProductList extends BaseProductList
     {
         $this->product->reset();
 
-        $this->product->client_id = resolve_static(Client::class, 'default')?->getKey();
+        $this->product->tenant_id = resolve_static(Tenant::class, 'default')?->getKey();
         $this->product->product_type = data_get(ProductType::getDefault(), 'type');
     }
 

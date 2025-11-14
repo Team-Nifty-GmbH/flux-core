@@ -8,11 +8,11 @@
         />
         <div x-show="! $wire.addressType.id" x-cloak>
             <x-select.styled
-                :label="__('Client')"
+                :label="__('Tenant')"
                 autocomplete="off"
-                wire:model="addressType.client_id"
+                wire:model="addressType.tenant_id"
                 select="label:name|value:id"
-                :options="$clients"
+                :options="$tenants"
             />
         </div>
         <div class="mt-2">

@@ -3,24 +3,24 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\AddressType;
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class AddressTypeTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $clients = Client::all(['id']);
+        $tenants = Tenant::all(['id']);
 
-        foreach ($clients as $client) {
+        foreach ($tenants as $tenant) {
             $invoiceAddressType = AddressType::query()
-                ->where('client_id', $client->id)
+                ->where('tenant_id', $tenant->id)
                 ->where('address_type_code', 'inv')
                 ->first();
 
             if (! $invoiceAddressType) {
                 AddressType::factory()->create([
-                    'client_id' => $client->id,
+                    'tenant_id' => $tenant->id,
                     'address_type_code' => 'inv',
                     'name' => 'invoice',
                     'is_locked' => true,
@@ -29,13 +29,13 @@ class AddressTypeTableSeeder extends Seeder
             }
 
             $deliveryAddressType = AddressType::query()
-                ->where('client_id', $client->id)
+                ->where('tenant_id', $tenant->id)
                 ->where('address_type_code', 'del')
                 ->first();
 
             if (! $deliveryAddressType) {
                 AddressType::factory()->create([
-                    'client_id' => $client->id,
+                    'tenant_id' => $tenant->id,
                     'address_type_code' => 'del',
                     'name' => 'delivery',
                     'is_locked' => true,
@@ -44,7 +44,7 @@ class AddressTypeTableSeeder extends Seeder
             }
 
             AddressType::factory()->count(3)->create([
-                'client_id' => $client->id,
+                'tenant_id' => $tenant->id,
                 'address_type_code' => null,
             ]);
         }

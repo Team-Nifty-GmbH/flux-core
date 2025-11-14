@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -18,7 +18,7 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class SerialNumberRange extends FluxModel
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     public static function hasPermission(): bool
     {
@@ -32,7 +32,7 @@ class SerialNumberRange extends FluxModel
                 $serialNumberRange->model_type,
                 $serialNumberRange->model_id,
                 $serialNumberRange->type,
-                $serialNumberRange->client_id,
+                $serialNumberRange->tenant_id,
             ]);
         });
     }
@@ -44,9 +44,9 @@ class SerialNumberRange extends FluxModel
         ];
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function getCurrentStyled(): array|string|Translator|Application|null

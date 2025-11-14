@@ -15,12 +15,12 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasRecordOrigin;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -42,8 +42,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin,
-        HasSerialNumberRange, HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable,
+        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin, HasSerialNumberRange,
+        HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable,
         Searchable;
 
     public static string $iconName = 'users';
@@ -93,9 +93,9 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->belongsTo(User::class, 'approval_user_id');
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function contactBankConnections(): HasMany

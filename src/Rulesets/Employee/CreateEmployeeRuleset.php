@@ -3,11 +3,11 @@
 namespace FluxErp\Rulesets\Employee;
 
 use FluxErp\Enums\SalutationEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Country;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Location;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\WorkTimeModel;
@@ -22,10 +22,10 @@ class CreateEmployeeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'country_id' => [
                 'nullable',

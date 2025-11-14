@@ -116,9 +116,9 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->morphMany(Activity::class, 'causer');
     }
 
-    public function clients(): BelongsToMany
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class, 'client_user');
+        return $this->belongsToMany(Tenant::class, 'tenant_user');
     }
 
     public function commissionRates(): HasMany

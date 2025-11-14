@@ -6,11 +6,11 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Facades\ProductType;
-use FluxErp\Models\Client;
-use FluxErp\Models\Pivots\ClientProduct;
+use FluxErp\Models\Pivots\TenantProduct;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
 use Illuminate\Support\Arr;
@@ -37,7 +37,7 @@ class CreateProduct extends FluxAction
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', []);
-        $clients = Arr::pull($this->data, 'clients', []);
+        $tenants = Arr::pull($this->data, 'tenants', []);
 
         $suppliers = Arr::pull($this->data, 'suppliers', false);
         $tags = Arr::pull($this->data, 'tags', []);
@@ -56,8 +56,8 @@ class CreateProduct extends FluxAction
             $product->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
-        if ($clients) {
-            $product->clients()->attach($clients);
+        if ($tenants) {
+            $product->tenants()->attach($tenants);
         }
 
         if ($product->is_bundle && $bundleProducts) {
@@ -106,15 +106,15 @@ class CreateProduct extends FluxAction
                 ->toArray();
         }
 
-        if (! data_get($this->data, 'clients')) {
+        if (! data_get($this->data, 'tenants')) {
             if (data_get($this->data, 'parent_id')) {
-                $this->data['clients'] = resolve_static(ClientProduct::class, 'query')
+                $this->data['tenants'] = resolve_static(TenantProduct::class, 'query')
                     ->where('product_id', data_get($this->data, 'parent_id'))
-                    ->pluck('client_id')
+                    ->pluck('tenant_id')
                     ->toArray();
             } else {
-                $this->data['clients'] = [
-                    resolve_static(Client::class, 'default')?->id,
+                $this->data['tenants'] = [
+                    resolve_static(Tenant::class, 'default')?->id,
                 ];
             }
         }

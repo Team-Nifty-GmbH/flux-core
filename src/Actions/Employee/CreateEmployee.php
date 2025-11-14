@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\Employee;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Client;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Rulesets\Employee\CreateEmployeeRuleset;
 use Illuminate\Support\Arr;
@@ -46,7 +46,7 @@ class CreateEmployee extends FluxAction
 
     public function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= resolve_static(Client::class, 'default')
+        $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')
             ?->getKey();
         $this->data['vacation_carryover_rule_id'] ??= resolve_static(
             VacationCarryoverRule::class,

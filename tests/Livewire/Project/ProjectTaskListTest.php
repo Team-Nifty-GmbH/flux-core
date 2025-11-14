@@ -7,7 +7,7 @@ use Livewire\Livewire;
 
 test('can add new task', function (): void {
     $project = Project::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
     ]);
 
     Livewire::test(ProjectTaskList::class, ['projectId' => $project->id])

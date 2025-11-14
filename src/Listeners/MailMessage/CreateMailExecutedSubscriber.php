@@ -8,12 +8,12 @@ use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Lead;
 use FluxErp\Models\Media;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
@@ -65,7 +65,7 @@ class CreateMailExecutedSubscriber
         foreach ($message->getMedia('attachments') as $attachment) {
             try {
                 $purchaseInvoice = CreatePurchaseInvoice::make([
-                    'client_id' => $contact?->client_id ?? resolve_static(Client::class, 'default')->getKey(),
+                    'tenant_id' => $contact?->tenant_id ?? resolve_static(Tenant::class, 'default')->getKey(),
                     'contact_id' => $contact?->id,
                     'currency_id' => $contact?->currency_id ?? resolve_static(Currency::class, 'default')->getKey(),
                     'payment_type_id' => $contact?->purchase_payment_type_id ?? $contact?->payment_type_id,
@@ -104,8 +104,8 @@ class CreateMailExecutedSubscriber
         try {
             /** @var Ticket $ticket */
             $ticket = CreateTicket::make([
-                'client_id' => $this->address->client_id
-                    ?? resolve_static(Client::class, 'default')->getKey(),
+                'tenant_id' => $this->address->tenant_id
+                    ?? resolve_static(Tenant::class, 'default')->getKey(),
                 'authenticatable_type' => morph_alias(Address::class),
                 'authenticatable_id' => $this->address->id,
                 'title' => $communication->subject,

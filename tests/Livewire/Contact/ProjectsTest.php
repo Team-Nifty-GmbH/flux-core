@@ -6,7 +6,7 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     Livewire::test(Projects::class, ['contactId' => $contact->id])

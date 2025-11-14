@@ -22,12 +22,12 @@ beforeEach(function (): void {
     ]);
 
     $this->orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
     $this->paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
             'is_active' => true,
             'is_sales' => true,
@@ -44,7 +44,7 @@ test('can change delivery address', function (): void {
         ->call('saveDeliveryAddress')
         ->assertReturned(true)
         ->assertSet('deliveryAddress.id', null)
-        ->assertSet('deliveryAddress.client_id', null)
+        ->assertSet('deliveryAddress.tenant_id', null)
         ->assertSet('deliveryAddress.language_id', null)
         ->assertSet('deliveryAddress.country_id', $newAddress->country_id)
         ->assertSet('deliveryAddress.contact_id', null)
@@ -83,7 +83,7 @@ test('can create order', function (): void {
         ->assertRedirect(route('portal.checkout-finish'));
 
     $this->assertDatabaseHas('orders', [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->address->contact_id,
         'address_invoice_id' => $this->address->id,
         'address_delivery_id' => $this->address->id,

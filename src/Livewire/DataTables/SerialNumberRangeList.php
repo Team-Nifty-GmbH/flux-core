@@ -7,7 +7,7 @@ use FluxErp\Models\SerialNumberRange;
 class SerialNumberRangeList extends BaseDataTable
 {
     public array $enabledCols = [
-        'client.name',
+        'tenant.name',
         'type',
         'current_number',
         'prefix',

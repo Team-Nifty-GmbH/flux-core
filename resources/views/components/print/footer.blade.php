@@ -4,38 +4,38 @@
         <div class="absolute left-0 right-0 m-auto max-h-32 px-6">
             <img
                 class="logo-small footer-logo m-auto"
-                src="{{ $client->logo_small }}"
+                src="{{ $tenant->logo_small }}"
             />
         </div>
         @show
         <div class="w-full">
             <div class="border-semi-black border-t">
-                @section('footer.client-address')
+                @section('footer.tenant-address')
                 <address class="float-left text-left not-italic">
                     <div class="font-semibold">
-                        {{ $client->name ?? '' }}
+                        {{ $tenant->name ?? '' }}
                     </div>
                     <div>
-                        {{ $client->ceo ?? '' }}
+                        {{ $tenant->ceo ?? '' }}
                     </div>
                     <div>
-                        {{ $client->street ?? '' }}
+                        {{ $tenant->street ?? '' }}
                     </div>
                     <div>
-                        {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
+                        {{ trim(($tenant->postcode ?? '') . ' ' . ($tenant->city ?? '')) }}
                     </div>
                     <div>
-                        {{ $client->phone ?? '' }}
+                        {{ $tenant->phone ?? '' }}
                     </div>
                     <div>
                         <div>
-                            {{ $client->vat_id }}
+                            {{ $tenant->vat_id }}
                         </div>
                     </div>
                 </address>
                 @show
                 @section('footer.bank-connections')
-                @foreach ($client->bankConnections as $bankConnection)
+                @foreach ($tenant->bankConnections as $bankConnection)
                     <div class="float-right pl-3 text-left">
                         <div class="font-semibold">
                             {{ $bankConnection->bank_name ?? '' }}
@@ -47,7 +47,7 @@
                             {{ $bankConnection->bic ?? '' }}
                         </div>
                     </div>
-                    @if ($client->logo_small)
+                    @if ($tenant->logo_small)
                         @break
                     @endif
                 @endforeach

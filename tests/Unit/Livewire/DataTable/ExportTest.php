@@ -16,7 +16,7 @@ test('can export data', function (): void {
     Notification::fake();
     Storage::fake(config('filesystems.default'));
 
-    Livewire::test(ClientDataTableTest::class)
+    Livewire::test(TenantDataTableTest::class)
         ->assertOk()
         ->call('export')
         ->assertToastNotification(type: 'success');
@@ -46,7 +46,7 @@ test('can export data', function (): void {
     );
 });
 
-class ClientDataTableTest extends BaseDataTable
+class TenantDataTableTest extends BaseDataTable
 {
-    protected string $model = \FluxErp\Models\Client::class;
+    protected string $model = \FluxErp\Models\Tenant::class;
 }

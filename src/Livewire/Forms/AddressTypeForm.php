@@ -11,7 +11,7 @@ class AddressTypeForm extends FluxForm
 {
     public ?string $address_type_code = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     #[Locked]
     public ?int $id = null;

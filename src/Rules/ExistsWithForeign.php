@@ -12,7 +12,7 @@ class ExistsWithForeign implements DataAwareRule, ValidationRule
     protected array $data;
 
     /**
-     * @param  string  $foreignAttribute  Example: client_id, the value is retrieved from the validation data array
+     * @param  string  $foreignAttribute  Example: tenant_id, the value is retrieved from the validation data array
      *                                    and has to match $attributeColumn on $table (or $throughTable if set).
      * @param  string  $table  Example: addresses, table used for the regular exists.
      * @param  string  $column  Used for the exists statement, the attribute value has to match the column value

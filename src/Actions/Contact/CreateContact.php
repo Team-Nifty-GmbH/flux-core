@@ -5,11 +5,11 @@ namespace FluxErp\Actions\Contact;
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
 
@@ -66,13 +66,13 @@ class CreateContact extends FluxAction
         if (! ($this->data['customer_number'] ?? false)) {
             $contact->getSerialNumber(
                 'customer_number',
-                $contact->client_id,
+                $contact->tenant_id,
             );
         }
 
         if (is_array($mainAddress)) {
             $mainAddress['contact_id'] = $contact->id;
-            $mainAddress['client_id'] = $contact->client_id;
+            $mainAddress['tenant_id'] = $contact->tenant_id;
 
             $mainAddress = CreateAddress::make($mainAddress)
                 ->validate()
@@ -87,7 +87,7 @@ class CreateContact extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= resolve_static(Client::class, 'default')?->getKey();
+        $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')?->getKey();
         $this->data['price_list_id'] ??= resolve_static(PriceList::class, 'default')?->getKey();
         $this->data['payment_type_id'] ??= resolve_static(PaymentType::class, 'default')?->getKey();
         $this->data['currency_id'] ??= resolve_static(Currency::class, 'default')?->getKey();

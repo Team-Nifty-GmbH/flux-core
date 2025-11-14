@@ -10,7 +10,7 @@ use Laravel\Sanctum\Sanctum;
 beforeEach(function (): void {
     $this->products = Product::factory()
         ->count(3)
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $this->serialNumberRanges = collect();
@@ -19,7 +19,7 @@ beforeEach(function (): void {
             'model_type' => morph_alias(Product::class),
             'model_id' => $product->id,
             'type' => 'product',
-            'client_id' => $product->client_id,
+            'tenant_id' => $product->tenant_id,
         ]));
     }
 
@@ -39,7 +39,7 @@ test('create serial number range', function (): void {
         'product_id' => $this->products[0]->id,
         'model_type' => morph_alias(Product::class),
         'type' => 'product',
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'start_number' => rand(1, 100),
         'prefix' => Str::random(),
         'suffix' => Str::random(),

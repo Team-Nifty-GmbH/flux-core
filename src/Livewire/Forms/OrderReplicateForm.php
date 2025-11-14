@@ -13,7 +13,7 @@ class OrderReplicateForm extends FluxForm
 
     public ?int $agent_id = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $contact_id = null;
 

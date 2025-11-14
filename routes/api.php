@@ -28,9 +28,6 @@ use FluxErp\Actions\Cart\UpdateCart;
 use FluxErp\Actions\Category\CreateCategory;
 use FluxErp\Actions\Category\DeleteCategory;
 use FluxErp\Actions\Category\UpdateCategory;
-use FluxErp\Actions\Client\CreateClient;
-use FluxErp\Actions\Client\DeleteClient;
-use FluxErp\Actions\Client\UpdateClient;
 use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Actions\Comment\DeleteComment;
 use FluxErp\Actions\Comment\UpdateComment;
@@ -203,6 +200,9 @@ use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\FinishTask;
 use FluxErp\Actions\Task\UpdateTask;
+use FluxErp\Actions\Tenant\CreateTenant;
+use FluxErp\Actions\Tenant\DeleteTenant;
+use FluxErp\Actions\Tenant\UpdateTenant;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Actions\Ticket\DeleteTicket;
 use FluxErp\Actions\Ticket\ToggleTicketUser;
@@ -247,7 +247,6 @@ use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Cart;
 use FluxErp\Models\Category;
-use FluxErp\Models\Client;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Commission;
 use FluxErp\Models\Communication;
@@ -302,6 +301,7 @@ use FluxErp\Models\Setting;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\Unit;
@@ -408,12 +408,12 @@ Route::prefix('api')
                 Route::put('/categories', UpdateCategory::class);
                 Route::delete('/categories/{id}', DeleteCategory::class);
 
-                // Clients
-                Route::get('/clients/{id}', [BaseController::class, 'show'])->defaults('model', Client::class);
-                Route::get('/clients', [BaseController::class, 'index'])->defaults('model', Client::class);
-                Route::post('/clients', CreateClient::class);
-                Route::put('/clients', UpdateClient::class);
-                Route::delete('/clients/{id}', DeleteClient::class);
+                // Tenants
+                Route::get('/tenants/{id}', [BaseController::class, 'show'])->defaults('model', Tenant::class);
+                Route::get('/tenants', [BaseController::class, 'index'])->defaults('model', Tenant::class);
+                Route::post('/tenants', CreateTenant::class);
+                Route::put('/tenants', UpdateTenant::class);
+                Route::delete('/tenants/{id}', DeleteTenant::class);
 
                 // Comments
                 Route::get('/{modelType}/comments/{id}', [CommentController::class, 'show'])

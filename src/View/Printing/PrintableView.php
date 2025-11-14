@@ -9,7 +9,7 @@ use Dompdf\FontMetrics;
 use Dompdf\Options;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Contracts\SignablePrintView;
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use FluxErp\Printing\Printable;
 use FluxErp\Traits\Makeable;
 use Illuminate\Database\Eloquent\Model;
@@ -237,16 +237,16 @@ abstract class PrintableView extends Component
     {
         $model = $this->getModel();
 
-        $client = $model?->client ?? Client::query()->first();
+        $tenant = $model?->tenant ?? Tenant::query()->first();
 
-        if (($logo = $client->getFirstMedia('logo')) && file_exists($logo->getPath())) {
-            $client->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
+        if (($logo = $tenant->getFirstMedia('logo')) && file_exists($logo->getPath())) {
+            $tenant->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
                 ? $logo->getUrl('png')
                 : $logo->getUrl();
         }
 
-        if (($logoSmall = $client->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
-            $client->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
+        if (($logoSmall = $tenant->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
+            $tenant->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
                 ? $logoSmall->getUrl('png')
                 : $logoSmall->getUrl();
         }
@@ -262,7 +262,7 @@ abstract class PrintableView extends Component
         }
 
         View::share('signaturePath', $signaturePath);
-        View::share('client', $client);
+        View::share('tenant', $tenant);
         View::share('subject', $this->getSubject());
         View::share('printView', Str::kebab(class_basename($this)));
         View::share('printLayout', static::$layout);

@@ -27,7 +27,7 @@ beforeEach(function (): void {
             'prices'
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'is_bundle' => false,
         ]);
 });
@@ -55,7 +55,7 @@ test('get price lists', function (): void {
 
 test('get product cross sellings', function (): void {
     $crossSellingProduct = ProductModel::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $crossSelling = ProductCrossSelling::factory()->create([
@@ -208,7 +208,7 @@ test('switch tabs', function (): void {
 
 test('tab visibility for bundle product', function (): void {
     $bundleProduct = ProductModel::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_bundle' => true,
     ]);
 
@@ -221,7 +221,7 @@ test('tab visibility for bundle product', function (): void {
 
 test('tab visibility for variant product', function (): void {
     $parentProduct = ProductModel::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'parent_id' => null,
     ]);
 

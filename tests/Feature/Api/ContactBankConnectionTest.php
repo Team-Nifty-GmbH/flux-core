@@ -11,7 +11,7 @@ uses(Illuminate\Foundation\Testing\WithFaker::class);
 
 beforeEach(function (): void {
     $contacts = Contact::factory()->count(2)->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $this->contactBankConnections = ContactBankConnection::factory()->count(2)->create([

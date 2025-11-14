@@ -5,7 +5,7 @@ namespace FluxErp\Actions\Ticket;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Events\Ticket\TicketAssignedEvent;
 use FluxErp\Models\AdditionalColumn;
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\User;
@@ -59,7 +59,7 @@ class CreateTicket extends FluxAction
 
         $ticket->getSerialNumber(
             'ticket_number',
-            Auth::user()?->client_id ?? resolve_static(Client::class, 'query')->where('is_active', true)->first()?->id
+            Auth::user()?->tenant_id ?? resolve_static(Tenant::class, 'query')->where('is_active', true)->first()?->id
         );
 
         $ticket->save();

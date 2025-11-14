@@ -115,9 +115,9 @@ test('create comment sends notification', function (): void {
     $user->save();
 
     $address = Address::factory()
-        ->for(Contact::factory()->create(['client_id' => $this->dbClient->getKey()]))
+        ->for(Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()]))
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'is_main_address' => true,
         ]);
 
@@ -158,9 +158,9 @@ test('create comment sends notification to address', function (): void {
     config(['queue.default' => 'sync']);
 
     $address = Address::factory()
-        ->for(Contact::factory()->create(['client_id' => $this->dbClient->id]))
+        ->for(Contact::factory()->create(['tenant_id' => $this->dbTenant->id]))
         ->create([
-            'client_id' => $this->dbClient->id,
+            'tenant_id' => $this->dbTenant->id,
             'is_active' => true,
             'is_main_address' => true,
         ]);

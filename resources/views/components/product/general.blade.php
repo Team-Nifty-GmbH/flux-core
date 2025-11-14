@@ -203,13 +203,13 @@
         <x-select.styled
             multiple
             x-bind:disabled="!edit"
-            wire:model.number="product.clients"
-            :label="__('Clients')"
+            wire:model.number="product.tenants"
+            :label="__('Tenants')"
             select="label:name|value:id"
             :src="'logo_small_url'"
             unfiltered
             :request="[
-                'url' => route('search', \FluxErp\Models\Client::class),
+                'url' => route('search', \FluxErp\Models\Tenant::class),
                 'method' => 'POST',
             ]"
         />

@@ -5,9 +5,9 @@ namespace FluxErp\Models;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasEnums;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderType extends FluxModel
 {
-    use CacheModelQueries, Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasUserModification, HasUuid,
+    use CacheModelQueries, Filterable, HasEnums, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;
 
     public static function hasPermission(): bool
@@ -38,9 +38,9 @@ class OrderType extends FluxModel
         ];
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function emailTemplate(): BelongsTo

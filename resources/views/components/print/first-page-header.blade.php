@@ -2,11 +2,11 @@
     @section('first-page-logo')
     <div class="grid h-32 content-center">
         <div class="m-auto max-h-72 text-center">
-            @if ($client->logo)
-                <img class="logo m-auto" src="{{ $client->logo }}" />
+            @if ($tenant->logo)
+                <img class="logo m-auto" src="{{ $tenant->logo }}" />
             @else
                 <div class="text-5xl font-semibold">
-                    {{ $client->name }}
+                    {{ $tenant->name }}
                 </div>
             @endif
         </div>
@@ -15,9 +15,9 @@
     <table class="w-full">
         <tr>
             <td colspan="2" class="w-full pb-1 pt-6 text-2xs">
-                @section('client-address')
+                @section('tenant-address')
                 <div>
-                    {{ $client->postal_address_one_line }}
+                    {{ $tenant->postal_address_one_line }}
                 </div>
                 <div class="black-bar"></div>
                 @show

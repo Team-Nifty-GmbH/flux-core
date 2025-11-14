@@ -2,19 +2,19 @@
 
 namespace FluxErp\Traits\Livewire;
 
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Facades\Auth;
 
 trait WithAddressAuth
 {
     use EnsureUsedInLivewire;
 
-    public array $customerClient = [];
+    public array $customerTenant = [];
 
     public function mountWithAddressAuth(): void
     {
-        $this->customerClient = resolve_static(Client::class, 'query')
-            ->whereKey(Auth::user()->contact->client_id)
+        $this->customerTenant = resolve_static(Tenant::class, 'query')
+            ->whereKey(Auth::user()->contact->tenant_id)
             ?->first()
             ->toArray();
     }

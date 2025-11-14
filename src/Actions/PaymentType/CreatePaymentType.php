@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\PaymentType;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\PaymentType\CreatePaymentTypeRuleset;
 use Illuminate\Support\Arr;
 
@@ -22,13 +22,13 @@ class CreatePaymentType extends FluxAction
 
     public function performAction(): PaymentType
     {
-        $clients = Arr::pull($this->data, 'clients');
+        $tenants = Arr::pull($this->data, 'tenants');
 
         $paymentType = app(PaymentType::class, ['attributes' => $this->data]);
         $paymentType->save();
 
-        if ($clients) {
-            $paymentType->clients()->attach($clients);
+        if ($tenants) {
+            $paymentType->tenants()->attach($tenants);
         }
 
         return $paymentType->fresh();
@@ -36,8 +36,8 @@ class CreatePaymentType extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['clients'] ??= [
-            data_get($this->data, 'client_id') ?? resolve_static(Client::class, 'default')?->id,
+        $this->data['tenants'] ??= [
+            data_get($this->data, 'tenant_id') ?? resolve_static(Tenant::class, 'default')?->id,
         ];
     }
 }

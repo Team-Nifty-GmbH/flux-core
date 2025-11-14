@@ -3,25 +3,25 @@
 use FluxErp\Models\Address;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $dbClient = Client::factory()->create();
+    $dbTenant = Tenant::factory()->create();
 
     $this->contact = Contact::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
     ]);
 
     Address::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
         'contact_id' => $this->contact->id,
     ]);
 
@@ -29,7 +29,7 @@ beforeEach(function (): void {
     $vatRate = VatRate::factory()->create();
 
     $this->products = Product::factory()->count(3)->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
         'vat_rate_id' => $vatRate->id,
     ]);
 
@@ -61,10 +61,10 @@ beforeEach(function (): void {
 
     OrderType::factory()->create([
         'order_type_enum' => 'order',
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
     ]);
 
-    $this->user->clients()->attach($dbClient->id);
+    $this->user->tenants()->attach($dbTenant->id);
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.carts.{id}.get'),

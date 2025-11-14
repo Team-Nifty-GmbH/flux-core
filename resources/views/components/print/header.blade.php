@@ -13,7 +13,7 @@
             <div class="float-right inline-block max-h-72 w-44 text-right">
                 <img
                     class="logo-small"
-                    src="{{ $client->logo_small }}"
+                    src="{{ $tenant->logo_small }}"
                     alt="logo-small"
                 />
             </div>

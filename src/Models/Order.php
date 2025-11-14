@@ -29,12 +29,12 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasRelatedModel;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -70,8 +70,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel,
-        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
+        HasStates, HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -191,9 +191,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 $order->payment_type_id = ! $contact->payment_type_id || $order->isDirty('payment_type_id')
                     ? $order->payment_type_id
                     : $contact->payment_type_id;
-                $order->client_id = ! $contact->client_id || $order->isDirty('client_id')
-                    ? $order->client_id
-                    : $contact->client_id;
+                $order->tenant_id = ! $contact->tenant_id || $order->isDirty('tenant_id')
+                    ? $order->tenant_id
+                    : $contact->tenant_id;
             }
 
             if ($order->isDirty('address_delivery_id')
@@ -679,9 +679,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this;
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function commissions(): HasMany
@@ -798,7 +798,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $printViews;
     }
 
-    public function getSerialNumber(string|array $types, ?int $clientId = null): static
+    public function getSerialNumber(string|array $types, ?int $tenantId = null): static
     {
         if (in_array('invoice_number', Arr::wrap($types))) {
             $rules = [
@@ -820,7 +820,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             Validator::make($data, $rules, $messages)->validate();
         }
 
-        return $this->hasSerialNumberRangeGetSerialNumber($types, $clientId);
+        return $this->hasSerialNumberRangeGetSerialNumber($types, $tenantId);
     }
 
     public function getUrl(): ?string

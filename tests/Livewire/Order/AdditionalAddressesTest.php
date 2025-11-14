@@ -16,25 +16,25 @@ beforeEach(function (): void {
         'is_default' => true,
     ]);
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     $priceList = PriceList::factory()->create([
         'is_default' => true,
     ]);
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
             'is_default' => true,
         ]);
 
     $orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order->value,
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
         'is_main_address' => true,
         'is_invoice_address' => true,
@@ -42,7 +42,7 @@ beforeEach(function (): void {
     ]);
 
     $this->order = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'currency_id' => $currency->id,
         'address_invoice_id' => $address->id,
         'price_list_id' => $priceList->id,

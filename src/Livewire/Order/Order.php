@@ -25,7 +25,6 @@ use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Livewire\Forms\OrderScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Discount;
@@ -36,6 +35,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Schedule;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
@@ -106,13 +106,13 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->whereRelation('clients', 'id', $this->order->client_id)
+                    ->whereRelation('tenants', 'id', $this->order->tenant_id)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'languages' => resolve_static(Language::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => resolve_static(Client::class, 'query')
+                'tenants' => resolve_static(Tenant::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
                 'frequencies' => array_map(
@@ -351,8 +351,8 @@ class Order extends Component
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderVariable}->client_id = $contact?->client_id
-            ?? resolve_static(Client::class, 'default')->getKey();
+        $this->{$orderVariable}->tenant_id = $contact?->tenant_id
+            ?? resolve_static(Tenant::class, 'default')->getKey();
         $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
         $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
@@ -392,7 +392,7 @@ class Order extends Component
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
             $this->schedule->parameters['orderTypeId'] = resolve_static(OrderType::class, 'query')
-                ->where('client_id', $this->order->client_id)
+                ->where('tenant_id', $this->order->tenant_id)
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
@@ -417,7 +417,7 @@ class Order extends Component
                             ])
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
-                            ->where('client_id', $this->order->client_id)
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
                             ->exists();
@@ -440,7 +440,7 @@ class Order extends Component
                             ])
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
-                            ->where('client_id', $this->order->client_id)
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::Refund->value)
                             ->where('is_active', true)
                             ->exists();
@@ -461,7 +461,7 @@ class Order extends Component
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
-                            ->where('client_id', $this->order->client_id)
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
                             ->where('is_active', true)
                             ->where('is_hidden', false)
@@ -616,7 +616,7 @@ class Order extends Component
 
         if ($orderTypeEnum) {
             $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
-                ->where('client_id', $this->order->client_id)
+                ->where('tenant_id', $this->order->tenant_id)
                 ->where('order_type_enum', $orderTypeEnum)
                 ->where('is_active', true)
                 ->value('id');
@@ -774,7 +774,7 @@ class Order extends Component
         $this->order->price_list_id = $this->order->address_invoice['contact']['price_list_id'] ?? null;
         $this->order->language_id = $this->order->address_invoice['language_id'];
         $this->order->contact_id = $this->order->address_invoice['contact_id'];
-        $this->order->client_id = $this->order->address_invoice['client_id'];
+        $this->order->tenant_id = $this->order->address_invoice['tenant_id'];
     }
 
     public function updatedOrderIsConfirmed(): void
@@ -814,7 +814,7 @@ class Order extends Component
             ->whereKey($id)
             ->with([
                 'addresses',
-                'client:id,name',
+                'tenant:id,name',
                 'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
                 'contact.contactBankConnections:id,contact_id,iban',
                 'currency:id,iso,name,symbol',

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Rulesets\PurchaseInvoice;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -47,10 +47,10 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'contact_id' => [
                 'required',

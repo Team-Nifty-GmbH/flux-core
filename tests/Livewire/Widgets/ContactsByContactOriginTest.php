@@ -35,34 +35,34 @@ beforeEach(function (): void {
         $this->contacts = $this->contacts
             ->merge(
                 Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
+                    'tenant_id' => $this->dbTenant->getKey(),
                     'record_origin_id' => $recordOrigin->id,
                 ])
             )
             ->merge(
                 Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
+                    'tenant_id' => $this->dbTenant->getKey(),
                     'record_origin_id' => $recordOrigin->id,
                     'created_at' => Carbon::now()->startOfWeek(),
                 ])
             )
             ->merge(
                 Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
+                    'tenant_id' => $this->dbTenant->getKey(),
                     'record_origin_id' => $recordOrigin->id,
                     'created_at' => Carbon::now()->startOfMonth(),
                 ])
             )
             ->merge(
                 Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
+                    'tenant_id' => $this->dbTenant->getKey(),
                     'record_origin_id' => $recordOrigin->id,
                     'created_at' => Carbon::now()->startOfQuarter(),
                 ])
             )
             ->merge(
                 Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
+                    'tenant_id' => $this->dbTenant->getKey(),
                     'record_origin_id' => $recordOrigin->id,
                     'created_at' => Carbon::now()->startOfYear(),
                 ])

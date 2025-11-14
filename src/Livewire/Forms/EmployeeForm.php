@@ -22,7 +22,7 @@ class EmployeeForm extends FluxForm
 
     public ?string $city = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?string $confession = null;
 

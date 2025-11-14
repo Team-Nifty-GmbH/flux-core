@@ -70,7 +70,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
+                    'foreignAttribute' => 'tenant_id',
                     'table' => 'addresses',
                     'baseTable' => 'orders',
                 ]),
@@ -79,7 +79,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
+                    'foreignAttribute' => 'tenant_id',
                     'table' => 'addresses',
                     'baseTable' => 'orders',
                 ]),
@@ -93,7 +93,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
+                    'foreignAttribute' => 'tenant_id',
                     'table' => 'order_types',
                     'baseTable' => 'orders',
                 ]),
@@ -112,8 +112,8 @@ class UpdateOrderRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
-                    'table' => 'client_payment_type',
+                    'foreignAttribute' => 'tenant_id',
+                    'table' => 'tenant_payment_type',
                     'column' => 'payment_type_id',
                     'baseTable' => 'orders',
                 ]),
@@ -142,7 +142,7 @@ class UpdateOrderRuleset extends FluxRuleset
             'address_delivery.id' => [
                 'integer',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
+                    'foreignAttribute' => 'tenant_id',
                     'table' => 'addresses',
                     'baseTable' => 'orders',
                 ]),
@@ -178,7 +178,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 'required',
                 'string',
                 'max:255',
-                app(UniqueInFieldDependence::class, ['model' => Order::class, 'dependingField' => 'client_id']),
+                app(UniqueInFieldDependence::class, ['model' => Order::class, 'dependingField' => 'tenant_id']),
             ],
             'commission' => 'string|max:255|nullable',
             'header' => 'string|nullable',

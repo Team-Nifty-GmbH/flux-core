@@ -17,7 +17,6 @@ use FluxErp\Models\CalendarUserSetting;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use FluxErp\Models\Category;
-use FluxErp\Models\Client;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Commission;
 use FluxErp\Models\CommissionRate;
@@ -78,8 +77,6 @@ use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\Calendarable;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
-use FluxErp\Models\Pivots\ClientPaymentType;
-use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
@@ -102,6 +99,8 @@ use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
+use FluxErp\Models\Pivots\TenantPaymentType;
+use FluxErp\Models\Pivots\TenantProduct;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -128,6 +127,7 @@ use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\Token;
@@ -166,7 +166,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'cart' => Cart::class,
             'cart_item' => CartItem::class,
             'category' => Category::class,
-            'client' => Client::class,
+            'tenant' => Tenant::class,
             'comment' => Comment::class,
             'commission' => Commission::class,
             'commission_rate' => CommissionRate::class,
@@ -270,8 +270,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'calendarable' => Calendarable::class,
             'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
-            'client_payment_type' => ClientPaymentType::class,
-            'client_product' => ClientProduct::class,
+            'tenant_payment_type' => TenantPaymentType::class,
+            'tenant_product' => TenantProduct::class,
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,

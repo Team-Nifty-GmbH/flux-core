@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\LedgerAccount;
 
 use FluxErp\Enums\LedgerAccountTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
@@ -17,10 +17,10 @@ class CreateLedgerAccountRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:ledger_accounts,uuid',
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'name' => 'required|string|max:255',
             'number' => 'required|numeric',

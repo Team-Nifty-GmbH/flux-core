@@ -33,14 +33,14 @@ class CreateSepaMandate extends FluxAction
     {
         parent::validateData();
 
-        $clientContactExists = resolve_static(Contact::class, 'query')
+        $tenantContactExists = resolve_static(Contact::class, 'query')
             ->whereKey($this->getData('contact_id'))
-            ->where('client_id', $this->getData('client_id'))
+            ->where('tenant_id', $this->getData('tenant_id'))
             ->exists();
 
         $errors = [];
-        if (! $clientContactExists) {
-            $errors[] = ['contact_id' => ['Client has no such contact']];
+        if (! $tenantContactExists) {
+            $errors[] = ['contact_id' => ['Tenant has no such contact']];
         }
 
         if ($bankConnectionId = $this->getData('contact_bank_connection_id')) {

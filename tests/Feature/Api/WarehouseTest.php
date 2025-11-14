@@ -9,12 +9,12 @@ use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $dbContact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $this->addresses = Address::factory()->count(3)->create([
         'contact_id' => $dbContact->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => false,
     ]);
 

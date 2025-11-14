@@ -7,9 +7,9 @@ use FluxErp\Actions\OrderType\DeleteOrderType;
 use FluxErp\Actions\OrderType\UpdateOrderType;
 use FluxErp\Livewire\DataTables\OrderTypeList;
 use FluxErp\Livewire\Forms\OrderTypeForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -118,7 +118,7 @@ class OrderTypes extends OrderTypeList
             parent::getViewData(),
             [
                 'printViews' => $printViews,
-                'clients' => resolve_static(Client::class, 'query')
+                'tenants' => resolve_static(Tenant::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
             ]

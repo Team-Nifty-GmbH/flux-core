@@ -7,18 +7,18 @@ use FluxErp\Models\Permission;
 
 beforeEach(function (): void {
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
             'is_default' => false,
         ]);
 
     $this->contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'payment_type_id' => $paymentType->id,
     ]);
 
     Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
         'is_main_address' => true,
     ]);

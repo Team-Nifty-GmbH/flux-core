@@ -6,11 +6,11 @@ use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Commission;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Commission\CreateCommissionCreditNotesRuleset;
@@ -39,16 +39,16 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
     {
         $orderIds = [];
         foreach ($this->agents as $agentId => $agentData) {
-            foreach (data_get($agentData, 'client_ids') as $clientId) {
+            foreach (data_get($agentData, 'tenant_ids') as $tenantId) {
                 $order = CreateOrder::make([
-                    'order_type_id' => resolve_static(Client::class, 'query')
-                        ->whereKey($clientId)
+                    'order_type_id' => resolve_static(Tenant::class, 'query')
+                        ->whereKey($tenantId)
                         ->value('commission_credit_note_order_type_id')
                         ?? resolve_static(OrderType::class, 'query')
-                            ->where('client_id', $clientId)
+                            ->where('tenant_id', $tenantId)
                             ->where('order_type_enum', OrderTypeEnum::Refund)
                             ->value('id'),
-                    'client_id' => $clientId,
+                    'tenant_id' => $tenantId,
                     'contact_id' => data_get($agentData, 'contact_id'),
                 ])
                     ->validate()
@@ -61,7 +61,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
                     ->whereDoesntHave('creditNoteOrderPosition')
                     ->withWhereHas(
                         'orderPosition',
-                        fn (Builder|BelongsTo $query) => $query->where('client_id', $clientId)
+                        fn (Builder|BelongsTo $query) => $query->where('tenant_id', $tenantId)
                     )
                     ->withWhereHas(
                         'order',
@@ -116,20 +116,20 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
             ->whereHas('commissions', fn (Builder $query) => $query->whereIntegerInRaw('id', $this->data))
             ->get(['id', 'name', 'contact_id']);
 
-        $clientIds = [];
+        $tenantIds = [];
         foreach ($agents as $agent) {
             $this->agents[$agent->id] = [
                 'contact_id' => $agent->contact_id,
-                'client_ids' => resolve_static(OrderPosition::class, 'query')
+                'tenant_ids' => resolve_static(OrderPosition::class, 'query')
                     ->whereHas('commission', fn (Builder $query) => $query->whereIntegerInRaw('id', $this->data)
                         ->where('user_id', $agent->id)
                     )
-                    ->distinct('client_id')
-                    ->pluck('client_id')
+                    ->distinct('tenant_id')
+                    ->pluck('tenant_id')
                     ->toArray(),
             ];
 
-            $clientIds = array_merge($clientIds, $this->agents[$agent->id]['client_ids']);
+            $tenantIds = array_merge($tenantIds, $this->agents[$agent->id]['tenant_ids']);
 
             if (! $agent->contact) {
                 $errors += [
@@ -139,18 +139,18 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
         }
 
         foreach (
-            resolve_static(Client::class, 'query')
-                ->whereIntegerInRaw('id', $clientIds)
-                ->get(['id', 'name']) as $client
+            resolve_static(Tenant::class, 'query')
+                ->whereIntegerInRaw('id', $tenantIds)
+                ->get(['id', 'name']) as $tenant
         ) {
             if (! resolve_static(OrderType::class, 'query')
-                ->where('client_id', $client->id)
+                ->where('tenant_id', $tenant->id)
                 ->where('order_type_enum', OrderTypeEnum::Refund)
                 ->value('id')
             ) {
                 $errors += [
                     'order_type_id' => [
-                        __('No refund order type found for client :client', ['client' => $client->name]),
+                        __('No refund order type found for tenant :tenant', ['tenant' => $tenant->name]),
                     ],
                 ];
             }

@@ -1,12 +1,12 @@
 <?php
 
 use FluxErp\Enums\BundleTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Models\ProductProperty;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use Illuminate\Support\Str;
@@ -15,11 +15,11 @@ use Laravel\Sanctum\Sanctum;
 beforeEach(function (): void {
     $productOptionGroup = ProductOptionGroup::factory()->create();
 
-    $this->clients = Client::factory()->count(3)->create();
+    $this->tenants = Tenant::factory()->count(3)->create();
 
     $this->products = Product::factory()
         ->count(3)
-        ->hasAttached($this->clients, relationship: 'clients')
+        ->hasAttached($this->tenants, relationship: 'tenants')
         ->create();
 
     $this->vatRates = VatRate::factory()->count(3)->create();
@@ -32,7 +32,7 @@ beforeEach(function (): void {
 
     $this->productProperties = ProductProperty::factory()->count(3)->create();
 
-    $this->user->clients()->attach($this->clients->pluck('id')->toArray());
+    $this->user->tenants()->attach($this->tenants->pluck('id')->toArray());
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.products.{id}.get'),
@@ -51,7 +51,7 @@ test('create product', function (): void {
 
     $product = [
         'name' => Str::random(),
-        'clients' => [$this->clients[0]->id],
+        'tenants' => [$this->tenants[0]->id],
     ];
 
     $this->user->givePermissionTo($this->permissions['create']);
@@ -67,7 +67,7 @@ test('create product', function (): void {
         ->first();
 
     expect($dbProduct->name)->toEqual($product['name']);
-    expect($dbProduct->clients->pluck('id')->toArray())->toEqual($product['clients']);
+    expect($dbProduct->tenants->pluck('id')->toArray())->toEqual($product['tenants']);
     expect($dbProduct->parent_id)->toBeNull();
     expect($dbProduct->vat_rate_id)->toEqual($defaultVatRate->id);
     expect($dbProduct->unit_id)->toBeNull();
@@ -132,7 +132,7 @@ test('create product maximum', function (): void {
         'has_serial_numbers' => (bool) rand(0, 1),
         'is_nos' => (bool) rand(0, 1),
         'is_active_export_to_web_shop' => (bool) rand(0, 1),
-        'clients' => [$this->clients[0]->id],
+        'tenants' => [$this->tenants[0]->id],
         'bundle_products' => [
             [
                 'id' => $this->products[0]->id,
@@ -187,7 +187,7 @@ test('create product maximum', function (): void {
     expect($dbProduct->is_nos)->toEqual($product['is_nos']);
     expect($dbProduct->is_active_export_to_web_shop)->toEqual($product['is_active_export_to_web_shop']);
 
-    expect($dbProduct->clients->pluck('id')->toArray())->toEqual($product['clients']);
+    expect($dbProduct->tenants->pluck('id')->toArray())->toEqual($product['tenants']);
     expect($dbProduct->bundleProducts()
         ->wherePivot('bundle_product_id', $product['bundle_products'][0]['id'])
         ->wherePivot('count', $product['bundle_products'][0]['count'])

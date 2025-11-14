@@ -124,7 +124,7 @@ class SepaMandates extends SepaMandateList
 
     public function save(): bool
     {
-        $this->sepaMandate->client_id = $this->contact->client_id;
+        $this->sepaMandate->tenant_id = $this->contact->tenant_id;
         $this->sepaMandate->contact_id = $this->contact->id;
 
         try {

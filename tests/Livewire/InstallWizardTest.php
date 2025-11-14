@@ -57,16 +57,16 @@ test('install wizard', function (): void {
         ->assertHasNoErrors()
         ->assertSet('step', 3);
 
-    $component->assertSee('Client')
-        ->set('clientForm.name', Str::uuid())
-        ->set('clientForm.client_code', Str::uuid())
-        ->set('clientForm.ceo', Str::uuid())
-        ->set('clientForm.street', Str::uuid())
-        ->set('clientForm.city', Str::uuid())
-        ->set('clientForm.postcode', Str::uuid())
-        ->set('clientForm.phone', Str::uuid())
-        ->set('clientForm.email', Str::uuid() . '@example.com')
-        ->set('clientForm.website', Str::uuid())
+    $component->assertSee('Tenant')
+        ->set('tenantForm.name', Str::uuid())
+        ->set('tenantForm.client_code', Str::uuid())
+        ->set('tenantForm.ceo', Str::uuid())
+        ->set('tenantForm.street', Str::uuid())
+        ->set('tenantForm.city', Str::uuid())
+        ->set('tenantForm.postcode', Str::uuid())
+        ->set('tenantForm.phone', Str::uuid())
+        ->set('tenantForm.email', Str::uuid() . '@example.com')
+        ->set('tenantForm.website', Str::uuid())
         ->call('continue')
         ->assertOk()
         ->assertHasNoErrors()
@@ -129,16 +129,16 @@ test('install wizard', function (): void {
         'name' => $component->get('vatRateForm.name'),
         'rate_percentage' => $component->get('vatRateForm.rate_percentage'),
     ]);
-    $this->assertDatabaseHas('clients', [
-        'name' => $component->get('clientForm.name'),
-        'client_code' => $component->get('clientForm.client_code'),
-        'ceo' => $component->get('clientForm.ceo'),
-        'street' => $component->get('clientForm.street'),
-        'city' => $component->get('clientForm.city'),
-        'postcode' => $component->get('clientForm.postcode'),
-        'phone' => $component->get('clientForm.phone'),
-        'email' => $component->get('clientForm.email'),
-        'website' => $component->get('clientForm.website'),
+    $this->assertDatabaseHas('tenants', [
+        'name' => $component->get('tenantForm.name'),
+        'client_code' => $component->get('tenantForm.client_code'),
+        'ceo' => $component->get('tenantForm.ceo'),
+        'street' => $component->get('tenantForm.street'),
+        'city' => $component->get('tenantForm.city'),
+        'postcode' => $component->get('tenantForm.postcode'),
+        'phone' => $component->get('tenantForm.phone'),
+        'email' => $component->get('tenantForm.email'),
+        'website' => $component->get('tenantForm.website'),
     ]);
     $this->assertDatabaseHas('currencies', [
         'name' => $component->get('currencyForm.name'),
