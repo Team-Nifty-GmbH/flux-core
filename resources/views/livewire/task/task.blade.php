@@ -52,28 +52,71 @@
                     ],
                 ]"
             />
-            <div class="flex justify-between">
-                <div class="space-y-2">
-                    <x-date
-                        :label="__('Start Date')"
-                        wire:model="replica.start_date"
-                    />
-                    <x-input
-                        type="time"
-                        :label="__('Start Time')"
-                        wire:model="replica.start_time"
-                    />
+            <div class="flex justify-between gap-x-4">
+                <div class="flex flex-1 flex-col gap-2">
+                    <div class="flex flex-col gap-2">
+                        <x-date
+                            :label="__('Start Date')"
+                            wire:model="replica.start_date"
+                        />
+                        <x-input
+                            type="time"
+                            :label="__('Start Time')"
+                            wire:model="replica.start_time"
+                        />
+                    </div>
+                    <div
+                        class="flex flex-col gap-2"
+                        x-cloak
+                        x-show="$wire.replica.start_date"
+                    >
+                        <x-toggle
+                            :label="__('Start Reminder')"
+                            wire:model="replica.has_start_reminder"
+                        />
+                        <div
+                            x-cloak
+                            x-show="$wire.replica.has_start_reminder"
+                        >
+                            <x-number
+                                :label="__('Remind Minutes Before')"
+                                wire:model="replica.start_reminder_minutes_before"
+                                min="0"
+                                :hint="__('Leave empty for reminder at start time')"
+                            />
+                        </div>
+                    </div>
                 </div>
-                <div class="space-y-2">
-                    <x-date
-                        :label="__('Due Date')"
-                        wire:model="replica.due_date"
-                    />
-                    <x-input
-                        type="time"
-                        :label="__('Due Time')"
-                        wire:model="replica.due_time"
-                    />
+                <div class="flex flex-1 flex-col gap-2">
+                    <div class="flex flex-col gap-2">
+                        <x-date
+                            :label="__('Due Date')"
+                            wire:model="replica.due_date"
+                        />
+                        <x-input
+                            type="time"
+                            :label="__('Due Time')"
+                            wire:model="replica.due_time"
+                        />
+                    </div>
+                    <div
+                        class="flex flex-col gap-2"
+                        x-cloak
+                        x-show="$wire.replica.due_date"
+                    >
+                        <x-toggle
+                            :label="__('Due Reminder')"
+                            wire:model="replica.has_due_reminder"
+                        />
+                        <div x-cloak x-show="$wire.replica.has_due_reminder">
+                            <x-number
+                                :label="__('Remind Minutes Before')"
+                                wire:model="replica.due_reminder_minutes_before"
+                                min="0"
+                                :hint="__('Leave empty for reminder at due time')"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
             <x-number

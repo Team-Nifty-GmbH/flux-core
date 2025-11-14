@@ -7,6 +7,7 @@ use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Models\Task;
+use FluxErp\Settings\ReminderSettings;
 use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
@@ -26,6 +27,14 @@ class TaskForm extends FluxForm
     public ?string $due_date = null;
 
     public ?string $due_time = null;
+
+    public bool $has_due_reminder = false;
+
+    public ?int $due_reminder_minutes_before = null;
+
+    public bool $has_start_reminder = false;
+
+    public ?int $start_reminder_minutes_before = null;
 
     #[Locked]
     public ?int $id = null;
@@ -80,6 +89,11 @@ class TaskForm extends FluxForm
 
         $this->responsible_user_id ??= auth()?->id();
         $this->users = $this->users ?: array_filter([auth()?->id()]);
+
+        $this->has_due_reminder = app(ReminderSettings::class)->has_end_reminder;
+        $this->has_start_reminder = app(ReminderSettings::class)->has_start_reminder;
+        $this->due_reminder_minutes_before = app(ReminderSettings::class)->end_reminder_minutes_before;
+        $this->start_reminder_minutes_before = app(ReminderSettings::class)->start_reminder_minutes_before;
     }
 
     protected function getActions(): array
