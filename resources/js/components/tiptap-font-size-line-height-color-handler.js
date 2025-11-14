@@ -1,6 +1,6 @@
 import { TextStyle } from '@tiptap/extension-text-style';
 
-export const FontSizeColorConfig = TextStyle.extend({
+export const FontSizeLineHeightColorConfig = TextStyle.extend({
     addOptions() {
         return {
             types: ['textStyle'],
@@ -61,6 +61,19 @@ export const FontSizeColorConfig = TextStyle.extend({
                             };
                         },
                     },
+                    lineHeight: {
+                        default: null,
+                        parseHTML: (element) => element.style.lineHeight,
+                        renderHTML: (attributes) => {
+                            if (!attributes.lineHeight) {
+                                return {};
+                            }
+
+                            return {
+                                style: `line-height: ${attributes.lineHeight}`,
+                            };
+                        },
+                    },
                 },
             },
         ];
@@ -96,57 +109,18 @@ export const FontSizeColorConfig = TextStyle.extend({
                         .setMark('textStyle', { backgroundColor: null })
                         .run();
                 },
+            setLineHeight:
+                (lineHeight) =>
+                ({ chain }) => {
+                    return chain().setMark('textStyle', { lineHeight }).run();
+                },
+            unsetLineHeight:
+                () =>
+                ({ chain }) => {
+                    return chain()
+                        .setMark('textStyle', { lineHeight: null })
+                        .run();
+                },
         };
     },
 });
-
-export default function (parentElement, dropdownElement) {
-    let sideEffect = null;
-    return {
-        popUpFontSize: null,
-        sideEffect() {
-            if (
-                this.popUpFontSize !== null &&
-                this.popUpFontSize.state.isVisible
-            ) {
-                this.popUpFontSize.hide();
-            }
-        },
-        onClick() {
-            if (this.popUpFontSize === null) {
-                if (
-                    dropdownElement !== undefined &&
-                    parentElement !== undefined
-                ) {
-                    const actions = dropdownElement.content.cloneNode(true);
-                    this.popUpFontSize = window.tippy(parentElement, {
-                        content: actions ?? 'not defined',
-                        showOnCreate: true,
-                        interactive: true,
-                        trigger: 'manual',
-                        placement: 'bottom',
-                        onShow: (instance) => {
-                            sideEffect = this.sideEffect.bind(this);
-                            instance.popper.addEventListener(
-                                'click',
-                                sideEffect,
-                            );
-                        },
-                        onHide: (instance) =>
-                            sideEffect &&
-                            instance.popper.removeEventListener(
-                                'click',
-                                sideEffect,
-                            ),
-                    });
-
-                    return;
-                }
-            }
-
-            if (!this.popUpFontSize.state.isVisible) {
-                this.popUpFontSize.show();
-            }
-        },
-    };
-}
