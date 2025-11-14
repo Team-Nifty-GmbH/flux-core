@@ -10,6 +10,7 @@
         "ext-zip": "*",
         "barryvdh/laravel-dompdf": "^3.0",
         "dompdf/dompdf": "^3.1.0",
+        "kreait/firebase-php": "^7.23",
         "laravel-notification-channels/webpush": "^10.2",
         "laravel/framework": "^12.21.0",
         "laravel/reverb": "^1.0.0",

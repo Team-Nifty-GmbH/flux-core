@@ -70,11 +70,23 @@ class CreateTaskRuleset extends FluxRuleset
                 'exclude_if:start_date,null',
                 Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
             ],
+            'start_reminder_minutes_before' => [
+                'required_if_accepted:has_start_reminder',
+                'exclude_if:has_start_reminder,false',
+                'integer',
+                'min:0',
+            ],
             'due_date' => 'date|nullable|after_or_equal:start_date',
             'due_time' => [
                 'nullable',
                 'exclude_if:due_date,null',
                 Rule::anyOf(['date_format:H:i', 'date_format:H:i:s']),
+            ],
+            'due_reminder_minutes_before' => [
+                'required_if_accepted:has_due_reminder',
+                'exclude_if:has_due_reminder,false',
+                'integer',
+                'min:0',
             ],
             'priority' => 'integer|nullable|min:0',
             'state' => [
@@ -86,6 +98,8 @@ class CreateTaskRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class, ['min' => 0]),
             ],
+            'has_due_reminder' => 'boolean',
+            'has_start_reminder' => 'boolean',
         ];
     }
 }

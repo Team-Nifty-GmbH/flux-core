@@ -11,6 +11,7 @@ use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\Notifications\EloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\Order\OrderStockSubscriber;
+use FluxErp\Listeners\RegisterMobilePushToken;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
 use FluxErp\Models\Comment;
@@ -43,6 +44,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Login::class => [
             LoginListener::class,
+            RegisterMobilePushToken::class,
         ],
         Logout::class => [
             LogoutListener::class,

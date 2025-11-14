@@ -96,6 +96,7 @@ use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\RecordOrigins;
+use FluxErp\Livewire\Settings\ReminderSettings;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
@@ -310,6 +311,7 @@ Route::middleware('web')
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
                         Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
+                        Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/system', System::class)->name('system');

@@ -56,6 +56,30 @@
                         <a href="{{ route('my-profile') }}">
                             <x-dropdown.items :text="__('My profile')" />
                         </a>
+
+                        <div
+                            x-data="{
+                                get isNativeApp() {
+                                    return (
+                                        window.nuxbeAppBridge &&
+                                        typeof window.nuxbeAppBridge.isNative === 'function' &&
+                                        window.nuxbeAppBridge.isNative()
+                                    )
+                                },
+                            }"
+                        >
+                            <div x-show="isNativeApp" x-cloak>
+                                <x-dropdown.items
+                                    x-on:click="async () => {
+                                        if (window.nativeBridge && window.nativeBridge.changeServer) {
+                                            await window.nativeBridge.changeServer();
+                                        }
+                                    }"
+                                    :text="__('Change Server')"
+                                />
+                            </div>
+                        </div>
+
                         <x-dropdown.items
                             x-on:click="document.getElementById('logout-form-desktop').submit()"
                             :text="__('Logout')"

@@ -90,10 +90,7 @@
                             }
 
                             if (this.selection.id === level.id) {
-                                this.selected = false
-                                this.selectionProxy = {}
-                                this.selection = {}
-                                this.setCollection(null)
+                                this.resetSelection()
 
                                 return
                             }
@@ -124,8 +121,19 @@
                                 this.selection = JSON.parse(JSON.stringify(this.selectionProxy))
                             }
                         },
+                        resetSelection() {
+                            this.selected = false
+                            this.selectionProxy = {}
+                            this.selection = {}
+                            this.setCollection(null)
+                        },
                     }"
                     x-on:folder-tree-select.window="treeSelect($event.detail)"
+                    x-on:refresh-tree.window="
+                        $wire.modelId = $event.detail.id
+                        resetSelection()
+                        tree = await $wire.getTree()
+                    "
                 >
                     <div
                         class="flex w-full flex-col gap-3"

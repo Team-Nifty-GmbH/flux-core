@@ -49,10 +49,13 @@
                         :label="__('Has repeatable events')"
                     />
                 </div>
-                <x-checkbox
-                    wire:model="calendar.is_public"
-                    :label="__('Public')"
-                />
+                @canAction(\FluxErp\Actions\Calendar\CreatePublicCalendar::class)
+                    <x-checkbox
+                        wire:model="calendar.is_public"
+                        :label="__('Public')"
+                    />
+                @endcanAction
+
                 <div x-show="!$wire.calendar.is_group" x-cloak>
                     <x-card :header="__('Custom Properties')">
                         <div class="flex flex-col gap-4">
