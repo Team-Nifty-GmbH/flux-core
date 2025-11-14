@@ -22,6 +22,8 @@ class Login extends Component
 
     public ?string $password = null;
 
+    public bool $remember = false;
+
     protected string $dashboardRoute = 'dashboard';
 
     protected string $guard = 'web';
@@ -104,10 +106,14 @@ class Login extends Component
 
     protected function tryLogin(): bool
     {
-        return Auth::guard($this->guard)->attempt([
-            'email' => $this->email,
-            'password' => $this->password,
-            'is_active' => true,
-        ]);
+        return Auth::guard($this->guard)
+            ->attempt(
+                [
+                    'email' => $this->email,
+                    'password' => $this->password,
+                    'is_active' => true,
+                ],
+                $this->remember
+            );
     }
 }

@@ -49,6 +49,10 @@
                         name="password"
                     />
                     <div class="flex items-center justify-between">
+                        <x-toggle
+                            wire:model="remember"
+                            :label="__('Remember me')"
+                        />
                         <div class="text-sm">
                             <a
                                 x-on:click="$modalOpen('password-reset')"
@@ -84,6 +88,23 @@
                     </div>
                 </form>
                 @show
+
+                <div
+                    x-cloak
+                    x-show="
+                        window.nuxbeAppBridge &&
+                            window.nuxbeAppBridge.isNative &&
+                            window.nuxbeAppBridge.isNative()
+                    "
+                    class="mt-4 text-center"
+                >
+                    <x-button
+                        :text="__('Change Server')"
+                        color="secondary"
+                        flat
+                        x-on:click="window.nuxbeAppBridge.changeServer()"
+                    />
+                </div>
             </div>
         </div>
     </div>
