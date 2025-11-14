@@ -378,6 +378,7 @@
     "Assignment": "Zuordnung",
     "Assignment suggestions": "Zuorderungsvorschläge",
     "At": "Um",
+    "At least one of the fields user_id or employee_id must be provided.": "Mindestens ein der Felder user_id oder employee_id muss angegeben werden.",
     "At least two records are required for merging": "Mindestens zwei Datensätze sind für die Zusammenführung erforderlich",
     "Attachments": "Anhänge",
     "Attempt": "Versuch",
