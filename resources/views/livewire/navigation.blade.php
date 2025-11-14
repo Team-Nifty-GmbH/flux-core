@@ -50,7 +50,7 @@
                     @foreach ($navigations as $key => $navigation)
                         <div>
                             <a
-                                @if ((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard")
+                                @if ((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard" || data_get($navigation, "route_name") === "portal.dashboard")
                                     )
                                     wire:current.exact="bg-indigo-500 dark:bg-indigo-700 !text-white hover:bg-indigo-600 nav-item-active"
                                 @else
