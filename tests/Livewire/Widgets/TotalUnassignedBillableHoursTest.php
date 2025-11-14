@@ -3,7 +3,7 @@
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\HumanResources\WorkTimes;
 use FluxErp\Livewire\Widgets\TotalUnassignedBillableHours;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -131,7 +131,7 @@ test('show method creates session filter', function (): void {
 
     $component->call('show');
 
-    $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
+    $workTimeListCacheKey = Livewire::new(WorkTimes::class)->getCacheKey();
 
     expect(session()->has($workTimeListCacheKey . '_query'))->toBeTrue();
 });
@@ -141,7 +141,7 @@ test('show method filters correct work times', function (): void {
 
     $component->call('show');
 
-    $workTimeListCacheKey = Livewire::new(WorkTimeList::class)->getCacheKey();
+    $workTimeListCacheKey = Livewire::new(WorkTimes::class)->getCacheKey();
     /** @var TeamNiftyGmbH\DataTable\Helpers\SessionFilter $sessionFilter */
     $sessionFilter = session($workTimeListCacheKey . '_query');
 

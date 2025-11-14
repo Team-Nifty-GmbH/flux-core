@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Widgets;
 use Carbon\CarbonInterval;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
-use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\HumanResources\WorkTimes;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\WorkTime;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,7 +57,7 @@ class TotalUnassignedBillableHours extends ValueBox implements HasWidgetOptions
     public function show(): void
     {
         SessionFilter::make(
-            Livewire::new(resolve_static(WorkTimeList::class, 'class'))->getCacheKey(),
+            Livewire::new(resolve_static(WorkTimes::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->whereNull('order_position_id')
                 ->where('is_billable', true)
