@@ -271,7 +271,7 @@
                                 {{ $tenant['name'] }}
                             </div>
                             <div class="flex-1 text-sm">
-                                {{ $tenant['client_code'] }}
+                                {{ $tenant['tenant_code'] }}
                             </div>
                             <div class="pr-4">
                                 <x-checkbox

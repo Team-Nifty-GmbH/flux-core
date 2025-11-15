@@ -10,7 +10,7 @@
                 <x-input
                     :label="__('Tenant Code')"
                     :placeholder="__('Tenant Code')"
-                    wire:model="tenant.client_code"
+                    wire:model="tenant.tenant_code"
                 />
                 <x-select.styled
                     :label="__('Country')"

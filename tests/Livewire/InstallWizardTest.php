@@ -59,7 +59,7 @@ test('install wizard', function (): void {
 
     $component->assertSee('Tenant')
         ->set('tenantForm.name', Str::uuid())
-        ->set('tenantForm.client_code', Str::uuid())
+        ->set('tenantForm.tenant_code', Str::uuid())
         ->set('tenantForm.ceo', Str::uuid())
         ->set('tenantForm.street', Str::uuid())
         ->set('tenantForm.city', Str::uuid())
@@ -131,7 +131,7 @@ test('install wizard', function (): void {
     ]);
     $this->assertDatabaseHas('tenants', [
         'name' => $component->get('tenantForm.name'),
-        'client_code' => $component->get('tenantForm.client_code'),
+        'tenant_code' => $component->get('tenantForm.tenant_code'),
         'ceo' => $component->get('tenantForm.ceo'),
         'street' => $component->get('tenantForm.street'),
         'city' => $component->get('tenantForm.city'),

@@ -14,7 +14,7 @@ class TenantFactory extends Factory
     {
         $i = 0;
         while (Tenant::query()
-            ->where('client_code', $clientCode = fake()->unique()->countryISOAlpha3())
+            ->where('tenant_code', $clientCode = fake()->unique()->countryISOAlpha3())
             ->exists() && $i < 100) {
             $i++;
         }
@@ -25,7 +25,7 @@ class TenantFactory extends Factory
 
         return [
             'name' => fake()->company(),
-            'client_code' => $clientCode,
+            'tenant_code' => $clientCode,
             'ceo' => fake()->name(),
             'street' => fake()->streetAddress(),
             'city' => fake()->city(),

@@ -5,7 +5,7 @@
     :label="__('Name')"
 />
 <x-input
-    wire:model="tenantForm.client_code"
+    wire:model="tenantForm.tenant_code"
     placeholder="e.g. TN"
     :label="__('Tenant Code')"
 />

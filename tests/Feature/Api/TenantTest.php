@@ -30,7 +30,7 @@ test('get tenant', function (): void {
     expect($tenant->uuid)->toEqual($this->tenants[0]->uuid);
     expect($tenant->country_id)->toEqual($this->tenants[0]->country_id);
     expect($tenant->name)->toEqual($this->tenants[0]->name);
-    expect($tenant->client_code)->toEqual($this->tenants[0]->client_code);
+    expect($tenant->tenant_code)->toEqual($this->tenants[0]->tenant_code);
     expect($tenant->ceo)->toEqual($this->tenants[0]->ceo);
     expect($tenant->street)->toEqual($this->tenants[0]->street);
     expect($tenant->city)->toEqual($this->tenants[0]->city);
@@ -70,7 +70,7 @@ test('get tenants', function (): void {
                 $jsonTenant->uuid === $tenant->uuid &&
                 $jsonTenant->country_id === $tenant->country_id &&
                 $jsonTenant->name === $tenant->name &&
-                $jsonTenant->client_code === $tenant->client_code &&
+                $jsonTenant->tenant_code === $tenant->tenant_code &&
                 $jsonTenant->ceo === $tenant->ceo &&
                 $jsonTenant->street === $tenant->street &&
                 $jsonTenant->city === $tenant->city &&

@@ -27,6 +27,10 @@ return new class() extends Migration
 
         Schema::rename('clients', 'tenants');
 
+        Schema::table('tenants', function (Blueprint $table): void {
+            $table->renameColumn('client_code', 'tenant_code');
+        });
+
         Schema::rename('client_user', 'tenant_user');
         Schema::rename('client_payment_type', 'tenant_payment_type');
         Schema::rename('client_product', 'tenant_product');
@@ -395,6 +399,10 @@ return new class() extends Migration
         Schema::rename('tenant_product', 'client_product');
         Schema::rename('tenant_payment_type', 'client_payment_type');
         Schema::rename('tenant_user', 'client_user');
+
+        Schema::table('tenants', function (Blueprint $table): void {
+            $table->renameColumn('tenant_code', 'client_code');
+        });
 
         Schema::rename('tenants', 'clients');
 
