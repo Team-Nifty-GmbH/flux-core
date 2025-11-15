@@ -7,11 +7,11 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'can_login' => false,
         'is_active' => true,
     ]);

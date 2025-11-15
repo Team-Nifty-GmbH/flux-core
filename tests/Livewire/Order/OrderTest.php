@@ -27,13 +27,13 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'has_delivery_lock' => false,
         'credit_line' => null,
     ]);
 
     $this->address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
     ]);
 
@@ -47,13 +47,13 @@ beforeEach(function (): void {
     $this->orderType = OrderType::factory()
         ->has(EmailTemplate::factory()->state(['model_type', 'order']), 'emailTemplate')
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'print_layouts' => ['invoice'],
         ]);
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $priceList = PriceList::factory()->create();
@@ -69,14 +69,14 @@ beforeEach(function (): void {
                 'total_base_gross_price' => 119,
                 'total_net_price' => 100,
                 'total_base_net_price' => 100,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_free_text' => false,
                 'is_alternative' => false,
             ])
         )
         ->for($currency)
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'payment_type_id' => $paymentType->id,
@@ -92,7 +92,7 @@ beforeEach(function (): void {
 
 test('address update events', function (): void {
     $newAddress = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
     ]);
 
@@ -106,7 +106,7 @@ test('address update events', function (): void {
         ->assertOk()
         ->assertSet('order.address_invoice_id', $newAddress->id)
         ->assertSet('order.contact_id', $newAddress->contact_id)
-        ->assertSet('order.client_id', $newAddress->client_id);
+        ->assertSet('order.tenant_id', $newAddress->tenant_id);
 });
 
 test('create and manage discount', function (): void {
@@ -229,11 +229,11 @@ test('delete order successful', function (): void {
 
 test('fetch contact data', function (): void {
     $newContact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $newAddress = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $newContact->id,
     ]);
 
@@ -247,7 +247,7 @@ test('fetch contact data', function (): void {
         ->set('order.contact_id', $newContact->id)
         ->call('fetchContactData')
         ->assertOk()
-        ->assertSet('order.client_id', $newContact->client_id)
+        ->assertSet('order.tenant_id', $newContact->tenant_id)
         ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
         ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
 });
@@ -258,7 +258,7 @@ test('get additional model actions', function (): void {
     ]);
 
     OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -272,7 +272,7 @@ test('get additional model actions', function (): void {
     $this->order->update(['invoice_date' => null]);
 
     OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::SplitOrder,
         'is_active' => true,
         'is_hidden' => false,
@@ -307,7 +307,7 @@ test('get tabs structure', function (): void {
 test('mount initializes order data', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->assertSet('order.id', $this->order->id)
-        ->assertSet('order.client_id', $this->order->client_id)
+        ->assertSet('order.tenant_id', $this->order->tenant_id)
         ->assertSet('order.contact_id', $this->order->contact_id)
         ->assertSet('order.order_type_id', $this->order->order_type_id)
         ->assertSet('order.is_locked', false)
@@ -337,7 +337,7 @@ test('order position with credit account', function (): void {
     Currency::factory()->create(['is_default' => true]);
 
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'has_delivery_lock' => false,
         'credit_line' => null,
     ]);
@@ -367,14 +367,14 @@ test('order position with credit account', function (): void {
     $currency = Currency::factory()->create();
 
     $order = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $this->orderType->getKey(),
         'currency_id' => $currency->getKey(),
         'contact_id' => $contact->getKey(),
         'address_invoice_id' => Address::factory()
             ->create([
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'contact_id' => $contact->getKey(),
             ])
             ->getKey(),
@@ -386,7 +386,7 @@ test('order position with credit account', function (): void {
 
     $orderPosition = OrderPosition::factory()->create([
         'order_id' => $order->getKey(),
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'credit_account_id' => $creditAccount->getKey(),
         'post_on_credit_account' => CreditAccountPostingEnum::Credit,
@@ -444,7 +444,7 @@ test('order position with credit account debit', function (): void {
     Currency::factory()->create(['is_default' => true]);
 
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'has_delivery_lock' => false,
         'credit_line' => null,
     ]);
@@ -474,14 +474,14 @@ test('order position with credit account debit', function (): void {
     $currency = Currency::factory()->create();
 
     $order = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $this->orderType->getKey(),
         'currency_id' => $currency->getKey(),
         'contact_id' => $contact->getKey(),
         'address_invoice_id' => Address::factory()
             ->create([
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'contact_id' => $contact->getKey(),
             ])
             ->getKey(),
@@ -493,7 +493,7 @@ test('order position with credit account debit', function (): void {
 
     $orderPosition = OrderPosition::factory()->create([
         'order_id' => $order->getKey(),
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'credit_account_id' => $creditAccount->getKey(),
         'post_on_credit_account' => CreditAccountPostingEnum::Debit,
@@ -561,7 +561,7 @@ test('render view data', function (): void {
     expect($viewData)->toHaveKey('priceLists');
     expect($viewData)->toHaveKey('paymentTypes');
     expect($viewData)->toHaveKey('languages');
-    expect($viewData)->toHaveKey('clients');
+    expect($viewData)->toHaveKey('tenants');
     expect($viewData)->toHaveKey('frequencies');
     expect($viewData)->toHaveKey('contactBankConnections');
     expect($viewData)->toHaveKey('vatRates');
@@ -569,7 +569,7 @@ test('render view data', function (): void {
     expect($viewData['priceLists'])->toBeArray();
     expect($viewData['paymentTypes'])->toBeArray();
     expect($viewData['languages'])->toBeArray();
-    expect($viewData['clients'])->toBeArray();
+    expect($viewData['tenants'])->toBeArray();
     expect($viewData['frequencies'])->toBeArray();
     expect($viewData['contactBankConnections'])->toBeArray();
     expect($viewData['vatRates'])->toBeArray();
@@ -577,7 +577,7 @@ test('render view data', function (): void {
 
 test('renders subscription order view', function (): void {
     $subscriptionOrderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Subscription,
         'is_active' => true,
         'is_hidden' => false,
@@ -622,7 +622,7 @@ test('reorder discount', function (): void {
 
 test('replicate order', function (): void {
     OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
         'is_hidden' => false,
@@ -699,12 +699,12 @@ test('save states', function (): void {
 
 test('subscription schedule functionality', function (): void {
     $subscriptionOrderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Subscription,
     ]);
 
     $targetOrderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
         'is_hidden' => false,
@@ -776,17 +776,17 @@ test('vat calculation prevents negative amounts', function (): void {
                 'total_base_net_price' => 100,
                 'total_net_price' => 100,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,
@@ -826,7 +826,7 @@ test('vat calculation with combined discounts', function (): void {
                 'total_net_price' => 50, // 50% position discount
                 'discount_percentage' => 0.5,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -838,17 +838,17 @@ test('vat calculation with combined discounts', function (): void {
                 'total_base_net_price' => 100,
                 'total_net_price' => 100, // no position discount
                 'vat_rate_percentage' => 0.07,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,
@@ -903,7 +903,7 @@ test('vat calculation with flat header discount', function (): void {
                 'total_net_price' => 50, // 50% position discount
                 'discount_percentage' => 0.5,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -915,17 +915,17 @@ test('vat calculation with flat header discount', function (): void {
                 'total_base_net_price' => 100,
                 'total_net_price' => 100, // no position discount
                 'vat_rate_percentage' => 0.07,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,
@@ -971,7 +971,7 @@ test('vat calculation with floating point precision', function (): void {
                 'total_base_net_price' => 0.1,
                 'total_net_price' => 0.1,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -983,7 +983,7 @@ test('vat calculation with floating point precision', function (): void {
                 'total_base_net_price' => 0.2,
                 'total_net_price' => 0.2,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -995,17 +995,17 @@ test('vat calculation with floating point precision', function (): void {
                 'total_base_net_price' => 0.3,
                 'total_net_price' => 0.3,
                 'vat_rate_percentage' => 0.07,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,
@@ -1059,7 +1059,7 @@ test('vat calculation with percentage header discount', function (): void {
                 'total_net_price' => 50, // 50% position discount
                 'discount_percentage' => 0.5,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -1071,17 +1071,17 @@ test('vat calculation with percentage header discount', function (): void {
                 'total_base_net_price' => 100,
                 'total_net_price' => 100, // no position discount
                 'vat_rate_percentage' => 0.07,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,
@@ -1127,7 +1127,7 @@ test('vat calculation with position discounts', function (): void {
                 'total_net_price' => 50, // 50% position discount
                 'discount_percentage' => 0.5,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -1139,17 +1139,17 @@ test('vat calculation with position discounts', function (): void {
                 'total_base_net_price' => 100,
                 'total_net_price' => 100, // no position discount
                 'vat_rate_percentage' => 0.07,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,
@@ -1191,7 +1191,7 @@ test('order discount with mixed vat rates and position discounts', function (): 
                 'discount_percentage' => 0.10,
                 'vat_rate_percentage' => 0.19,
                 'vat_price' => 453.15,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -1208,7 +1208,7 @@ test('order discount with mixed vat rates and position discounts', function (): 
                 'discount_percentage' => 0.20,
                 'vat_rate_percentage' => 0.07,
                 'vat_price' => 11.20,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
@@ -1225,17 +1225,17 @@ test('order discount with mixed vat rates and position discounts', function (): 
                 'discount_percentage' => 1.00,
                 'vat_rate_percentage' => 0.00,
                 'vat_price' => 0,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,
@@ -1282,17 +1282,17 @@ test('vat calculation with repeating decimals', function (): void {
                 'total_base_net_price' => 100,
                 'total_net_price' => 100,
                 'vat_rate_percentage' => 0.19,
-                'client_id' => $this->dbClient->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
             ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $this->defaultLanguage->id,
             'order_type_id' => $this->orderType->id,
             'currency_id' => Currency::factory()->create()->id,
-            'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-            'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
             'price_list_id' => PriceList::factory()->create()->id,
             'payment_type_id' => PaymentType::factory()->create()->id,
             'shipping_costs_net_price' => 0,

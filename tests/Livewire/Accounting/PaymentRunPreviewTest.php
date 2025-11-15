@@ -15,12 +15,12 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
     ]);
 
     $this->address = Address::factory()->create([
         'contact_id' => $this->contact->id,
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'is_main_address' => true,
         'name' => 'Test Customer',
     ]);
@@ -35,14 +35,14 @@ beforeEach(function (): void {
     $this->currency = Currency::factory()->create();
 
     $this->orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'is_active' => true,
         'order_type_enum' => collect(OrderTypeEnum::cases())
             ->first(fn ($case) => $case->multiplier() < 0),
     ]);
 
     $this->orders = Order::factory()->count(2)->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'contact_id' => $this->contact->id,
         'order_type_id' => $this->orderType->id,
         'payment_type_id' => $this->paymentType->id,

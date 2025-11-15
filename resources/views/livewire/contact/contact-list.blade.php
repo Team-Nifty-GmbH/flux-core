@@ -7,12 +7,12 @@
             x-on:open="$focusOn('contact-company')"
             persistent
         >
-            @if (resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
+            @if (resolve_static(\FluxErp\Models\Tenant::class, 'query')->count() > 1)
                 <x-select.styled
-                    wire:model="contact.client_id"
-                    label="{{ __('Client') }}"
+                    wire:model="contact.tenant_id"
+                    label="{{ __('Tenant') }}"
                     select="label:name|value:id"
-                    :options="resolve_static(\FluxErp\Models\Client::class, 'query')->get(['id', 'name'])"
+                    :options="resolve_static(\FluxErp\Models\Tenant::class, 'query')->get(['id', 'name'])"
                 />
             @endif
 

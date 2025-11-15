@@ -19,11 +19,11 @@ use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $addresses = Address::factory()->count(2)->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
     ]);
 
@@ -36,16 +36,16 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $this->order = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $language->id,
         'order_type_id' => $orderType->id,
         'payment_type_id' => $paymentType->id,
@@ -57,7 +57,7 @@ beforeEach(function (): void {
     ]);
 
     $this->projects = Project::factory()->count(2)->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
         'order_id' => $this->order->id,
         'responsible_user_id' => $this->user->id,
@@ -76,7 +76,7 @@ beforeEach(function (): void {
 
 test('create project', function (): void {
     $project = [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
         'order_id' => $this->order->id,
         'responsible_user_id' => $this->user->id,
@@ -101,7 +101,7 @@ test('create project', function (): void {
         ->whereKey($responseProject->id)
         ->first();
     expect($dbProject)->not->toBeEmpty();
-    expect($dbProject->client_id)->toEqual($project['client_id']);
+    expect($dbProject->tenant_id)->toEqual($project['tenant_id']);
     expect($dbProject->contact_id)->toEqual($project['contact_id']);
     expect($dbProject->order_id)->toEqual($project['order_id']);
     expect($dbProject->responsible_user_id)->toEqual($project['responsible_user_id']);
@@ -119,7 +119,7 @@ test('create project', function (): void {
 
 test('create project contact not found', function (): void {
     $project = [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => ++$this->contact->id,
         'name' => 'Project Name',
     ];
@@ -133,7 +133,7 @@ test('create project contact not found', function (): void {
 
 test('create project order not found', function (): void {
     $project = [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'parent_id' => $this->order->id + 1000,
         'name' => 'Project Name',
     ];
@@ -147,7 +147,7 @@ test('create project order not found', function (): void {
 
 test('create project parent project not found', function (): void {
     $project = [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'parent_id' => ++$this->projects[1]->id,
         'name' => 'Project Name',
     ];
@@ -162,7 +162,7 @@ test('create project parent project not found', function (): void {
 
 test('create project responsible user not found', function (): void {
     $project = [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'responsible_user_id' => ++$this->user->id,
         'name' => 'Project Name',
     ];
@@ -296,7 +296,7 @@ test('get project', function (): void {
     $project = $json->data;
     expect($project)->not->toBeEmpty();
     expect($project->id)->toEqual($this->projects[0]->id);
-    expect($project->client_id)->toEqual($this->projects[0]->client_id);
+    expect($project->tenant_id)->toEqual($this->projects[0]->tenant_id);
     expect($project->contact_id)->toEqual($this->projects[0]->contact_id);
     expect($project->order_id)->toEqual($this->projects[0]->order_id);
     expect($project->responsible_user_id)->toEqual($this->projects[0]->responsible_user_id);
@@ -335,7 +335,7 @@ test('get projects', function (): void {
     $referenceProject = Project::query()->first();
     expect($projects)->not->toBeEmpty();
     expect($projects[0]->id)->toEqual($referenceProject->id);
-    expect($projects[0]->client_id)->toEqual($referenceProject->client_id);
+    expect($projects[0]->tenant_id)->toEqual($referenceProject->tenant_id);
     expect($projects[0]->contact_id)->toEqual($referenceProject->contact_id);
     expect($projects[0]->order_id)->toEqual($referenceProject->order_id);
     expect($projects[0]->responsible_user_id)->toEqual($referenceProject->responsible_user_id);
@@ -518,7 +518,7 @@ test('update project with additional column', function (): void {
 
     expect($dbProject)->not->toBeEmpty();
     expect($dbProject->id)->toEqual($project['id']);
-    expect($dbProject->client_id)->toEqual($this->projects[0]->client_id);
+    expect($dbProject->tenant_id)->toEqual($this->projects[0]->tenant_id);
     expect($dbProject->contact_id)->toEqual($project['contact_id']);
     expect($dbProject->order_id)->toEqual($project['order_id']);
     expect($dbProject->responsible_user_id)->toEqual($project['responsible_user_id']);

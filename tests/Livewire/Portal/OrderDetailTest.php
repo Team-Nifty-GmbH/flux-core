@@ -14,11 +14,11 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -27,12 +27,12 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $priceList = PriceList::factory()->create();
@@ -43,13 +43,13 @@ beforeEach(function (): void {
             1,
             function ($attributes, $order) {
                 return [
-                    'client_id' => $order->client_id,
+                    'tenant_id' => $order->tenant_id,
                     'name' => 'test orderposition',
                 ];
             }
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,
@@ -62,7 +62,7 @@ beforeEach(function (): void {
         ]);
 
     $this->orders[] = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $language->id,
         'order_type_id' => $orderType->id,
         'payment_type_id' => $paymentType->id,

@@ -7,20 +7,20 @@ use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
-use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Models\Pivots\TenantProduct;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasAttributeTranslations;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasTags;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -40,8 +40,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends FluxModel implements HasMedia, HasMediaForeignKey, InteractsWithDataTables
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags,
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasTenantAssignment,
         HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -126,9 +126,9 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->hasMany(CartItem::class);
     }
 
-    public function clients(): BelongsToMany
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class, 'client_product')->using(ClientProduct::class);
+        return $this->belongsToMany(Tenant::class, 'tenant_product')->using(TenantProduct::class);
     }
 
     public function coverMedia(): BelongsTo

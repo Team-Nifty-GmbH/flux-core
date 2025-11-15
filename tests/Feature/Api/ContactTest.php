@@ -2,36 +2,36 @@
 
 use Carbon\Carbon;
 use FluxErp\Models\AdditionalColumn;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 uses(Illuminate\Foundation\Testing\WithFaker::class);
 
 beforeEach(function (): void {
-    $dbClients = Client::factory()->count(2)->create();
+    $dbTenants = Tenant::factory()->count(2)->create();
 
     $this->paymentTypes = PaymentType::factory()->count(3)->create([
         'is_active' => true,
         'is_sales' => true,
     ]);
-    $dbClients[0]->paymentTypes()->attach([$this->paymentTypes[0]->id, $this->paymentTypes[1]->id]);
-    $dbClients[1]->paymentTypes()->attach($this->paymentTypes[2]->id);
+    $dbTenants[0]->paymentTypes()->attach([$this->paymentTypes[0]->id, $this->paymentTypes[1]->id]);
+    $dbTenants[1]->paymentTypes()->attach($this->paymentTypes[2]->id);
 
     $this->contacts = Contact::factory()->count(2)->create([
-        'client_id' => $dbClients[0]->id,
+        'tenant_id' => $dbTenants[0]->id,
         'payment_type_id' => $this->paymentTypes[0]->id,
     ]);
     $this->contacts[] = Contact::factory()->create([
-        'client_id' => $dbClients[1]->id,
+        'tenant_id' => $dbTenants[1]->id,
         'payment_type_id' => $this->paymentTypes[1]->id,
     ]);
 
-    $this->user->clients()->attach($dbClients->pluck('id')->toArray());
+    $this->user->tenants()->attach($dbTenants->pluck('id')->toArray());
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.contacts.{id}.get'),
@@ -44,7 +44,7 @@ beforeEach(function (): void {
 
 test('create contact', function (): void {
     $contact = [
-        'client_id' => $this->contacts[0]->client_id,
+        'tenant_id' => $this->contacts[0]->tenant_id,
         'customer_number' => 'Not Existing Customer Number' . Str::random(),
         'contact_id' => $this->contacts[0]->id,
         'iban' => $this->faker->iban(),
@@ -62,7 +62,7 @@ test('create contact', function (): void {
         ->first();
 
     expect($dbContact)->not->toBeEmpty();
-    expect($dbContact->client_id)->toEqual($contact['client_id']);
+    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
     expect($dbContact->customer_number)->toEqual($contact['customer_number']);
     expect($dbContact->payment_type_id)->toEqual(PaymentType::default()?->id);
     expect($dbContact->price_list_id)->toEqual(PriceList::default()?->id);
@@ -82,7 +82,7 @@ test('create contact', function (): void {
 
 test('create contact maximum', function (): void {
     $contact = [
-        'client_id' => $this->contacts[0]->client_id,
+        'tenant_id' => $this->contacts[0]->tenant_id,
         'payment_type_id' => $this->paymentTypes[1]->id,
         'price_list_id' => null,
         'customer_number' => 'Not Existing Customer Number' . Str::random(),
@@ -112,7 +112,7 @@ test('create contact maximum', function (): void {
         ->first();
 
     expect($dbContact)->not->toBeEmpty();
-    expect($dbContact->client_id)->toEqual($contact['client_id']);
+    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
     expect($dbContact->payment_type_id)->toEqual($contact['payment_type_id']);
     expect($dbContact->price_list_id)->toEqual(PriceList::default()->getKey());
     expect($dbContact->customer_number)->toEqual($contact['customer_number']);
@@ -132,7 +132,7 @@ test('create contact maximum', function (): void {
 
 test('create contact validation fails', function (): void {
     $contact = [
-        'client_id' => $this->contacts[0]->client_id,
+        'tenant_id' => $this->contacts[0]->tenant_id,
         'customer_number' => $this->contacts[0]->customer_number,
     ];
 
@@ -183,7 +183,7 @@ test('get contact', function (): void {
     expect($jsonContact->id)->toEqual($this->contacts[0]->id);
     expect($jsonContact->payment_type_id)->toEqual($this->contacts[0]->payment_type_id);
     expect($jsonContact->price_list_id)->toEqual($this->contacts[0]->price_list_id);
-    expect($jsonContact->client_id)->toEqual($this->contacts[0]->client_id);
+    expect($jsonContact->tenant_id)->toEqual($this->contacts[0]->tenant_id);
     expect($jsonContact->customer_number)->toEqual($this->contacts[0]->customer_number);
     expect($jsonContact->creditor_number)->toEqual($this->contacts[0]->creditor_number);
     expect($jsonContact->payment_target_days)->toEqual($this->contacts[0]->payment_target_days);
@@ -226,7 +226,7 @@ test('get contacts', function (): void {
             return $jsonContact->id === $contact->id &&
                 $jsonContact->payment_type_id === $contact->payment_type_id &&
                 $jsonContact->price_list_id === $contact->price_list_id &&
-                $jsonContact->client_id === $contact->client_id &&
+                $jsonContact->tenant_id === $contact->tenant_id &&
                 $jsonContact->customer_number === $contact->customer_number &&
                 $jsonContact->creditor_number === $contact->creditor_number &&
                 $jsonContact->payment_target_days === $contact->payment_target_days &&
@@ -286,7 +286,7 @@ test('update contact customer number already exists', function (): void {
 test('update contact maximum', function (): void {
     $contact = [
         'id' => $this->contacts[0]->id,
-        'client_id' => $this->contacts[2]->client_id,
+        'tenant_id' => $this->contacts[2]->tenant_id,
         'payment_type_id' => $this->paymentTypes[2]->id,
         'price_list_id' => null,
         'customer_number' => 'Not Existing Customer Number' . Str::random(),
@@ -315,7 +315,7 @@ test('update contact maximum', function (): void {
 
     expect($dbContact)->not->toBeEmpty();
     expect($dbContact->id)->toEqual($contact['id']);
-    expect($dbContact->client_id)->toEqual($contact['client_id']);
+    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
     expect($dbContact->payment_type_id)->toEqual($contact['payment_type_id']);
     expect($dbContact->price_list_id)->toEqual($contact['price_list_id']);
     expect($dbContact->customer_number)->toEqual($contact['customer_number']);
@@ -332,7 +332,7 @@ test('update contact maximum', function (): void {
     expect($this->user->is($dbContact->getUpdatedBy()))->toBeTrue();
 });
 
-test('update contact multi status client payment type not exists', function (): void {
+test('update contact multi status tenant payment type not exists', function (): void {
     $contacts = [
         [
             'id' => $this->contacts[0]->id,
@@ -340,11 +340,11 @@ test('update contact multi status client payment type not exists', function (): 
         ],
         [
             'id' => $this->contacts[1]->id,
-            'client_id' => $this->contacts[2]->client_id,
+            'tenant_id' => $this->contacts[2]->tenant_id,
         ],
         [
             'id' => $this->contacts[2]->id,
-            'client_id' => $this->contacts[0]->client_id,
+            'tenant_id' => $this->contacts[0]->tenant_id,
             'payment_type_id' => $this->paymentTypes[2]->id,
         ],
     ];

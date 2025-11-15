@@ -11,10 +11,10 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 trait HasSerialNumberRange
 {
-    public function getSerialNumber(string|array $types, ?int $clientId = null): static
+    public function getSerialNumber(string|array $types, ?int $tenantId = null): static
     {
         $types = (array) $types;
-        $clientId = $clientId ?? ($this->client_id ?? null);
+        $tenantId = $tenantId ?? ($this->tenant_id ?? null);
 
         foreach ($types as $type) {
             if ($this->{$type}) {
@@ -24,7 +24,7 @@ trait HasSerialNumberRange
             $query = resolve_static(SerialNumberRange::class, 'query')
                 ->where('type', $type)
                 ->where('model_type', morph_alias(static::class))
-                ->where('client_id', $clientId);
+                ->where('tenant_id', $tenantId);
 
             $store = false;
             if (ModelInfo::forModel($this)->attribute($type)) {
@@ -39,7 +39,7 @@ trait HasSerialNumberRange
             if (! $serialNumberRange->exists) {
                 try {
                     $serialNumberRange->fill([
-                        'client_id' => $clientId,
+                        'tenant_id' => $tenantId,
                         'type' => $type,
                         'model_type' => morph_alias(static::class),
                         'stores_serial_numbers' => $store,

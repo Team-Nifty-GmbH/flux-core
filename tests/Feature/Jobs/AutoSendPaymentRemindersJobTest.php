@@ -21,12 +21,12 @@ beforeEach(function (): void {
     ]);
 
     $this->contact = Contact::factory()
-        ->state(['client_id' => $this->dbClient->getKey()])
+        ->state(['tenant_id' => $this->dbTenant->getKey()])
         ->create();
 
     $this->address = Address::factory()
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => 'test@example.com',
         ])
@@ -42,7 +42,7 @@ beforeEach(function (): void {
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ])
-        ->for(factory: $this->dbClient, relationship: 'client')
+        ->for(factory: $this->dbTenant, relationship: 'tenant')
         ->create();
 });
 
@@ -54,7 +54,7 @@ test('sends payment reminders for overdue orders', function (): void {
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),
@@ -90,7 +90,7 @@ test('does not send payment reminders when setting is disabled', function (): vo
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),
@@ -115,7 +115,7 @@ test('does not send payment reminders for orders without invoice number', functi
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => null,
@@ -140,7 +140,7 @@ test('does not send payment reminders for orders with zero balance', function ()
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),
@@ -165,7 +165,7 @@ test('does not send payment reminders for not yet due orders', function (): void
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),
@@ -188,7 +188,7 @@ test('does not send payment reminders for purchase orders', function (): void {
             'order_type_enum' => OrderTypeEnum::Purchase,
             'is_active' => true,
         ])
-        ->for(factory: $this->dbClient, relationship: 'client')
+        ->for(factory: $this->dbTenant, relationship: 'tenant')
         ->create();
 
     $purchaseOrder = Order::factory()
@@ -198,7 +198,7 @@ test('does not send payment reminders for purchase orders', function (): void {
         ->for(PaymentType::factory(), 'paymentType')
         ->for($purchaseOrderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),
@@ -223,7 +223,7 @@ test('does not send payment reminders for orders at maximum reminder level', fun
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),
@@ -248,7 +248,7 @@ test('processes only specified order ids when provided', function (): void {
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),
@@ -269,7 +269,7 @@ test('processes only specified order ids when provided', function (): void {
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'address_invoice_id' => $this->address->id,
             'invoice_number' => Str::uuid(),

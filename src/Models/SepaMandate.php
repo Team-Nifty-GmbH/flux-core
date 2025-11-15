@@ -6,9 +6,9 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -21,7 +21,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
 {
-    use Communicatable, Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification,
+    use Communicatable, Filterable, HasPackageFactory, HasSerialNumberRange, HasTenantAssignment, HasUserModification,
         HasUuid, InteractsWithMedia, LogsActivity, Printable, SoftDeletes;
 
     protected static function booted(): void
@@ -46,9 +46,9 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         ];
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function contact(): BelongsTo

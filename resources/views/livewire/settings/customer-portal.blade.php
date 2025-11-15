@@ -157,7 +157,7 @@
             color="secondary"
             light
             :text="__('Cancel')"
-            :href="route('settings.clients')"
+            :href="route('settings.tenants')"
         />
         <x-button color="indigo" :text="__('Save')" wire:click="save" />
     </div>

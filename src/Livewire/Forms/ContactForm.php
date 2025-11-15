@@ -6,8 +6,8 @@ use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\RestoreContact;
 use FluxErp\Actions\Contact\UpdateContact;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Tenant;
 use Livewire\Attributes\Locked;
 
 class ContactForm extends FluxForm
@@ -18,7 +18,7 @@ class ContactForm extends FluxForm
 
     public array $categories = [];
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?float $credit_line = null;
 
@@ -48,7 +48,7 @@ class ContactForm extends FluxForm
     public array $industries = [];
 
     public array $main_address = [
-        'client_id' => null,
+        'tenant_id' => null,
         'country_id' => null,
         'language_id' => null,
         'salutation' => null,
@@ -96,8 +96,8 @@ class ContactForm extends FluxForm
     {
         parent::reset(...$properties);
 
-        $this->main_address['client_id'] = resolve_static(Client::class, 'query')->where('is_active', true)->count() === 1
-            ? resolve_static(Client::class, 'query')->where('is_active', true)->first()->id
+        $this->main_address['tenant_id'] = resolve_static(Tenant::class, 'query')->where('is_active', true)->count() === 1
+            ? resolve_static(Tenant::class, 'query')->where('is_active', true)->first()->id
             : null;
     }
 

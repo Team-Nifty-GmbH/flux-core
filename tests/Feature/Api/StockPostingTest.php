@@ -11,12 +11,12 @@ use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => false,
     ]);
 
@@ -26,7 +26,7 @@ beforeEach(function (): void {
 
     $this->products = Product::factory()
         ->count(3)
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $this->stockPostings = StockPosting::factory()->count(3)->create([

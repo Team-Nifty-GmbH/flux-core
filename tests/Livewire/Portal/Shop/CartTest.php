@@ -12,7 +12,7 @@ test('can add cart item', function (): void {
     /** @var Collection $products */
     $products = Product::factory()
         ->count(2)
-        ->hasAttached($this->dbClient, relationship: 'clients')
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
         ->for(VatRate::factory(), relationship: 'vatRate')
         ->has(
             Price::factory()

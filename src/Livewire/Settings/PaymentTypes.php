@@ -7,8 +7,8 @@ use FluxErp\Actions\PaymentType\DeletePaymentType;
 use FluxErp\Actions\PaymentType\UpdatePaymentType;
 use FluxErp\Livewire\DataTables\PaymentTypeList;
 use FluxErp\Livewire\Forms\PaymentTypeForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
@@ -108,7 +108,7 @@ class PaymentTypes extends PaymentTypeList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => resolve_static(Client::class, 'query')
+                'tenants' => resolve_static(Tenant::class, 'query')
                     ->select(['id', 'name'])
                     ->get()
                     ->toArray(),

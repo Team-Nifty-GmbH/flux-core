@@ -42,7 +42,7 @@ class OrderForm extends FluxForm
 
     public ?string $bic = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?string $commission = null;
 

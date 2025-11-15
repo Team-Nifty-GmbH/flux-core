@@ -23,8 +23,8 @@ class Logo extends Component
     {
         if (auth()->user() instanceof \FluxErp\Models\Address) {
             $this->default = false;
-            $this->logo = auth()->user()->contact->client?->getFirstMedia('logo');
-            $this->logoSmall = auth()->user()->contact->client?->getFirstMedia('logo_small');
+            $this->logo = auth()->user()->contact->tenant?->getFirstMedia('logo');
+            $this->logoSmall = auth()->user()->contact->tenant?->getFirstMedia('logo_small');
         }
     }
 

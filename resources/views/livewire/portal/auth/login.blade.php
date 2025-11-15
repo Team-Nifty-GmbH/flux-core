@@ -1,6 +1,6 @@
 <div>
     @php
-        $client = app(\FluxErp\Models\Client::class)->first();
+        $tenant = app(\FluxErp\Models\Tenant::class)->first();
     @endphp
 
     @section('password-reset-dialog')
@@ -27,11 +27,11 @@
     </x-modal>
     @show
     <x-slot:title>
-        {{ $client?->name . ' Portal' }}
+        {{ $tenant?->name . ' Portal' }}
     </x-slot>
     <div class="md:text-portal-font-color absolute right-4 top-6 text-white">
         <a
-            href="{{ $client?->website }}"
+            href="{{ $tenant?->website }}"
             target="_blank"
             class="flex items-center dark:text-gray-50"
         >
@@ -44,7 +44,7 @@
     <div
         class="md:text-portal-font-color absolute left-4 top-6 max-h-80 max-w-80 text-white"
     >
-        {{ $client?->getFirstMedia('logo') }}
+        {{ $tenant?->getFirstMedia('logo') }}
     </div>
     <div class="flex min-h-full justify-center">
         <div

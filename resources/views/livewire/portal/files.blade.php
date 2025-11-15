@@ -1,6 +1,6 @@
 <div class="dark:text-white">
     <h2 class="text-base font-bold uppercase">
-        {{ data_get($customerClient, 'name') }} {{ __('Connect') }}
+        {{ data_get($customerTenant, 'name') }} {{ __('Connect') }}
     </h2>
     <h1 class="pt-5 text-5xl font-bold">
         {{ __('My documents') }}
@@ -27,11 +27,11 @@
                     {{ __('Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us.') }}
                 </div>
                 <div class="py-5 font-bold">
-                    <a href="tel:+{{ data_get($customerClient, 'phone') }}">
-                        {{ data_get($customerClient, 'phone') }}
+                    <a href="tel:+{{ data_get($customerTenant, 'phone') }}">
+                        {{ data_get($customerTenant, 'phone') }}
                     </a>
                 </div>
-                @foreach (data_get($customerClient, 'opening_hours') ?? [] as $openingHour)
+                @foreach (data_get($customerTenant, 'opening_hours') ?? [] as $openingHour)
                     <div class="">
                         {{ data_get($openingHour, 'day') }}
                     </div>

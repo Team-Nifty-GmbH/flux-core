@@ -39,7 +39,7 @@ class Profile extends Component
         } elseif ($id === 'new') {
             $user = app(Address::class);
             $user->contact_id = auth()->user()->contact_id;
-            $user->client_id = auth()->user()->client_id;
+            $user->tenant_id = auth()->user()->tenant_id;
             $user->company = auth()->user()->company;
             $user->language_id = null;
             $user->country_id = null;

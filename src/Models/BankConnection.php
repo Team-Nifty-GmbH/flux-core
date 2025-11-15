@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class BankConnection extends FluxModel
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
+    use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity;
 
     protected static function booted(): void
     {
@@ -32,9 +32,9 @@ class BankConnection extends FluxModel
         ];
     }
 
-    public function clients(): BelongsToMany
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class, 'bank_connection_client');
+        return $this->belongsToMany(Tenant::class, 'bank_connection_tenant');
     }
 
     public function currency(): BelongsTo

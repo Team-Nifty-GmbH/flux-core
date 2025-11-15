@@ -7,12 +7,12 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $this->address = Address::factory()->create([
         'contact_id' => $contact->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 });
 

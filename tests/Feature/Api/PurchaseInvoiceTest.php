@@ -3,7 +3,6 @@
 use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
@@ -17,6 +16,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -26,21 +26,21 @@ use Laravel\Sanctum\Sanctum;
 beforeEach(function (): void {
     Storage::fake('public');
 
-    $this->clients = Client::factory()->count(2)->create();
+    $this->tenants = Tenant::factory()->count(2)->create();
 
     $this->paymentTypes = PaymentType::factory()
         ->count(2)
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
             'is_active' => true,
             'is_purchase' => true,
         ]);
 
     $this->contacts = Contact::factory()->count(2)
-        ->has(Address::factory()->set('client_id', $this->dbClient->getKey()))
+        ->has(Address::factory()->set('tenant_id', $this->dbTenant->getKey()))
         ->for(PriceList::factory()->state(['is_default' => true]))
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'payment_type_id' => $this->paymentTypes->random()->id,
             'payment_target_days' => 0,
             'discount_days' => 0,
@@ -52,7 +52,7 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $this->orderTypes = OrderType::factory()->count(2)->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Purchase,
     ]);
 
@@ -69,7 +69,7 @@ beforeEach(function (): void {
             ]);
         })
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_id' => $this->orderTypes->random()->id,
             'payment_type_id' => $this->paymentTypes->random()->id,
             'currency_id' => $this->currencies->random()->id,
@@ -77,7 +77,7 @@ beforeEach(function (): void {
         ]);
 
     $this->order = Order::factory()->create([
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'currency_id' => $this->currencies->random()->id,
         'order_type_id' => $this->orderTypes[0]->id,
         'payment_type_id' => $this->paymentTypes[0]->id,
@@ -90,7 +90,7 @@ beforeEach(function (): void {
     $this->order->invoice_number = Str::uuid()->toString();
     $this->order->save();
 
-    $this->user->clients()->attach($this->clients->pluck('id')->toArray());
+    $this->user->tenants()->attach($this->tenants->pluck('id')->toArray());
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.purchase-invoices.{id}.get'),
@@ -104,16 +104,16 @@ beforeEach(function (): void {
 
 test('can create purchase invoice with all fields', function (): void {
     $ledgerAccount = LedgerAccount::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     $product = Product::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
     $vatRate = VatRate::factory()->create();
 
     $purchaseInvoice = [
         'uuid' => Str::uuid()->toString(),
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contacts->random()->id,
         'currency_id' => $this->currencies->random()->id,
         'order_type_id' => $this->orderTypes->random()->id,
@@ -151,7 +151,7 @@ test('can create purchase invoice with all fields', function (): void {
 
     expect($dbPurchaseInvoice)
         ->uuid->toEqual($purchaseInvoice['uuid'])
-        ->client_id->toEqual($purchaseInvoice['client_id'])
+        ->tenant_id->toEqual($purchaseInvoice['tenant_id'])
         ->contact_id->toEqual($purchaseInvoice['contact_id'])
         ->currency_id->toEqual($purchaseInvoice['currency_id'])
         ->media_id->not->toBeNull()
@@ -197,7 +197,7 @@ test('can create purchase invoice with minimum fields', function (): void {
         ->first();
 
     expect($dbPurchaseInvoice)
-        ->client_id->toEqual(Client::default()?->id)
+        ->tenant_id->toEqual(Tenant::default()?->id)
         ->contact_id->toBeNull()
         ->currency_id->toBeNull()
         ->media_id->not->toBeNull()
@@ -218,7 +218,7 @@ test('validates required fields on creation', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices', [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'purchase_invoice_positions' => [],
     ]);
 
@@ -305,7 +305,7 @@ test('converts purchase invoice to order with payment fields', function (): void
     $dbPurchaseInvoice = $this->purchaseInvoices[0]->fresh();
 
     expect($dbOrder)
-        ->client_id->toEqual($dbPurchaseInvoice->client_id)
+        ->tenant_id->toEqual($dbPurchaseInvoice->tenant_id)
         ->contact_id->toEqual($dbPurchaseInvoice->contact_id)
         ->currency_id->toEqual($dbPurchaseInvoice->currency_id)
         ->order_type_id->toEqual($dbPurchaseInvoice->order_type_id)
@@ -326,7 +326,7 @@ test('converts purchase invoice to order with payment fields', function (): void
 
 test('validates required fields when finishing purchase invoice', function (): void {
     $this->purchaseInvoices[1]->update([
-        'client_id' => null,
+        'tenant_id' => null,
         'contact_id' => null,
         'order_type_id' => null,
         'invoice_number' => null,
@@ -341,7 +341,7 @@ test('validates required fields when finishing purchase invoice', function (): v
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors([
-            'client_id',
+            'tenant_id',
             'contact_id',
             'order_type_id',
             'invoice_number',
@@ -362,7 +362,7 @@ test('can get single purchase invoice', function (): void {
 
     expect($purchaseInvoice)
         ->id->toEqual($this->purchaseInvoices[0]->id)
-        ->client_id->toEqual($this->purchaseInvoices[0]->client_id)
+        ->tenant_id->toEqual($this->purchaseInvoices[0]->tenant_id)
         ->contact_id->toEqual($this->purchaseInvoices[0]->contact_id)
         ->currency_id->toEqual($this->purchaseInvoices[0]->currency_id)
         ->media_id->toEqual($this->purchaseInvoices[0]->media_id)
@@ -414,7 +414,7 @@ test('can list purchase invoices', function (): void {
 
     expect($this->purchaseInvoices[0])
         ->id->toEqual($referencePurchaseInvoice->id)
-        ->client_id->toEqual($referencePurchaseInvoice->client_id)
+        ->tenant_id->toEqual($referencePurchaseInvoice->tenant_id)
         ->contact_id->toEqual($referencePurchaseInvoice->contact_id)
         ->currency_id->toEqual($referencePurchaseInvoice->currency_id)
         ->media_id->toEqual($referencePurchaseInvoice->media_id)
@@ -465,7 +465,7 @@ test('can update purchase invoice', function (): void {
     expect($dbPurchaseInvoice)
         ->id->toEqual($purchaseInvoice['id'])
         ->uuid->toEqual($this->purchaseInvoices[0]->uuid)
-        ->client_id->toEqual($this->purchaseInvoices[0]->client_id)
+        ->tenant_id->toEqual($this->purchaseInvoices[0]->tenant_id)
         ->contact_id->toEqual($purchaseInvoice['contact_id'])
         ->currency_id->toEqual($purchaseInvoice['currency_id'])
         ->media_id->toEqual($this->purchaseInvoices[0]->media_id)
@@ -489,7 +489,7 @@ test('validates unique invoice number on update', function (): void {
         'id' => $this->purchaseInvoices[0]->id,
         'invoice_number' => $this->order->invoice_number,
         'contact_id' => $this->order->contact_id,
-        'client_id' => $this->order->client_id,
+        'tenant_id' => $this->order->tenant_id,
     ]);
 
     $response->assertUnprocessable()

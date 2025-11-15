@@ -3,12 +3,12 @@
 namespace FluxErp\Rulesets\Order;
 
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Lead;
 use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ExistsWithForeign;
@@ -59,10 +59,10 @@ class CreateOrderRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Order::class]),
             ],
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'agent_id' => [
                 'integer',
@@ -73,7 +73,7 @@ class CreateOrderRuleset extends FluxRuleset
                 'required_without:address_invoice_id',
                 'integer',
                 'nullable',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'contacts']),
+                app(ExistsWithForeign::class, ['foreignAttribute' => 'tenant_id', 'table' => 'contacts']),
             ],
             'contact_bank_connection_id' => [
                 'integer',
@@ -96,7 +96,7 @@ class CreateOrderRuleset extends FluxRuleset
             'address_delivery_id' => [
                 'integer',
                 'nullable',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'addresses']),
+                app(ExistsWithForeign::class, ['foreignAttribute' => 'tenant_id', 'table' => 'addresses']),
             ],
             'language_id' => [
                 'integer',
@@ -106,7 +106,7 @@ class CreateOrderRuleset extends FluxRuleset
             'order_type_id' => [
                 'required',
                 'integer',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'order_types']),
+                app(ExistsWithForeign::class, ['foreignAttribute' => 'tenant_id', 'table' => 'order_types']),
             ],
             'price_list_id' => [
                 'integer',
@@ -122,8 +122,8 @@ class CreateOrderRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
-                    'table' => 'client_payment_type',
+                    'foreignAttribute' => 'tenant_id',
+                    'table' => 'tenant_payment_type',
                     'column' => 'payment_type_id',
                 ]),
             ],
@@ -152,7 +152,7 @@ class CreateOrderRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
+                    'foreignAttribute' => 'tenant_id',
                     'table' => 'addresses',
                     'baseTable' => 'orders',
                 ]),

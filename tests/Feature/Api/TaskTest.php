@@ -15,7 +15,7 @@ use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $this->project = Project::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $this->tasks = Task::factory()->count(3)->create([
@@ -495,7 +495,7 @@ test('update task validation fails', function (): void {
 test('update task with project id', function (): void {
     $this->tasks[2] = $this->tasks[2]->refresh();
     $project = Project::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $task = [

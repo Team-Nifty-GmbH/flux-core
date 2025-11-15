@@ -19,7 +19,7 @@ class OrderPositionForm extends FluxForm
 
     public ?string $amount_packed_products = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $contact_id = null;
 

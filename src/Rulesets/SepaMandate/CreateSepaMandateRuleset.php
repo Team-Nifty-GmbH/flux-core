@@ -3,10 +3,10 @@
 namespace FluxErp\Rulesets\SepaMandate;
 
 use FluxErp\Enums\SepaMandateTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
@@ -19,10 +19,10 @@ class CreateSepaMandateRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:sepa_mandates,uuid',
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'contact_id' => [
                 'required',

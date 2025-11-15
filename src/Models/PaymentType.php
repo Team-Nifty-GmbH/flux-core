@@ -2,13 +2,13 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Models\Pivots\ClientPaymentType;
+use FluxErp\Models\Pivots\TenantPaymentType;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAttributeTranslations;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PaymentType extends FluxModel
 {
-    use CacheModelQueries, Filterable, HasAttributeTranslations, HasClientAssignment, HasDefault, HasPackageFactory,
+    use CacheModelQueries, Filterable, HasAttributeTranslations, HasDefault, HasPackageFactory, HasTenantAssignment,
         HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected function casts(): array
@@ -32,10 +32,10 @@ class PaymentType extends FluxModel
         ];
     }
 
-    public function clients(): BelongsToMany
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class, 'client_payment_type')
-            ->using(ClientPaymentType::class);
+        return $this->belongsToMany(Tenant::class, 'tenant_payment_type')
+            ->using(TenantPaymentType::class);
     }
 
     protected function translatableAttributes(): array

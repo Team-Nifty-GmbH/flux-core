@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Livewire\Portal\Dashboard;
 use FluxErp\Models\Calendar;
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Setting\CreateSettingRuleset;
 use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
 use FluxErp\Services\SettingService;
@@ -25,7 +25,7 @@ class CustomerPortal extends Component
 
     public array $setting = [];
 
-    public function mount(Client $client): void
+    public function mount(Tenant $tenant): void
     {
         $modules = get_subclasses_of(Component::class, 'FluxErp\\Livewire\\Portal');
         $this->modules = array_filter($modules, function ($value) {
@@ -37,15 +37,15 @@ class CustomerPortal extends Component
             ->get()
             ->toArray();
 
-        $setting = $client->settings()
+        $setting = $tenant->settings()
             ->where('key', 'customerPortal')
             ->first();
 
         $this->setting = $setting?->toArray() ??
             [
                 'key' => 'customerPortal',
-                'model_type' => morph_alias(Client::class),
-                'model_id' => $client->id,
+                'model_type' => morph_alias(Tenant::class),
+                'model_id' => $tenant->id,
                 'settings' => [
                     'nav' => [
                         'background' => [

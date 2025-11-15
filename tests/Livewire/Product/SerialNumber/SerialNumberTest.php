@@ -10,7 +10,7 @@ use Livewire\Livewire;
 test('renders successfully', function (): void {
     $warehouse = Warehouse::factory()->create();
     $product = Product::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $serialNumber = SerialNumber::factory()->create();

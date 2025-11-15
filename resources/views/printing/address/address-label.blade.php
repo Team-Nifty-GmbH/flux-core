@@ -1,8 +1,8 @@
 <table class="w-full text-2xs" style="page-break-inside: avoid">
     <tr colspan="100%" class="text-3xs">
         <td>
-            @section('client_address')
-            {{ $client->postal_address_one_line }}
+            @section('tenant_address')
+            {{ $tenant->postal_address_one_line }}
             @show
         </td>
     </tr>
@@ -19,7 +19,7 @@
             <div class="float-right inline-block max-h-72 text-right">
                 <img
                     class="logo-small"
-                    src="{{ $client->logo_small }}"
+                    src="{{ $tenant->logo_small }}"
                     alt="logo-small"
                 />
             </div>

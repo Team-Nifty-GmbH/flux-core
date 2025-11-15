@@ -8,7 +8,7 @@ use FluxErp\Models\Product;
 
 beforeEach(function (): void {
     $this->product = Product::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $category = Category::factory()->create([

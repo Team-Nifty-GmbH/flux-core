@@ -108,12 +108,12 @@
                 </div>
                 <div class="flex flex-col gap-4 pt-4">
                     <x-select.styled
-                        :label="__('Client')"
+                        :label="__('Tenant')"
                         required
                         autocomplete="off"
-                        wire:model="order.client_id"
+                        wire:model="order.tenant_id"
                         select="label:name|value:id"
-                        :options="$clients"
+                        :options="$tenants"
                     />
                     <x-select.styled
                         :label="__('Price list')"

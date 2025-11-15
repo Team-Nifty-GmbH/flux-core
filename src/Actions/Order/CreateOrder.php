@@ -117,7 +117,7 @@ class CreateOrder extends FluxAction
         $this->data['payment_type_id'] = $this->data['payment_type_id']
             ?? $contact->payment_type_id
             ?? resolve_static(PaymentType::class, 'default')?->getKey();
-        $this->data['client_id'] ??= $contact->client_id;
+        $this->data['tenant_id'] ??= $contact->tenant_id;
 
         $paymentType = resolve_static(PaymentType::class, 'query')
             ->whereKey(data_get($this->data, 'payment_type_id'))
@@ -160,13 +160,13 @@ class CreateOrder extends FluxAction
                 'order_type_id' => [
                     'required',
                     'integer',
-                    (new ModelExists(OrderType::class))->where('client_id', $this->data['client_id']),
+                    (new ModelExists(OrderType::class))->where('tenant_id', $this->data['tenant_id']),
                 ],
                 'payment_type_id' => [
                     'required',
                     'integer',
                     (new ModelExists(PaymentType::class))
-                        ->whereRelation('clients', 'id', $this->data['client_id']),
+                        ->whereRelation('tenants', 'id', $this->data['tenant_id']),
                 ],
             ]
         );
@@ -189,7 +189,7 @@ class CreateOrder extends FluxAction
             }
 
             if (resolve_static(Order::class, 'query')
-                ->where('client_id', $this->data['client_id'])
+                ->where('tenant_id', $this->data['tenant_id'])
                 ->where('invoice_number', $this->data['invoice_number'])
                 ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $this->data['contact_id']))
                 ->exists()

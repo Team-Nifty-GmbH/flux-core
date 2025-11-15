@@ -6,7 +6,7 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     $product = Product::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     Livewire::withoutLazyLoading()

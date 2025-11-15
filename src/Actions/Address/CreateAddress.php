@@ -114,8 +114,8 @@ class CreateAddress extends FluxAction
             ? Str::between($this->getData('email'), '<', '>')
             : null;
         $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
-        $this->data['client_id'] ??= resolve_static(Contact::class, 'query')
+        $this->data['tenant_id'] ??= resolve_static(Contact::class, 'query')
             ->whereKey($this->getData('contact_id'))
-            ->value('client_id');
+            ->value('tenant_id');
     }
 }

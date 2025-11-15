@@ -26,12 +26,12 @@
             >
                 <x-select.styled
                     x-bind:readonly="!edit"
-                    :label="__('Client')"
-                    wire:model="project.client_id"
+                    :label="__('Tenant')"
+                    wire:model="project.tenant_id"
                     select="label:name|value:id"
                     unfiltered
                     :request="[
-                        'url' => route('search', \FluxErp\Models\Client::class),
+                        'url' => route('search', \FluxErp\Models\Tenant::class),
                         'method' => 'POST',
                     ]"
                 />

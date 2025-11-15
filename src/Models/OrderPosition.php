@@ -10,12 +10,12 @@ use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasTags;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -37,8 +37,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable, Targetable
 {
-    use CascadeSoftDeletes, Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
+    use CascadeSoftDeletes, Commentable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasParentChildRelations, HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid,
         LogsActivity, SortableTrait;
 
     public array $sortable = [
@@ -164,9 +164,9 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             ->where('parent_id', $this->parent_id);
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function commission(): HasOne

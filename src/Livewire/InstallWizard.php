@@ -9,11 +9,11 @@ use FluxErp\Actions\Warehouse\CreateWarehouse;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Events\InstallProcessOutputEvent;
 use FluxErp\Jobs\InstallWizard\CommandJob;
-use FluxErp\Livewire\Forms\ClientForm;
 use FluxErp\Livewire\Forms\CurrencyForm;
 use FluxErp\Livewire\Forms\DbForm;
 use FluxErp\Livewire\Forms\LanguageForm;
 use FluxErp\Livewire\Forms\PaymentTypeForm;
+use FluxErp\Livewire\Forms\TenantForm;
 use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Livewire\Forms\VatRateForm;
 use FluxErp\Models\Language;
@@ -38,7 +38,7 @@ class InstallWizard extends Component
 {
     public ?string $batchId = null;
 
-    public ClientForm $clientForm;
+    public TenantForm $tenantForm;
 
     public CurrencyForm $currencyForm;
 
@@ -224,9 +224,9 @@ class InstallWizard extends Component
                 'title' => __('Currency'),
             ],
             [
-                'view' => 'client',
-                'property' => 'clientForm',
-                'title' => __('Client'),
+                'view' => 'tenant',
+                'property' => 'tenantForm',
+                'title' => __('Tenant'),
             ],
             [
                 'view' => 'vat-rates',
@@ -245,7 +245,7 @@ class InstallWizard extends Component
                 'title' => __('Payment Type'),
                 'rules' => function () {
                     $rules = CreatePaymentType::make([])->setRulesFromRulesets()->getRules();
-                    $rules['clients'] = 'array|nullable';
+                    $rules['tenants'] = 'array|nullable';
 
                     return $rules;
                 },
@@ -295,7 +295,7 @@ class InstallWizard extends Component
     {
         CommandJob::dispatchSync('flux:init-env', [
             'keyValues' => 'app_locale:' . $this->languageForm->language_code . ',' .
-                'app_name:' . $this->clientForm->name . ',' .
+                'app_name:' . $this->tenantForm->name . ',' .
                 'flux_install_done:true',
         ]);
 
@@ -303,7 +303,7 @@ class InstallWizard extends Component
         $this->languageForm->setCheckPermission(false)->save();
 
         $this->currencyForm->setCheckPermission(false)->save();
-        $this->clientForm->setCheckPermission(false)->save();
+        $this->tenantForm->setCheckPermission(false)->save();
 
         $this->userForm->language_id = $this->languageForm->id;
         $this->userForm->setCheckPermission(false)->save();
@@ -336,7 +336,7 @@ class InstallWizard extends Component
             $this->vatRateForm->setCheckPermission(false)->save();
         }
 
-        $this->paymentTypeForm->clients = [$this->clientForm->id];
+        $this->paymentTypeForm->tenants = [$this->tenantForm->id];
         $this->paymentTypeForm->setCheckPermission(false)->save();
 
         foreach (OrderTypeEnum::cases() as $orderType) {
@@ -346,7 +346,7 @@ class InstallWizard extends Component
                     ->doesntExist()
             ) {
                 CreateOrderType::make([
-                    'client_id' => $this->clientForm->id,
+                    'tenant_id' => $this->tenantForm->id,
                     'name' => __($orderType->name),
                     'order_type_enum' => $orderType,
                 ])

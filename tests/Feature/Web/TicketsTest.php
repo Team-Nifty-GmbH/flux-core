@@ -7,11 +7,11 @@ use FluxErp\Models\Ticket;
 
 beforeEach(function (): void {
     $dbContact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $dbContact->client_id,
+        'tenant_id' => $dbContact->tenant_id,
         'language_id' => $this->user->language_id,
         'contact_id' => $dbContact->id,
         'is_main_address' => true,

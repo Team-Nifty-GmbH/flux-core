@@ -2,23 +2,23 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\RecordOrigin;
+use FluxErp\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class ContactTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $clients = Client::all(['id']);
+        $tenants = Tenant::all(['id']);
         $recordOrigins = RecordOrigin::query()
             ->where('model_type', morph_alias(Contact::class))
             ->get('id');
 
-        foreach ($clients as $client) {
+        foreach ($tenants as $tenant) {
             Contact::factory()->count(10)->create([
-                'client_id' => $client->id,
+                'tenant_id' => $tenant->id,
                 'record_origin_id' => fn () => $recordOrigins->random()->id,
             ]);
         }

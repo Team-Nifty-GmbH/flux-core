@@ -109,7 +109,7 @@ class Checkout extends Cart
     #[Renderless]
     public function loadTermsAndConditions(): string
     {
-        return auth()->user()->contact->client->terms_and_conditions ?? '';
+        return auth()->user()->contact->tenant->terms_and_conditions ?? '';
     }
 
     public function saveDeliveryAddress(): bool

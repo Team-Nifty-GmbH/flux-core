@@ -16,7 +16,7 @@ test('portal service no user', function (): void {
 
 test('portal service page', function (): void {
     $product = Product::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $warehouse = Warehouse::factory()->create();

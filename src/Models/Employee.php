@@ -12,8 +12,8 @@ use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -32,7 +32,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Communicatable, HasClientAssignment, HasFrontendAttributes, HasUserModification, HasUuid,
+    use Commentable, Communicatable, HasFrontendAttributes, HasTenantAssignment, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Notifiable, Searchable, SoftDeletes;
 
     public static string $iconName = 'user';
@@ -81,9 +81,9 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->hasMany(AbsenceRequest::class);
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function employeeBalanceAdjustments(): HasMany

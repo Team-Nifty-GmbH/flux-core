@@ -120,7 +120,7 @@ class OrderPositionList extends BaseDataTable
         return array_merge(
             parent::getReturnKeys(),
             [
-                'client_id',
+                'tenant_id',
                 'order_id',
                 'parent_id',
                 'price_id',

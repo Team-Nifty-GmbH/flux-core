@@ -1,6 +1,6 @@
 <div>
     <h2 class="text-base font-bold uppercase dark:text-gray-50">
-        {{ $customerClient['name'] }} {{ __('Connect') }}
+        {{ $customerTenant['name'] }} {{ __('Connect') }}
     </h2>
     <h1 class="pt-5 text-5xl font-bold dark:text-gray-50">
         {{ __('Service request') }}
@@ -57,7 +57,7 @@
                     />
                 </div>
                 <div class="text-portal-font-color pt-12 font-bold">
-                    {{ __(':client_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.', ['client_name' => $customerClient['name']]) }}
+                    {{ __(':tenant_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.', ['tenant_name' => $customerTenant['name']]) }}
                 </div>
                 <x-button color="indigo" wire:click.prevent="save()">
                     {{ __('Send') }}
@@ -75,12 +75,12 @@
                 {!! __('Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us.') !!}
             </div>
             <div class="py-5 font-bold">
-                <a href="tel:+{{ $customerClient['phone'] }}">
-                    {{ $customerClient['phone'] }}
+                <a href="tel:+{{ $customerTenant['phone'] }}">
+                    {{ $customerTenant['phone'] }}
                 </a>
             </div>
             <div class="grid grid-cols-2">
-                @foreach ($customerClient['opening_hours'] ?? [] as $openingHour)
+                @foreach ($customerTenant['opening_hours'] ?? [] as $openingHour)
                     <div class="">
                         {{ $openingHour['day'] }}
                     </div>

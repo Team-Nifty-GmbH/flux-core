@@ -3,7 +3,6 @@
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -12,17 +11,18 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $this->clients = Client::factory()->count(2)->create();
+    $this->tenants = Tenant::factory()->count(2)->create();
 
     $contacts = Contact::factory()->count(2)->create([
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
     ]);
     $this->addresses = Address::factory()->count(2)->create([
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'contact_id' => $contacts[0]->id,
     ]);
 
@@ -34,24 +34,24 @@ beforeEach(function (): void {
     $this->languages = Language::factory()->count(2)->create();
 
     $this->orderTypes = OrderType::factory()->count(2)->create([
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
     $this->paymentTypes = PaymentType::factory()
         ->count(2)
-        ->hasAttached(factory: $this->clients[0], relationship: 'clients')
+        ->hasAttached(factory: $this->tenants[0], relationship: 'tenants')
         ->create();
 
     $priceLists = PriceList::factory()->count(2)->create();
 
     $addresses = Address::factory()->count(2)->create([
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'contact_id' => $contacts->random()->id,
     ]);
 
     $this->orders = Order::factory()->count(3)->create([
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'language_id' => $this->languages[0]->id,
         'order_type_id' => $this->orderTypes[0]->id,
         'payment_type_id' => $this->paymentTypes[0]->id,
@@ -62,7 +62,7 @@ beforeEach(function (): void {
         'is_locked' => false,
     ]);
 
-    $this->user->clients()->attach($this->clients->pluck('id')->toArray());
+    $this->user->tenants()->attach($this->tenants->pluck('id')->toArray());
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.orders.{id}.get'),
@@ -77,7 +77,7 @@ test('create order', function (): void {
     $order = [
         'address_invoice_id' => $this->addresses[0]->id,
         'address_delivery_id' => $this->addresses[1]->id,
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'language_id' => $this->languages[0]->id,
         'order_type_id' => $this->orderTypes[0]->id,
         'payment_type_id' => $this->paymentTypes[0]->id,
@@ -103,7 +103,7 @@ test('create order', function (): void {
         ->whereKey($responseOrder->id)
         ->first();
 
-    expect($dbOrder->client_id)->toEqual($order['client_id']);
+    expect($dbOrder->tenant_id)->toEqual($order['tenant_id']);
     expect($dbOrder->language_id)->toEqual($order['language_id']);
     expect($dbOrder->order_type_id)->toEqual($order['order_type_id']);
     expect($dbOrder->payment_type_id)->toEqual($order['payment_type_id']);
@@ -142,7 +142,7 @@ test('create order with address delivery', function (): void {
     $order = [
         'address_invoice_id' => $this->addresses[0]->id,
         'address_delivery_id' => $this->addresses[1]->id,
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'language_id' => $this->languages[0]->id,
         'order_type_id' => $this->orderTypes[0]->id,
         'payment_type_id' => $this->paymentTypes[0]->id,
@@ -174,7 +174,7 @@ test('create order with address delivery', function (): void {
     expect($dbOrder->address_delivery['company'])->toEqual($order['address_delivery']['company']);
     expect($dbOrder->address_delivery_id)->toBeNull();
     expect($dbOrder->address_invoice_id)->toEqual($order['address_invoice_id']);
-    expect($dbOrder->client_id)->toEqual($order['client_id']);
+    expect($dbOrder->tenant_id)->toEqual($order['tenant_id']);
     expect($dbOrder->language_id)->toEqual($order['language_id']);
     expect($dbOrder->order_type_id)->toEqual($order['order_type_id']);
     expect($dbOrder->payment_type_id)->toEqual($order['payment_type_id']);
@@ -193,7 +193,7 @@ test('create order with address delivery validation fails', function (): void {
     $order = [
         'address_invoice_id' => $this->addresses[0]->id,
         'address_delivery_id' => $this->addresses[1]->id,
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'language_id' => $this->languages[0]->id,
         'order_type_id' => $this->orderTypes[0]->id,
         'payment_type_id' => $this->paymentTypes[0]->id,
@@ -259,7 +259,7 @@ test('get order', function (): void {
     $order = json_decode($response->getContent())->data;
 
     expect($order->id)->toEqual($this->orders[0]->id);
-    expect($order->client_id)->toEqual($this->orders[0]->client_id);
+    expect($order->tenant_id)->toEqual($this->orders[0]->tenant_id);
     expect($order->language_id)->toEqual($this->orders[0]->language_id);
     expect($order->order_type_id)->toEqual($this->orders[0]->order_type_id);
     expect($order->payment_type_id)->toEqual($this->orders[0]->payment_type_id);
@@ -284,7 +284,7 @@ test('get orders', function (): void {
     $orders = json_decode($response->getContent())->data;
 
     expect($orders->data[0]->id)->toEqual($this->orders[0]->id);
-    expect($orders->data[0]->client_id)->toEqual($this->orders[0]->client_id);
+    expect($orders->data[0]->tenant_id)->toEqual($this->orders[0]->tenant_id);
     expect($orders->data[0]->language_id)->toEqual($this->orders[0]->language_id);
     expect($orders->data[0]->order_type_id)->toEqual($this->orders[0]->order_type_id);
     expect($orders->data[0]->payment_type_id)->toEqual($this->orders[0]->payment_type_id);
@@ -353,7 +353,7 @@ test('update order address delivery', function (): void {
     expect($dbOrder->address_delivery['company'])->toEqual($order['address_delivery']['company']);
     expect($dbOrder->address_delivery_id)->toBeNull();
     expect($dbOrder->address_invoice_id)->toEqual($this->orders[0]->address_invoice_id);
-    expect($dbOrder->client_id)->toEqual($this->orders[0]->client_id);
+    expect($dbOrder->tenant_id)->toEqual($this->orders[0]->tenant_id);
     expect($dbOrder->language_id)->toEqual($this->orders[0]->language_id);
     expect($dbOrder->order_type_id)->toEqual($this->orders[0]->order_type_id);
     expect($dbOrder->payment_type_id)->toEqual($this->orders[0]->payment_type_id);
@@ -386,7 +386,7 @@ test('update order address delivery validation fails', function (): void {
 
 test('update order validation fails', function (): void {
     $order = [
-        'client_id' => $this->clients[0]->id,
+        'tenant_id' => $this->tenants[0]->id,
         'language_id' => $this->languages[0]->id,
         'order_type_id' => $this->orderTypes[0]->id,
         'payment_type_id' => $this->paymentTypes[0]->id,

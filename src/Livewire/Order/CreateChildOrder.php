@@ -71,7 +71,7 @@ class CreateChildOrder extends Component
         $this->replicateOrder->order_positions = [];
 
         $this->availableOrderTypes = resolve_static(OrderType::class, 'query')
-            ->where('client_id', $parentOrder->client_id)
+            ->where('tenant_id', $parentOrder->tenant_id)
             ->where('order_type_enum', $this->type)
             ->where('is_active', true)
             ->when(

@@ -2,10 +2,10 @@
 
 namespace FluxErp\Rulesets\Project;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\ValidStateRule;
@@ -20,10 +20,10 @@ class CreateProjectRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:projects,uuid',
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'contact_id' => [
                 'integer',

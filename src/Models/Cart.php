@@ -108,7 +108,7 @@ class Cart extends FluxModel
                         ->first()
                         ->id,
                     'contact_id' => $address->contact_id,
-                    'client_id' => $address->contact->client_id,
+                    'tenant_id' => $address->contact->tenant_id,
                     'is_imported' => true,
                     'address_delivery' => is_array($deliveryAddress) || is_null($deliveryAddress)
                         ? $deliveryAddress

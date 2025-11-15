@@ -16,12 +16,12 @@ use Illuminate\Support\Str;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
         'company' => Str::uuid()->toString(),
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
     ]);
 
@@ -36,18 +36,18 @@ beforeEach(function (): void {
     $orderType = OrderType::factory()
         ->create([
             'print_layouts' => ['offer', 'invoice'],
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
             'is_default' => false,
         ]);
 
     $this->order = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $language->getKey(),
         'order_type_id' => $orderType->getKey(),
         'payment_type_id' => $paymentType->getKey(),

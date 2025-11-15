@@ -68,8 +68,8 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     ->where('is_active', true);
             })
             ->with([
-                'order:id,client_id,total_net_price',
-                'order.client:id,name',
+                'order:id,tenant_id,total_net_price',
+                'order.tenant:id,name',
                 'schedule:id,cron_expression,ends_at,recurrences,current_recurrence',
             ])
             ->get();
@@ -88,7 +88,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 continue;
             }
 
-            $index = $orderSchedule->order->client_id;
+            $index = $orderSchedule->order->tenant_id;
             $currentRecurrence = $orderSchedule->schedule->current_recurrence;
             while (
                 $nextRun <= $this->getEnd()
@@ -102,9 +102,9 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     || $currentRecurrence < $orderSchedule->schedule->recurrences
                 )
             ) {
-                $client = $orderSchedule->order->client;
+                $tenant = $orderSchedule->order->tenant;
                 if (! data_get($series, $index . '.name')) {
-                    data_set($series, $index . '.name', $client->name);
+                    data_set($series, $index . '.name', $tenant->name);
                 }
 
                 $dates[] = $nextRun->format('Y-m-d');

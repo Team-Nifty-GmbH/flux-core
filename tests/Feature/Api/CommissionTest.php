@@ -2,7 +2,6 @@
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Commission;
 use FluxErp\Models\CommissionRate;
 use FluxErp\Models\Contact;
@@ -14,20 +13,21 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $dbClient = Client::factory()->create();
+    $dbTenant = Tenant::factory()->create();
 
     $language = Language::factory()->create();
     $this->agent = User::factory()->create([
         'language_id' => $language->id,
     ]);
-    $this->agent->clients()->attach($dbClient->id);
+    $this->agent->tenants()->attach($dbTenant->id);
 
     $contact = Contact::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
     ]);
 
     $currency = Currency::factory()->create();
@@ -35,22 +35,22 @@ beforeEach(function (): void {
     $paymentType = PaymentType::factory()->create();
     $language = Language::factory()->create();
     $orderType = OrderType::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
     $addressInvoice = Address::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
         'contact_id' => $contact->id,
     ]);
 
     $addressDelivery = Address::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
         'contact_id' => $contact->id,
     ]);
 
     $this->order = Order::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
         'contact_id' => $contact->id,
         'currency_id' => $currency->id,
         'address_invoice_id' => $addressInvoice->id,
@@ -63,7 +63,7 @@ beforeEach(function (): void {
 
     $this->orderPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
     ]);
 
     CommissionRate::factory()->create([
@@ -79,7 +79,7 @@ beforeEach(function (): void {
         ],
     ]);
 
-    $this->user->clients()->attach($dbClient->id);
+    $this->user->tenants()->attach($dbTenant->id);
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.commissions.{id}.get'),
@@ -101,7 +101,7 @@ test('commission avatar url method', function (): void {
 test('commission credit note relationship', function (): void {
     $creditNotePosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
     ]);
 
     $commission = Commission::factory()->create([

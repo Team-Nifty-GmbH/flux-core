@@ -2,12 +2,12 @@
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             x-bind:readonly="!edit"
-            :label="__('Client')"
-            wire:model="ledgerAccount.client_id"
+            :label="__('Tenant')"
+            wire:model="ledgerAccount.tenant_id"
             select="label:name|value:id"
             unfiltered
             :request="[
-                'url' => route('search', \FluxErp\Models\Client::class),
+                'url' => route('search', \FluxErp\Models\Tenant::class),
                 'method' => 'POST',
             ]"
         />

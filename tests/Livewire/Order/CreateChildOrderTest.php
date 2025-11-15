@@ -19,44 +19,44 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
     $currency = Currency::factory()->create();
     $priceList = PriceList::factory()->create();
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
     $vatRate = VatRate::factory()->create();
     $language = Language::factory()->create();
     $warehouse = Warehouse::factory()->create();
 
     $orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $this->retoureOrderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
 
     $this->splitOrderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::SplitOrder,
         'is_active' => true,
         'is_hidden' => false,
     ]);
 
     $this->parentOrder = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
         'order_type_id' => $orderType->id,
         'address_invoice_id' => $address->id,
@@ -71,12 +71,12 @@ beforeEach(function (): void {
 
     $unit = Unit::factory()->create();
     $product = Product::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'unit_id' => $unit->id,
     ]);
 
     OrderPosition::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $this->parentOrder->id,
         'product_id' => $product->id,
         'vat_rate_id' => $vatRate->id,

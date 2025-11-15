@@ -6,12 +6,12 @@ use FluxErp\Models\Permission;
 
 test('portal profiles address not found', function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $this->address->language_id,
     ]);
 

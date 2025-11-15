@@ -19,7 +19,7 @@ class AdditionalAddresses extends Component
 
     public ?int $address_type_id = null;
 
-    public int $clientId;
+    public int $tenantId;
 
     public OrderAddressesForm $form;
 

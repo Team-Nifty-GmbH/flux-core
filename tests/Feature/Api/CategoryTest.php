@@ -258,13 +258,13 @@ test('delete category category belongs to project', function (): void {
     $category = Category::factory()->create(['model_type' => Task::class]);
     $project = Project::factory()->create([
         'category_id' => $category->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     $address = Address::factory()->create([
-        'client_id' => $contact->client_id,
+        'tenant_id' => $contact->tenant_id,
         'contact_id' => $contact->id,
         'is_main_address' => false,
     ]);

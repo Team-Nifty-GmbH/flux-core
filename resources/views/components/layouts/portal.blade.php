@@ -1,5 +1,5 @@
 @php
-    $client = auth()->user()?->contact->client ?? resolve_static(\FluxErp\Models\Client::class, 'default');
+    $tenant = auth()->user()?->contact->tenant ?? resolve_static(\FluxErp\Models\Tenant::class, 'default');
 @endphp
 
 <!DOCTYPE html>
@@ -11,7 +11,7 @@
     <head>
         <x-flux::layouts.head.head>
             <x-slot:title>
-                {{ $client?->name . ' Portal' }}
+                {{ $tenant?->name . ' Portal' }}
             </x-slot>
         </x-flux::layouts.head.head>
     </head>
@@ -73,7 +73,7 @@
             <div class="flex gap-1.5">
                 <x-link
                     icon="arrow-up-right"
-                    :href="$client?->website"
+                    :href="$tenant?->website"
                     target="_blank"
                     :text="__('Return to website')"
                     class="font-bold"

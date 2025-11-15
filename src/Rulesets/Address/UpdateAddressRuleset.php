@@ -38,7 +38,7 @@ class UpdateAddressRuleset extends FluxRuleset
             'contact_id' => [
                 'integer',
                 app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'client_id',
+                    'foreignAttribute' => 'tenant_id',
                     'table' => 'contacts',
                     'baseTable' => 'addresses',
                 ]),

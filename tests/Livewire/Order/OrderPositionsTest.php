@@ -26,13 +26,13 @@ beforeEach(function (): void {
     Warehouse::factory()->create(['is_default' => true]);
 
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'has_delivery_lock' => false,
         'credit_line' => null,
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -40,20 +40,20 @@ beforeEach(function (): void {
     $this->vatRate = VatRate::factory()->create();
 
     $this->orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'print_layouts' => ['invoice'],
     ]);
 
     $paymentType = PaymentType::factory()->create();
-    $paymentType->clients()->attach($this->dbClient->id);
+    $paymentType->tenants()->attach($this->dbTenant->id);
 
     $this->priceList = PriceList::factory()->create([
         'is_net' => true,
     ]);
 
     $this->product = Product::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $this->vatRate->id,
     ]);
 
@@ -64,7 +64,7 @@ beforeEach(function (): void {
 
     $this->order = Order::factory()->create([
         'currency_id' => Currency::default()->getKey(),
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $language->id,
         'order_type_id' => $this->orderType->id,
         'payment_type_id' => $paymentType->id,
@@ -83,7 +83,7 @@ beforeEach(function (): void {
         'unit_gross_price' => 119,
         'total_gross_price' => 119,
         'total_net_price' => 100,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_free_text' => false,
         'is_alternative' => false,
     ]);
@@ -138,7 +138,7 @@ test('add order position successfully', function (): void {
     expect($newPosition->unit_net_price)->toEqual($testUnitPrice);
     expect($newPosition->vat_rate_id)->toEqual($this->vatRate->id);
     expect($newPosition->order_id)->toEqual($this->order->id);
-    expect($newPosition->client_id)->toEqual($this->dbClient->getKey());
+    expect($newPosition->tenant_id)->toEqual($this->dbTenant->getKey());
 
     // Validate model properties are properly set
     expect($newPosition->id)->not->toBeNull();
@@ -209,7 +209,7 @@ test('changed product id fills position data', function (): void {
 
 test('create tasks from selected positions', function (): void {
     $project = Project::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $orderPosition = $this->order->orderPositions->first();
@@ -229,7 +229,7 @@ test('create tasks from selected positions', function (): void {
 
 test('create tasks prevents duplicates', function (): void {
     $project = Project::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $orderPosition = $this->order->orderPositions->first();
@@ -268,7 +268,7 @@ test('delete order position', function (): void {
 test('delete selected order positions', function (): void {
     $positions = OrderPosition::factory()->count(2)->create([
         'order_id' => $this->order->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $selectedIds = $positions->pluck('id')->toArray();
@@ -438,7 +438,7 @@ test('move position', function (): void {
 test('move position with parent', function (): void {
     $parentPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $orderPosition = $this->order->orderPositions->first();
@@ -480,7 +480,7 @@ test('recalculate order positions', function (): void {
     $orderPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'product_id' => $this->product->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'price_list_id' => $this->priceList->id,
         'warehouse_id' => $warehouse->id,
     ]);

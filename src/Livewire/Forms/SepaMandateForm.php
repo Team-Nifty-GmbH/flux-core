@@ -10,7 +10,7 @@ use Livewire\Attributes\Locked;
 class SepaMandateForm extends FluxForm
 {
     #[Locked]
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $contact_bank_connection_id = null;
 

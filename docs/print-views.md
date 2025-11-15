@@ -171,11 +171,11 @@ class Invoice extends PrintableView
 ## Shared data
 
 The result of your views `getSubject` will be available in all blade files as `$subject`.
-If your printable class has an `client` property or relation you can access it in the blade file like this:
+If your printable class has an `tenant` property or relation you can access it in the blade file like this:
 
 ```blade
 <div>
-    <h1>{{ $client->name }}</h1>
+    <h1>{{ $tenant->name }}</h1>
     <h2>{{ $subject }}</h2>
 </div>
 ```

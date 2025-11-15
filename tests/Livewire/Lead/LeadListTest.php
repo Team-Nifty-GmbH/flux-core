@@ -11,12 +11,12 @@ test('lead list', function (): void {
     $lead = Lead::factory()->create();
 
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $leadState = LeadState::factory()->create();

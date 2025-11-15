@@ -255,7 +255,7 @@ class Addresses extends Component
         $this->address->reset();
 
         $this->address->contact_id = $this->contact->id;
-        $this->address->client_id = $this->contact->client_id;
+        $this->address->tenant_id = $this->contact->tenant_id;
         $this->address->advertising_state = resolve_static(AdvertisingState::class, 'config')
             ->defaultStateClass::getMorphClass();
         $this->addressId = null;

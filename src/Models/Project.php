@@ -11,11 +11,11 @@ use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasTags;
+use FluxErp\Traits\HasTenantAssignment;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -34,8 +34,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
+    use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+        HasSerialNumberRange, HasStates, HasTags, HasTenantAssignment, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -118,9 +118,9 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         }
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class, 'client_id');
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 
     public function contact(): BelongsTo

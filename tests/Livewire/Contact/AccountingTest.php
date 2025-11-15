@@ -2,8 +2,8 @@
 
 use FluxErp\Livewire\Contact\Accounting;
 use FluxErp\Livewire\Forms\ContactForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Tenant;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -12,11 +12,11 @@ test('renders successfully', function (): void {
 });
 
 test('switch tabs', function (): void {
-    $client = Client::factory()->create([
+    $tenant = Tenant::factory()->create([
         'is_default' => true,
     ]);
     $this->contact = Contact::factory()->create([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
     ]);
 
     $form = new ContactForm(Livewire::new(Accounting::class), 'contact');

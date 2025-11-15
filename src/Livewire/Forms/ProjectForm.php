@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Actions\Project\UpdateProject;
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
@@ -15,7 +15,7 @@ class ProjectForm extends Form
 
     public ?string $budget = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $contact_id = null;
 
@@ -46,7 +46,7 @@ class ProjectForm extends Form
     {
         parent::reset(...$properties);
 
-        $this->client_id = resolve_static(Client::class, 'default')?->getKey();
+        $this->tenant_id = resolve_static(Tenant::class, 'default')?->getKey();
     }
 
     public function save(): void

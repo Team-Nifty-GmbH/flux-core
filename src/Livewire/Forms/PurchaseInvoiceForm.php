@@ -8,9 +8,9 @@ use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\ForceDeletePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\UpdatePurchaseInvoice;
 use FluxErp\Enums\LedgerAccountTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Tenant;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
@@ -24,7 +24,7 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?string $bic = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $contact_id = null;
 
@@ -108,7 +108,7 @@ class PurchaseInvoiceForm extends FluxForm
     {
         parent::reset(...$properties);
 
-        $this->client_id = resolve_static(Client::class, 'default')?->getKey();
+        $this->tenant_id = resolve_static(Tenant::class, 'default')?->getKey();
         $this->currency_id = resolve_static(Currency::class, 'default')?->getKey();
     }
 

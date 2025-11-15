@@ -31,7 +31,7 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Order Date' => '$paymentReminder->order?->order_date?->isoFormat(\'L\')',
                 'Invoice Number' => '$paymentReminder->order?->invoice_number',
                 'Invoice Date' => '$paymentReminder->order?->invoice_date?->isoFormat(\'L\')',
-                'Client Name' => '$paymentReminder->order?->client?->name',
+                'Tenant Name' => '$paymentReminder->order?->tenant?->name',
             ],
             PaymentReminder::class
         );
@@ -45,7 +45,7 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Order Date' => '$order->order_date?->isoFormat(\'L\')',
                 'Invoice Number' => '$order->invoice_number',
                 'Invoice Date' => '$order->invoice_date?->isoFormat(\'L\')',
-                'Client Name' => '$order->client?->name',
+                'Tenant Name' => '$order->tenant?->name',
             ],
             Order::class
         );
@@ -59,8 +59,8 @@ class EditorVariableServiceProvider extends ServiceProvider
                 'Customer Account Holder' => '$sepaMandate->contactBankConnection?->account_holder',
                 'Mandate Reference Number' => '$sepaMandate->mandate_reference_number',
                 'Sepa Mandate Type Enum' => '__($sepaMandate->sepa_mandate_type_enum->value)',
-                'Client Name' => '$sepaMandate->client->name',
-                'Client Creditor Identifier' => '$sepaMandate->client->creditor_identifier',
+                'Tenant Name' => '$sepaMandate->tenant->name',
+                'Tenant Creditor Identifier' => '$sepaMandate->tenant->creditor_identifier',
             ],
             SepaMandate::class
         );

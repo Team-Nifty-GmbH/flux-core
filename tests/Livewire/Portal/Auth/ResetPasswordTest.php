@@ -15,13 +15,13 @@ test('can reset password', function (): void {
     $baseAddress = Contact::factory()
         ->has(
             Address::factory()
-                ->for($this->dbClient)
+                ->for($this->dbTenant)
                 ->set('password', bcrypt(Str::random(10)))
         )
         ->for(User::factory()->for($this->defaultLanguage), 'agent')
         ->for(PriceList::factory())
-        ->for(PaymentType::factory()->hasAttached($this->dbClient))
-        ->for($this->dbClient)
+        ->for(PaymentType::factory()->hasAttached($this->dbTenant))
+        ->for($this->dbTenant)
         ->create()
         ->addresses()
         ->first();

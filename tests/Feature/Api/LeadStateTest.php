@@ -1,12 +1,12 @@
 <?php
 
-use FluxErp\Models\Client;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Tenant;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $dbClient = Client::factory()->create();
+    $dbTenant = Tenant::factory()->create();
 
     $this->leadStates = LeadState::factory()->count(3)->create([
         'is_default' => false,
@@ -18,7 +18,7 @@ beforeEach(function (): void {
         ])
     );
 
-    $this->user->clients()->attach($dbClient->id);
+    $this->user->tenants()->attach($dbTenant->id);
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.lead-states.{id}.get'),

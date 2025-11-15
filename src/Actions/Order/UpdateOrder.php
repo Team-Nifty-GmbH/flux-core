@@ -105,7 +105,7 @@ class UpdateOrder extends FluxAction
 
             if (resolve_static(Order::class, 'query')
                 ->where('id', '!=', $this->data['id'])
-                ->where('client_id', $order->client_id)
+                ->where('tenant_id', $order->tenant_id)
                 ->where('invoice_number', $this->data['invoice_number'] ?? $order->invoice_number)
                 ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $order->contact_id))
                 ->exists()

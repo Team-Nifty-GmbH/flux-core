@@ -107,7 +107,7 @@ class Product extends Component
                 'vatRate:id,rate_percentage',
                 'parent',
                 'coverMedia',
-                'clients:id',
+                'tenants:id',
             ])
             ->withCount('children')
             ->firstOrFail();
@@ -373,7 +373,7 @@ class Product extends Component
                 'vatRate:id,rate_percentage',
                 'parent',
                 'coverMedia',
-                'clients:id',
+                'tenants:id',
             ])
             ->withCount('children')
             ->firstOrFail();

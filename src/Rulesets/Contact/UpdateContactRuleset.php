@@ -2,13 +2,13 @@
 
 namespace FluxErp\Rulesets\Contact;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\RecordOrigin;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
@@ -43,9 +43,9 @@ class UpdateContactRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'client_id' => [
+            'tenant_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'agent_id' => [
                 'integer',

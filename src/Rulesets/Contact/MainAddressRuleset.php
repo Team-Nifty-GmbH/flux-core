@@ -17,7 +17,7 @@ class MainAddressRuleset extends FluxRuleset
             Arr::prependKeysWith(
                 Arr::except(
                     resolve_static(CreateAddressRuleset::class, 'getRules'),
-                    ['client_id', 'contact_id']
+                    ['tenant_id', 'contact_id']
                 ),
                 'main_address.'
             )

@@ -7,11 +7,11 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $this->contact = ContactModel::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
     ]);
 
     Address::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'contact_id' => $this->contact->id,
         'is_main_address' => true,
         'is_invoice_address' => true,
