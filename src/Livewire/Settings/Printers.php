@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Printer\GeneratePrinterBridgeConfig;
 use FluxErp\Livewire\DataTables\PrinterList;
+use FluxErp\Models\Token;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -21,6 +22,8 @@ class Printers extends PrinterList
     public int $apiPort = 8080;
 
     public bool $reverbDisabled = false;
+
+    public bool $forceRegenerate = false;
 
     protected ?string $includeBefore = 'flux::livewire.settings.printers';
 
@@ -42,8 +45,18 @@ class Printers extends PrinterList
         JS);
     }
 
-    public function generateBridgeConfig(): bool
+    public function generateBridgeConfig(): void
     {
+        // Check if token with this name already exists
+        $existingToken = Token::where('name', $this->instanceName)->first();
+
+        if ($existingToken && ! $this->forceRegenerate) {
+            // Token exists, ask for confirmation
+            $this->dispatch('confirm-token-regeneration');
+
+            return;
+        }
+
         try {
             $this->bridgeConfig = GeneratePrinterBridgeConfig::make([
                 'instance_name' => $this->instanceName,
@@ -51,23 +64,37 @@ class Printers extends PrinterList
                 'job_check_interval' => $this->jobCheckInterval,
                 'api_port' => $this->apiPort,
                 'reverb_disabled' => $this->reverbDisabled,
+                'force_regenerate' => $this->forceRegenerate,
             ])
                 ->checkPermission()
                 ->validate()
                 ->execute();
+
+            $this->toast()
+                ->success(__('Success'), __('Configuration generated successfully'))
+                ->send();
+
+            $this->dispatch('config-generated');
+
+            // Reset the force regenerate flag
+            $this->forceRegenerate = false;
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return false;
+            $this->toast()
+                ->error(__('Error'), __('Failed to generate configuration'))
+                ->send();
         }
+    }
 
-        return true;
+    public function confirmRegeneration(): void
+    {
+        $this->forceRegenerate = true;
+        $this->generateBridgeConfig();
     }
 
     public function copyToClipboard(): void
     {
-        $this->dispatch('clipboard-copy', json_encode($this->bridgeConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-
         $this->toast()
             ->success(__('Copied!'), __('Configuration copied to clipboard'))
             ->send();

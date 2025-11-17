@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Printer;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Token\CreateToken;
 use FluxErp\Models\Printer;
 use FluxErp\Rulesets\Printer\GeneratePrinterBridgeConfigRuleset;
 use Illuminate\Support\Facades\URL;
@@ -30,15 +31,34 @@ class GeneratePrinterBridgeConfig extends FluxAction
         $reverbScheme = config('reverb.scheme', config('broadcasting.connections.reverb.scheme', 'http'));
         $reverbUseTls = in_array($reverbScheme, ['https', 'wss']);
 
-        // Generate API token for the authenticated user if not provided
-        $apiToken = $this->data['api_token'] ?? null;
+        $instanceName = $this->data['instance_name'] ?? 'default-instance';
+        $forceRegenerate = $this->data['force_regenerate'] ?? false;
 
-        // Build reverb auth endpoint
+        // Expire all existing tokens with this name if force regenerate is enabled
+        if ($forceRegenerate) {
+            $updated = \FluxErp\Models\Token::query()
+                ->where('name', $instanceName)
+                ->whereNull('expires_at')
+                ->update(['expires_at' => now()]);
+
+            \Log::info("Expired {$updated} token(s) for instance: {$instanceName}");
+        }
+
+        $token = CreateToken::make([
+            'name' => $instanceName,
+            'description' => 'API token for printer bridge instance: ' . $instanceName,
+            'abilities' => ['*'],
+        ])
+            ->checkPermission()
+            ->validate()
+            ->execute();
+
+        $apiToken = $token->plain_text_token;
+        
         $reverbAuthEndpoint = $appUrl ? rtrim($appUrl, '/') . '/broadcasting/auth' : null;
 
-        // Build configuration array
         $config = [
-            'instance_name' => $this->data['instance_name'] ?? 'default-instance',
+            'instance_name' => $instanceName,
             'printer_check_interval' => $this->data['printer_check_interval'] ?? 5,
             'job_check_interval' => $this->data['job_check_interval'] ?? 2,
             'flux_url' => $appUrl,
