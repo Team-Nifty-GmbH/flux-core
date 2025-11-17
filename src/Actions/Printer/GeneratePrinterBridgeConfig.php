@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Printer;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Token\CreateToken;
+use FluxErp\Models\Permission;
 use FluxErp\Models\Printer;
 use FluxErp\Models\Token;
 use FluxErp\Rulesets\Printer\GeneratePrinterBridgeConfigRuleset;
@@ -44,10 +45,27 @@ class GeneratePrinterBridgeConfig extends FluxAction
             Log::info("Expired {$updated} token(s) for instance: {$instanceName}");
         }
 
+        $requiredPermissionNames = [
+            'api.printers.get',
+            'api.printers.create',
+            'api.printers.update',
+            'api.printers.delete',
+            'api.print-jobs.get',
+            'api.print-jobs.create',
+            'api.print-jobs.update',
+        ];
+
+        $permissionIds = Permission::query()
+            ->whereIn('name', $requiredPermissionNames)
+            ->where('guard_name', 'token')
+            ->pluck('id')
+            ->toArray();
+
         $token = CreateToken::make([
             'name' => $instanceName,
             'description' => 'API token for printer bridge instance: ' . $instanceName,
             'abilities' => ['*'],
+            'permissions' => $permissionIds,
         ])
             ->checkPermission()
             ->validate()
@@ -55,21 +73,21 @@ class GeneratePrinterBridgeConfig extends FluxAction
 
         $apiToken = $token->plain_text_token;
 
-        $reverbAuthEndpoint = $appUrl ? rtrim($appUrl, '/') . '/broadcasting/auth' : null;
+        $reverbAuthEndpoint = $appUrl ? rtrim($appUrl, '/') . '/broadcasting/auth' : '';
 
         $config = [
             'instance_name' => $instanceName,
             'printer_check_interval' => $this->data['printer_check_interval'] ?? 5,
             'job_check_interval' => $this->data['job_check_interval'] ?? 2,
-            'flux_url' => $appUrl,
-            'flux_api_token' => $apiToken,
+            'flux_url' => $appUrl ?? '',
+            'flux_api_token' => $apiToken ?? '',
             'api_port' => $this->data['api_port'] ?? 8080,
             'reverb_disabled' => $this->data['reverb_disabled'] ?? ! $reverbAppId,
-            'reverb_app_id' => $reverbAppId,
-            'reverb_app_key' => $reverbAppKey,
-            'reverb_app_secret' => $reverbAppSecret,
+            'reverb_app_id' => $reverbAppId ?? '',
+            'reverb_app_key' => $reverbAppKey ?? '',
+            'reverb_app_secret' => $reverbAppSecret ?? '',
             'reverb_use_tls' => $reverbUseTls,
-            'reverb_host' => $reverbHost,
+            'reverb_host' => $reverbHost ?? '',
             'reverb_auth_endpoint' => $reverbAuthEndpoint,
         ];
 
