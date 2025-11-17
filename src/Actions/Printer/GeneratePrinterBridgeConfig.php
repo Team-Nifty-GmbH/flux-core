@@ -7,6 +7,7 @@ use FluxErp\Actions\Token\CreateToken;
 use FluxErp\Models\Printer;
 use FluxErp\Models\Token;
 use FluxErp\Rulesets\Printer\GeneratePrinterBridgeConfigRuleset;
+use Log;
 
 class GeneratePrinterBridgeConfig extends FluxAction
 {
@@ -40,12 +41,12 @@ class GeneratePrinterBridgeConfig extends FluxAction
                 ->whereNull('expires_at')
                 ->update(['expires_at' => now()]);
 
-            \Log::info("Expired {$updated} token(s) for instance: {$instanceName}");
+            Log::info("Expired {$updated} token(s) for instance: {$instanceName}");
         }
 
         $token = CreateToken::make([
             'name' => $instanceName,
-            'description' => 'API token for printer bridge instance: '.$instanceName,
+            'description' => 'API token for printer bridge instance: ' . $instanceName,
             'abilities' => ['*'],
         ])
             ->checkPermission()
@@ -54,7 +55,7 @@ class GeneratePrinterBridgeConfig extends FluxAction
 
         $apiToken = $token->plain_text_token;
 
-        $reverbAuthEndpoint = $appUrl ? rtrim($appUrl, '/').'/broadcasting/auth' : null;
+        $reverbAuthEndpoint = $appUrl ? rtrim($appUrl, '/') . '/broadcasting/auth' : null;
 
         $config = [
             'instance_name' => $instanceName,
