@@ -3,10 +3,13 @@
 ])
 
 <div>
-    <div class="mb-1">
+    <div @if(!$tooltipDropdown) class="mb-1" @endif>
         <x-label :text="$label ?? ''" />
     </div>
     <div
+        @if ($fullHeight)
+            class="h-full"
+        @endif
         @if ($attributes->has("x-modelable"))
             x-modelable="{{ $attributes->get("x-modelable") }}"
         @else
@@ -31,10 +34,18 @@
                             : 0
                     }}
                 @endif
-            )(), { bladeVariables: @js($bladeVariables) })"
-        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
+            )(), {
+                showBladeVariables: false,
+                bladeVariables: @js($bladeVariables)
+                })"
+        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize),@json($defaultFontSize),@json($fullHeight), @json($showEditorPadding), @json($lineHeight))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
+        {{-- add button for blade variable dropdown --}}
+        @if ($tooltipDropdown)
+            x-on:mouseenter="showBladeVariables = true"
+            x-on:mouseleave="showBladeVariables = false"
+        @endif
     >
         <div
             x-cloak
@@ -44,7 +55,27 @@
             id="controlPanel"
             class="{{ $tooltipDropdown ? "" : "border border-b-0" }} flex w-full flex-wrap items-stretch rounded-t-md border-secondary-300 placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
         ></div>
-        <div class="list-disc" x-ref="editor-{{ $id }}"></div>
+        <div class="relative list-disc" x-ref="editor-{{ $id }}">
+            {{-- button on input hover in case toolTip is true --}}
+            @if ($tooltipDropdown)
+                <div
+                    x-cloak
+                    x-show="
+                        proxy.isEditable &&
+                            showBladeVariables &&
+                            Object.values(bladeVariables).length > 0
+                    "
+                    class="absolute right-0 top-0 z-10 p-2"
+                    x-data="tippyDropdown($refs['tippyParent-blade-variables-on-hover-{{ $id }}'], $refs['bladeVariablesDropdown-{{ $id }}'])"
+                >
+                    <x-button.circle
+                        icon="plus"
+                        x-on:click.prevent="onClick"
+                        x-ref="tippyParent-blade-variables-on-hover-{{ $id }}"
+                    />
+                </div>
+            @endif
+        </div>
     </div>
     {{-- templates to be add on demand --}}
     <template
@@ -133,7 +164,7 @@
             <x-button
                 x-on:click.prevent="onClick"
                 x-ref="tippyParent-fontSize-{{ $id }}"
-                x-data="editorFontSizeColorHandler($refs['tippyParent-fontSize-{{ $id }}'], $refs['fontSizeDropdown-{{ $id }}'])"
+                x-data="tippyDropdown($refs['tippyParent-fontSize-{{ $id }}'], $refs['fontSizeDropdown-{{ $id }}'])"
                 flat
                 color="secondary"
             >
@@ -149,7 +180,7 @@
                 x-ref="tippyParent-color-{{ $id }}"
                 flat
                 icon="paint-brush"
-                x-data="editorFontSizeColorHandler($refs['tippyParent-color-{{ $id }}'], $refs['colorDropDown-{{$id}}'])"
+                x-data="tippyDropdown($refs['tippyParent-color-{{ $id }}'], $refs['colorDropDown-{{$id}}'])"
                 color="secondary"
             />
         @endif
@@ -160,9 +191,20 @@
                 x-ref="tippyParent-background-color-{{ $id }}"
                 flat
                 icon="swatch"
-                x-data="editorFontSizeColorHandler($refs['tippyParent-background-color-{{ $id }}'], $refs['backgroundColorDropDown-{{ $id }}'])"
+                x-data="tippyDropdown($refs['tippyParent-background-color-{{ $id }}'], $refs['backgroundColorDropDown-{{ $id }}'])"
                 color="secondary"
             />
+        @endif
+
+        @if ($lineHeight && $availableLineHeights && ! $tooltipDropdown)
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent-line-height-{{ $id }}"
+                flat
+                icon="ellipsis-vertical"
+                x-data="tippyDropdown($refs['tippyParent-line-height-{{ $id }}'], $refs['lineHeightDropDown-{{ $id }}'])"
+                color="secondary"
+            ></x-button>
         @endif
 
         <template
@@ -173,7 +215,7 @@
                 x-ref="tippyParent-blade-variables-{{ $id }}"
                 flat
                 icon="variable"
-                x-data="editorFontSizeColorHandler($refs['tippyParent-blade-variables-{{ $id }}'], $refs['bladeVariablesDropdown-{{ $id }}'])"
+                x-data="tippyDropdown($refs['tippyParent-blade-variables-{{ $id }}'], $refs['bladeVariablesDropdown-{{ $id }}'])"
                 color="secondary"
             />
         </template>
@@ -225,6 +267,27 @@
             />
         @endif
 
+        @if ($textAlign)
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3-bottom-left"
+                x-on:click="editor().chain().focus().setTextAlign('left').run()"
+            ></x-button>
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3"
+                x-on:click="editor().chain().focus().setTextAlign('center').run()"
+            ></x-button>
+            <x-button
+                flat
+                color="secondary"
+                icon="bars-3-bottom-right"
+                x-on:click="editor().chain().focus().setTextAlign('right').run()"
+            ></x-button>
+        @endif
+
         @if ($codeBlock)
             <x-button
                 flat
@@ -232,6 +295,23 @@
                 icon="code-bracket-square"
                 x-on:click="editor().chain().focus().toggleCodeBlock().run()"
             />
+        @endif
+
+        @if ($tooltipDropdown && $lineHeight && $availableLineHeights)
+            <x-button
+                flat
+                color="secondary"
+                :text=" 'L-0' "
+                x-on:click="editor().chain().focus().unsetLineHeight().run()"
+            ></x-button>
+            @foreach ($availableLineHeights as $lineHeightSize)
+                <x-button
+                    flat
+                    color="secondary"
+                    :text=" 'L-' . $lineHeightSize"
+                    x-on:click="editor().chain().focus().setLineHeight({{ json_encode($lineHeightSize) }}).run()"
+                ></x-button>
+            @endforeach
         @endif
 
         @if ($tooltipDropdown && $textColors)
@@ -288,6 +368,7 @@
             </div>
         @endif
     </template>
+    {{-- drop down places holders if tooltipDropdown is false --}}
     <template x-ref="fontSizeDropdown-{{ $id }}">
         <div class="flex flex-col">
             @foreach ($availableFontSizes as $size)
@@ -344,6 +425,26 @@
                             ></div>
                         @endforeach
                     </div>
+                @endforeach
+            </div>
+        </div>
+    </template>
+    <template x-ref="lineHeightDropDown-{{ $id }}">
+        <div class="p-1">
+            <div class="flex flex-col">
+                <x-button
+                    flat
+                    color="secondary"
+                    :text="'L-0'"
+                    x-on:click="editor().chain().focus().unsetLineHeight().run()"
+                ></x-button>
+                @foreach ($availableLineHeights as $lineHeightSize)
+                    <x-button
+                        flat
+                        color="secondary"
+                        :text=" 'L-' . $lineHeightSize"
+                        x-on:click="editor().chain().focus().setLineHeight({{ json_encode($lineHeightSize) }}).run()"
+                    ></x-button>
                 @endforeach
             </div>
         </div>
