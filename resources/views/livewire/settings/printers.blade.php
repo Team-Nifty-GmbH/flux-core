@@ -1,1 +1,106 @@
-<x-printer-bridge-config-modal />
+<x-modal
+    id="printer-bridge-config-modal"
+    size="3xl"
+    :title="__('Printer Bridge Configuration')"
+>
+    <div
+        class="flex flex-col gap-4"
+        x-data="{ configGenerated: false }"
+        x-on:config-generated.window="configGenerated = true"
+    >
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            {{ __('Configure the settings for your printer bridge device. Fill in the options below and generate the configuration.') }}
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <x-input
+                wire:model="instanceName"
+                :label="__('Instance Name')"
+                :hint="__('Unique identifier for this bridge instance')"
+            />
+
+            <x-number
+                wire:model.number="printerCheckInterval"
+                :label="__('Printer Check Interval (minutes)')"
+                :hint="__('How often to check for new printers')"
+                min="1"
+            />
+
+            <x-number
+                wire:model.number="jobCheckInterval"
+                :label="__('Job Check Interval (minutes)')"
+                :hint="__('How often to check for new print jobs')"
+                min="1"
+            />
+
+            <x-number
+                wire:model.number="apiPort"
+                :label="__('API Port')"
+                :hint="__('Port for the bridge API server')"
+                min="1"
+                max="65535"
+            />
+        </div>
+
+        <x-toggle
+            wire:model.boolean="reverbDisabled"
+            :label="__('Disable Reverb (WebSocket)')"
+            :hint="__('Enable this if you want to disable real-time updates via WebSocket')"
+        />
+
+        <div class="flex gap-2">
+            <x-button
+                color="indigo"
+                :text="__('Generate Configuration')"
+                icon="cog"
+                wire:click="generateBridgeConfig"
+            />
+        </div>
+
+        <div x-show="configGenerated" x-cloak class="mt-4">
+            <div class="mb-2 flex items-center justify-between">
+                <label
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                    {{ __('Generated Configuration') }}
+                </label>
+                <x-button
+                    color="primary"
+                    size="sm"
+                    :text="__('Copy to Clipboard')"
+                    icon="clipboard"
+                    x-on:click="
+                        const configText = $wire.bridgeConfig ? JSON.stringify($wire.bridgeConfig, null, 2) : '';
+                        navigator.clipboard.writeText(configText)
+                            .then(() => {
+                                $wire.copyToClipboard();
+                            })
+                            .catch(() => {
+                                $wire.showClipboardError();
+                            });
+                    "
+                />
+            </div>
+
+            <div class="relative">
+                <pre
+                    class="max-h-96 overflow-x-auto rounded-lg bg-gray-900 p-4 font-mono text-xs text-gray-100"
+                ><code x-text="$wire.bridgeConfig ? JSON.stringify($wire.bridgeConfig, null, 2) : ''"></code></pre>
+            </div>
+
+            <div class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                {{ __('Copy this configuration and paste it into your printer bridge device configuration file.') }}
+            </div>
+        </div>
+    </div>
+
+    <x-slot:footer>
+        <x-button
+            color="secondary"
+            light
+            flat
+            :text="__('Close')"
+            x-on:click="$modalClose('printer-bridge-config-modal')"
+        />
+    </x-slot>
+</x-modal>

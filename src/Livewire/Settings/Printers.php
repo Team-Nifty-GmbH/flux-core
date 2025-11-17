@@ -6,6 +6,7 @@ use FluxErp\Actions\Printer\GeneratePrinterBridgeConfig;
 use FluxErp\Livewire\DataTables\PrinterList;
 use FluxErp\Models\Token;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -34,23 +35,28 @@ class Printers extends PrinterList
                 ->text(__('Generate Bridge Config'))
                 ->color('primary')
                 ->icon('cog')
-                ->wireClick('openBridgeConfigModal'),
+                ->xOnClick("\$modalOpen('printer-bridge-config-modal')"),
         ];
     }
 
-    public function openBridgeConfigModal(): void
-    {
-        $this->js(<<<'JS'
-            $modalOpen('printer-bridge-config-modal');
-        JS);
-    }
-
+    #[Renderless]
     public function generateBridgeConfig(): void
     {
-        $existingToken = Token::where('name', $this->instanceName)->first();
+        $existingToken = resolve_static(Token::class, 'query')
+            ->where('name', $this->instanceName)
+            ->first();
 
         if ($existingToken && ! $this->forceRegenerate) {
-            $this->dispatch('confirm-token-regeneration');
+            $this->js(<<<'JS'
+                $interaction('dialog')
+                    .wireable($wire.__instance.id)
+                    .warning(
+                        'Token Already Exists',
+                        'A token with this instance name already exists. Regenerating will invalidate the old token. Do you want to continue?'
+                    )
+                    .confirm('Yes, Regenerate Token', 'confirmRegeneration', 'Cancel')
+                    .send();
+            JS);
 
             return;
         }
@@ -77,13 +83,10 @@ class Printers extends PrinterList
             $this->forceRegenerate = false;
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
-
-            $this->toast()
-                ->error(__('Error'), __('Failed to generate configuration'))
-                ->send();
         }
     }
 
+    #[Renderless]
     public function confirmRegeneration(): void
     {
         $this->forceRegenerate = true;
