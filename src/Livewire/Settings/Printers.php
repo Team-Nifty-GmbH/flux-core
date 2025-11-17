@@ -96,4 +96,11 @@ class Printers extends PrinterList
             ->success(__('Copied!'), __('Configuration copied to clipboard'))
             ->send();
     }
+
+    public function showClipboardError(): void
+    {
+        $this->toast()
+            ->error(__('Error'), __('Failed to copy to clipboard. Please try again.'))
+            ->send();
+    }
 }
