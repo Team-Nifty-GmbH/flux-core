@@ -47,11 +47,9 @@ class Printers extends PrinterList
 
     public function generateBridgeConfig(): void
     {
-        // Check if token with this name already exists
         $existingToken = Token::where('name', $this->instanceName)->first();
 
         if ($existingToken && ! $this->forceRegenerate) {
-            // Token exists, ask for confirmation
             $this->dispatch('confirm-token-regeneration');
 
             return;
@@ -76,7 +74,6 @@ class Printers extends PrinterList
 
             $this->dispatch('config-generated');
 
-            // Reset the force regenerate flag
             $this->forceRegenerate = false;
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);

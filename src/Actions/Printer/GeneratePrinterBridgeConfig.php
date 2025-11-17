@@ -5,8 +5,8 @@ namespace FluxErp\Actions\Printer;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Token\CreateToken;
 use FluxErp\Models\Printer;
+use FluxErp\Models\Token;
 use FluxErp\Rulesets\Printer\GeneratePrinterBridgeConfigRuleset;
-use Illuminate\Support\Facades\URL;
 
 class GeneratePrinterBridgeConfig extends FluxAction
 {
@@ -34,9 +34,8 @@ class GeneratePrinterBridgeConfig extends FluxAction
         $instanceName = $this->data['instance_name'] ?? 'default-instance';
         $forceRegenerate = $this->data['force_regenerate'] ?? false;
 
-        // Expire all existing tokens with this name if force regenerate is enabled
         if ($forceRegenerate) {
-            $updated = \FluxErp\Models\Token::query()
+            $updated = Token::query()
                 ->where('name', $instanceName)
                 ->whereNull('expires_at')
                 ->update(['expires_at' => now()]);
@@ -46,7 +45,7 @@ class GeneratePrinterBridgeConfig extends FluxAction
 
         $token = CreateToken::make([
             'name' => $instanceName,
-            'description' => 'API token for printer bridge instance: ' . $instanceName,
+            'description' => 'API token for printer bridge instance: '.$instanceName,
             'abilities' => ['*'],
         ])
             ->checkPermission()
@@ -54,8 +53,8 @@ class GeneratePrinterBridgeConfig extends FluxAction
             ->execute();
 
         $apiToken = $token->plain_text_token;
-        
-        $reverbAuthEndpoint = $appUrl ? rtrim($appUrl, '/') . '/broadcasting/auth' : null;
+
+        $reverbAuthEndpoint = $appUrl ? rtrim($appUrl, '/').'/broadcasting/auth' : null;
 
         $config = [
             'instance_name' => $instanceName,
