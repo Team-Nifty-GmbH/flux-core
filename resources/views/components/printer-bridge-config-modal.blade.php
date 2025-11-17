@@ -13,7 +13,7 @@
             {{ __('Configure the settings for your printer bridge device. Fill in the options below and generate the configuration.') }}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <x-input
                 wire:model="instanceName"
                 :label="__('Instance Name')"
@@ -49,18 +49,34 @@
             :hint="__('Enable this if you want to disable real-time updates via WebSocket')"
         />
 
-        <div x-show="showConfirmation" x-cloak class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+        <div
+            x-show="showConfirmation"
+            x-cloak
+            class="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20"
+        >
             <div class="flex items-start gap-3">
                 <div class="flex-shrink-0">
-                    <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    <svg
+                        class="h-5 w-5 text-yellow-600 dark:text-yellow-500"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clip-rule="evenodd"
+                        />
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    <h3
+                        class="text-sm font-medium text-yellow-800 dark:text-yellow-200"
+                    >
                         {{ __('Token Already Exists') }}
                     </h3>
-                    <p class="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
+                    <p
+                        class="mt-1 text-sm text-yellow-700 dark:text-yellow-300"
+                    >
                         {{ __('A token with this instance name already exists. Regenerating will invalidate the old token. Do you want to continue?') }}
                     </p>
                     <div class="mt-3 flex gap-2">
@@ -92,8 +108,10 @@
         </div>
 
         <div x-show="configGenerated" x-cloak class="mt-4">
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div class="mb-2 flex items-center justify-between">
+                <label
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                     {{ __('Generated Configuration') }}
                 </label>
                 <x-button
@@ -115,7 +133,9 @@
             </div>
 
             <div class="relative">
-                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-xs font-mono max-h-96"><code x-text="$wire.bridgeConfig ? JSON.stringify($wire.bridgeConfig, null, 2) : ''"></code></pre>
+                <pre
+                    class="max-h-96 overflow-x-auto rounded-lg bg-gray-900 p-4 font-mono text-xs text-gray-100"
+                ><code x-text="$wire.bridgeConfig ? JSON.stringify($wire.bridgeConfig, null, 2) : ''"></code></pre>
             </div>
 
             <div class="mt-3 text-sm text-gray-600 dark:text-gray-400">
@@ -132,5 +152,5 @@
             :text="__('Close')"
             x-on:click="$modalClose('printer-bridge-config-modal')"
         />
-    </x-slot:footer>
+    </x-slot>
 </x-modal>
