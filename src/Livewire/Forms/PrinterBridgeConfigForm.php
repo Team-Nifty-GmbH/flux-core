@@ -32,13 +32,6 @@ class PrinterBridgeConfigForm extends FluxForm
         ];
     }
 
-    protected function getActions(): array
-    {
-        return [
-            'generate' => GeneratePrinterBridgeConfig::class,
-        ];
-    }
-
     public function generate(): array
     {
         $action = $this->makeAction('generate')
@@ -48,5 +41,12 @@ class PrinterBridgeConfigForm extends FluxForm
         $this->bridgeConfig = $action->execute();
 
         return $this->bridgeConfig;
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'generate' => GeneratePrinterBridgeConfig::class,
+        ];
     }
 }

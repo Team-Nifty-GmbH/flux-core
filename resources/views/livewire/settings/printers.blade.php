@@ -89,7 +89,11 @@
             <div class="relative">
                 <pre
                     class="max-h-96 overflow-x-auto rounded-lg bg-gray-900 p-4 font-mono text-xs text-gray-100"
-                ><code x-text="$wire.configForm.bridgeConfig ? JSON.stringify($wire.configForm.bridgeConfig, null, 2) : ''"></code></pre>
+                ><code x-text="
+                    $wire.configForm.bridgeConfig
+                        ? JSON.stringify($wire.configForm.bridgeConfig, null, 2)
+                        : ''
+                "></code></pre>
             </div>
 
             <div class="mt-3 text-sm text-gray-600 dark:text-gray-400">
