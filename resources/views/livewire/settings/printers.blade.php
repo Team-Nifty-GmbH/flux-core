@@ -14,27 +14,27 @@
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <x-input
-                wire:model="instanceName"
+                wire:model="configForm.instanceName"
                 :label="__('Instance Name')"
                 :hint="__('Unique identifier for this bridge instance')"
             />
 
             <x-number
-                wire:model.number="printerCheckInterval"
+                wire:model.number="configForm.printerCheckInterval"
                 :label="__('Printer Check Interval (minutes)')"
                 :hint="__('How often to check for new printers')"
                 min="1"
             />
 
             <x-number
-                wire:model.number="jobCheckInterval"
+                wire:model.number="configForm.jobCheckInterval"
                 :label="__('Job Check Interval (minutes)')"
                 :hint="__('How often to check for new print jobs')"
                 min="1"
             />
 
             <x-number
-                wire:model.number="apiPort"
+                wire:model.number="configForm.apiPort"
                 :label="__('API Port')"
                 :hint="__('Port for the bridge API server')"
                 min="1"
@@ -43,7 +43,7 @@
         </div>
 
         <x-toggle
-            wire:model.boolean="reverbDisabled"
+            wire:model.boolean="configForm.reverbDisabled"
             :label="__('Disable Reverb (WebSocket)')"
             :hint="__('Enable this if you want to disable real-time updates via WebSocket')"
         />
@@ -70,13 +70,17 @@
                     :text="__('Copy to Clipboard')"
                     icon="clipboard"
                     x-on:click="
-                        const configText = $wire.bridgeConfig ? JSON.stringify($wire.bridgeConfig, null, 2) : '';
+                        const configText = $wire.configForm.bridgeConfig ? JSON.stringify($wire.configForm.bridgeConfig, null, 2) : '';
                         navigator.clipboard.writeText(configText)
                             .then(() => {
-                                $wire.copyToClipboard();
+                                $interaction('toast')
+                                    .success('{{ __('Copied!') }}', '{{ __('Configuration copied to clipboard') }}')
+                                    .send();
                             })
                             .catch(() => {
-                                $wire.showClipboardError();
+                                $interaction('toast')
+                                    .error('{{ __('Error') }}', '{{ __('Failed to copy to clipboard. Please try again.') }}')
+                                    .send();
                             });
                     "
                 />
@@ -85,7 +89,7 @@
             <div class="relative">
                 <pre
                     class="max-h-96 overflow-x-auto rounded-lg bg-gray-900 p-4 font-mono text-xs text-gray-100"
-                ><code x-text="$wire.bridgeConfig ? JSON.stringify($wire.bridgeConfig, null, 2) : ''"></code></pre>
+                ><code x-text="$wire.configForm.bridgeConfig ? JSON.stringify($wire.configForm.bridgeConfig, null, 2) : ''"></code></pre>
             </div>
 
             <div class="mt-3 text-sm text-gray-600 dark:text-gray-400">

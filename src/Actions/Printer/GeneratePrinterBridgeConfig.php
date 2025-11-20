@@ -23,9 +23,9 @@ class GeneratePrinterBridgeConfig extends FluxAction
 
     public function performAction(): array
     {
-        $instanceName = $this->getData('instance_name', 'default-instance');
+        $instanceName = $this->getData('instance_name');
 
-        if ($this->getData('force_regenerate', false)) {
+        if ($this->getData('force_regenerate')) {
             resolve_static(Token::class, 'query')
                 ->where('name', $instanceName)
                 ->whereNull('expires_at')
@@ -62,12 +62,12 @@ class GeneratePrinterBridgeConfig extends FluxAction
 
         return [
             'instance_name' => $instanceName,
-            'printer_check_interval' => $this->getData('printer_check_interval', 5),
-            'job_check_interval' => $this->getData('job_check_interval', 2),
+            'printer_check_interval' => $this->getData('printer_check_interval'),
+            'job_check_interval' => $this->getData('job_check_interval'),
             'flux_url' => config('app.url') ?? '',
             'flux_api_token' => $token->plain_text_token ?? '',
-            'api_port' => $this->getData('api_port', 8080),
-            'reverb_disabled' => $this->getData('reverb_disabled', ! config('reverb.app_id', config('broadcasting.connections.reverb.app_id'))),
+            'api_port' => $this->getData('api_port'),
+            'reverb_disabled' => $this->getData('reverb_disabled'),
             'reverb_app_id' => config('reverb.app_id', config('broadcasting.connections.reverb.app_id')) ?? '',
             'reverb_app_key' => config('reverb.app_key', config('broadcasting.connections.reverb.key')) ?? '',
             'reverb_app_secret' => config('reverb.app_secret', config('broadcasting.connections.reverb.secret')) ?? '',
