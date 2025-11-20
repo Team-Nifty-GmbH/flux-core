@@ -203,7 +203,6 @@
                 flat
                 color="secondary"
                 icon="table-cells"
-                color="secondary"
                 x-data="tippyDropdown($refs['tippyParent-table-{{ $id }}'], $refs['tableDropDown-{{ $id }}'])"
             />
         @endif
