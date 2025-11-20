@@ -19,4 +19,5 @@
         @show
     </div>
     <x-flux::dashboard.grid />
+    <x-flux::editor/>
 </div>
