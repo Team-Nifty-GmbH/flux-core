@@ -29,7 +29,6 @@ strong {
     color: inherit !important;
 }
 
-
 .tiptap {
     :first-child {
         margin-top: 0;
@@ -49,7 +48,7 @@ strong {
 
         td,
         th {
-            @apply border border-solid dark:border-gray-600 border-gray-300 ;
+            @apply border border-solid border-gray-300 dark:border-gray-600;
             box-sizing: border-box;
             min-width: 1em;
             padding: 6px 8px;
