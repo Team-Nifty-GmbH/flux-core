@@ -5,6 +5,7 @@ import { TextAlignConfig } from './tiptap-text-align-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 import { BladeVariableConfig } from './tiptap-blade-variable.js';
+import { Table } from './tiptap-table.js';
 
 export default function (
     content,
@@ -66,6 +67,7 @@ export default function (
                         FontSizeLineHeightColorConfig,
                         LiteralTab,
                         TextAlignConfig,
+                        Table,
                         MentionConfig(searchModel, element),
                         BladeVariableConfig(),
                     ],

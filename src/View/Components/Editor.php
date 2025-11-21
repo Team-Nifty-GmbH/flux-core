@@ -149,6 +149,7 @@ class Editor extends Component
         public bool $codeBlock = true,
         public bool $textAlign = true,
         public bool $lineHeight = true,
+        public bool $table = true,
 
         public bool $tooltipDropdown = false,
         public bool $transparent = false,
