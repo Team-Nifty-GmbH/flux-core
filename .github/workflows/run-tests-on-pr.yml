@@ -68,13 +68,6 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Configure MySQL performance settings
-        run: |
-          mysql -h 127.0.0.1 -P 33306 -u root -ppassword -e "
-            SET GLOBAL innodb_flush_log_at_trx_commit = 2;
-            SET GLOBAL sync_binlog = 0;
-          "
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
