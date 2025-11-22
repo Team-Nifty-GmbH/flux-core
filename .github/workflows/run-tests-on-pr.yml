@@ -51,6 +51,12 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+          mysqld
+          --innodb-flush-log-at-trx-commit=2
+          --sync-binlog=0
+          --innodb-doublewrite=OFF
+          --skip-log-bin
+          --performance-schema=OFF
 
       redis:
         image: redis
