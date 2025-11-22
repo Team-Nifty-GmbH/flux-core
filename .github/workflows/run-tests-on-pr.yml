@@ -73,7 +73,6 @@ jobs:
           mysql -h 127.0.0.1 -P 33306 -u root -ppassword -e "
             SET GLOBAL innodb_flush_log_at_trx_commit = 2;
             SET GLOBAL sync_binlog = 0;
-            SET GLOBAL innodb_doublewrite = OFF;
           "
 
       - name: Setup PHP
