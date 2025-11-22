@@ -51,12 +51,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-          mysqld
-          --innodb-flush-log-at-trx-commit=2
-          --sync-binlog=0
-          --innodb-doublewrite=OFF
-          --skip-log-bin
-          --performance-schema=OFF
 
       redis:
         image: redis
@@ -73,6 +67,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
+      - name: Configure MySQL performance settings
+        run: |
+          mysql -h 127.0.0.1 -P 33306 -u root -ppassword -e "
+            SET GLOBAL innodb_flush_log_at_trx_commit = 2;
+            SET GLOBAL sync_binlog = 0;
+            SET GLOBAL innodb_doublewrite = OFF;
+          "
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
