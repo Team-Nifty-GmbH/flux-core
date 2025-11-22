@@ -63,7 +63,7 @@ You should also mount the MySQL config file in your `docker-compose.yml` to impr
         ...
 ```
 
-If you already have built the docker images you should rebuild them
+If you have already built the Docker images, you should rebuild them.
 
 ```bash
 sail build --no-cache
