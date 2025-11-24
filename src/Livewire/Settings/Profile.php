@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use Closure;
 use Exception;
+use FluxErp\Actions\DeviceToken\DeleteDeviceToken;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Models\DeviceToken;
@@ -156,19 +157,27 @@ class Profile extends Component
     #[Renderless]
     public function deleteFcmDeviceToken(int $id): void
     {
-        try {
-            resolve_static(DeviceToken::class, 'query')
-                ->whereMorphedTo('authenticatable', auth()->user())
-                ->whereKey($id)
-                ->delete();
-            $this->loadFcmDeviceTokens();
+        $deviceToken = resolve_static(DeviceToken::class, 'query')
+            ->whereMorphedTo('authenticatable', auth()->user())
+            ->whereKey($id)
+            ->firstOrFail();
 
-            $this->notification()
-                ->success(__('Device token deleted'))
-                ->send();
-        } catch (Exception $e) {
+        try {
+            DeleteDeviceToken::make(['id' => $deviceToken->getKey()])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
+
+            return;
         }
+
+        $this->loadFcmDeviceTokens();
+
+        $this->notification()
+            ->success(__('Device token deleted'))
+            ->send();
     }
 
     #[Renderless]
@@ -205,11 +214,11 @@ class Profile extends Component
             ->where('is_active', true)
             ->select(['id', 'device_name', 'device_id', 'platform', 'created_at'])
             ->get()
-            ->map(function ($deviceToken) {
+            ->map(function (DeviceToken $deviceToken) {
                 return [
                     'id' => $deviceToken->getKey(),
-                    'device_name' => $deviceToken->device_name ?? __('Unknown Device'),
                     'device_id' => $deviceToken->device_id,
+                    'device_name' => $deviceToken->device_name ?? __('Unknown Device'),
                     'platform' => $deviceToken->platform?->value ?? __('Unknown'),
                     'created_at' => $deviceToken->created_at->format('Y-m-d H:i'),
                 ];

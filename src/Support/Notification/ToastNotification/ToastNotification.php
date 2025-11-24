@@ -255,11 +255,11 @@ class ToastNotification extends Toast implements Arrayable
             return null;
         }
 
-        $webPush = (new WebPushMessage())
-            ->title(strip_tags($this->title))
+        $webPush = new WebPushMessage()
+            ->title(strip_tags($this->title ?? ''))
             ->data($this->data)
             ->badge(url('/pwa-icons/icons-vector.svg'))
-            ->body(strip_tags($this->description));
+            ->body(strip_tags($this->description ?? ''));
 
         if ($this->accept) {
             $webPush->action(strip_tags($this->accept->label ?? ''), $this->accept->url ?? '');

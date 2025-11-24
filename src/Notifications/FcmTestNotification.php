@@ -33,10 +33,9 @@ class FcmTestNotification extends Notification implements HasToastNotification
             ->notifiable($notifiable)
             ->title($this->getTitle())
             ->when(
-                auth()->user()
-                && method_exists(auth()->user(), 'getAvatarUrl')
-                && auth()->user()->getAvatarUrl(),
-                fn (ToastNotification $toast) => $toast->image(auth()->user()->getAvatarUrl())
+                method_exists($notifiable, 'getAvatarUrl')
+                && $notifiable->getAvatarUrl(),
+                fn (ToastNotification $toast) => $toast->image($notifiable->getAvatarUrl())
             )
             ->accept(
                 NotificationAction::make()
