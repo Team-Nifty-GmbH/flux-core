@@ -48,11 +48,22 @@ Alternative you can change your docker-compose.yml file to use the flux-erp dock
 ```yaml
     laravel.test:
         build:
-            context: ./vendor/team-nifty-gmbh/flux-erp/docker/8.2 # <--- Here
+            context: ./vendor/team-nifty-gmbh/flux-erp/docker/8.4 # <--- Here
    ...
 ```
 
-If you already have built the docker images you should rebuild them
+You should also mount the MySQL config file in your `docker-compose.yml` to improve database performance:
+
+```yaml
+    mysql:
+        ...
+        volumes:
+            - 'sail-mysql:/var/lib/mysql'
+            - './vendor/team-nifty-gmbh/flux-erp/docker/mysql/my.cnf:/etc/my.cnf:ro' # <--- Add this line
+        ...
+```
+
+If you have already built the Docker images, you should rebuild them.
 
 ```bash
 sail build --no-cache

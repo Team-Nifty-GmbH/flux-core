@@ -196,6 +196,17 @@
             />
         @endif
 
+        @if ($table && ! $tooltipDropdown)
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent-table-{{ $id }}"
+                flat
+                color="secondary"
+                icon="table-cells"
+                x-data="tippyDropdown($refs['tippyParent-table-{{ $id }}'], $refs['tableDropDown-{{ $id }}'])"
+            />
+        @endif
+
         @if ($lineHeight && $availableLineHeights && ! $tooltipDropdown)
             <x-button
                 x-on:click.prevent="onClick"
@@ -447,6 +458,70 @@
                     ></x-button>
                 @endforeach
             </div>
+        </div>
+    </template>
+    <template x-ref="tableDropDown-{{ $id }}">
+        <div class="flex flex-col gap-1 p-1">
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().insertTable({ rows: 5, cols: 3, withHeaderRow: false }).run()"
+                :text='__("Insert Table")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().mergeCells().run()"
+                :text='__("Merge Cells")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().splitCell().run()"
+                :text='__("Split Cell")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().addColumnBefore().run()"
+                :text='__("Add Column Before")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().addColumnAfter().run()"
+                :text='__("Add Column After")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().deleteColumn().run()"
+                :text='__("Delete Column")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().addRowBefore().run()"
+                :text='__("Add Row Before")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().addRowAfter().run()"
+                :text='__("Add Row After")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().deleteRow().run()"
+                :text="__('Delete Row')"
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().deleteTable().run()"
+                :text="__('Delete Table')"
+            />
         </div>
     </template>
     <template x-ref="bladeVariablesDropdown-{{ $id }}">
