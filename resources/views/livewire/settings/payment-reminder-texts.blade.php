@@ -41,7 +41,7 @@
         <x-flux::editor
             :label="__('Payment Reminder Text')"
             wire:model="paymentReminderTextForm.reminder_body"
-            :blade-variables="\FluxErp\Facades\EditorVariable::getTranslated(\FluxErp\Models\PaymentReminder::class)"
+            :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\PaymentReminder::class)"
         />
         <x-slot:footer>
             <x-button
