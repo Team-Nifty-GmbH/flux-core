@@ -10,8 +10,6 @@ use Illuminate\View\ComponentAttributeBag;
 
 trait EditorButtonTrait
 {
-    public ?string $scope = null;
-
     public ?Editor $editor = null;
 
     public static function identifier(): Stringable
