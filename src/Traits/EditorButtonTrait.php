@@ -67,20 +67,6 @@ trait EditorButtonTrait
         );
     }
 
-    public function setScope(?string $scope = null): static
-    {
-        $this->scope = $scope;
-
-        return $this;
-    }
-
-    public function setEditor(Editor $editor): static
-    {
-        $this->editor = $editor;
-
-        return $this;
-    }
-
     public function command(): ?string
     {
         $toggleMethod = 'toggle' . static::identifier()->pascal();
@@ -117,5 +103,19 @@ trait EditorButtonTrait
     public function tooltip(): ?string
     {
         return null;
+    }
+
+    public function setScope(?string $scope = null): static
+    {
+        $this->scope = $scope;
+
+        return $this;
+    }
+
+    public function setEditor(Editor $editor): static
+    {
+        $this->editor = $editor;
+
+        return $this;
     }
 }

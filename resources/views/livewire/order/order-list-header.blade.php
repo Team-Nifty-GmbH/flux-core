@@ -236,9 +236,9 @@
                 </div>
                 @section('order-position-detail-modal.content.bottom')
                 <x-flux::editor
-                    :label="__('Description')"
-                    scope="orderPosition"
                     wire:model="orderPosition.description"
+                    scope="orderPosition"
+                    :label="__('Description')"
                     :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\OrderPosition::class)"
                 />
                 @show

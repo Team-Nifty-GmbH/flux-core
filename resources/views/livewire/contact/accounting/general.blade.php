@@ -160,13 +160,13 @@
     <x-card class="flex flex-col gap-4">
         <x-flux::editor
             wire:model="contact.header"
-            :label="__('Header')"
             scope="contact"
+            :label="__('Header')"
         />
         <x-flux::editor
             wire:model="contact.footer"
-            :label="__('Footer')"
             scope="contact"
+            :label="__('Footer')"
         />
     </x-card>
 </div>
