@@ -2,6 +2,7 @@
 
 namespace FluxErp\Contracts;
 
+use FluxErp\View\Components\Editor;
 use Illuminate\Support\Stringable;
 
 interface EditorButton
@@ -23,4 +24,8 @@ interface EditorButton
     public function title(): ?string;
 
     public function tooltip(): ?string;
+
+    public function setScope(?string $scope = null): static;
+
+    public function setEditor(Editor $editor): static;
 }

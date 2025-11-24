@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\View\Components\Editor;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
@@ -10,6 +11,8 @@ use Illuminate\View\ComponentAttributeBag;
 trait EditorButtonTrait
 {
     public ?string $scope = null;
+
+    public ?Editor $editor = null;
 
     public static function identifier(): Stringable
     {
@@ -67,6 +70,13 @@ trait EditorButtonTrait
     public function setScope(?string $scope = null): static
     {
         $this->scope = $scope;
+
+        return $this;
+    }
+
+    public function setEditor(Editor $editor): static
+    {
+        $this->editor = $editor;
 
         return $this;
     }

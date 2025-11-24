@@ -43,14 +43,19 @@ trait EditorDropdownButtonTrait
             );
         }
 
-        return Blade::render(<<<'Blade'
-            <x-button {{ $attributes }} />
-        Blade, ['attributes' => $attributes]);
+        return Blade::render(
+            <<<'Blade'
+                <x-button {{ $attributes }} />
+            Blade,
+            [
+                'attributes' => $attributes,
+            ]
+        );
     }
 
     public function dropdownRef(): string
     {
-        return static::identifier();
+        return static::identifier()->toString();
     }
 
     public function command(): ?string

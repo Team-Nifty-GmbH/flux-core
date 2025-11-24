@@ -191,7 +191,7 @@
                     x-bind:disabled="$wire.multiple"
                 />
             </div>
-            <x-flux::editor wire:model="mailMessage.html_body" />
+            <x-flux::editor wire:model="mailMessage.html_body" scope="mail" />
         </div>
         <x-slot:footer>
             <x-button

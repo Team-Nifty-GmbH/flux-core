@@ -79,6 +79,7 @@ export default function (
                         parent.isFloatingVisible = true;
                         parent.updateFloatingPosition(virtualReference);
                     }
+
                     parent.setIsClickListenerSet(false);
                 };
 

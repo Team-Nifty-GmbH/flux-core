@@ -24,6 +24,7 @@ use FluxErp\View\Components\EditorButtons\LineHeight;
 use FluxErp\View\Components\EditorButtons\Link;
 use FluxErp\View\Components\EditorButtons\OrderedList;
 use FluxErp\View\Components\EditorButtons\Strike;
+use FluxErp\View\Components\EditorButtons\Table;
 use FluxErp\View\Components\EditorButtons\TextColor;
 use FluxErp\View\Components\EditorButtons\Underline;
 use Illuminate\Support\ServiceProvider;
@@ -52,6 +53,7 @@ class EditorServiceProvider extends ServiceProvider
             AlignCenter::class,
             AlignRight::class,
             CodeBlock::class,
+            Table::class,
         ]);
 
         Editor::mergeVariables([

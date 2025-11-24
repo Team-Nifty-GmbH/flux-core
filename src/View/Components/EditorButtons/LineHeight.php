@@ -33,7 +33,7 @@ class LineHeight extends Component implements EditorDropdownButton
     {
         $isActiveChecks = collect($this->availableLineHeights)
             ->map(fn (int|float $height): string => "!editor().isActive({ lineHeight: {$height} })")
-            ->join("\n                    && ");
+            ->join("\n&& ");
 
         $buttons = [
             app(DropdownItem::class, [

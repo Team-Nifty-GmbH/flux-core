@@ -238,6 +238,7 @@
             <x-flux::editor
                 :id="$editorId"
                 wire:model="emailTemplateForm.html_body"
+                scope="emailTemplate"
                 :label="__('Html Body')"
             />
             <x-textarea

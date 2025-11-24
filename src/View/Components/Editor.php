@@ -62,7 +62,9 @@ class Editor extends Component
         $instances = [];
 
         foreach (EditorFacade::getButtons() as $buttonClass) {
-            $instance = $this->getButtonInstance($buttonClass)?->setScope($this->scope);
+            $instance = $this->getButtonInstance($buttonClass)
+                ?->setScope($this->scope)
+                ?->setEditor($this);
             if (! is_null($instance)) {
                 $instances[] = $instance;
             }
@@ -77,7 +79,6 @@ class Editor extends Component
 
         foreach ($buttonInstances as $instance) {
             if ($instance instanceof EditorDropdownButton) {
-                $this->tooltipDropdown = true;
                 $content = array_merge($content, $instance->dropdownContent());
             }
         }
