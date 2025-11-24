@@ -346,7 +346,9 @@
                                 x-init="
                                     $nextTick(async () => {
                                         if (window.webPush) {
-                                            isCurrentBrowser = await window.webPush.checkCurrentSubscription(subscription.endpoint);
+                                            isCurrentBrowser = await window.webPush.checkCurrentSubscription(
+                                                subscription.endpoint,
+                                            )
                                         }
                                     })
                                 "
@@ -470,7 +472,9 @@
                                             name="device-phone-mobile"
                                             class="mr-2 size-8"
                                         />
-                                        <span x-text="device.device_name"></span>
+                                        <span
+                                            x-text="device.device_name"
+                                        ></span>
                                     </div>
                                 </td>
                                 <td x-text="device.platform"></td>
