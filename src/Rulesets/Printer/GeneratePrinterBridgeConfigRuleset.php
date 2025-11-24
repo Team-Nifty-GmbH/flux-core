@@ -6,20 +6,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class GeneratePrinterBridgeConfigRuleset extends FluxRuleset
 {
-    protected static ?string $addValidationAttributesMethod = 'prepareForValidation';
-
-    public static function prepareForValidation($attributes): array
-    {
-        $attributes['instance_name'] ??= 'default-instance';
-        $attributes['printer_check_interval'] ??= 5;
-        $attributes['job_check_interval'] ??= 2;
-        $attributes['api_port'] ??= 8080;
-        $attributes['reverb_disabled'] ??= ! config('reverb.app_id', config('broadcasting.connections.reverb.app_id'));
-        $attributes['force_regenerate'] ??= false;
-
-        return $attributes;
-    }
-
     public function rules(): array
     {
         return [

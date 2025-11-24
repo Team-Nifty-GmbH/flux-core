@@ -14,27 +14,27 @@
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <x-input
-                wire:model="configForm.instanceName"
+                wire:model="configForm.instance_name"
                 :label="__('Instance Name')"
                 :hint="__('Unique identifier for this bridge instance')"
             />
 
             <x-number
-                wire:model.number="configForm.printerCheckInterval"
+                wire:model.number="configForm.printer_check_interval"
                 :label="__('Printer Check Interval (minutes)')"
                 :hint="__('How often to check for new printers')"
                 min="1"
             />
 
             <x-number
-                wire:model.number="configForm.jobCheckInterval"
+                wire:model.number="configForm.job_check_interval"
                 :label="__('Job Check Interval (minutes)')"
                 :hint="__('How often to check for new print jobs')"
                 min="1"
             />
 
             <x-number
-                wire:model.number="configForm.apiPort"
+                wire:model.number="configForm.api_port"
                 :label="__('API Port')"
                 :hint="__('Port for the bridge API server')"
                 min="1"
@@ -43,7 +43,7 @@
         </div>
 
         <x-toggle
-            wire:model.boolean="configForm.reverbDisabled"
+            wire:model.boolean="configForm.reverb_disabled"
             :label="__('Disable Reverb (WebSocket)')"
             :hint="__('Enable this if you want to disable real-time updates via WebSocket')"
         />
@@ -70,7 +70,7 @@
                     :text="__('Copy to Clipboard')"
                     icon="clipboard"
                     x-on:click="
-                        const configText = $wire.configForm.bridgeConfig ? JSON.stringify($wire.configForm.bridgeConfig, null, 2) : '';
+                        const configText = $wire.configForm.bridge_config ? JSON.stringify($wire.configForm.bridge_config, null, 2) : '';
                         navigator.clipboard.writeText(configText)
                             .then(() => {
                                 $interaction('toast')
@@ -90,8 +90,8 @@
                 <pre
                     class="max-h-96 overflow-x-auto rounded-lg bg-gray-900 p-4 font-mono text-xs text-gray-100"
                 ><code x-text="
-                    $wire.configForm.bridgeConfig
-                        ? JSON.stringify($wire.configForm.bridgeConfig, null, 2)
+                    $wire.configForm.bridge_config
+                        ? JSON.stringify($wire.configForm.bridge_config, null, 2)
                         : ''
                 "></code></pre>
             </div>

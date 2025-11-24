@@ -27,35 +27,27 @@ class Printers extends PrinterList
         ];
     }
 
-    #[Renderless]
     public function generateBridgeConfig(): void
     {
         $existingToken = resolve_static(Token::class, 'query')
-            ->where('name', $this->configForm->instanceName)
+            ->where('name', $this->configForm->instance_name)
             ->first();
 
-        if ($existingToken && ! $this->configForm->forceRegenerate) {
-            $title = __('Token Already Exists');
-            $description = __('A token with this instance name already exists. Regenerating will invalidate the old token. Do you want to continue?');
-            $confirmText = __('Yes, Regenerate Token');
-            $cancelText = __('Cancel');
-
-            $this->js(<<<JS
-                \$interaction('dialog')
-                    .wireable(\$wire.__instance.id)
-                    .warning(
-                        '{$title}',
-                        '{$description}'
-                    )
-                    .confirm('{$confirmText}', 'confirmRegeneration', '{$cancelText}')
-                    .send();
-            JS);
+        if ($existingToken && ! $this->configForm->force_regenerate) {
+            $this->dialog()
+                ->warning(
+                    __('Token Already Exists'),
+                    __('A token with this instance name already exists. Regenerating will invalidate the old token. Do you want to continue?')
+                )
+                ->confirm(__('Yes, Regenerate Token'), 'confirmRegeneration')
+                ->cancel(__('Cancel'))
+                ->send();
 
             return;
         }
 
         try {
-            $this->configForm->generate();
+            $this->configForm->create();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -68,13 +60,13 @@ class Printers extends PrinterList
 
         $this->dispatch('config-generated');
 
-        $this->configForm->forceRegenerate = false;
+        $this->configForm->force_regenerate = false;
     }
 
     #[Renderless]
     public function confirmRegeneration(): void
     {
-        $this->configForm->forceRegenerate = true;
+        $this->configForm->force_regenerate = true;
         $this->generateBridgeConfig();
     }
 }

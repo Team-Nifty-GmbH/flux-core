@@ -3,50 +3,38 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Printer\GeneratePrinterBridgeConfig;
+use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 
 class PrinterBridgeConfigForm extends FluxForm
 {
-    public array $bridgeConfig = [];
+    #[ExcludeFromActionData]
+    public array $bridge_config = [];
 
-    public string $instanceName = 'default-instance';
+    public string $instance_name = 'default-instance';
 
-    public int $printerCheckInterval = 5;
+    public int $printer_check_interval = 5;
 
-    public int $jobCheckInterval = 2;
+    public int $job_check_interval = 2;
 
-    public int $apiPort = 8080;
+    public int $api_port = 8080;
 
-    public bool $reverbDisabled = false;
+    public bool $reverb_disabled = false;
 
-    public bool $forceRegenerate = false;
+    public bool $force_regenerate = false;
 
-    public function toActionData(): array
+    public function create(): void
     {
-        return [
-            'instance_name' => $this->instanceName,
-            'printer_check_interval' => $this->printerCheckInterval,
-            'job_check_interval' => $this->jobCheckInterval,
-            'api_port' => $this->apiPort,
-            'reverb_disabled' => $this->reverbDisabled,
-            'force_regenerate' => $this->forceRegenerate,
-        ];
-    }
-
-    public function generate(): array
-    {
-        $action = $this->makeAction('generate')
+        $action = $this->makeAction('create')
             ->checkPermission()
             ->validate();
 
-        $this->bridgeConfig = $action->execute();
-
-        return $this->bridgeConfig;
+        $this->bridge_config = $action->execute();
     }
 
     protected function getActions(): array
     {
         return [
-            'generate' => GeneratePrinterBridgeConfig::class,
+            'create' => GeneratePrinterBridgeConfig::class,
         ];
     }
 }

@@ -76,4 +76,14 @@ class GeneratePrinterBridgeConfig extends FluxAction
             'reverb_auth_endpoint' => config('app.url') ? rtrim(config('app.url'), '/') . '/broadcasting/auth' : '',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['instance_name'] ??= 'default-instance';
+        $this->data['printer_check_interval'] ??= 5;
+        $this->data['job_check_interval'] ??= 2;
+        $this->data['api_port'] ??= 8080;
+        $this->data['reverb_disabled'] ??= ! config('reverb.app_id', config('broadcasting.connections.reverb.app_id'));
+        $this->data['force_regenerate'] ??= false;
+    }
 }
