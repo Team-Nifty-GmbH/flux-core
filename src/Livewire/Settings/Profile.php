@@ -6,8 +6,10 @@ use Closure;
 use Exception;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
+use FluxErp\Models\DeviceToken;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Notifications\FcmTestNotification;
 use FluxErp\Notifications\WebPushTestNotification;
 use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Traits\Livewire\Actions;
@@ -32,6 +34,8 @@ class Profile extends Component
     public $avatar;
 
     public array $dirtyNotifications = [];
+
+    public array $fcmDeviceTokens = [];
 
     public array $notificationChannels = [];
 
@@ -119,6 +123,7 @@ class Profile extends Component
 
         $this->loadPushSubscriptions();
         $this->checkWebPushSupport();
+        $this->loadFcmDeviceTokens();
     }
 
     public function render(): View|Factory|Application
@@ -149,6 +154,24 @@ class Profile extends Component
     }
 
     #[Renderless]
+    public function deleteFcmDeviceToken(int $id): void
+    {
+        try {
+            resolve_static(DeviceToken::class, 'query')
+                ->whereMorphedTo('authenticatable', auth()->user())
+                ->whereKey($id)
+                ->delete();
+            $this->loadFcmDeviceTokens();
+
+            $this->notification()
+                ->success(__('Device token deleted'))
+                ->send();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    #[Renderless]
     public function deletePushSubscription(int $id): void
     {
         try {
@@ -172,6 +195,26 @@ class Profile extends Component
         return [
             'user.password' => 'confirmed',
         ];
+    }
+
+    #[Renderless]
+    public function loadFcmDeviceTokens(): void
+    {
+        $this->fcmDeviceTokens = resolve_static(DeviceToken::class, 'query')
+            ->whereMorphedTo('authenticatable', auth()->user())
+            ->where('is_active', true)
+            ->select(['id', 'device_name', 'device_id', 'platform', 'created_at'])
+            ->get()
+            ->map(function ($deviceToken) {
+                return [
+                    'id' => $deviceToken->getKey(),
+                    'device_name' => $deviceToken->device_name ?? __('Unknown Device'),
+                    'device_id' => $deviceToken->device_id,
+                    'platform' => $deviceToken->platform?->value ?? __('Unknown'),
+                    'created_at' => $deviceToken->created_at->format('Y-m-d H:i'),
+                ];
+            })
+            ->toArray();
     }
 
     #[Renderless]
@@ -250,6 +293,31 @@ class Profile extends Component
         }
 
         $this->skipRender();
+    }
+
+    public function sendFcmTestNotification(): void
+    {
+        try {
+            if (! resolve_static(DeviceToken::class, 'query')
+                ->whereMorphedTo('authenticatable', auth()->user())
+                ->where('is_active', true)
+                ->exists()
+            ) {
+                $this->notification()
+                    ->error(__('No active FCM device tokens found.'))
+                    ->send();
+
+                return;
+            }
+
+            auth()->user()->notify(new FcmTestNotification());
+
+            $this->notification()
+                ->success(__('Test notification sent! Check your mobile device.'))
+                ->send();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     public function sendTestNotification(): void

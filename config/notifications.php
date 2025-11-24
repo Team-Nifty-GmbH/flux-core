@@ -28,5 +28,9 @@ return [
             'driver' => NotificationChannels\WebPush\WebPushChannel::class,
             'method' => 'toWebPush',
         ],
+        'fcm' => [
+            'driver' => FluxErp\Notifications\Channels\FcmChannel::class,
+            'method' => 'toFcm',
+        ],
     ],
 ];

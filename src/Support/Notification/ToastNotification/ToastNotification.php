@@ -256,17 +256,17 @@ class ToastNotification extends Toast implements Arrayable
         }
 
         $webPush = (new WebPushMessage())
-            ->title($this->title)
+            ->title(strip_tags($this->title))
             ->data($this->data)
             ->badge(url('/pwa-icons/icons-vector.svg'))
-            ->body($this->description);
+            ->body(strip_tags($this->description));
 
         if ($this->accept) {
-            $webPush->action($this->accept->label ?? '', $this->accept->url ?? '');
+            $webPush->action(strip_tags($this->accept->label ?? ''), $this->accept->url ?? '');
         }
 
         if ($this->reject) {
-            $webPush->action($this->reject->label ?? '', $this->reject->url ?? '');
+            $webPush->action(strip_tags($this->reject->label ?? ''), $this->reject->url ?? '');
         }
 
         if (data_get($this->data, 'image')) {
@@ -279,8 +279,8 @@ class ToastNotification extends Toast implements Arrayable
     public function toFcm(): ?FcmNotification
     {
         $fcmNotification = FcmNotification::create(
-            $this->title ?? '',
-            $this->description ?? ''
+            strip_tags($this->title ?? ''),
+            strip_tags($this->description ?? '')
         );
 
         if ($imageUrl = data_get($this->data, 'image')) {
