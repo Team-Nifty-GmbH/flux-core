@@ -12,9 +12,11 @@ const initializeNativeBridge = async () => {
     const bridge = {};
 
     try {
-        const { Capacitor } = window.Capacitor;
-        const { Camera } = window.CapacitorPlugins || {};
-        const { CapacitorBarcodeScanner } = window.CapacitorPlugins || {};
+        const Capacitor = window.Capacitor;
+        const Plugins = Capacitor.Plugins || {};
+        const Camera = Plugins.Camera;
+        const CapacitorBarcodeScanner = Plugins.CapacitorBarcodeScanner;
+        const Preferences = Plugins.Preferences;
 
         // Check if running in native app
         bridge.isNative = () => Capacitor.isNativePlatform();
@@ -25,16 +27,15 @@ const initializeNativeBridge = async () => {
         // Change server
         bridge.changeServer = async () => {
             try {
-                const { Preferences } = window.CapacitorPlugins || {};
                 if (Preferences) {
                     await Preferences.remove({ key: 'server_url' });
-                    window.location.href = 'capacitor://localhost/index.html';
-                    return { success: true };
                 }
-                return {
-                    success: false,
-                    error: 'Preferences plugin not available',
-                };
+                // Use correct URL scheme per platform
+                const baseUrl = Capacitor.getPlatform() === 'android'
+                    ? 'http://localhost'
+                    : 'capacitor://localhost';
+                window.location.href = baseUrl + '/index.html';
+                return { success: true };
             } catch (error) {
                 return {
                     success: false,
