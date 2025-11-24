@@ -308,6 +308,17 @@
             />
         @endif
 
+        @if ($link && ! $tooltipDropdown)
+                <x-button
+                    x-ref="tippyParent-link-{{ $id }}"
+                    flat
+                    color="secondary"
+                    x-on:click.prevent="onClick"
+                    icon="link"
+                    x-data="tippyDropdown($refs['tippyParent-link-{{ $id }}'], $refs['linkDropdown-{{ $id }}'])"
+                />
+        @endif
+
         @if ($tooltipDropdown && $lineHeight && $availableLineHeights)
             <x-button
                 flat
@@ -521,6 +532,22 @@
                 color="secondary"
                 x-on:click="editor().chain().focus().deleteTable().run()"
                 :text="__('Delete Table')"
+            />
+        </div>
+    </template>
+    <template x-ref="linkDropdown-{{ $id }}">
+        <div class="flex flex-col gap-1 p-2">
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="linkHandler"
+                :text='__("Set Link")'
+            />
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().unsetLink().run()"
+                :text='__("Remove Link")'
             />
         </div>
     </template>

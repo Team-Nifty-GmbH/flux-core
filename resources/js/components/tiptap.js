@@ -1,11 +1,13 @@
 import { Editor } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import { Underline } from '@tiptap/extension-underline';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
 import { FontSizeLineHeightColorConfig } from './tiptap-font-size-line-height-color-handler.js';
 import { TextAlignConfig } from './tiptap-text-align-handler.js';
-import StarterKit from '@tiptap/starter-kit';
+import { LinkConfiguration, linkHandler } from './tiptap-starterkit-handler.js';
 import { MentionConfig } from './tiptap-mention-handler.js';
 import { BladeVariableConfig } from './tiptap-blade-variable.js';
-import { Table } from './tiptap-table.js';
+import { Table } from './tiptap-table-handler.js';
 
 export default function (
     content,
@@ -27,6 +29,7 @@ export default function (
             setIsClickListenerSet(value) {
                 this.isClickListenerSet = value;
             },
+            linkHandler: null,
             initTextArea(
                 id,
                 element,
@@ -64,8 +67,10 @@ export default function (
                     element: element,
                     extensions: [
                         StarterKit,
+                        Underline,
                         FontSizeLineHeightColorConfig,
                         LiteralTab,
+                        LinkConfiguration,
                         TextAlignConfig,
                         Table,
                         MentionConfig(searchModel, element),
@@ -150,6 +155,8 @@ export default function (
                         }, debounceDelay);
                     },
                 });
+
+                this.linkHandler = linkHandler(_editor);
 
                 this.proxy = Alpine.raw(_editor);
 

@@ -29,6 +29,15 @@ strong {
     color: inherit !important;
 }
 
+.tiptap .link-style {
+    @apply text-indigo-400 no-underline cursor-pointer;
+}
+
+
+.tiptap .link-style:hover {
+    @apply text-indigo-600 no-underline cursor-pointer;
+}
+
 .tiptap {
     :first-child {
         margin-top: 0;
