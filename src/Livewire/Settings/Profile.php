@@ -18,6 +18,7 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
@@ -157,17 +158,18 @@ class Profile extends Component
     #[Renderless]
     public function deleteFcmDeviceToken(int $id): void
     {
-        $deviceToken = resolve_static(DeviceToken::class, 'query')
-            ->whereMorphedTo('authenticatable', auth()->user())
-            ->whereKey($id)
-            ->firstOrFail();
-
         try {
-            DeleteDeviceToken::make(['id' => $deviceToken->getKey()])
+            DeleteDeviceToken::make([
+                'id' => resolve_static(DeviceToken::class, 'query')
+                    ->whereMorphedTo('authenticatable', auth()->user())
+                    ->whereKey($id)
+                    ->firstOrFail(['id'])
+                    ->getKey(),
+            ])
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
+        } catch (ValidationException|UnauthorizedException|ModelNotFoundException $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -212,7 +214,7 @@ class Profile extends Component
         $this->fcmDeviceTokens = resolve_static(DeviceToken::class, 'query')
             ->whereMorphedTo('authenticatable', auth()->user())
             ->where('is_active', true)
-            ->select(['id', 'device_name', 'device_id', 'platform', 'created_at'])
+            ->select(['id', 'device_id', 'device_name', 'platform', 'created_at'])
             ->get()
             ->map(function (DeviceToken $deviceToken) {
                 return [
