@@ -31,9 +31,10 @@ const initializeNativeBridge = async () => {
                     await Preferences.remove({ key: 'server_url' });
                 }
                 // Use correct URL scheme per platform
-                const baseUrl = Capacitor.getPlatform() === 'android'
-                    ? 'http://localhost'
-                    : 'capacitor://localhost';
+                const baseUrl =
+                    Capacitor.getPlatform() === 'android'
+                        ? 'http://localhost'
+                        : 'capacitor://localhost';
                 window.location.href = baseUrl + '/index.html';
                 return { success: true };
             } catch (error) {
