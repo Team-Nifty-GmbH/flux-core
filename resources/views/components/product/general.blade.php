@@ -14,6 +14,7 @@
         <x-flux::editor
             x-model="edit"
             wire:model="product.description"
+            scope="product"
             :label="__('Description')"
         />
         @show

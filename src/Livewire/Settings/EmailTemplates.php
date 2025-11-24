@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Contracts\OffersPrinting;
-use FluxErp\Facades\EditorVariable;
+use FluxErp\Facades\Editor;
 use FluxErp\Livewire\DataTables\EmailTemplateList;
 use FluxErp\Livewire\Forms\EmailTemplateForm;
 use FluxErp\Models\EmailTemplate;
@@ -92,7 +92,7 @@ class EmailTemplates extends EmailTemplateList
     public function updatedEmailTemplateFormModelType(): void
     {
         $this->skipRender();
-        $variables = json_encode(EditorVariable::getTranslated($this->emailTemplateForm->model_type));
+        $variables = json_encode(Editor::getTranslatedVariables($this->emailTemplateForm->model_type));
 
         $this->js(<<<JS
             const editorElement = document.querySelector('[x-ref="editor-{$this->editorId}"]');

@@ -179,6 +179,7 @@
         <x-flux::editor
             x-model="edit"
             wire:model="task.description"
+            scope="task"
             :label="__('Description')"
         />
         <div x-bind:class="!edit && 'pointer-events-none'">
