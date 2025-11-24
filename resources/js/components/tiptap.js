@@ -7,6 +7,7 @@ import Link from '@tiptap/extension-link';
 import { MentionConfig } from './tiptap-mention-handler.js';
 import { BladeVariableConfig } from './tiptap-blade-variable.js';
 import { computePosition, flip, shift, offset } from '@floating-ui/dom';
+import { Table } from './tiptap-table.js';
 
 export default function (
     content,
@@ -96,6 +97,7 @@ export default function (
                         FontSizeLineHeightColorConfig,
                         LiteralTab,
                         TextAlignConfig,
+                        Table,
                         MentionConfig(searchModel, element),
                         BladeVariableConfig(),
                     ],

@@ -153,7 +153,7 @@
                 min="0"
                 max="100"
                 wire:model="contact.discount_percent"
-                :label="__('Payment Discount Percentage')"
+                :label="__('Payment Discount Percent')"
             />
         </div>
     </x-card>
