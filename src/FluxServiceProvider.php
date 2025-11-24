@@ -41,7 +41,6 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Bus;
@@ -55,6 +54,7 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -73,7 +73,7 @@ class FluxServiceProvider extends ServiceProvider
                 if ($iso = resolve_static(Currency::class, 'default')?->iso) {
                     Number::useCurrency($iso);
                 }
-            } catch (QueryException) {
+            } catch (Throwable) {
             }
         });
         Number::useLocale(app()->getLocale());
