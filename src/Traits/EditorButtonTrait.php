@@ -105,13 +105,6 @@ trait EditorButtonTrait
         return null;
     }
 
-    public function setScope(?string $scope = null): static
-    {
-        $this->scope = $scope;
-
-        return $this;
-    }
-
     public function setEditor(Editor $editor): static
     {
         $this->editor = $editor;

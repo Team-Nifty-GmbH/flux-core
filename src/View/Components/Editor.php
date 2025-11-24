@@ -62,9 +62,7 @@ class Editor extends Component
         $instances = [];
 
         foreach (EditorFacade::getButtons() as $buttonClass) {
-            $instance = $this->getButtonInstance($buttonClass)
-                ?->setScope($this->scope)
-                ?->setEditor($this);
+            $instance = $this->getButtonInstance($buttonClass)?->setEditor($this);
             if (! is_null($instance)) {
                 $instances[] = $instance;
             }
