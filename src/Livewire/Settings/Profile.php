@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\Settings;
 
 use Closure;
-use Exception;
 use FluxErp\Actions\DeviceToken\DeleteDeviceToken;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
@@ -28,6 +27,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use ReflectionFunction;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Throwable;
 
 class Profile extends Component
 {
@@ -308,27 +308,27 @@ class Profile extends Component
 
     public function sendFcmTestNotification(): void
     {
-        try {
-            if (! resolve_static(DeviceToken::class, 'query')
-                ->whereMorphedTo('authenticatable', auth()->user())
-                ->where('is_active', true)
-                ->exists()
-            ) {
-                $this->notification()
-                    ->error(__('No active FCM device tokens found.'))
-                    ->send();
-
-                return;
-            }
-
-            auth()->user()->notify(new FcmTestNotification());
-
+        if (! resolve_static(DeviceToken::class, 'query')
+            ->whereMorphedTo('authenticatable', auth()->user())
+            ->where('is_active', true)
+            ->exists()
+        ) {
             $this->notification()
-                ->success(__('Test notification sent! Check your mobile device.'))
+                ->error(__('No active FCM device tokens found.'))
                 ->send();
-        } catch (Exception $e) {
+
+            return;
+        }
+
+        try {
+            auth()->user()->notify(app(FcmTestNotification::class));
+        } catch (Throwable $e) {
             exception_to_notifications($e, $this);
         }
+
+        $this->notification()
+            ->success(__('Test notification sent! Check your mobile device.'))
+            ->send();
     }
 
     public function sendTestNotification(): void
