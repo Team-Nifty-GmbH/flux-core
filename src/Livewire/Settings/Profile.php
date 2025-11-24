@@ -177,7 +177,7 @@ class Profile extends Component
 
         $this->loadFcmDeviceTokens();
 
-        $this->notification()
+        $this->toast()
             ->success(__('Device token deleted'))
             ->send();
     }
@@ -193,10 +193,10 @@ class Profile extends Component
                 ->delete();
             $this->loadPushSubscriptions();
 
-            $this->notification()
+            $this->toast()
                 ->success(__('Push subscription deleted'))
                 ->send();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -250,7 +250,7 @@ class Profile extends Component
     #[Renderless]
     public function onPushError(string $message): void
     {
-        $this->notification()
+        $this->toast()
             ->error($message)
             ->send();
     }
@@ -260,7 +260,7 @@ class Profile extends Component
     public function onPushSubscriptionUpdated(): void
     {
         $this->loadPushSubscriptions();
-        $this->notification()
+        $this->toast()
             ->success(__('Web Push activated successfully'))
             ->send();
     }
@@ -277,7 +277,7 @@ class Profile extends Component
             return;
         }
 
-        $this->notification()
+        $this->toast()
             ->success(__(':model saved', ['model' => __('My Profile')]))
             ->send();
 
@@ -313,7 +313,7 @@ class Profile extends Component
             ->where('is_active', true)
             ->exists()
         ) {
-            $this->notification()
+            $this->toast()
                 ->error(__('No active FCM device tokens found.'))
                 ->send();
 
@@ -324,9 +324,11 @@ class Profile extends Component
             auth()->user()->notify(app(FcmTestNotification::class));
         } catch (Throwable $e) {
             exception_to_notifications($e, $this);
+
+            return;
         }
 
-        $this->notification()
+        $this->toast()
             ->success(__('Test notification sent! Check your mobile device.'))
             ->send();
     }
@@ -335,7 +337,7 @@ class Profile extends Component
     {
         try {
             if (! auth()->user()->pushSubscriptions()->exists()) {
-                $this->notification()
+                $this->toast()
                     ->error(__('No active push subscriptions found. Please activate Web Push first.'))
                     ->send();
 
@@ -344,10 +346,10 @@ class Profile extends Component
 
             auth()->user()->notify(new WebPushTestNotification());
 
-            $this->notification()
+            $this->toast()
                 ->success(__('Test notification sent! Check your browser notifications.'))
                 ->send();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -361,7 +363,7 @@ class Profile extends Component
                 auth()->id(),
                 app(User::class)->getMorphClass()
             );
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             exception_to_notifications($e, $this);
 
             return;
