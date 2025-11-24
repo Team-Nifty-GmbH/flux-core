@@ -81,8 +81,9 @@
                                 wire:model="ticket.title"
                             />
                             <x-flux::editor
-                                :label="__('Description')"
                                 wire:model="ticket.description"
+                                scope="ticket"
+                                :label="__('Description')"
                             />
                         </x-card>
                         <div

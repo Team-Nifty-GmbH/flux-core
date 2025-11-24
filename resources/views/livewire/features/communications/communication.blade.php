@@ -294,6 +294,7 @@
             </div>
             <x-flux::editor
                 wire:model="communication.html_body"
+                scope="communication"
                 :label="__('Content')"
             />
             <x-select.styled

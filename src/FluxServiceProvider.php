@@ -23,7 +23,7 @@ use FluxErp\Providers\AuthServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\BroadcastServiceProvider;
 use FluxErp\Providers\ComponentServiceProvider;
-use FluxErp\Providers\EditorVariableServiceProvider;
+use FluxErp\Providers\EditorServiceProvider;
 use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MacroServiceProvider;
 use FluxErp\Providers\MenuServiceProvider;
@@ -140,7 +140,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->register(ActionServiceProvider::class);
         $this->app->register(RepeatableServiceProvider::class);
         $this->app->register(WidgetServiceProvider::class);
-        $this->app->register(EditorVariableServiceProvider::class);
+        $this->app->register(EditorServiceProvider::class);
         $this->app->register(MenuServiceProvider::class);
 
         if ($this->app->runningUnitTests()) {
