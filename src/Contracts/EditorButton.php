@@ -25,7 +25,5 @@ interface EditorButton
 
     public function tooltip(): ?string;
 
-    public function setScope(?string $scope = null): static;
-
     public function setEditor(Editor $editor): static;
 }
