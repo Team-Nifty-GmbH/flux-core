@@ -104,7 +104,7 @@ class UpdateContactRuleset extends FluxRuleset
             'payment_reminder_days_2' => 'sometimes|integer|nullable',
             'payment_reminder_days_3' => 'sometimes|integer|nullable',
             'discount_days' => 'sometimes|integer|nullable',
-            'discount_percent' => 'sometimes|numeric|nullable',
+            'discount_percent' => 'sometimes|numeric|min:0|max:1|nullable',
             'credit_line' => 'sometimes|numeric|nullable',
             'vat_id' => 'sometimes|string|max:255|nullable',
             'customs_identifier' => 'sometimes|string|max:255|nullable',

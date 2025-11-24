@@ -102,7 +102,7 @@ class CreateContactRuleset extends FluxRuleset
             'payment_reminder_days_2' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_3' => 'sometimes|integer|min:1|nullable',
             'discount_days' => 'sometimes|integer|min:1|nullable',
-            'discount_percent' => 'sometimes|numeric|min:0|max:100|nullable',
+            'discount_percent' => 'sometimes|numeric|min:0|max:1|nullable',
             'credit_line' => 'sometimes|numeric|min:0|nullable',
             'vat_id' => 'sometimes|string|max:255|nullable',
             'customs_identifier' => 'sometimes|string|max:255|nullable',
