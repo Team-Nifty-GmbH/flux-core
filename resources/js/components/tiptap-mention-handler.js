@@ -70,7 +70,8 @@ export const MentionConfig = (searchModel, element) =>
 
             render: () => {
                 let suggestionElement = document.createElement('div');
-                suggestionElement.className = 'suggestion-popup absolute z-50 bg-white dark:bg-secondary-800 rounded-md shadow-lg border border-secondary-200 dark:border-secondary-700 p-2';
+                suggestionElement.className =
+                    'suggestion-popup absolute z-50 bg-white dark:bg-secondary-800 rounded-md shadow-lg border border-secondary-200 dark:border-secondary-700 p-2';
                 suggestionElement.style.display = 'none';
                 let virtualReference = null;
 
@@ -82,7 +83,11 @@ export const MentionConfig = (searchModel, element) =>
                         suggestionElement,
                         {
                             placement: 'bottom-start',
-                            middleware: [offset(8), flip(), shift({ padding: 5 })],
+                            middleware: [
+                                offset(8),
+                                flip(),
+                                shift({ padding: 5 }),
+                            ],
                         },
                     );
 
@@ -95,7 +100,9 @@ export const MentionConfig = (searchModel, element) =>
                 return {
                     onStart: (props) => {
                         if (!suggestionPopup) {
-                            element.parentElement.appendChild(suggestionElement);
+                            element.parentElement.appendChild(
+                                suggestionElement,
+                            );
                             Alpine.initTree(suggestionElement);
                             suggestionPopup = suggestionElement;
                         }

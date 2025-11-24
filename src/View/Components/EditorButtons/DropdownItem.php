@@ -11,11 +11,11 @@ class DropdownItem extends Component implements EditorButton
     use EditorButtonTrait;
 
     public function __construct(
-        private ?string $text = null,
-        private ?string $icon = null,
-        private ?string $command = null,
-        private ?string $isActive = null,
-        private array $additionalAttributes = [],
+        protected ?string $text = null,
+        protected ?string $icon = null,
+        protected ?string $command = null,
+        protected ?string $isActive = null,
+        protected array $additionalAttributes = [],
     ) {}
 
     public function command(): ?string

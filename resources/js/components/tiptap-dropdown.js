@@ -19,11 +19,16 @@ export default function (parentElement, dropdownElement) {
             if (this.floatingElement) {
                 this.floatingElement.style.display = 'none';
                 this.isVisible = false;
+
                 if (currentOpenDropdown === this) {
                     currentOpenDropdown = null;
                 }
+
                 if (this.floatingElement._clickOutsideHandler) {
-                    document.removeEventListener('click', this.floatingElement._clickOutsideHandler);
+                    document.removeEventListener(
+                        'click',
+                        this.floatingElement._clickOutsideHandler,
+                    );
                 }
             }
         },
@@ -79,13 +84,16 @@ export default function (parentElement, dropdownElement) {
                     this.floatingElement.addEventListener('click', sideEffect);
 
                     const clickOutsideHandler = (event) => {
-                        if (!this.floatingElement.contains(event.target) &&
-                            !parentElement.contains(event.target)) {
+                        if (
+                            !this.floatingElement.contains(event.target) &&
+                            !parentElement.contains(event.target)
+                        ) {
                             this.hide();
                         }
                     };
                     document.addEventListener('click', clickOutsideHandler);
-                    this.floatingElement._clickOutsideHandler = clickOutsideHandler;
+                    this.floatingElement._clickOutsideHandler =
+                        clickOutsideHandler;
 
                     this.popUp = true;
                     this.show();

@@ -80,6 +80,7 @@ export default function (
                     }
                     parent.setIsClickListenerSet(false);
                 };
+
                 _editor = new Editor({
                     element: element,
                     extensions: [

@@ -10,7 +10,6 @@ class Underline extends Component implements EditorButton
 {
     use EditorButtonTrait;
 
-
     public function icon(): ?string
     {
         return null;

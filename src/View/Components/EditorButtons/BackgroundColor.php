@@ -2,14 +2,14 @@
 
 namespace FluxErp\View\Components\EditorButtons;
 
-use FluxErp\Contracts\DropdownButton;
+use FluxErp\Contracts\EditorDropdownButton;
 use FluxErp\Enums\EditorColorPaletteEnum;
-use FluxErp\Traits\DropdownButtonTrait;
+use FluxErp\Traits\EditorDropdownButtonTrait;
 use Illuminate\View\Component;
 
-class BackgroundColor extends Component implements DropdownButton
+class BackgroundColor extends Component implements EditorDropdownButton
 {
-    use DropdownButtonTrait;
+    use EditorDropdownButtonTrait;
 
     public array $textBackgroundColors;
 

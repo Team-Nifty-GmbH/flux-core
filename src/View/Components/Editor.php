@@ -3,7 +3,8 @@
 namespace FluxErp\View\Components;
 
 use Closure;
-use FluxErp\Contracts\DropdownButton;
+use FluxErp\Contracts\EditorDropdownButton;
+use FluxErp\Facades\Editor as EditorFacade;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
@@ -26,8 +27,8 @@ class Editor extends Component
     public function render(): View|Closure|string
     {
         return view('flux::components.editor', [
-            'buttonInstances' => $this->getButtonInstances(),
-            'tooltipDropdownContent' => $this->getTooltipDropdownContent(),
+            'buttonInstances' => $buttonInstances = $this->getButtonInstances(),
+            'tooltipDropdownContent' => $this->getTooltipDropdownContent($buttonInstances),
         ]);
     }
 
@@ -60,8 +61,8 @@ class Editor extends Component
     {
         $instances = [];
 
-        foreach (\FluxErp\Facades\Editor::getButtons() as $buttonClass) {
-            $instance = $this->getButtonInstance($buttonClass);
+        foreach (EditorFacade::getButtons() as $buttonClass) {
+            $instance = $this->getButtonInstance($buttonClass)?->setScope($this->scope);
             if (! is_null($instance)) {
                 $instances[] = $instance;
             }
@@ -70,17 +71,13 @@ class Editor extends Component
         return $instances;
     }
 
-    public function getTooltipDropdownContent(): array
+    public function getTooltipDropdownContent(array $buttonInstances): array
     {
-        if (! $this->tooltipDropdown) {
-            return [];
-        }
-
         $content = [];
-        $buttonInstances = $this->getButtonInstances();
 
         foreach ($buttonInstances as $instance) {
-            if ($instance instanceof DropdownButton) {
+            if ($instance instanceof EditorDropdownButton) {
+                $this->tooltipDropdown = true;
                 $content = array_merge($content, $instance->dropdownContent());
             }
         }

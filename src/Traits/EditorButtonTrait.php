@@ -4,13 +4,16 @@ namespace FluxErp\Traits;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
+use Illuminate\Support\Stringable;
 use Illuminate\View\ComponentAttributeBag;
 
 trait EditorButtonTrait
 {
-    public static function identifier(): string
+    public ?string $scope = null;
+
+    public static function identifier(): Stringable
     {
-        return Str::kebab(class_basename(static::class));
+        return Str::of(class_basename(static::class))->kebab();
     }
 
     public static function scopes(): array
@@ -51,15 +54,26 @@ trait EditorButtonTrait
             $attributes = $attributes->merge($this->attributes());
         }
 
-        return Blade::render(<<<'Blade'
-            <x-button {{ $attributes }} />
-        Blade, ['attributes' => $attributes]);
+        return Blade::render(
+            <<<'Blade'
+                <x-button {{ $attributes }} />
+            Blade,
+            [
+                'attributes' => $attributes,
+            ]
+        );
+    }
+
+    public function setScope(?string $scope = null): static
+    {
+        $this->scope = $scope;
+
+        return $this;
     }
 
     public function command(): ?string
     {
-        $mark = lcfirst(class_basename(static::class));
-        $toggleMethod = 'toggle' . class_basename(static::class);
+        $toggleMethod = 'toggle' . static::identifier()->pascal();
 
         return <<<JS
             editor().chain().focus().$toggleMethod().run()
@@ -68,7 +82,7 @@ trait EditorButtonTrait
 
     public function isActive(): ?string
     {
-        $mark = lcfirst(class_basename(static::class));
+        $mark = static::identifier()->camel();
 
         return <<<JS
             editor().isActive('$mark')

@@ -51,19 +51,6 @@ class EditorManager
         return static::$buttons;
     }
 
-    public static function getTranslatedVariables(
-        ?string $modelClass = null,
-        ?string $path = null,
-        bool $withGlobals = true
-    ): array {
-        $variables = static::getVariables($modelClass, $path, $withGlobals);
-        if (is_string($variables)) {
-            $variables = [$variables => $variables];
-        }
-
-        return static::translate($variables);
-    }
-
     public static function getVariables(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): string|array
     {
         $data = data_get(
@@ -81,6 +68,19 @@ class EditorManager
         ) ?? [];
 
         return array_merge($data, $globals);
+    }
+
+    public static function getTranslatedVariables(
+        ?string $modelClass = null,
+        ?string $path = null,
+        bool $withGlobals = true
+    ): array {
+        $variables = static::getVariables($modelClass, $path, $withGlobals);
+        if (is_string($variables)) {
+            $variables = [$variables => $variables];
+        }
+
+        return static::translate($variables);
     }
 
     /**

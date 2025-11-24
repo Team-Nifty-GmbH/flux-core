@@ -3,10 +3,9 @@
 namespace FluxErp\Traits;
 
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Str;
 use Illuminate\View\ComponentAttributeBag;
 
-trait DropdownButtonTrait
+trait EditorDropdownButtonTrait
 {
     use EditorButtonTrait;
 
@@ -31,11 +30,17 @@ trait DropdownButtonTrait
         }
 
         if ($text = $this->text()) {
-            return Blade::render(<<<'Blade'
-                <x-button {{ $attributes }}>
-                    {!! $text !!}
-                </x-button>
-            Blade, ['attributes' => $attributes, 'text' => $text]);
+            return Blade::render(
+                <<<'Blade'
+                    <x-button {{ $attributes }}>
+                        {!! $text !!}
+                    </x-button>
+                Blade,
+                [
+                    'attributes' => $attributes,
+                    'text' => $text,
+                ]
+            );
         }
 
         return Blade::render(<<<'Blade'
@@ -45,7 +50,7 @@ trait DropdownButtonTrait
 
     public function dropdownRef(): string
     {
-        return Str::kebab(class_basename(static::class));
+        return static::identifier();
     }
 
     public function command(): ?string

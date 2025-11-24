@@ -10,10 +10,9 @@ class OrderedList extends Component implements EditorButton
 {
     use EditorButtonTrait;
 
-
     public function icon(): ?string
     {
-        return 'list-bullet';
+        return 'numbered-list';
     }
 
     public function tooltip(): ?string

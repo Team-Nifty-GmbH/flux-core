@@ -2,27 +2,25 @@
 
 namespace FluxErp\View\Components\EditorButtons;
 
-use FluxErp\Contracts\DropdownButton;
-use FluxErp\Traits\DropdownButtonTrait;
+use FluxErp\Contracts\EditorDropdownButton;
+use FluxErp\Traits\EditorDropdownButtonTrait;
 use Illuminate\View\Component;
 
-class FontSize extends Component implements DropdownButton
+class FontSize extends Component implements EditorDropdownButton
 {
-    use DropdownButtonTrait;
+    use EditorDropdownButtonTrait;
 
-    public function __construct(
-        public array $availableFontSizes = [
-            12,
-            14,
-            16,
-            18,
-            20,
-            24,
-            28,
-            32,
-            36,
-        ],
-    ) {}
+    public array $availableFontSizes = [
+        12,
+        14,
+        16,
+        18,
+        20,
+        24,
+        28,
+        32,
+        36,
+    ];
 
     public function text(): ?string
     {
@@ -37,7 +35,7 @@ class FontSize extends Component implements DropdownButton
     public function dropdownContent(): array
     {
         return array_map(
-            fn ($size) => app(DropdownItem::class, [
+            fn (int|string $size) => app(DropdownItem::class, [
                 'text' => $size . 'px',
                 'command' => <<<JS
                     editor().chain().focus().setFontSize({$size}).run()

@@ -2,24 +2,22 @@
 
 namespace FluxErp\View\Components\EditorButtons;
 
-use FluxErp\Contracts\DropdownButton;
-use FluxErp\Traits\DropdownButtonTrait;
+use FluxErp\Contracts\EditorDropdownButton;
+use FluxErp\Traits\EditorDropdownButtonTrait;
 use Illuminate\View\Component;
 
-class LineHeight extends Component implements DropdownButton
+class LineHeight extends Component implements EditorDropdownButton
 {
-    use DropdownButtonTrait;
+    use EditorDropdownButtonTrait;
 
-    public function __construct(
-        public array $availableLineHeights = [
-            1,
-            1.2,
-            1.5,
-            2,
-            2.5,
-            3,
-        ],
-    ) {}
+    public array $availableLineHeights = [
+        1,
+        1.2,
+        1.5,
+        2,
+        2.5,
+        3,
+    ];
 
     public function icon(): ?string
     {
@@ -33,14 +31,18 @@ class LineHeight extends Component implements DropdownButton
 
     public function dropdownContent(): array
     {
+        $isActiveChecks = collect($this->availableLineHeights)
+            ->map(fn (int|float $height): string => "!editor().isActive({ lineHeight: {$height} })")
+            ->join("\n                    && ");
+
         $buttons = [
             app(DropdownItem::class, [
-                'text' => __('Standard'),
+                'text' => __('Default'),
                 'command' => <<<'JS'
                     editor().chain().focus().unsetLineHeight().run()
                     JS,
-                'isActive' => <<<'JS'
-                    !editor().isActive({ lineHeight: 1 }) && !editor().isActive({ lineHeight: 1.2 }) && !editor().isActive({ lineHeight: 1.5 }) && !editor().isActive({ lineHeight: 2 }) && !editor().isActive({ lineHeight: 2.5 }) && !editor().isActive({ lineHeight: 3 })
+                'isActive' => <<<JS
+                    {$isActiveChecks}
                     JS,
             ]),
         ];

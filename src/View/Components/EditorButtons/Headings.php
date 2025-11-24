@@ -2,24 +2,19 @@
 
 namespace FluxErp\View\Components\EditorButtons;
 
-use FluxErp\Contracts\DropdownButton;
-use FluxErp\Traits\DropdownButtonTrait;
+use FluxErp\Contracts\EditorDropdownButton;
+use FluxErp\Traits\EditorDropdownButtonTrait;
 use Illuminate\View\Component;
 
-class Headings extends Component implements DropdownButton
+class Headings extends Component implements EditorDropdownButton
 {
-    use DropdownButtonTrait;
+    use EditorDropdownButtonTrait;
 
-    public function __construct(
-        public bool $h1 = true,
-        public bool $h2 = true,
-        public bool $h3 = true,
-    ) {}
-
-    public function icon(): ?string
-    {
-        return null;
-    }
+    public array $headings = [
+        'h1' => true,
+        'h2' => true,
+        'h3' => true,
+    ];
 
     public function text(): ?string
     {
@@ -35,38 +30,20 @@ class Headings extends Component implements DropdownButton
     {
         $buttons = [];
 
-        if ($this->h1) {
-            $buttons[] = app(DropdownItem::class, [
-                'text' => 'H1',
-                'command' => <<<'JS'
-                    editor().chain().focus().toggleHeading({ level: 1 }).run()
-                    JS,
-                'isActive' => <<<'JS'
-                    editor().isActive('heading', { level: 1 })
-                    JS,
-            ]);
-        }
+        foreach ($this->headings as $heading => $enabled) {
+            if (! $enabled) {
+                continue;
+            }
 
-        if ($this->h2) {
-            $buttons[] = app(DropdownItem::class, [
-                'text' => 'H2',
-                'command' => <<<'JS'
-                    editor().chain().focus().toggleHeading({ level: 2 }).run()
-                    JS,
-                'isActive' => <<<'JS'
-                    editor().isActive('heading', { level: 2 })
-                    JS,
-            ]);
-        }
+            $level = (int) substr($heading, 1);
 
-        if ($this->h3) {
             $buttons[] = app(DropdownItem::class, [
-                'text' => 'H3',
-                'command' => <<<'JS'
-                    editor().chain().focus().toggleHeading({ level: 3 }).run()
+                'text' => strtoupper($heading),
+                'command' => <<<JS
+                    editor().chain().focus().toggleHeading({ level: {$level} }).run()
                     JS,
-                'isActive' => <<<'JS'
-                    editor().isActive('heading', { level: 3 })
+                'isActive' => <<<JS
+                    editor().isActive('heading', { level: {$level} })
                     JS,
             ]);
         }

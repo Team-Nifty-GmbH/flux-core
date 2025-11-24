@@ -2,7 +2,7 @@
 
 namespace FluxErp\Contracts;
 
-interface DropdownButton extends EditorButton
+interface EditorDropdownButton extends EditorButton
 {
     public function dropdownContent(): array;
 

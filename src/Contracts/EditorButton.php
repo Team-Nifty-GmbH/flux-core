@@ -2,9 +2,11 @@
 
 namespace FluxErp\Contracts;
 
+use Illuminate\Support\Stringable;
+
 interface EditorButton
 {
-    public static function identifier(): string;
+    public static function identifier(): Stringable;
 
     public static function scopes(): array;
 

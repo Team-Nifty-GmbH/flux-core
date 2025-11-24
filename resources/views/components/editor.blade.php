@@ -84,7 +84,7 @@
     ></template>
     <template x-ref="commands-{{ $id }}">
         @foreach ($buttonInstances as $buttonInstance)
-            @if (! $tooltipDropdown || ! $buttonInstance instanceof \FluxErp\Contracts\DropdownButton)
+            @if (! $tooltipDropdown || ! $buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton)
                 {!! $buttonInstance->render() !!}
             @endif
         @endforeach
@@ -98,7 +98,7 @@
     {{-- Dropdown templates for dropdown buttons --}}
     @if (! $tooltipDropdown)
         @foreach ($buttonInstances as $buttonInstance)
-            @if ($buttonInstance instanceof \FluxErp\Contracts\DropdownButton)
+            @if ($buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton)
                 <template x-ref="{{ $buttonInstance->dropdownRef() }}Dropdown">
                     <div class="flex flex-col">
                         @foreach ($buttonInstance->dropdownContent() as $dropdownButton)

@@ -3,25 +3,18 @@
 namespace FluxErp\View\Components\EditorButtons;
 
 use FluxErp\Contracts\EditorButton;
+use FluxErp\Traits\EditorButtonTrait;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Component;
 
 class ColorPicker extends Component implements EditorButton
 {
+    use EditorButtonTrait;
+
     public function __construct(
-        private readonly array $colors,
-        private readonly string $commandTemplate,
+        protected array $colors,
+        protected string $commandTemplate,
     ) {}
-
-    public static function identifier(): string
-    {
-        return 'color-picker';
-    }
-
-    public static function scopes(): array
-    {
-        return [];
-    }
 
     public function render(): string
     {
@@ -50,26 +43,6 @@ class ColorPicker extends Component implements EditorButton
     }
 
     public function isActive(): ?string
-    {
-        return null;
-    }
-
-    public function icon(): ?string
-    {
-        return null;
-    }
-
-    public function text(): ?string
-    {
-        return null;
-    }
-
-    public function title(): ?string
-    {
-        return null;
-    }
-
-    public function tooltip(): ?string
     {
         return null;
     }

@@ -12,12 +12,14 @@ class Link extends Component implements EditorButton
 
     public function command(): ?string
     {
-        return <<<'JS'
+        $label = __('Input URL');
+
+        return <<<JS
             (() => {
                 if (editor().isActive('link')) {
                     editor().chain().focus().unsetLink().run();
                 } else {
-                    const url = prompt('URL eingeben:');
+                    const url = prompt('$label:');
                     if (url) {
                         editor().chain().focus().setLink({ href: url }).run();
                     }
