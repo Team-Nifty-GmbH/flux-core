@@ -73,14 +73,8 @@ class Editor extends Component
 
     public function getTooltipDropdownContent(array $buttonInstances): array
     {
-        $content = [];
-
-        foreach ($buttonInstances as $instance) {
-            if ($instance instanceof EditorDropdownButton) {
-                $content = array_merge($content, $instance->dropdownContent());
-            }
-        }
-
-        return $content;
+        return array_filter($buttonInstances, function ($buttonInstance) {
+            return $buttonInstance instanceof EditorDropdownButton;
+        });
     }
 }

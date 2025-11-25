@@ -50,4 +50,9 @@ class Headings extends Component implements EditorDropdownButton
 
         return $buttons;
     }
+
+    public function expandableContent(): bool
+    {
+        return true;
+    }
 }
