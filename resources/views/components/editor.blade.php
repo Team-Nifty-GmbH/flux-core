@@ -114,7 +114,7 @@
                             color="primary"
                         />
                         <div
-                            x-collapes.duration.500ms
+                            x-collapse.duration.200ms
                             x-show="expanded"
                             class="{{ $expandableContent->tooltip() === "Table" ? "flex flex-col" : "" }} pt-2"
                         >

@@ -19,5 +19,4 @@
         @show
     </div>
     <x-flux::dashboard.grid />
-        <x-flux::editor :tooltip-dropdown="true" />
 </div>
