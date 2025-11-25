@@ -203,10 +203,14 @@ class VariantList extends ProductList
                 continue;
             }
 
-            RestoreProduct::make($variantRestore)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            try {
+                RestoreProduct::make($variantRestore)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $selectedLanguage = Session::pull('selectedLanguageId');

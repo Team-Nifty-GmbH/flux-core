@@ -61,7 +61,7 @@
                         x-text="$wire.variants?.new?.length ?? 0"
                     ></div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ __('Will be created') }}
+                        {{ __('Variants will be created') }}
                     </div>
                 </x-card>
                 <x-card class="text-center">
@@ -70,7 +70,7 @@
                         x-text="$wire.variants?.delete?.length ?? 0"
                     ></div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ __('Will be deleted') }}
+                        {{ __('Variants will be deleted') }}
                     </div>
                 </x-card>
                 <x-card class="text-center">
@@ -79,7 +79,7 @@
                         x-text="$wire.variants?.restore?.filter((v) => v.selected).length ?? 0"
                     ></div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ __('Will be restored') }}
+                        {{ __('Variants will be restored') }}
                     </div>
                 </x-card>
                 <x-card class="text-center">
@@ -88,7 +88,7 @@
                         x-text="$wire.variants?.existing?.length ?? 0"
                     ></div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ __('Already exist') }}
+                        {{ __('Variants already exist') }}
                     </div>
                 </x-card>
             </div>
