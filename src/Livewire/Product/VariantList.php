@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
+use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\Product\Variant\CreateVariants;
 use FluxErp\Livewire\DataTables\ProductList;
@@ -128,7 +129,8 @@ class VariantList extends ProductList
 
         $this->variants = [];
         foreach ($activeProductOptionCombinations as $activeProductOption) {
-            if (! $product = resolve_static(Product::class, 'query')
+            $product = resolve_static(Product::class, 'query')
+                ->withTrashed()
                 ->where('parent_id', $this->product->id)
                 ->whereHas('productOptions', function (Builder $query) use ($activeProductOption) {
                     return $query
@@ -137,16 +139,23 @@ class VariantList extends ProductList
                         ->groupBy('product_product_option.product_id')
                         ->havingRaw('COUNT(`product_options`.`id`) = ?', [count($activeProductOption)]);
                 })
-                ->first()
-            ) {
+                ->first();
+
+            if (! $product) {
                 $this->variants['new'][] = $activeProductOption;
+            } elseif ($product->trashed()) {
+                $this->variants['restore'][] = [
+                    'id' => $product->getKey(),
+                    'name' => $product->name,
+                    'selected' => true,
+                ];
             } else {
-                $this->variants['existing'][] = $product->id;
+                $this->variants['existing'][] = $product->getKey();
             }
         }
 
         $this->variants['delete'] = resolve_static(Product::class, 'query')
-            ->select('id')
+            ->select('id', 'name')
             ->where('parent_id', $this->product->id)
             ->whereNotIn('id', $this->variants['existing'] ?? [])
             ->get()
@@ -189,6 +198,21 @@ class VariantList extends ProductList
                 ->execute();
         }
 
+        foreach (data_get($this->variants, 'restore', []) as $variantRestore) {
+            if (! data_get($variantRestore, 'selected', false)) {
+                continue;
+            }
+
+            try {
+                RestoreProduct::make($variantRestore)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
         $selectedLanguage = Session::pull('selectedLanguageId');
 
         $product = resolve_static(Product::class, 'query')
@@ -198,22 +222,24 @@ class VariantList extends ProductList
 
         Session::put('selectedLanguageId', $selectedLanguage);
 
-        try {
-            CreateVariants::make(
-                array_merge(
-                    $this->product->toArray(),
-                    $product ?? [],
-                    [
-                        'parent_id' => $this->product->id,
-                        'product_options' => data_get($this->variants, 'new', []),
-                    ]
+        if ($newVariants = data_get($this->variants, 'new')) {
+            try {
+                CreateVariants::make(
+                    array_merge(
+                        $this->product->toArray(),
+                        $product ?? [],
+                        [
+                            'parent_id' => $this->product->id,
+                            'product_options' => $newVariants,
+                        ]
+                    )
                 )
-            )
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $this->variants = [];
