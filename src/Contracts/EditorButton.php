@@ -3,6 +3,7 @@
 namespace FluxErp\Contracts;
 
 use FluxErp\View\Components\Editor;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Stringable;
 
 interface EditorButton
@@ -11,7 +12,7 @@ interface EditorButton
 
     public static function scopes(): array;
 
-    public function render(): string;
+    public function render(): string|View;
 
     public function command(): ?string;
 

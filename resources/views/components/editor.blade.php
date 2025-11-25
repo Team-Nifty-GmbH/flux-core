@@ -85,7 +85,11 @@
     <template x-ref="commands-{{ $id }}">
         @foreach ($buttonInstances as $buttonInstance)
             @if (! $tooltipDropdown || ! $buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton)
-                {!! $buttonInstance->render() !!}
+                @if ($buttonInstance instanceof \Livewire\Component)
+                    <livewire:dynamic-component :is="$buttonInstance::class" />
+                @else
+                    {!! $buttonInstance->render() !!}
+                @endif
             @endif
         @endforeach
 
