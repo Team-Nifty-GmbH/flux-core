@@ -31,10 +31,10 @@ class RegisterMobilePushToken
 
         /** @var DeviceToken|null $existingToken */
         $existingToken = resolve_static(DeviceToken::class, 'query')
-                ->withTrashed()
-                ->where('device_id', $deviceId)
-                ->whereMorphedTo('authenticatable', $event->user)
-                ->first(['id', 'deleted_at', 'deleted_by']);
+            ->withTrashed()
+            ->where('device_id', $deviceId)
+            ->whereMorphedTo('authenticatable', $event->user)
+            ->first(['id', 'deleted_at', 'deleted_by']);
 
         if ($existingToken?->trashed()) {
             $existingToken->restore();
