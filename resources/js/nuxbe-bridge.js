@@ -122,6 +122,68 @@ const initializeNativeBridge = async () => {
                 }
             };
         }
+
+        // Status Bar - Update based on dark mode
+        const StatusBar = Plugins.StatusBar;
+        if (StatusBar) {
+            bridge.setDarkMode = async (isDark) => {
+                try {
+                    if (isDark) {
+                        await StatusBar.setStyle({ style: 'DARK' });
+                        await StatusBar.setBackgroundColor({
+                            color: '#1e293b',
+                        });
+                    } else {
+                        await StatusBar.setStyle({ style: 'LIGHT' });
+                        await StatusBar.setBackgroundColor({
+                            color: '#ffffff',
+                        });
+                    }
+                    return { success: true };
+                } catch (error) {
+                    return { success: false, error: error.message };
+                }
+            };
+
+            bridge.updateStatusBarFromDOM = async () => {
+                const isDark =
+                    document.documentElement.classList.contains('dark') ||
+                    document.body.classList.contains('dark');
+                return bridge.setDarkMode(isDark);
+            };
+        }
+
+        // Watch for dark mode changes automatically
+        const observeDarkMode = () => {
+            if (!bridge.updateStatusBarFromDOM) return;
+
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    if (mutation.attributeName === 'class') {
+                        bridge.updateStatusBarFromDOM();
+                    }
+                }
+            });
+
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+            observer.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+
+            // Initial update
+            bridge.updateStatusBarFromDOM();
+        };
+
+        // Start observing when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', observeDarkMode);
+        } else {
+            observeDarkMode();
+        }
     } catch (error) {
         // Silent fail
     }
