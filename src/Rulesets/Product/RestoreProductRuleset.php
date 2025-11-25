@@ -57,15 +57,15 @@ class RestoreProductRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Unit::class]),
             ],
-            'bundle_type_enum' => [
-                'required_if_accepted:is_bundle',
-                'nullable',
-                Rule::enum(BundleTypeEnum::class),
-            ],
             'product_number' => [
                 'string',
                 'nullable',
                 app(ModelDoesntExist::class, ['model' => Product::class, 'key' => 'product_number']),
+            ],
+            'bundle_type_enum' => [
+                'required_if_accepted:is_bundle',
+                'nullable',
+                Rule::enum(BundleTypeEnum::class),
             ],
             'name' => 'string|max:255',
             'description' => 'string|nullable',
@@ -82,7 +82,6 @@ class RestoreProductRuleset extends FluxRuleset
             ],
             'ean' => 'string|nullable',
             'customs_tariff_number' => 'string|nullable|max:64',
-            'stock' => 'integer|nullable',
             'min_delivery_time' => 'integer|nullable',
             'max_delivery_time' => 'integer|nullable',
             'restock_time' => 'integer|nullable',
