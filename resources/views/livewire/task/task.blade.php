@@ -127,6 +127,7 @@
             <x-flux::editor
                 x-model="edit"
                 wire:model="replica.description"
+                scope="task"
                 :label="__('Description')"
             />
             <x-select.styled

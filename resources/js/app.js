@@ -2,10 +2,8 @@ import _ from 'lodash';
 import axios from 'axios';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
-import tippy from 'tippy.js';
 import nuxbeAppBridge from './nuxbe-bridge.js';
 
-window.tippy = tippy;
 window.nuxbeAppBridge = nuxbeAppBridge;
 
 window._ = _;

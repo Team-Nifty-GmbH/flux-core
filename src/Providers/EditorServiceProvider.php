@@ -2,25 +2,68 @@
 
 namespace FluxErp\Providers;
 
-use FluxErp\Facades\EditorVariable;
+use FluxErp\Facades\Editor;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\SepaMandate;
-use FluxErp\Support\EditorVariableManager;
+use FluxErp\Support\EditorManager;
+use FluxErp\View\Components\EditorButtons\AlignCenter;
+use FluxErp\View\Components\EditorButtons\AlignLeft;
+use FluxErp\View\Components\EditorButtons\AlignRight;
+use FluxErp\View\Components\EditorButtons\BackgroundColor;
+use FluxErp\View\Components\EditorButtons\Blockquote;
+use FluxErp\View\Components\EditorButtons\Bold;
+use FluxErp\View\Components\EditorButtons\BulletList;
+use FluxErp\View\Components\EditorButtons\Code;
+use FluxErp\View\Components\EditorButtons\CodeBlock;
+use FluxErp\View\Components\EditorButtons\FontSize;
+use FluxErp\View\Components\EditorButtons\Headings;
+use FluxErp\View\Components\EditorButtons\HorizontalRule;
+use FluxErp\View\Components\EditorButtons\Italic;
+use FluxErp\View\Components\EditorButtons\LineHeight;
+use FluxErp\View\Components\EditorButtons\Link;
+use FluxErp\View\Components\EditorButtons\OrderedList;
+use FluxErp\View\Components\EditorButtons\Strike;
+use FluxErp\View\Components\EditorButtons\Table;
+use FluxErp\View\Components\EditorButtons\TextColor;
+use FluxErp\View\Components\EditorButtons\Underline;
 use Illuminate\Support\ServiceProvider;
 
-class EditorVariableServiceProvider extends ServiceProvider
+class EditorServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        EditorVariable::merge([
+        Editor::registerButtons([
+            Bold::class,
+            Italic::class,
+            Underline::class,
+            Strike::class,
+            Code::class,
+            Link::class,
+            Headings::class,
+            FontSize::class,
+            TextColor::class,
+            BackgroundColor::class,
+            LineHeight::class,
+            HorizontalRule::class,
+            BulletList::class,
+            OrderedList::class,
+            Blockquote::class,
+            AlignLeft::class,
+            AlignCenter::class,
+            AlignRight::class,
+            CodeBlock::class,
+            Table::class,
+        ]);
+
+        Editor::mergeVariables([
             'Current User Name' => 'auth()->user()?->name',
             'Current User Email' => 'auth()->user()?->email',
             'Current Date' => 'now()->isoFormat(\'L\')',
             'Current DateTime' => 'now()->isoFormat(\'L LT\')',
         ]);
 
-        EditorVariable::merge(
+        Editor::mergeVariables(
             [
                 'Salutation' => '$paymentReminder->order->addressInvoice->salutation()',
                 'Total Gross Price' => 'format_money($paymentReminder->order->total_gross_price, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
@@ -36,7 +79,7 @@ class EditorVariableServiceProvider extends ServiceProvider
             PaymentReminder::class
         );
 
-        EditorVariable::merge(
+        Editor::mergeVariables(
             [
                 'Salutation' => '$order->addressInvoice->salutation()',
                 'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->addressInvoice->language)',
@@ -50,7 +93,7 @@ class EditorVariableServiceProvider extends ServiceProvider
             Order::class
         );
 
-        EditorVariable::merge(
+        Editor::mergeVariables(
             [
                 'Salutation' => '$sepaMandate->contact->addressInvoice?->salutation()',
                 'Customer IBAN' => '$sepaMandate->contactBankConnection?->iban',
@@ -68,6 +111,6 @@ class EditorVariableServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->singleton(EditorVariableManager::class);
+        $this->app->singleton(EditorManager::class);
     }
 }

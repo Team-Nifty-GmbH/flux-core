@@ -100,6 +100,14 @@ strong {
     }
 }
 
+.ProseMirror {
+    @apply text-gray-900 dark:text-white;
+}
+
+.ProseMirror p {
+    @apply text-gray-900 dark:text-white;
+}
+
 /* tiptap related --- end --- */
 
 @layer components {
@@ -159,11 +167,22 @@ strong {
 
     .blade-variable,
     .mention {
-        @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700;
+        @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300;
     }
 
-    .tippy-box {
-        @apply pointer-events-auto relative w-full overflow-hidden rounded-t-md border border-slate-200 bg-slate-100 shadow-lg transition-all sm:rounded-xl dark:border-slate-600 dark:bg-slate-800;
+    .blade-variable-pill {
+        @apply inline-flex items-center gap-1 rounded-md bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700 transition-all duration-150 hover:bg-indigo-200 hover:shadow-sm dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-800;
+        user-select: none;
+    }
+
+    .blade-variable-label {
+        @apply inline-block;
+    }
+
+    .suggestion-popup {
+        @apply pointer-events-auto overflow-hidden rounded-md border border-slate-200 bg-slate-100 shadow-lg transition-all dark:border-slate-600 dark:bg-slate-800;
+        max-width: 300px;
+        min-width: 200px;
     }
 
     .suggestion-item {
