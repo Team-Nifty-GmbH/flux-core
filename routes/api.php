@@ -724,7 +724,7 @@ Route::prefix('api')
                 Route::post('/employee-days', CreateEmployeeDay::class);
                 Route::put('/employee-days', UpdateEmployeeDay::class);
                 Route::delete('/employee-days/{id}', DeleteEmployeeDay::class);
-                Route::post('/employee-days/{id}/close', CloseEmployeeDay::class);
+                Route::post('/employee-days/close', CloseEmployeeDay::class);
 
                 // EmployeeDepartments
                 Route::get('/employee-departments/{id}', [BaseController::class, 'show'])
@@ -1248,16 +1248,6 @@ Route::prefix('api')
                 Route::put('/time-tracking-types', UpdateWorkTimeType::class);
                 Route::delete('/time-tracking-types/{id}', DeleteWorkTimeType::class);
 
-                // WorkTimeModels
-                Route::get('/work-time-models/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', WorkTimeModel::class);
-                Route::get('/work-time-models', [BaseController::class, 'index'])
-                    ->defaults('model', WorkTimeModel::class);
-                Route::post('/work-time-models', CreateWorkTimeModel::class);
-                Route::put('/work-time-models', UpdateWorkTimeModel::class);
-                Route::delete('/work-time-models/{id}', DeleteWorkTimeModel::class);
-                Route::post('/work-time-models/assign', AssignWorkTimeModel::class);
-
                 // Translations
                 Route::get('/language-lines', [BaseController::class, 'index'])->defaults('model', LanguageLine::class);
                 Route::post('/language-lines', CreateLanguageLine::class);
@@ -1322,6 +1312,16 @@ Route::prefix('api')
                 Route::post('/warehouses', CreateWarehouse::class);
                 Route::put('/warehouses', UpdateWarehouse::class);
                 Route::delete('/warehouses/{id}', DeleteWarehouse::class);
+
+                // WorkTimeModels
+                Route::get('/work-time-models/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', WorkTimeModel::class);
+                Route::get('/work-time-models', [BaseController::class, 'index'])
+                    ->defaults('model', WorkTimeModel::class);
+                Route::post('/work-time-models', CreateWorkTimeModel::class);
+                Route::put('/work-time-models', UpdateWorkTimeModel::class);
+                Route::delete('/work-time-models/{id}', DeleteWorkTimeModel::class);
+                Route::post('/work-time-models/assign', AssignWorkTimeModel::class);
             });
 
         Route::get('/media/{file_name}', DownloadMedia::class)->name('media.public');
