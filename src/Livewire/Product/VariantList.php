@@ -220,6 +220,30 @@ class VariantList extends ProductList
         $this->loadData();
     }
 
+    #[Renderless]
+    public function restore(int $id): void
+    {
+        $this->product->fill(
+            resolve_static(Product::class, 'query')
+                ->withTrashed()
+                ->whereKey($id)
+                ->first()
+        );
+
+        try {
+            $this->product->restore();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model restored', ['model' => __('Product')]))
+            ->send();
+        $this->loadData();
+    }
+
     protected function itemToArray($item): array
     {
         $item->load('productOptions:id,name');

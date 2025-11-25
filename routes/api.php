@@ -220,6 +220,7 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
+use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\DeleteProductCrossSelling;
@@ -1034,6 +1035,7 @@ Route::prefix('api')
                 Route::post('/products', CreateProduct::class);
                 Route::put('/products', UpdateProduct::class);
                 Route::delete('/products/{id}', DeleteProduct::class);
+                Route::post('/products/{id}/restore', RestoreProduct::class);
 
                 // Product bundle products
                 Route::get('/product-bundle-products/{id}', [BaseController::class, 'show'])
