@@ -24,11 +24,9 @@ class PrinterBridgeConfigForm extends FluxForm
 
     public function create(): void
     {
-        $action = $this->makeAction('create')
-            ->checkPermission()
-            ->validate();
+        parent::create();
 
-        $this->bridge_config = $action->execute();
+        $this->bridge_config = $this->actionResult;
     }
 
     protected function getActions(): array
