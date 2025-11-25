@@ -90,37 +90,39 @@
         @endforeach
 
         @if ($tooltipDropdown)
-            <div class="w-full flex flex-col gap-1 pt-2">
+            <div class="flex w-full flex-col gap-1 pt-2">
                 @foreach ($tooltipDropdownContent as $expandableContent)
-                  <div x-data="tiptapExpandable()">
+                    <div x-data="tiptapExpandable()">
                         <x-button
                             x-show="!expanded"
                             class="w-full"
-                                  x-on:click.prevent="toggle"
-                                  :text='__($expandableContent->tooltip())'
-                                  position="right"
-                                  flat
-                                  icon="chevron-down"
-                                  color="secondary"
+                            x-on:click.prevent="toggle"
+                            :text='__($expandableContent->tooltip())'
+                            position="right"
+                            flat
+                            icon="chevron-down"
+                            color="secondary"
                         />
-                      <x-button
-                          x-show="expanded"
-                          class="w-full"
-                          x-on:click.prevent="toggle"
-                          :text='__($expandableContent->tooltip())'
-                          position="right"
-                          flat
-                          icon="chevron-right"
-                          color="primary"
-                      />
-                        <div x-collapes.duration.500ms
-                             x-show="expanded"
-                             class="pt-2 {{ $expandableContent->tooltip() === 'Table' ? 'flex flex-col' : '' }}">
+                        <x-button
+                            x-show="expanded"
+                            class="w-full"
+                            x-on:click.prevent="toggle"
+                            :text='__($expandableContent->tooltip())'
+                            position="right"
+                            flat
+                            icon="chevron-right"
+                            color="primary"
+                        />
+                        <div
+                            x-collapes.duration.500ms
+                            x-show="expanded"
+                            class="{{ $expandableContent->tooltip() === "Table" ? "flex flex-col" : "" }} pt-2"
+                        >
                             @foreach ($expandableContent->dropdownContent() as $dropdownButton)
                                 {!! $dropdownButton->render() !!}
                             @endforeach
                         </div>
-                  </div>
+                    </div>
                 @endforeach
             </div>
         @endif
