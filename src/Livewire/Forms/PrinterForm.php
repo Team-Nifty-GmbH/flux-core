@@ -14,6 +14,15 @@ class PrinterForm extends FluxForm
 
     public ?string $alias = null;
 
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+
+        $data['alias'] = blank($data['alias'] ?? null) ? null : $data['alias'];
+
+        return $data;
+    }
+
     protected function getActions(): array
     {
         return [

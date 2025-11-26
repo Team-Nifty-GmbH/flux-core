@@ -165,8 +165,15 @@ trait CreatesDocuments
                     ->get([
                         'id',
                         'name',
+                        'alias',
                         'location',
                         'media_sizes',
+                    ])
+                    ->map(fn ($printer) => [
+                        'id' => $printer->id,
+                        'name' => $printer->alias ?? $printer->name,
+                        'location' => $printer->location,
+                        'media_sizes' => $printer->media_sizes,
                     ])
                     ->toArray() ?? [],
                 'mediaSizes' => (

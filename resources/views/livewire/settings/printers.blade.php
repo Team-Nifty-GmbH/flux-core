@@ -18,6 +18,35 @@
     </x-slot>
 </x-modal>
 
+<x-modal id="delete-spooler-modal" :title="__('Delete Spooler')">
+    <div class="flex flex-col gap-4">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            {{ __('Select a spooler to delete. This will delete all printers associated with this spooler and invalidate the corresponding API token.') }}
+        </div>
+        <x-select.styled
+            wire:model="deleteSpoolerName"
+            :label="__('Spooler Name')"
+            :options="$spoolerNames"
+            select="label:label|value:value"
+        />
+    </div>
+    <x-slot:footer>
+        <x-button
+            color="secondary"
+            light
+            flat
+            :text="__('Cancel')"
+            x-on:click="$modalClose('delete-spooler-modal')"
+        />
+        <x-button
+            color="red"
+            :text="__('Delete')"
+            wire:click="deleteSpooler().then((success) => { if(success) $modalClose('delete-spooler-modal')})"
+            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Spooler')]) }}"
+        />
+    </x-slot>
+</x-modal>
+
 <x-modal
     id="printer-bridge-config-modal"
     size="3xl"

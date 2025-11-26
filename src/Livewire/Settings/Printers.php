@@ -2,12 +2,14 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\Printer\DeletePrinter;
 use FluxErp\Actions\Printer\UpdatePrinter;
 use FluxErp\Livewire\DataTables\PrinterList;
 use FluxErp\Livewire\Forms\PrinterBridgeConfigForm;
 use FluxErp\Livewire\Forms\PrinterForm;
 use FluxErp\Models\Printer;
 use FluxErp\Models\Token;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -15,9 +17,13 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Printers extends PrinterList
 {
+    use Actions;
+
     public PrinterBridgeConfigForm $configForm;
 
     public PrinterForm $printerForm;
+
+    public string $deleteSpoolerName = '';
 
     protected ?string $includeBefore = 'flux::livewire.settings.printers';
 
@@ -29,7 +35,29 @@ class Printers extends PrinterList
                 ->color('primary')
                 ->icon('cog')
                 ->xOnClick("\$modalOpen('printer-bridge-config-modal')"),
+            DataTableButton::make()
+                ->text(__('Delete Spooler'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeletePrinter::class, 'canPerformAction', [false]))
+                ->xOnClick("\$modalOpen('delete-spooler-modal')"),
         ];
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'spoolerNames' => resolve_static(Printer::class, 'query')
+                    ->distinct()
+                    ->pluck('spooler_name')
+                    ->filter()
+                    ->map(fn ($name) => ['label' => $name, 'value' => $name])
+                    ->values()
+                    ->toArray(),
+            ]
+        );
     }
 
     protected function getRowActions(): array
@@ -49,9 +77,7 @@ class Printers extends PrinterList
         $this->printerForm->reset();
         $this->printerForm->fill($printer);
 
-        $this->js(<<<'JS'
-            $modalOpen('edit-printer-modal');
-        JS);
+        $this->modalOpen('edit-printer-modal');
     }
 
     public function save(): bool
@@ -110,5 +136,47 @@ class Printers extends PrinterList
     {
         $this->configForm->force_regenerate = true;
         $this->generateBridgeConfig();
+    }
+
+    public function deleteSpooler(): bool
+    {
+        if (empty($this->deleteSpoolerName)) {
+            $this->toast()
+                ->error(__('Error'), __('Please select a spooler to delete'))
+                ->send();
+
+            return false;
+        }
+
+        $printers = resolve_static(Printer::class, 'query')
+            ->where('spooler_name', $this->deleteSpoolerName)
+            ->get();
+
+        foreach ($printers as $printer) {
+            try {
+                DeletePrinter::make(['id' => $printer->id])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                return false;
+            }
+        }
+
+        resolve_static(Token::class, 'query')
+            ->where('name', $this->deleteSpoolerName)
+            ->whereNull('expires_at')
+            ->update(['expires_at' => now()]);
+
+        $this->toast()
+            ->success(__('Success'), __('Spooler and associated printers deleted successfully'))
+            ->send();
+
+        $this->deleteSpoolerName = '';
+        $this->loadData();
+
+        return true;
     }
 }
