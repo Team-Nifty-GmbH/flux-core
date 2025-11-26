@@ -94,6 +94,7 @@
                 @foreach ($tooltipDropdownContent as $expandableContent)
                     <div x-data="tiptapExpandable()">
                         <x-button
+                            x-cloak
                             x-show="!expanded"
                             class="w-full"
                             x-on:click.prevent="toggle"
@@ -104,6 +105,7 @@
                             color="secondary"
                         />
                         <x-button
+                            x-cloak
                             x-show="expanded"
                             class="w-full"
                             x-on:click.prevent="toggle"
@@ -115,6 +117,7 @@
                         />
                         <div
                             x-collapse.duration.200ms
+                            x-cloak
                             x-show="expanded"
                             class="pt-2"
                         >
