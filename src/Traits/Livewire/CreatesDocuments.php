@@ -7,6 +7,7 @@ use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\PrintJobForm;
 use FluxErp\Models\Media;
+use FluxErp\Models\Printer;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
@@ -169,7 +170,7 @@ trait CreatesDocuments
                         'location',
                         'media_sizes',
                     ])
-                    ->map(fn ($printer) => [
+                    ->map(fn (Printer $printer): array => [
                         'id' => $printer->id,
                         'name' => $printer->alias ?? $printer->name,
                         'location' => $printer->location,

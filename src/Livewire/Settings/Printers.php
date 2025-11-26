@@ -23,7 +23,7 @@ class Printers extends PrinterList
 
     public PrinterForm $printerForm;
 
-    public string $deleteSpoolerName = '';
+    public ?string $deleteSpoolerName = null;
 
     protected ?string $includeBefore = 'flux::livewire.settings.printers';
 
@@ -124,7 +124,7 @@ class Printers extends PrinterList
 
     public function deleteSpooler(): bool
     {
-        if (empty($this->deleteSpoolerName)) {
+        if (! $this->deleteSpoolerName) {
             $this->toast()
                 ->error(__('Error'), __('Please select a spooler to delete'))
                 ->send();
@@ -132,13 +132,13 @@ class Printers extends PrinterList
             return false;
         }
 
-        $printers = resolve_static(Printer::class, 'query')
+        $printerIds = resolve_static(Printer::class, 'query')
             ->where('spooler_name', $this->deleteSpoolerName)
-            ->get();
+            ->pluck('id');
 
-        foreach ($printers as $printer) {
+        foreach ($printerIds as $printerId) {
             try {
-                DeletePrinter::make(['id' => $printer->id])
+                DeletePrinter::make(['id' => $printerId])
                     ->checkPermission()
                     ->validate()
                     ->execute();
@@ -158,7 +158,7 @@ class Printers extends PrinterList
             ->success(__('Success'), __('Spooler and associated printers deleted successfully'))
             ->send();
 
-        $this->deleteSpoolerName = '';
+        $this->reset('deleteSpoolerName');
         $this->loadData();
 
         return true;
@@ -173,7 +173,7 @@ class Printers extends PrinterList
                     ->distinct()
                     ->pluck('spooler_name')
                     ->filter()
-                    ->map(fn ($name) => ['label' => $name, 'value' => $name])
+                    ->map(fn (string $name): array => ['label' => $name, 'value' => $name])
                     ->values()
                     ->toArray(),
             ]
