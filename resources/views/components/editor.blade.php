@@ -98,10 +98,10 @@
                             x-show="!expanded"
                             class="w-full"
                             x-on:click.prevent="toggle"
-                            :text='__($expandableContent->tooltip())'
-                            position="right"
+                            :text="__($expandableContent->tooltip())"
                             flat
                             icon="chevron-right"
+                            position="right"
                             color="secondary"
                         />
                         <x-button
@@ -109,14 +109,14 @@
                             x-show="expanded"
                             class="w-full"
                             x-on:click.prevent="toggle"
-                            :text='__($expandableContent->tooltip())'
-                            position="right"
+                            :text="__($expandableContent->tooltip())"
                             flat
                             icon="chevron-down"
+                            position="right"
                             color="primary"
                         />
                         <div
-                            x-collapse.duration.200ms
+                            x-collapse
                             x-cloak
                             x-show="expanded"
                             class="pt-2"
