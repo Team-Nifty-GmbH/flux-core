@@ -3,6 +3,7 @@
 namespace FluxErp\View\Components;
 
 use Closure;
+use FluxErp\Contracts\EditorButton;
 use FluxErp\Contracts\EditorDropdownButton;
 use FluxErp\Facades\Editor as EditorFacade;
 use Illuminate\Contracts\View\View;
@@ -28,7 +29,7 @@ class Editor extends Component
     {
         return view('flux::components.editor', [
             'buttonInstances' => $buttonInstances = $this->getButtonInstances(),
-            'tooltipDropdownContent' => $this->getTooltipDropdownContent($buttonInstances),
+            'collapsibleInstances' => $this->getCollapsibleInstances($buttonInstances),
         ]);
     }
 
@@ -71,16 +72,8 @@ class Editor extends Component
         return $instances;
     }
 
-    public function getTooltipDropdownContent(array $buttonInstances): array
+    public function getCollapsibleInstances(array $buttonInstances): array
     {
-        $content = [];
-
-        foreach ($buttonInstances as $instance) {
-            if ($instance instanceof EditorDropdownButton) {
-                $content = array_merge($content, $instance->dropdownContent());
-            }
-        }
-
-        return $content;
+        return array_filter($buttonInstances, fn (EditorButton $buttonInstance) => $buttonInstance instanceof EditorDropdownButton);
     }
 }

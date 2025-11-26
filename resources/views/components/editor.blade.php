@@ -94,9 +94,44 @@
         @endforeach
 
         @if ($tooltipDropdown)
-            @foreach ($tooltipDropdownContent as $dropdownButton)
-                {!! $dropdownButton->render() !!}
-            @endforeach
+            <div class="flex w-full flex-col gap-1 pt-2">
+                @foreach ($collapsibleInstances as $collapsible)
+                    <div x-data="tiptapExpandable()">
+                        <x-button
+                            x-cloak
+                            x-show="!expanded"
+                            class="w-full"
+                            x-on:click.prevent="toggle"
+                            :text="__($collapsible->tooltip())"
+                            flat
+                            icon="chevron-right"
+                            position="right"
+                            color="secondary"
+                        />
+                        <x-button
+                            x-cloak
+                            x-show="expanded"
+                            class="w-full"
+                            x-on:click.prevent="toggle"
+                            :text="__($collapsible->tooltip())"
+                            flat
+                            icon="chevron-down"
+                            position="right"
+                            color="primary"
+                        />
+                        <div
+                            x-collapse
+                            x-cloak
+                            x-show="expanded"
+                            class="pt-2"
+                        >
+                            @foreach ($collapsible->dropdownContent() as $action)
+                                {!! $action->render() !!}
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         @endif
     </template>
     {{-- Dropdown templates for dropdown buttons --}}

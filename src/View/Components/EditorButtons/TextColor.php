@@ -32,6 +32,7 @@ class TextColor extends Component implements EditorDropdownButton
     {
         return [
             app(DropdownItem::class, [
+                'additionalAttributes' => ['class' => 'w-full mb-2'],
                 'text' => __('Remove Color'),
                 'command' => <<<'JS'
                     editor().chain().focus().unsetColor().run()

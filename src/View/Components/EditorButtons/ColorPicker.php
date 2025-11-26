@@ -18,7 +18,7 @@ class ColorPicker extends Component implements EditorButton
 
     public function render(): string
     {
-        $html = '<div class="flex space-x-1">';
+        $html = '<div class="flex space-x-1 justify-center w-full">';
 
         foreach ($this->colors as $colorFamily) {
             $html .= '<div class="flex flex-col gap-1">';
