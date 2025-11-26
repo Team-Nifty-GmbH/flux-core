@@ -29,7 +29,7 @@ class Editor extends Component
     {
         return view('flux::components.editor', [
             'buttonInstances' => $buttonInstances = $this->getButtonInstances(),
-            'tooltipDropdownContent' => $this->getCollapsableContent($buttonInstances),
+            'collapsibleInstances' => $this->getCollapsibleInstances($buttonInstances),
         ]);
     }
 
@@ -72,7 +72,7 @@ class Editor extends Component
         return $instances;
     }
 
-    public function getCollapsableContent(array $buttonInstances): array
+    public function getCollapsibleInstances(array $buttonInstances): array
     {
         return array_filter($buttonInstances, fn (EditorButton $buttonInstance) => $buttonInstance instanceof EditorDropdownButton);
     }

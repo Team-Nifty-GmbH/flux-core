@@ -91,14 +91,14 @@
 
         @if ($tooltipDropdown)
             <div class="flex w-full flex-col gap-1 pt-2">
-                @foreach ($tooltipDropdownContent as $expandableContent)
+                @foreach ($collapsibleInstances as $collapsible)
                     <div x-data="tiptapExpandable()">
                         <x-button
                             x-cloak
                             x-show="!expanded"
                             class="w-full"
                             x-on:click.prevent="toggle"
-                            :text="__($expandableContent->tooltip())"
+                            :text="__($collapsible->tooltip())"
                             flat
                             icon="chevron-right"
                             position="right"
@@ -109,7 +109,7 @@
                             x-show="expanded"
                             class="w-full"
                             x-on:click.prevent="toggle"
-                            :text="__($expandableContent->tooltip())"
+                            :text="__($collapsible->tooltip())"
                             flat
                             icon="chevron-down"
                             position="right"
@@ -121,8 +121,8 @@
                             x-show="expanded"
                             class="pt-2"
                         >
-                            @foreach ($expandableContent->dropdownContent() as $dropdownButton)
-                                {!! $dropdownButton->render() !!}
+                            @foreach ($collapsible->dropdownContent() as $action)
+                                {!! $action->render() !!}
                             @endforeach
                         </div>
                     </div>
