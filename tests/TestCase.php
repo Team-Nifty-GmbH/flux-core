@@ -6,6 +6,8 @@ use Barryvdh\DomPDF\ServiceProvider;
 use FluxErp\FluxServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Testing\WithCachedConfig;
+use Illuminate\Foundation\Testing\WithCachedRoutes;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Maatwebsite\Excel\ExcelServiceProvider;
@@ -25,7 +27,7 @@ use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication, RefreshDatabase;
+    use CreatesApplication, RefreshDatabase, WithCachedConfig, WithCachedRoutes;
 
     protected $loadEnvironmentVariables = true;
 

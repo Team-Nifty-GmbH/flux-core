@@ -344,22 +344,25 @@ class Order extends Component
     #[Renderless]
     public function fetchContactData(bool $replicate = false): void
     {
-        $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
+        $orderFormName = ! $replicate ? 'order' : 'replicateOrder';
 
         $contact = resolve_static(Contact::class, 'query')
-            ->whereKey($this->{$orderVariable}->contact_id)
+            ->whereKey($this->{$orderFormName}->contact_id)
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderVariable}->client_id = $contact?->client_id
+        $this->{$orderFormName}->client_id = $contact?->client_id
             ?? resolve_static(Client::class, 'default')->getKey();
-        $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
-        $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderVariable}->language_id = $contact?->mainAddress?->language_id
+        $this->{$orderFormName}->agent_id = $contact?->agent_id ?? $this->{$orderFormName}->agent_id;
+        $this->{$orderFormName}->contact_bank_connection_id = $contact?->contactBankConnections()
+            ->latest()
+            ->value('id');
+        $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
             ?? resolve_static(Language::class, 'default')->getKey();
-        $this->{$orderVariable}->price_list_id = $contact?->price_list_id;
-        $this->{$orderVariable}->payment_type_id = $contact?->payment_type_id;
+        $this->{$orderFormName}->price_list_id = $contact?->price_list_id;
+        $this->{$orderFormName}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
             $this->order->address_invoice = resolve_static(Address::class, 'query')

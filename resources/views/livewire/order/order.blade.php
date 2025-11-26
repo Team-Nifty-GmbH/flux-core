@@ -707,8 +707,6 @@
                                     required
                                     autocomplete="off"
                                     wire:model="order.language_id"
-                                    x-bind:disabled="$wire.order.is_locked"
-                                    :disabled="$order->is_locked"
                                     select="label:name|value:id"
                                     :options="$languages"
                                 />
