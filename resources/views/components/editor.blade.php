@@ -100,7 +100,7 @@
                             :text='__($expandableContent->tooltip())'
                             position="right"
                             flat
-                            icon="chevron-down"
+                            icon="chevron-right"
                             color="secondary"
                         />
                         <x-button
@@ -110,13 +110,13 @@
                             :text='__($expandableContent->tooltip())'
                             position="right"
                             flat
-                            icon="chevron-right"
+                            icon="chevron-down"
                             color="primary"
                         />
                         <div
                             x-collapse.duration.200ms
                             x-show="expanded"
-                            class="{{ $expandableContent->tooltip() === "Table" ? "flex flex-col" : "" }} pt-2"
+                            class="pt-2"
                         >
                             @foreach ($expandableContent->dropdownContent() as $dropdownButton)
                                 {!! $dropdownButton->render() !!}
