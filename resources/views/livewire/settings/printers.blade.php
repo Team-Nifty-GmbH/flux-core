@@ -1,3 +1,23 @@
+<x-modal id="edit-printer-modal" :title="__('Edit Printer')">
+    <div class="flex flex-col gap-1.5">
+        <x-input wire:model="printerForm.alias" :label="__('Alias')" />
+    </div>
+    <x-slot:footer>
+        <x-button
+            color="secondary"
+            light
+            flat
+            :text="__('Cancel')"
+            x-on:click="$modalClose('edit-printer-modal')"
+        />
+        <x-button
+            color="primary"
+            :text="__('Save')"
+            wire:click="save().then((success) => { if(success) $modalClose('edit-printer-modal')})"
+        />
+    </x-slot>
+</x-modal>
+
 <x-modal
     id="printer-bridge-config-modal"
     size="3xl"

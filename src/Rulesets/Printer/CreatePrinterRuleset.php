@@ -10,6 +10,7 @@ class CreatePrinterRuleset extends FluxRuleset
     {
         return [
             'name' => 'required|string|max:255',
+            'alias' => 'nullable|string|max:255',
             'spooler_name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
             'make_and_model' => 'nullable|string|max:255',

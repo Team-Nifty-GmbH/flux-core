@@ -12,6 +12,8 @@ class PrinterForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?string $alias = null;
+
     protected function getActions(): array
     {
         return [

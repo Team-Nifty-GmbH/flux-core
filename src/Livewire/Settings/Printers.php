@@ -2,8 +2,11 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\Printer\UpdatePrinter;
 use FluxErp\Livewire\DataTables\PrinterList;
 use FluxErp\Livewire\Forms\PrinterBridgeConfigForm;
+use FluxErp\Livewire\Forms\PrinterForm;
+use FluxErp\Models\Printer;
 use FluxErp\Models\Token;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -13,6 +16,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 class Printers extends PrinterList
 {
     public PrinterBridgeConfigForm $configForm;
+
+    public PrinterForm $printerForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.printers';
 
@@ -25,6 +30,43 @@ class Printers extends PrinterList
                 ->icon('cog')
                 ->xOnClick("\$modalOpen('printer-bridge-config-modal')"),
         ];
+    }
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Edit'))
+                ->icon('pencil')
+                ->color('indigo')
+                ->when(resolve_static(UpdatePrinter::class, 'canPerformAction', [false]))
+                ->wireClick('edit(record.id)'),
+        ];
+    }
+
+    public function edit(Printer $printer): void
+    {
+        $this->printerForm->reset();
+        $this->printerForm->fill($printer);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-printer-modal');
+        JS);
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->printerForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function generateBridgeConfig(): void
