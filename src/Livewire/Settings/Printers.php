@@ -44,22 +44,6 @@ class Printers extends PrinterList
         ];
     }
 
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'spoolerNames' => resolve_static(Printer::class, 'query')
-                    ->distinct()
-                    ->pluck('spooler_name')
-                    ->filter()
-                    ->map(fn ($name) => ['label' => $name, 'value' => $name])
-                    ->values()
-                    ->toArray(),
-            ]
-        );
-    }
-
     protected function getRowActions(): array
     {
         return [
@@ -178,5 +162,21 @@ class Printers extends PrinterList
         $this->loadData();
 
         return true;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'spoolerNames' => resolve_static(Printer::class, 'query')
+                    ->distinct()
+                    ->pluck('spooler_name')
+                    ->filter()
+                    ->map(fn ($name) => ['label' => $name, 'value' => $name])
+                    ->values()
+                    ->toArray(),
+            ]
+        );
     }
 }
