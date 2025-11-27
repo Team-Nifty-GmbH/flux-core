@@ -12,6 +12,13 @@
                     'method' => 'POST',
                     'params' => [
                         'with' => 'media',
+                        'where' => [
+                            [
+                                'is_active',
+                                '=',
+                                true,
+                            ],
+                        ]
                     ],
                 ]"
             />

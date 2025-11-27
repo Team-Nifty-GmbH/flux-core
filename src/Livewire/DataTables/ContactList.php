@@ -46,7 +46,7 @@ class ContactList extends BaseDataTable
 
     protected string $model = Contact::class;
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return array_merge(
             parent::getSelectedActions(),
@@ -85,7 +85,11 @@ class ContactList extends BaseDataTable
         $actions = [];
 
         try {
-            if (! resolve_static(User::class, 'query')->whereKey($this->agentId)->exists()) {
+            if (! resolve_static(User::class, 'query')
+                ->where('is_active', true)
+                ->whereKey($this->agentId)
+                ->exists()
+            ) {
                 throw ValidationException::withMessages(['agentId' => __('The selected agent does not exist.')]);
             }
 
