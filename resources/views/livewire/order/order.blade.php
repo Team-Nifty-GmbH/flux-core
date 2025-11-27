@@ -31,7 +31,10 @@
                 },
             }"
         >
-            <div class="space-y-2.5 divide-y divide-secondary-200">
+            <div
+                class="space-y-2.5 divide-y divide-secondary-200"
+                x-bind:class="$wire.disableReplicateModalInputs && 'pointer-events-none'"
+            >
                 <x-select.styled
                     :label="__('Order type')"
                     wire:model="replicateOrder.order_type_id"

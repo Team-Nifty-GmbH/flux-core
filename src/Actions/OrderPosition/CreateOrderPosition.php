@@ -14,8 +14,8 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -186,7 +186,7 @@ class CreateOrderPosition extends FluxAction
         }
 
         // Only allow creation of order_position if exists in parent order and amount not greater than totalAmount
-        if (! $this->getData('is_free_text')) {
+        if (! $this->getData('is_free_text') && ! $this->getData('is_bundle_position')) {
             if ($order?->parent_id
                 && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
             ) {
@@ -206,29 +206,60 @@ class CreateOrderPosition extends FluxAction
                     ];
                 }
 
-                $originPosition = resolve_static(OrderPosition::class, 'query')
-                    ->whereKey($originPositionId)
-                    ->where('order_positions.order_id', $order->parent_id)
-                    ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
-                        $join->on('order_positions.id', '=', 'descendants.origin_position_id')
-                            ->whereNull('descendants.deleted_at');
-                    })
-                    ->leftJoin('order_positions AS subDescendants', function (JoinClause $join): void {
-                        $join->on('descendants.id', '=', 'subDescendants.origin_position_id')
-                            ->whereNull('subDescendants.deleted_at');
-                    })
-                    ->selectRaw(
-                        'order_positions.id'
-                        . ', order_positions.amount'
-                        . ' - SUM(COALESCE(descendants.amount, 0))'
-                        . ' + SUM(COALESCE(subDescendants.amount, 0)) AS maxAmount'
-                    )
-                    ->groupBy('order_positions.id')
-                    ->first();
+                $maxAmount = data_get(
+                    array_find(
+                        array_reduce(
+                            DB::select(
+                                'WITH RECURSIVE siblings AS (
+                                    SELECT id, origin_position_id, signed_amount
+                                    FROM order_positions
+                                    WHERE id = ' . $originPositionId
+                                . ' AND order_id = ' . $order->parent_id
+                                . ' UNION ALL
+                                    SELECT op.id, op.origin_position_id, s.signed_amount - op.signed_amount
+                                    FROM order_positions op
+                                    INNER JOIN siblings s ON s.id = op.origin_position_id
+                                    WHERE op.deleted_at IS NULL
+                                )
+                                SELECT * FROM siblings'
+                            ),
+                            function (?array $carry, object $item) {
+                                $parentKey = array_find_key(
+                                    $carry ?? [],
+                                    fn (array $value) => ! is_null($item->origin_position_id)
+                                        && in_array(
+                                            $item->origin_position_id,
+                                            [
+                                                $value['id'],
+                                                $value['origin_position_id'],
+                                            ]
+                                        )
+                                );
 
-                $maxAmount = $originPosition->maxAmount ?? 0;
+                                if (is_null($parentKey)) {
+                                    $carry[] = (array) $item;
+                                } else {
+                                    $carry[$parentKey] = array_merge(
+                                        $carry[$parentKey],
+                                        [
+                                            'origin_position_id' => $item->id,
+                                            'signed_amount' => bcsub(
+                                                data_get($carry, $parentKey . '.signed_amount'),
+                                                $item->signed_amount
+                                            ),
+                                        ]
+                                    );
+                                }
 
-                if (bccomp($this->getData('amount') ?? 1, $maxAmount) === 1) {
+                                return $carry;
+                            }
+                        ),
+                        fn (array $value) => $value['id'] === $originPositionId
+                    ),
+                    'signed_amount'
+                );
+
+                if (bccomp($this->getData('amount') ?? 1, $maxAmount ?? 0) === 1) {
                     $errors += [
                         'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
                     ];

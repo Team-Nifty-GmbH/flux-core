@@ -38,6 +38,7 @@ class ReplicateOrderRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Contact::class]),
                 app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'contacts']),
             ],
+            'set_new_as_parent' => 'boolean',
         ];
     }
 }
