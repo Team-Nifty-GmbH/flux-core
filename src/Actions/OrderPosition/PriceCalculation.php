@@ -97,6 +97,7 @@ class PriceCalculation
         $margin = bcsub($discountedNetPrice, bcmul($this->orderPosition->purchase_price, $this->orderPosition->amount));
 
         $multiplier = $this->orderPosition->order->orderType->order_type_enum->multiplier();
+        $this->orderPosition->signed_amount = bcmul($this->orderPosition->amount, $multiplier);
         $this->orderPosition->margin = bcmul($margin, $multiplier);
         $this->orderPosition->discount_percentage = $totalDiscountPercentage == 0
             ? null

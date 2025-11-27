@@ -81,6 +81,7 @@ beforeEach(function (): void {
         'product_id' => $product->id,
         'vat_rate_id' => $vatRate->id,
         'amount' => 10,
+        'signed_amount' => 10,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
         'total_net_price' => 1000,

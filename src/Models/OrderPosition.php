@@ -286,11 +286,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
     public function siblings(): HasMany
     {
-        return $this->hasMany(
-            OrderPosition::class,
-            'origin_position_id',
-            'origin_position_id'
-        );
+        return $this->hasMany(OrderPosition::class, 'origin_position_id', 'origin_position_id');
     }
 
     public function stockPostings(): HasMany
