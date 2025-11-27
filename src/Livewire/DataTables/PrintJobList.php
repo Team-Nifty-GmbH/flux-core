@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\PrintJob;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrintJobList extends BaseDataTable
 {
@@ -21,14 +20,6 @@ class PrintJobList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->with([
-            'media' => static fn (BelongsTo $q) => $q->select([
-                'id',
-                'model_type',
-                'model_id',
-                'name',
-                'disk',
-            ]),
-        ]);
+        return $builder->with('media:id,model_type,model_id,name,disk');
     }
 }
