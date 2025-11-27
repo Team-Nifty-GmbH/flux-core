@@ -17,6 +17,31 @@ const initializeNativeBridge = async () => {
         const Camera = Plugins.Camera;
         const CapacitorBarcodeScanner = Plugins.CapacitorBarcodeScanner;
         const Preferences = Plugins.Preferences;
+        const PushNotifications = Plugins.PushNotifications;
+
+        // Handle push notification tap - Deep Link Navigation
+        if (PushNotifications) {
+            PushNotifications.addListener(
+                'pushNotificationActionPerformed',
+                (notification) => {
+                    const data = notification.notification?.data;
+
+                    if (data?.url && data?.path) {
+                        const currentOrigin = window.location.origin;
+                        const targetOrigin = new URL(data.url).origin;
+
+                        if (currentOrigin === targetOrigin && window.Livewire) {
+                            window.Livewire.navigate(data.path);
+                        } else {
+                            window.location.href =
+                                data.url +
+                                '/login-mobile?redirect=' +
+                                encodeURIComponent(data.path);
+                        }
+                    }
+                }
+            );
+        }
 
         // Check if running in native app
         bridge.isNative = () => Capacitor.isNativePlatform();
@@ -126,6 +151,9 @@ const initializeNativeBridge = async () => {
         // Status Bar - Update based on dark mode
         const StatusBar = Plugins.StatusBar;
         if (StatusBar) {
+            // Ensure StatusBar does NOT overlay WebView (content below status bar)
+            StatusBar.setOverlaysWebView({ overlay: false });
+
             bridge.setDarkMode = async (isDark) => {
                 try {
                     if (isDark) {
