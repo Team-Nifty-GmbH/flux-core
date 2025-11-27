@@ -16,6 +16,7 @@ class Editor extends Component
         public ?string $id = null,
         public ?array $buttons = null,
         public ?string $scope = null,
+        public ?int $defaultFontSize = null,
         public bool $tooltipDropdown = false,
         public bool $transparent = false,
         public bool $fullHeight = false,
