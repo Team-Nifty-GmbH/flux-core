@@ -38,7 +38,7 @@
                 showBladeVariables: false,
                 bladeVariables: @js($bladeVariables)
                 })"
-        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($fullHeight), @json($showEditorPadding))"
+        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($fullHeight), @json($showEditorPadding),@json($defaultFontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
         {{-- add button for blade variable dropdown --}}
