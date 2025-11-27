@@ -2,11 +2,13 @@
     <x-flux::editor
         x-modelable="content"
         x-model="$wire.$parent.order.header"
+        scope="order"
         :label="__('Header')"
     />
     <x-flux::editor
         x-modelable="content"
         x-model="$wire.$parent.order.footer"
+        scope="order"
         :label="__('Footer')"
     />
 </div>

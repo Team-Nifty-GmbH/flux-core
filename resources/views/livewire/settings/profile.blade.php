@@ -332,7 +332,7 @@
                     >
                         {{ __('Active Subscriptions') }}
                     </h4>
-                    <x-table>
+                    <x-flux::table>
                         <x-slot:header>
                             <th>{{ __('Browser') }}</th>
                             <th>{{ __('Activated') }}</th>
@@ -341,12 +341,14 @@
                         <template
                             x-for="subscription in $wire.pushSubscriptions"
                         >
-                            <x-table.row
+                            <tr
                                 x-data="{ isCurrentBrowser: false }"
                                 x-init="
                                     $nextTick(async () => {
                                         if (window.webPush) {
-                                            isCurrentBrowser = await window.webPush.checkCurrentSubscription(subscription.endpoint);
+                                            isCurrentBrowser = await window.webPush.checkCurrentSubscription(
+                                                subscription.endpoint,
+                                            )
                                         }
                                     })
                                 "
@@ -386,9 +388,9 @@
                                         wire:click="deletePushSubscription(subscription.id)"
                                     />
                                 </td>
-                            </x-table.row>
+                            </tr>
                         </template>
-                    </x-table>
+                    </x-flux::table>
                 </div>
                 <div
                     x-show="webPushSupport.allSupported && ! ($wire.pushSubscriptions?.length ?? []) > 0"
@@ -422,6 +424,83 @@
                         :text="__('Send Test')"
                         color="secondary"
                         wire:click="sendTestNotification"
+                        icon="paper-airplane"
+                    />
+                </div>
+            </x-slot>
+        </x-card>
+    </div>
+    @show
+
+    @section('profile.fcm-push')
+    <div class="space-y-6 pt-8">
+        <x-card>
+            <div class="space-y-4">
+                <div
+                    class="flex items-center justify-between border-b pb-4 dark:border-gray-700"
+                >
+                    <div>
+                        <h3 class="text-lg font-semibold dark:text-white">
+                            {{ __('FCM Push Notifications') }}
+                        </h3>
+                        <p
+                            class="mt-1 text-sm text-gray-600 dark:text-gray-400"
+                        >
+                            {{ __('Receive notifications on your mobile devices') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4
+                        class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                        {{ __('Active Devices') }}
+                    </h4>
+                    <x-flux::table>
+                        <x-slot:header>
+                            <th>{{ __('Device') }}</th>
+                            <th>{{ __('Platform') }}</th>
+                            <th>{{ __('Activated') }}</th>
+                            <th class="text-right">{{ __('Actions') }}</th>
+                        </x-slot>
+                        <template x-for="device in $wire.fcmDeviceTokens">
+                            <tr>
+                                <td>
+                                    <div class="flex items-center">
+                                        <x-icon
+                                            name="device-phone-mobile"
+                                            class="mr-2 size-8"
+                                        />
+                                        <span
+                                            x-text="device.device_name"
+                                        ></span>
+                                    </div>
+                                </td>
+                                <td x-text="device.platform"></td>
+                                <td
+                                    x-text="window.formatters.datetime(device.created_at)"
+                                ></td>
+                                <td class="text-right">
+                                    <x-button
+                                        color="red"
+                                        size="xs"
+                                        icon="trash"
+                                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Device Token')]) }}"
+                                        wire:click="deleteFcmDeviceToken(device.id)"
+                                    />
+                                </td>
+                            </tr>
+                        </template>
+                    </x-flux::table>
+                </div>
+            </div>
+            <x-slot:footer>
+                <div class="flex justify-end">
+                    <x-button
+                        :text="__('Send Test')"
+                        color="secondary"
+                        wire:click="sendFcmTestNotification"
                         icon="paper-airplane"
                     />
                 </div>

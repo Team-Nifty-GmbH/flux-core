@@ -12,6 +12,7 @@ use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Livewire\Forms\ProductPricesUpdateForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
@@ -143,6 +144,30 @@ class ProductList extends BaseProductList
         $this->redirect(route('products.id', $this->product->id), true);
 
         return true;
+    }
+
+    #[Renderless]
+    public function restore(int $id): void
+    {
+        $this->product->fill(
+            resolve_static(Product::class, 'query')
+                ->withTrashed()
+                ->whereKey($id)
+                ->first()
+        );
+
+        try {
+            $this->product->restore();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model restored', ['model' => __('Product')]))
+            ->send();
+        $this->loadData();
     }
 
     #[Renderless]
