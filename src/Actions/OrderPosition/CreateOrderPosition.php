@@ -216,7 +216,7 @@ class CreateOrderPosition extends FluxAction
                                     WHERE id = ' . $originPositionId
                                 . ' AND order_id = ' . $order->parent_id
                                 . ' UNION ALL
-                                    SELECT op.id, op.origin_position_id, s.signed_amount - op.signed_amount
+                                    SELECT op.id, op.origin_position_id, op.signed_amount
                                     FROM order_positions op
                                     INNER JOIN siblings s ON s.id = op.origin_position_id
                                     WHERE op.deleted_at IS NULL
