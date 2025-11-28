@@ -30,7 +30,7 @@ trait EditorButtonTrait
         $text = $this->text();
 
         if ($isCircle && ! $this->icon() && $text) {
-            return Blade::render(
+            $button = Blade::render(
                 <<<'Blade'
                     <x-button.circle {{ $attributes }}>
                         <span class="{{ $class }}">{!! $text !!}</span>
@@ -42,24 +42,24 @@ trait EditorButtonTrait
                     'class' => method_exists($this, 'attributes') ? ($this->attributes()['class'] ?? '') : '',
                 ]
             );
-        }
-
-        if ($text) {
-            return Blade::render(
+        } elseif ($text) {
+            $button = Blade::render(
                 $isCircle ? '<x-button.circle {{ $attributes }} />' : '<x-button {{ $attributes }}>{!! $text !!}</x-button>',
                 [
                     'attributes' => $attributes,
                     'text' => $text,
                 ]
             );
+        } else {
+            $button = Blade::render(
+                $isCircle ? '<x-button.circle {{ $attributes }} />' : '<x-button {{ $attributes }} />',
+                [
+                    'attributes' => $attributes,
+                ]
+            );
         }
 
-        return Blade::render(
-            $isCircle ? '<x-button.circle {{ $attributes }} />' : '<x-button {{ $attributes }} />',
-            [
-                'attributes' => $attributes,
-            ]
-        );
+        return $button;
     }
 
     public function command(): ?string

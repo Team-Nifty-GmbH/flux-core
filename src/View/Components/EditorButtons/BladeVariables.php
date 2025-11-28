@@ -58,9 +58,9 @@ class BladeVariables extends Component implements EditorDropdownButton, EditorTo
                 [
                     'text' => e($variable['label']),
                     'command' => 'editor()
-                            .chain()
-                            .focus()
-                            .insertContent([
+                        .chain()
+                        .focus()
+                        .insertContent([
                             {
                                 type: \'bladeVariable\',
                                 attrs: {
