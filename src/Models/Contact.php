@@ -188,7 +188,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function getDescription(): ?string
     {
-        return null;
+        return $this->mainAddress?->getDescription();
     }
 
     public function getEmailTemplateModelType(): ?string
@@ -198,7 +198,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function getLabel(): ?string
     {
-        return $this->customer_number;
+        return $this->mainAddress?->getLabel();
     }
 
     public function getPrintViews(): array
