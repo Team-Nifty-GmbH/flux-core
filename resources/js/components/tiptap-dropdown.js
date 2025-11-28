@@ -3,8 +3,20 @@ import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 // Track currently open dropdown globally
 let currentOpenDropdown = null;
 
-export default function (parentElement, dropdownElement) {
+export default function (parentElement, dropdownElementOrSelector) {
     let sideEffect = null;
+
+    const resolveDropdownElement = () => {
+        if (typeof dropdownElementOrSelector === 'string') {
+            return document.querySelector(dropdownElementOrSelector);
+        }
+
+        if (typeof dropdownElementOrSelector === 'function') {
+            return dropdownElementOrSelector();
+        }
+
+        return dropdownElementOrSelector;
+    };
 
     return {
         popUp: null,
@@ -63,8 +75,11 @@ export default function (parentElement, dropdownElement) {
         },
         onClick() {
             if (this.popUp === null) {
+                const dropdownElement = resolveDropdownElement();
+
                 if (
                     dropdownElement !== undefined &&
+                    dropdownElement !== null &&
                     parentElement !== undefined
                 ) {
                     const actions = dropdownElement.content.cloneNode(true);

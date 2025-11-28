@@ -2,8 +2,8 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Contracts\EditorTooltipButton;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\View\ComponentAttributeBag;
 
 trait EditorDropdownButtonTrait
 {
@@ -12,22 +12,30 @@ trait EditorDropdownButtonTrait
     public function render(): string
     {
         $ref = $this->dropdownRef();
+        $isCircle = $this instanceof EditorTooltipButton && $this->editor?->tooltipDropdown;
 
-        $attributes = new ComponentAttributeBag([
-            'flat' => true,
-            'color' => 'secondary',
+        $attributes = $this->buttonAttributes()->merge([
             'x-on:click.prevent' => 'onClick',
-            'x-ref' => "floatingUiParent-$ref",
-            'x-data' => "floatingUiDropdown(\$refs['floatingUiParent-$ref'], \$refs['$ref" . "Dropdown'])",
+            'x-ref' => $isCircle ? "floatingUiTooltip-$ref" : "floatingUiParent-$ref",
         ]);
 
-        if ($icon = $this->icon()) {
-            $attributes = $attributes->merge(['icon' => $icon]);
+        if ($isCircle) {
+            return Blade::render(
+                <<<'Blade'
+                    <div x-data="floatingUiDropdown($refs['floatingUiTooltip-{{ $ref }}'], () => $refs['{{ $ref }}Dropdown'])">
+                        <x-button.circle {{ $attributes }} />
+                    </div>
+                Blade,
+                [
+                    'ref' => $ref,
+                    'attributes' => $attributes,
+                ]
+            );
         }
 
-        if ($displayTitle = $this->title() ?? ($this->tooltip() ? __($this->tooltip()) : null)) {
-            $attributes = $attributes->merge(['title' => $displayTitle]);
-        }
+        $attributes = $attributes->merge([
+            'x-data' => "floatingUiDropdown(\$refs['floatingUiParent-$ref'], \$refs['{$ref}Dropdown'])",
+        ]);
 
         if ($text = $this->text()) {
             return Blade::render(

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Contracts\EditorTooltipButton;
 use FluxErp\View\Components\Editor;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
@@ -24,41 +25,37 @@ trait EditorButtonTrait
 
     public function render(): string
     {
-        $attributes = new ComponentAttributeBag([
-            'flat' => true,
-            'color' => 'secondary',
-        ]);
+        $attributes = $this->buttonAttributes();
+        $isCircle = $this instanceof EditorTooltipButton && $this->editor?->tooltipDropdown;
+        $text = $this->text();
 
-        if ($command = $this->command()) {
-            $attributes = $attributes->merge(['x-on:click' => $command]);
+        if ($isCircle && ! $this->icon() && $text) {
+            return Blade::render(
+                <<<'Blade'
+                    <x-button.circle {{ $attributes }}>
+                        <span class="{{ $class }}">{!! $text !!}</span>
+                    </x-button.circle>
+                Blade,
+                [
+                    'attributes' => $attributes,
+                    'text' => $text,
+                    'class' => method_exists($this, 'attributes') ? ($this->attributes()['class'] ?? '') : '',
+                ]
+            );
         }
 
-        if ($isActive = $this->isActive()) {
-            $attributes = $attributes->merge([
-                'x-bind:class' => "{ 'bg-primary-100 dark:bg-primary-900': editorState >= 0 && ($isActive) }",
-            ]);
-        }
-
-        if ($icon = $this->icon()) {
-            $attributes = $attributes->merge(['icon' => $icon]);
-        }
-
-        if ($text = $this->text()) {
-            $attributes = $attributes->merge(['text' => $text]);
-        }
-
-        if ($displayTitle = $this->title() ?? ($this->tooltip() ? __($this->tooltip()) : null)) {
-            $attributes = $attributes->merge(['title' => $displayTitle]);
-        }
-
-        if (method_exists($this, 'attributes')) {
-            $attributes = $attributes->merge($this->attributes());
+        if ($text) {
+            return Blade::render(
+                $isCircle ? '<x-button.circle {{ $attributes }} />' : '<x-button {{ $attributes }}>{!! $text !!}</x-button>',
+                [
+                    'attributes' => $attributes,
+                    'text' => $text,
+                ]
+            );
         }
 
         return Blade::render(
-            <<<'Blade'
-                <x-button {{ $attributes }} />
-            Blade,
+            $isCircle ? '<x-button.circle {{ $attributes }} />' : '<x-button {{ $attributes }} />',
             [
                 'attributes' => $attributes,
             ]
@@ -108,5 +105,37 @@ trait EditorButtonTrait
         $this->editor = $editor;
 
         return $this;
+    }
+
+    protected function buttonAttributes(): ComponentAttributeBag
+    {
+        $attributes = new ComponentAttributeBag([
+            'flat' => true,
+            'color' => 'secondary',
+        ]);
+
+        if ($command = $this->command()) {
+            $attributes = $attributes->merge(['x-on:click' => $command]);
+        }
+
+        if ($isActive = $this->isActive()) {
+            $attributes = $attributes->merge([
+                'x-bind:class' => "{ 'bg-primary-100 dark:bg-primary-900': editorState >= 0 && ($isActive) }",
+            ]);
+        }
+
+        if ($icon = $this->icon()) {
+            $attributes = $attributes->merge(['icon' => $icon]);
+        }
+
+        if ($displayTitle = $this->title() ?? ($this->tooltip() ? __($this->tooltip()) : null)) {
+            $attributes = $attributes->merge(['title' => $displayTitle]);
+        }
+
+        if (method_exists($this, 'attributes')) {
+            $attributes = $attributes->merge($this->attributes());
+        }
+
+        return $attributes;
     }
 }

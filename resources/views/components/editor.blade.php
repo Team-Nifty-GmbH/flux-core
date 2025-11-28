@@ -56,23 +56,24 @@
             class="{{ $tooltipDropdown ? "" : "border border-b-0" }} flex w-full flex-wrap items-stretch rounded-t-md border-secondary-300 placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
         ></div>
         <div class="relative list-disc" x-ref="editor-{{ $id }}">
-            {{-- button on input hover in case toolTip is true --}}
+            {{-- Tooltip buttons (rendered via buttonInstance->render() when tooltipDropdown is true) --}}
             @if ($tooltipDropdown)
                 <div
                     x-cloak
-                    x-show="
-                        proxy.isEditable &&
-                            showBladeVariables &&
-                            Object.values(bladeVariables).length > 0
-                    "
-                    class="absolute right-0 top-0 z-10 p-2"
-                    x-data="floatingUiDropdown($refs['tippyParent-blade-variables-on-hover-{{ $id }}'], $refs['bladeVariablesDropdown-{{ $id }}'])"
+                    x-show="proxy.isEditable"
+                    class="absolute right-0 top-0 z-10 flex gap-1 p-2"
                 >
-                    <x-button.circle
-                        icon="plus"
-                        x-on:click.prevent="onClick"
-                        x-ref="tippyParent-blade-variables-on-hover-{{ $id }}"
-                    />
+                    @foreach ($buttonInstances as $buttonInstance)
+                        @if ($buttonInstance instanceof \FluxErp\Contracts\EditorTooltipButton)
+                            @if ($buttonInstance instanceof \Livewire\Component)
+                                <livewire:dynamic-component
+                                    :is="$buttonInstance::class"
+                                />
+                            @else
+                                {!! $buttonInstance->render() !!}
+                            @endif
+                        @endif
+                    @endforeach
                 </div>
             @endif
         </div>
@@ -84,7 +85,14 @@
     ></template>
     <template x-ref="commands-{{ $id }}">
         @foreach ($buttonInstances as $buttonInstance)
-            @if (! $tooltipDropdown || ! $buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton)
+            @if (
+
+                (! $tooltipDropdown ||
+                    ! $buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton) &&
+                ! (
+                    $tooltipDropdown &&
+                    $buttonInstance instanceof \FluxErp\Contracts\EditorTooltipButton
+                )            )
                 @if ($buttonInstance instanceof \Livewire\Component)
                     <livewire:dynamic-component :is="$buttonInstance::class" />
                 @else
@@ -135,9 +143,9 @@
         @endif
     </template>
     {{-- Dropdown templates for dropdown buttons --}}
-    @if (! $tooltipDropdown)
-        @foreach ($buttonInstances as $buttonInstance)
-            @if ($buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton)
+    @foreach ($buttonInstances as $buttonInstance)
+        @if ($buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton)
+            @if (! $tooltipDropdown || $buttonInstance instanceof \FluxErp\Contracts\EditorTooltipButton)
                 <template x-ref="{{ $buttonInstance->dropdownRef() }}Dropdown">
                     <div class="flex flex-col">
                         @foreach ($buttonInstance->dropdownContent() as $dropdownButton)
@@ -146,6 +154,6 @@
                     </div>
                 </template>
             @endif
-        @endforeach
-    @endif
+        @endif
+    @endforeach
 </div>
