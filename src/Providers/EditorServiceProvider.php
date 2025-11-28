@@ -11,6 +11,7 @@ use FluxErp\View\Components\EditorButtons\AlignCenter;
 use FluxErp\View\Components\EditorButtons\AlignLeft;
 use FluxErp\View\Components\EditorButtons\AlignRight;
 use FluxErp\View\Components\EditorButtons\BackgroundColor;
+use FluxErp\View\Components\EditorButtons\BladeVariables;
 use FluxErp\View\Components\EditorButtons\Blockquote;
 use FluxErp\View\Components\EditorButtons\Bold;
 use FluxErp\View\Components\EditorButtons\BulletList;
@@ -54,6 +55,7 @@ class EditorServiceProvider extends ServiceProvider
             AlignRight::class,
             CodeBlock::class,
             Table::class,
+            BladeVariables::class,
         ]);
 
         Editor::mergeVariables([
