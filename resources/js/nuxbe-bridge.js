@@ -39,7 +39,7 @@ const initializeNativeBridge = async () => {
                                 encodeURIComponent(data.path);
                         }
                     }
-                }
+                },
             );
         }
 
