@@ -128,7 +128,7 @@ export default function (
                             parent.floatingElement =
                                 document.createElement('div');
                             parent.floatingElement.className =
-                                'floating-dropdown absolute flex items-center flex-wrap w-fit max-w-[300px] z-50 bg-white dark:bg-secondary-800 rounded-md shadow-lg border border-secondary-200 dark:border-secondary-700 p-2';
+                                'floating-dropdown absolute flex items-center flex-wrap w-full max-w-[300px] z-50 bg-white dark:bg-secondary-800 rounded-md shadow-lg border border-secondary-200 dark:border-secondary-700 p-2';
                             parent.floatingElement.style.display = 'none';
                             parent.floatingElement.setAttribute(
                                 'x-show',
