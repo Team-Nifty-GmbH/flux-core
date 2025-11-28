@@ -119,6 +119,11 @@ class ContactList extends BaseDataTable
         return true;
     }
 
+    protected function supportRestore(): bool
+    {
+        return true;
+    }
+
     protected function itemToArray($item): array
     {
         $returnArray = parent::itemToArray($item);
