@@ -57,22 +57,12 @@
                             <x-dropdown.items :text="__('My profile')" />
                         </a>
 
-                        <div
-                            x-data="{
-                                get isNativeApp() {
-                                    return (
-                                        window.nuxbeAppBridge &&
-                                        typeof window.nuxbeAppBridge.isNative === 'function' &&
-                                        window.nuxbeAppBridge.isNative()
-                                    )
-                                },
-                            }"
-                        >
-                            <div x-show="isNativeApp" x-cloak>
+                        <div>
+                            <div x-show="window.nuxbeAppBridge" x-cloak>
                                 <x-dropdown.items
                                     x-on:click="async () => {
-                                        if (window.nativeBridge && window.nativeBridge.changeServer) {
-                                            await window.nativeBridge.changeServer();
+                                        if (window.nuxbeAppBridge && window.nuxbeAppBridge.changeServer) {
+                                            await window.nuxbeAppBridge.changeServer();
                                         }
                                     }"
                                     :text="__('Change Server')"
