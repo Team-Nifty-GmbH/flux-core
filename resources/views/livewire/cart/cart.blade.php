@@ -1,4 +1,4 @@
-@extends('flux::livewire.portal.shop.cart')
+@extends('flux::livewire.cart.cart-base')
 @section('cart-sidebar.footer.buttons')
     @parent
     @section('cart-sidebar.footer.buttons.buy')

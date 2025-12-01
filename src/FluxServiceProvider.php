@@ -10,7 +10,6 @@ use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
-use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Activity;
@@ -61,8 +60,6 @@ class FluxServiceProvider extends ServiceProvider
     public static bool $registerApiRoutes = true;
 
     public static bool $registerFluxRoutes = true;
-
-    public static bool $registerPortalRoutes = true;
 
     public function boot(): void
     {
@@ -159,7 +156,7 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function bootRoutes(): void
     {
-        if (static::$registerFluxRoutes || static::$registerPortalRoutes) {
+        if (static::$registerFluxRoutes) {
             Authenticate::redirectUsing(fn (HttpRequest $request) => route('login', absolute: false));
         }
 
@@ -167,10 +164,6 @@ class FluxServiceProvider extends ServiceProvider
 
         if (static::$registerApiRoutes) {
             $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
-        }
-
-        if (static::$registerPortalRoutes) {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/portal.php');
         }
 
         if (static::$registerFluxRoutes) {
@@ -274,7 +267,6 @@ class FluxServiceProvider extends ServiceProvider
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
-        $kernel->appendMiddlewareToGroup('web', PortalMiddleware::class);
 
         $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);

@@ -49,7 +49,7 @@
             </div>
             <x-slot:footer>
                 @section('cart-sidebar.footer')
-                <div class="flex w-full flex-col gap-x-2">
+                <div class="flex w-full flex-col gap-2">
                     @section('cart-sidebar.footer.buttons')
                     <x-button
                         color="secondary"
@@ -60,14 +60,6 @@
                     />
                     @if ($this->cart->cartItems->isNotEmpty())
                         @section('cart-sidebar.footer.buttons.buy')
-                        <x-button
-                            class="w-full"
-                            :text="__('Checkout')"
-                            wire:navigate
-                            x-on:click="show = false;"
-                            :href="route('portal.checkout')"
-                            color="indigo"
-                        />
                         @show
                         @section('cart-sidebar.footer.buttons.watchlist')
                         <x-button

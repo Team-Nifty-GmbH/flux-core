@@ -21,51 +21,52 @@
         </div>
     </x-slot>
     <div
-        class="flex gap-4 px-2 py-5 md:px-4"
+        class="flex flex-wrap gap-4 px-2 py-5 md:px-4"
         @if($cartForm->isUserOwned()) x-sort="$wire.reOrder($item, $position)" @endif
         x-cloak
         x-show="showCart === {{ $cartForm->id ?? 'null' }}"
         x-collapse
     >
+        @section('cart-items')
         @foreach ($cartForm->cart_items ?? [] as $cartFormItem)
             @if (is_null($cartFormItem))
                 @continue
             @endif
 
             <div
-                class="relative z-0 max-w-96"
-                @if($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['cart_item_id'] }}" @endif
+                class="relative z-0"
+                @if($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['id'] }}" @endif
             >
                 @if ($cartForm->isUserOwned())
                     <x-button.circle
                         xs
                         color="red"
                         icon="x-mark"
-                        wire:click="removeProduct({{ $cartFormItem['id'] }})"
+                        wire:click="removeProduct({{ $cartFormItem['product_id'] }})"
                         class="absolute right-2 top-2 z-10 h-4 w-4"
                     />
                 @endif
 
-                <livewire:portal.shop.product-list-card
-                    :product="$cartFormItem"
-                    :cart-item-id="$cartForm->isUserOwned() ? $cartFormItem['cart_item_id'] : null"
-                    :key="$cartForm->id . '_' . $cartFormItem['id']"
-                />
+                <div class="rounded-lg border p-4 dark:border-secondary-700">
+                    <div class="font-semibold">
+                        {{ $cartFormItem['name'] ?? ($cartFormItem['product']['name'] ?? __('Product')) }}
+                    </div>
+                    <div class="text-sm text-secondary-500">
+                        {{ __('Amount') }}: {{ $cartFormItem['amount'] ?? 1 }}
+                    </div>
+                </div>
             </div>
         @endforeach
+
+        @show
     </div>
-    @if (auth()->user()?->getMorphClass() === 'user' && $cartForm->isUserOwned())
+    @if ($cartForm->isUserOwned())
         <hr />
         <div class="p-4">
             <x-toggle
                 :id="uniqid()"
-                :text="__('Is Public')"
+                :label="__('Is Public')"
                 wire:model.live="cartForm.is_public"
-            />
-            <x-toggle
-                :id="uniqid()"
-                :label="__('Is Portal Public')"
-                wire:model.live="cartForm.is_portal_public"
             />
         </div>
     @endif
