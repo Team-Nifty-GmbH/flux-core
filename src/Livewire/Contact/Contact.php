@@ -21,6 +21,8 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class Contact extends Component
 {
@@ -41,6 +43,13 @@ class Contact extends Component
             ->with(['mainAddress', 'categories:id'])
             ->whereKey($id)
             ->firstOrFail();
+
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $this->avatar = $contact->getAvatarUrl();
 
         $this->contact->fill($contact);

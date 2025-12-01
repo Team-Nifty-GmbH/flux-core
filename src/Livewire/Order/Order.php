@@ -51,7 +51,9 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use Throwable;
 
 class Order extends Component
 {
@@ -81,6 +83,12 @@ class Order extends Component
 
     public function mount(?string $id = null): void
     {
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $this->fetchOrder($id);
 
         $orderType = resolve_static(OrderType::class, 'query')

@@ -9,6 +9,8 @@ use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class EmployeeDay extends Component
 {
@@ -24,6 +26,12 @@ class EmployeeDay extends Component
 
     public function mount(EmployeeDayModel $id): void
     {
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $this->employeeDayForm->fill($id);
     }
 
