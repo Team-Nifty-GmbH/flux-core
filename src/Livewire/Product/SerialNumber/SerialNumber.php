@@ -14,6 +14,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class SerialNumber extends Component
 {
@@ -40,6 +42,12 @@ class SerialNumber extends Component
                 'product:products.id,products.name',
             ])
             ->firstOrFail();
+
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
 
         $this->serialNumber->fill($serialNumber);
         $this->productImage = $serialNumber->product?->getFirstMediaUrl('images');

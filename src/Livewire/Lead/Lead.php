@@ -12,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class Lead extends Component
 {
@@ -29,6 +31,12 @@ class Lead extends Component
 
     public function mount(LeadModel $id): void
     {
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $this->leadForm->fill($id);
     }
 
