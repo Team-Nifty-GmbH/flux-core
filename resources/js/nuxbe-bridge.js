@@ -12,9 +12,36 @@ const initializeNativeBridge = async () => {
     const bridge = {};
 
     try {
-        const { Capacitor } = window.Capacitor;
-        const { Camera } = window.CapacitorPlugins || {};
-        const { CapacitorBarcodeScanner } = window.CapacitorPlugins || {};
+        const Capacitor = window.Capacitor;
+        const Plugins = Capacitor.Plugins || {};
+        const Camera = Plugins.Camera;
+        const CapacitorBarcodeScanner = Plugins.CapacitorBarcodeScanner;
+        const Preferences = Plugins.Preferences;
+        const PushNotifications = Plugins.PushNotifications;
+
+        // Handle push notification tap - Deep Link Navigation
+        if (PushNotifications) {
+            PushNotifications.addListener(
+                'pushNotificationActionPerformed',
+                (notification) => {
+                    const data = notification.notification?.data;
+
+                    if (data?.url && data?.path) {
+                        const currentOrigin = window.location.origin;
+                        const targetOrigin = new URL(data.url).origin;
+
+                        if (currentOrigin === targetOrigin && window.Livewire) {
+                            window.Livewire.navigate(data.path);
+                        } else {
+                            window.location.href =
+                                data.url +
+                                '/login-mobile?redirect=' +
+                                encodeURIComponent(data.path);
+                        }
+                    }
+                },
+            );
+        }
 
         // Check if running in native app
         bridge.isNative = () => Capacitor.isNativePlatform();
@@ -25,16 +52,16 @@ const initializeNativeBridge = async () => {
         // Change server
         bridge.changeServer = async () => {
             try {
-                const { Preferences } = window.CapacitorPlugins || {};
                 if (Preferences) {
                     await Preferences.remove({ key: 'server_url' });
-                    window.location.href = 'capacitor://localhost/index.html';
-                    return { success: true };
                 }
-                return {
-                    success: false,
-                    error: 'Preferences plugin not available',
-                };
+                // Use correct URL scheme per platform
+                const baseUrl =
+                    Capacitor.getPlatform() === 'android'
+                        ? 'http://localhost'
+                        : 'capacitor://localhost';
+                window.location.href = baseUrl + '/index.html';
+                return { success: true };
             } catch (error) {
                 return {
                     success: false,
@@ -119,6 +146,71 @@ const initializeNativeBridge = async () => {
                     };
                 }
             };
+        }
+
+        // Status Bar - Update based on dark mode
+        const StatusBar = Plugins.StatusBar;
+        if (StatusBar) {
+            // Ensure StatusBar does NOT overlay WebView (content below status bar)
+            StatusBar.setOverlaysWebView({ overlay: false });
+
+            bridge.setDarkMode = async (isDark) => {
+                try {
+                    if (isDark) {
+                        await StatusBar.setStyle({ style: 'DARK' });
+                        await StatusBar.setBackgroundColor({
+                            color: '#1e293b',
+                        });
+                    } else {
+                        await StatusBar.setStyle({ style: 'LIGHT' });
+                        await StatusBar.setBackgroundColor({
+                            color: '#ffffff',
+                        });
+                    }
+                    return { success: true };
+                } catch (error) {
+                    return { success: false, error: error.message };
+                }
+            };
+
+            bridge.updateStatusBarFromDOM = async () => {
+                const isDark =
+                    document.documentElement.classList.contains('dark') ||
+                    document.body.classList.contains('dark');
+                return bridge.setDarkMode(isDark);
+            };
+        }
+
+        // Watch for dark mode changes automatically
+        const observeDarkMode = () => {
+            if (!bridge.updateStatusBarFromDOM) return;
+
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    if (mutation.attributeName === 'class') {
+                        bridge.updateStatusBarFromDOM();
+                    }
+                }
+            });
+
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+            observer.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+
+            // Initial update
+            bridge.updateStatusBarFromDOM();
+        };
+
+        // Start observing when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', observeDarkMode);
+        } else {
+            observeDarkMode();
         }
     } catch (error) {
         // Silent fail

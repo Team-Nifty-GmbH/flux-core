@@ -91,11 +91,7 @@
 
                 <div
                     x-cloak
-                    x-show="
-                        window.nuxbeAppBridge &&
-                            window.nuxbeAppBridge.isNative &&
-                            window.nuxbeAppBridge.isNative()
-                    "
+                    x-show="window.nuxbeAppBridge"
                     class="mt-4 text-center"
                 >
                     <x-button
