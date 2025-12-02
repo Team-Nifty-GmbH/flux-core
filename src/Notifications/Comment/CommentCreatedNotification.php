@@ -2,6 +2,7 @@
 
 namespace FluxErp\Notifications\Comment;
 
+use Exception;
 use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
 use FluxErp\Models\MailAccount;
@@ -89,5 +90,14 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
             ->trim()
             ->deduplicate()
             ->toString();
+    }
+
+    protected function getChannelFromEvent(object $event): string
+    {
+        if (! method_exists($event, 'broadcastChannel')) {
+            throw new Exception('Event must have a broadcast channel.');
+        }
+
+        return $event->broadcastChannel();
     }
 }
