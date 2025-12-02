@@ -63,7 +63,13 @@ class Order extends Component
 
     public array $deliveryStates = [];
 
+    #[Locked]
+    public bool $disableReplicateModalInputs = false;
+
     public DiscountForm $discount;
+
+    #[Locked]
+    public bool $hasFinalInvoice = false;
 
     public OrderForm $order;
 
@@ -369,7 +375,8 @@ class Order extends Component
         $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
             ?? resolve_static(Language::class, 'default')->getKey();
-        $this->{$orderFormName}->price_list_id = $contact?->price_list_id;
+        $this->{$orderFormName}->price_list_id = $contact?->price_list_id
+            ?? resolve_static(PriceList::class, 'default')?->getKey();
         $this->{$orderFormName}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
@@ -482,6 +489,24 @@ class Order extends Component
                     'class' => 'w-full',
                     'wire:click' => 'replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
                 ]),
+            DataTableButton::make()
+                ->text(__('New Order for Final Invoice'))
+                ->icon('shopping-bag')
+                ->color('indigo')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && is_null($this->order->parent_id)
+                        && $this->order->invoice_number
+                        && $this->hasFinalInvoice
+                        && resolve_static(OrderType::class, 'query')
+                            ->whereKey($this->order->order_type_id)
+                            ->where('order_type_enum', OrderTypeEnum::Order->value)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'wire:click' => 'replicateForFinalInvoice()',
+                ]),
         ];
     }
 
@@ -570,6 +595,7 @@ class Order extends Component
                 'currency_id',
                 'order_type_id',
                 'price_list_id',
+                'payment_discount_percent',
                 'invoice_number',
             ]);
 
@@ -638,6 +664,23 @@ class Order extends Component
         }
 
         $this->replicateOrder->order_positions = null;
+        $this->replicateOrder->set_new_as_parent = false;
+        $this->disableReplicateModalInputs = false;
+
+        $this->js(<<<'JS'
+            $modalOpen('replicate-order');
+        JS);
+    }
+
+    #[Renderless]
+    public function replicateForFinalInvoice(): void
+    {
+        $this->replicateOrder->fill($this->order->toArray());
+        $this->fetchContactData();
+
+        $this->replicateOrder->order_positions = null;
+        $this->replicateOrder->set_new_as_parent = true;
+        $this->disableReplicateModalInputs = true;
 
         $this->js(<<<'JS'
             $modalOpen('replicate-order');
@@ -863,6 +906,8 @@ class Order extends Component
                 'mime_type' => $invoice->mime_type,
             ];
         }
+
+        $this->hasFinalInvoice = (bool) $order->getFirstMedia('final-invoice');
     }
 
     protected function getAvailableStates(array|string $fieldNames): void
