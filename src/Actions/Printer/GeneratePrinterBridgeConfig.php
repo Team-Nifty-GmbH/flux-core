@@ -38,6 +38,7 @@ class GeneratePrinterBridgeConfig extends FluxAction
             'api.printers.update',
             'api.printers.delete',
             'api.print-jobs.get',
+            'api.print-jobs.{id}.get',
             'api.print-jobs.create',
             'api.print-jobs.update',
         ];
