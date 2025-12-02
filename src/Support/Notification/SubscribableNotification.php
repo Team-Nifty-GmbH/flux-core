@@ -17,6 +17,7 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Illuminate\Support\Str;
 use Kreait\Firebase\Messaging\Notification as FcmNotification;
 use NotificationChannels\WebPush\WebPushMessage;
 
@@ -151,9 +152,16 @@ abstract class SubscribableNotification extends Notification implements HasToast
 
     protected function getChannelFromEvent(object $event): string
     {
-        return method_exists($event, 'broadcastChannel')
-            ? $event->broadcastChannel()
-            : throw new Exception('Event must have a broadcast channel.');
+        if (! method_exists($event, 'broadcastChannel')) {
+            throw new Exception('Event must have a broadcast channel.');
+        }
+
+        $channel = $event->broadcastChannel();
+        if ($event instanceof Model && $event->wasRecentlyCreated) {
+            $channel = Str::chopEnd($channel, '.' . $event->getKey()) . '.';
+        }
+
+        return $channel;
     }
 
     protected function getDescription(): ?string
