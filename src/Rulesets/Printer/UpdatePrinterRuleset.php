@@ -17,6 +17,7 @@ class UpdatePrinterRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Printer::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
+            'alias' => 'nullable|string|max:255',
             'spooler_name' => 'sometimes|required|string|max:255',
             'location' => 'nullable|string|max:255',
             'make_and_model' => 'nullable|string|max:255',

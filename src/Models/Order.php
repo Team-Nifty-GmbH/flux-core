@@ -177,7 +177,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 $order->address_invoice = $addressInvoice;
 
                 // Get additional attributes from address if not explicitly changed
-                $order->language_id = $order->isDirty('language_id')
+                $order->language_id = (! $addressInvoice->language_id || $order->isDirty('language_id'))
                     ? $order->language_id
                     : $addressInvoice->language_id;
                 $order->contact_id = $order->isDirty('contact_id')

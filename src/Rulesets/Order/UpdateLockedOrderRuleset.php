@@ -20,6 +20,7 @@ class UpdateLockedOrderRuleset extends FluxRuleset
                     [
                         'approval_user_id',
                         'contact_bank_connection_id',
+                        'language_id',
                         'payment_type_id',
                         'responsible_user_id',
                         'state',

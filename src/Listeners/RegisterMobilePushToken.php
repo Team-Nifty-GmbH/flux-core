@@ -29,13 +29,20 @@ class RegisterMobilePushToken
             'is_active' => true,
         ];
 
+        /** @var DeviceToken|null $existingToken */
+        $existingToken = resolve_static(DeviceToken::class, 'query')
+            ->withTrashed()
+            ->where('device_id', $deviceId)
+            ->whereMorphedTo('authenticatable', $event->user)
+            ->first(['id', 'deleted_at', 'deleted_by']);
+
+        if ($existingToken?->trashed()) {
+            $existingToken->restore();
+        }
+
         try {
-            if ($existingTokenId = resolve_static(DeviceToken::class, 'query')
-                ->where('device_id', $deviceId)
-                ->whereMorphedTo('authenticatable', $event->user)
-                ->value('id')
-            ) {
-                UpdateDeviceToken::make(array_merge($deviceData, ['id' => $existingTokenId]))
+            if ($existingToken) {
+                UpdateDeviceToken::make(array_merge($deviceData, ['id' => $existingToken->getKey()]))
                     ->validate()
                     ->execute();
             } else {

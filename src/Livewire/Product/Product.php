@@ -34,6 +34,8 @@ use Livewire\Component;
 use Livewire\Features\SupportPageComponents\PageComponentConfig;
 use Livewire\Features\SupportPageComponents\SupportPageComponents;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class Product extends Component
 {
@@ -111,6 +113,13 @@ class Product extends Component
             ])
             ->withCount('children')
             ->firstOrFail();
+
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $product->append('avatar_url');
 
         $this->product->fill($product);

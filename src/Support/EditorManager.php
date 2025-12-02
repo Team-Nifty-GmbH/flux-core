@@ -2,13 +2,17 @@
 
 namespace FluxErp\Support;
 
+use FluxErp\Contracts\EditorButton;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 
-class EditorVariableManager
+class EditorManager
 {
+    protected static array $buttons = [];
+
     protected static array $variables = [];
 
-    public static function add(string|array $value, ?string $modelClass = null, ?string $path = null): void
+    public static function addVariable(string|array $value, ?string $modelClass = null, ?string $path = null): void
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
@@ -24,17 +28,30 @@ class EditorVariableManager
         data_set(static::$variables, $variablePath, $current);
     }
 
-    public static function all(): array
+    public static function allVariables(): array
     {
         return static::$variables;
     }
 
-    public static function clear(): void
+    public static function clearButtons(): void
+    {
+        static::$buttons = [];
+    }
+
+    public static function clearVariables(): void
     {
         static::$variables = [];
     }
 
-    public static function get(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): string|array
+    /**
+     * @return array<class-string<EditorButton>>
+     */
+    public static function getButtons(): array
+    {
+        return static::$buttons;
+    }
+
+    public static function getVariables(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): string|array
     {
         $data = data_get(
             static::$variables,
@@ -53,12 +70,12 @@ class EditorVariableManager
         return array_merge($data, $globals);
     }
 
-    public static function getTranslated(
+    public static function getTranslatedVariables(
         ?string $modelClass = null,
         ?string $path = null,
         bool $withGlobals = true
     ): array {
-        $variables = static::get($modelClass, $path, $withGlobals);
+        $variables = static::getVariables($modelClass, $path, $withGlobals);
         if (is_string($variables)) {
             $variables = [$variables => $variables];
         }
@@ -66,7 +83,23 @@ class EditorVariableManager
         return static::translate($variables);
     }
 
-    public static function merge(array $values, ?string $modelClass = null, ?string $path = null): void
+    /**
+     * @param  class-string<EditorButton>  $buttonClass
+     */
+    public static function hasButton(string $buttonClass): bool
+    {
+        return in_array($buttonClass, static::$buttons, true);
+    }
+
+    /**
+     * @param  class-string  $buttonClass
+     */
+    public static function isLivewireButton(string $buttonClass): bool
+    {
+        return is_subclass_of($buttonClass, \Livewire\Component::class);
+    }
+
+    public static function mergeVariables(array $values, ?string $modelClass = null, ?string $path = null): void
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
@@ -82,7 +115,38 @@ class EditorVariableManager
         );
     }
 
-    public static function register(array $variables, ?string $modelClass = null): void
+    /**
+     * @param  class-string<EditorButton>  $buttonClass
+     */
+    public static function registerButton(string $buttonClass): void
+    {
+        if (! is_subclass_of($buttonClass, EditorButton::class)) {
+            throw new InvalidArgumentException(
+                'Button class must implement ' . EditorButton::class
+            );
+        }
+
+        if (! in_array($buttonClass, static::$buttons, true)) {
+            static::$buttons[] = $buttonClass;
+        }
+    }
+
+    /**
+     * @param  array<class-string<EditorButton>>  $buttonClasses
+     */
+    public static function registerButtons(array $buttonClasses): void
+    {
+        foreach ($buttonClasses as $buttonClass) {
+            static::registerButton($buttonClass);
+        }
+    }
+
+    public static function registerVariable(string $key, string|array $value, ?string $modelClass = null): void
+    {
+        static::registerVariables([$key => $value], $modelClass);
+    }
+
+    public static function registerVariables(array $variables, ?string $modelClass = null): void
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
@@ -93,12 +157,20 @@ class EditorVariableManager
         );
     }
 
-    public static function registerVariable(string $key, string|array $value, ?string $modelClass = null): void
+    /**
+     * @param  class-string<EditorButton>  $buttonClass
+     */
+    public static function removeButton(string $buttonClass): void
     {
-        static::register([$key => $value], $modelClass);
+        static::$buttons = array_values(
+            array_filter(
+                static::$buttons,
+                fn ($class) => $class !== $buttonClass
+            )
+        );
     }
 
-    public static function remove(?string $modelClass = null, ?string $path = null): void
+    public static function removeVariable(?string $modelClass = null, ?string $path = null): void
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
@@ -109,7 +181,7 @@ class EditorVariableManager
         data_forget(static::$variables, implode('.', array_filter([$morphAlias, $path])));
     }
 
-    public static function set(string|array $value, ?string $modelClass = null, ?string $path = null): void
+    public static function setVariable(string|array $value, ?string $modelClass = null, ?string $path = null): void
     {
         data_set(
             static::$variables,

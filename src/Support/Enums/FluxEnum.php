@@ -25,7 +25,7 @@ abstract class FluxEnum implements EnumInterface, SerializesCastableAttributes
 
                 return Arr::mapWithKeys(
                     $reflection->getConstants(ReflectionClassConstant::IS_FINAL),
-                    fn (int|string $value, string $key) => [
+                    fn (int|string|array $value, string $key) => [
                         $key => (object) [
                             'name' => $key,
                             'value' => $value,

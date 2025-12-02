@@ -311,6 +311,7 @@
     "wire:confirm.cancel.dashboard-edit": "Discard Changes|Do you really want to discard the changes?|Cancel|Discard",
     "wire:confirm.clear.queue": "Clear Queue|Do you really want to clear the queue?|Cancel|Clear",
     "wire:confirm.commission-credit-notes": "Create credit notes|Are you sure you want to create credit notes for the selected commissions?|Cancel|Yes",
+    "wire:confirm.contact.assign-agent": "Assign Agent|Are you sure you want to assign the selected contacts to this agent?|Cancel|Assign",
     "wire:confirm.delete": "Delete :model|Do you really want to delete this :model?|Cancel|Delete",
     "wire:confirm.delete-all-indexes.scout": "Delete all indices|Do you really want to delete all indexes?|Cancel|Delete",
     "wire:confirm.flush.scout": "Flush Scout|Do you really want to flush all Scout data?|Cancel|Flush",
