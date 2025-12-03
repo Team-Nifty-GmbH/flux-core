@@ -47,11 +47,6 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'tenant_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'contact_id' => [
                 'required',
                 'integer',
@@ -77,6 +72,11 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => PaymentType::class]),
+            ],
+            'tenant_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'invoice_number' => 'required|string|max:255',
             'invoice_date' => 'required|date',

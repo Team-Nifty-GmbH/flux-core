@@ -104,10 +104,10 @@ class CreateOrderPosition extends FluxAction
             $product->bundleProducts
                 ->map(function (Product $bundleProduct) use ($orderPosition) {
                     return [
-                        'tenant_id' => $orderPosition->tenant_id,
                         'order_id' => $orderPosition->order_id,
                         'parent_id' => $orderPosition->id,
                         'product_id' => $bundleProduct->id,
+                        'tenant_id' => $orderPosition->tenant_id,
                         'vat_rate_id' => $bundleProduct->vat_rate_id,
                         'warehouse_id' => $orderPosition->warehouse_id,
                         'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),

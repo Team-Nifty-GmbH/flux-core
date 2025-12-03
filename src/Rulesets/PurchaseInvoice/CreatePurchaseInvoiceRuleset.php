@@ -40,11 +40,6 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'tenant_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'contact_id' => [
                 'nullable',
                 'integer',
@@ -71,6 +66,11 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_purchase', true)
                     ->where('is_active', true),
+            ],
+            'tenant_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'invoice_date' => 'nullable|date',
             'payment_target_date' => 'nullable|date',

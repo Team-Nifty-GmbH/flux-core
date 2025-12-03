@@ -19,15 +19,15 @@ class CreateSepaMandateRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:sepa_mandates,uuid',
-            'tenant_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'contact_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Contact::class]),
+            ],
+            'tenant_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'contact_bank_connection_id' => [
                 'nullable',

@@ -34,9 +34,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
-        HasSerialNumberRange, HasStates, HasTags, HasTenantAssignment, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
+    use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasTenantAssignment, HasUserModification,
+        HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

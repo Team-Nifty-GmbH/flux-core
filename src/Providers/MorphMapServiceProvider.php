@@ -99,8 +99,8 @@ use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
-use FluxErp\Models\Pivots\TenantPaymentType;
-use FluxErp\Models\Pivots\TenantProduct;
+use FluxErp\Models\Pivots\PaymentTypeTenant;
+use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -166,7 +166,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'cart' => Cart::class,
             'cart_item' => CartItem::class,
             'category' => Category::class,
-            'tenant' => Tenant::class,
             'comment' => Comment::class,
             'commission' => Commission::class,
             'commission_rate' => CommissionRate::class,
@@ -247,6 +246,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'tag' => Tag::class,
             'target' => Target::class,
             'task' => Task::class,
+            'tenant' => Tenant::class,
             'ticket' => Ticket::class,
             'ticket_type' => TicketType::class,
             'token' => Token::class,
@@ -270,8 +270,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'calendarable' => Calendarable::class,
             'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
-            'tenant_payment_type' => TenantPaymentType::class,
-            'tenant_product' => TenantProduct::class,
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
@@ -287,10 +285,12 @@ class MorphMapServiceProvider extends ServiceProvider
             'media_folder_model' => MediaFolderModel::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
+            'payment_type_tenant' => PaymentTypeTenant::class,
             'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
+            'product_tenant' => ProductTenant::class,
             'queue_monitorable' => QueueMonitorable::class,
             'target_user' => TargetUser::class,
             'task_user' => TaskUser::class,

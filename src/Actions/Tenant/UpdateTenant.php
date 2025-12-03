@@ -24,10 +24,10 @@ class UpdateTenant extends FluxAction
     {
         $bankConnections = Arr::pull($this->data, 'bank_connections');
         $tenant = resolve_static(Tenant::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $tenant->fill($this->data);
+        $tenant->fill($this->getData());
         $tenant->save();
 
         if (! is_null($bankConnections)) {

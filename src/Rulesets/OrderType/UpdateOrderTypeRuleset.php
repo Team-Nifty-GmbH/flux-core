@@ -20,17 +20,17 @@ class UpdateOrderTypeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => OrderType::class]),
             ],
+            'email_template_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => EmailTemplate::class]),
+            ],
             'tenant_id' => [
                 'integer',
                 app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
-            'email_template_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => EmailTemplate::class]),
-            ],
             'print_layouts' => 'array|nullable',
             'print_layouts.*' => 'required|string',
             'post_stock_print_layouts' => 'array|nullable',

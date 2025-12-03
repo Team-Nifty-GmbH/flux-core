@@ -6,7 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Facades\ProductType;
-use FluxErp\Models\Pivots\TenantProduct;
+use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
@@ -108,7 +108,7 @@ class CreateProduct extends FluxAction
 
         if (! data_get($this->data, 'tenants')) {
             if (data_get($this->data, 'parent_id')) {
-                $this->data['tenants'] = resolve_static(TenantProduct::class, 'query')
+                $this->data['tenants'] = resolve_static(ProductTenant::class, 'query')
                     ->where('product_id', data_get($this->data, 'parent_id'))
                     ->pluck('tenant_id')
                     ->toArray();

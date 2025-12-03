@@ -72,9 +72,9 @@ class UpdatePurchaseInvoice extends FluxAction
 
         if ($invoiceNumber && $contactId && $tenantId) {
             if (resolve_static(Order::class, 'query')
+                ->where('contact_id', $contactId)
                 ->where('tenant_id', $tenantId)
                 ->where('invoice_number', $invoiceNumber)
-                ->where('contact_id', $contactId)
                 ->when($purchaseInvoice->order_id, fn ($query) => $query->whereKeyNot($purchaseInvoice->order_id))
                 ->exists()
             ) {

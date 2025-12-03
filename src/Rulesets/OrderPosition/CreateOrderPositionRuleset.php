@@ -37,12 +37,6 @@ class CreateOrderPositionRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:order_positions,uuid',
-            'tenant_id' => [
-                'required_without:order_id',
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'ledger_account_id' => [
                 'integer',
                 'nullable',
@@ -97,6 +91,12 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Contact::class]),
+            ],
+            'tenant_id' => [
+                'required_without:order_id',
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'vat_rate_id' => [
                 'exclude_if:is_free_text,true',

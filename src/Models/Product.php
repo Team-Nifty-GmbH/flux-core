@@ -8,7 +8,7 @@ use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ProductProductOption;
-use FluxErp\Models\Pivots\TenantProduct;
+use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
@@ -128,7 +128,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'tenant_product')->using(TenantProduct::class);
+        return $this->belongsToMany(Tenant::class, 'tenant_product')->using(ProductTenant::class);
     }
 
     public function coverMedia(): BelongsTo

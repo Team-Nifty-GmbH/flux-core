@@ -58,10 +58,10 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasDefaultTargetableColumns,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasTenantAssignment,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
-        SoftDeletes;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart,
+        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
+        HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue,
+        Notifiable, Printable, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

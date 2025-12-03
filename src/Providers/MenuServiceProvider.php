@@ -137,7 +137,6 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.address-types');
                 Menu::register(route: 'settings.bank-connections');
                 Menu::register(route: 'settings.categories');
-                Menu::register(route: 'settings.tenants');
                 Menu::register(route: 'settings.core-settings');
                 Menu::register(route: 'settings.countries');
                 Menu::register(route: 'settings.currencies');
@@ -174,6 +173,7 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.system');
                 Menu::register(route: 'settings.tags');
                 Menu::register(route: 'settings.targets');
+                Menu::register(route: 'settings.tenants');
                 Menu::register(route: 'settings.ticket-types');
                 Menu::register(route: 'settings.tokens');
                 Menu::register(route: 'settings.translations');

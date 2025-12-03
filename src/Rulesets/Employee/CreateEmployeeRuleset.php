@@ -22,11 +22,6 @@ class CreateEmployeeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'tenant_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'country_id' => [
                 'nullable',
                 'integer',
@@ -46,6 +41,11 @@ class CreateEmployeeRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
+            ],
+            'tenant_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'user_id' => [
                 'nullable',

@@ -14,18 +14,18 @@ class TenantFactory extends Factory
     {
         $i = 0;
         while (Tenant::query()
-            ->where('tenant_code', $clientCode = fake()->unique()->countryISOAlpha3())
+            ->where('tenant_code', $tenantCode = fake()->unique()->countryISOAlpha3())
             ->exists() && $i < 100) {
             $i++;
         }
 
         if ($i === 100) {
-            $clientCode .= '_' . Str::uuid();
+            $tenantCode .= '_' . Str::uuid();
         }
 
         return [
             'name' => fake()->company(),
-            'tenant_code' => $clientCode,
+            'tenant_code' => $tenantCode,
             'ceo' => fake()->name(),
             'street' => fake()->streetAddress(),
             'city' => fake()->city(),

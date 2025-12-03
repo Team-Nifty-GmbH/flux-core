@@ -20,11 +20,6 @@ class CreateProjectRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:projects,uuid',
-            'tenant_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'contact_id' => [
                 'integer',
                 'nullable',
@@ -39,6 +34,11 @@ class CreateProjectRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => User::class]),
+            ],
+            'tenant_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'parent_id' => [
                 'integer',

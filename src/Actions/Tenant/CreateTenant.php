@@ -24,7 +24,7 @@ class CreateTenant extends FluxAction
         $bankConnections = Arr::pull($this->data, 'bank_connections');
 
         /** @var Tenant $tenant */
-        $tenant = app(Tenant::class, ['attributes' => $this->data]);
+        $tenant = app(Tenant::class, ['attributes' => $this->getData()]);
         $tenant->save();
 
         if ($bankConnections) {

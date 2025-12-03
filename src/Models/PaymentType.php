@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Models\Pivots\TenantPaymentType;
+use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAttributeTranslations;
@@ -35,7 +35,7 @@ class PaymentType extends FluxModel
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'tenant_payment_type')
-            ->using(TenantPaymentType::class);
+            ->using(PaymentTypeTenant::class);
     }
 
     protected function translatableAttributes(): array

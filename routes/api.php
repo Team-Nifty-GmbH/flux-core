@@ -408,13 +408,6 @@ Route::prefix('api')
                 Route::put('/categories', UpdateCategory::class);
                 Route::delete('/categories/{id}', DeleteCategory::class);
 
-                // Tenants
-                Route::get('/tenants/{id}', [BaseController::class, 'show'])->defaults('model', Tenant::class);
-                Route::get('/tenants', [BaseController::class, 'index'])->defaults('model', Tenant::class);
-                Route::post('/tenants', CreateTenant::class);
-                Route::put('/tenants', UpdateTenant::class);
-                Route::delete('/tenants/{id}', DeleteTenant::class);
-
                 // Comments
                 Route::get('/{modelType}/comments/{id}', [CommentController::class, 'show'])
                     ->defaults('model', Comment::class);
@@ -875,6 +868,13 @@ Route::prefix('api')
                 Route::put('/tasks', UpdateTask::class);
                 Route::delete('/tasks/{id}', DeleteTask::class);
                 Route::post('/tasks/finish', FinishTask::class);
+
+                // Tenants
+                Route::get('/tenants/{id}', [BaseController::class, 'show'])->defaults('model', Tenant::class);
+                Route::get('/tenants', [BaseController::class, 'index'])->defaults('model', Tenant::class);
+                Route::post('/tenants', CreateTenant::class);
+                Route::put('/tenants', UpdateTenant::class);
+                Route::delete('/tenants/{id}', DeleteTenant::class);
 
                 // Tickets
                 Route::post('/tickets/toggle', ToggleTicketUser::class);

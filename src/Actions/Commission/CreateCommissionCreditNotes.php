@@ -140,7 +140,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
         foreach (
             resolve_static(Tenant::class, 'query')
-                ->whereIntegerInRaw('id', $tenantIds)
+                ->whereKey($tenantIds)
                 ->get(['id', 'name']) as $tenant
         ) {
             if (! resolve_static(OrderType::class, 'query')

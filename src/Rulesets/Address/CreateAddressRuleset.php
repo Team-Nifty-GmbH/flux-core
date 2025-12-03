@@ -36,11 +36,6 @@ class CreateAddressRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:addresses,uuid',
-            'tenant_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'contact_id' => [
                 'required',
                 'integer',
@@ -55,6 +50,11 @@ class CreateAddressRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Language::class]),
+            ],
+            'tenant_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'advertising_state' => [
                 'string',

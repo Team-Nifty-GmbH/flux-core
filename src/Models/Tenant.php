@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Models\Pivots\TenantPaymentType;
+use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasDefault;
@@ -26,8 +26,6 @@ class Tenant extends FluxModel implements HasMedia
 {
     use CacheModelQueries, Filterable, HasDefault, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
-
-    protected $table = 'tenants';
 
     protected $appends = [
         'logo_url',
@@ -91,7 +89,7 @@ class Tenant extends FluxModel implements HasMedia
     public function paymentTypes(): BelongsToMany
     {
         return $this->belongsToMany(PaymentType::class, 'tenant_payment_type')
-            ->using(TenantPaymentType::class);
+            ->using(PaymentTypeTenant::class);
     }
 
     public function projects(): HasMany

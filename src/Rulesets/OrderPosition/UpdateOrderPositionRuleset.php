@@ -42,10 +42,6 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
-            'tenant_id' => [
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'ledger_account_id' => [
                 'integer',
                 'nullable',
@@ -86,6 +82,10 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Contact::class]),
+            ],
+            'tenant_id' => [
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'vat_rate_id' => [
                 'exclude_if:is_free_text,true',

@@ -7,7 +7,6 @@ use FluxErp\Models\Country;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateTenantRuleset extends FluxRuleset

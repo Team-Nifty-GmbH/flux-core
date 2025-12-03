@@ -18,6 +18,11 @@ class CreateOrderTypeRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:order_types,uuid',
+            'email_template_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => EmailTemplate::class]),
+            ],
             'tenant_id' => [
                 'required',
                 'integer',
@@ -25,11 +30,6 @@ class CreateOrderTypeRuleset extends FluxRuleset
             ],
             'name' => 'required|string|max:255',
             'description' => 'string|nullable',
-            'email_template_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => EmailTemplate::class]),
-            ],
             'print_layouts' => 'array|nullable',
             'print_layouts.*' => 'required|string',
             'post_stock_print_layouts' => 'array|nullable',

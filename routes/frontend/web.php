@@ -281,7 +281,6 @@ Route::middleware('web')
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
                         Route::get('/categories', Categories::class)->name('categories');
-                        Route::get('/tenants', Tenants::class)->name('tenants');
                         Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/countries', Countries::class)->name('countries');
                         Route::get('/currencies', Currencies::class)->name('currencies');
@@ -317,6 +316,7 @@ Route::middleware('web')
                         Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/targets', Targets::class)->name('targets');
+                        Route::get('/tenants', Tenants::class)->name('tenants');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/tokens', Tokens::class)->name('tokens');
                         Route::get('/translations', LanguageLines::class)->name('translations');
