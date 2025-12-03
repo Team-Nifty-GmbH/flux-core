@@ -9,7 +9,6 @@ use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\SalutationEnum;
-use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Support\Collection\AddressCollection;
@@ -45,21 +44,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Illuminate\Validation\UnauthorizedException;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
-use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
+class Address extends FluxModel implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
-        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
+        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasStates, HasTags,
         HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
         SoftDeletes;
     use Searchable {
@@ -70,22 +63,13 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     protected ?string $detailRouteName = 'contacts.id?';
 
-    protected $guarded = [
-        'id',
-    ];
-
-    protected $hidden = [
-        'password',
-    ];
-
     public static function findAddressByEmail(string $email): ?Address
     {
         $address = null;
         if ($email) {
             $address = resolve_static(Address::class, 'query')
                 ->with('contact')
-                ->where('email', $email)
-                ->orWhere('email_primary', $email)
+                ->where('email_primary', $email)
                 ->first();
 
             if (! $address) {
@@ -359,7 +343,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'is_dark_mode' => 'boolean',
             'is_delivery_address' => 'boolean',
             'is_active' => 'boolean',
-            'can_login' => 'boolean',
         ];
     }
 
@@ -419,37 +402,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
-    }
-
-    public function createLoginToken(): array
-    {
-        if (! $this->can_login || ! $this->is_active) {
-            throw new UnauthorizedException('Address cannot login');
-        }
-
-        $plaintext = Str::uuid()->toString();
-        $expires = now()->addMinutes(15);
-        Cache::put('login_token_' . $plaintext,
-            [
-                'user' => $this,
-                'guard' => 'address',
-                'intended_url' => Session::get('url.intended', route('portal.dashboard')),
-            ],
-            $expires
-        );
-        URL::forceRootUrl(config('flux.portal_domain'));
-
-        return [
-            'token' => $plaintext,
-            'expires' => $expires,
-            'url' => URL::temporarySignedRoute(
-                'login-link',
-                $expires,
-                [
-                    'token' => $plaintext,
-                ]
-            ),
-        ];
     }
 
     public function detailRouteParams(): array
@@ -644,18 +596,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             });
     }
 
-    public function sendLoginLink(): void
-    {
-        try {
-            $login = $this->createLoginToken();
-        } catch (UnauthorizedException) {
-            return;
-        }
-
-        // dont queue mail as the address isnt used as auth in the regular app url
-        Mail::to($this->email)->send(MagicLoginLink::make($login['token'], $login['expires']));
-    }
-
     public function serialNumbers(): BelongsToMany
     {
         return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
@@ -721,13 +661,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     )
                 )
             )
-        );
-    }
-
-    protected function password(): Attribute
-    {
-        return Attribute::set(
-            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
         );
     }
 

@@ -20,7 +20,6 @@ use FluxErp\Actions\AdditionalColumn\UpdateAdditionalColumn;
 use FluxErp\Actions\AdditionalColumn\UpdateValueList;
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
-use FluxErp\Actions\Address\GenerateAddressLoginToken;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Actions\AddressType\CreateAddressType;
 use FluxErp\Actions\AddressType\DeleteAddressType;
@@ -508,7 +507,6 @@ Route::prefix('api')
                 Route::post('/addresses', CreateAddress::class);
                 Route::put('/addresses', UpdateAddress::class);
                 Route::delete('/addresses/{id}', DeleteAddress::class);
-                Route::post('/addresses/{id}/login-token', GenerateAddressLoginToken::class);
 
                 // AddressTypes
                 Route::get('/address-types/{id}', [BaseController::class, 'show'])

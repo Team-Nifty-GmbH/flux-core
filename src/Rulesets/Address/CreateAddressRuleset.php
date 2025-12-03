@@ -11,7 +11,6 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Address\AdvertisingState;
-use Illuminate\Validation\Rule;
 
 class CreateAddressRuleset extends FluxRuleset
 {
@@ -25,7 +24,6 @@ class CreateAddressRuleset extends FluxRuleset
             resolve_static(AddressTypeRuleset::class, 'getRules'),
             resolve_static(ContactOptionRuleset::class, 'getRules'),
             resolve_static(TagRuleset::class, 'getRules'),
-            resolve_static(PermissionRuleset::class, 'getRules'),
             [
                 'contact_options.*.id' => 'exclude',
             ]
@@ -62,14 +60,6 @@ class CreateAddressRuleset extends FluxRuleset
             ],
             'date_of_birth' => 'date|nullable',
             'department' => 'string|max:255|nullable',
-            'email' => [
-                'nullable',
-                'email',
-                'max:255',
-                Rule::unique('addresses', 'email')
-                    ->whereNull('deleted_at'),
-            ],
-            'password' => 'string|max:255|nullable',
             'search_aliases' => [
                 'array',
                 'nullable',
@@ -79,7 +69,6 @@ class CreateAddressRuleset extends FluxRuleset
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',
             'is_active' => 'boolean',
-            'can_login' => 'boolean',
         ];
     }
 }

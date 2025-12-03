@@ -15,7 +15,7 @@ class Watchlists extends Component
     public function render(): View
     {
         return view(
-            'flux::livewire.cart.watchlist',
+            'flux::livewire.cart.watchlists',
             [
                 'carts' => $this->getCarts(),
             ]

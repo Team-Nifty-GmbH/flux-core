@@ -82,10 +82,6 @@ class UpdateAddress extends FluxAction
             $address->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
-        if (! is_null($permissions)) {
-            $address->syncPermissions($permissions);
-        }
-
         if (! is_null($contactOptions)) {
             Helper::updateRelatedRecords(
                 model: $address,
@@ -112,10 +108,6 @@ class UpdateAddress extends FluxAction
             }
 
             $address->addressTypes()->sync($this->data['address_types']);
-        }
-
-        if ($canLogin && ! $address->can_login) {
-            $address->tokens()->delete();
         }
 
         return $address->withoutRelations()->fresh();

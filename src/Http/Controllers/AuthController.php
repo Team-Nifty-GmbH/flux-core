@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Models\Address;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -34,38 +33,19 @@ class AuthController extends Controller
             return ResponseHelper::createResponseFromBase(statusCode: 422, data: $validator->errors()->toArray());
         }
 
-        $abilities = [];
-
         $user = resolve_static(User::class, 'query')
             ->where('email', $request->email ?? $request->username)
             ->where('is_active', true)
             ->first();
 
-        if ($user && Hash::check($request->password, $user->password)) {
-            $abilities = ['user'];
-        }
-
-        if (count($abilities) < 1) {
-            $user = resolve_static(Address::class, 'query')
-                ->where('email', $request->email)
-                ->where('can_login', true)
-                ->whereNotNull('email')
-                ->whereNotNull('password')
-                ->first();
-
-            if ($user && Hash::check($request->password, $user->password)) {
-                $abilities = ['address'];
-            }
-        }
-
-        if (count($abilities) < 1) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 401,
                 data: ['credentials' => 'invalid credentials']
             );
         }
 
-        $token = $user->createToken('API Token', $abilities);
+        $token = $user->createToken('API Token', ['user']);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -75,29 +55,6 @@ class AuthController extends Controller
                 'token' => $token->plainTextToken,
             ]
         );
-    }
-
-    public function authenticatePortal(Request $request): RedirectResponse
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'string'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::guard('address')->attempt(
-            array_merge($credentials, [
-                'is_active' => true,
-                'can_login' => true,
-            ])
-        )) {
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('portal.dashboard'));
-        }
-
-        return back()->withErrors([
-            'email' => __('auth.failed'),
-        ])->onlyInput('email');
     }
 
     public function authenticateWeb(Request $request): RedirectResponse
