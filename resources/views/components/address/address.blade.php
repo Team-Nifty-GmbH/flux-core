@@ -101,6 +101,8 @@
             <x-input
                 x-bind:readonly="!$wire.edit"
                 wire:model="address.street"
+                autocomplete="off"
+                data-form-type="other"
             />
         </div>
     </div>
@@ -131,14 +133,20 @@
                 <x-input
                     x-bind:readonly="!$wire.edit"
                     wire:model="address.zip"
+                    autocomplete="off"
+                    data-form-type="other"
                 />
             </div>
             <div class="grow">
                 <x-input
                     x-bind:readonly="!$wire.edit"
                     wire:model="address.city"
+                    autocomplete="off"
+                    data-form-type="other"
                 />
             </div>
+            <input type="hidden" wire:model="address.latitude" />
+            <input type="hidden" wire:model="address.longitude" />
         </div>
     </div>
     @show
