@@ -41,8 +41,14 @@ export default function (
 
             if (typeof $wire[propertyName] !== 'function') {
                 // side-effect -> update map only when coordinates change
-                this.$watch('$wire.' + propertyName + '.latitude', this.onChange.bind(this));
-                this.$watch('$wire.' + propertyName + '.longitude', this.onChange.bind(this));
+                this.$watch(
+                    '$wire.' + propertyName + '.latitude',
+                    this.onChange.bind(this),
+                );
+                this.$watch(
+                    '$wire.' + propertyName + '.longitude',
+                    this.onChange.bind(this),
+                );
             }
         },
         addMarkers(addresses = null) {
