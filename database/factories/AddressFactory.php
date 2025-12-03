@@ -29,11 +29,8 @@ class AddressFactory extends Factory
             'email_primary' => uniqid() . fake()->safeEmail(),
             'date_of_birth' => fake()->boolean ? fake()->date : null,
             'department' => fake()->boolean ? fake()->realText(maxNbChars: 20) : null,
-            'email' => uniqid() . fake()->unique()->safeEmail(),
-            'password' => 'password',
             'is_active' => fake()->boolean(90),
             'is_main_address' => fake()->boolean,
-            'can_login' => fake()->boolean(80),
         ];
     }
 }

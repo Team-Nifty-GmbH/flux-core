@@ -16,8 +16,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
 {
@@ -38,11 +36,8 @@ class UpdateAddress extends FluxAction
             ->first();
 
         $tags = Arr::pull($this->data, 'tags');
-        $permissions = Arr::pull($this->data, 'permissions');
         $contactOptions = Arr::pull($this->data, 'contact_options');
         $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
-
-        $canLogin = $address->can_login;
 
         if (! data_get($this->data, 'is_main_address', false)
             && ! resolve_static(Address::class, 'query')
@@ -69,10 +64,6 @@ class UpdateAddress extends FluxAction
                 ->exists()
         ) {
             $this->data['is_delivery_address'] = true;
-        }
-
-        if (! trim(data_get($this->data, 'password', ''))) {
-            unset($this->data['password']);
         }
 
         $address->fill($this->data);
@@ -119,56 +110,6 @@ class UpdateAddress extends FluxAction
             $this->data['email_primary'] = is_string($this->getData('email_primary'))
                 ? Str::between($this->getData('email_primary'), '<', '>')
                 : null;
-        }
-
-        if (array_key_exists('email', $this->data)) {
-            $this->rules['email'][] = Rule::unique('addresses', 'email')
-                ->whereNull('deleted_at')
-                ->ignore(data_get($this->data, 'id'));
-            $this->data['email'] = is_string($this->getData('email'))
-                ? Str::between($this->getData('email'), '<', '>')
-                : null;
-        }
-    }
-
-    protected function validateData(): void
-    {
-        parent::validateData();
-
-        $errors = [];
-        $address = resolve_static(Address::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first();
-
-        if ($address->can_login && ($this->data['can_login'] ?? false)) {
-            if ($address->email
-                && array_key_exists('email', $this->data)
-                && ! $this->data['email']
-            ) {
-                $errors += [
-                    'email' => ['Unable to clear email while \'can_login\' = \'true\''],
-                ];
-            }
-
-            if ($address->password
-                && array_key_exists('password', $this->data)
-                && ! is_null(data_get($this->data, 'password'))
-                && ! data_get($this->data, 'password')
-            ) {
-                $errors += [
-                    'password' => ['Unable to clear password while \'can_login\' = \'true\''],
-                ];
-            }
-
-            if (data_get($this->data, 'password') && ! data_get($this->data, 'email', $address->email)) {
-                $errors += [
-                    'email' => ['Email is required when setting a password'],
-                ];
-            }
-        }
-
-        if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('updateAddress');
         }
     }
 }
