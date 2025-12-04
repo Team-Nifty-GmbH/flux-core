@@ -258,7 +258,12 @@ class FluxOptimize extends Command
                     continue;
                 }
 
-                $actions[$class::name()] = $class;
+                $actions[$class::name()] = [
+                    'name' => $class::name(),
+                    'description' => $class::description(),
+                    'models' => $class::models(),
+                    'class' => $class,
+                ];
             }
 
             $allActions[$cacheKey] = $actions;

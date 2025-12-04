@@ -83,8 +83,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootCommands();
 
         if ($this->app->runningInConsole()) {
-            $this->optimizes('flux:optimize', 'flux:optimize-clear');
-            $this->optimizes('settings:discover', 'settings:clear-cache');
+            $this->optimizes('flux:optimize', 'flux:optimize-clear', 'flux');
+            $this->optimizes('settings:discover', 'settings:clear-cache', 'flux-settings');
         }
 
         $this->bootRoutes();
