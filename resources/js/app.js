@@ -62,7 +62,7 @@ const createBatchAuthorizer = () => {
                     ([channelName, authData]) => {
                         const callbacks = callbacksToProcess[channelName] || [];
                         callbacks.forEach((callback) => {
-                            if (authData.error) {
+                            if (authData.status) {
                                 callback(true, authData);
                             } else {
                                 callback(null, authData);
