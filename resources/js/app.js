@@ -26,6 +26,82 @@ const key = document.head.querySelector('meta[name="ws-key"]')?.content;
 const effectiveBroadcaster =
     broadcaster === 'log' || !key ? 'null' : broadcaster;
 
+const createBatchAuthorizer = () => {
+    let pendingChannels = [];
+    let pendingCallbacks = {};
+    let batchTimeout = null;
+    const BATCH_DELAY = 75;
+
+    const processBatch = () => {
+        if (pendingChannels.length === 0) return;
+
+        const channelsToProcess = [...pendingChannels];
+        const callbacksToProcess = { ...pendingCallbacks };
+        pendingChannels = [];
+        pendingCallbacks = {};
+        batchTimeout = null;
+
+        const socketId = channelsToProcess[0]?.socketId;
+
+        const uniqueChannels = [
+            ...new Map(
+                channelsToProcess.map((c) => [c.channelName, c]),
+            ).values(),
+        ];
+
+        axios
+            .post('/broadcasting/auth/batch', {
+                socket_id: socketId,
+                channels: uniqueChannels.map((c) => ({
+                    name: c.channelName,
+                    socket_id: c.socketId,
+                })),
+            })
+            .then((response) => {
+                Object.entries(response.data).forEach(
+                    ([channelName, authData]) => {
+                        const callbacks = callbacksToProcess[channelName] || [];
+                        callbacks.forEach((callback) => {
+                            if (authData.status) {
+                                callback(true, authData);
+                            } else {
+                                callback(null, authData);
+                            }
+                        });
+                    },
+                );
+            })
+            .catch((error) => {
+                Object.values(callbacksToProcess)
+                    .flat()
+                    .forEach((callback) => {
+                        callback(true, error);
+                    });
+            });
+    };
+
+    return (channel, options) => {
+        return {
+            authorize: (socketId, callback) => {
+                pendingChannels.push({
+                    channelName: channel.name,
+                    socketId: socketId,
+                });
+
+                if (!pendingCallbacks[channel.name]) {
+                    pendingCallbacks[channel.name] = [];
+                }
+                pendingCallbacks[channel.name].push(callback);
+
+                if (batchTimeout) {
+                    clearTimeout(batchTimeout);
+                }
+                batchTimeout = setTimeout(processBatch, BATCH_DELAY);
+            },
+        };
+    };
+};
+
 window.Echo = new Echo({
     broadcaster: effectiveBroadcaster,
     key: key || 'dummy-key',
@@ -39,6 +115,7 @@ window.Echo = new Echo({
         document.head.querySelector('meta[name="ws-protocol"]')?.content ===
         'https',
     enabledTransports: ['ws', 'wss'],
+    authorizer: createBatchAuthorizer(),
 });
 
 window.parseNumber = function (number) {
