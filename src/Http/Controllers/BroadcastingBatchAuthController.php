@@ -43,8 +43,7 @@ class BroadcastingBatchAuthController
                     default => [],
                 };
             } catch (Throwable $e) {
-                $statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
-                $errors[] = $statusCode;
+                $errors[] = $statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
                 $results[$channelName] = ['status' => $statusCode];
             }
         }
