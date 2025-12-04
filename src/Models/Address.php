@@ -64,6 +64,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     protected ?string $detailRouteName = 'contacts.id?';
 
+    protected $guarded = [
+        'id',
+    ];
+
     public static function findAddressByEmail(string $email): ?Address
     {
         $address = null;
