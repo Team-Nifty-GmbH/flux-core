@@ -348,6 +348,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'is_dark_mode' => 'boolean',
             'is_delivery_address' => 'boolean',
             'is_active' => 'boolean',
+            'can_login' => 'boolean',
         ];
     }
 
