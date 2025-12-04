@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/broadcasting/auth/batch', BroadcastingBatchAuthController::class)
-    ->middleware(['web'])
+    ->middleware(['web', 'auth:web'])
     ->name('broadcasting.auth.batch');
 
 /*

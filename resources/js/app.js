@@ -43,10 +43,16 @@ const createBatchAuthorizer = () => {
 
         const socketId = channelsToProcess[0]?.socketId;
 
+        const uniqueChannels = [
+            ...new Map(
+                channelsToProcess.map((c) => [c.channelName, c]),
+            ).values(),
+        ];
+
         axios
             .post('/broadcasting/auth/batch', {
                 socket_id: socketId,
-                channels: channelsToProcess.map((c) => ({
+                channels: uniqueChannels.map((c) => ({
                     name: c.channelName,
                     socket_id: c.socketId,
                 })),
@@ -54,21 +60,23 @@ const createBatchAuthorizer = () => {
             .then((response) => {
                 Object.entries(response.data).forEach(
                     ([channelName, authData]) => {
-                        const callback = callbacksToProcess[channelName];
-                        if (callback) {
+                        const callbacks = callbacksToProcess[channelName] || [];
+                        callbacks.forEach((callback) => {
                             if (authData.error) {
                                 callback(true, authData);
                             } else {
                                 callback(null, authData);
                             }
-                        }
+                        });
                     },
                 );
             })
             .catch((error) => {
-                Object.values(callbacksToProcess).forEach((callback) => {
-                    callback(true, error);
-                });
+                Object.values(callbacksToProcess)
+                    .flat()
+                    .forEach((callback) => {
+                        callback(true, error);
+                    });
             });
     };
 
@@ -79,7 +87,11 @@ const createBatchAuthorizer = () => {
                     channelName: channel.name,
                     socketId: socketId,
                 });
-                pendingCallbacks[channel.name] = callback;
+
+                if (!pendingCallbacks[channel.name]) {
+                    pendingCallbacks[channel.name] = [];
+                }
+                pendingCallbacks[channel.name].push(callback);
 
                 if (batchTimeout) {
                     clearTimeout(batchTimeout);

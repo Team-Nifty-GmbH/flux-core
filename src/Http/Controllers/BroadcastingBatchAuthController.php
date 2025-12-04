@@ -36,7 +36,9 @@ class BroadcastingBatchAuthController
 
                 $response = Broadcast::auth($subRequest);
 
-                $results[$channelName] = $response;
+                $results[$channelName] = $response instanceof JsonResponse
+                    ? $response->getData(true)
+                    : $response;
             } catch (Throwable) {
                 $results[$channelName] = ['error' => true];
             }
