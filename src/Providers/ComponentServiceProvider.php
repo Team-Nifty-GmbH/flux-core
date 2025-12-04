@@ -28,10 +28,12 @@ class ComponentServiceProvider extends ServiceProvider
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
             try {
-                if ($fromCache) {
-                    Livewire::component($alias, $class);
-                } elseif (is_a($class, Component::class, true)
-                    && ! (new ReflectionClass($class))->isAbstract()
+                if (
+                    $fromCache
+                    || (
+                        is_a($class, Component::class, true)
+                        && ! (new ReflectionClass($class))->isAbstract()
+                    )
                 ) {
                     Livewire::component($alias, $class);
                 }

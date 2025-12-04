@@ -70,14 +70,14 @@ test('flux:optimize generates valid actions cache', function (): void {
 
     $foundCreateProduct = false;
     foreach ($actions as $actionList) {
-        if (array_key_exists(CreateProduct::class, $actionList)) {
+        if (array_key_exists(CreateProduct::name(), $actionList)) {
             $foundCreateProduct = true;
 
             break;
         }
     }
 
-    expect($foundCreateProduct)->toBeTrue('Should contain CreateProduct action');
+    expect($foundCreateProduct)->toBeTrue('Should contain CreateProduct action with name key');
 });
 
 test('flux:optimize generates valid widgets cache', function (): void {
