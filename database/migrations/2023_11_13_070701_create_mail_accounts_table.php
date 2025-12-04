@@ -25,9 +25,13 @@ return new class() extends Migration
             $table->integer('smtp_port')->default(587);
             $table->string('smtp_encryption')->nullable();
 
-            $table->boolean('is_o_auth')->default(false);
             $table->boolean('has_valid_certificate')->default(true);
-            $table->timestamps();
+            $table->boolean('is_auto_assign')->default(false);
+            $table->boolean('is_o_auth')->default(false);
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
         });
     }
 

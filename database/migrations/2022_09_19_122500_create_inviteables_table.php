@@ -20,11 +20,11 @@ return new class() extends Migration
             $table->foreign('calendar_event_id')
                 ->references('id')
                 ->on('calendar_events')
-                ->onDelete('cascade');
+                ->cascadeOnDelete();
             $table->foreign('model_calendar_id')
                 ->references('id')
                 ->on('calendars')
-                ->onDelete('cascade');
+                ->cascadeOnDelete();
 
             $table->unique(['calendar_event_id', 'inviteable_id', 'inviteable_type'], 'inviteables_unique');
         });

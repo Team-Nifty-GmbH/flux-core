@@ -10,8 +10,8 @@ return new class() extends Migration
     {
         Schema::create('target_user', function (Blueprint $table): void {
             $table->id('pivot_id');
-            $table->foreignId('target_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('target_id')->constrained('targets')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 
