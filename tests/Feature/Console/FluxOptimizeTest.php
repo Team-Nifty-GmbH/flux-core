@@ -70,7 +70,7 @@ test('flux:optimize generates valid actions cache', function (): void {
 
     $foundCreateProduct = false;
     foreach ($actions as $actionList) {
-        if (in_array(CreateProduct::class, $actionList)) {
+        if (array_key_exists(CreateProduct::class, $actionList)) {
             $foundCreateProduct = true;
 
             break;
