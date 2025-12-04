@@ -30,6 +30,7 @@ class CreateAddress extends FluxAction
     public function performAction(): Address
     {
         $tags = Arr::pull($this->data, 'tags');
+        $permissions = Arr::pull($this->data, 'permissions');
 
         if (! data_get($this->data, 'is_main_address', false)
             && ! resolve_static(Address::class, 'query')
@@ -68,6 +69,10 @@ class CreateAddress extends FluxAction
             $address->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
+        if ($permissions) {
+            $address->givePermissionTo($permissions);
+        }
+
         if (resolve_static(CreateContactOption::class, 'canPerformAction', [false])) {
             foreach ($contactOptions as $contactOption) {
                 $contactOption['address_id'] = $address->id;
@@ -104,6 +109,9 @@ class CreateAddress extends FluxAction
         $this->data['country_id'] ??= resolve_static(Country::class, 'default')?->getKey();
         $this->data['email_primary'] = is_string($this->getData('email_primary'))
             ? Str::between($this->getData('email_primary'), '<', '>')
+            : null;
+        $this->data['email'] = is_string($this->getData('email'))
+            ? Str::between($this->getData('email'), '<', '>')
             : null;
         $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
         $this->data['client_id'] ??= resolve_static(Contact::class, 'query')

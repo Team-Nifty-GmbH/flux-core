@@ -23,6 +23,7 @@ class UpdateAddressRuleset extends FluxRuleset
             resolve_static(AddressTypeRuleset::class, 'getRules'),
             resolve_static(ContactOptionRuleset::class, 'getRules'),
             resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(PermissionRuleset::class, 'getRules')
         );
     }
 
@@ -59,6 +60,7 @@ class UpdateAddressRuleset extends FluxRuleset
             'date_of_birth' => 'date|nullable',
             'department' => 'string|max:255|nullable',
             'email' => [
+                'required_if_accepted:can_login',
                 'email',
                 'max:255',
                 'nullable',
@@ -68,10 +70,12 @@ class UpdateAddressRuleset extends FluxRuleset
                 'nullable',
             ],
             'search_aliases.*' => 'string|max:255|distinct:ignore_case',
+            'password' => 'string|max:255|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',
             'is_active' => 'boolean',
+            'can_login' => 'boolean',
         ];
     }
 }
