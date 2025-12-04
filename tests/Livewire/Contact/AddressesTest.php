@@ -5,8 +5,6 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Permission;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -43,50 +41,14 @@ test('can save address', function (): void {
     $this->assertDatabaseHas('addresses', ['id' => $this->addressForm->id, 'street' => $street]);
 });
 
-test('can update password', function (): void {
-    Address::query()
-        ->whereKey($this->addressForm->id)
-        ->update([
-            'can_login' => 1,
-            'password' => Hash::make('!password123'),
-        ]);
-
-    Livewire::actingAs($this->user)
-        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
-        ->assertSet('address.password', null)
-        ->set('address.password', $password = Hash::make(Str::random()))
-        ->set('edit', true)
-        ->call('save')
-        ->assertOk()
-        ->assertHasNoErrors()
-        ->assertSet('address.password', $password)
-        ->assertSet('edit', false);
-
-    $this->assertDatabaseHas(
-        'addresses',
-        [
-            'id' => $this->addressForm->id,
-            'password' => $password,
-        ]
-    );
-});
-
 test('renders successfully', function (): void {
     Livewire::test(Addresses::class)
         ->assertOk();
 });
 
 test('replicate address', function (): void {
-    $originalAddress = Address::query()
-        ->whereKey($this->addressForm->id)
-        ->first();
-    $originalAddress->givePermissionTo(Permission::findOrCreate(Str::random(), 'address'));
-    $this->addressForm->fill($originalAddress->fresh());
-
     $component = Livewire::actingAs($this->user)
         ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
-        ->assertNotSet('address.permissions', null)
-        ->assertCount('address.permissions', 1)
         ->call('replicate')
         ->assertOk()
         ->assertHasNoErrors()
@@ -97,21 +59,6 @@ test('replicate address', function (): void {
 
     expect($component->get('address.id'))->toBeGreaterThan($this->addressForm->id);
     $this->assertDatabaseHas('addresses', ['lastname' => $lastname]);
-
-    $dbAddress = Address::query()
-        ->whereKey($component->get('address.id'))
-        ->with('permissions')
-        ->first();
-
-    expect($dbAddress->permissions)->toBeEmpty();
-    $this->assertDatabaseMissing(
-        'meta',
-        [
-            'model_id' => $dbAddress->id,
-            'model_type' => $dbAddress->getMorphClass(),
-            'key' => 'permissions',
-        ]
-    );
 });
 
 test('switch tabs', function (): void {

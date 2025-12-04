@@ -19,8 +19,6 @@ class AddressForm extends FluxForm
 
     public ?string $advertising_state = null;
 
-    public bool $can_login = false;
-
     public ?string $city = null;
 
     public ?int $client_id = null;
@@ -36,8 +34,6 @@ class AddressForm extends FluxForm
     public ?string $date_of_birth = null;
 
     public ?string $department = null;
-
-    public ?string $email = null;
 
     public ?string $email_primary = null;
 
@@ -72,10 +68,6 @@ class AddressForm extends FluxForm
 
     public ?string $name = null;
 
-    public ?string $password = null;
-
-    public ?array $permissions = null;
-
     public ?string $phone = null;
 
     public ?string $phone_mobile = null;
@@ -97,21 +89,19 @@ class AddressForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Address) {
-            $values->loadMissing(['contactOptions', 'tags:id', 'permissions:id']);
+            $values->loadMissing(['contactOptions', 'tags:id']);
 
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
-            $values['permissions'] = array_column($values['permissions'] ?? [], 'id');
         } elseif (data_get($values, 'id')) {
             $address = resolve_static(Address::class, 'query')
                 ->whereKey(data_get($values, 'id'))
-                ->with(['contactOptions', 'tags:id', 'permissions:id'])
+                ->with(['contactOptions', 'tags:id'])
                 ->first(['id']);
 
             if ($address) {
                 $values['contact_options'] ??= $address->contactOptions->toArray();
                 $values['tags'] ??= $address->tags->pluck('id')->toArray();
-                $values['permissions'] ??= $address->permissions->pluck('id')->toArray();
             }
         }
 
@@ -131,10 +121,6 @@ class AddressForm extends FluxForm
     public function toActionData(): array
     {
         $data = parent::toArray();
-
-        if (is_null($this->password)) {
-            unset($data['password']);
-        }
 
         $data['contact_options'] = array_filter($this->contact_options);
 

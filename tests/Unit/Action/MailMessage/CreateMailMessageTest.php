@@ -37,7 +37,7 @@ test('add comment to ticket from mail message', function (): void {
     $action = CreateMailMessage::make([
         'mail_account_id' => $this->mailAccount->id,
         'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
-        'from' => 'Tester McTestFace <' . $this->address->email . '>',
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
         'to' => [$this->mailAccount->email],
         'subject' => Str::uuid()->toString(),
         'text_body' => $textBody = faker()->text(),
@@ -72,7 +72,7 @@ test('create ticket from mail message', function (): void {
     $action = CreateMailMessage::make([
         'mail_account_id' => $this->mailAccount->id,
         'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
-        'from' => 'Tester McTestFace <' . $this->address->email . '>',
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
         'to' => [$this->mailAccount->email],
         'subject' => $subject = Str::uuid()->toString(),
         'text_body' => faker()->text(),

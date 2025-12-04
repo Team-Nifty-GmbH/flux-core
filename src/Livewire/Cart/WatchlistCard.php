@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\Portal\Shop;
+namespace FluxErp\Livewire\Cart;
 
 use FluxErp\Actions\CartItem\DeleteCartItem;
 use FluxErp\Actions\CartItem\UpdateCartItem;
@@ -8,8 +8,6 @@ use FluxErp\Livewire\Forms\CartForm;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use FluxErp\Traits\Livewire\Actions;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -31,7 +29,7 @@ class WatchlistCard extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.portal.shop.watchlist-card');
+        return view('flux::livewire.cart.watchlist-card');
     }
 
     #[Renderless]
@@ -44,18 +42,11 @@ class WatchlistCard extends Component
                 ->first()
                 ->cartItems()
                 ->ordered()
-                ->whereHas('product', function (Builder $query): void {
-                    $query->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop());
-                })
-                ->with([
-                    'product' => fn (BelongsTo $query) => $query
-                        ->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop()),
-                ])
                 ->get(['product_id', 'amount', 'order_column'])
                 ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         )
-            ->to(auth()->user()?->getMorphClass() === 'user' ? 'cart.cart' : 'portal.shop.cart');
+            ->to('cart.cart');
     }
 
     public function delete(): void
@@ -113,7 +104,7 @@ class WatchlistCard extends Component
 
         try {
             UpdateCartItem::make([
-                'id' => $cartItem->id,
+                'id' => $cartItem->getKey(),
                 'order_column' => $index + 1,
             ])
                 ->validate()
@@ -121,12 +112,6 @@ class WatchlistCard extends Component
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
         }
-    }
-
-    public function updatedCartFormIsPortalPublic(): void
-    {
-        $this->skipRender();
-        $this->cartForm->save();
     }
 
     public function updatedCartFormIsPublic(): void
