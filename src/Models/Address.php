@@ -47,12 +47,13 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
+use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
-        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasStates, HasTags,
+        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
         HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
         SoftDeletes;
     use Searchable {
