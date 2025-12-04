@@ -17,6 +17,7 @@ class BroadcastingBatchAuthController
         $validated = $request->validated();
 
         $results = [];
+        $errors = [];
 
         foreach ($validated['channels'] as $channel) {
             $channelName = $channel['name'];
@@ -42,13 +43,11 @@ class BroadcastingBatchAuthController
                     default => [],
                 };
             } catch (Throwable $e) {
-                $results[$channelName] = [
-                    'status' => $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500,
-                ];
+                $statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+                $errors[] = $statusCode;
+                $results[$channelName] = ['status' => $statusCode];
             }
         }
-
-        $errors = array_filter(array_column($results, 'status'));
 
         $statusCode = match (true) {
             $errors === [] => 200,
