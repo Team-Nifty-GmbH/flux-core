@@ -80,6 +80,7 @@ return new class() extends Migration
         // Contacts
         Schema::table('contacts', function (Blueprint $table): void {
             $table->dropForeign(['client_id']);
+            $table->dropUnique('contacts_customer_number_client_id_unique');
         });
 
         Schema::table('contacts', function (Blueprint $table): void {
@@ -88,6 +89,7 @@ return new class() extends Migration
 
         Schema::table('contacts', function (Blueprint $table): void {
             $table->foreign('tenant_id')->references('id')->on('tenants');
+            $table->unique(['customer_number', 'tenant_id']);
         });
 
         // Employees
@@ -111,6 +113,7 @@ return new class() extends Migration
         // LedgerAccounts
         Schema::table('ledger_accounts', function (Blueprint $table): void {
             $table->dropForeign(['client_id']);
+            $table->dropUnique('ledger_accounts_number_ledger_account_type_enum_client_id_unique');
         });
 
         Schema::table('ledger_accounts', function (Blueprint $table): void {
@@ -119,6 +122,7 @@ return new class() extends Migration
 
         Schema::table('ledger_accounts', function (Blueprint $table): void {
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->unique(['number', 'ledger_account_type_enum', 'tenant_id']);
         });
 
         // OrderPositions
@@ -160,6 +164,7 @@ return new class() extends Migration
         // Orders
         Schema::table('orders', function (Blueprint $table): void {
             $table->dropForeign(['client_id']);
+            $table->dropUnique('orders_order_number_client_id_unique');
         });
 
         Schema::table('orders', function (Blueprint $table): void {
@@ -168,6 +173,7 @@ return new class() extends Migration
 
         Schema::table('orders', function (Blueprint $table): void {
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->unique(['order_number', 'tenant_id']);
         });
 
         // PaymentTypeTenant
@@ -280,6 +286,8 @@ return new class() extends Migration
         Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->unsignedBigInteger('tenant_id')->nullable(false)->change();
             $table->dropConstrainedForeignId('client_id');
+            $table->dropUnique('sepa_mandates_client_id_mandate_reference_number_unique');
+            $table->unique(['tenant_id', 'mandate_reference_number']);
         });
 
         // SerialNumberRanges
@@ -365,6 +373,8 @@ return new class() extends Migration
         Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->nullable(false)->change();
             $table->dropConstrainedForeignId('tenant_id');
+            $table->dropUnique('sepa_mandates_tenant_id_mandate_reference_number_unique');
+            $table->unique(['client_id', 'mandate_reference_number']);
         });
 
         // PurchaseInvoices
@@ -461,6 +471,7 @@ return new class() extends Migration
         // Orders
         Schema::table('orders', function (Blueprint $table): void {
             $table->dropForeign(['tenant_id']);
+            $table->dropUnique('orders_order_number_tenant_id_unique');
         });
 
         Schema::table('orders', function (Blueprint $table): void {
@@ -469,6 +480,7 @@ return new class() extends Migration
 
         Schema::table('orders', function (Blueprint $table): void {
             $table->foreign('client_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->unique(['order_number', 'client_id']);
         });
 
         // OrderTypes
@@ -510,6 +522,7 @@ return new class() extends Migration
         // LedgerAccounts
         Schema::table('ledger_accounts', function (Blueprint $table): void {
             $table->dropForeign(['tenant_id']);
+            $table->dropUnique('ledger_accounts_number_ledger_account_type_enum_tenant_id_unique');
         });
 
         Schema::table('ledger_accounts', function (Blueprint $table): void {
@@ -518,6 +531,7 @@ return new class() extends Migration
 
         Schema::table('ledger_accounts', function (Blueprint $table): void {
             $table->foreign('client_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->unique(['number', 'ledger_account_type_enum', 'client_id']);
         });
 
         // Employees
@@ -541,6 +555,7 @@ return new class() extends Migration
         // Contacts
         Schema::table('contacts', function (Blueprint $table): void {
             $table->dropForeign(['tenant_id']);
+            $table->dropUnique('contacts_customer_number_tenant_id_unique');
         });
 
         Schema::table('contacts', function (Blueprint $table): void {
@@ -549,6 +564,7 @@ return new class() extends Migration
 
         Schema::table('contacts', function (Blueprint $table): void {
             $table->foreign('client_id')->references('id')->on('tenants');
+            $table->unique(['customer_number', 'client_id']);
         });
 
         // BankConnectionTenant
