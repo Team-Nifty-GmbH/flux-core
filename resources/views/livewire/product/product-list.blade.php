@@ -39,6 +39,7 @@
                 />
                 <x-flux::editor
                     wire:model="product.description"
+                    scope="product"
                     :label="__('Description')"
                 />
             </section>

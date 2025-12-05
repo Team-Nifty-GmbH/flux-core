@@ -54,16 +54,20 @@ class ActionManager
         }
 
         if (! is_null($cachedActions) && ! app()->runningInConsole()) {
-            $actions = $cachedActions;
-            $iterator = [];
-        } else {
-            $actions = [];
-            $iterator = Finder::create()
-                ->in($path)
-                ->files()
-                ->name('*.php')
-                ->sortByName();
+            foreach ($cachedActions as $metadata) {
+                if ($name = data_get($metadata, 'name')) {
+                    $this->actions[$name] = $metadata;
+                }
+            }
+
+            return;
         }
+
+        $iterator = Finder::create()
+            ->in($path)
+            ->files()
+            ->name('*.php')
+            ->sortByName();
 
         foreach ($iterator as $file) {
             $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
@@ -80,12 +84,8 @@ class ActionManager
                 continue;
             }
 
-            $actions[$class::name()] = $class;
-        }
-
-        foreach ($actions as $name => $class) {
             try {
-                $this->register($name, $class);
+                $this->register($class::name(), $class);
             } catch (Throwable) {
                 // Ignore exceptions during auto-discovery
             }

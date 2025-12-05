@@ -3,7 +3,7 @@
 namespace FluxErp\Widgets;
 
 use Exception;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;

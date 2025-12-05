@@ -2,17 +2,16 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\Categorizable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasAttributeTranslations;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Categorizable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasAttributeTranslations;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SortableTrait;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -23,8 +22,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
-    use Filterable, HasAdditionalColumns, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations,
-        HasUserModification, HasUuid, LogsActivity, SortableTrait;
+    use Filterable, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid,
+        LogsActivity, SortableTrait;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

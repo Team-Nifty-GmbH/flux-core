@@ -24,24 +24,23 @@ use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
-use FluxErp\Traits\CascadeSoftDeletes;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasRelatedModel;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasTenantAssignment;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\CascadeSoftDeletes;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasRelatedModel;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Printable;
+use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\DeliveryNote;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
@@ -69,9 +68,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange, HasStates,
+        HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -177,7 +176,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 $order->address_invoice = $addressInvoice;
 
                 // Get additional attributes from address if not explicitly changed
-                $order->language_id = $order->isDirty('language_id')
+                $order->language_id = (! $addressInvoice->language_id || $order->isDirty('language_id'))
                     ? $order->language_id
                     : $addressInvoice->language_id;
                 $order->contact_id = $order->isDirty('contact_id')
@@ -679,11 +678,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this;
     }
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function commissions(): HasMany
     {
         return $this->hasMany(Commission::class);
@@ -962,6 +956,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->singleFile()
             ->readOnly();
 
+        $this->addMediaCollection('final-invoice')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
+            ->singleFile()
+            ->readOnly();
+
         $this->addMediaCollection('payment-reminders')
             ->acceptsMimeTypes(['application/pdf'])
             ->readOnly();
@@ -1029,6 +1028,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function totalPaid(): string|float|int

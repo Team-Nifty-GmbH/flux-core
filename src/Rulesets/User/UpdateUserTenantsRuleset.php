@@ -9,8 +9,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateUserTenantsRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = User::class;
 
     public function rules(): array

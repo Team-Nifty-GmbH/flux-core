@@ -6,7 +6,7 @@ use FluxErp\Actions\VacationBlackout\CreateVacationBlackout;
 use FluxErp\Actions\VacationBlackout\DeleteVacationBlackout;
 use FluxErp\Actions\VacationBlackout\UpdateVacationBlackout;
 use FluxErp\Models\VacationBlackout;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class VacationBlackoutForm extends FluxForm

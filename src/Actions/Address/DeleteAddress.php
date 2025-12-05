@@ -25,7 +25,6 @@ class DeleteAddress extends FluxAction
             ->first();
 
         $address->addressTypes()->detach();
-        $address->tokens()->delete();
 
         return $address->delete();
     }

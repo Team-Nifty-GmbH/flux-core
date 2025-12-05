@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Lead;
 use FluxErp\Livewire\DataTables\LeadList as BaseLeadList;
 use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Livewire\Attributes\Renderless;
 
 class LeadList extends BaseLeadList

@@ -12,7 +12,7 @@ use FluxErp\Livewire\Forms\TransactionForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Transaction;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;

@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
+use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
@@ -165,6 +166,7 @@ class ProductForm extends FluxForm
     {
         return [
             'create' => CreateProduct::class,
+            'restore' => RestoreProduct::class,
             'update' => UpdateProduct::class,
             'delete' => DeleteProduct::class,
         ];

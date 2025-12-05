@@ -10,24 +10,22 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Support\Collection\ProductOptionCollection;
-use FluxErp\Traits\Categorizable;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasAttributeTranslations;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasTenantAssignment;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Lockable;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Categorizable;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasAttributeTranslations;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -40,9 +38,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends FluxModel implements HasMedia, HasMediaForeignKey, InteractsWithDataTables
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasTenantAssignment,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, SoftDeletes;
+    use Categorizable, Commentable, Filterable, HasAttributeTranslations, HasFrontendAttributes, HasPackageFactory,
+        HasParentChildRelations, HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -124,11 +122,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
-    }
-
-    public function tenants(): BelongsToMany
-    {
-        return $this->belongsToMany(Tenant::class, 'tenant_product')->using(ProductTenant::class);
     }
 
     public function coverMedia(): BelongsTo
@@ -286,6 +279,11 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier');
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'tenant_product')->using(ProductTenant::class);
     }
 
     public function unit(): BelongsTo

@@ -20,6 +20,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class Project extends Component
 {
@@ -48,14 +50,14 @@ class Project extends Component
             ])
             ->withCount('tasks')
             ->firstOrFail();
+
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $this->project->fill($project);
-        $this->project->additionalColumns = array_intersect_key(
-            $project->toArray(),
-            array_fill_keys(
-                $project->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
         $this->avatar = $project->getAvatarUrl();
 
         $this->availableStates = app(ProjectModel::class)
@@ -128,13 +130,6 @@ class Project extends Component
 
         $this->project->reset();
         $this->project->fill($project);
-        $this->project->additionalColumns = array_intersect_key(
-            $project->toArray(),
-            array_fill_keys(
-                $project->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
     }
 
     #[Renderless]

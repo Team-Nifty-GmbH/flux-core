@@ -30,7 +30,7 @@ class UpdateOrder extends FluxAction
         $users = Arr::pull($this->data, 'users');
 
         $order = resolve_static(Order::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
         if ($order->shipping_costs_net_price) {
             $order->shipping_costs_vat_rate_percentage = 0.190000000;   // TODO: Make this percentage NOT hardcoded!
@@ -44,10 +44,8 @@ class UpdateOrder extends FluxAction
             );
         }
 
-        if (! ($this->data['address_delivery']['id'] ?? false)) {
-            $this->data['address_delivery_id'] = null;
-        } else {
-            $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
+        if (is_array($this->getData('address_delivery'))) {
+            $this->data['address_delivery_id'] = $this->getData('address_delivery.id');
         }
 
         $approvalUserId = $this->getData('approval_user_id', $order->approval_user_id);
@@ -60,7 +58,10 @@ class UpdateOrder extends FluxAction
 
         if (! is_null($addresses)) {
             $addresses = collect($addresses)
-                ->unique(fn ($address) => $address['address_id'] . '_' . $address['address_type_id'])
+                ->unique(fn (array $address) => data_get($address, 'address_id')
+                    . '_'
+                    . data_get($address, 'address_type_id')
+                )
                 ->keyBy('address_id')
                 ->toArray();
 

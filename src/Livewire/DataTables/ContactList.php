@@ -2,10 +2,13 @@
 
 namespace FluxErp\Livewire\DataTables;
 
-use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Contact;
+use FluxErp\Models\User;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -13,8 +16,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ContactList extends BaseDataTable
 {
-    use AllowRecordMerging;
+    use AllowRecordMerging, DataTableHasFormEdit {
+        DataTableHasFormEdit::save as parentSave;
+    }
 
+    #[DataTableForm(modalName: 'create-contact-modal')]
     public ContactForm $contact;
 
     public array $enabledCols = [
@@ -34,22 +40,25 @@ class ContactList extends BaseDataTable
 
     public bool $isSelectable = true;
 
+    public ?int $agentId = null;
+
     protected ?string $includeBefore = 'flux::livewire.contact.contact-list';
 
     protected string $model = Contact::class;
 
-    protected function getTableActions(): array
+    protected function getSelectedActions(): array
     {
-        return [
-            DataTableButton::make()
-                ->text(__('Create'))
-                ->color('indigo')
-                ->icon('plus')
-                ->attributes([
-                    'x-on:click' => '$modalOpen(\'create-contact-modal\')',
-                ])
-                ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
-        ];
+        return array_merge(
+            parent::getSelectedActions(),
+            [
+                DataTableButton::make()
+                    ->text(__('Assign to agent'))
+                    ->when(fn () => resolve_static(UpdateContact::class, 'canPerformAction', [false]))
+                    ->xOnClick(<<<'JS'
+                        $modalOpen('assign-agent-modal');
+                    JS),
+            ]
+        );
     }
 
     #[Renderless]
@@ -59,46 +68,59 @@ class ContactList extends BaseDataTable
     }
 
     #[Renderless]
-    public function restore(int $id): void
+    public function save(): bool
     {
-        $this->contact->fill(
-            resolve_static(Contact::class, 'query')
-                ->withTrashed()
-                ->whereKey($id)
-                ->first()
-        );
+        $result = $this->parentSave();
 
-        try {
-            $this->contact->restore();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
+        if ($result) {
+            $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
         }
 
-        $this->toast()
-            ->success(__(':model restored', ['model' => __('Contact')]))
-            ->send();
-        $this->loadData();
+        return $result;
     }
 
     #[Renderless]
-    public function save(): bool
+    public function assignToAgent(): bool
     {
+        $actions = [];
+
         try {
-            $this->contact->save();
+            if (! resolve_static(User::class, 'query')
+                ->where('is_active', true)
+                ->whereKey($this->agentId)
+                ->exists()
+            ) {
+                throw ValidationException::withMessages(['agentId' => __('The selected agent does not exist.')]);
+            }
+
+            foreach ($this->getSelectedModelsQuery()->pluck('id') as $contactId) {
+                $actions[] = UpdateContact::make([
+                    'id' => $contactId,
+                    'agent_id' => $this->agentId,
+                ])
+                    ->checkPermission()
+                    ->validate();
+            }
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
+        foreach ($actions as $action) {
+            $action->execute();
+        }
+
+        $this->loadData();
         $this->toast()
-            ->success(__(':model saved', ['model' => __('Contact')]))
+            ->success(__('Contacts assigned to agent successfully.'))
             ->send();
 
-        $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
+        return true;
+    }
 
+    protected function supportRestore(): bool
+    {
         return true;
     }
 

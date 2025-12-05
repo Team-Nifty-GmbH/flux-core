@@ -7,7 +7,7 @@ use FluxErp\Livewire\DataTables\TokenList;
 use FluxErp\Livewire\Forms\TokenForm;
 use FluxErp\Models\Permission;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;

@@ -18,6 +18,8 @@ use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class Employee extends Component
 {
@@ -45,6 +47,12 @@ class Employee extends Component
                 'supervisor:id',
             ])
             ->firstOrFail();
+
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
 
         $this->employee->fill($employee);
         $this->avatar = $employee->getAvatarUrl();

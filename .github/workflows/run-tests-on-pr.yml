@@ -153,5 +153,7 @@ jobs:
         if: failure()
         with:
           name: browser-test-artifacts-${{ matrix.browser }}-${{ matrix.php-versions }}
-          path: tests/Browser
+          path: |
+            tests/Browser/Screenshots/
+            vendor/orchestra/testbench-core/laravel/storage/logs/
           retention-days: 7

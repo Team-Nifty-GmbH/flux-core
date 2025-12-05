@@ -15,10 +15,6 @@ class MenuServiceProvider extends ServiceProvider
         if (FluxServiceProvider::$registerFluxRoutes) {
             $this->bootFluxMenu();
         }
-
-        if (FluxServiceProvider::$registerPortalRoutes) {
-            $this->bootPortalMenu();
-        }
     }
 
     public function register(): void
@@ -187,15 +183,5 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.work-time-types');
             }
         );
-    }
-
-    protected function bootPortalMenu(): void
-    {
-        Menu::register(route: 'portal.dashboard', icon: 'home', order: -9999);
-        Menu::register(route: 'portal.calendar', icon: 'calendar');
-        Menu::register(route: 'portal.products', icon: 'square-3-stack-3d');
-        Menu::register(route: 'portal.files', icon: 'folder-open');
-        Menu::register(route: 'portal.orders', icon: 'shopping-bag');
-        Menu::register(route: 'portal.tickets', icon: 'wrench-screwdriver');
     }
 }

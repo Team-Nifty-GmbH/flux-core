@@ -3,11 +3,13 @@
 namespace FluxErp\Livewire\Settings;
 
 use Closure;
-use Exception;
+use FluxErp\Actions\DeviceToken\DeleteDeviceToken;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
+use FluxErp\Models\DeviceToken;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Notifications\FcmTestNotification;
 use FluxErp\Notifications\WebPushTestNotification;
 use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Traits\Livewire\Actions;
@@ -15,6 +17,7 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
@@ -24,6 +27,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use ReflectionFunction;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Throwable;
 
 class Profile extends Component
 {
@@ -32,6 +36,8 @@ class Profile extends Component
     public $avatar;
 
     public array $dirtyNotifications = [];
+
+    public array $fcmDeviceTokens = [];
 
     public array $notificationChannels = [];
 
@@ -119,6 +125,7 @@ class Profile extends Component
 
         $this->loadPushSubscriptions();
         $this->checkWebPushSupport();
+        $this->loadFcmDeviceTokens();
     }
 
     public function render(): View|Factory|Application
@@ -149,6 +156,33 @@ class Profile extends Component
     }
 
     #[Renderless]
+    public function deleteFcmDeviceToken(int $id): void
+    {
+        try {
+            DeleteDeviceToken::make([
+                'id' => resolve_static(DeviceToken::class, 'query')
+                    ->whereMorphedTo('authenticatable', auth()->user())
+                    ->whereKey($id)
+                    ->firstOrFail(['id'])
+                    ->getKey(),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException|ModelNotFoundException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadFcmDeviceTokens();
+
+        $this->toast()
+            ->success(__('Device token deleted'))
+            ->send();
+    }
+
+    #[Renderless]
     public function deletePushSubscription(int $id): void
     {
         try {
@@ -159,10 +193,10 @@ class Profile extends Component
                 ->delete();
             $this->loadPushSubscriptions();
 
-            $this->notification()
+            $this->toast()
                 ->success(__('Push subscription deleted'))
                 ->send();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -172,6 +206,26 @@ class Profile extends Component
         return [
             'user.password' => 'confirmed',
         ];
+    }
+
+    #[Renderless]
+    public function loadFcmDeviceTokens(): void
+    {
+        $this->fcmDeviceTokens = resolve_static(DeviceToken::class, 'query')
+            ->whereMorphedTo('authenticatable', auth()->user())
+            ->where('is_active', true)
+            ->select(['id', 'device_id', 'device_name', 'platform', 'created_at'])
+            ->get()
+            ->map(function (DeviceToken $deviceToken) {
+                return [
+                    'id' => $deviceToken->getKey(),
+                    'device_id' => $deviceToken->device_id,
+                    'device_name' => $deviceToken->device_name ?? __('Unknown Device'),
+                    'platform' => $deviceToken->platform?->value ?? __('Unknown'),
+                    'created_at' => $deviceToken->created_at->format('Y-m-d H:i'),
+                ];
+            })
+            ->toArray();
     }
 
     #[Renderless]
@@ -196,7 +250,7 @@ class Profile extends Component
     #[Renderless]
     public function onPushError(string $message): void
     {
-        $this->notification()
+        $this->toast()
             ->error($message)
             ->send();
     }
@@ -206,7 +260,7 @@ class Profile extends Component
     public function onPushSubscriptionUpdated(): void
     {
         $this->loadPushSubscriptions();
-        $this->notification()
+        $this->toast()
             ->success(__('Web Push activated successfully'))
             ->send();
     }
@@ -223,7 +277,7 @@ class Profile extends Component
             return;
         }
 
-        $this->notification()
+        $this->toast()
             ->success(__(':model saved', ['model' => __('My Profile')]))
             ->send();
 
@@ -252,11 +306,38 @@ class Profile extends Component
         $this->skipRender();
     }
 
+    public function sendFcmTestNotification(): void
+    {
+        if (! resolve_static(DeviceToken::class, 'query')
+            ->whereMorphedTo('authenticatable', auth()->user())
+            ->where('is_active', true)
+            ->exists()
+        ) {
+            $this->toast()
+                ->error(__('No active FCM device tokens found.'))
+                ->send();
+
+            return;
+        }
+
+        try {
+            auth()->user()->notify(app(FcmTestNotification::class));
+        } catch (Throwable $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__('Test notification sent! Check your mobile device.'))
+            ->send();
+    }
+
     public function sendTestNotification(): void
     {
         try {
             if (! auth()->user()->pushSubscriptions()->exists()) {
-                $this->notification()
+                $this->toast()
                     ->error(__('No active push subscriptions found. Please activate Web Push first.'))
                     ->send();
 
@@ -265,10 +346,10 @@ class Profile extends Component
 
             auth()->user()->notify(new WebPushTestNotification());
 
-            $this->notification()
+            $this->toast()
                 ->success(__('Test notification sent! Check your browser notifications.'))
                 ->send();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -282,7 +363,7 @@ class Profile extends Component
                 auth()->id(),
                 app(User::class)->getMorphClass()
             );
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             exception_to_notifications($e, $this);
 
             return;

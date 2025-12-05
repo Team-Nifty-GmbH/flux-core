@@ -14,6 +14,7 @@
         <x-flux::editor
             x-model="edit"
             wire:model="product.description"
+            scope="product"
             :label="__('Description')"
         />
         @show
@@ -384,20 +385,6 @@
         </div>
         @show
     </x-card>
-    @if ($this->additionalColumns)
-        <x-card :header="__('Additional columns')">
-            @section('additional-columns')
-            <div class="flex flex-col gap-4">
-                <x-flux::additional-columns
-                    :table="false"
-                    wire="product"
-                    :model="\FluxErp\Models\Product::class"
-                    :id="$this->product->id"
-                />
-            </div>
-            @show
-        </x-card>
-    @endif
 
     <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
         @section('suppliers')

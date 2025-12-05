@@ -71,23 +71,21 @@
                             {{ Number::currency(bcmul($child->total_net_price, '-1')) }}
                         </td>
                     </tr>
-                    @section('total.child.vats')
-                        @foreach ($child->total_vats ?? [] as $childVat)
-                            <tr>
-                                <td class="text-right">
-                                    {{
-                                        __('Plus :percentage VAT from :total_net', [
-                                            'percentage' => Number::percentage(bcmul($childVat['vat_rate_percentage'], 100)),
-                                            'total_net' => Number::currency(bcmul($childVat['total_net_price'], '-1')),
-                                        ])
-                                    }}
-                                </td>
-                                <td class="w-0 whitespace-nowrap pl-12 text-right">
-                                    {{ Number::currency(bcmul($childVat['total_vat_price'], '-1')) }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    @show
+                    @foreach ($child->total_vats ?? [] as $childVat)
+                        <tr>
+                            <td class="text-right">
+                                {{
+                                    __('Plus :percentage VAT from :total_net', [
+                                        'percentage' => Number::percentage(bcmul($childVat['vat_rate_percentage'], 100)),
+                                        'total_net' => Number::currency(bcmul($childVat['total_net_price'], '-1')),
+                                    ])
+                                }}
+                            </td>
+                            <td class="w-0 whitespace-nowrap pl-12 text-right">
+                                {{ Number::currency(bcmul($childVat['total_vat_price'], '-1')) }}
+                            </td>
+                        </tr>
+                    @endforeach
                 @endforeach
 
                 <tr class="border-b"></tr>

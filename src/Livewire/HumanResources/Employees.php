@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\HumanResources;
 use FluxErp\Livewire\DataTables\EmployeeList as BaseEmployeeList;
 use FluxErp\Livewire\Forms\EmployeeForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Livewire\Attributes\Renderless;
 
 class Employees extends BaseEmployeeList

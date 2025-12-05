@@ -4,7 +4,7 @@ namespace FluxErp\Console\Commands;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Console\Scheduling\Repeatable;
-use FluxErp\Traits\HasDefault;
+use FluxErp\Traits\Model\HasDefault;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -258,7 +258,12 @@ class FluxOptimize extends Command
                     continue;
                 }
 
-                $actions[$class::name()] = $class;
+                $actions[$class::name()] = [
+                    'name' => $class::name(),
+                    'description' => $class::description(),
+                    'models' => $class::models(),
+                    'class' => $class,
+                ];
             }
 
             $allActions[$cacheKey] = $actions;

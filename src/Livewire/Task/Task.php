@@ -43,13 +43,6 @@ class Task extends Component
 
         $this->task->fill($task);
         $this->task->users = $task->users()->pluck('users.id')->toArray();
-        $this->task->additionalColumns = array_intersect_key(
-            $task->toArray(),
-            array_fill_keys(
-                $task->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
 
         if ($task->model && in_array(InteractsWithDataTables::class, class_implements($task->model))) {
             $this->task->modelUrl = $task->model->getUrl();
@@ -160,13 +153,6 @@ class Task extends Component
         $this->task->reset();
         $this->task->fill($task);
         $this->task->users = $task->users()->pluck('users.id')->toArray();
-        $this->task->additionalColumns = array_intersect_key(
-            $task->toArray(),
-            array_fill_keys(
-                $task->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
     }
 
     public function save(): array|bool

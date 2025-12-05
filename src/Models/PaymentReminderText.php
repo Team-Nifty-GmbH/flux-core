@@ -2,15 +2,14 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\HasAttributeTranslations;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\Model\HasAttributeTranslations;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUuid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentReminderText extends FluxModel
 {
-    use CacheModelQueries, HasAttributeTranslations, HasPackageFactory, HasUuid;
+    use HasAttributeTranslations, HasPackageFactory, HasUuid;
 
     protected function casts(): array
     {

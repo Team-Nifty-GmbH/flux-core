@@ -1,3 +1,3 @@
 <div>
-    <x-flux::editor wire:model="tenant.terms_and_conditions" />
+    <x-flux::editor wire:model="tenant.terms_and_conditions" scope="tenant" />
 </div>

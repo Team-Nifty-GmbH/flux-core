@@ -8,7 +8,7 @@ if you want to make a class printable you have to implement the `OffersPrinting`
 namespace App\Models;
 
 use FluxErp\Contracts\OffersPrinting;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\Printable;
 
 class Order extends Model implements OffersPrinting
 {

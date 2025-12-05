@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\EmployeeBalanceAdjustment\CreateEmployeeBalanceAdjustment;
 use FluxErp\Actions\EmployeeBalanceAdjustment\DeleteEmployeeBalanceAdjustment;
 use FluxErp\Actions\EmployeeBalanceAdjustment\UpdateEmployeeBalanceAdjustment;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class EmployeeBalanceAdjustmentForm extends FluxForm

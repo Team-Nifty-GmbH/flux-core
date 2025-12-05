@@ -51,7 +51,9 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use Throwable;
 
 class Order extends Component
 {
@@ -61,7 +63,13 @@ class Order extends Component
 
     public array $deliveryStates = [];
 
+    #[Locked]
+    public bool $disableReplicateModalInputs = false;
+
     public DiscountForm $discount;
+
+    #[Locked]
+    public bool $hasFinalInvoice = false;
 
     public OrderForm $order;
 
@@ -81,6 +89,12 @@ class Order extends Component
 
     public function mount(?string $id = null): void
     {
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $this->fetchOrder($id);
 
         $orderType = resolve_static(OrderType::class, 'query')
@@ -344,22 +358,26 @@ class Order extends Component
     #[Renderless]
     public function fetchContactData(bool $replicate = false): void
     {
-        $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
+        $orderFormName = ! $replicate ? 'order' : 'replicateOrder';
 
         $contact = resolve_static(Contact::class, 'query')
-            ->whereKey($this->{$orderVariable}->contact_id)
+            ->whereKey($this->{$orderFormName}->contact_id)
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderVariable}->tenant_id = $contact?->tenant_id
+        $this->{$orderFormName}->tenant_id = $contact?->tenant_id
             ?? resolve_static(Tenant::class, 'default')->getKey();
-        $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
-        $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderVariable}->language_id = $contact?->mainAddress?->language_id
+        $this->{$orderFormName}->agent_id = $contact?->agent_id ?? $this->{$orderFormName}->agent_id;
+        $this->{$orderFormName}->contact_bank_connection_id = $contact?->contactBankConnections()
+            ->latest()
+            ->value('id');
+        $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
             ?? resolve_static(Language::class, 'default')->getKey();
-        $this->{$orderVariable}->price_list_id = $contact?->price_list_id;
-        $this->{$orderVariable}->payment_type_id = $contact?->payment_type_id;
+        $this->{$orderFormName}->price_list_id = $contact?->price_list_id
+            ?? resolve_static(PriceList::class, 'default')?->getKey();
+        $this->{$orderFormName}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
             $this->order->address_invoice = resolve_static(Address::class, 'query')
@@ -471,6 +489,24 @@ class Order extends Component
                     'class' => 'w-full',
                     'wire:click' => 'replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
                 ]),
+            DataTableButton::make()
+                ->text(__('New Order for Final Invoice'))
+                ->icon('shopping-bag')
+                ->color('indigo')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && is_null($this->order->parent_id)
+                        && $this->order->invoice_number
+                        && $this->hasFinalInvoice
+                        && resolve_static(OrderType::class, 'query')
+                            ->whereKey($this->order->order_type_id)
+                            ->where('order_type_enum', OrderTypeEnum::Order->value)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'wire:click' => 'replicateForFinalInvoice()',
+                ]),
         ];
     }
 
@@ -559,6 +595,7 @@ class Order extends Component
                 'currency_id',
                 'order_type_id',
                 'price_list_id',
+                'payment_discount_percent',
                 'invoice_number',
             ]);
 
@@ -627,6 +664,23 @@ class Order extends Component
         }
 
         $this->replicateOrder->order_positions = null;
+        $this->replicateOrder->set_new_as_parent = false;
+        $this->disableReplicateModalInputs = false;
+
+        $this->js(<<<'JS'
+            $modalOpen('replicate-order');
+        JS);
+    }
+
+    #[Renderless]
+    public function replicateForFinalInvoice(): void
+    {
+        $this->replicateOrder->fill($this->order->toArray());
+        $this->fetchContactData();
+
+        $this->replicateOrder->order_positions = null;
+        $this->replicateOrder->set_new_as_parent = true;
+        $this->disableReplicateModalInputs = true;
 
         $this->js(<<<'JS'
             $modalOpen('replicate-order');
@@ -852,6 +906,8 @@ class Order extends Component
                 'mime_type' => $invoice->mime_type,
             ];
         }
+
+        $this->hasFinalInvoice = (bool) $order->getFirstMedia('final-invoice');
     }
 
     protected function getAvailableStates(array|string $fieldNames): void

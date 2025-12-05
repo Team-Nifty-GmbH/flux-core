@@ -7,7 +7,7 @@ use FluxErp\Livewire\Forms\BankConnectionForm;
 use FluxErp\Models\Currency;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 
 class BankConnections extends BankConnectionList
 {

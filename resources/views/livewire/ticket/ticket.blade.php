@@ -81,75 +81,11 @@
                                 wire:model="ticket.title"
                             />
                             <x-flux::editor
-                                :label="__('Description')"
                                 wire:model="ticket.description"
+                                scope="ticket"
+                                :label="__('Description')"
                             />
                         </x-card>
-                        <div
-                            x-cloak
-                            x-show="Object.keys($wire.ticket.availableAdditionalColumns)?.length > 0"
-                        >
-                            <x-card>
-                                <x-slot:header>
-                                    <div
-                                        class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0"
-                                    >
-                                        <x-label>
-                                            {{ __('Additional columns') }}
-                                        </x-label>
-                                    </div>
-                                </x-slot>
-                                @section('content.additional-columns')
-                                <div class="flex flex-col gap-4">
-                                    <template
-                                        x-for="(additionalColumn, name) in $wire.ticket.availableAdditionalColumns"
-                                    >
-                                        <div>
-                                            <x-checkbox
-                                                x-cloak
-                                                x-show="additionalColumn.field_type === 'checkbox'"
-                                                x-model="$wire.ticket.additional_columns[name].value"
-                                            >
-                                                <x-slot:label>
-                                                    <span
-                                                        x-text="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                                    ></span>
-                                                </x-slot>
-                                            </x-checkbox>
-                                            <x-input
-                                                x-cloak
-                                                x-show="additionalColumn.field_type !== 'checkbox' && additionalColumn.field_type !== 'select'"
-                                                x-model="$wire.ticket.additional_columns[name].value"
-                                                x-bind:class="(additionalColumn.field_type === 'color') && '!w-auto'"
-                                                x-bind:type="additionalColumn.field_type"
-                                            ></x-input>
-                                            <div
-                                                x-cloak
-                                                x-show="additionalColumn.field_type === 'select'"
-                                            >
-                                                <x-select.native
-                                                    x-model="$wire.ticket.additional_columns[name].value"
-                                                    x-bind:type="additionalColumn.field_type"
-                                                >
-                                                    <option selected>
-                                                        {{ __('Please select') }}
-                                                    </option>
-                                                    <template
-                                                        x-for="value in additionalColumn.values"
-                                                    >
-                                                        <option
-                                                            x-bind:value="value"
-                                                            x-text="value"
-                                                        ></option>
-                                                    </template>
-                                                </x-select.native>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                                @show
-                            </x-card>
-                        </div>
                         @section('content.widget')
                         @if ($ticket->model_type &&
                             ($widgetComponent = resolve_static(
@@ -203,9 +139,8 @@
                         />
                         <x-select.styled
                             :disabled="! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
-                            x-on:select="$wire.updateAdditionalColumns($event.detail.select.value)"
                             :label="__('Ticket Type')"
-                            wire:model.live="ticket.ticket_type_id"
+                            wire:model="ticket.ticket_type_id"
                             select="label:name|value:id"
                             :options="$ticketTypes"
                         />

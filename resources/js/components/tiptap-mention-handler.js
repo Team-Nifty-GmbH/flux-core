@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Mention from '@tiptap/extension-mention';
+import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 
 let suggestionPopup = null;
 
@@ -69,20 +70,50 @@ export const MentionConfig = (searchModel, element) =>
 
             render: () => {
                 let suggestionElement = document.createElement('div');
-                suggestionElement.className = 'suggestion-popup';
+                suggestionElement.className =
+                    'suggestion-popup absolute z-50 bg-white dark:bg-secondary-800 rounded-md shadow-lg border border-secondary-200 dark:border-secondary-700 p-2';
+                suggestionElement.style.display = 'none';
+                let virtualReference = null;
+
+                const updatePosition = async () => {
+                    if (!virtualReference || !suggestionElement) return;
+
+                    const { x, y } = await computePosition(
+                        virtualReference,
+                        suggestionElement,
+                        {
+                            placement: 'bottom-start',
+                            middleware: [
+                                offset(8),
+                                flip(),
+                                shift({ padding: 5 }),
+                            ],
+                        },
+                    );
+
+                    Object.assign(suggestionElement.style, {
+                        left: `${x}px`,
+                        top: `${y}px`,
+                    });
+                };
 
                 return {
                     onStart: (props) => {
-                        suggestionPopup = window.tippy(element, {
-                            content: suggestionElement,
-                            showOnCreate: true,
-                            interactive: true,
-                            trigger: 'manual',
-                            placement: 'bottom-start',
-                            getReferenceClientRect: props.clientRect,
-                        });
+                        if (!suggestionPopup) {
+                            element.parentElement.appendChild(
+                                suggestionElement,
+                            );
+                            Alpine.initTree(suggestionElement);
+                            suggestionPopup = suggestionElement;
+                        }
 
+                        virtualReference = {
+                            getBoundingClientRect: props.clientRect,
+                        };
+
+                        suggestionElement.style.display = 'block';
                         updateSuggestionItems(suggestionElement, props);
+                        updatePosition();
                     },
 
                     onUpdate: (props) => {
@@ -92,29 +123,29 @@ export const MentionConfig = (searchModel, element) =>
 
                         updateSuggestionItems(suggestionElement, props);
 
-                        if (suggestionPopup) {
-                            suggestionPopup.setProps({
-                                getReferenceClientRect: props.clientRect,
-                            });
-                        }
+                        virtualReference = {
+                            getBoundingClientRect: props.clientRect,
+                        };
+
+                        updatePosition();
                     },
 
                     onKeyDown: (props) => {
                         if (props.event.key === 'Escape') {
-                            if (suggestionPopup) {
-                                suggestionPopup.hide();
+                            if (suggestionElement) {
+                                suggestionElement.style.display = 'none';
                             }
 
                             return true;
                         }
 
-                        // Add custom key handling if needed
                         return false;
                     },
 
                     onExit: () => {
-                        if (suggestionPopup) {
-                            suggestionPopup.destroy();
+                        if (suggestionElement) {
+                            suggestionElement.style.display = 'none';
+                            suggestionElement.remove();
                             suggestionPopup = null;
                         }
                     },

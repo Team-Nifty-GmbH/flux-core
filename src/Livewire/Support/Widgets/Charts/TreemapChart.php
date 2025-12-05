@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Support\Widgets\Charts;
 
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Js;

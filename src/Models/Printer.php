@@ -3,7 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\PrinterUser;
-use FluxErp\Traits\Filterable;
+use FluxErp\Traits\Model\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 

@@ -31,7 +31,10 @@
                 },
             }"
         >
-            <div class="space-y-2.5 divide-y divide-secondary-200">
+            <div
+                class="space-y-2.5 divide-y divide-secondary-200"
+                x-bind:class="$wire.disableReplicateModalInputs && 'pointer-events-none'"
+            >
                 <x-select.styled
                     :label="__('Order type')"
                     wire:model="replicateOrder.order_type_id"
@@ -707,8 +710,6 @@
                                     required
                                     autocomplete="off"
                                     wire:model="order.language_id"
-                                    x-bind:disabled="$wire.order.is_locked"
-                                    :disabled="$order->is_locked"
                                     select="label:name|value:id"
                                     :options="$languages"
                                 />

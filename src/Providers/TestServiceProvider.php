@@ -99,7 +99,7 @@ class TestServiceProvider extends ServiceProvider
                     if (
                         is_null($modalName) &&
                         in_array(
-                            \FluxErp\Traits\Livewire\SupportsAutoRender::class,
+                            \FluxErp\Traits\Livewire\Form\SupportsAutoRender::class,
                             class_uses_recursive($this->instance()->{$formPropertyName})
                         )
                     ) {

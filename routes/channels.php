@@ -1,10 +1,16 @@
 <?php
 
+use FluxErp\Http\Controllers\BroadcastingBatchAuthController;
 use FluxErp\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/broadcasting/auth/batch', BroadcastingBatchAuthController::class)
+    ->middleware(['web', 'auth:web'])
+    ->name('broadcasting.auth.batch');
 
 /*
 |--------------------------------------------------------------------------

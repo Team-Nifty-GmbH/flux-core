@@ -5,9 +5,8 @@ namespace FluxErp\Actions\Ticket;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Events\Ticket\TicketAssignedEvent;
 use FluxErp\Models\Ticket;
-use FluxErp\Models\TicketType;
 use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
-use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Model\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
@@ -54,18 +53,5 @@ class UpdateTicket extends FluxAction
         }
 
         return $ticket->refresh();
-    }
-
-    protected function prepareForValidation(): void
-    {
-        if ($this->data['ticket_type_id'] ?? false) {
-            $this->rules = array_merge(
-                $this->rules,
-                resolve_static(TicketType::class, 'query')
-                    ->whereKey($this->data['ticket_type_id'])
-                    ->first()
-                    ?->hasAdditionalColumnsValidationRules() ?? []
-            );
-        }
     }
 }

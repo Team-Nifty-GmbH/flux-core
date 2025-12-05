@@ -23,11 +23,17 @@ class ComponentServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $livewireNamespace = 'FluxErp\\Livewire\\';
+        $cachePath = $this->app->bootstrapPath('cache/flux-livewire-components.php');
+        $fromCache = file_exists($cachePath);
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
             try {
-                if (is_a($class, Component::class, true)
-                    && ! (new ReflectionClass($class))->isAbstract()
+                if (
+                    $fromCache
+                    || (
+                        is_a($class, Component::class, true)
+                        && ! (new ReflectionClass($class))->isAbstract()
+                    )
                 ) {
                     Livewire::component($alias, $class);
                 }

@@ -3,7 +3,7 @@
 namespace FluxErp\Rules;
 
 use Closure;
-use FluxErp\Traits\HasAttributeTranslations;
+use FluxErp\Traits\Model\HasAttributeTranslations;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 

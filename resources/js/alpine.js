@@ -1,6 +1,7 @@
 import folders from './components/folders';
 import setupEditor from './components/tiptap';
-import editorFontSizeColorHandler from './components/tiptap-font-size-color-handler.js';
+import floatingUiDropdown from './components/tiptap-dropdown.js';
+import tiptapExpandable from './components/tiptap-expandable.js';
 import workTime from './components/work-time.js';
 import calendar from './components/calendar.js';
 import dashboard from './components/dashboard';
@@ -9,6 +10,7 @@ import addressMap from './components/address-map';
 import filePond from './components/file-pond';
 import templateOutlet from './components/template-outlet';
 import sort from '@alpinejs/sort';
+import collapse from '@alpinejs/collapse';
 import navigationSpinner from './components/navigation-spinner.js';
 import wireNavigation from './components/wire-navigation.js';
 import comments from './components/comments.js';
@@ -29,7 +31,8 @@ dayjs.extend(utc);
 window.dayjs = dayjs;
 window.calendar = calendar;
 window.setupEditor = setupEditor;
-window.editorFontSizeColorHandler = editorFontSizeColorHandler;
+window.floatingUiDropdown = floatingUiDropdown;
+window.tiptapExpandable = tiptapExpandable;
 window.workTime = workTime;
 window.dashboard = dashboard;
 window.addressMap = addressMap;
@@ -49,6 +52,7 @@ navigationSpinner();
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.plugin(sort);
+    window.Alpine.plugin(collapse);
 });
 
 Alpine.directive('currency', (el, { expression }, { evaluate }) => {

@@ -6,7 +6,7 @@ use FluxErp\Contracts\Targetable;
 use FluxErp\Livewire\DataTables\TargetList;
 use FluxErp\Livewire\Forms\TargetForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;

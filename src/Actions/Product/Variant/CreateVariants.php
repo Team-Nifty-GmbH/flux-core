@@ -77,6 +77,7 @@ class CreateVariants extends FluxAction
     protected function variantExists(array $configuration): bool
     {
         return resolve_static(Product::class, 'query')
+            ->withTrashed()
             ->where('parent_id', data_get($this->data, 'parent_id'))
             ->whereHas('productOptions', function (Builder $query) use ($configuration) {
                 return $query

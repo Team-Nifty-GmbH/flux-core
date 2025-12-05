@@ -3,9 +3,9 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\SortableTrait;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

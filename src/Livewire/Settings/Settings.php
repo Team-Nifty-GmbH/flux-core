@@ -14,6 +14,7 @@ use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Traits\HasRoles;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Settings extends Component
 {
@@ -30,8 +31,14 @@ class Settings extends Component
         $this->settings = $this->prepareSettings(data_get(Menu::forGuard('web'), 'settings.children', []));
 
         if ($this->settingComponent) {
-            $this->setting = collect($this->settings)
+            $settings = collect($this->settings)
                 ->firstWhere('component', $this->settingComponent);
+
+            if (is_null($settings)) {
+                throw new NotFoundHttpException('Settings not found.');
+            }
+
+            $this->settings = $settings;
         }
     }
 

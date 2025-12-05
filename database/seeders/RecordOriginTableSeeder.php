@@ -3,7 +3,7 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\RecordOrigin;
-use FluxErp\Traits\HasRecordOrigin;
+use FluxErp\Traits\Model\HasRecordOrigin;
 use Illuminate\Database\Seeder;
 
 class RecordOriginTableSeeder extends Seeder

@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
@@ -203,32 +202,4 @@ test('update serial number validation fails', function (): void {
 
     $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
     $response->assertUnprocessable();
-});
-
-test('update serial number with additional columns', function (): void {
-    $additionalColumn = AdditionalColumn::factory()->create([
-        'model_type' => morph_alias(SerialNumber::class),
-    ]);
-
-    $serialNumber = [
-        'id' => $this->serialNumbers[0]->id,
-        $additionalColumn->name => 'New Value',
-    ];
-
-    $this->user->givePermissionTo($this->permissions['update']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-    $response->assertOk();
-
-    $responseSerialNumber = json_decode($response->getContent())->data;
-
-    $dbSerialNumber = SerialNumber::query()
-        ->whereKey($responseSerialNumber->id)
-        ->first();
-
-    expect($dbSerialNumber->id)->toEqual($serialNumber['id']);
-    expect($dbSerialNumber->{$additionalColumn->name})->toEqual($serialNumber[$additionalColumn->name]);
-    expect($dbSerialNumber->serial_number)->toEqual($this->serialNumbers[0]->serial_number);
-    expect($dbSerialNumber->serial_number_range_id)->toEqual($this->serialNumbers[0]->serial_number_range_id);
 });

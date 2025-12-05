@@ -8,6 +8,7 @@
         />
         <x-flux::editor
             wire:model="vatRate.footer_text"
+            scope="vatRate"
             :label="__('Footer Text')"
         />
         <div class="mt-2">

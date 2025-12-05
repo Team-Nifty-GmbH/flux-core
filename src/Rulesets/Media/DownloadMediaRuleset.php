@@ -7,13 +7,11 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Model\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
 
 class DownloadMediaRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = Media::class;
 
     public function rules(): array

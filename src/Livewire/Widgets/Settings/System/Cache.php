@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Widgets\Settings\System;
 
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Cache\Console\ClearCommand;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Artisan;

@@ -47,10 +47,6 @@ return [
             'driver' => 'sanctum',
             'provider' => 'tokens',
         ],
-        'address' => [
-            'driver' => 'session',
-            'provider' => 'addresses',
-        ],
     ],
 
     /*
@@ -75,10 +71,6 @@ return [
             'driver' => 'eloquent',
             'model' => FluxErp\Models\User::class,
         ],
-        'addresses' => [
-            'driver' => 'eloquent',
-            'model' => FluxErp\Models\Address::class,
-        ],
         'tokens' => [
             'driver' => 'eloquent',
             'model' => FluxErp\Models\Token::class,
@@ -88,12 +80,6 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-        ],
-
-        'addresses' => [
-            'provider' => 'addresses',
             'table' => 'password_reset_tokens',
             'expire' => 60,
         ],

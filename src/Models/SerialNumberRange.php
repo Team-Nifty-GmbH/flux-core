@@ -2,13 +2,13 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTenantAssignment;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,6 +49,11 @@ class SerialNumberRange extends FluxModel
         return $this->belongsTo(Tenant::class);
     }
 
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
     public function getCurrentStyled(): array|string|Translator|Application|null
     {
         return __(
@@ -57,11 +62,6 @@ class SerialNumberRange extends FluxModel
             $this->suffix,
             $this->variables()
         );
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
     }
 
     private function variables(): array

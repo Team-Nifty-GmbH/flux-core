@@ -1,7 +1,6 @@
 <?php
 
 use Carbon\Carbon;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
@@ -62,10 +61,10 @@ test('create contact', function (): void {
         ->first();
 
     expect($dbContact)->not->toBeEmpty();
-    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
-    expect($dbContact->customer_number)->toEqual($contact['customer_number']);
     expect($dbContact->payment_type_id)->toEqual(PaymentType::default()?->id);
     expect($dbContact->price_list_id)->toEqual(PriceList::default()?->id);
+    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
+    expect($dbContact->customer_number)->toEqual($contact['customer_number']);
     expect($dbContact->creditor_number)->not->toBeNull();
     expect($dbContact->payment_target_days)->toBeNull();
     expect($dbContact->payment_reminder_days_1)->toBeNull();
@@ -82,9 +81,9 @@ test('create contact', function (): void {
 
 test('create contact maximum', function (): void {
     $contact = [
-        'tenant_id' => $this->contacts[0]->tenant_id,
         'payment_type_id' => $this->paymentTypes[1]->id,
         'price_list_id' => null,
+        'tenant_id' => $this->contacts[0]->tenant_id,
         'customer_number' => 'Not Existing Customer Number' . Str::random(),
         'creditor_number' => Str::random(),
         'payment_target_days' => rand(1, 1024),
@@ -92,7 +91,7 @@ test('create contact maximum', function (): void {
         'payment_reminder_days_2' => rand(1, 1024),
         'payment_reminder_days_3' => rand(1, 1024),
         'discount_days' => rand(0, 1024),
-        'discount_percent' => rand(0, 100),
+        'discount_percent' => rand(1, 100) / 100,
         'credit_line' => rand(0, 8192),
         'has_sensitive_reminder' => true,
         'has_delivery_lock' => true,
@@ -112,9 +111,9 @@ test('create contact maximum', function (): void {
         ->first();
 
     expect($dbContact)->not->toBeEmpty();
-    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
     expect($dbContact->payment_type_id)->toEqual($contact['payment_type_id']);
     expect($dbContact->price_list_id)->toEqual(PriceList::default()->getKey());
+    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
     expect($dbContact->customer_number)->toEqual($contact['customer_number']);
     expect($dbContact->creditor_number)->toEqual($contact['creditor_number']);
     expect($dbContact->payment_target_days)->toEqual($contact['payment_target_days']);
@@ -144,11 +143,6 @@ test('create contact validation fails', function (): void {
 });
 
 test('delete contact', function (): void {
-    AdditionalColumn::factory()->create([
-        'name' => Str::random(),
-        'model_type' => Contact::class,
-    ]);
-
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -286,9 +280,9 @@ test('update contact customer number already exists', function (): void {
 test('update contact maximum', function (): void {
     $contact = [
         'id' => $this->contacts[0]->id,
-        'tenant_id' => $this->contacts[2]->tenant_id,
         'payment_type_id' => $this->paymentTypes[2]->id,
         'price_list_id' => null,
+        'tenant_id' => $this->contacts[2]->tenant_id,
         'customer_number' => 'Not Existing Customer Number' . Str::random(),
         'creditor_number' => Str::random(),
         'payment_target_days' => rand(1, 1024),
@@ -296,7 +290,7 @@ test('update contact maximum', function (): void {
         'payment_reminder_days_2' => rand(1, 1024),
         'payment_reminder_days_3' => rand(1, 1024),
         'discount_days' => rand(0, 1024),
-        'discount_percent' => rand(0, 100),
+        'discount_percent' => rand(1, 100) / 100,
         'credit_line' => rand(0, 8192),
         'has_sensitive_reminder' => true,
         'has_delivery_lock' => true,
@@ -315,9 +309,9 @@ test('update contact maximum', function (): void {
 
     expect($dbContact)->not->toBeEmpty();
     expect($dbContact->id)->toEqual($contact['id']);
-    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
     expect($dbContact->payment_type_id)->toEqual($contact['payment_type_id']);
     expect($dbContact->price_list_id)->toEqual($contact['price_list_id']);
+    expect($dbContact->tenant_id)->toEqual($contact['tenant_id']);
     expect($dbContact->customer_number)->toEqual($contact['customer_number']);
     expect($dbContact->creditor_number)->toEqual($contact['creditor_number']);
     expect($dbContact->payment_target_days)->toEqual($contact['payment_target_days']);

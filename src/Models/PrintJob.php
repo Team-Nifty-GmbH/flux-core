@@ -3,7 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\HasMediaForeignKey;
-use FluxErp\Traits\Filterable;
+use FluxErp\Traits\Model\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrintJob extends FluxModel implements HasMediaForeignKey

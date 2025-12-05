@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Employee\CreateEmployee;
 use FluxErp\Actions\Employee\DeleteEmployee;
 use FluxErp\Actions\Employee\UpdateEmployee;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class EmployeeForm extends FluxForm

@@ -61,6 +61,7 @@
         />
         <x-flux::editor
             wire:model="paymentType.description"
+            scope="paymentType"
             :label="__('Description')"
         />
     </div>

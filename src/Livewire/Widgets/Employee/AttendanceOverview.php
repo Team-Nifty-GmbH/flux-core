@@ -8,7 +8,7 @@ use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;

@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\WorkTimeModel\CreateWorkTimeModel;
 use FluxErp\Actions\WorkTimeModel\DeleteWorkTimeModel;
 use FluxErp\Actions\WorkTimeModel\UpdateWorkTimeModel;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 

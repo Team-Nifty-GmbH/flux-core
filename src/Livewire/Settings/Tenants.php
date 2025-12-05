@@ -154,11 +154,6 @@ class Tenants extends TenantList
         JS);
     }
 
-    public function showCustomerPortal(Tenant $record): void
-    {
-        $this->redirect(route('settings.customer-portal', ['tenant' => $record->id]), true);
-    }
-
     public function updatingTab(): void
     {
         $this->forceRender();

@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\TicketType;
 use FluxErp\Rulesets\TicketType\UpdateTicketTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 
 class UpdateTicketType extends FluxAction
 {
@@ -23,18 +22,12 @@ class UpdateTicketType extends FluxAction
     public function performAction(): Model
     {
         $ticketType = resolve_static(TicketType::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $roles = Arr::pull($this->data, 'roles');
-
-        $ticketType->fill($this->data);
+        $ticketType->fill($this->getData());
         $ticketType->save();
 
-        if (! is_null($roles)) {
-            $ticketType->roles()->sync($roles);
-        }
-
-        return $ticketType->withoutRelations()->fresh();
+        return $ticketType->withoutRelations()->refresh();
     }
 }

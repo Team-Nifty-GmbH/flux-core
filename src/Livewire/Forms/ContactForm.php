@@ -90,6 +90,11 @@ class ContactForm extends FluxForm
         }
 
         parent::fill($values);
+
+        // Convert discount percent from decimal to percent for display
+        $this->discount_percent = ! is_null($this->discount_percent)
+            ? bcmul($this->discount_percent, 100)
+            : null;
     }
 
     public function reset(...$properties): void
@@ -99,6 +104,18 @@ class ContactForm extends FluxForm
         $this->main_address['tenant_id'] = resolve_static(Tenant::class, 'query')->where('is_active', true)->count() === 1
             ? resolve_static(Tenant::class, 'query')->where('is_active', true)->first()->id
             : null;
+    }
+
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+
+        // Convert discount percent from percent to decimal for storage
+        $data['discount_percent'] = ! is_null($this->discount_percent)
+            ? bcdiv($this->discount_percent, 100)
+            : null;
+
+        return $data;
     }
 
     protected function getActions(): array

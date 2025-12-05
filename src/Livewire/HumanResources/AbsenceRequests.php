@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\HumanResources;
 use FluxErp\Livewire\DataTables\AbsenceRequestList;
 use FluxErp\Livewire\Forms\AbsenceRequestForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Livewire\Attributes\Renderless;
 
 class AbsenceRequests extends AbsenceRequestList

@@ -5,8 +5,8 @@ namespace FluxErp\Models\Pivots;
 use Carbon\Carbon;
 use FluxErp\Models\Employee;
 use FluxErp\Models\WorkTimeModel;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeWorkTimeModel extends FluxPivot

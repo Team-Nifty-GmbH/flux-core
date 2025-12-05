@@ -6,7 +6,7 @@ use FluxErp\Actions\User\CreateUser;
 use FluxErp\Actions\User\DeleteUser;
 use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Models\User;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class UserForm extends FluxForm

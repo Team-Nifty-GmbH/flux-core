@@ -34,7 +34,7 @@ class ReplicateOrder extends FluxAction
             ->value('order_type_enum');
 
         $originalOrder = resolve_static(Order::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->when(
                 $getOrderPositionsFromOrigin,
                 fn (Builder $query) => $query->with([
@@ -43,12 +43,11 @@ class ReplicateOrder extends FluxAction
                         ->orderBy('slug_position'),
                 ])
             )
-            ->first()
-            ->toArray();
+            ->firstOrFail();
 
         $orderData = array_merge(
-            $originalOrder,
-            $this->data,
+            $originalOrder->toArray(),
+            $this->getData(),
         );
 
         unset(
@@ -122,10 +121,10 @@ class ReplicateOrder extends FluxAction
 
                         return $position;
                     },
-                    $originalOrder['order_positions'] ?? []
+                    $originalOrder->orderPositions?->toArray() ?? []
                 );
             } else {
-                $orderPositions = $originalOrder['order_positions'] ?? [];
+                $orderPositions = $originalOrder->orderPositions?->toArray() ?? [];
             }
         }
 
@@ -158,6 +157,11 @@ class ReplicateOrder extends FluxAction
 
         $order->calculatePrices()->save();
 
+        if ($this->getData('set_new_as_parent')) {
+            $originalOrder->parent_id = $order->id;
+            $originalOrder->save();
+        }
+
         return $order->withoutRelations()->fresh();
     }
 
@@ -168,10 +172,23 @@ class ReplicateOrder extends FluxAction
         $orderPositions = data_get($this->data, 'order_positions', []);
         $ids = array_column($orderPositions ?? [], 'id');
 
+        if ($this->getData('set_new_as_parent')
+            && resolve_static(Order::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->whereNotNull('parent_id')
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'set_new_as_parent' => ['The given order already has a parent.'],
+            ])
+                ->errorBag('replicateOrder');
+        }
+
         if (count($ids) !== count(array_unique($ids))) {
             throw ValidationException::withMessages([
                 'order_positions' => ['No duplicate order position ids allowed.'],
-            ])->errorBag('replicateOrder');
+            ])
+                ->errorBag('replicateOrder');
         }
 
         if ($orderPositions) {
@@ -182,7 +199,8 @@ class ReplicateOrder extends FluxAction
             ) {
                 throw ValidationException::withMessages([
                     'order_positions' => ['Only order positions from given order allowed.'],
-                ])->errorBag('replicateOrder');
+                ])
+                    ->errorBag('replicateOrder');
             }
         }
     }

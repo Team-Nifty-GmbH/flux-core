@@ -40,8 +40,15 @@ export default function (
             }
 
             if (typeof $wire[propertyName] !== 'function') {
-                // side-effect -> update map on address change
-                this.$watch('$wire.' + propertyName, this.onChange.bind(this));
+                // side-effect -> update map only when coordinates change
+                this.$watch(
+                    '$wire.' + propertyName + '.latitude',
+                    this.onChange.bind(this),
+                );
+                this.$watch(
+                    '$wire.' + propertyName + '.longitude',
+                    this.onChange.bind(this),
+                );
             }
         },
         addMarkers(addresses = null) {
@@ -160,7 +167,6 @@ export default function (
         },
         addUserMarker() {
             navigator.geolocation.getCurrentPosition((position) => {
-                let icon = null;
                 let options = {};
                 if (userIcon) {
                     options.icon = L.divIcon({

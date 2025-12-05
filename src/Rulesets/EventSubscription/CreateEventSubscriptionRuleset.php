@@ -6,7 +6,7 @@ use FluxErp\Models\EventSubscription;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Model\Notifiable;
 
 class CreateEventSubscriptionRuleset extends FluxRuleset
 {

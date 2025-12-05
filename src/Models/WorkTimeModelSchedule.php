@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkTimeModelSchedule extends FluxModel

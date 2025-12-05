@@ -11,8 +11,6 @@ use Livewire\Form;
 
 class ProjectForm extends Form
 {
-    public array $additionalColumns = [];
-
     public ?string $budget = null;
 
     public ?int $tenant_id = null;

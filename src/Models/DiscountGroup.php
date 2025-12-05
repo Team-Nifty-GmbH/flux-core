@@ -2,9 +2,9 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class DiscountGroup extends FluxModel

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\Model\HasUuid;
 
 class Favorite extends FluxModel
 {

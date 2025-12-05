@@ -3,17 +3,17 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\PaymentTypeTenant;
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasDefault;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTenantAssignment;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Models\Pivots\ProductTenant;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasDefault;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,7 +24,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Tenant extends FluxModel implements HasMedia
 {
-    use CacheModelQueries, Filterable, HasDefault, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
+    use Filterable, HasDefault, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected $appends = [
@@ -90,6 +90,11 @@ class Tenant extends FluxModel implements HasMedia
     {
         return $this->belongsToMany(PaymentType::class, 'tenant_payment_type')
             ->using(PaymentTypeTenant::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_tenant')->using(ProductTenant::class);
     }
 
     public function projects(): HasMany

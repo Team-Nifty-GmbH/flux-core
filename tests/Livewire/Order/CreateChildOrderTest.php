@@ -34,7 +34,6 @@ beforeEach(function (): void {
         ->create();
     $vatRate = VatRate::factory()->create();
     $language = Language::factory()->create();
-    $warehouse = Warehouse::factory()->create();
 
     $orderType = OrderType::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
@@ -65,22 +64,24 @@ beforeEach(function (): void {
         'price_list_id' => $priceList->id,
         'payment_type_id' => $paymentType->id,
         'language_id' => $language->id,
-        'warehouse_id' => $warehouse->id,
         'invoice_date' => now(),
     ]);
 
     $unit = Unit::factory()->create();
     $product = Product::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'unit_id' => $unit->id,
     ]);
+    $product->tenants()->attach($this->dbTenant->getKey());
 
+    $warehouse = Warehouse::factory()->create();
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $this->parentOrder->id,
         'product_id' => $product->id,
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->id,
+        'warehouse_id' => $warehouse->getKey(),
         'amount' => 10,
+        'signed_amount' => 10,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
         'total_net_price' => 1000,

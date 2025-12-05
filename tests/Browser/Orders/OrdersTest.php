@@ -8,6 +8,8 @@ use FluxErp\Models\OrderType;
 use Illuminate\Support\Str;
 
 test('can create new order', function (): void {
+    OrderType::query()->delete();
+
     $orderType = OrderType::factory()
         ->create([
             'tenant_id' => $this->dbTenant->getKey(),

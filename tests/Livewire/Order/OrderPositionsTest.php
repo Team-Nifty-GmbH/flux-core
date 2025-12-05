@@ -53,9 +53,9 @@ beforeEach(function (): void {
     ]);
 
     $this->product = Product::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $this->vatRate->id,
     ]);
+    $this->product->tenants()->attach($this->dbTenant->getKey());
 
     Price::factory()->create([
         'product_id' => $this->product->id,
