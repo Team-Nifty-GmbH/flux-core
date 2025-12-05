@@ -154,11 +154,6 @@ class Clients extends ClientList
         JS);
     }
 
-    public function showCustomerPortal(Client $record): void
-    {
-        $this->redirect(route('settings.customer-portal', ['client' => $record->id]), true);
-    }
-
     public function updatingTab(): void
     {
         $this->forceRender();

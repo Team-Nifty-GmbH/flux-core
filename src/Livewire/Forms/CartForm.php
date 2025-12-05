@@ -21,8 +21,6 @@ class CartForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?bool $is_portal_public = null;
-
     public ?bool $is_public = null;
 
     public ?string $name = null;
@@ -30,8 +28,8 @@ class CartForm extends FluxForm
     #[Renderless]
     public function isUserOwned(): bool
     {
-        return ! ($this->is_public || $this->is_portal_public)
-            || auth()->user()->is(morph_to($this->authenticatable_type, $this->authenticatable_id));
+        return ! $this->is_public
+            || auth()->user()?->is(morph_to($this->authenticatable_type, $this->authenticatable_id));
     }
 
     protected function getActions(): array

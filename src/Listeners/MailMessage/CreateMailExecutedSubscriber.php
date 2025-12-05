@@ -107,7 +107,7 @@ class CreateMailExecutedSubscriber
                 'client_id' => $this->address->client_id
                     ?? resolve_static(Client::class, 'default')->getKey(),
                 'authenticatable_type' => morph_alias(Address::class),
-                'authenticatable_id' => $this->address->id,
+                'authenticatable_id' => $this->address->getKey(),
                 'title' => $communication->subject,
                 'description' => $communication->text_body ?? $communication->html_body,
             ])

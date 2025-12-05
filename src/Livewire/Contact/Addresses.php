@@ -8,7 +8,6 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Permission;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -61,7 +60,7 @@ class Addresses extends Component
             $this->addressId
                 ? resolve_static(Address::class, 'query')
                     ->whereKey($this->addressId)
-                    ->with(['contactOptions', 'tags:id', 'permissions:id'])
+                    ->with(['contactOptions', 'tags:id'])
                     ->first()
                     ?? $this->contact->main_address
                 : $this->contact->main_address
@@ -209,12 +208,6 @@ class Addresses extends Component
                 ])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
-            TabButton::make('address.permissions')
-                ->text(__('Permissions'))
-                ->attributes([
-                    'x-cloak',
-                    'x-show' => '$wire.address.id',
-                ]),
             TabButton::make('address.activities')
                 ->text(__('Activities'))
                 ->attributes([
@@ -263,23 +256,6 @@ class Addresses extends Component
     }
 
     #[Renderless]
-    public function permissions(): array
-    {
-        $this->address->permissions ??= [];
-
-        return resolve_static(Permission::class, 'query')
-            ->where('guard_name', 'address')
-            ->get(['id', 'name'])
-            ->map(function (Permission $permission) {
-                return [
-                    'id' => $permission->id,
-                    'name' => __($permission->name),
-                ];
-            })
-            ->toArray();
-    }
-
-    #[Renderless]
     public function reloadAddress(): void
     {
         if (! $this->address->id) {
@@ -314,8 +290,6 @@ class Addresses extends Component
             'is_delivery_address',
             'is_invoice_address',
             'can_login',
-
-            'permissions',
         );
 
         $this->address->advertising_state = resolve_static(AdvertisingState::class, 'config')
@@ -352,7 +326,7 @@ class Addresses extends Component
 
     public function select(Address $address): void
     {
-        $address->loadMissing(['contactOptions', 'tags:id', 'permissions:id']);
+        $address->loadMissing(['contactOptions', 'tags:id']);
 
         $currentTab = $this->getTabButton($this->tab);
         if (! $currentTab->isLivewireComponent) {
