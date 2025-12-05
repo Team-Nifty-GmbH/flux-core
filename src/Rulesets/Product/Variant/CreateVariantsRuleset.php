@@ -2,8 +2,8 @@
 
 namespace FluxErp\Rulesets\Product\Variant;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
@@ -29,7 +29,7 @@ class CreateVariantsRuleset extends FluxRuleset
                     'is_bundle',
 
                     'product_options',
-                    'clients',
+                    'tenants',
                 ]
             ),
             Arr::mapWithKeys(
@@ -49,11 +49,11 @@ class CreateVariantsRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Product::class]),
             ],
             'name' => 'string|max:255',
-            'clients' => 'array',
-            'clients.*' => [
+            'tenants' => 'array',
+            'tenants.*' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'product_options' => 'required|array',
         ];

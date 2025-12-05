@@ -12,11 +12,11 @@
                         :label="__('Description')"
                     />
                     <x-select.styled
-                        :label="__('Client')"
-                        :placeholder="__('Select a Client')"
-                        wire:model="orderType.client_id"
+                        :label="__('Tenant')"
+                        :placeholder="__('Select a Tenant')"
+                        wire:model="orderType.tenant_id"
                         select="label:name|value:id"
-                        :request="route('search', \FluxErp\Models\Client::class)"
+                        :request="route('search', \FluxErp\Models\Tenant::class)"
                     />
                     <x-select.styled
                         :label="__('Order Type')"

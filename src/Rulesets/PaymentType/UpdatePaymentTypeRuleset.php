@@ -15,7 +15,7 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
-            resolve_static(ClientRuleset::class, 'getRules'),
+            resolve_static(TenantRuleset::class, 'getRules'),
         );
     }
 

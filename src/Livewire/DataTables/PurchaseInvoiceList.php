@@ -7,13 +7,13 @@ use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Media;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -125,7 +125,7 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
         $this->purchaseInvoiceForm->currency_id = $contact->currency_id
             ?? resolve_static(Currency::class, 'default')?->getKey();
-        $this->purchaseInvoiceForm->client_id = $contact->client_id;
+        $this->purchaseInvoiceForm->tenant_id = $contact->tenant_id;
 
         $this->purchaseInvoiceForm->lay_out_user_id = null;
         $this->purchaseInvoiceForm->account_holder = $bankConnection?->account_holder;
@@ -275,7 +275,7 @@ class PurchaseInvoiceList extends BaseDataTable
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => resolve_static(Client::class, 'query')->get(['id', 'name'])->toArray(),
+                'tenants' => resolve_static(Tenant::class, 'query')->get(['id', 'name'])->toArray(),
                 'currencies' => resolve_static(Currency::class, 'query')->get(['id', 'name'])->toArray(),
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->whereIn('order_type_enum', $purchaseOrderTypes)

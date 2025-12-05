@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\LedgerAccount;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\LedgerAccount\CreateLedgerAccountRuleset;
 use Illuminate\Validation\ValidationException;
 
@@ -32,7 +32,7 @@ class CreateLedgerAccount extends FluxAction
     {
         parent::prepareForValidation();
 
-        $this->data['client_id'] ??= resolve_static(Client::class, 'default')->getKey();
+        $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')->getKey();
     }
 
     protected function validateData(): void
@@ -40,7 +40,7 @@ class CreateLedgerAccount extends FluxAction
         parent::validateData();
 
         if (resolve_static(LedgerAccount::class, 'query')
-            ->where('client_id', $this->getData('client_id'))
+            ->where('tenant_id', $this->getData('tenant_id'))
             ->where('number', $this->getData('number'))
             ->where('ledger_account_type_enum', $this->getData('ledger_account_type_enum'))
             ->exists()

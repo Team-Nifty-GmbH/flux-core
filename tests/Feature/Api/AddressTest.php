@@ -3,18 +3,18 @@
 use Carbon\Carbon;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $dbClients = Client::factory()->count(2)->create();
+    $dbTenants = Tenant::factory()->count(2)->create();
 
     $this->languages = Language::factory()->count(2)->create();
     $currency = Currency::factory()->create();
@@ -31,34 +31,34 @@ beforeEach(function (): void {
     ]);
 
     $paymentTypes = PaymentType::factory()->count(3)->create();
-    $dbClients[0]->paymentTypes()->attach([$paymentTypes[0]->id, $paymentTypes[1]->id]);
-    $dbClients[1]->paymentTypes()->attach($paymentTypes[2]->id);
+    $dbTenants[0]->paymentTypes()->attach([$paymentTypes[0]->id, $paymentTypes[1]->id]);
+    $dbTenants[1]->paymentTypes()->attach($paymentTypes[2]->id);
 
     $this->contacts = Contact::factory()->count(2)->create([
-        'client_id' => $dbClients[0]->id,
+        'tenant_id' => $dbTenants[0]->id,
         'payment_type_id' => $paymentTypes[0]->id,
     ]);
     $this->contacts[] = Contact::factory()->create([
-        'client_id' => $dbClients[1]->id,
+        'tenant_id' => $dbTenants[1]->id,
         'payment_type_id' => $paymentTypes[1]->id,
     ]);
 
     $this->addresses = Address::factory()->count(3)->create([
-        'client_id' => $dbClients[0]->id,
+        'tenant_id' => $dbTenants[0]->id,
         'contact_id' => $this->contacts[0]->id,
         'language_id' => $this->languages[0]->id,
         'country_id' => $this->countries[0]->id,
         'is_main_address' => false,
     ]);
     $this->addresses[] = Address::factory()->create([
-        'client_id' => $dbClients[1]->id,
+        'tenant_id' => $dbTenants[1]->id,
         'contact_id' => $this->contacts[2]->id,
         'language_id' => $this->languages[1]->id,
         'country_id' => $this->countries[2]->id,
         'is_main_address' => true,
     ]);
 
-    $this->user->clients()->attach($dbClients->pluck('id')->toArray());
+    $this->user->tenants()->attach($dbTenants->pluck('id')->toArray());
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.addresses.{id}.get'),
@@ -71,7 +71,7 @@ beforeEach(function (): void {
 
 test('create address', function (): void {
     $address = [
-        'client_id' => $this->contacts[2]->client_id,
+        'tenant_id' => $this->contacts[2]->tenant_id,
         'contact_id' => $this->contacts[2]->id,
     ];
 
@@ -87,7 +87,7 @@ test('create address', function (): void {
         ->first();
 
     expect($dbAddress)->not->toBeEmpty();
-    expect($dbAddress->client_id)->toEqual($address['client_id']);
+    expect($dbAddress->tenant_id)->toEqual($address['tenant_id']);
     expect($dbAddress->contact_id)->toEqual($address['contact_id']);
     expect($dbAddress->language_id)->toBeNull();
     expect($dbAddress->country_id)->toEqual($this->countries[2]->id);
@@ -114,7 +114,7 @@ test('create address', function (): void {
 
 test('create address maximum', function (): void {
     $address = [
-        'client_id' => $this->contacts[1]->client_id,
+        'tenant_id' => $this->contacts[1]->tenant_id,
         'contact_id' => $this->contacts[1]->id,
         'language_id' => $this->languages[0]->id,
         'country_id' => $this->countries[2]->id,
@@ -149,7 +149,7 @@ test('create address maximum', function (): void {
         ->first();
 
     expect($dbAddress)->not->toBeEmpty();
-    expect($dbAddress->client_id)->toEqual($address['client_id']);
+    expect($dbAddress->tenant_id)->toEqual($address['tenant_id']);
     expect($dbAddress->contact_id)->toEqual($address['contact_id']);
     expect($dbAddress->language_id)->toEqual($address['language_id']);
     expect($dbAddress->country_id)->toEqual($address['country_id']);
@@ -176,7 +176,7 @@ test('create address maximum', function (): void {
 
 test('create address validation fails', function (): void {
     $address = [
-        'client_id' => $this->addresses[2]->client_id,
+        'tenant_id' => $this->addresses[2]->tenant_id,
         'contact_id' => ++$this->addresses[3]->contact_id,
         'zip' => -123456,
     ];

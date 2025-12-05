@@ -1,24 +1,24 @@
 <?php
 
 use FluxErp\Enums\PropertyTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $this->productProperties = ProductProperty::factory()->count(3)->create();
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
 
     $this->products = Product::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $this->products->productProperties()->sync($this->productProperties[1]->id);
 
-    $this->user->clients()->attach($client->id);
+    $this->user->tenants()->attach($tenant->id);
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.product-properties.{id}.get'),

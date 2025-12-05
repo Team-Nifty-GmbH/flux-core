@@ -188,7 +188,7 @@ class FillOrderPositions extends FluxAction
             foreach ($orderPosition->product->bundleProducts as $index => $bundleProduct) {
                 $position = app(OrderPosition::class, [
                     'attributes' => [
-                        'client_id' => $orderPosition->client_id,
+                        'tenant_id' => $orderPosition->tenant_id,
                         'order_id' => $orderPosition->order_id,
                         'parent_id' => $orderPosition->id,
                         'product_id' => $bundleProduct->id,

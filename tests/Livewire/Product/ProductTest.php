@@ -30,7 +30,7 @@ beforeEach(function (): void {
             'is_bundle' => false,
         ]);
 
-    $this->product->clients()->attach($this->dbClient->getKey());
+    $this->product->tenants()->attach($this->dbTenant->getKey());
 });
 
 test('delete product', function (): void {
@@ -56,7 +56,7 @@ test('get price lists', function (): void {
 
 test('get product cross sellings', function (): void {
     $crossSellingProduct = ProductModel::factory()->create();
-    $crossSellingProduct->clients()->attach($this->dbClient->getKey());
+    $crossSellingProduct->tenants()->attach($this->dbTenant->getKey());
 
     $crossSelling = ProductCrossSelling::factory()->create([
         'product_id' => $this->product->id,
@@ -210,7 +210,7 @@ test('tab visibility for bundle product', function (): void {
     $bundleProduct = ProductModel::factory()->create([
         'is_bundle' => true,
     ]);
-    $bundleProduct->clients()->attach($this->dbClient->getKey());
+    $bundleProduct->tenants()->attach($this->dbTenant->getKey());
 
     $component = Livewire::test(Product::class, ['id' => $bundleProduct->id]);
     $tabs = $component->instance()->getTabs();
@@ -223,7 +223,7 @@ test('tab visibility for variant product', function (): void {
     $parentProduct = ProductModel::factory()->create([
         'parent_id' => null,
     ]);
-    $parentProduct->clients()->attach($this->dbClient->getKey());
+    $parentProduct->tenants()->attach($this->dbTenant->getKey());
 
     $component = Livewire::test(Product::class, ['id' => $parentProduct->id]);
     $tabs = $component->instance()->getTabs();

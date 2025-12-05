@@ -12,7 +12,7 @@ test('can create new order', function (): void {
 
     $orderType = OrderType::factory()
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'is_hidden' => false,
         ]);
@@ -21,11 +21,11 @@ test('can create new order', function (): void {
         ->for(
             Contact::factory()
                 ->state([
-                    'client_id' => $this->dbClient->getKey(),
+                    'tenant_id' => $this->dbTenant->getKey(),
                 ])
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'company' => 'Test Company ' . uniqid(),
             'firstname' => 'Firstname',
             'lastname' => 'Lastname',

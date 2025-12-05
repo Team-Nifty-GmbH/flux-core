@@ -34,17 +34,17 @@
             @show
             @show
             <div class="flex flex-col gap-1.5 overflow-auto px-2">
-                @section('client')
-                @if (count($clients ?? []) > 1)
+                @section('tenant')
+                @if (count($tenants ?? []) > 1)
                     <div
                         x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
                     >
                         <x-select.styled
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                            wire:model="purchaseInvoiceForm.client_id"
-                            :label="__('Client')"
+                            wire:model="purchaseInvoiceForm.tenant_id"
+                            :label="__('Tenant')"
                             select="label:name|value:id"
-                            :options="$clients"
+                            :options="$tenants"
                         />
                     </div>
                 @endif

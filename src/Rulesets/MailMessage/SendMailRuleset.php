@@ -2,9 +2,9 @@
 
 namespace FluxErp\Rulesets\MailMessage;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Communication\CommunicatablesRuleset;
 use FluxErp\Rulesets\FluxRuleset;
@@ -27,10 +27,10 @@ class SendMailRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => MailAccount::class]),
             ],
-            'client_id' => [
+            'tenant_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'template_id' => [
                 'nullable',

@@ -1,11 +1,11 @@
 <x-mail::layout>
     {{-- Header --}}
-    @php($logo = $client->getFirstMedia('logo_small') ?? $client->getFirstMedia('logo'))
+    @php($logo = $tenant->getFirstMedia('logo_small') ?? $tenant->getFirstMedia('logo'))
     <x-slot:header>
-        <x-mail::header :url="$client->website">
+        <x-mail::header :url="$tenant->website">
             <img
                 style="max-height: 100px; max-width: 100px; width: auto; height: auto; @if($logo?->mime_type === 'image/svg+xml') min-height: 60px @endif"
-                alt="{{ $client->name }}"
+                alt="{{ $tenant->name }}"
                 src="{{ $logo?->getUrl() ?? '#' }}"
             />
         </x-mail::header>
@@ -25,7 +25,7 @@
     {{-- Footer --}}
     <x-slot:footer>
         <x-mail::footer>
-            © {{ date('Y') }} {{ $client->name }}.
+            © {{ date('Y') }} {{ $tenant->name }}.
             @lang('All rights reserved.')
         </x-mail::footer>
     </x-slot>

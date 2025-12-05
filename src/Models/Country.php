@@ -30,9 +30,9 @@ class Country extends FluxModel
         return $this->hasMany(Address::class);
     }
 
-    public function clients(): HasMany
+    public function tenants(): HasMany
     {
-        return $this->hasMany(Client::class);
+        return $this->hasMany(Tenant::class);
     }
 
     public function currency(): BelongsTo

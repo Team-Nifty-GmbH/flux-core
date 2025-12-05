@@ -9,13 +9,13 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $this->contact = ContactModel::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'payment_type_id' => PaymentType::default()->id,
         'discount_percent' => 0.05,
     ]);
 
     Address::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'contact_id' => $this->contact->id,
         'is_main_address' => true,
         'is_invoice_address' => true,

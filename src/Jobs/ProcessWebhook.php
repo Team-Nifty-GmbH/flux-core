@@ -4,7 +4,6 @@ namespace FluxErp\Jobs;
 
 use Carbon\Carbon;
 use FluxErp\Models\User;
-use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -83,8 +82,8 @@ class ProcessWebhook implements ShouldQueue
             ],
         ];
 
-        $client = app(Client::class);
-        $client->post($this->url, [
+        $tenant = app(Tenant::class);
+        $tenant->post($this->url, [
             'body' => json_encode($body),
         ]);
     }

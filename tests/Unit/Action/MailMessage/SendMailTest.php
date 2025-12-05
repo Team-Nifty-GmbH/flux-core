@@ -2,9 +2,9 @@
 
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Mail\GenericMail;
-use FluxErp\Models\Client;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Facades\Mail;
 
 test('handle mail failure', function (): void {
@@ -14,10 +14,10 @@ test('handle mail failure', function (): void {
     Mail::shouldReceive('bcc')->andReturnSelf();
     Mail::shouldReceive('send')->andThrow(new Exception('Mail server error'));
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'to' => ['test@example.com'],
         'subject' => 'Test Subject',
         'text_body' => 'Test Text Body',
@@ -67,10 +67,10 @@ test('handles null values correctly', function (): void {
 test('handles string email addresses', function (): void {
     Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'to' => 'single@example.com',
         'cc' => 'cc@example.com',
         'bcc' => 'bcc@example.com',
@@ -118,10 +118,10 @@ test('provided data overrides template', function (): void {
 test('send mail queued', function (): void {
     Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'to' => ['test@example.com'],
         'subject' => 'Queued Test',
         'text_body' => 'Queued Test Text Body',
@@ -140,7 +140,7 @@ test('send mail queued', function (): void {
 test('send mail with all validated keys', function (): void {
     Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
     $template = EmailTemplate::factory()->create([
         'subject' => 'Template Subject',
         'html_body' => '<p>Template HTML Body</p>',
@@ -148,7 +148,7 @@ test('send mail with all validated keys', function (): void {
     ]);
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'template_id' => $template->id,
         'to' => ['test@example.com', 'test2@example.com'],
         'cc' => ['cc1@example.com', 'cc2@example.com'],
@@ -183,10 +183,10 @@ test('send mail with all validated keys', function (): void {
 test('send mail with attachments', function (): void {
     Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'to' => ['test@example.com'],
         'cc' => ['cc@example.com'],
         'bcc' => ['bcc@example.com'],
@@ -211,7 +211,7 @@ test('send mail with attachments', function (): void {
 test('send mail with blade parameters', function (): void {
     Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
     $template = EmailTemplate::factory()->create([
         'subject' => 'Hello {{ $name }}',
         'html_body' => '<p>Hello {{ $name }}, welcome!</p>',
@@ -219,7 +219,7 @@ test('send mail with blade parameters', function (): void {
     ]);
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'to' => ['test@example.com'],
         'cc' => ['cc@example.com'],
         'bcc' => ['bcc@example.com'],
@@ -241,10 +241,10 @@ test('send mail with blade parameters', function (): void {
 test('send mail with cc and bcc', function (): void {
     Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'to' => ['test@example.com'],
         'cc' => ['cc@example.com'],
         'bcc' => ['bcc@example.com'],
@@ -296,10 +296,10 @@ test('send mail with template', function (): void {
 test('send simple mail', function (): void {
     Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'to' => ['test@example.com'],
         'cc' => [],
         'bcc' => [],
@@ -347,7 +347,7 @@ test('template overrides empty fields', function (): void {
 test('send mail with custom mail account', function (): void {
     $fakeMail = Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
     $mailAccount = MailAccount::factory()->create([
         'smtp_email' => 'custom@example.com',
         'smtp_password' => 'password123',
@@ -372,7 +372,7 @@ test('send mail with custom mail account', function (): void {
         ->andReturn($fakeMail);
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'mail_account_id' => $mailAccount->id,
         'to' => ['test@example.com'],
         'subject' => 'Custom Mail Test',
@@ -393,7 +393,7 @@ test('send mail with custom mail account', function (): void {
 test('send mail with custom mail account and queue sends immediately', function (): void {
     $fakeMail = Mail::fake();
 
-    $client = Client::factory()->create();
+    $tenant = Tenant::factory()->create();
     $mailAccount = MailAccount::factory()->create([
         'smtp_email' => 'queued@example.com',
         'smtp_password' => 'password456',
@@ -418,7 +418,7 @@ test('send mail with custom mail account and queue sends immediately', function 
         ->andReturn($fakeMail);
 
     $action = SendMail::make([
-        'client_id' => $client->id,
+        'tenant_id' => $tenant->id,
         'mail_account_id' => $mailAccount->id,
         'to' => ['test@example.com'],
         'cc' => ['cc@example.com'],

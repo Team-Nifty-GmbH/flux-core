@@ -8,7 +8,7 @@ use FluxErp\Actions\AddressType\UpdateAddressType;
 use FluxErp\Livewire\DataTables\AddressTypeList;
 use FluxErp\Livewire\Forms\AddressTypeForm;
 use FluxErp\Models\AddressType;
-use FluxErp\Models\Client;
+use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -103,7 +103,7 @@ class AddressTypes extends AddressTypeList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => resolve_static(Client::class, 'query')
+                'tenants' => resolve_static(Tenant::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
             ]);

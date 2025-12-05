@@ -14,12 +14,12 @@ use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Communicatable;
 use FluxErp\Traits\Model\Filterable;
-use FluxErp\Traits\Model\HasClientAssignment;
 use FluxErp\Traits\Model\HasDefaultTargetableColumns;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasRecordOrigin;
 use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
@@ -39,8 +39,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasClientAssignment,
-        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin, HasSerialNumberRange,
+    use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasDefaultTargetableColumns,
+        HasFrontendAttributes, HasPackageFactory, HasRecordOrigin, HasSerialNumberRange, HasTenantAssignment,
         HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable;
 
     public static string $iconName = 'users';
@@ -88,11 +88,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function approvalUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approval_user_id');
-    }
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
     }
 
     public function contactBankConnections(): HasMany
@@ -263,6 +258,11 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function sepaMandates(): HasMany
     {
         return $this->hasMany(SepaMandate::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function toSearchableArray(): array

@@ -2,21 +2,21 @@
 
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Tenant;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $dbClient = Client::factory()->create();
+    $dbTenant = Tenant::factory()->create();
 
     $this->contact = Contact::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
     ]);
 
     Address::factory()->create([
-        'client_id' => $dbClient->id,
+        'tenant_id' => $dbTenant->id,
         'contact_id' => $this->contact->id,
     ]);
 
@@ -30,7 +30,7 @@ beforeEach(function (): void {
         ])
     );
 
-    $this->user->clients()->attach($dbClient->id);
+    $this->user->tenants()->attach($dbTenant->id);
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.communications.{id}.get'),

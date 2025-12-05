@@ -6,7 +6,6 @@ use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\OrderForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
@@ -14,6 +13,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
@@ -73,7 +73,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->price_list_id ??= resolve_static(PriceList::class, 'default')?->getKey();
         $this->order->payment_type_id ??= resolve_static(PaymentType::class, 'default')?->getKey();
         $this->order->language_id ??= resolve_static(Language::class, 'default')?->getKey();
-        $this->order->client_id ??= resolve_static(Client::class, 'default')?->getKey();
+        $this->order->tenant_id ??= resolve_static(Tenant::class, 'default')?->getKey();
 
         $this->js(<<<'JS'
              $modalOpen('create-order-modal');
@@ -98,7 +98,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->with('invoiceAddress:id,language_id')
             ->first();
 
-        $this->order->client_id = $contact->client_id ?? $this->order->client_id;
+        $this->order->tenant_id = $contact->tenant_id ?? $this->order->tenant_id;
         $this->order->agent_id = $contact->agent_id ?? $this->order->agent_id;
         $this->order->language_id = $contact->invoiceAddress?->language_id;
         $this->order->address_invoice_id = $contact->address_invoice_id;
@@ -180,7 +180,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 'languages' => resolve_static(Language::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => resolve_static(Client::class, 'query')
+                'tenants' => resolve_static(Tenant::class, 'query')
                     ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),

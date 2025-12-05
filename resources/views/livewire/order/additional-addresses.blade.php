@@ -19,9 +19,9 @@
                                 'with' => 'contact.media',
                                 'where' => [
                                     [
-                                        'client_id',
+                                        'tenant_id',
                                         '=',
-                                        $clientId
+                                        $tenantId
                                     ],
                                 ],
                             ],
@@ -31,7 +31,7 @@
                         :label="__('Type')"
                         wire:model="address_type_id"
                         select="label:name|value:id"
-                        :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->where('client_id', $clientId)->get(['id', 'name'])->toArray()"
+                        :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->where('tenant_id', $tenantId)->get(['id', 'name'])->toArray()"
                     />
                 </div>
                 <x-slot:footer>

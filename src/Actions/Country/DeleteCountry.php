@@ -52,9 +52,9 @@ class DeleteCountry extends FluxAction
             ];
         }
 
-        if ($country->clients()->exists()) {
+        if ($country->tenants()->exists()) {
             $errors += [
-                'client' => ['Country referenced by a client'],
+                'tenant' => ['Country referenced by a tenant'],
             ];
         }
 

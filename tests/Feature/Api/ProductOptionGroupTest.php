@@ -68,7 +68,7 @@ test('delete product option group', function (): void {
 
 test('delete product option group group option has product', function (): void {
     $product = Product::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $product->productOptions()->attach($this->productOptions[1]->id);

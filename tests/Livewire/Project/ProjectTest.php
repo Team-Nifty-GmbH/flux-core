@@ -6,7 +6,7 @@ use Livewire\Livewire;
 
 beforeEach(function (): void {
     $this->project = Project::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 });
 

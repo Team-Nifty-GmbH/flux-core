@@ -28,7 +28,7 @@ class OrderProject extends Component
     public function mount(Order $order): void
     {
         $this->form->order_id = $order->id;
-        $this->form->client_id = $order->client_id;
+        $this->form->tenant_id = $order->tenant_id;
         $this->form->contact_id = $order->contact_id;
         $this->form->start_date = $order->system_delivery_date ?? now();
         $this->form->end_date = $order->system_delivery_date_end;
@@ -70,7 +70,7 @@ class OrderProject extends Component
                 ->whereKey($this->projectId)
                 ->first();
             $project->order_id ??= $this->form->order_id;
-            $project->client_id ??= $this->form->client_id;
+            $project->tenant_id ??= $this->form->tenant_id;
             $project->contact_id ??= $this->form->contact_id;
             $project->start_date ??= $this->form->start_date;
             $project->end_date ??= $this->form->end_date;

@@ -13,7 +13,7 @@ beforeEach(function (): void {
     $warehouse = Warehouse::factory()->create();
     $this->products = Product::factory()
         ->count(3)
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
             'has_serial_numbers' => true,
         ]);
@@ -26,7 +26,7 @@ beforeEach(function (): void {
             'model_type' => Product::class,
             'model_id' => $product->id,
             'type' => 'product',
-            'client_id' => $product->client_id,
+            'tenant_id' => $product->tenant_id,
         ]));
 
         StockPosting::factory()->create([

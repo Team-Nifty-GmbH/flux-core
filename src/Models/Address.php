@@ -17,11 +17,11 @@ use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Communicatable;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasCart;
-use FluxErp\Traits\Model\HasClientAssignment;
 use FluxErp\Traits\Model\HasDefaultTargetableColumns;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
@@ -50,8 +50,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
-    use Commentable, Communicatable, Filterable, HasCalendars, HasCart, HasClientAssignment,
-        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
+    use Commentable, Communicatable, Filterable, HasCalendars, HasCart, HasDefaultTargetableColumns,
+        HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasTenantAssignment,
         HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, MonitorsQueue, Notifiable, Printable,
         SoftDeletes;
     use Searchable {
@@ -388,9 +388,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             ->wherePivot('categorizable_type', morph_alias(Contact::class));
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function contact(): BelongsTo

@@ -83,7 +83,7 @@ class UpdateContact extends FluxAction
             ->first();
 
         $this->data['payment_type_id'] ??= $contact?->payment_type_id;
-        $this->data['client_id'] ??= $contact?->client_id;
+        $this->data['tenant_id'] ??= $contact?->tenant_id;
     }
 
     protected function validateData(): void
@@ -95,7 +95,7 @@ class UpdateContact extends FluxAction
         if ($customerNumber = $this->getData('customer_number')) {
             $customerNumberExists = resolve_static(Contact::class, 'query')
                 ->where('id', '!=', $this->getData('id'))
-                ->where('client_id', '=', $this->getData('client_id'))
+                ->where('tenant_id', '=', $this->getData('tenant_id'))
                 ->where('customer_number', $customerNumber)
                 ->exists();
 
@@ -106,19 +106,19 @@ class UpdateContact extends FluxAction
             }
         }
 
-        $clientPaymentTypeExists = resolve_static(PaymentType::class, 'query')
+        $tenantPaymentTypeExists = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->getData('payment_type_id'))
-            ->whereRelation('clients', 'id', $this->getData('client_id'))
+            ->whereRelation('tenants', 'id', $this->getData('tenant_id'))
             ->exists();
 
-        if (! $clientPaymentTypeExists) {
+        if (! $tenantPaymentTypeExists) {
             $errors += [
                 'payment_type_id' => [
                     __(
-                        'Payment type with id: \':paymentTypeId\' doesnt match client id: \':clientId\'',
+                        'Payment type with id: \':paymentTypeId\' doesnt match tenant id: \':tenantId\'',
                         [
                             'paymentTypeId' => $this->getData('payment_type_id'),
-                            'clientId' => $this->getData('client_id'),
+                            'tenantId' => $this->getData('tenant_id'),
                         ]
                     ),
                 ],

@@ -23,7 +23,7 @@ class UserForm extends FluxForm
 
     public ?string $bic = null;
 
-    public array $clients = [];
+    public array $tenants = [];
 
     public ?string $color = null;
 
@@ -49,7 +49,7 @@ class UserForm extends FluxForm
 
     public ?string $employee_number = null;
 
-    public ?int $employer_client_id = null;
+    public ?int $employer_tenant_id = null;
 
     public ?string $employment_date = null;
 

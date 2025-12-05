@@ -2,28 +2,28 @@
 
 use Carbon\Carbon;
 use FluxErp\Enums\SepaMandateTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Models\Tenant;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $dbClients = Client::factory()->count(2)->create();
+    $dbTenants = Tenant::factory()->count(2)->create();
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $dbClients[0], relationship: 'clients')
+        ->hasAttached(factory: $dbTenants[0], relationship: 'tenants')
         ->create();
 
     $this->contacts = Contact::factory()->count(2)->create([
-        'client_id' => $dbClients[0]->id,
         'payment_type_id' => $paymentType->id,
+        'tenant_id' => $dbTenants[0]->id,
     ]);
     $this->contacts[] = Contact::factory()->create([
-        'client_id' => $dbClients[1]->id,
+        'tenant_id' => $dbTenants[1]->id,
     ]);
 
     $this->contactBankConnections = ContactBankConnection::factory()->count(2)->create([
@@ -34,17 +34,17 @@ beforeEach(function (): void {
     ]);
 
     $this->sepaMandates = SepaMandate::factory()->count(2)->create([
-        'client_id' => $dbClients[0]->id,
         'contact_id' => $this->contacts[0]->id,
         'contact_bank_connection_id' => $this->contactBankConnections[0]->id,
+        'tenant_id' => $dbTenants[0]->id,
     ]);
     $this->sepaMandates[] = SepaMandate::factory()->create([
-        'client_id' => $dbClients[1]->id,
         'contact_id' => $this->contacts[2]->id,
         'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
+        'tenant_id' => $dbTenants[1]->id,
     ]);
 
-    $this->user->clients()->attach($dbClients->pluck('id')->toArray());
+    $this->user->tenants()->attach($dbTenants->pluck('id')->toArray());
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.sepa-mandates.{id}.get'),
@@ -57,9 +57,9 @@ beforeEach(function (): void {
 
 test('create sepa mandate', function (): void {
     $sepaMandate = [
-        'client_id' => $this->sepaMandates[0]->client_id,
         'contact_id' => $this->contacts[0]->id,
         'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+        'tenant_id' => $this->sepaMandates[0]->tenant_id,
         'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC->name,
     ];
 
@@ -75,20 +75,20 @@ test('create sepa mandate', function (): void {
         ->first();
 
     expect($dbSepaMandate)->not->toBeEmpty();
-    expect($dbSepaMandate->client_id)->toEqual($sepaMandate['client_id']);
     expect($dbSepaMandate->contact_id)->toEqual($sepaMandate['contact_id']);
     expect($dbSepaMandate->contact_bank_connection_id)->toEqual($sepaMandate['contact_bank_connection_id']);
+    expect($dbSepaMandate->tenant_id)->toEqual($sepaMandate['tenant_id']);
     expect($dbSepaMandate->sepa_mandate_type_enum->name)->toEqual($sepaMandate['sepa_mandate_type_enum']);
     expect($dbSepaMandate->signed_date)->toBeNull();
     expect($this->user->is($dbSepaMandate->getCreatedBy()))->toBeTrue();
     expect($this->user->is($dbSepaMandate->getUpdatedBy()))->toBeTrue();
 });
 
-test('create sepa mandate client contact not exists', function (): void {
+test('create sepa mandate tenant contact not exists', function (): void {
     $sepaMandate = [
-        'client_id' => $this->sepaMandates[0]->client_id,
         'contact_id' => $this->contacts[2]->id,
         'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+        'tenant_id' => $this->sepaMandates[0]->tenant_id,
         'sepa_mandate_type_enum' => SepaMandateTypeEnum::B2B->name,
         'signed_date' => date('Y-m-d'),
     ];
@@ -102,9 +102,9 @@ test('create sepa mandate client contact not exists', function (): void {
 
 test('create sepa mandate contact bank connection not exists', function (): void {
     $sepaMandate = [
-        'client_id' => $this->sepaMandates[0]->client_id,
         'contact_id' => $this->contacts[0]->id,
         'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
+        'tenant_id' => $this->sepaMandates[0]->tenant_id,
         'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC->name,
         'signed_date' => date('Y-m-d'),
     ];
@@ -118,9 +118,9 @@ test('create sepa mandate contact bank connection not exists', function (): void
 
 test('create sepa mandate maximum', function (): void {
     $sepaMandate = [
-        'client_id' => $this->sepaMandates[0]->client_id,
         'contact_id' => $this->contacts[0]->id,
         'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+        'tenant_id' => $this->sepaMandates[0]->tenant_id,
         'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC->name,
         'signed_date' => date('Y-m-d'),
     ];
@@ -137,9 +137,9 @@ test('create sepa mandate maximum', function (): void {
         ->first();
 
     expect($dbSepaMandate)->not->toBeEmpty();
-    expect($dbSepaMandate->client_id)->toEqual($sepaMandate['client_id']);
     expect($dbSepaMandate->contact_id)->toEqual($sepaMandate['contact_id']);
     expect($dbSepaMandate->contact_bank_connection_id)->toEqual($sepaMandate['contact_bank_connection_id']);
+    expect($dbSepaMandate->tenant_id)->toEqual($sepaMandate['tenant_id']);
     expect($dbSepaMandate->sepa_mandate_type_enum->name)->toEqual($sepaMandate['sepa_mandate_type_enum']);
     expect($dbSepaMandate->signed_date->toDateString())->toEqual($sepaMandate['signed_date']);
     expect($this->user->is($dbSepaMandate->getCreatedBy()))->toBeTrue();
@@ -148,9 +148,9 @@ test('create sepa mandate maximum', function (): void {
 
 test('create sepa mandate validation fails', function (): void {
     $sepaMandate = [
-        'client_id' => $this->sepaMandates[0]->client_id,
         'contact_id' => 0,
         'contact_bank_connection_id' => 0,
+        'tenant_id' => $this->sepaMandates[0]->tenant_id,
     ];
 
     $this->user->givePermissionTo($this->permissions['create']);
@@ -196,9 +196,9 @@ test('get sepa mandate', function (): void {
     // Check if controller returns the test contact.
     expect($jsonSepaMandate)->not->toBeEmpty();
     expect($jsonSepaMandate->id)->toEqual($this->sepaMandates[0]->id);
-    expect($jsonSepaMandate->client_id)->toEqual($this->sepaMandates[0]->client_id);
     expect($jsonSepaMandate->contact_id)->toEqual($this->sepaMandates[0]->contact_id);
     expect($jsonSepaMandate->contact_bank_connection_id)->toEqual($this->sepaMandates[0]->contact_bank_connection_id);
+    expect($jsonSepaMandate->tenant_id)->toEqual($this->sepaMandates[0]->tenant_id);
     expect($jsonSepaMandate->sepa_mandate_type_enum)->toEqual($this->sepaMandates[0]->sepa_mandate_type_enum->name);
 
     if (is_null($this->sepaMandates[0]->signed_date)) {
@@ -236,9 +236,9 @@ test('get sepa mandates', function (): void {
     foreach ($this->sepaMandates as $sepaMandate) {
         $jsonSepaMandates->contains(function ($jsonSepaMandate) use ($sepaMandate) {
             return $jsonSepaMandate->id === $sepaMandate->id &&
-                $jsonSepaMandate->client_id === $sepaMandate->client_id &&
                 $jsonSepaMandate->contact_id === $sepaMandate->contact_id &&
                 $jsonSepaMandate->contact_bank_connection_id === $sepaMandate->contact_bank_connection_id &&
+                $jsonSepaMandate->tenant_id === $sepaMandate->tenant_id &&
                 $jsonSepaMandate->sepa_mandate_type_enum === $sepaMandate->sepa_mandate_type_enum &&
                 $jsonSepaMandate->signed_date === $sepaMandate->signed_date &&
                 Carbon::parse($jsonSepaMandate->created_at) === Carbon::parse($sepaMandate->created_at) &&
@@ -290,9 +290,9 @@ test('update sepa mandate maximum', function (): void {
 
     expect($dbSepaMandate)->not->toBeEmpty();
     expect($dbSepaMandate->id)->toEqual($sepaMandate['id']);
-    expect($dbSepaMandate->client_id)->toEqual($this->sepaMandates[0]->client_id);
     expect($dbSepaMandate->contact_id)->toEqual($this->sepaMandates[0]->contact_id);
     expect($dbSepaMandate->contact_bank_connection_id)->toEqual($sepaMandate['contact_bank_connection_id']);
+    expect($dbSepaMandate->tenant_id)->toEqual($this->sepaMandates[0]->tenant_id);
     expect($dbSepaMandate->signed_date->toDateString())->toEqual($sepaMandate['signed_date']);
     expect($this->user->is($dbSepaMandate->getUpdatedBy()))->toBeTrue();
 });

@@ -4,8 +4,8 @@ namespace FluxErp\Mail;
 
 use FluxErp\Actions\Printing;
 use FluxErp\Livewire\Forms\CommunicationForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\Media;
+use FluxErp\Models\Tenant;
 use FluxErp\Traits\Makeable;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Bus\Queueable;
@@ -26,17 +26,17 @@ class GenericMail extends Mailable
     public function __construct(
         public Arrayable|array $mailMessageForm,
         public SerializableClosure|array|null $bladeParameters = null,
-        public ?Client $client = null,
+        public ?Tenant $tenant = null,
     ) {
         if ($this->mailMessageForm instanceof CommunicationForm) {
-            $this->client ??= $this->mailMessageForm->communicatable()?->client;
+            $this->tenant ??= $this->mailMessageForm->communicatable()?->tenant;
         }
 
-        $this->client ??= data_get($this->mailMessageForm, 'client_id')
-            ? resolve_static(Client::class, 'query')
-                ->whereKey(data_get($this->mailMessageForm, 'client_id'))
+        $this->tenant ??= data_get($this->mailMessageForm, 'tenant_id')
+            ? resolve_static(Tenant::class, 'query')
+                ->whereKey(data_get($this->mailMessageForm, 'tenant_id'))
                 ->first()
-            : resolve_static(Client::class, 'default');
+            : resolve_static(Tenant::class, 'default');
 
         $this->mailMessageForm = $this->mailMessageForm instanceof Arrayable
             ? $this->mailMessageForm->toArray()

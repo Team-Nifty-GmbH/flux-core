@@ -11,9 +11,9 @@ use Livewire\Attributes\Locked;
 
 class PaymentTypeForm extends FluxForm
 {
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
-    public ?array $clients = [];
+    public ?array $tenants = [];
 
     public ?string $description = null;
 
@@ -53,10 +53,10 @@ class PaymentTypeForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof PaymentType) {
-            $values->loadMissing(['clients:id']);
+            $values->loadMissing(['tenants:id']);
 
             $values = $values->toArray();
-            $values['clients'] = array_column($values['clients'] ?? [], 'id');
+            $values['tenants'] = array_column($values['tenants'] ?? [], 'id');
         }
 
         parent::fill($values);

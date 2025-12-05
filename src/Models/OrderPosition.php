@@ -9,12 +9,12 @@ use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\Commentable;
-use FluxErp\Traits\Model\HasClientAssignment;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
@@ -36,9 +36,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable, Targetable
 {
-    use CascadeSoftDeletes, Commentable, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity,
-        SortableTrait;
+    use CascadeSoftDeletes, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+        HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity, SortableTrait;
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
@@ -161,11 +160,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return static::query()
             ->where('order_id', $this->order_id)
             ->where('parent_id', $this->parent_id);
-    }
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
     }
 
     public function commission(): HasOne
@@ -296,6 +290,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function vatRate(): BelongsTo

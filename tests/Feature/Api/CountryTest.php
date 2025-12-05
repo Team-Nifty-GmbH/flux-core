@@ -2,12 +2,12 @@
 
 use Carbon\Carbon;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Tenant;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -146,10 +146,10 @@ test('delete country country not found', function (): void {
 
 test('delete country country referenced by address', function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     Address::factory()->create([
-        'client_id' => $contact->client_id,
+        'tenant_id' => $contact->tenant_id,
         'language_id' => $this->language->id,
         'country_id' => $this->countries[1]->id,
         'contact_id' => $contact->id,
@@ -162,12 +162,12 @@ test('delete country country referenced by address', function (): void {
     $response->assertStatus(423);
 });
 
-test('delete country country referenced by client', function (): void {
-    $client = Client::factory()->create([
+test('delete country country referenced by tenant', function (): void {
+    $tenant = Tenant::factory()->create([
         'country_id' => $this->countries[1]->id,
     ]);
 
-    $this->user->clients()->attach($client->id);
+    $this->user->tenants()->attach($tenant->id);
 
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);

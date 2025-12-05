@@ -16,7 +16,6 @@ use FluxErp\Models\CalendarUserSetting;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use FluxErp\Models\Category;
-use FluxErp\Models\Client;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Commission;
 use FluxErp\Models\CommissionRate;
@@ -75,8 +74,6 @@ use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\Calendarable;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
-use FluxErp\Models\Pivots\ClientPaymentType;
-use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
@@ -92,10 +89,12 @@ use FluxErp\Models\Pivots\LocationVacationBlackout;
 use FluxErp\Models\Pivots\MediaFolderModel;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
+use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
@@ -125,6 +124,7 @@ use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
 use FluxErp\Models\Task;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\Token;
@@ -162,7 +162,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'cart' => Cart::class,
             'cart_item' => CartItem::class,
             'category' => Category::class,
-            'client' => Client::class,
             'comment' => Comment::class,
             'commission' => Commission::class,
             'commission_rate' => CommissionRate::class,
@@ -241,6 +240,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'tag' => Tag::class,
             'target' => Target::class,
             'task' => Task::class,
+            'tenant' => Tenant::class,
             'ticket' => Ticket::class,
             'ticket_type' => TicketType::class,
             'token' => Token::class,
@@ -264,8 +264,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'calendarable' => Calendarable::class,
             'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
-            'client_payment_type' => ClientPaymentType::class,
-            'client_product' => ClientProduct::class,
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
@@ -281,10 +279,12 @@ class MorphMapServiceProvider extends ServiceProvider
             'media_folder_model' => MediaFolderModel::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
+            'payment_type_tenant' => PaymentTypeTenant::class,
             'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
+            'product_tenant' => ProductTenant::class,
             'queue_monitorable' => QueueMonitorable::class,
             'target_user' => TargetUser::class,
             'task_user' => TaskUser::class,

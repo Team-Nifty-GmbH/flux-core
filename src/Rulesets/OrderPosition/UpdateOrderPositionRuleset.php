@@ -3,7 +3,6 @@
 namespace FluxErp\Rulesets\OrderPosition;
 
 use FluxErp\Enums\CreditAccountPostingEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\LedgerAccount;
@@ -12,6 +11,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
@@ -41,10 +41,6 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => OrderPosition::class]),
-            ],
-            'client_id' => [
-                'integer',
-                app(ModelExists::class, ['model' => Client::class]),
             ],
             'ledger_account_id' => [
                 'integer',
@@ -86,6 +82,10 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Contact::class]),
+            ],
+            'tenant_id' => [
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'vat_rate_id' => [
                 'exclude_if:is_free_text,true',

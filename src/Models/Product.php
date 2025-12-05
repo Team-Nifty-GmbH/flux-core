@@ -7,19 +7,19 @@ use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
-use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasAttributeTranslations;
-use FluxErp\Traits\Model\HasClientAssignment;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
@@ -38,8 +38,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends FluxModel implements HasMedia, HasMediaForeignKey, InteractsWithDataTables
 {
-    use Categorizable, Commentable, Filterable, HasAttributeTranslations, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
+    use Categorizable, Commentable, Filterable, HasAttributeTranslations, HasFrontendAttributes, HasPackageFactory,
+        HasParentChildRelations, HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -122,11 +122,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
-    }
-
-    public function clients(): BelongsToMany
-    {
-        return $this->belongsToMany(Client::class, 'client_product')->using(ClientProduct::class);
     }
 
     public function coverMedia(): BelongsTo
@@ -284,6 +279,11 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier');
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'product_tenant')->using(ProductTenant::class);
     }
 
     public function unit(): BelongsTo

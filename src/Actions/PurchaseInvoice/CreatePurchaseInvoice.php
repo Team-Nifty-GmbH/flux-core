@@ -6,11 +6,11 @@ use Exception;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
-use FluxErp\Models\Client;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tag;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\PurchaseInvoice\CreatePurchaseInvoiceRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -76,7 +76,7 @@ class CreatePurchaseInvoice extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= resolve_static(Client::class, 'default')->getKey();
+        $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')->getKey();
     }
 
     protected function validateData(): void
@@ -113,10 +113,10 @@ class CreatePurchaseInvoice extends FluxAction
         if (
             data_get($this->data, 'invoice_number')
             && data_get($this->data, 'contact_id')
-            && data_get($this->data, 'client_id')
+            && data_get($this->data, 'tenant_id')
         ) {
             if (resolve_static(Order::class, 'query')
-                ->where('client_id', $this->data['client_id'])
+                ->where('tenant_id', $this->data['tenant_id'])
                 ->where('invoice_number', $this->data['invoice_number'])
                 ->where('contact_id', $this->data['contact_id'])
                 ->exists()

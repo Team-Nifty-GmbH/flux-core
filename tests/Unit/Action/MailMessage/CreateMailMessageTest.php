@@ -14,10 +14,10 @@ use Illuminate\Support\Str;
 
 beforeEach(function (): void {
     $this->address = Contact::factory()
-        ->has(Address::factory()->for($this->dbClient))
+        ->has(Address::factory()->for($this->dbTenant))
         ->for(PriceList::factory())
-        ->for(PaymentType::factory()->hasAttached($this->dbClient))
-        ->for($this->dbClient)
+        ->for(PaymentType::factory()->hasAttached($this->dbTenant))
+        ->for($this->dbTenant)
         ->create()
         ->addresses()
         ->first();

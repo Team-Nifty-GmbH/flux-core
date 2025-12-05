@@ -6,9 +6,9 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Traits\Model\Communicatable;
 use FluxErp\Traits\Model\Filterable;
-use FluxErp\Traits\Model\HasClientAssignment;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
@@ -21,7 +21,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
 {
-    use Communicatable, Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification,
+    use Communicatable, Filterable, HasPackageFactory, HasSerialNumberRange, HasTenantAssignment, HasUserModification,
         HasUuid, InteractsWithMedia, LogsActivity, Printable, SoftDeletes;
 
     protected static function booted(): void
@@ -46,11 +46,6 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         ];
     }
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
-
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -59,6 +54,11 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
     public function contactBankConnection(): BelongsTo
     {
         return $this->belongsTo(ContactBankConnection::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function getEmailTemplateModelType(): ?string

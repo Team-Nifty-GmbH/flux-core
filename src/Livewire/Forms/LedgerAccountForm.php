@@ -9,7 +9,7 @@ use Livewire\Attributes\Locked;
 
 class LedgerAccountForm extends FluxForm
 {
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?string $description = null;
 

@@ -14,10 +14,10 @@
                 :options="$models"
             />
             <x-select.styled
-                wire:model="serialNumberRange.client_id"
-                :label="__('Client')"
+                wire:model="serialNumberRange.tenant_id"
+                :label="__('Tenant')"
                 select="label:name|value:id"
-                :options="$clients"
+                :options="$tenants"
             />
         </div>
         <x-input wire:model="serialNumberRange.type" :label="__('Type')" />

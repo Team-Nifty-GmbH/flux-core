@@ -3,8 +3,8 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Facades\Asset;
-use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
+use FluxErp\Models\Tenant;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -71,7 +71,7 @@ class AssetController extends Controller
                 ->log($communication->subject . ' opened');
         }
 
-        $logo = resolve_static(Client::class, 'default')->getFirstMedia('logo_small');
+        $logo = resolve_static(Tenant::class, 'default')->getFirstMedia('logo_small');
 
         if ($logo && file_exists($logo->getPath())) {
             $path = $logo->getPath();

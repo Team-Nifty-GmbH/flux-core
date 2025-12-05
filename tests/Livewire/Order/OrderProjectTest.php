@@ -19,25 +19,25 @@ beforeEach(function (): void {
         'is_default' => true,
     ]);
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     $priceList = PriceList::factory()->create([
         'is_default' => true,
     ]);
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
             'is_default' => true,
         ]);
 
     $orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order->value,
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
         'is_main_address' => true,
         'is_invoice_address' => true,
@@ -45,7 +45,7 @@ beforeEach(function (): void {
     ]);
 
     $this->order = Order::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'currency_id' => $currency->id,
         'address_invoice_id' => $address->id,
         'price_list_id' => $priceList->id,
@@ -63,7 +63,7 @@ test('can create project from order', function (): void {
         ->set('existingProject', false)
         ->assertSet('form.id', null)
         ->assertSet('form.order_id', $this->order->id)
-        ->assertSet('form.client_id', $this->order->client_id)
+        ->assertSet('form.tenant_id', $this->order->tenant_id)
         ->assertSet('form.contact_id', $this->order->contact_id)
         ->assertSet('form.start_date', $this->order->system_delivery_date)
         ->assertSet('form.end_date', $this->order->system_delivery_date_end)
@@ -80,7 +80,7 @@ test('can create project from order', function (): void {
     $this->assertDatabaseHas('projects', [
         'id' => $component->get('form.id'),
         'order_id' => $this->order->id,
-        'client_id' => $this->order->client_id,
+        'tenant_id' => $this->order->tenant_id,
         'contact_id' => $this->order->contact_id,
         'start_date' => $this->order->system_delivery_date,
         'end_date' => $this->order->system_delivery_date_end,
@@ -90,7 +90,7 @@ test('can create project from order', function (): void {
 
 test('create tasks for existing project', function (): void {
     $projects = Project::factory(3)->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
     $currentProjectCount = Project::query()->count();
 
@@ -99,7 +99,7 @@ test('create tasks for existing project', function (): void {
         ->set('existingProject', true)
         ->assertSet('projectId', null)
         ->assertSet('form.order_id', $this->order->id)
-        ->assertSet('form.client_id', $this->order->client_id)
+        ->assertSet('form.tenant_id', $this->order->tenant_id)
         ->assertSet('form.contact_id', $this->order->contact_id)
         ->assertSet('form.start_date', $this->order->system_delivery_date)
         ->assertSet('form.end_date', $this->order->system_delivery_date_end)
@@ -125,7 +125,7 @@ test('renders successfully', function (): void {
         ->test(OrderProject::class, ['order' => $this->order])
         ->assertOk()
         ->assertSet('form.order_id', $this->order->id)
-        ->assertSet('form.client_id', $this->order->client_id)
+        ->assertSet('form.tenant_id', $this->order->tenant_id)
         ->assertSet('form.contact_id', $this->order->contact_id)
         ->assertSet('form.start_date', $this->order->system_delivery_date)
         ->assertSet('form.end_date', $this->order->system_delivery_date_end)

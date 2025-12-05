@@ -2,8 +2,8 @@
 
 namespace FluxErp\Rulesets\SerialNumberRange;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\SerialNumberRange;
+use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
@@ -18,10 +18,10 @@ class CreateSerialNumberRangeRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:serial_number_ranges,uuid',
-            'client_id' => [
+            'tenant_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Client::class]),
+                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'model_type' => [
                 'required',

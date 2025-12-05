@@ -3,7 +3,6 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\BankConnection;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -12,6 +11,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Transaction;
 use FluxErp\Models\User;
 use Illuminate\Database\Seeder;
@@ -20,30 +20,30 @@ class OrderTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $clients = Client::all(['id']);
+        $tenants = Tenant::all(['id']);
         $languages = Language::all(['id']);
         $currencies = Currency::all(['id']);
         $priceLists = PriceList::all(['id']);
         $users = User::all(['id']);
         $bankConnections = BankConnection::all(['id']);
 
-        foreach ($clients as $client) {
+        foreach ($tenants as $tenant) {
             $contacts = Contact::query()
                 ->with('addresses')
                 ->where('has_delivery_lock', false)
-                ->where('client_id', $client->id)
+                ->where('tenant_id', $tenant->id)
                 ->get(['id']);
 
             $orderTypes = OrderType::query()
-                ->where('client_id', $client->id)
+                ->where('tenant_id', $tenant->id)
                 ->get(['id']);
 
             $paymentTypes = PaymentType::query()
-                ->whereRelation('clients', 'id', $client->id)
+                ->whereRelation('tenants', 'id', $tenant->id)
                 ->get(['id']);
 
             $orders = Order::query()
-                ->where('client_id', $client->id)
+                ->where('tenant_id', $tenant->id)
                 ->get(['id']);
             $orderModel = new Order();
 
@@ -60,7 +60,7 @@ class OrderTableSeeder extends Seeder
                         'address_delivery_id' => $contact->addresses->random()->id,
                         'agent_id' => faker()->boolean(40) ? $users->random()->id : null,
                         'parent_id' => rand(0, 1) ? null : $parentId,
-                        'client_id' => $client->id,
+                        'tenant_id' => $tenant->id,
                         'currency_id' => $currency->id,
                         'language_id' => $languages->random()->id,
                         'order_type_id' => $orderType->id,
@@ -91,7 +91,7 @@ class OrderTableSeeder extends Seeder
                         'invoice_date',
                         faker()->dateTimeBetween(now()->startOfYear(), now()->endOfYear())
                     )
-                        ->getSerialNumber('invoice_number', $order->client_id)
+                        ->getSerialNumber('invoice_number', $order->tenant_id)
                         ->calculateBalance()
                         ->save();
                 }

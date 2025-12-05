@@ -15,7 +15,7 @@ test('renders successfully', function (): void {
 test('shows order types', function (): void {
     $orderTypes = OrderType::factory(5)
         ->create([
-            'client_id' => $this->dbClient->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
             'is_visible_in_sidebar' => true,

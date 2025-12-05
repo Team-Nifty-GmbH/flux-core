@@ -8,7 +8,7 @@ use Laravel\Sanctum\Sanctum;
 beforeEach(function (): void {
     $this->paymentTypes = PaymentType::factory()
         ->count(2)
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 
     $this->permissions = [
@@ -22,7 +22,7 @@ beforeEach(function (): void {
 
 test('create payment type', function (): void {
     $paymentType = [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'name' => 'Payment Type Name',
     ];
 
@@ -38,7 +38,7 @@ test('create payment type', function (): void {
         ->first();
 
     expect($dbPaymentType)->not->toBeEmpty();
-    expect($dbPaymentType->clients()->pluck('id')->toArray())->toEqual([$paymentType['client_id']]);
+    expect($dbPaymentType->tenants()->pluck('id')->toArray())->toEqual([$paymentType['tenant_id']]);
     expect($dbPaymentType->name)->toEqual($paymentType['name']);
     expect($dbPaymentType->description)->toBeNull();
     expect($dbPaymentType->payment_reminder_days_1)->toBeNull();
@@ -54,7 +54,7 @@ test('create payment type', function (): void {
 
 test('create payment type maximum', function (): void {
     $paymentType = [
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'name' => 'Payment Type Name',
         'description' => 'New description text for further information',
         'payment_reminder_days_1' => 42,
@@ -78,7 +78,7 @@ test('create payment type maximum', function (): void {
         ->first();
 
     expect($dbPaymentType)->not->toBeEmpty();
-    expect($dbPaymentType->clients()->pluck('id')->toArray())->toEqual([$paymentType['client_id']]);
+    expect($dbPaymentType->tenants()->pluck('id')->toArray())->toEqual([$paymentType['tenant_id']]);
     expect($dbPaymentType->name)->toEqual($paymentType['name']);
     expect($dbPaymentType->description)->toEqual($paymentType['description']);
     expect($dbPaymentType->payment_reminder_days_1)->toEqual($paymentType['payment_reminder_days_1']);
@@ -95,7 +95,7 @@ test('create payment type maximum', function (): void {
 test('create payment type validation fails', function (): void {
     $paymentType = [
         'name' => 'Payment Type Name',
-        'clients' => 'client_id',
+        'tenants' => 'tenant_id',
     ];
 
     $this->user->givePermissionTo($this->permissions['create']);
@@ -273,7 +273,7 @@ test('update payment type validation fails', function (): void {
     $paymentType = [
         'id' => $this->paymentTypes[0]->id,
         'name' => 'Payment Type Name',
-        'clients' => 'client_id',
+        'tenants' => 'tenant_id',
     ];
 
     $this->user->givePermissionTo($this->permissions['update']);

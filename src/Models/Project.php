@@ -10,11 +10,11 @@ use FluxErp\Contracts\IsSubscribable;
 use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Filterable;
-use FluxErp\Traits\Model\HasClientAssignment;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
@@ -33,9 +33,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable
 {
-    use Commentable, Filterable, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
-        HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        SoftDeletes, Trackable;
+    use Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+        HasSerialNumberRange, HasStates, HasTags, HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -117,11 +117,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         }
     }
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class, 'client_id');
-    }
-
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'contact_id');
@@ -184,6 +179,11 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 
     public function toCalendarEvent(?array $info = null): array

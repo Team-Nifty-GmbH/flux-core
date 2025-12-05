@@ -28,12 +28,12 @@
             :label="__('Requires Manual Transfer')"
         />
         <x-select.styled
-            :label="__('Client')"
+            :label="__('Tenant')"
             multiple
             autocomplete="off"
-            wire:model="paymentType.clients"
+            wire:model="paymentType.tenants"
             select="label:name|value:id"
-            :options="$clients"
+            :options="$tenants"
         />
         <x-number
             wire:model="paymentType.payment_reminder_days_1"

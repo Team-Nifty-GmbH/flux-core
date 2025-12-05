@@ -9,7 +9,7 @@ use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $this->orderTypes = OrderType::factory()->count(2)->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
@@ -24,7 +24,7 @@ beforeEach(function (): void {
 
 test('create order type', function (): void {
     $orderType = [
-        'client_id' => $this->orderTypes[0]->client_id,
+        'tenant_id' => $this->orderTypes[0]->tenant_id,
         'name' => 'Order Type Name',
         'order_type_enum' => OrderTypeEnum::Retoure->value,
     ];
@@ -41,7 +41,7 @@ test('create order type', function (): void {
         ->first();
 
     expect($dbOrderType)->not->toBeEmpty();
-    expect($dbOrderType->client_id)->toEqual($orderType['client_id']);
+    expect($dbOrderType->tenant_id)->toEqual($orderType['tenant_id']);
     expect($dbOrderType->name)->toEqual($orderType['name']);
     expect($dbOrderType->description)->toBeNull();
     expect($dbOrderType->order_type_enum->value)->toEqual($orderType['order_type_enum']);
@@ -53,7 +53,7 @@ test('create order type', function (): void {
 
 test('create order type maximum', function (): void {
     $orderType = [
-        'client_id' => $this->orderTypes[0]->client_id,
+        'tenant_id' => $this->orderTypes[0]->tenant_id,
         'name' => 'Order Type Name',
         'description' => 'New description text for further information',
         'order_type_enum' => OrderTypeEnum::Retoure->value,
@@ -73,7 +73,7 @@ test('create order type maximum', function (): void {
         ->first();
 
     expect($dbOrderType)->not->toBeEmpty();
-    expect($dbOrderType->client_id)->toEqual($orderType['client_id']);
+    expect($dbOrderType->tenant_id)->toEqual($orderType['tenant_id']);
     expect($dbOrderType->name)->toEqual($orderType['name']);
     expect($dbOrderType->description)->toEqual($orderType['description']);
     expect($dbOrderType->order_type_enum->value)->toEqual($orderType['order_type_enum']);
@@ -85,7 +85,7 @@ test('create order type maximum', function (): void {
 
 test('create order type validation fails', function (): void {
     $orderType = [
-        'client_id' => 'client_id',
+        'tenant_id' => 'tenant_id',
         'name' => 'Order Type Name',
         'order_type_enum' => Str::random(),
     ];
@@ -130,7 +130,7 @@ test('get order type', function (): void {
     // Check if controller returns the test order type.
     expect($jsonOrderType)->not->toBeEmpty();
     expect($jsonOrderType->id)->toEqual($this->orderTypes[0]->id);
-    expect($jsonOrderType->client_id)->toEqual($this->orderTypes[0]->client_id);
+    expect($jsonOrderType->tenant_id)->toEqual($this->orderTypes[0]->tenant_id);
     expect($jsonOrderType->name)->toEqual($this->orderTypes[0]->name);
     expect($jsonOrderType->description)->toEqual($this->orderTypes[0]->description);
     expect($jsonOrderType->is_active)->toEqual($this->orderTypes[0]->is_active);
@@ -164,7 +164,7 @@ test('get order types', function (): void {
     foreach ($this->orderTypes as $orderType) {
         $jsonOrderTypes->contains(function ($jsonOrderType) use ($orderType) {
             return $jsonOrderType->id === $orderType->id &&
-                $jsonOrderType->client_id === $orderType->client_id &&
+                $jsonOrderType->tenant_id === $orderType->tenant_id &&
                 $jsonOrderType->name === $orderType->name &&
                 $jsonOrderType->description === $orderType->description &&
                 $jsonOrderType->is_active === $orderType->is_active &&
@@ -235,7 +235,7 @@ test('update order type maximum', function (): void {
 test('update order type validation fails', function (): void {
     $orderType = [
         'id' => $this->orderTypes[0]->id,
-        'client_id' => 'client_id',
+        'tenant_id' => 'tenant_id',
         'name' => 'Order Type Name',
     ];
 

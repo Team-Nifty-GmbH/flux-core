@@ -19,21 +19,21 @@ test('renders successfully', function (): void {
 
 test('calculates margin from order and related orders', function (): void {
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
     $orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
     $parentOrder = Order::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'order_type_id' => $orderType->id,
         'currency_id' => Currency::default()->id,
         'payment_type_id' => PaymentType::default()->id,
@@ -44,7 +44,7 @@ test('calculates margin from order and related orders', function (): void {
     ]);
 
     Order::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'order_type_id' => $orderType->id,
         'currency_id' => Currency::default()->id,
         'payment_type_id' => PaymentType::default()->id,
@@ -56,7 +56,7 @@ test('calculates margin from order and related orders', function (): void {
     ]);
 
     Order::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'order_type_id' => $orderType->id,
         'currency_id' => Currency::default()->id,
         'payment_type_id' => PaymentType::default()->id,
@@ -68,7 +68,7 @@ test('calculates margin from order and related orders', function (): void {
     ]);
 
     $project = Project::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'order_id' => $parentOrder->id,
     ]);
 
@@ -79,7 +79,7 @@ test('calculates margin from order and related orders', function (): void {
 
 test('returns zero when project has no order', function (): void {
     $project = Project::factory()->create([
-        'client_id' => $this->dbClient->id,
+        'tenant_id' => $this->dbTenant->id,
         'order_id' => null,
     ]);
 

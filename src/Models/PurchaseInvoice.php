@@ -75,9 +75,9 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
         );
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function contact(): BelongsTo
