@@ -2,7 +2,6 @@
 
 use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
@@ -198,10 +197,6 @@ test('create project validation fails', function (): void {
 });
 
 test('delete project', function (): void {
-    AdditionalColumn::factory()->create([
-        'model_type' => Project::class,
-    ]);
-
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -233,10 +228,6 @@ test('delete project project not found', function (): void {
 });
 
 test('finish project', function (): void {
-    AdditionalColumn::factory()->create([
-        'model_type' => Project::class,
-    ]);
-
     $project = [
         'id' => $this->projects[1]->id,
         'finish' => true,
@@ -480,57 +471,4 @@ test('update project validation fails', function (): void {
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
     $response->assertUnprocessable();
-});
-
-test('update project with additional column', function (): void {
-    $additionalColumns = AdditionalColumn::factory()->count(2)->create([
-        'model_type' => morph_alias(Project::class),
-    ]);
-
-    $value = 'Original value from second additional column';
-    $this->projects[0]->saveMeta($additionalColumns[0]->name, 'Original Value');
-    $this->projects[0]->saveMeta($additionalColumns[1]->name, $value);
-
-    $project = [
-        'id' => $this->projects[0]->id,
-        'contact_id' => null,
-        'order_id' => null,
-        'responsible_user_id' => null,
-        'project_number' => Str::random(),
-        'name' => Str::random(),
-        'start_date' => date('Y-m-d'),
-        'end_date' => null,
-        'description' => 'New description text for further information',
-        $additionalColumns[0]->name => 'New Value',
-        $additionalColumns[1]->name => null,
-    ];
-
-    $this->user->givePermissionTo($this->permissions['update']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertOk();
-
-    $responseProject = json_decode($response->getContent())->data;
-    $dbProject = Project::query()
-        ->whereKey($responseProject->id)
-        ->first();
-
-    expect($dbProject)->not->toBeEmpty();
-    expect($dbProject->id)->toEqual($project['id']);
-    expect($dbProject->client_id)->toEqual($this->projects[0]->client_id);
-    expect($dbProject->contact_id)->toEqual($project['contact_id']);
-    expect($dbProject->order_id)->toEqual($project['order_id']);
-    expect($dbProject->responsible_user_id)->toEqual($project['responsible_user_id']);
-    expect($dbProject->parent_id)->toEqual($this->projects[0]->parent_id);
-    expect($dbProject->project_number)->toEqual($project['project_number']);
-    expect($dbProject->name)->toEqual($project['name']);
-    expect(Carbon::parse($dbProject->start_date)->toDateString())->toEqual($project['start_date']);
-    expect($dbProject->end_date)->toBeNull();
-    expect($dbProject->description)->toEqual($project['description']);
-    expect($this->user->is($dbProject->getUpdatedBy()))->toBeTrue();
-    expect($responseProject->{$additionalColumns[0]->name})->toEqual($project[$additionalColumns[0]->name]);
-    expect($dbProject->{$additionalColumns[0]->name})->toEqual($project[$additionalColumns[0]->name]);
-    expect($responseProject->{$additionalColumns[1]->name})->toBeNull();
-    expect($dbProject->{$additionalColumns[1]->name})->toBeNull();
 });

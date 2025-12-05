@@ -1,7 +1,6 @@
 <?php
 
 use Carbon\Carbon;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
@@ -144,11 +143,6 @@ test('create contact validation fails', function (): void {
 });
 
 test('delete contact', function (): void {
-    AdditionalColumn::factory()->create([
-        'name' => Str::random(),
-        'model_type' => Contact::class,
-    ]);
-
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 

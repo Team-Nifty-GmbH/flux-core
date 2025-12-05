@@ -2,9 +2,9 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
-use FluxErp\Traits\HasModelPermission;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\BroadcastsEvents;
+use FluxErp\Traits\Model\HasModelPermission;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class FluxModel extends Model

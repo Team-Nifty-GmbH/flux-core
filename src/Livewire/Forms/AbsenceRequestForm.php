@@ -13,7 +13,7 @@ use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\EmployeeCanCreateEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class AbsenceRequestForm extends FluxForm

@@ -593,7 +593,7 @@ if (! function_exists('morph_alias')) {
 
         if (
             class_exists($class)
-            && in_array(FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))
+            && in_array(FluxErp\Traits\Model\HasParentMorphClass::class, class_uses_recursive($class))
         ) {
             return $class::getParentMorphClass();
         }

@@ -4,7 +4,7 @@ namespace FluxErp\View\Components\EditorButtons;
 
 use FluxErp\Contracts\EditorDropdownButton;
 use FluxErp\Enums\EditorColorPaletteEnum;
-use FluxErp\Traits\EditorDropdownButtonTrait;
+use FluxErp\Traits\Editor\EditorDropdownButtonTrait;
 use Illuminate\View\Component;
 
 class TextColor extends Component implements EditorDropdownButton

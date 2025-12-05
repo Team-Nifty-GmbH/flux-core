@@ -10,7 +10,7 @@ use FluxErp\Models\User;
 use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\ToastNotification\NotificationAction;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
-use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Model\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\AnonymousNotifiable;

@@ -10,7 +10,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\Trackable;
+use FluxErp\Traits\Model\Trackable;
 
 class UpdateWorkTimeRuleset extends FluxRuleset
 {

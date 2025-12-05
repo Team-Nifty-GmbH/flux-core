@@ -9,7 +9,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Support\Calculation\Rounding;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;

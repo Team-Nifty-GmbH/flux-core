@@ -14,9 +14,6 @@ class AddressForm extends FluxForm
 {
     public ?string $addition = null;
 
-    // relations
-    public array $additional_columns = [];
-
     public ?string $advertising_state = null;
 
     public bool $can_login = false;

@@ -6,7 +6,7 @@ use FluxErp\Livewire\Forms\WorkTimeForm;
 use FluxErp\Models\WorkTime as WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Trackable;
+use FluxErp\Traits\Model\Trackable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;

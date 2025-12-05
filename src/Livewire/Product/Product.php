@@ -41,8 +41,6 @@ class Product extends Component
 {
     use Actions, WithTabs;
 
-    public array $additionalColumns = [];
-
     public ?array $currency = null;
 
     public array $displayedProductProperties = [];
@@ -132,7 +130,6 @@ class Product extends Component
             ->get(['id', 'name'])
             ->toArray();
 
-        $this->additionalColumns = $product->getAdditionalColumns()->toArray();
         $this->recalculateDisplayedProductProperties();
     }
 

@@ -8,7 +8,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\HasCalendarEvents;
+use FluxErp\Traits\Model\Calendar\HasCalendarEvents;
 
 class CreateCalendarEventRuleset extends FluxRuleset
 {

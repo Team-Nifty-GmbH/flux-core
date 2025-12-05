@@ -5,12 +5,10 @@ namespace FluxErp\Livewire\DataTables;
 use Exception;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Actions\WorkTime\CreateWorkTime;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -19,8 +17,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 class TicketList extends BaseDataTable
 {
     use WithFileUploads;
-
-    public array $additionalColumns;
 
     public $attachments;
 
@@ -39,8 +35,6 @@ class TicketList extends BaseDataTable
 
     #[Locked]
     public ?string $modelType = null;
-
-    public array $selectedAdditionalColumns = [];
 
     public bool $showTicketModal = false;
 
@@ -67,7 +61,6 @@ class TicketList extends BaseDataTable
         $modelType = $this->modelType ? morph_alias($this->modelType) : null;
 
         $this->ticketTypes = resolve_static(TicketType::class, 'query')
-            ->with('additionalModelColumns:id,name,model_type,model_id,field_type,values')
             ->when(
                 $modelType,
                 fn (Builder $query) => $query->where(
@@ -77,13 +70,6 @@ class TicketList extends BaseDataTable
                     }),
                 fn (Builder $query) => $query->whereNull('model_type')
             )
-            ->get()
-            ->toArray();
-
-        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-            ->where('model_type', morph_alias(Ticket::class))
-            ->whereNull('model_id')
-            ->select(['id', 'name', 'model_type', 'model_id', 'field_type', 'values'])
             ->get()
             ->toArray();
 
@@ -159,7 +145,6 @@ class TicketList extends BaseDataTable
         ];
 
         $this->ticketTypeId = null;
-        $this->selectedAdditionalColumns = [];
         $this->filesArray = [];
         $this->attachments = [];
 
@@ -188,25 +173,6 @@ class TicketList extends BaseDataTable
     public function updatedAttachments(): void
     {
         $this->prepareForMediaLibrary('attachments');
-    }
-
-    public function updatedTicketTypeId(): void
-    {
-        $ticketTypeAdditionalColumns = array_filter(array_map(
-            fn (array $item) => data_get($item, 'additional_model_columns'),
-            Arr::keyBy($this->ticketTypes, 'id')
-        ));
-
-        $oldAdditionalColumns = array_column(
-            $ticketTypeAdditionalColumns[$this->oldTicketTypeId] ?? [],
-            'name'
-        );
-
-        $this->ticket = array_merge($this->ticket, array_fill_keys($oldAdditionalColumns, null));
-        $this->oldTicketTypeId = $this->ticketTypeId;
-
-        $this->selectedAdditionalColumns = $this->ticketTypeId ?
-            $ticketTypeAdditionalColumns[$this->ticketTypeId] ?? [] : [];
     }
 
     protected function getBuilder(Builder $builder): Builder

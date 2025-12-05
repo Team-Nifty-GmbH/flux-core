@@ -3,7 +3,7 @@
 namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\CalendarEvent;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;

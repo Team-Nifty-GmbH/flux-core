@@ -6,7 +6,7 @@ use FluxErp\Actions\EmployeeDay\CreateEmployeeDay;
 use FluxErp\Actions\EmployeeDay\DeleteEmployeeDay;
 use FluxErp\Actions\EmployeeDay\UpdateEmployeeDay;
 use FluxErp\Models\EmployeeDay;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class EmployeeDayForm extends FluxForm

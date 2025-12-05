@@ -6,8 +6,8 @@ use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Lead;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
 

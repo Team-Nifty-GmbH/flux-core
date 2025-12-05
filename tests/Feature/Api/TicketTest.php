@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
@@ -237,40 +236,4 @@ test('update ticket validation fails', function (): void {
 
     $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
     $response->assertUnprocessable();
-});
-
-test('update ticket with additional columns', function (): void {
-    $additionalColumn = AdditionalColumn::factory()->create([
-        'model_type' => Ticket::class,
-    ]);
-
-    $this->tickets[0]->saveMeta($additionalColumn->name, 'Original Value');
-
-    $ticket = [
-        'id' => $this->tickets[0]->id,
-        'authenticatable_id' => $this->address->id,
-        'authenticatable_type' => morph_alias(Address::class),
-        'state' => 'waiting_for_customer',
-        'title' => Str::random(),
-        'description' => Str::random(),
-    ];
-
-    $this->user->givePermissionTo($this->permissions['update']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
-    $response->assertOk();
-
-    $responseTicket = json_decode($response->getContent())->data;
-
-    $dbTicket = Ticket::query()
-        ->whereKey($responseTicket->id)
-        ->first();
-
-    expect($dbTicket->id)->toEqual($ticket['id']);
-    expect($dbTicket->authenticatable_id)->toEqual($ticket['authenticatable_id']);
-    expect($dbTicket->authenticatable_type)->toEqual($ticket['authenticatable_type']);
-    expect($dbTicket->state)->toEqual($ticket['state']);
-    expect($dbTicket->title)->toEqual($ticket['title']);
-    expect($dbTicket->description)->toEqual($ticket['description']);
 });

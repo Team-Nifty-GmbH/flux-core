@@ -4,7 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\ToastType;
 use FluxErp\Support\TallstackUI\Interactions\Toast;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Notifications\DatabaseNotification;

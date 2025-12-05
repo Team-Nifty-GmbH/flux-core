@@ -1,7 +1,6 @@
 <?php
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -405,49 +404,4 @@ test('update order validation fails', function (): void {
 
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
     $response->assertUnprocessable();
-});
-
-test('update order with additional columns', function (): void {
-    $additionalColumn = AdditionalColumn::factory()->create([
-        'model_type' => Order::class,
-    ]);
-
-    $order = [
-        'id' => $this->orders[0]->id,
-        'language_id' => $this->languages[0]->id,
-        'order_type_id' => $this->orderTypes[0]->id,
-        'payment_type_id' => $this->paymentTypes[0]->id,
-        'payment_target' => rand(10, 20),
-        'payment_discount_target' => rand(3, 5),
-        'payment_discount_percent' => rand(1, 10) / 100,
-        'payment_reminder_days_1' => rand(1, 10),
-        'payment_reminder_days_2' => rand(1, 10),
-        'payment_reminder_days_3' => rand(1, 10),
-        'payment_texts' => [Str::random(300)],
-        'order_date' => date('Y-m-d', strtotime('-1 day')),
-        $additionalColumn->name => 'Testvalue for this column',
-    ];
-
-    $this->user->givePermissionTo($this->permissions['update']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->put('/api/orders', $order);
-    $response->assertOk();
-
-    $responseOrder = json_decode($response->getContent())->data;
-    $dbOrder = Order::query()
-        ->whereKey($responseOrder->id)
-        ->first();
-
-    expect($dbOrder->id)->toEqual($order['id']);
-    expect($dbOrder->language_id)->toEqual($order['language_id']);
-    expect($dbOrder->order_type_id)->toEqual($order['order_type_id']);
-    expect($dbOrder->payment_type_id)->toEqual($order['payment_type_id']);
-    expect($dbOrder->payment_target)->toEqual($order['payment_target']);
-    expect($dbOrder->payment_discount_target)->toEqual($order['payment_discount_target']);
-    expect($dbOrder->payment_discount_percent)->toEqual($order['payment_discount_percent']);
-    expect($dbOrder->payment_reminder_days_1)->toEqual($order['payment_reminder_days_1']);
-    expect($dbOrder->payment_reminder_days_2)->toEqual($order['payment_reminder_days_2']);
-    expect($dbOrder->payment_reminder_days_3)->toEqual($order['payment_reminder_days_3']);
-    expect($dbOrder->payment_texts)->toEqual($order['payment_texts']);
 });

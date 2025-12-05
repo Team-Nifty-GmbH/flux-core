@@ -4,7 +4,7 @@ namespace FluxErp\View\Components\EditorButtons;
 
 use FluxErp\Contracts\EditorDropdownButton;
 use FluxErp\Contracts\EditorTooltipButton;
-use FluxErp\Traits\EditorDropdownButtonTrait;
+use FluxErp\Traits\Editor\EditorDropdownButtonTrait;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Js;
 use Illuminate\View\Component;

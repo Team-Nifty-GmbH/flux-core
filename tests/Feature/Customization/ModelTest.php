@@ -6,7 +6,7 @@ use FluxErp\Models\User;
 test('model customization', function (): void {
     $class = new class() extends Language
     {
-        use FluxErp\Traits\HasParentMorphClass;
+        use FluxErp\Traits\Model\HasParentMorphClass;
 
         protected $table = 'languages';
     };
@@ -23,7 +23,7 @@ test('model customization', function (): void {
 test('model relation', function (): void {
     $class = new class() extends Language
     {
-        use FluxErp\Traits\HasParentMorphClass;
+        use FluxErp\Traits\Model\HasParentMorphClass;
 
         protected $table = 'languages';
     };

@@ -27,8 +27,6 @@ class DeleteUser extends FluxAction
             ->first();
 
         $user->tokens()->delete();
-        $user->locks()->delete();
-
         $user->children()->update(['parent_id' => $user->parent_id]);
 
         return $user->delete();

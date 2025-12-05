@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Forms\Settings;
 
 use FluxErp\Actions\Setting\UpdateSetting;
 use FluxErp\Livewire\Forms\FluxForm;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 abstract class SettingsForm extends FluxForm

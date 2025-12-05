@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\AbsencePolicyList;
 use FluxErp\Livewire\Forms\AbsencePolicyForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 
 class AbsencePolicies extends AbsencePolicyList
 {

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Facades;
 
-use FluxErp\Support\EditorManager;
+use FluxErp\Support\Editor\EditorManager;
 use Illuminate\Support\Facades\Facade;
 
 /**

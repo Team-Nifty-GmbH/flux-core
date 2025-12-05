@@ -104,7 +104,7 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->loadMigrationsFrom([
             __DIR__ . '/../database/migrations',
-            __DIR__ . '/../database/migrations/settings',
+            __DIR__ . '/../database/settings',
         ]);
         $this->app->bind(
             'path.lang',

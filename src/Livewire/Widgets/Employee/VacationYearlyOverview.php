@@ -9,7 +9,7 @@ use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;

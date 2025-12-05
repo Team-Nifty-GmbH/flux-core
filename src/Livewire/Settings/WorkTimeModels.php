@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\WorkTimeModelList;
 use FluxErp\Livewire\Forms\WorkTimeModelForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 

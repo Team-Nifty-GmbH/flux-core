@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\VacationCarryoverRule\CreateVacationCarryoverRule;
 use FluxErp\Actions\VacationCarryoverRule\DeleteVacationCarryoverRule;
 use FluxErp\Actions\VacationCarryoverRule\UpdateVacationCarryoverRule;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class VacationCarryOverRuleForm extends FluxForm

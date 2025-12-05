@@ -6,7 +6,6 @@ use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Activity;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\AttributeTranslation;
@@ -54,13 +53,11 @@ use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Location;
-use FluxErp\Models\Lock;
 use FluxErp\Models\Log;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
-use FluxErp\Models\Meta;
 use FluxErp\Models\Notification;
 use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\Order;
@@ -155,7 +152,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'absence_request' => AbsenceRequest::class,
             'absence_type' => AbsenceType::class,
             'activity' => Activity::class,
-            'additional_column' => AdditionalColumn::class,
             'address' => Address::class,
             'address_type' => AddressType::class,
             'attribute_translation' => AttributeTranslation::class,
@@ -203,13 +199,11 @@ class MorphMapServiceProvider extends ServiceProvider
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
             'location' => Location::class,
-            'lock' => Lock::class,
             'log' => Log::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
             'media_folder' => MediaFolder::class,
-            'meta' => Meta::class,
             'notification' => Notification::class,
             'database_notification' => Notification::class,
             'notification_setting' => NotificationSetting::class,

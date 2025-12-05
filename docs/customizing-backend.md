@@ -41,7 +41,7 @@ Or you can add the `HasParentMorphClass` trait to your model.
 // App\Models\User.php
 class User extends \FluxErp\Models\User
 {
-    use \FluxErp\Traits\HasParentMorphClass;
+    use \FluxErp\Traits\Model\HasParentMorphClass;
 }
 ```
 

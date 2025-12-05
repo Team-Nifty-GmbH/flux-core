@@ -6,7 +6,7 @@ use FluxErp\Actions\Holiday\CreateHoliday;
 use FluxErp\Actions\Holiday\DeleteHoliday;
 use FluxErp\Actions\Holiday\UpdateHoliday;
 use FluxErp\Models\Holiday;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class HolidayForm extends FluxForm

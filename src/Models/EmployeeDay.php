@@ -4,11 +4,11 @@ namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
 use FluxErp\Models\Pivots\EmployeeDayWorkTime;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;

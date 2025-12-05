@@ -2,11 +2,11 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\CascadeSoftDeletes;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Model\CascadeSoftDeletes;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;

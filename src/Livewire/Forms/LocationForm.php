@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Location\CreateLocation;
 use FluxErp\Actions\Location\DeleteLocation;
 use FluxErp\Actions\Location\UpdateLocation;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class LocationForm extends FluxForm

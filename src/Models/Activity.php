@@ -2,14 +2,13 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\BroadcastsEvents;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Spatie\Activitylog\Models\Activity as BaseActivity;
 
 class Activity extends BaseActivity
 {
-    use BroadcastsEvents, CacheModelQueries, ResolvesRelationsThroughContainer;
+    use BroadcastsEvents, ResolvesRelationsThroughContainer;
 
     protected function casts(): array
     {

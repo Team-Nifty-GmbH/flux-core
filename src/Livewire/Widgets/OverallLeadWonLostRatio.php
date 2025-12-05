@@ -8,7 +8,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Lead;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;

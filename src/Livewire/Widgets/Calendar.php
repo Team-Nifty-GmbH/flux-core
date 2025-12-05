@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Features\Calendar\Calendar as BaseCalendar;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Locked;

@@ -6,7 +6,7 @@ use FluxErp\Models\JobBatch;
 use FluxErp\Notifications\QueueMonitor\Batch\BatchFinishedNotification;
 use FluxErp\Notifications\QueueMonitor\Batch\BatchProcessingNotification;
 use FluxErp\Notifications\QueueMonitor\Batch\BatchStartedNotification;
-use FluxErp\Traits\MonitorsQueue;
+use FluxErp\Traits\Model\MonitorsQueue;
 use Illuminate\Bus\Batch;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Contracts\Container\Container;

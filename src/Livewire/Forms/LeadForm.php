@@ -6,7 +6,7 @@ use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Actions\Lead\DeleteLead;
 use FluxErp\Actions\Lead\UpdateLead;
 use FluxErp\Models\Lead;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class LeadForm extends FluxForm

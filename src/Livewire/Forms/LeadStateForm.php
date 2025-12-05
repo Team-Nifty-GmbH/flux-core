@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\LeadState\CreateLeadState;
 use FluxErp\Actions\LeadState\DeleteLeadState;
 use FluxErp\Actions\LeadState\UpdateLeadState;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class LeadStateForm extends FluxForm

@@ -6,23 +6,22 @@ use Exception;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasCalendars;
-use FluxErp\Traits\HasCalendarUserSettings;
-use FluxErp\Traits\HasCart;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasPushSubscriptions;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\HasWidgets;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\MonitorsQueue;
-use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Model\Calendar\HasCalendars;
+use FluxErp\Traits\Model\Calendar\HasCalendarUserSettings;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasCart;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasPushSubscriptions;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\HasWidgets;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\MonitorsQueue;
+use FluxErp\Traits\Model\Notifiable;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,9 +42,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
-        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+    use Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles, HasUserModification, HasUuid,
+        HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -194,11 +193,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);
-    }
-
-    public function locks(): MorphMany
-    {
-        return $this->morphMany(Lock::class, 'authenticatable');
     }
 
     public function mailAccounts(): BelongsToMany

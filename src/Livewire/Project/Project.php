@@ -58,13 +58,6 @@ class Project extends Component
         }
 
         $this->project->fill($project);
-        $this->project->additionalColumns = array_intersect_key(
-            $project->toArray(),
-            array_fill_keys(
-                $project->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
         $this->avatar = $project->getAvatarUrl();
 
         $this->availableStates = app(ProjectModel::class)
@@ -137,13 +130,6 @@ class Project extends Component
 
         $this->project->reset();
         $this->project->fill($project);
-        $this->project->additionalColumns = array_intersect_key(
-            $project->toArray(),
-            array_fill_keys(
-                $project->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
     }
 
     #[Renderless]

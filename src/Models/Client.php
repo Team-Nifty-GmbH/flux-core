@@ -3,17 +3,16 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\ClientPaymentType;
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasDefault;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasClientAssignment;
+use FluxErp\Traits\Model\HasDefault;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,7 +23,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Client extends FluxModel implements HasMedia
 {
-    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
+    use Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected $appends = [

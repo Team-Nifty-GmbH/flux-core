@@ -6,7 +6,7 @@ use FluxErp\Livewire\DataTables\CommissionRateList;
 use FluxErp\Livewire\Forms\CommissionRateForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Livewire\Attributes\Locked;
 
 class CommissionRates extends CommissionRateList

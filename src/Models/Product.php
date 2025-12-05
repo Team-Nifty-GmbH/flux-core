@@ -10,24 +10,22 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Support\Collection\ProductOptionCollection;
-use FluxErp\Traits\Categorizable;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasAttributeTranslations;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Lockable;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Categorizable;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasAttributeTranslations;
+use FluxErp\Traits\Model\HasClientAssignment;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -40,9 +38,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends FluxModel implements HasMedia, HasMediaForeignKey, InteractsWithDataTables
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, SoftDeletes;
+    use Categorizable, Commentable, Filterable, HasAttributeTranslations, HasClientAssignment, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

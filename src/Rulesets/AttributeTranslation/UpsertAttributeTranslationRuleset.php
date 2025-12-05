@@ -9,7 +9,7 @@ use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\Translatable;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\HasAttributeTranslations;
+use FluxErp\Traits\Model\HasAttributeTranslations;
 
 class UpsertAttributeTranslationRuleset extends FluxRuleset
 {
