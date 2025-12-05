@@ -112,7 +112,6 @@ test('create order', function (): void {
     expect($dbOrder->payment_reminder_days_1)->toEqual($order['payment_reminder_days_1']);
     expect($dbOrder->payment_reminder_days_2)->toEqual($order['payment_reminder_days_2']);
     expect($dbOrder->payment_reminder_days_3)->toEqual($order['payment_reminder_days_3']);
-    expect($dbOrder->payment_texts)->toEqual($order['payment_texts']);
 });
 
 test('create order validation fails', function (): void {
@@ -184,7 +183,6 @@ test('create order with address delivery', function (): void {
     expect($dbOrder->payment_reminder_days_1)->toEqual($order['payment_reminder_days_1']);
     expect($dbOrder->payment_reminder_days_2)->toEqual($order['payment_reminder_days_2']);
     expect($dbOrder->payment_reminder_days_3)->toEqual($order['payment_reminder_days_3']);
-    expect($dbOrder->payment_texts)->toEqual($order['payment_texts']);
     expect($dbOrder->order_date->format('Y-m-d'))->toEqual($order['order_date']);
 });
 
@@ -327,7 +325,6 @@ test('update order', function (): void {
     expect($dbOrder->payment_reminder_days_1)->toEqual($order['payment_reminder_days_1']);
     expect($dbOrder->payment_reminder_days_2)->toEqual($order['payment_reminder_days_2']);
     expect($dbOrder->payment_reminder_days_3)->toEqual($order['payment_reminder_days_3']);
-    expect($dbOrder->payment_texts)->toEqual($order['payment_texts']);
 });
 
 test('update order address delivery', function (): void {

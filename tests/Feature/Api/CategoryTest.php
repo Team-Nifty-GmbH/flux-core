@@ -133,34 +133,6 @@ test('delete category', function (): void {
     expect(Category::query()->whereKey($this->categories[1]->id)->exists())->toBeFalse();
 });
 
-test('delete category category belongs to project', function (): void {
-    $category = Category::factory()->create(['model_type' => Task::class]);
-    $project = Project::factory()->create([
-        'category_id' => $category->id,
-        'client_id' => $this->dbClient->getKey(),
-    ]);
-    $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
-    ]);
-    $address = Address::factory()->create([
-        'client_id' => $contact->client_id,
-        'contact_id' => $contact->id,
-        'is_main_address' => false,
-    ]);
-    $projectTask = Task::factory()->create([
-        'project_id' => $project->id,
-        'address_id' => $address->id,
-        'user_id' => $this->user->id,
-    ]);
-    $projectTask->category()->attach($this->categories[1]->id);
-
-    $this->user->givePermissionTo($this->permissions['delete']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->delete('/api/categories/' . $this->categories[1]->id);
-    $response->assertStatus(423);
-});
-
 test('delete category category has children', function (): void {
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);

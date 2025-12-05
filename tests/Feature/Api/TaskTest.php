@@ -205,53 +205,6 @@ test('delete task task not found', function (): void {
     $response->assertNotFound();
 });
 
-test('finish task', function (): void {
-    $task = [
-        'id' => $this->tasks[0]->id,
-        'finish' => true,
-    ];
-
-    $this->user->givePermissionTo($this->permissions['finish']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertOk();
-
-    $responseTask = json_decode($response->getContent())->data;
-    $dbTask = Task::query()
-        ->whereKey($responseTask->id)
-        ->first();
-
-    expect($dbTask)->not->toBeEmpty();
-    expect($dbTask->is_done)->toEqual($task['finish']);
-});
-
-test('finish task task not found', function (): void {
-    $task = [
-        'id' => ++$this->tasks[2]->id,
-        'finish' => true,
-    ];
-
-    $this->user->givePermissionTo($this->permissions['finish']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertUnprocessable();
-});
-
-test('finish task validation fails', function (): void {
-    $task = [
-        'id' => $this->tasks[0]->id,
-        'finish' => 'true',
-    ];
-
-    $this->user->givePermissionTo($this->permissions['finish']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertUnprocessable();
-});
-
 test('get task', function (): void {
     $this->tasks[0] = $this->tasks[0]->refresh();
 

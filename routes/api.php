@@ -1180,7 +1180,6 @@ Route::prefix('api')
                 Route::post('/tasks', CreateTask::class);
                 Route::put('/tasks', UpdateTask::class);
                 Route::delete('/tasks/{id}', DeleteTask::class);
-                Route::post('/tasks/finish', FinishTask::class);
                 Route::post('/tasks/{id}/replicate', ReplicateTask::class);
 
                 // Tickets
