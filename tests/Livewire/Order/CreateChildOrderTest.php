@@ -14,7 +14,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
-use FluxErp\Models\Warehouse;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -34,7 +33,6 @@ beforeEach(function (): void {
         ->create();
     $vatRate = VatRate::factory()->create();
     $language = Language::factory()->create();
-    $warehouse = Warehouse::factory()->create();
 
     $orderType = OrderType::factory()->create([
         'client_id' => $this->dbClient->getKey(),
@@ -65,7 +63,6 @@ beforeEach(function (): void {
         'price_list_id' => $priceList->id,
         'payment_type_id' => $paymentType->id,
         'language_id' => $language->id,
-        'warehouse_id' => $warehouse->id,
         'invoice_date' => now(),
     ]);
 

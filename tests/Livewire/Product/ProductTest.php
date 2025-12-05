@@ -27,9 +27,10 @@ beforeEach(function (): void {
             'prices'
         )
         ->create([
-            'client_id' => $this->dbClient->getKey(),
             'is_bundle' => false,
         ]);
+
+    $this->product->clients()->attach($this->dbClient->getKey());
 });
 
 test('delete product', function (): void {

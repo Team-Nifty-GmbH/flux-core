@@ -40,37 +40,22 @@ class TicketList extends BaseDataTable
 
     public array $ticket;
 
-    public ?int $ticketTypeId = null;
-
     public array $ticketTypes;
 
     protected ?string $includeBefore = 'flux::livewire.ticket.tickets';
 
     protected string $model = Ticket::class;
 
-    private ?int $oldTicketTypeId = null;
-
     public function mount(): void
     {
         $this->ticket = [
+            'ticket_type_id' => null,
             'title' => null,
             'description' => null,
-            'ticket_type_id' => null,
         ];
 
-        $modelType = $this->modelType ? morph_alias($this->modelType) : null;
-
         $this->ticketTypes = resolve_static(TicketType::class, 'query')
-            ->when(
-                $modelType,
-                fn (Builder $query) => $query->where(
-                    function (Builder $query) use ($modelType): void {
-                        $query->where('model_type', $modelType)
-                            ->orWhereNull('model_type');
-                    }),
-                fn (Builder $query) => $query->whereNull('model_type')
-            )
-            ->get()
+            ->get(['id', 'name'])
             ->toArray();
 
         parent::mount();
@@ -106,7 +91,6 @@ class TicketList extends BaseDataTable
         $this->ticket = array_merge($this->ticket, [
             'authenticatable_type' => Auth::user()->getMorphClass(),
             'authenticatable_id' => Auth::id(),
-            'ticket_type_id' => $this->ticketTypeId,
         ]);
 
         if ($this->modelType && $this->modelId) {
@@ -140,11 +124,11 @@ class TicketList extends BaseDataTable
     public function show(): void
     {
         $this->ticket = [
+            'ticket_type_id' => null,
             'title' => null,
             'description' => null,
         ];
 
-        $this->ticketTypeId = null;
         $this->filesArray = [];
         $this->attachments = [];
 

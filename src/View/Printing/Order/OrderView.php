@@ -68,7 +68,7 @@ class OrderView extends PrintableView
         ]);
 
         $positions = array_map(
-            fn (array $item) => app(OrderPosition::class)->withoutMeta()->forceFill($item),
+            fn (array $item) => app(OrderPosition::class)->forceFill($item),
             to_flat_tree(
                 resolve_static(OrderPosition::class, 'familyTree')
                     ->where('order_id', $this->model->getKey())

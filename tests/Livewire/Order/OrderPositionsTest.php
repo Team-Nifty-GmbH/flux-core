@@ -53,9 +53,9 @@ beforeEach(function (): void {
     ]);
 
     $this->product = Product::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
         'vat_rate_id' => $this->vatRate->id,
     ]);
+    $this->product->clients()->attach($this->dbClient->getKey());
 
     Price::factory()->create([
         'product_id' => $this->product->id,
