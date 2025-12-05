@@ -14,6 +14,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
+use FluxErp\Models\Warehouse;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -72,11 +73,13 @@ beforeEach(function (): void {
     ]);
     $product->clients()->attach($this->dbClient->getKey());
 
+    $warehouse = Warehouse::factory()->create();
     OrderPosition::factory()->create([
         'client_id' => $this->dbClient->getKey(),
         'order_id' => $this->parentOrder->id,
         'product_id' => $product->id,
         'vat_rate_id' => $vatRate->id,
+        'warehouse_id' => $warehouse->getKey(),
         'amount' => 10,
         'signed_amount' => 10,
         'unit_net_price' => 100,
