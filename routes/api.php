@@ -274,7 +274,6 @@ use FluxErp\Actions\Target\DeleteTarget;
 use FluxErp\Actions\Target\UpdateTarget;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
-use FluxErp\Actions\Task\FinishTask;
 use FluxErp\Actions\Task\ReplicateTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Actions\Ticket\CreateTicket;

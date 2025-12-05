@@ -2,11 +2,8 @@
 
 use Carbon\Carbon;
 use FluxErp\FluxServiceProvider;
-use FluxErp\Models\Address;
 use FluxErp\Models\Category;
-use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use Laravel\Sanctum\Sanctum;
 
