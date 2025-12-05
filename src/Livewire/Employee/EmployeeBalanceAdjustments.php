@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Employee;
 use FluxErp\Livewire\DataTables\EmployeeBalanceAdjustmentList;
 use FluxErp\Livewire\Forms\EmployeeBalanceAdjustmentForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Modelable;
 

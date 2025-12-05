@@ -9,7 +9,7 @@ use FluxErp\Livewire\DataTables\EmailTemplateList;
 use FluxErp\Livewire\Forms\EmailTemplateForm;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;

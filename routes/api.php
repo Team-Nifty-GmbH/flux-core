@@ -12,12 +12,6 @@ use FluxErp\Actions\AbsenceRequest\UpdateAbsenceRequest;
 use FluxErp\Actions\AbsenceType\CreateAbsenceType;
 use FluxErp\Actions\AbsenceType\DeleteAbsenceType;
 use FluxErp\Actions\AbsenceType\UpdateAbsenceType;
-use FluxErp\Actions\AdditionalColumn\CreateAdditionalColumn;
-use FluxErp\Actions\AdditionalColumn\CreateValueList;
-use FluxErp\Actions\AdditionalColumn\DeleteAdditionalColumn;
-use FluxErp\Actions\AdditionalColumn\DeleteValueList;
-use FluxErp\Actions\AdditionalColumn\UpdateAdditionalColumn;
-use FluxErp\Actions\AdditionalColumn\UpdateValueList;
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
@@ -280,7 +274,6 @@ use FluxErp\Actions\Target\DeleteTarget;
 use FluxErp\Actions\Target\UpdateTarget;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
-use FluxErp\Actions\Task\FinishTask;
 use FluxErp\Actions\Task\ReplicateTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Actions\Ticket\CreateTicket;
@@ -327,7 +320,6 @@ use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\BaseController;
 use FluxErp\Http\Controllers\CommentController;
 use FluxErp\Http\Controllers\EventSubscriptionController;
-use FluxErp\Http\Controllers\LockController;
 use FluxErp\Http\Controllers\MobileController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PrintController;
@@ -337,7 +329,6 @@ use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\BankConnection;
@@ -379,13 +370,11 @@ use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Location;
-use FluxErp\Models\Lock;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
-use FluxErp\Models\OrderTransaction;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentReminderText;
@@ -393,6 +382,7 @@ use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Price;
@@ -491,15 +481,6 @@ Route::prefix('api')
                 Route::post('/absence-types', CreateAbsenceType::class);
                 Route::put('/absence-types', UpdateAbsenceType::class);
                 Route::delete('/absence-types/{id}', DeleteAbsenceType::class);
-
-                // AdditionalColumns
-                Route::get('/additional-columns/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', AdditionalColumn::class);
-                Route::get('/additional-columns', [BaseController::class, 'index'])
-                    ->defaults('model', AdditionalColumn::class);
-                Route::post('/additional-columns', CreateAdditionalColumn::class);
-                Route::put('/additional-columns', UpdateAdditionalColumn::class);
-                Route::delete('/additional-columns/{id}', DeleteAdditionalColumn::class);
 
                 // Addresses
                 Route::get('/addresses/{id}', [BaseController::class, 'show'])->defaults('model', Address::class);
@@ -858,11 +839,6 @@ Route::prefix('api')
                 Route::put('/locations', UpdateLocation::class);
                 Route::delete('/locations/{id}', DeleteLocation::class);
 
-                // Locking
-                Route::get('/user/locks', [LockController::class, 'showUserLocks']);
-                Route::get('/locks', [BaseController::class, 'index'])->defaults('model', Lock::class);
-                Route::get('/{modelType}/lock', [LockController::class, 'lock']);
-
                 // MailAccounts
                 Route::get('/mail-accounts/{id}', [BaseController::class, 'show'])
                     ->defaults('model', MailAccount::class);
@@ -1203,7 +1179,6 @@ Route::prefix('api')
                 Route::post('/tasks', CreateTask::class);
                 Route::put('/tasks', UpdateTask::class);
                 Route::delete('/tasks/{id}', DeleteTask::class);
-                Route::post('/tasks/finish', FinishTask::class);
                 Route::post('/tasks/{id}/replicate', ReplicateTask::class);
 
                 // Tickets
@@ -1293,11 +1268,6 @@ Route::prefix('api')
                 Route::post('/vacation-carryover-rules', CreateVacationCarryoverRule::class);
                 Route::put('/vacation-carryover-rules', UpdateVacationCarryoverRule::class);
                 Route::delete('/vacation-carryover-rules/{id}', DeleteVacationCarryoverRule::class);
-
-                // ValueLists
-                Route::post('/value-lists', CreateValueList::class);
-                Route::put('/value-lists', UpdateValueList::class);
-                Route::delete('/value-lists/{id}', DeleteValueList::class);
 
                 // VatRates
                 Route::get('/vat-rates/{id}', [BaseController::class, 'show'])->defaults('model', VatRate::class);

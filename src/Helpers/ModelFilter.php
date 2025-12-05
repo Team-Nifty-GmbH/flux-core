@@ -2,7 +2,6 @@
 
 namespace FluxErp\Helpers;
 
-use FluxErp\Models\AdditionalColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -104,12 +103,7 @@ class ModelFilter
         }
 
         if (! is_null($filter)) {
-            $additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-                ->where('model_type', $model)
-                ->get()
-                ->pluck('name')
-                ->toArray();
-            $modelFilter->addFilters($filter, $additionalColumns);
+            $modelFilter->addFilters($filter);
         }
 
         if (! is_null($sort)) {
@@ -209,7 +203,7 @@ class ModelFilter
         }
     }
 
-    public function addFilters(array|string $filters, array $additionalColumns = []): void
+    public function addFilters(array|string $filters): void
     {
         if (is_string($filters)) {
             $filters = [$filters];
@@ -232,7 +226,7 @@ class ModelFilter
         } else {
             foreach ($filterParams as $fKey => $filterParam) {
                 foreach ($filterParam as $param) {
-                    if (str_contains($param[0], '.') || in_array($param[0], $additionalColumns)) {
+                    if (str_contains($param[0], '.')) {
                         $this->collectionFilters[] = $filterParam;
                         unset($filterParams[$fKey]);
                         break;

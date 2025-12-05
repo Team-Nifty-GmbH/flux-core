@@ -7,7 +7,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Model\InteractsWithMedia;
 
 class DeleteMediaFolderRuleset extends FluxRuleset
 {

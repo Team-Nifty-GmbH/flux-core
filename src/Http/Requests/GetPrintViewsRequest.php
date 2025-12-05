@@ -4,7 +4,7 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\Printable;
 
 class GetPrintViewsRequest extends BaseFormRequest
 {

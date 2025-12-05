@@ -7,7 +7,7 @@ use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Support\Metrics\Charts\Bar;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;

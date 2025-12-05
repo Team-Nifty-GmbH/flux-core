@@ -28,13 +28,6 @@
             </div>
         </div>
     </x-card>
-    <x-card :header="__('Additional columns')">
-        <x-flux::additional-columns
-            :model="\FluxErp\Models\SerialNumber::class"
-            :id="data_get($this->serialNumber, 'id')"
-            wire="serialNumber"
-        />
-    </x-card>
     <x-errors />
     @if ($serialNumberId = data_get($this->serialNumber, 'id'))
         <x-card :header="__('Files')">

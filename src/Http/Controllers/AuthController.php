@@ -78,7 +78,6 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $request->user()->tokens()->delete();
-        $request->user()->locks()->delete();
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,

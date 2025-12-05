@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\AbsencePolicy\CreateAbsencePolicy;
 use FluxErp\Actions\AbsencePolicy\DeleteAbsencePolicy;
 use FluxErp\Actions\AbsencePolicy\UpdateAbsencePolicy;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class AbsencePolicyForm extends FluxForm

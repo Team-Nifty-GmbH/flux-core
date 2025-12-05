@@ -60,7 +60,6 @@ use FluxErp\Livewire\Settings\AbsencePolicies;
 use FluxErp\Livewire\Settings\AbsenceTypes;
 use FluxErp\Livewire\Settings\AccountingSettings;
 use FluxErp\Livewire\Settings\ActivityLogs;
-use FluxErp\Livewire\Settings\AdditionalColumns;
 use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
@@ -277,7 +276,6 @@ Route::middleware('web')
                         Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
                         Route::get('/accounting-settings', AccountingSettings::class)->name('accounting-settings');
                         Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
-                        Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
                         Route::get('/categories', Categories::class)->name('categories');

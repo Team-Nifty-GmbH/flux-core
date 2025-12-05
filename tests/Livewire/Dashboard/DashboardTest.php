@@ -11,7 +11,7 @@ use Livewire\Livewire;
 beforeEach(function (): void {
     $this->components[] = new class() extends Component
     {
-        use FluxErp\Traits\Widgetable;
+        use FluxErp\Traits\Livewire\Widget\Widgetable;
 
         public static function dashboardComponent(): string
         {
@@ -32,7 +32,7 @@ beforeEach(function (): void {
     };
     $this->components[] = new class() extends Component
     {
-        use FluxErp\Traits\Widgetable;
+        use FluxErp\Traits\Livewire\Widget\Widgetable;
 
         public static function dashboardComponent(): string
         {

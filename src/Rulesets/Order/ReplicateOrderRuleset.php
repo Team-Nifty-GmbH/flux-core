@@ -10,8 +10,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class ReplicateOrderRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = Order::class;
 
     public static function getRules(): array

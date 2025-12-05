@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\LeadLossReasonList;
 use FluxErp\Livewire\Forms\LeadLossReasonForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 
 class LeadLossReasons extends LeadLossReasonList
 {

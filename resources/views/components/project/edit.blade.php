@@ -165,23 +165,6 @@
                 placeholder="02:30"
             />
             @show
-            @section('additional-columns')
-            @if ($this->project->additionalColumns)
-                <div class="space-y-2.5">
-                    <h3
-                        class="text-md mt-4 whitespace-normal font-medium text-secondary-700 dark:text-secondary-400"
-                    >
-                        {{ __('Additional Columns') }}
-                    </h3>
-                    <x-flux::additional-columns
-                        :model="\FluxErp\Models\Project::class"
-                        :id="$this->project->id"
-                        wire="project.additionalColumns"
-                    />
-                </div>
-            @endif
-
-            @show
         </div>
         @if ($collapsed)
             <x-badge

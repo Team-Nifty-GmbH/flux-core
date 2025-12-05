@@ -38,7 +38,7 @@ test('init permissions', function (): void {
     // Add Custom Widget
     Livewire::component('custom-widget-that-never-exists', new class() extends Component
     {
-        use FluxErp\Traits\Widgetable;
+        use FluxErp\Traits\Livewire\Widget\Widgetable;
 
         public static function dashboardComponent(): string
         {

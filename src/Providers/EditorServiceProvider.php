@@ -6,7 +6,7 @@ use FluxErp\Facades\Editor;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\SepaMandate;
-use FluxErp\Support\EditorManager;
+use FluxErp\Support\Editor\EditorManager;
 use FluxErp\View\Components\EditorButtons\AlignCenter;
 use FluxErp\View\Components\EditorButtons\AlignLeft;
 use FluxErp\View\Components\EditorButtons\AlignRight;

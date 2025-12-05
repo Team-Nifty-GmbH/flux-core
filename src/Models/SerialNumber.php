@@ -3,15 +3,14 @@
 namespace FluxErp\Models;
 
 use Exception;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,8 +20,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasUserModification,
-        HasUuid, InteractsWithMedia, LogsActivity;
+    use Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

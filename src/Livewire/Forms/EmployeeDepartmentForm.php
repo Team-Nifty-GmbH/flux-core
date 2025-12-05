@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\EmployeeDepartment\CreateEmployeeDepartment;
 use FluxErp\Actions\EmployeeDepartment\DeleteEmployeeDepartment;
 use FluxErp\Actions\EmployeeDepartment\UpdateEmployeeDepartment;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class EmployeeDepartmentForm extends FluxForm

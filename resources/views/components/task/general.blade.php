@@ -279,18 +279,4 @@
         />
         @show
     </div>
-    @section('task-additional-columns')
-    <div class="flex flex-col gap-2">
-        <h3
-            class="text-md mt-4 whitespace-normal font-medium text-secondary-700 dark:text-secondary-400"
-        >
-            {{ __('Additional Columns') }}
-        </h3>
-        <x-flux::additional-columns
-            :model="\FluxErp\Models\Task::class"
-            :id="$this->task->id"
-            wire="task.additionalColumns"
-        />
-    </div>
-    @show
 </div>

@@ -28,11 +28,6 @@ class CreateTaskModal extends Component
 
     public function mount(): void
     {
-        $this->task->additionalColumns = array_fill_keys(
-            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
-            null
-        );
-
         $this->availableStates = app(Task::class)
             ->getStatesFor('state')
             ->map(function (string $state) {
@@ -53,11 +48,6 @@ class CreateTaskModal extends Component
     public function resetTask(): void
     {
         $this->task->reset();
-
-        $this->task->additionalColumns = array_fill_keys(
-            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
-            null
-        );
     }
 
     public function save(): bool

@@ -4,7 +4,7 @@ namespace FluxErp\Console\Commands;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Console\Scheduling\Repeatable;
-use FluxErp\Traits\HasDefault;
+use FluxErp\Traits\Model\HasDefault;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;

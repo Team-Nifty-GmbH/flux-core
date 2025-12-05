@@ -5,7 +5,6 @@ namespace FluxErp\Actions\TicketType;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\TicketType;
 use FluxErp\Rulesets\TicketType\CreateTicketTypeRuleset;
-use Illuminate\Support\Arr;
 
 class CreateTicketType extends FluxAction
 {
@@ -21,15 +20,9 @@ class CreateTicketType extends FluxAction
 
     public function performAction(): TicketType
     {
-        $roles = Arr::pull($this->data, 'roles');
-
-        $ticketType = app(TicketType::class, ['attributes' => $this->data]);
+        $ticketType = app(TicketType::class, ['attributes' => $this->getData()]);
         $ticketType->save();
 
-        if ($roles) {
-            $ticketType->roles()->sync($roles);
-        }
-
-        return $ticketType->fresh();
+        return $ticketType->refresh();
     }
 }

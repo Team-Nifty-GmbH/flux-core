@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Token\CreateToken;
 use FluxErp\Actions\Token\DeleteToken;
 use FluxErp\Models\Permission;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class TokenForm extends FluxForm

@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\BroadcastsEvents;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 
 class PushSubscription extends \NotificationChannels\WebPush\PushSubscription
 {

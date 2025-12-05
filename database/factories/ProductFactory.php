@@ -23,7 +23,6 @@ class ProductFactory extends Factory
             'min_purchase' => fake()->randomKey([1, 5, 10]),
             'max_purchase' => fake()->randomKey([100, 15, 25, 50]),
             'seo_keywords' => fake()->word,
-            'manufacturer_product_number' => fake()->word,
             'posting_account' => fake()->word,
             'warning_stock_amount' => fake()->randomKey([100, 15, 25, 50]),
             'is_bundle' => fake()->boolean(30),

@@ -24,11 +24,6 @@ class ProjectList extends BaseProjectList
     {
         parent::mount();
 
-        $this->project->additionalColumns = array_fill_keys(
-            resolve_static(Project::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
-            null
-        );
-
         $this->availableStates = app(Project::class)
             ->getStatesFor('state')
             ->map(function (string $state) {
@@ -56,12 +51,6 @@ class ProjectList extends BaseProjectList
     public function createProject(): void
     {
         $this->project->reset();
-        $this->project->additionalColumns = array_fill_keys(
-            resolve_static(Project::class, 'additionalColumnsQuery')
-                ->pluck('name')
-                ?->toArray() ?? [],
-            null
-        );
 
         $this->js(<<<'JS'
             $modalOpen('edit-project');

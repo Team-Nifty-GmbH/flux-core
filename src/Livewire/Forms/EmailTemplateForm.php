@@ -6,7 +6,7 @@ use FluxErp\Actions\EmailTemplate\CreateEmailTemplate;
 use FluxErp\Actions\EmailTemplate\DeleteEmailTemplate;
 use FluxErp\Actions\EmailTemplate\UpdateEmailTemplate;
 use FluxErp\Models\EmailTemplate;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class EmailTemplateForm extends FluxForm

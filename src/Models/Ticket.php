@@ -7,21 +7,20 @@ use FluxErp\Casts\Money;
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Support\Scout\ScoutCustomize;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasRelatedModel;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasRelatedModel;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
+use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
-use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -32,9 +31,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasFrontendAttributes, HasPackageFactory, HasRelatedModel,
+        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

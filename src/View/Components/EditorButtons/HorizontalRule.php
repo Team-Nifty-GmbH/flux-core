@@ -3,7 +3,7 @@
 namespace FluxErp\View\Components\EditorButtons;
 
 use FluxErp\Contracts\EditorButton;
-use FluxErp\Traits\EditorButtonTrait;
+use FluxErp\Traits\Editor\EditorButtonTrait;
 use Illuminate\View\Component;
 
 class HorizontalRule extends Component implements EditorButton

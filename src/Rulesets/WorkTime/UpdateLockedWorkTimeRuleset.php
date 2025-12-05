@@ -11,12 +11,10 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\Trackable;
+use FluxErp\Traits\Model\Trackable;
 
 class UpdateLockedWorkTimeRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = WorkTime::class;
 
     public function rules(): array

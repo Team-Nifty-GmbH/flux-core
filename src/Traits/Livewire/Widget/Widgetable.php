@@ -1,0 +1,38 @@
+<?php
+
+namespace FluxErp\Traits\Livewire\Widget;
+
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
+
+trait Widgetable
+{
+    #[Locked]
+    public ?string $dashboardComponent = null;
+
+    abstract public static function dashboardComponent(): array|string;
+
+    public static function getLabel(): string
+    {
+        if (app()->runningInConsole()) {
+            return Str::headline(class_basename(static::class));
+        }
+
+        return __(Str::headline(class_basename(static::class)));
+    }
+
+    public function placeholder(): View
+    {
+        if (method_exists(parent::class, 'placeholder')) {
+            return parent::placeholder();
+        }
+
+        return view('flux::livewire.placeholders.box');
+    }
+
+    public function showTitle(): bool
+    {
+        return true;
+    }
+}

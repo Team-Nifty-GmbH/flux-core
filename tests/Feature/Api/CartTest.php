@@ -29,9 +29,9 @@ beforeEach(function (): void {
     $vatRate = VatRate::factory()->create();
 
     $this->products = Product::factory()->count(3)->create([
-        'client_id' => $dbClient->id,
         'vat_rate_id' => $vatRate->id,
     ]);
+    $dbClient->products()->attach($this->products);
 
     $this->carts = Cart::factory()->count(2)->create([
         'authenticatable_type' => morph_alias(User::class),

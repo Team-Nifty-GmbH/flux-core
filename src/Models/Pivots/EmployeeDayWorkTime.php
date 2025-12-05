@@ -4,7 +4,7 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\EmployeeDay;
 use FluxErp\Models\WorkTime;
-use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\Model\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeDayWorkTime extends FluxPivot

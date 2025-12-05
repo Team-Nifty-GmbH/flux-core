@@ -6,7 +6,7 @@ use FluxErp\Actions\AbsenceType\CreateAbsenceType;
 use FluxErp\Actions\AbsenceType\DeleteAbsenceType;
 use FluxErp\Actions\AbsenceType\UpdateAbsenceType;
 use FluxErp\Models\AbsenceType;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class AbsenceTypeForm extends FluxForm

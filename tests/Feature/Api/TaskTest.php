@@ -1,7 +1,6 @@
 <?php
 
 use Carbon\Carbon;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
@@ -23,10 +22,6 @@ beforeEach(function (): void {
         'responsible_user_id' => $this->user->id,
     ]);
 
-    $this->additionalColumns = AdditionalColumn::query()
-        ->where('model_type', morph_alias(Task::class))
-        ->get();
-
     $this->permissions = [
         'show' => Permission::findOrCreate('api.tasks.{id}.get'),
         'index' => Permission::findOrCreate('api.tasks.get'),
@@ -38,15 +33,7 @@ beforeEach(function (): void {
     ];
 });
 
-test('bulk update tasks with additional columns', function (): void {
-    $additionalColumns[] = AdditionalColumn::factory()->create([
-        'model_type' => morph_alias(Task::class),
-    ]);
-    $additionalColumns[] = AdditionalColumn::factory()->create([
-        'model_type' => morph_alias(Task::class),
-        'values' => ['a', 'b', 'c'],
-    ]);
-
+test('bulk update tasks', function (): void {
     $tasks = [
         [
             'id' => $this->tasks[0]->id,
@@ -65,18 +52,6 @@ test('bulk update tasks with additional columns', function (): void {
             'due_date' => $this->tasks[1]->due_date?->toDateString(),
         ],
     ];
-
-    $this->additionalColumns = AdditionalColumn::query()
-        ->where('model_type', morph_alias(Task::class))
-        ->get();
-
-    foreach ($tasks as $key => $task) {
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $tasks[$key] += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-    }
 
     $this->user->givePermissionTo($this->permissions['update']);
     Sanctum::actingAs($this->user, ['user']);
@@ -102,11 +77,6 @@ test('bulk update tasks with additional columns', function (): void {
     expect($dbTasks[1]->name)->toEqual($tasks[1]['name']);
     expect($dbTasks[1]->description)->toEqual($tasks[1]['description']);
     expect($this->user->is($dbTasks[1]->getUpdatedBy()))->toBeTrue();
-
-    expect($dbTasks[0]->{$additionalColumns[0]->name})->toEqual($tasks[0][$additionalColumns[0]->name]);
-    expect($dbTasks[0]->{$additionalColumns[1]->name})->toEqual($tasks[0][$additionalColumns[1]->name]);
-    expect($dbTasks[1]->{$additionalColumns[0]->name})->toEqual($tasks[1][$additionalColumns[0]->name]);
-    expect($dbTasks[1]->{$additionalColumns[1]->name})->toEqual($tasks[1][$additionalColumns[1]->name]);
 });
 
 test('create task', function (): void {
@@ -130,12 +100,6 @@ test('create task', function (): void {
         'budget' => rand(0, 10000) / 100,
         'users' => $users->pluck('id')->toArray(),
     ];
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        $task += [
-            $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-        ];
-    }
 
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
@@ -180,11 +144,6 @@ test('create task', function (): void {
         TaskAssignedNotification::class
     );
     Notification::assertNothingSentTo($this->user);
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        expect($responseTask->{$additionalColumn->name})->toEqual($task[$additionalColumn->name]);
-        expect($dbTask->{$additionalColumn->name})->toEqual($task[$additionalColumn->name]);
-    }
 });
 
 test('create task project not found', function (): void {
@@ -192,12 +151,6 @@ test('create task project not found', function (): void {
         'project_id' => ++$this->project->id,
         'name' => 'test',
     ];
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        $task += [
-            $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-        ];
-    }
 
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
@@ -211,12 +164,6 @@ test('create task user not found', function (): void {
         'responsible_user_id' => ++$this->user->id,
         'name' => 'test',
     ];
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        $task += [
-            $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-        ];
-    }
 
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
@@ -239,10 +186,6 @@ test('create task validation fails', function (): void {
 });
 
 test('delete task', function (): void {
-    AdditionalColumn::factory()->create([
-        'model_type' => morph_alias(Task::class),
-    ]);
-
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -260,57 +203,6 @@ test('delete task task not found', function (): void {
 
     $response = $this->actingAs($this->user)->delete('/api/tasks/' . ++$this->tasks[2]->id);
     $response->assertNotFound();
-});
-
-test('finish task', function (): void {
-    AdditionalColumn::factory()->create([
-        'model_type' => app(Task::class)->getMorphClass(),
-    ]);
-
-    $task = [
-        'id' => $this->tasks[0]->id,
-        'finish' => true,
-    ];
-
-    $this->user->givePermissionTo($this->permissions['finish']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertOk();
-
-    $responseTask = json_decode($response->getContent())->data;
-    $dbTask = Task::query()
-        ->whereKey($responseTask->id)
-        ->first();
-
-    expect($dbTask)->not->toBeEmpty();
-    expect($dbTask->is_done)->toEqual($task['finish']);
-});
-
-test('finish task task not found', function (): void {
-    $task = [
-        'id' => ++$this->tasks[2]->id,
-        'finish' => true,
-    ];
-
-    $this->user->givePermissionTo($this->permissions['finish']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertUnprocessable();
-});
-
-test('finish task validation fails', function (): void {
-    $task = [
-        'id' => $this->tasks[0]->id,
-        'finish' => 'true',
-    ];
-
-    $this->user->givePermissionTo($this->permissions['finish']);
-    Sanctum::actingAs($this->user, ['user']);
-
-    $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertUnprocessable();
 });
 
 test('get task', function (): void {
@@ -394,12 +286,6 @@ test('update task', function (): void {
         'users' => [$this->user->id],
     ];
 
-    foreach ($this->additionalColumns as $additionalColumn) {
-        $task += [
-            $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-        ];
-    }
-
     $this->user->givePermissionTo($this->permissions['update']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -426,11 +312,6 @@ test('update task', function (): void {
     expect($dbTask->budget)->toEqual($task['budget']);
     expect($this->user->is($dbTask->getUpdatedBy()))->toBeTrue();
     expect($dbTask->users()->pluck('users.id')->toArray())->toEqual($task['users']);
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        expect($responseTask->{$additionalColumn->name})->toEqual($task[$additionalColumn->name]);
-        expect($dbTask->{$additionalColumn->name})->toEqual($task[$additionalColumn->name]);
-    }
 });
 
 test('update task task not found', function (): void {
@@ -440,12 +321,6 @@ test('update task task not found', function (): void {
         'start_date' => null,
         'due_date' => null,
     ];
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        $task += [
-            $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-        ];
-    }
 
     $this->user->givePermissionTo($this->permissions['update']);
     Sanctum::actingAs($this->user, ['user']);
@@ -462,12 +337,6 @@ test('update task user not found', function (): void {
         'start_date' => null,
         'due_date' => null,
     ];
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        $task += [
-            $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-        ];
-    }
 
     $this->user->givePermissionTo($this->permissions['update']);
     Sanctum::actingAs($this->user, ['user']);
@@ -506,12 +375,6 @@ test('update task with project id', function (): void {
         'due_date' => null,
     ];
 
-    foreach ($this->additionalColumns as $additionalColumn) {
-        $task += [
-            $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-        ];
-    }
-
     $this->user->givePermissionTo($this->permissions['update']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -538,9 +401,4 @@ test('update task with project id', function (): void {
     expect($dbTask->budget)->toEqual($this->tasks[2]->budget);
     expect($this->user->is($dbTask->getUpdatedBy()))->toBeTrue();
     expect($dbTask->users()->pluck('users.id')->toArray())->toEqual([]);
-
-    foreach ($this->additionalColumns as $additionalColumn) {
-        expect($responseTask->{$additionalColumn->name})->toEqual($task[$additionalColumn->name]);
-        expect($dbTask->{$additionalColumn->name})->toEqual($task[$additionalColumn->name]);
-    }
 });

@@ -2,10 +2,10 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Casts\AsHtmlString;
 use Illuminate\Database\Eloquent\Casts\AsStringable;

@@ -2,20 +2,18 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Model\HasClientAssignment;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AddressType extends FluxModel
 {
-    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
-        SoftDeletes;
+    use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected function casts(): array
     {

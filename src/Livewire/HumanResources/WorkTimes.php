@@ -13,7 +13,7 @@ use FluxErp\Livewire\Forms\LockedWorkTimeForm;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
-use FluxErp\Traits\Trackable;
+use FluxErp\Traits\Model\Trackable;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;

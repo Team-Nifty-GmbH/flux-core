@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\HolidayList;
 use FluxErp\Livewire\Forms\HolidayForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 
 class Holidays extends HolidayList
 {

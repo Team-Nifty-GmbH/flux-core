@@ -7,7 +7,7 @@ use FluxErp\Actions\EmployeeWorkTimeModel\CreateEmployeeWorkTimeModel;
 use FluxErp\Actions\EmployeeWorkTimeModel\DeleteEmployeeWorkTimeModel;
 use FluxErp\Actions\EmployeeWorkTimeModel\UpdateEmployeeWorkTimeModel;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class EmployeeWorkTimeModelForm extends FluxForm

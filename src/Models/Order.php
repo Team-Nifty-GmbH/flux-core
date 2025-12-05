@@ -24,24 +24,23 @@ use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
-use FluxErp\Traits\CascadeSoftDeletes;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasRelatedModel;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\CascadeSoftDeletes;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasClientAssignment;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasRelatedModel;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Printable;
+use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\DeliveryNote;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
@@ -69,9 +68,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel,
-        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasClientAssignment,
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

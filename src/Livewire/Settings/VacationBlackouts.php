@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\VacationBlackoutList;
 use FluxErp\Livewire\Forms\VacationBlackoutForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 
 class VacationBlackouts extends VacationBlackoutList
 {

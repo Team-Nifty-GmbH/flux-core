@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models\Pivots;
 
-use FluxErp\Traits\BroadcastsEvents;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\BroadcastsEvents;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 abstract class FluxPivot extends Pivot

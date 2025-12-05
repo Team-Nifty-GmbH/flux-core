@@ -6,7 +6,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\Communicatable;
+use FluxErp\Traits\Model\Communicatable;
 
 class CommunicatablesRuleset extends FluxRuleset
 {

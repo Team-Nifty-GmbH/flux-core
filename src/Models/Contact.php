@@ -9,24 +9,22 @@ use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
 use FluxErp\Support\Scout\ScoutCustomize;
-use FluxErp\Traits\CascadeSoftDeletes;
-use FluxErp\Traits\Categorizable;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasDefaultTargetableColumns;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasRecordOrigin;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Lockable;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\CascadeSoftDeletes;
+use FluxErp\Traits\Model\Categorizable;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasClientAssignment;
+use FluxErp\Traits\Model\HasDefaultTargetableColumns;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasRecordOrigin;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\View\Printing\Contact\BalanceStatement;
 use Illuminate\Database\Eloquent\Builder;
@@ -41,10 +39,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin,
-        HasSerialNumberRange, HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable,
-        Searchable;
+    use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasClientAssignment,
+        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin, HasSerialNumberRange,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable;
 
     public static string $iconName = 'users';
 

@@ -3,7 +3,7 @@
 namespace FluxErp\View\Components\EditorButtons;
 
 use FluxErp\Contracts\EditorDropdownButton;
-use FluxErp\Traits\EditorDropdownButtonTrait;
+use FluxErp\Traits\Editor\EditorDropdownButtonTrait;
 use Illuminate\View\Component;
 
 class Table extends Component implements EditorDropdownButton

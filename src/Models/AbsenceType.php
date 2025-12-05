@@ -4,10 +4,10 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\EmployeeCanCreateEnum;
 use FluxErp\Models\Pivots\AbsencePolicyAbsenceType;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;

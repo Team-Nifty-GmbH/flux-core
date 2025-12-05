@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;

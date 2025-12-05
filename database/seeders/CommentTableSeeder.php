@@ -4,7 +4,7 @@ namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\Comment;
 use FluxErp\Models\User;
-use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Model\Commentable;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;

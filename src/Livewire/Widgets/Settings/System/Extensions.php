@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Widgets\Settings\System;
 
 use FluxErp\Livewire\Settings\System;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;

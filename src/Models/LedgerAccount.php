@@ -3,16 +3,15 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\LedgerAccountTypeEnum;
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\Model\HasClientAssignment;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LedgerAccount extends FluxModel
 {
-    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasUuid;
+    use HasClientAssignment, HasPackageFactory, HasUuid;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

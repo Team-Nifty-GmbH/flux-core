@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\Notifiable;
 
 class NotificationSetting extends FluxModel
 {

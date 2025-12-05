@@ -2,7 +2,7 @@
 
 namespace FluxErp\Traits\Livewire\Calendar;
 
-use FluxErp\Traits\HasCalendarUserSettings;
+use FluxErp\Traits\Model\Calendar\HasCalendarUserSettings;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Renderless;

@@ -9,8 +9,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class ToggleTicketUserRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = Ticket::class;
 
     public function rules(): array

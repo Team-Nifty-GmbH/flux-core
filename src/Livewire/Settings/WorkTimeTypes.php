@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\WorkTimeTypeList;
 use FluxErp\Livewire\Forms\WorkTimeTypeForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 
 class WorkTimeTypes extends WorkTimeTypeList
 {

@@ -9,7 +9,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\HasCart;
+use FluxErp\Traits\Model\HasCart;
 
 class CreateCartRuleset extends FluxRuleset
 {
