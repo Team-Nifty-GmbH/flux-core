@@ -283,7 +283,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'tenant_product')->using(ProductTenant::class);
+        return $this->belongsToMany(Tenant::class, 'product_tenant')->using(ProductTenant::class);
     }
 
     public function unit(): BelongsTo

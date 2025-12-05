@@ -88,7 +88,7 @@ class Tenant extends FluxModel implements HasMedia
 
     public function paymentTypes(): BelongsToMany
     {
-        return $this->belongsToMany(PaymentType::class, 'tenant_payment_type')
+        return $this->belongsToMany(PaymentType::class, 'payment_type_tenant')
             ->using(PaymentTypeTenant::class);
     }
 
