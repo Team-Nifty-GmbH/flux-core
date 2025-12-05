@@ -68,9 +68,9 @@ beforeEach(function (): void {
 
     $unit = Unit::factory()->create();
     $product = Product::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
         'unit_id' => $unit->id,
     ]);
+    $product->clients()->attach($this->dbClient->getKey());
 
     OrderPosition::factory()->create([
         'client_id' => $this->dbClient->getKey(),
