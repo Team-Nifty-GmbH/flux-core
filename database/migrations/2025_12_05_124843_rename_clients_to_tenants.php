@@ -7,44 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    private function clientToTenant(string $table, bool $nullable = false, string $onDelete = 'cascade'): void
-    {
-        $this->replaceColumn($table, 'client_id', 'tenant_id', $nullable, $onDelete);
-    }
-
-    private function tenantToClient(string $table, bool $nullable = false, string $onDelete = 'cascade'): void
-    {
-        $this->replaceColumn($table, 'tenant_id', 'client_id', $nullable, $onDelete);
-    }
-
-    private function replaceColumn(
-        string $table,
-        string $oldColumn,
-        string $newColumn,
-        bool $nullable,
-        string $onDelete
-    ): void {
-        Schema::table($table, function (Blueprint $table) use ($newColumn, $oldColumn): void {
-            $table->unsignedBigInteger($newColumn)->nullable()->after($oldColumn);
-        });
-
-        DB::table($table)->update([$newColumn => DB::raw($oldColumn)]);
-
-        Schema::table($table, function (Blueprint $table) use ($newColumn, $oldColumn, $nullable, $onDelete): void {
-            if (! $nullable) {
-                $table->unsignedBigInteger($newColumn)->nullable(false)->change();
-            }
-            $table->dropConstrainedForeignId($oldColumn);
-
-            $fk = $table->foreign($newColumn)->references('id')->on('tenants');
-            match ($onDelete) {
-                'cascade' => $fk->cascadeOnDelete(),
-                'null' => $fk->nullOnDelete(),
-                default => null,
-            };
-        });
-    }
-
     public function up(): void
     {
         // First rename clients table to tenants
@@ -68,7 +30,7 @@ return new class() extends Migration
         });
 
         // Addresses
-        $this->clientToTenant('addresses');
+        $this->clientToTenant('addresses', 'contact_id');
 
         // BankConnectionTenant
         Schema::table('bank_connection_client', function (Blueprint $table): void {
@@ -82,13 +44,21 @@ return new class() extends Migration
             $table->unsignedBigInteger('tenant_id')->nullable()->after('bank_connection_id');
         });
 
-        DB::table('bank_connection_tenant')->update(['tenant_id' => DB::raw('client_id')]);
+        DB::table('bank_connection_tenant')
+            ->update(['tenant_id' => DB::raw('client_id')]);
 
         Schema::table('bank_connection_tenant', function (Blueprint $table): void {
             $table->unsignedBigInteger('tenant_id')->nullable(false)->change();
+            $table->foreign('bank_connection_id')
+                ->references('id')
+                ->on('bank_connections')
+                ->cascadeOnDelete();
+            $table->foreign('tenant_id')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
+
             $table->dropColumn('client_id');
-            $table->foreign('bank_connection_id')->references('id')->on('bank_connections')->cascadeOnDelete();
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
         });
 
         // Contacts
@@ -107,7 +77,7 @@ return new class() extends Migration
         });
 
         // Employees
-        $this->clientToTenant('employees');
+        $this->clientToTenant('employees', 'supervisor_id');
 
         // LedgerAccounts
         Schema::table('ledger_accounts', function (Blueprint $table): void {
@@ -125,10 +95,10 @@ return new class() extends Migration
         });
 
         // OrderPositions
-        $this->clientToTenant('order_positions');
+        $this->clientToTenant('order_positions', 'supplier_contact_id');
 
         // OrderTypes
-        $this->clientToTenant('order_types');
+        $this->clientToTenant('order_types', 'email_template_id');
 
         // Orders
         Schema::table('orders', function (Blueprint $table): void {
@@ -157,13 +127,21 @@ return new class() extends Migration
             $table->unsignedBigInteger('tenant_id')->nullable()->after('payment_type_id');
         });
 
-        DB::table('payment_type_tenant')->update(['tenant_id' => DB::raw('client_id')]);
+        DB::table('payment_type_tenant')
+            ->update(['tenant_id' => DB::raw('client_id')]);
 
         Schema::table('payment_type_tenant', function (Blueprint $table): void {
             $table->unsignedBigInteger('tenant_id')->nullable(false)->change();
+            $table->foreign('payment_type_id')
+                ->references('id')
+                ->on('payment_types')
+                ->cascadeOnDelete();
+            $table->foreign('tenant_id')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
+
             $table->dropColumn('client_id');
-            $table->foreign('payment_type_id')->references('id')->on('payment_types')->cascadeOnDelete();
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
         });
 
         // ProductTenant
@@ -178,38 +156,48 @@ return new class() extends Migration
             $table->unsignedBigInteger('tenant_id')->nullable()->after('client_id');
         });
 
-        DB::table('product_tenant')->update(['tenant_id' => DB::raw('client_id')]);
+        DB::table('product_tenant')
+            ->update(['tenant_id' => DB::raw('client_id')]);
 
         Schema::table('product_tenant', function (Blueprint $table): void {
             $table->unsignedBigInteger('tenant_id')->nullable(false)->change();
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
+            $table->foreign('tenant_id')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
+
             $table->dropColumn('client_id');
-            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
         });
 
         // Projects
-        $this->clientToTenant('projects');
+        $this->clientToTenant('projects', 'responsible_user_id');
 
         // PurchaseInvoices
-        $this->clientToTenant('purchase_invoices', true, 'null');
+        $this->clientToTenant('purchase_invoices', 'payment_type_id', true, 'null');
 
-        // SepaMandates - drop FK first before dropping unique index that it depends on
-        Schema::table('sepa_mandates', function (Blueprint $table): void {
-            $table->dropForeign(['client_id']);
-            $table->dropUnique('sepa_mandates_client_id_mandate_reference_number_unique');
-        });
-
+        // SepaMandates
         Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->unsignedBigInteger('tenant_id')->nullable()->after('client_id');
         });
 
-        DB::table('sepa_mandates')->update(['tenant_id' => DB::raw('client_id')]);
+        DB::table('sepa_mandates')
+            ->update(['tenant_id' => DB::raw('client_id')]);
 
         Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->unsignedBigInteger('tenant_id')->nullable(false)->change();
-            $table->dropColumn('client_id');
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->foreign('tenant_id')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
+
             $table->unique(['tenant_id', 'mandate_reference_number']);
+            $table->dropForeign(['client_id']);
+            $table->dropUnique('sepa_mandates_client_id_mandate_reference_number_unique');
+            $table->dropColumn('client_id');
         });
 
         // SerialNumberRanges
@@ -279,30 +267,29 @@ return new class() extends Migration
             $table->foreign('client_id')->references('id')->on('tenants')->nullOnDelete();
         });
 
-        // SepaMandates - drop FK first before dropping unique index that it depends on
-        Schema::table('sepa_mandates', function (Blueprint $table): void {
-            $table->dropForeign(['tenant_id']);
-            $table->dropUnique('sepa_mandates_tenant_id_mandate_reference_number_unique');
-        });
-
+        // SepaMandates
         Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->nullable()->after('tenant_id');
         });
 
-        DB::table('sepa_mandates')->update(['client_id' => DB::raw('tenant_id')]);
+        DB::table('sepa_mandates')
+            ->update(['client_id' => DB::raw('tenant_id')]);
 
         Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->nullable(false)->change();
-            $table->dropColumn('tenant_id');
             $table->foreign('client_id')->references('id')->on('tenants')->cascadeOnDelete();
+
             $table->unique(['client_id', 'mandate_reference_number']);
+            $table->dropForeign(['tenant_id']);
+            $table->dropUnique('sepa_mandates_tenant_id_mandate_reference_number_unique');
+            $table->dropColumn('tenant_id');
         });
 
         // PurchaseInvoices
-        $this->tenantToClient('purchase_invoices', true, 'null');
+        $this->tenantToClient('purchase_invoices', 'approval_user_id', true, 'null');
 
         // Projects
-        $this->tenantToClient('projects');
+        $this->tenantToClient('projects', 'uuid');
 
         // ProductTenant
         Schema::table('product_tenant', function (Blueprint $table): void {
@@ -316,13 +303,14 @@ return new class() extends Migration
             $table->unsignedBigInteger('client_id')->nullable()->after('tenant_id');
         });
 
-        DB::table('client_product')->update(['client_id' => DB::raw('tenant_id')]);
+        DB::table('client_product')
+            ->update(['client_id' => DB::raw('tenant_id')]);
 
         Schema::table('client_product', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->nullable(false)->change();
-            $table->dropColumn('tenant_id');
             $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
             $table->foreign('client_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->dropColumn('tenant_id');
         });
 
         // PaymentTypeTenant
@@ -337,13 +325,21 @@ return new class() extends Migration
             $table->unsignedBigInteger('client_id')->nullable()->after('tenant_id');
         });
 
-        DB::table('client_payment_type')->update(['client_id' => DB::raw('tenant_id')]);
+        DB::table('client_payment_type')
+            ->update(['client_id' => DB::raw('tenant_id')]);
 
         Schema::table('client_payment_type', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->nullable(false)->change();
+            $table->foreign('payment_type_id')
+                ->references('id')
+                ->on('payment_types')
+                ->cascadeOnDelete();
+            $table->foreign('client_id')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
+
             $table->dropColumn('tenant_id');
-            $table->foreign('payment_type_id')->references('id')->on('payment_types')->cascadeOnDelete();
-            $table->foreign('client_id')->references('id')->on('tenants')->cascadeOnDelete();
         });
 
         // Orders
@@ -362,10 +358,10 @@ return new class() extends Migration
         });
 
         // OrderTypes
-        $this->tenantToClient('order_types');
+        $this->tenantToClient('order_types', 'uuid');
 
         // OrderPositions
-        $this->tenantToClient('order_positions');
+        $this->tenantToClient('order_positions', 'uuid');
 
         // LedgerAccounts
         Schema::table('ledger_accounts', function (Blueprint $table): void {
@@ -383,7 +379,7 @@ return new class() extends Migration
         });
 
         // Employees
-        $this->tenantToClient('employees');
+        $this->tenantToClient('employees', 'uuid');
 
         // Contacts
         Schema::table('contacts', function (Blueprint $table): void {
@@ -417,11 +413,14 @@ return new class() extends Migration
                 ->references('id')
                 ->on('bank_connections')
                 ->cascadeOnDelete();
-            $table->foreign('client_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->foreign('client_id')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
         });
 
         // Addresses
-        $this->tenantToClient('addresses');
+        $this->tenantToClient('addresses', 'uuid');
 
         // AddressTypes
         Schema::table('address_types', function (Blueprint $table): void {
@@ -442,5 +441,53 @@ return new class() extends Migration
         });
 
         Schema::rename('tenants', 'clients');
+    }
+
+    private function clientToTenant(
+        string $table,
+        string $after,
+        bool $nullable = false,
+        string $onDelete = 'cascade'
+    ): void {
+        $this->replaceColumn($table, 'client_id', 'tenant_id', $after, $nullable, $onDelete);
+    }
+
+    private function tenantToClient(
+        string $table,
+        string $after,
+        bool $nullable = false,
+        string $onDelete = 'cascade'
+    ): void {
+        $this->replaceColumn($table, 'tenant_id', 'client_id', $after, $nullable, $onDelete);
+    }
+
+    private function replaceColumn(
+        string $table,
+        string $oldColumn,
+        string $newColumn,
+        string $after,
+        bool $nullable,
+        string $onDelete
+    ): void {
+        Schema::table($table, function (Blueprint $table) use ($newColumn, $after): void {
+            $table->unsignedBigInteger($newColumn)->nullable()->after($after);
+        });
+
+        DB::table($table)
+            ->update([$newColumn => DB::raw($oldColumn)]);
+
+        Schema::table($table, function (Blueprint $table) use ($newColumn, $oldColumn, $nullable, $onDelete): void {
+            if (! $nullable) {
+                $table->unsignedBigInteger($newColumn)->nullable(false)->change();
+            }
+            $table->dropConstrainedForeignId($oldColumn);
+
+            $fk = $table->foreign($newColumn)->references('id')->on('tenants');
+            match ($onDelete) {
+                'cascade' => $fk->cascadeOnDelete(),
+                'null' => $fk->nullOnDelete(),
+                default => null,
+            };
+        });
     }
 };
