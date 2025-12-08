@@ -111,7 +111,7 @@ abstract class SubscribableNotification extends Notification implements HasToast
     public function via(object $notifiable): array
     {
         if (! $notifiable instanceof AnonymousNotifiable
-            && ! in_array(get_class($notifiable), static::sendsTo())
+            && ! in_array(resolve_static(get_class($notifiable), 'class'), static::sendsTo())
         ) {
             return [];
         }
