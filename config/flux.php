@@ -7,10 +7,6 @@ return [
 
     'formal_salutation' => env('FLUX_FORMAL_SALUTATION', true),
 
-    'portal_domain' => env(
-        'PORTAL_DOMAIN',
-        'portal.' . preg_replace('(^https?://)', '', env('APP_URL'))
-    ),
     'flux_url' => env('FLUX_URL'),
 
     'rate_limit' => env('API_RATE_LIMIT', 60),

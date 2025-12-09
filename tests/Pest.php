@@ -1,7 +1,5 @@
 <?php
 
-use FluxErp\Models\Address;
-use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
@@ -14,32 +12,6 @@ use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
 use Pest\Browser\Api\PendingAwaitablePage;
-
-pest()
-    ->beforeEach(function (): void {
-        $this->dbTenant = Tenant::default() ?? Tenant::factory()->create([
-            'is_default' => true,
-        ]);
-        $this->defaultLanguage = Language::default() ?? Language::factory()->create([
-            'is_default' => true,
-        ]);
-
-        $this->contact = Contact::factory()->create([
-            'tenant_id' => $this->dbTenant->getKey(),
-        ]);
-        $this->address = Address::factory()->create([
-            'contact_id' => $this->contact->getKey(),
-            'tenant_id' => $this->dbTenant->getKey(),
-            'language_id' => $this->defaultLanguage->getKey(),
-            'can_login' => true,
-            'is_active' => true,
-        ]);
-
-        $this->actingAsGuest('web');
-        $this->be($this->address, 'address');
-    })
-    ->group('portal')
-    ->in('Livewire/Portal', 'Feature/Web/Portal');
 
 pest()
     ->beforeEach(function (): void {

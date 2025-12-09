@@ -1,9 +1,7 @@
 <?php
 
-use FluxErp\Models\Address;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
-use FluxErp\Models\Contact;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
@@ -15,15 +13,6 @@ use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
     $dbTenant = Tenant::factory()->create();
-
-    $this->contact = Contact::factory()->create([
-        'tenant_id' => $dbTenant->id,
-    ]);
-
-    Address::factory()->create([
-        'tenant_id' => $dbTenant->id,
-        'contact_id' => $this->contact->id,
-    ]);
 
     $priceList = PriceList::factory()->create();
     $vatRate = VatRate::factory()->create();
@@ -37,9 +26,8 @@ beforeEach(function (): void {
         'authenticatable_type' => morph_alias(User::class),
         'authenticatable_id' => $this->user->id,
         'price_list_id' => $priceList->id,
-        'is_watchlist' => false,
-        'is_portal_public' => false,
         'is_public' => false,
+        'is_watchlist' => false,
     ]);
 
     $this->carts->push(
@@ -47,9 +35,8 @@ beforeEach(function (): void {
             'authenticatable_type' => morph_alias(User::class),
             'authenticatable_id' => $this->user->id,
             'price_list_id' => $priceList->id,
-            'is_watchlist' => true,
-            'is_portal_public' => false,
             'is_public' => false,
+            'is_watchlist' => true,
         ])
     );
 
@@ -60,8 +47,8 @@ beforeEach(function (): void {
     ]);
 
     OrderType::factory()->create([
-        'order_type_enum' => 'order',
         'tenant_id' => $dbTenant->id,
+        'order_type_enum' => 'order',
     ]);
 
     $this->user->tenants()->attach($dbTenant->id);
@@ -93,20 +80,16 @@ test('create cart', function (): void {
         ->whereKey($responseCart->id)
         ->first();
 
+    // Validate all model properties with expected values
     expect($dbCart)->not->toBeEmpty();
+    expect($dbCart->id)->not->toBeNull();
     expect($dbCart->authenticatable_type)->toEqual($cart['authenticatable_type']);
     expect($dbCart->authenticatable_id)->toEqual($cart['authenticatable_id']);
+    expect($dbCart->session_id)->not->toBeEmpty();
+    expect($dbCart->is_public)->toBeFalse();
     expect($dbCart->is_watchlist)->toEqual($cart['is_watchlist']);
-
-    // Validate all model properties with expected values
-    expect($dbCart->id)->not->toBeNull();
     expect($dbCart->created_at)->not->toBeNull();
     expect($dbCart->updated_at)->not->toBeNull();
-    expect($dbCart->session_id)->not->toBeEmpty();
-    expect($dbCart->is_portal_public)->toBeFalse();
-    // Default value
-    expect($dbCart->is_public)->toBeFalse();
-    // Default value
 });
 
 test('create cart validation fails', function (): void {
@@ -154,15 +137,12 @@ test('create cart with price list', function (): void {
 
     // Validate all model properties with expected values
     expect($dbCart->id)->not->toBeNull();
-    expect($dbCart->created_at)->not->toBeNull();
-    expect($dbCart->updated_at)->not->toBeNull();
-    expect($dbCart->session_id)->not->toBeEmpty();
-    expect($dbCart->is_portal_public)->toBeFalse();
-    // Default value
-    expect($dbCart->is_public)->toBeFalse();
-    // Default value
     expect($dbCart->authenticatable_type)->toEqual($cart['authenticatable_type']);
     expect($dbCart->authenticatable_id)->toEqual($cart['authenticatable_id']);
+    expect($dbCart->session_id)->not->toBeEmpty();
+    expect($dbCart->is_public)->toBeFalse();
+    expect($dbCart->created_at)->not->toBeNull();
+    expect($dbCart->updated_at)->not->toBeNull();
 });
 
 test('delete cart', function (): void {
@@ -254,13 +234,10 @@ test('update cart', function (): void {
 
     // Validate all model properties with expected values
     expect($dbCart->id)->not->toBeNull();
-    expect($dbCart->created_at)->not->toBeNull();
-    expect($dbCart->updated_at)->not->toBeNull();
-    expect($dbCart->session_id)->not->toBeEmpty();
-    expect($dbCart->is_portal_public)->toBeFalse();
-    // Default value
-    expect($dbCart->is_public)->toBeFalse();
-    // Default value
     expect($dbCart->authenticatable_type)->not->toBeNull();
     expect($dbCart->authenticatable_id)->not->toBeNull();
+    expect($dbCart->session_id)->not->toBeEmpty();
+    expect($dbCart->is_public)->toBeFalse();
+    expect($dbCart->created_at)->not->toBeNull();
+    expect($dbCart->updated_at)->not->toBeNull();
 });

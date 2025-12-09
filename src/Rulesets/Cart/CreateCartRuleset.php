@@ -45,7 +45,6 @@ class CreateCartRuleset extends FluxRuleset
             ],
             'session_id' => 'required|string|max:255',
             'name' => 'nullable|string|max:255',
-            'is_portal_public' => 'boolean',
             'is_public' => 'boolean',
             'is_watchlist' => 'boolean',
         ];

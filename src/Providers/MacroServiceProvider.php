@@ -9,7 +9,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -21,7 +20,6 @@ class MacroServiceProvider extends ServiceProvider
     {
         $this->registerArrMacros();
         $this->registerStrMacros();
-        $this->registerRequestMacros();
         $this->registerCollectionMacros();
         $this->registerNumberMacros();
         $this->registerRouteMacros();
@@ -85,17 +83,6 @@ class MacroServiceProvider extends ServiceProvider
         if (! Str::hasMacro('iban')) {
             Str::macro('iban', function (?string $iban) {
                 return trim(chunk_split($iban ?? '', 4, ' '));
-            });
-        }
-    }
-
-    protected function registerRequestMacros(): void
-    {
-        if (! Request::hasMacro('isPortal')) {
-            Request::macro('isPortal', function () {
-                // check if the current url matches with config('flux.portal_domain')
-                // ignore http or https, just match the host itself
-                return Str::startsWith($this->getHost(), Str::after(config('flux.portal_domain'), '://'));
             });
         }
     }

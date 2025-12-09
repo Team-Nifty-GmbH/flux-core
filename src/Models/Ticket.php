@@ -110,11 +110,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
         return $this->title . ' ' . $this->ticket_number;
     }
 
-    public function getPortalDetailRoute(): string
-    {
-        return route('portal.tickets.id', ['id' => $this->id]);
-    }
-
     public function getUrl(): ?string
     {
         return $this->detailRoute();

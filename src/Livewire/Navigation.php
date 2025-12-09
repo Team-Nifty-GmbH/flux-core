@@ -73,7 +73,7 @@ class Navigation extends Component
 
         $guard = explode('_', Auth::guard()->getName());
 
-        $navigations = Menu::forGuard($guard[1], $guard[1] === 'address' ? 'portal' : null);
+        $navigations = Menu::forGuard($guard[1]);
         data_forget($navigations, 'settings.children');
 
         foreach ($navigations as $group => &$items) {

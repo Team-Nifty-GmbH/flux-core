@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Cart;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Models\User;
 use FluxErp\Rulesets\Cart\CreateCartRuleset;
 
 class CreateCart extends FluxAction
@@ -25,11 +24,6 @@ class CreateCart extends FluxAction
 
     public function performAction(): mixed
     {
-        // allow setting of portal public and public flags only for users
-        if (! auth()->user() instanceof User) {
-            unset($this->data['is_portal_public'], $this->data['is_public']);
-        }
-
         $cart = app(Cart::class, ['attributes' => $this->data]);
         $cart->save();
 
