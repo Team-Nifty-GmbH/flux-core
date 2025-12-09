@@ -61,11 +61,6 @@ class ContactList extends BaseDataTable
         );
     }
 
-    protected function getRowActionEditButton(): ?DataTableButton
-    {
-        return null;
-    }
-
     #[Renderless]
     public function resetForm(): void
     {
@@ -122,6 +117,11 @@ class ContactList extends BaseDataTable
             ->send();
 
         return true;
+    }
+
+    protected function getRowActionEditButton(): ?DataTableButton
+    {
+        return null;
     }
 
     protected function supportRestore(): bool
