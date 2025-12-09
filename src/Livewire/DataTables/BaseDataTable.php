@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Traits\Livewire\Actions;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Renderless;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -32,6 +33,15 @@ abstract class BaseDataTable extends DataTable
             ->send();
 
         return response()->noContent();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        if (method_exists($builder->getModel(), 'media')) {
+            return $builder->with('media:id,model_type,model_id,name,file_name,mime_type,disk,conversions_disk,generated_conversions');
+        }
+
+        return $builder;
     }
 
     protected function getModel(): string
