@@ -14,7 +14,6 @@ class CartFactory extends Factory
         return [
             'session_id' => fake()->uuid,
             'name' => fake()->name,
-            'is_portal_public' => fake()->boolean,
             'is_public' => fake()->boolean,
             'is_watchlist' => fake()->boolean,
         ];

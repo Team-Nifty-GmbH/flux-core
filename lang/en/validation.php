@@ -387,7 +387,6 @@ return [
         'is_paid' => 'Is Paid',
         'is_pause' => 'Is Pause',
         'is_percentage' => 'Is Percentage',
-        'is_portal_public' => 'Is Portal Public',
         'is_pre_filled' => 'Is Pre-filled',
         'is_product_serial_number' => 'Is Product Serial Number',
         'is_public' => 'Is Public',

@@ -28,7 +28,6 @@ class Cart extends FluxModel
     protected function casts(): array
     {
         return [
-            'is_portal_public' => 'boolean',
             'is_public' => 'boolean',
             'is_watchlist' => 'boolean',
         ];

@@ -746,11 +746,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
     }
 
-    public function getPortalDetailRoute(): string
-    {
-        return route('portal.orders.id', ['id' => $this->id]);
-    }
-
     public function getPrintViews(): array
     {
         // This has to be done this way, as this method is also called on order types settings with an empty order.

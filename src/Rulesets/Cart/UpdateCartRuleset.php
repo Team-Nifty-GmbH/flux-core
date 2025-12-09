@@ -27,7 +27,6 @@ class UpdateCartRuleset extends FluxRuleset
                     ->where('is_sales', true),
             ],
             'name' => 'nullable|string|max:255',
-            'is_portal_public' => 'boolean',
             'is_public' => 'boolean',
             'is_watchlist' => 'boolean',
         ];

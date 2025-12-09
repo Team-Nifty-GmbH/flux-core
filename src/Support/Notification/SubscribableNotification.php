@@ -124,17 +124,12 @@ abstract class SubscribableNotification extends Notification implements HasToast
         return NotificationAction::make()
             ->label(__('View'))
             ->url(
-                ! $notifiable instanceof User
-                && method_exists($this->model, 'getPortalDetailRoute')
-                    ? $this->model->getPortalDetailRoute()
-                    : (
-                        $this->route
-                        ?? (
-                            method_exists($this->model, 'detailRoute')
-                                ? $this->model->detailRoute()
-                                : null
-                        )
-                    )
+                $this->route
+                ?? (
+                    method_exists($this->model, 'detailRoute')
+                        ? $this->model->detailRoute()
+                        : null
+                )
             );
     }
 

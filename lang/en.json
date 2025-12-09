@@ -184,7 +184,6 @@
     "settings.order-types.get": "View order type settings",
     "settings.permissions.get": "View permission settings",
     "settings.tenants.get": "View tenant settings",
-    "settings.tenants.{tenant}.customer-portal.get": "View customer portal settings",
     "settings.ticket-types.get": "View ticket type settings",
     "settings.translations.get": "View translation settings",
     "settings.users.get": "View user settings",

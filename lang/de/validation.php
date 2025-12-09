@@ -387,7 +387,6 @@ return [
         'is_paid' => 'Bezahlt',
         'is_pause' => 'Pause',
         'is_percentage' => 'Prozentual',
-        'is_portal_public' => 'Portal Öffentlich',
         'is_pre_filled' => 'Vorgefüllt',
         'is_product_serial_number' => 'Produkt-Seriennummer',
         'is_public' => 'Öffentlich',
