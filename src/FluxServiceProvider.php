@@ -243,7 +243,14 @@ class FluxServiceProvider extends ServiceProvider
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
-        config(['auth' => require __DIR__ . '/../config/auth.php']);
+        $this->replaceConfigRecursivelyFrom(__DIR__ . '/../config/auth.php', 'auth');
+        if (is_null(config('auth.guards.sanctum.provider'))) {
+            config()
+                ->set(
+                    'auth.guards.sanctum.provider',
+                    data_get(require __DIR__ . '/../config/auth.php', 'guards.sanctum.provider')
+                );
+        }
 
         if (! app()->configurationIsCached()) {
             config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);

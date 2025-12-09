@@ -4,6 +4,7 @@ namespace FluxErp\Tests;
 
 use Barryvdh\DomPDF\ServiceProvider;
 use FluxErp\FluxServiceProvider;
+use FluxErp\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\WithCachedConfig;
@@ -64,6 +65,7 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
         $app['config']->set('flux.install_done', true);
         $app['config']->set('auth.defaults.guard', 'sanctum');
+        $app['config']->set('auth.providers.users.model', User::class);
         $app['config']->set('cache.default', 'array');
         $app['config']->set('settings.auto_discover_settings', []);
     }
