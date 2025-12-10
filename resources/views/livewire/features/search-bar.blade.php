@@ -68,7 +68,7 @@
                                     <li
                                         x-on:mouseover.debounce.500ms="showDetails(model, item.id)"
                                         class="flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:bg-indigo-600 hover:text-white"
-                                        x-on:click="$wire.showDetail(model, item.id)"
+                                        wire:click="showDetail(model, item.id)"
                                     >
                                         <x-avatar
                                             image

@@ -38,6 +38,7 @@ class SearchBar extends Component
     {
         if ($this->searchModel === '') {
             $this->searchModel = collect(Relation::morphMap())
+                ->map(fn (string $model) => resolve_static($model, 'class'))
                 ->filter(fn (string $class) => in_array(
                     Searchable::class,
                     class_uses_recursive($class)

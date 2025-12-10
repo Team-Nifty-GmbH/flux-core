@@ -9,7 +9,7 @@
             {{ __('No results…') }}
         </div>
     </div>
-    <x-flux::spinner />
+    <x-flux::spinner wire:target="search" />
     <ul>
         <template x-for="(items, model) in $wire.return">
             <li>
