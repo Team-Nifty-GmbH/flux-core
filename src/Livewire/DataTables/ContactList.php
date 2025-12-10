@@ -119,6 +119,11 @@ class ContactList extends BaseDataTable
         return true;
     }
 
+    protected function getRowActionEditButton(): ?DataTableButton
+    {
+        return null;
+    }
+
     protected function supportRestore(): bool
     {
         return true;
