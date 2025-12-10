@@ -384,7 +384,10 @@
         class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            <section class="relative max-w-96 basis-2/12" wire:ignore>
+            <section
+                class="relative w-full xl:max-w-96 xl:basis-2/12"
+                wire:ignore
+            >
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
                     <x-card>
@@ -749,7 +752,10 @@
             </section>
         </x-slot>
         <x-slot:append>
-            <section class="relative max-w-96 basis-2/12" wire:ignore>
+            <section
+                class="relative w-full xl:max-w-96 xl:basis-2/12"
+                wire:ignore
+            >
                 <div class="sticky top-6 space-y-6">
                     @section('content.right')
                     <x-card>
