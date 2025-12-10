@@ -44,10 +44,7 @@ class SearchBar extends Component
                     class_uses_recursive($class)
                 )
                     && method_exists($class, 'detailRoute')
-                    && (
-                        method_exists($class, 'getLabel')
-                        || method_exists($class, 'getName')
-                    )
+                    && method_exists($class, 'getLabel')
                 )
                 ->values()
                 ->toArray();
@@ -55,7 +52,7 @@ class SearchBar extends Component
 
         foreach ((array) $this->searchModel as $searchModel) {
             $this->modelLabels[$searchModel] = [
-                'label' => __(Str::plural(class_basename($searchModel))),
+                'label' => __(Str::of(morph_alias($searchModel))->plural()->headline()->toString()),
                 'icon' => method_exists($searchModel, 'icon') ? $searchModel::icon()->getSvg() : null,
             ];
         }
@@ -109,8 +106,7 @@ class SearchBar extends Component
                             ->filter(fn ($item) => $item->detailRoute())
                             ->map(fn (Model $item) => [
                                 'id' => $item->getKey(),
-                                'label' => method_exists($item, 'getLabel') ?
-                                    $item->getLabel() : $item->getAttribute('name'),
+                                'label' => $item->getLabel(),
                                 'src' => method_exists($item, 'getAvatarUrl') ? $item->getAvatarUrl() : null,
                             ]);
 
