@@ -118,13 +118,26 @@
                         @auth('web')
                             <div
                                 x-persist="layout.header.search-bar"
-                                class="grow"
+                                class="hidden grow sm:block"
                             >
                                 <livewire:features.search-bar />
                             </div>
                         @endauth
 
-                        <div class="flex gap-2 overflow-hidden">
+                        <div class="grow sm:hidden"></div>
+
+                        <div class="flex flex-shrink-0 gap-2">
+                            @auth('web')
+                                <div
+                                    x-persist="layout.header.search-bar-mobile"
+                                >
+                                    <livewire:features.search-bar
+                                        :mobile="true"
+                                        lazy
+                                    />
+                                </div>
+                            @endauth
+
                             @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
                                     <livewire:cart.cart lazy />
