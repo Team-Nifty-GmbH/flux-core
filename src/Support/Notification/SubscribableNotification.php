@@ -27,7 +27,7 @@ abstract class SubscribableNotification extends Notification implements HasToast
 
     public ?Model $model;
 
-    public ?string $route = null;
+    public ?string $fallbackRoute = null;
 
     abstract protected function getTitle(): string;
 
@@ -35,7 +35,7 @@ abstract class SubscribableNotification extends Notification implements HasToast
 
     public function __construct()
     {
-        $this->route = request()->header('referer');
+        $this->fallbackRoute = request()->header('referer');
     }
 
     public static function sendsTo(): array
@@ -43,6 +43,11 @@ abstract class SubscribableNotification extends Notification implements HasToast
         return [
             resolve_static(User::class, 'class'),
         ];
+    }
+
+    public function getRoute(): ?string
+    {
+        return null;
     }
 
     public function sendNotification(object $event): void
@@ -124,12 +129,12 @@ abstract class SubscribableNotification extends Notification implements HasToast
         return NotificationAction::make()
             ->label(__('View'))
             ->url(
-                $this->route
-                ?? (
-                    method_exists($this->model, 'detailRoute')
-                        ? $this->model->detailRoute()
-                        : null
-                )
+                $this->getRoute()
+                    ?? (
+                        method_exists($this->model, 'detailRoute')
+                            ? $this->model->detailRoute()
+                            : $this->fallbackRoute
+                    )
             );
     }
 
