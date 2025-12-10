@@ -4,7 +4,6 @@ namespace FluxErp\Tests;
 
 use FluxErp\Console\Commands\InstallAssets;
 use FluxErp\FluxServiceProvider;
-use FluxErp\Models\User;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
@@ -124,7 +123,6 @@ abstract class BrowserTestCase extends TestCase
         $app['config']->set('app.debug', true);
         $app['config']->set('database.connections.mysql.database', 'testing');
         $app['config']->set('auth.defaults.guard', 'web');
-        $app['config']->set('auth.providers.users.model', User::class);
         $app['config']->set('flux.install_done', true);
         $app['config']->set('session.driver', 'file');
     }

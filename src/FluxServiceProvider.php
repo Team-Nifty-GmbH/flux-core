@@ -63,6 +63,8 @@ class FluxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->updateAuthUserProvider();
+
         Model::automaticallyEagerLoadRelationships();
 
         $this->app->booted(function (): void {
@@ -304,5 +306,17 @@ class FluxServiceProvider extends ServiceProvider
                 return $this->app->get(Composer::class);
             }
         );
+    }
+
+    protected function updateAuthUserProvider(): void
+    {
+        $usersProvider = data_get(require __DIR__ . '/../config/auth.php', 'providers.users');
+        $usersProvider['model'] = resolve_static(data_get($usersProvider, 'model'), 'class');
+
+        config()
+            ->set(
+                'auth.providers.users',
+                $usersProvider
+            );
     }
 }

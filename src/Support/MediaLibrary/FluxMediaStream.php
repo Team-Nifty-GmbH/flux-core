@@ -53,7 +53,7 @@ class FluxMediaStream extends MediaStream
         return $this;
     }
 
-    public function getZipStream(): ZipStream
+    public function getZipStream(bool $finish = true): ZipStream
     {
         $this->zipOptions['outputName'] = $this->zipName;
         $zip = new ZipStream(...$this->zipOptions);
@@ -78,7 +78,9 @@ class FluxMediaStream extends MediaStream
             }
         });
 
-        $zip->finish();
+        if ($finish) {
+            $zip->finish();
+        }
 
         return $zip;
     }
