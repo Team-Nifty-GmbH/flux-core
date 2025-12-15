@@ -2,13 +2,14 @@
 
 namespace FluxErp\Support\Tree;
 
+use Closure;
 use Exception;
 use FluxErp\Traits\Makeable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Wireable;
 
-class TreeHelper implements Wireable
+class Tree implements Wireable
 {
     use Makeable;
 
@@ -50,6 +51,13 @@ class TreeHelper implements Wireable
     public function setTree(array $tree): static
     {
         $this->tree = $tree;
+
+        return $this;
+    }
+
+    public function mapTree(Closure $callback): static
+    {
+        $this->setTree($this->mapNodes($this->getTree(), $callback));
 
         return $this;
     }
@@ -205,5 +213,17 @@ class TreeHelper implements Wireable
         }
 
         return null;
+    }
+
+    protected function mapNodes(array $nodes, Closure $callback): array
+    {
+        $mapped = [];
+        foreach ($nodes as $key => $node) {
+            $children = Arr::pull($node, $this->childKey);
+            $mapped[$key] = $callback($node);
+            $mapped[$key][$this->childKey] = $this->mapNodes($children, $callback);
+        }
+
+        return $mapped;
     }
 }
