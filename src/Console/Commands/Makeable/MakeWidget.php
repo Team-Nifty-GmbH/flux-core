@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Console\Commands;
+namespace FluxErp\Console\Commands\Makeable;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
