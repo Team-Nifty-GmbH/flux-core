@@ -6,7 +6,7 @@ use FluxErp\Contracts\EditorDropdownButton;
 use FluxErp\Contracts\EditorTooltipButton;
 use FluxErp\Traits\Editor\EditorDropdownButtonTrait;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Js;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Component;
 
 class BladeVariables extends Component implements EditorDropdownButton, EditorTooltipButton
@@ -46,38 +46,17 @@ class BladeVariables extends Component implements EditorDropdownButton, EditorTo
 
     public function dropdownContent(): array
     {
-        $buttons = [];
-
-        if (! $this->editor) {
-            return $buttons;
-        }
-
-        foreach ($this->editor->bladeVariables as $variable) {
-            $buttons[] = app(
-                DropdownItem::class,
-                [
-                    'text' => e($variable['label']),
-                    'command' => 'editor()
-                        .chain()
-                        .focus()
-                        .insertContent([
-                            {
-                                type: \'bladeVariable\',
-                                attrs: {
-                                    label: ' . Js::from($variable['label']) . ',
-                                    value: ' . Js::from($variable['value']) . '
-                                }
-                            },
-                            {
-                                type: \'text\',
-                                text: \' \'
-                            }
-                        ])
-                        .run()',
-                ]
-            );
-        }
-
-        return $buttons;
+        return [
+            new HtmlString(<<<'HTML'
+                <template x-for="variable in Object.values(bladeVariables || {})" :key="variable.value">
+                    <button
+                        type="button"
+                        class="flex w-full items-center gap-2 rounded p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                        x-on:click.prevent="editor().chain().focus().insertContent([{ type: 'bladeVariable', attrs: { label: variable.label, value: variable.value } }, { type: 'text', text: ' ' }]).run()"
+                        x-text="variable.label"
+                    ></button>
+                </template>
+                HTML),
+        ];
     }
 }
