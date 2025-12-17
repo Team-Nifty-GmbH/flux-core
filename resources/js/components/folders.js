@@ -387,7 +387,13 @@ export default function folders(
                 return null;
             };
 
-            return findPath(node);
+            const pathArray = findPath(node);
+
+            if (attribute === 'slug' && pathArray) {
+                return pathArray.join('.');
+            }
+
+            return pathArray;
         },
     };
 }
