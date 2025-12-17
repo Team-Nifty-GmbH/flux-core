@@ -35,7 +35,9 @@
     <!-- Root Rendering of the Tree -->
     {{ $header ?? null }}
     <div class="tree-container flex w-full flex-col gap-4 lg:flex-row">
-        <ul class="tree max-h-[50vh] shrink-0 grow overflow-auto pl-2 lg:max-h-none lg:w-1/2">
+        <ul
+            class="tree max-h-[50vh] shrink-0 grow overflow-auto pl-2 lg:max-h-none lg:w-1/2"
+        >
             {{ $beforeTree ?? null }}
             @if ($withSearch)
                 <div class="pb-2">
@@ -137,7 +139,9 @@
                         class="tree__children border-l border-gray-200 pl-4 dark:border-slate-500"
                     >
                         @if ($sortable)
-                            <li x-bind:class="node[childrenAttribute]?.length ? 'h-0' : 'min-h-[1rem]'"></li>
+                            <li
+                                x-bind:class="node[childrenAttribute]?.length ? 'h-0' : 'min-h-[1rem]'"
+                            ></li>
                         @endif
 
                         <template
