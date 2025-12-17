@@ -174,86 +174,31 @@ abstract class FolderTree extends Component
         );
     }
 
-    #[Renderless]
-    public function moveItem(array $subject, array $target, string $subjectPath, string $targetPath): void
+    public function moveItem(array $subject, array $target, ?string $subjectPath, ?string $targetPath): bool
     {
-        $subjectType = match (true) {
-            ! is_null(data_get($subject, 'file_name')) => 'media',
-            is_int(data_get($subject, 'id')) => 'folder',
-            default => 'collection',
+        $subjectPath = $this->resolveSubjectPath($subject, $subjectPath);
+        $targetPath = $this->resolveTargetPath($target, $targetPath);
+
+        if (! $subjectPath || ! $targetPath) {
+            return false;
+        }
+
+        $subjectType = $this->determineNodeType($subject);
+        $targetType = $this->determineNodeType($target);
+
+        if (! $this->canMove($subjectType, $targetType, $subject, $target, $subjectPath, $targetPath)) {
+            $this->toast()
+                ->error(__('Move failed'), __('This operation is not allowed.'))
+                ->send();
+
+            return false;
+        }
+
+        return match (true) {
+            $subjectType === 'folder' => $this->moveFolder($subject, $target),
+            $subjectType === 'collection' => $this->moveCollection($subject, $subjectPath, $targetPath),
+            default => $this->moveMedia($subject, $target, $targetPath, $targetType),
         };
-
-        $targetType = match (true) {
-            is_int(data_get($target, 'id')) => 'folder',
-            default => 'collection',
-        };
-
-        if ($this->isReadonly
-            || ($subjectType === 'folder' && $targetType !== 'folder')
-            || ($subjectType === 'collection' && $targetType !== 'collection')
-            || ($subjectType !== 'media' && $this->readOnly(data_get($subject, 'id'), $subjectPath))
-            || $this->readOnly(data_get($target, 'id'), $targetPath)
-        ) {
-            return;
-        }
-
-        if ($subjectType === 'folder' && $targetType === 'folder') {
-            try {
-                UpdateMediaFolder::make([
-                    'id' => data_get($subject, 'id'),
-                    'parent_id' => data_get($target, 'id'),
-                    'model_type' => morph_alias($this->modelType),
-                    'model_id' => $this->modelId,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (UnauthorizedException|ValidationException $e) {
-                exception_to_notifications($e, $this);
-
-                return;
-            }
-        }
-
-        $newCollectionName = $targetPath . '.'
-            . Str::of(data_get($subject, 'name') ?? '')
-                ->replace('.', '_')
-                ->snake()
-                ->toString();
-        if ($subjectType === 'collection' && $targetType === 'collection') {
-            if ($newCollectionName !== $subjectPath) {
-                resolve_static(Media::class, 'query')
-                    ->where('model_type', morph_alias($this->modelType))
-                    ->where('model_id', $this->modelId)
-                    ->where('collection_name', 'like', $subjectPath . '%')
-                    ->update([
-                        'collection_name' => DB::raw('CONCAT(\'' . $newCollectionName
-                            . '\', SUBSTRING(collection_name, ' . strlen($subjectPath) + 1 . '))'
-                        ),
-                    ]);
-            }
-
-            return;
-        }
-
-        // Now only moving media to media folder or collection is left
-        if ($targetType === 'collection') {
-            $model = resolve_static($this->modelType, 'query')
-                ->whereKey($this->modelId)
-                ->first();
-        } else {
-            $model = resolve_static(MediaFolder::class, 'query')
-                ->whereKey(data_get($target, 'id'))
-                ->first();
-        }
-
-        resolve_static(MediaModel::class, 'query')
-            ->where('model_type', morph_alias($this->modelType))
-            ->where('model_id', $this->modelId)
-            ->with('model')
-            ->whereKey(data_get($subject, 'id'))
-            ->first()
-            ?->move($model, $newCollectionName);
     }
 
     #[Renderless]
@@ -288,9 +233,16 @@ abstract class FolderTree extends Component
     #[Renderless]
     public function saveFolder(array $attributes): false|array
     {
-        if (is_string(data_get($attributes, 'parent_id')) || is_string(data_get($attributes, 'id'))) {
+        $isNew = data_get($attributes, 'is_new', false);
+        $hasStringParent = is_string(data_get($attributes, 'parent_id'));
+        $hasStringId = is_string(data_get($attributes, 'id'));
+
+        // Handle virtual folder updates (renaming collections)
+        if (($hasStringParent || $hasStringId) && ! $isNew) {
             $attributes['slug'] = Str::of(data_get($attributes, 'name') ?? '')
-                ->replace('.', '_')
+                ->lower()
+                ->replace('.', '')
+                ->replace('_', ' ')
                 ->snake()
                 ->toString();
             $path = data_get($attributes, 'path') ?? '';
@@ -309,6 +261,15 @@ abstract class FolderTree extends Component
             }
 
             return $attributes;
+        }
+
+        if ($isNew && $hasStringParent) {
+            $attributes['parent_id'] = null;
+        }
+
+        unset($attributes['is_new'], $attributes['path']);
+        if ($hasStringId) {
+            unset($attributes['id']);
         }
 
         $this->folder->reset();
@@ -342,5 +303,156 @@ abstract class FolderTree extends Component
                 ])
             )
         );
+    }
+
+    protected function resolveSubjectPath(array $subject, ?string $subjectPath): ?string
+    {
+        $path = $subjectPath ?? data_get($subject, 'collection_name');
+
+        if (is_null($path)) {
+            $this->toast()
+                ->error(__('Move failed'), __('Could not determine source path.'))
+                ->send();
+        }
+
+        return $path;
+    }
+
+    protected function resolveTargetPath(array $target, ?string $targetPath): ?string
+    {
+        $path = $targetPath ?? data_get($target, 'slug') ?? data_get($target, 'collection_name');
+
+        if (is_null($path)) {
+            $this->toast()
+                ->error(__('Move failed'), __('Could not determine target path.'))
+                ->send();
+        }
+
+        return $path;
+    }
+
+    protected function determineNodeType(array $node): string
+    {
+        return match (true) {
+            ! is_null(data_get($node, 'file_name')) => 'media',
+            is_int(data_get($node, 'id')) => 'folder',
+            default => 'collection',
+        };
+    }
+
+    protected function canMove(
+        string $subjectType,
+        string $targetType,
+        array $subject,
+        array $target,
+        string $subjectPath,
+        string $targetPath
+    ): bool {
+        return ! $this->isReadonly
+            && $targetType !== 'media'
+            && ! ($subjectType === 'folder' && $targetType !== 'folder')
+            && ! ($subjectType === 'collection' && $targetType !== 'collection')
+            && ($subjectType === 'media' || ! $this->readOnly(data_get($subject, 'id'), $subjectPath))
+            && ! $this->readOnly(data_get($target, 'id'), $targetPath);
+    }
+
+    protected function moveFolder(array $subject, array $target): bool
+    {
+        try {
+            UpdateMediaFolder::make([
+                'id' => data_get($subject, 'id'),
+                'parent_id' => data_get($target, 'id'),
+                'model_type' => morph_alias($this->modelType),
+                'model_id' => $this->modelId,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->toast()
+            ->success(__('Moved successfully'))
+            ->send();
+
+        return true;
+    }
+
+    protected function moveCollection(array $subject, string $subjectPath, string $targetPath): bool
+    {
+        $newCollectionName = $this->buildCollectionName($subject, $targetPath);
+
+        if ($newCollectionName !== $subjectPath) {
+            resolve_static(Media::class, 'query')
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
+                ->where('collection_name', 'like', $subjectPath . '%')
+                ->update([
+                    'collection_name' => DB::raw(
+                        'CONCAT(\'' . $newCollectionName . '\', SUBSTRING(collection_name, ' . (strlen($subjectPath) + 1) . '))'
+                    ),
+                ]);
+        }
+
+        $this->toast()
+            ->success(__('Moved successfully'))
+            ->send();
+
+        return true;
+    }
+
+    protected function moveMedia(array $subject, array $target, string $targetPath, string $targetType): bool
+    {
+        $targetModel = $targetType === 'collection'
+            ? resolve_static($this->modelType, 'query')->whereKey($this->modelId)->first()
+            : resolve_static(MediaFolder::class, 'query')->whereKey(data_get($target, 'id'))->first();
+
+        $media = $this->findMedia(data_get($subject, 'id'));
+
+        if (! $media) {
+            $this->toast()
+                ->error(__('Move failed'), __('Media not found.'))
+                ->send();
+
+            return false;
+        }
+
+        $collectionName = $targetType === 'folder'
+            ? $targetPath
+            : data_get($subject, 'collection_name', $targetPath);
+
+        $media->move($targetModel, $collectionName);
+
+        $this->toast()
+            ->success(__('Moved successfully'))
+            ->send();
+
+        return true;
+    }
+
+    protected function findMedia(int $mediaId): ?MediaModel
+    {
+        return resolve_static(MediaModel::class, 'query')
+            ->where('model_type', morph_alias($this->modelType))
+            ->where('model_id', $this->modelId)
+            ->whereKey($mediaId)
+            ->first()
+            ?? resolve_static(MediaModel::class, 'query')
+                ->where('model_type', morph_alias(MediaFolder::class))
+                ->whereKey($mediaId)
+                ->first();
+    }
+
+    protected function buildCollectionName(array $subject, string $targetPath): string
+    {
+        return $targetPath . '.' . Str::of(data_get($subject, 'name') ?? '')
+            ->lower()
+            ->replace('.', '')
+            ->replace('_', ' ')
+            ->snake()
+            ->toString();
     }
 }

@@ -34,8 +34,10 @@
 >
     <!-- Root Rendering of the Tree -->
     {{ $header ?? null }}
-    <div class="tree-container w-full gap-4 lg:flex">
-        <ul class="tree grow pl-2">
+    <div class="tree-container flex w-full flex-col gap-4 lg:flex-row">
+        <ul
+            class="tree max-h-[50vh] shrink-0 grow overflow-auto pl-2 lg:max-h-none lg:w-1/2"
+        >
             {{ $beforeTree ?? null }}
             @if ($withSearch)
                 <div class="pb-2">
@@ -69,7 +71,7 @@
             <!-- this is the root level elements only -->
             <li>
                 <div
-                    class="-ml-3 flex cursor-pointer select-none items-center space-x-2 rounded px-1.5 text-sm text-gray-700 dark:text-gray-50"
+                    class="-ml-3 flex min-w-0 cursor-pointer select-none items-center space-x-2 rounded px-1.5 text-sm text-gray-700 dark:text-gray-50"
                     x-on:click="toggleSelect(node)"
                     x-bind:class="selected?.id === node.id ? 'bg-indigo-500 dark:bg-indigo-700 text-white' : ''"
                 >
@@ -121,23 +123,25 @@
                     @endif
 
                     <div
-                        class="whitespace-nowrap"
+                        class="min-w-0 truncate"
                         x-html="node[nameAttribute]"
                     ></div>
                     {{ $suffix }}
                 </div>
-                <template x-if="node[childrenAttribute]?.length">
+                <template x-if="Array.isArray(node[childrenAttribute])">
                     <ul
                         @if ($sortable)
                             x-sort="(item, position) => {{{ $attributes->get("moved", "null") }}}"
                             x-sort:group="folder-tree"
                         @endif
-                        x-collapse
-                        x-show="isOpen(node) && node[childrenAttribute]?.length"
+                        x-show="isOpen(node)"
+                        x-transition
                         class="tree__children border-l border-gray-200 pl-4 dark:border-slate-500"
                     >
                         @if ($sortable)
-                            <li></li>
+                            <li
+                                x-bind:class="node[childrenAttribute]?.length ? 'h-0' : 'min-h-[1rem]'"
+                            ></li>
                         @endif
 
                         <template
