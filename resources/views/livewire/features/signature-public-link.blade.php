@@ -1,15 +1,6 @@
-@use('FluxErp\Providers\ViewServiceProvider')
 <div>
-    @vite([
-        ViewServiceProvider::getRealPackageAssetPath(
-            '/resources/js/alpine.js',
-            'team-nifty-gmbh/flux-erp',
-        ),
-        ViewServiceProvider::getRealPackageAssetPath(
-            '/resources/css/app.css',
-            'team-nifty-gmbh/flux-erp',
-        ),
-    ])
+    @fluxStyles
+    @fluxScripts
     <div
         x-cloak
         x-show="id === null"
