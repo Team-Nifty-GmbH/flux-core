@@ -4,7 +4,7 @@ import colors from 'tailwindcss/colors';
 window.colors = colors;
 window.ApexCharts = ApexCharts;
 
-export default function ($wire) {
+function apexCharts($wire) {
     return {
         chart: null,
         chartType: null,
@@ -393,3 +393,6 @@ export default function ($wire) {
         },
     };
 }
+
+window.apexCharts = apexCharts;
+export default apexCharts;

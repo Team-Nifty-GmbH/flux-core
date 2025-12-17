@@ -4,6 +4,11 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import nuxbeAppBridge from './nuxbe-bridge.js';
 
+// Import all modules into single bundle
+import './components/alpine.js';
+import './components/apex-charts.js';
+import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';
+
 window.nuxbeAppBridge = nuxbeAppBridge;
 
 window._ = _;
