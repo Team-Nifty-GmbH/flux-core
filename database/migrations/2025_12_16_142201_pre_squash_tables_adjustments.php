@@ -365,7 +365,7 @@ return new class() extends Migration
 
         // PaymentTypes
         Schema::table('payment_types', function (Blueprint $table): void {
-            $table->boolean('is_direct_debit')->default(false)->after('is_default');
+            $table->boolean('is_direct_debit')->default(false)->after('is_default')->change();
         });
 
         // PriceLists
