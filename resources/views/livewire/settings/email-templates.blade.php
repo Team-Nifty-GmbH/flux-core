@@ -32,15 +32,24 @@
     <x-modal :id="$emailTemplateForm->modalName()" :title="__('Email Template')">
         <div class="flex flex-col gap-4">
             <x-input wire:model="emailTemplateForm.name" :label="__('Name')" />
-            <x-select.styled
-                wire:model.live="emailTemplateForm.model_type"
-                :label="__('Model Type')"
-                :options="$modelTypes"
-            />
+            <div x-cloak x-show="$wire.emailTemplateForm.id">
+                <x-input
+                    :label="__('Model Type')"
+                    readonly
+                    x-bind:value="$wire.emailTemplateForm.model_type ? $wire.emailTemplateForm.model_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '{{ __('General') }}'"
+                />
+            </div>
+            <div x-cloak x-show="! $wire.emailTemplateForm.id">
+                <x-select.styled
+                    wire:model.live="emailTemplateForm.model_type"
+                    :label="__('Model Type')"
+                    :options="$modelTypes"
+                />
+            </div>
             <div class="flex flex-col gap-1.5">
                 <x-label :label="__('To')" />
                 <div class="flex gap-1">
-                    <template x-for="to in $wire.emailTemplateForm.to || []">
+                    <template x-for="(to, index) in $wire.emailTemplateForm.to || []" :key="'to-' + index">
                         <x-badge flat color="indigo" cl>
                             <x-slot:text>
                                 <span x-text="to"></span>
@@ -69,7 +78,7 @@
             <div class="flex flex-col gap-1.5">
                 <x-label :label="__('CC')" />
                 <div class="flex gap-1">
-                    <template x-for="cc in $wire.emailTemplateForm.cc || []">
+                    <template x-for="(cc, index) in $wire.emailTemplateForm.cc || []" :key="'cc-' + index">
                         <x-badge flat color="indigo" cl>
                             <x-slot:text>
                                 <span x-text="cc"></span>
@@ -98,7 +107,7 @@
             <div class="flex flex-col gap-1.5">
                 <x-label :label="__('BCC')" />
                 <div class="flex gap-1">
-                    <template x-for="bcc in $wire.emailTemplateForm.bcc || []">
+                    <template x-for="(bcc, index) in $wire.emailTemplateForm.bcc || []" :key="'bcc-' + index">
                         <x-badge flat color="indigo" cl>
                             <x-slot:text>
                                 <span x-text="bcc"></span>
@@ -130,7 +139,7 @@
                 rows="3"
             />
             <div class="flex gap-1 flex-wrap">
-                <template x-for="file in $wire.emailTemplateForm.media ?? []">
+                <template x-for="file in $wire.emailTemplateForm.media ?? []" :key="file.id">
                     <div
                         x-cloak
                         x-show="! $wire.emailTemplateForm.deleteMedia.includes(file.id)"
@@ -240,6 +249,7 @@
                 wire:model="emailTemplateForm.html_body"
                 scope="emailTemplate"
                 :label="__('Html Body')"
+                :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables()"
             />
             <x-textarea
                 wire:model="emailTemplateForm.text_body"

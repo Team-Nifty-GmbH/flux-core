@@ -142,7 +142,7 @@
                 <template x-ref="{{ $buttonInstance->dropdownRef() }}Dropdown">
                     <div class="flex flex-col">
                         @foreach ($buttonInstance->dropdownContent() as $dropdownButton)
-                            {!! $dropdownButton->render() !!}
+                            {!! $dropdownButton instanceof \Stringable ? $dropdownButton : $dropdownButton->render() !!}
                         @endforeach
                     </div>
                 </template>

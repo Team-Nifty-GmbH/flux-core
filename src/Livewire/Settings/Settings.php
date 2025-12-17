@@ -31,14 +31,9 @@ class Settings extends Component
         $this->settings = $this->prepareSettings(data_get(Menu::forGuard('web'), 'settings.children', []));
 
         if ($this->settingComponent) {
-            $settings = collect($this->settings)
-                ->firstWhere('component', $this->settingComponent);
-
-            if (is_null($settings)) {
-                throw new NotFoundHttpException('Settings not found.');
-            }
-
-            $this->settings = $settings;
+            $this->setting = collect($this->settings)
+                ->firstWhere('component', $this->settingComponent)
+                ?? throw new NotFoundHttpException('Settings not found.');
         }
     }
 
