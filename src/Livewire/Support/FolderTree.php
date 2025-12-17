@@ -187,7 +187,9 @@ abstract class FolderTree extends Component
         $targetType = $this->determineNodeType($target);
 
         if (! $this->canMove($subjectType, $targetType, $subject, $target, $subjectPath, $targetPath)) {
-            $this->toast()->error(__('Move failed'), __('This operation is not allowed.'))->send();
+            $this->toast()
+                ->error(__('Move failed'), __('This operation is not allowed.'))
+                ->send();
 
             return false;
         }
@@ -238,7 +240,9 @@ abstract class FolderTree extends Component
         // Handle virtual folder updates (renaming collections)
         if (($hasStringParent || $hasStringId) && ! $isNew) {
             $attributes['slug'] = Str::of(data_get($attributes, 'name') ?? '')
-                ->replace('.', '_')
+                ->lower()
+                ->replace('.', '')
+                ->replace('_', ' ')
                 ->snake()
                 ->toString();
             $path = data_get($attributes, 'path') ?? '';
@@ -306,7 +310,9 @@ abstract class FolderTree extends Component
         $path = $subjectPath ?? data_get($subject, 'collection_name');
 
         if (is_null($path)) {
-            $this->toast()->error(__('Move failed'), __('Could not determine source path.'))->send();
+            $this->toast()
+                ->error(__('Move failed'), __('Could not determine source path.'))
+                ->send();
         }
 
         return $path;
@@ -317,7 +323,9 @@ abstract class FolderTree extends Component
         $path = $targetPath ?? data_get($target, 'slug') ?? data_get($target, 'collection_name');
 
         if (is_null($path)) {
-            $this->toast()->error(__('Move failed'), __('Could not determine target path.'))->send();
+            $this->toast()
+                ->error(__('Move failed'), __('Could not determine target path.'))
+                ->send();
         }
 
         return $path;
@@ -341,6 +349,7 @@ abstract class FolderTree extends Component
         string $targetPath
     ): bool {
         return ! $this->isReadonly
+            && $targetType !== 'media'
             && ! ($subjectType === 'folder' && $targetType !== 'folder')
             && ! ($subjectType === 'collection' && $targetType !== 'collection')
             && ($subjectType === 'media' || ! $this->readOnly(data_get($subject, 'id'), $subjectPath))
@@ -365,7 +374,9 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        $this->toast()->success(__('Moved successfully'))->send();
+        $this->toast()
+            ->success(__('Moved successfully'))
+            ->send();
 
         return true;
     }
@@ -386,7 +397,9 @@ abstract class FolderTree extends Component
                 ]);
         }
 
-        $this->toast()->success(__('Moved successfully'))->send();
+        $this->toast()
+            ->success(__('Moved successfully'))
+            ->send();
 
         return true;
     }
@@ -400,7 +413,9 @@ abstract class FolderTree extends Component
         $media = $this->findMedia(data_get($subject, 'id'));
 
         if (! $media) {
-            $this->toast()->error(__('Move failed'), __('Media not found.'))->send();
+            $this->toast()
+                ->error(__('Move failed'), __('Media not found.'))
+                ->send();
 
             return false;
         }
@@ -411,7 +426,9 @@ abstract class FolderTree extends Component
 
         $media->move($targetModel, $collectionName);
 
-        $this->toast()->success(__('Moved successfully'))->send();
+        $this->toast()
+            ->success(__('Moved successfully'))
+            ->send();
 
         return true;
     }
@@ -432,7 +449,9 @@ abstract class FolderTree extends Component
     protected function buildCollectionName(array $subject, string $targetPath): string
     {
         return $targetPath . '.' . Str::of(data_get($subject, 'name') ?? '')
-            ->replace('.', '_')
+            ->lower()
+            ->replace('.', '')
+            ->replace('_', ' ')
             ->snake()
             ->toString();
     }
