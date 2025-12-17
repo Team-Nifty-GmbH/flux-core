@@ -11,7 +11,7 @@ use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
-use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
@@ -435,7 +435,7 @@ class Product extends Component
         }
 
         if ($this->product->is_bundle) {
-            $this->product->bundle_products = resolve_static(ProductBundleProduct::class, 'query')
+            $this->product->bundle_products = resolve_static(BundleProductProduct::class, 'query')
                 ->where('product_id', $this->product->id)
                 ->get(['id', 'bundle_product_id', 'count'])
                 ->map(fn ($item) => ['id' => $item->bundle_product_id, 'count' => $item->count])

@@ -13,8 +13,6 @@ class AddressTypeFactory extends Factory
     {
         return [
             'name' => fake()->name,
-            'is_locked' => fake()->boolean(),
-            'is_unique' => fake()->boolean(),
         ];
     }
 }

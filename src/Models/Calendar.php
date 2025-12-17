@@ -3,7 +3,6 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\Calendarable;
-use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Support\Collection\CalendarCollection;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
@@ -73,17 +72,6 @@ class Calendar extends FluxModel
         $parent = $this->parent?->getLabel();
 
         return ($parent ? $parent . ' -> ' : '') . $this->name;
-    }
-
-    public function invitesCalendarEvents()
-    {
-        return $this->hasManyThrough(
-            CalendarEvent::class,
-            Inviteable::class,
-            'model_calendar_id',
-            'id',
-            'id',
-            'calendar_event_id');
     }
 
     public function newCollection(array $models = []): Collection

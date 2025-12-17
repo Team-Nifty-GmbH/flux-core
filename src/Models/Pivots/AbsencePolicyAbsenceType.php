@@ -8,12 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AbsencePolicyAbsenceType extends FluxPivot
 {
-    public $incrementing = true;
-
-    public $timestamps = false;
-
-    protected $primaryKey = 'pivot_id';
-
     public function absencePolicy(): BelongsTo
     {
         return $this->belongsTo(AbsencePolicy::class);

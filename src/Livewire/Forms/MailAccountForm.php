@@ -29,9 +29,9 @@ class MailAccountForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public bool $is_auto_assign = false;
+    public bool $has_auto_assign = false;
 
-    public bool $is_o_auth = false;
+    public bool $has_o_auth = false;
 
     public ?string $name = null;
 

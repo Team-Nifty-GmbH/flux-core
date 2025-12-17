@@ -13,9 +13,7 @@ class EmployeeWorkTimeModel extends FluxPivot
 {
     use HasUserModification, SoftDeletes;
 
-    public $incrementing = true;
-
-    protected $primaryKey = 'pivot_id';
+    public $timestamps = true;
 
     protected function casts(): array
     {

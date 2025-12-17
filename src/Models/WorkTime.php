@@ -308,12 +308,10 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
             'start' => $this->started_at->toDateTimeString(),
             'end' => $this->ended_at?->toDateTimeString(),
             'color' => $this->user->color ?? '#0891b2',
-            'invited' => [],
             'description' => $this->description,
             'allDay' => false,
             'editable' => ! $this->is_locked,
             'is_editable' => ! $this->is_locked,
-            'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,
         ];

@@ -2,13 +2,13 @@
 
 namespace FluxErp\Rulesets\Product\ProductBundleProduct;
 
-use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteProductBundleProductRuleset extends FluxRuleset
 {
-    protected static ?string $model = ProductBundleProduct::class;
+    protected static ?string $model = BundleProductProduct::class;
 
     public function rules(): array
     {
@@ -16,7 +16,7 @@ class DeleteProductBundleProductRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => ProductBundleProduct::class]),
+                app(ModelExists::class, ['model' => BundleProductProduct::class]),
             ],
         ];
     }

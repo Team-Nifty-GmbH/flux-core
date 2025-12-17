@@ -273,7 +273,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'start' => ($this->start ?? $this->created_at)->toDateTimeString(),
             'end' => $this->end?->endOfDay()->toDateTimeString(),
             'status' => $this->leadState()->value('name'),
-            'invited' => [],
             'description' => $this->description,
             'extendedProps' => [
                 'modelUrl' => $this->getUrl(),
@@ -281,7 +280,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ],
             'allDay' => true,
             'is_editable' => true,
-            'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,
         ];

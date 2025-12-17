@@ -17,8 +17,8 @@ class OrderTypeTableSeeder extends Seeder
         foreach ($tenants as $tenant) {
             foreach (OrderTypeEnum::cases() as $orderType) {
                 OrderType::factory()->create([
-                    'name' => Str::headline($orderType->name),
                     'tenant_id' => $tenant->id,
+                    'name' => Str::headline($orderType->name),
                     'print_layouts' => match ($orderType) {
                         OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, OrderTypeEnum::Subscription => [
                             'offer',

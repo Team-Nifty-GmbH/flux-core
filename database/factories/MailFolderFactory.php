@@ -15,9 +15,9 @@ class MailFolderFactory extends Factory
             'uuid' => fake()->uuid(),
             'name' => fake()->name,
             'slug' => fake()->slug,
-            'can_create_ticket' => fake()->boolean,
-            'can_create_purchase_invoice' => fake()->boolean,
             'can_create_lead' => fake()->boolean,
+            'can_create_purchase_invoice' => fake()->boolean,
+            'can_create_ticket' => fake()->boolean,
         ];
     }
 }

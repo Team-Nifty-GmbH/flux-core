@@ -25,32 +25,6 @@ const calendar = () => {
 
             return dateTime.toLocaleString(locale, config);
         },
-        inviteStatus(calendarEvent, status) {
-            calendarEvent.status = status;
-            if (this.calendarItem.resourceEditable === false) {
-                this.calendarClick(
-                    this.calendars.find((c) => c.resourceEditable === true),
-                );
-            }
-
-            const existingEvent = this.calendar.getEventById(
-                calendarEvent.calendar_event.id,
-            );
-
-            if (
-                (status === 'accepted' || status === 'maybe') &&
-                !existingEvent
-            ) {
-                this.calendar.addEvent(
-                    calendarEvent.calendar_event,
-                    this.calendar.getEventSourceById(this.calendarId),
-                );
-            } else if (status === 'declined' && existingEvent) {
-                existingEvent.remove();
-            }
-
-            this.$wire.inviteStatus(calendarEvent.id, status, this.calendarId);
-        },
         calendarClick(calendar) {
             this.calendarId = calendar.id;
             this.calendarItem = calendar;
@@ -252,7 +226,6 @@ const calendar = () => {
         config: {},
         calendarId: null,
         calendars: [],
-        invites: [],
         calendarEvent: {},
         dispatchCalendarEvents(eventName, params) {
             const eventNameKebap = eventName
@@ -330,9 +303,6 @@ const calendar = () => {
             this.$wire.getConfig().then((config) => {
                 this.config = config;
                 this.initCalendar();
-            });
-            this.$wire.getInvites().then((invites) => {
-                this.invites = invites;
             });
         },
         flattenCalendars(calendars, parentPath = '') {

@@ -16,8 +16,8 @@ class LeadStateTableSeeder extends Seeder
         LeadState::factory()
             ->create([
                 'is_default' => true,
-                'is_won' => false,
                 'is_lost' => false,
+                'is_won' => false,
             ]);
     }
 }

@@ -113,7 +113,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     {
         return $this->belongsToMany(
             Product::class,
-            'product_bundle_product',
+            'bundle_product_product',
             'product_id',
             'bundle_product_id'
         )->withPivot('count');
@@ -215,7 +215,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ProductProperty::class,
             'product_product_property',
             'product_id',
-            'product_prop_id'
+            'product_property_id'
         );
     }
 

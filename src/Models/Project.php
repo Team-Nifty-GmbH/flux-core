@@ -195,7 +195,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'start' => ($this->start_date ?? $this->created_at)->toDateTimeString(),
             'end' => $this->end_date?->endOfDay()->toDateTimeString(),
             'status' => $this->state::$name,
-            'invited' => [],
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
@@ -204,7 +203,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             ],
             'allDay' => true,
             'is_editable' => true,
-            'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,
         ];
