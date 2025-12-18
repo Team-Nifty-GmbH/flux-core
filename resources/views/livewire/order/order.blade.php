@@ -509,16 +509,27 @@
                         <div class="text-sm">
                             <p
                                 class="truncate first-line:font-semibold"
-                                x-html="Array.isArray($wire.order.address_invoice)
-                                    ? $wire.order.address_invoice.join('<br>')
-                                    : [
-                                        $wire.order.address_invoice?.company,
-                                        [$wire.order.address_invoice?.firstname, $wire.order.address_invoice?.lastname].filter(Boolean).join(' '),
-                                        $wire.order.address_invoice?.addition,
-                                        $wire.order.address_invoice?.street,
-                                        [$wire.order.address_invoice?.zip, $wire.order.address_invoice?.city].filter(Boolean).join(' '),
-                                        $wire.order.address_invoice?.country?.name,
-                                    ].filter(Boolean).join('<br>')"
+                                x-html="
+                                    Array.isArray($wire.order.address_invoice)
+                                        ? $wire.order.address_invoice.join('<br>')
+                                        : [
+                                              $wire.order.address_invoice?.company,
+                                              [
+                                                  $wire.order.address_invoice?.firstname,
+                                                  $wire.order.address_invoice?.lastname,
+                                              ]
+                                                  .filter(Boolean)
+                                                  .join(' '),
+                                              $wire.order.address_invoice?.addition,
+                                              $wire.order.address_invoice?.street,
+                                              [$wire.order.address_invoice?.zip, $wire.order.address_invoice?.city]
+                                                  .filter(Boolean)
+                                                  .join(' '),
+                                              $wire.order.address_invoice?.country?.name,
+                                          ]
+                                              .filter(Boolean)
+                                              .join('<br>')
+                                "
                             ></p>
                         </div>
                     </x-card>
@@ -581,16 +592,30 @@
                         >
                             <p
                                 class="truncate first-line:font-semibold"
-                                x-html="Array.isArray($wire.order.address_delivery)
-                                    ? $wire.order.address_delivery.join('<br>')
-                                    : [
-                                        $wire.order.address_delivery?.company,
-                                        [$wire.order.address_delivery?.firstname, $wire.order.address_delivery?.lastname].filter(Boolean).join(' '),
-                                        $wire.order.address_delivery?.addition,
-                                        $wire.order.address_delivery?.street,
-                                        [$wire.order.address_delivery?.zip, $wire.order.address_delivery?.city].filter(Boolean).join(' '),
-                                        $wire.order.address_delivery?.country?.name,
-                                    ].filter(Boolean).join('<br>')"
+                                x-html="
+                                    Array.isArray($wire.order.address_delivery)
+                                        ? $wire.order.address_delivery.join('<br>')
+                                        : [
+                                              $wire.order.address_delivery?.company,
+                                              [
+                                                  $wire.order.address_delivery?.firstname,
+                                                  $wire.order.address_delivery?.lastname,
+                                              ]
+                                                  .filter(Boolean)
+                                                  .join(' '),
+                                              $wire.order.address_delivery?.addition,
+                                              $wire.order.address_delivery?.street,
+                                              [
+                                                  $wire.order.address_delivery?.zip,
+                                                  $wire.order.address_delivery?.city,
+                                              ]
+                                                  .filter(Boolean)
+                                                  .join(' '),
+                                              $wire.order.address_delivery?.country?.name,
+                                          ]
+                                              .filter(Boolean)
+                                              .join('<br>')
+                                "
                             ></p>
                         </div>
                     </x-card>
