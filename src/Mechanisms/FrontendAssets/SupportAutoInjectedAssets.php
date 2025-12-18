@@ -75,8 +75,8 @@ class SupportAutoInjectedAssets
                 return;
             }
 
-            $assetsHead = FrontendAssets::styles()->toHtml();
-            $assetsBody = FrontendAssets::scripts()->toHtml();
+            $assetsHead = resolve_static(FrontendAssets::class, 'styles')->toHtml();
+            $assetsBody = resolve_static(FrontendAssets::class, 'scripts')->toHtml();
 
             if ($assetsHead === '' && $assetsBody === '') {
                 return;
