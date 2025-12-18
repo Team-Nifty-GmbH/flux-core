@@ -433,14 +433,16 @@ test('can delete real media folder', function (): void {
     expect(MediaFolder::whereKey($folder->getKey())->exists())->toBeFalse();
 });
 
-class FolderTreeTestClass extends FolderTree
+namespace FluxErp\Tests\Livewire;
+
+class FolderTreeTestClass extends \FluxErp\Livewire\Support\FolderTree
 {
-    protected string $modelType = Contact::class;
+    protected string $modelType = \FluxErp\Models\Contact::class;
 }
 
-class FolderTreeReadonlyTestClass extends FolderTree
+class FolderTreeReadonlyTestClass extends \FluxErp\Livewire\Support\FolderTree
 {
     public bool $isReadonly = true;
 
-    protected string $modelType = Contact::class;
+    protected string $modelType = \FluxErp\Models\Contact::class;
 }
