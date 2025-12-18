@@ -29,6 +29,15 @@ strong {
     color: inherit !important;
 }
 
+.no-margin {
+    @apply p-1;
+}
+
+
+.no-margin p {
+    @apply m-0 leading-[10.5px];
+}
+
 .tiptap {
     :first-child {
         margin-top: 0;
