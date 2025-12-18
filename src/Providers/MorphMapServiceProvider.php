@@ -46,7 +46,6 @@ use FluxErp\Models\Holiday;
 use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
-use FluxErp\Models\LanguageLine;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
@@ -192,7 +191,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'industry' => Industry::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
-            'language_line' => LanguageLine::class,
             'lead' => Lead::class,
             'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,

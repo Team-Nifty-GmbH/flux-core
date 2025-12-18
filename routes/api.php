@@ -123,9 +123,6 @@ use FluxErp\Actions\Industry\UpdateIndustry;
 use FluxErp\Actions\Language\CreateLanguage;
 use FluxErp\Actions\Language\DeleteLanguage;
 use FluxErp\Actions\Language\UpdateLanguage;
-use FluxErp\Actions\LanguageLine\CreateLanguageLine;
-use FluxErp\Actions\LanguageLine\DeleteLanguageLine;
-use FluxErp\Actions\LanguageLine\UpdateLanguageLine;
 use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Actions\Lead\DeleteLead;
 use FluxErp\Actions\Lead\UpdateLead;
@@ -363,7 +360,6 @@ use FluxErp\Models\FormBuilderSection;
 use FluxErp\Models\Holiday;
 use FluxErp\Models\Industry;
 use FluxErp\Models\Language;
-use FluxErp\Models\LanguageLine;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
@@ -403,7 +399,6 @@ use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
-use FluxErp\Models\Setting;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
@@ -1133,7 +1128,7 @@ Route::prefix('api')
                 Route::delete('/serial-numbers/{id}', DeleteSerialNumber::class);
 
                 // Settings
-                Route::get('/settings', [BaseController::class, 'index'])->defaults('model', Setting::class);
+                Route::get('/settings', [SettingController::class, 'getSettings']);
                 Route::put('/settings', UpdateSetting::class);
 
                 // Subscriptions
@@ -1222,12 +1217,6 @@ Route::prefix('api')
                 Route::post('/time-tracking-types', CreateWorkTimeType::class);
                 Route::put('/time-tracking-types', UpdateWorkTimeType::class);
                 Route::delete('/time-tracking-types/{id}', DeleteWorkTimeType::class);
-
-                // Translations
-                Route::get('/language-lines', [BaseController::class, 'index'])->defaults('model', LanguageLine::class);
-                Route::post('/language-lines', CreateLanguageLine::class);
-                Route::put('/language-lines', UpdateLanguageLine::class);
-                Route::delete('/language-lines/{id}', DeleteLanguageLine::class);
 
                 // Units
                 Route::get('/units/{id}', [BaseController::class, 'show'])->defaults('model', Unit::class);
