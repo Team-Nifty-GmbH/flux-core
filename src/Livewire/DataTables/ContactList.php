@@ -62,14 +62,6 @@ class ContactList extends BaseDataTable
 
     protected string $model = Contact::class;
 
-    protected function getTableActions(): array
-    {
-        return array_merge(
-            $this->getTableActionsDataTableHasFormEdit(),
-            []
-        );
-    }
-
     protected function getSelectedActions(): array
     {
         return array_merge(

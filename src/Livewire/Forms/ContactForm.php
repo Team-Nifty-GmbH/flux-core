@@ -193,9 +193,9 @@ class ContactForm extends FluxForm
     {
         parent::reset(...$properties);
 
-        $this->tenant_id = resolve_static(Tenant::class, 'default')->getKey();
-        $this->language_id = resolve_static(Language::class, 'default')->getKey();
-        $this->country_id = resolve_static(Country::class, 'default')->getKey();
+        $this->tenant_id = resolve_static(Tenant::class, 'default')?->getKey();
+        $this->language_id = resolve_static(Language::class, 'default')?->getKey();
+        $this->country_id = resolve_static(Country::class, 'default')?->getKey();
     }
 
     public function toActionData(): array
