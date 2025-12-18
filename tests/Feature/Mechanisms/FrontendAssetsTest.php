@@ -28,7 +28,7 @@ describe('FrontendAssets', function (): void {
     test('styles method returns html string with css link', function (): void {
         $styles = FrontendAssets::styles();
 
-        expect($styles)->toBeInstanceOf(\Illuminate\Support\HtmlString::class)
+        expect($styles)->toBeInstanceOf(Illuminate\Support\HtmlString::class)
             ->and($styles->toHtml())->toContain('<link rel="stylesheet"')
             ->and($styles->toHtml())->toContain('app-');
     });
@@ -36,7 +36,7 @@ describe('FrontendAssets', function (): void {
     test('scripts method returns html string with script tags', function (): void {
         $scripts = FrontendAssets::scripts();
 
-        expect($scripts)->toBeInstanceOf(\Illuminate\Support\HtmlString::class)
+        expect($scripts)->toBeInstanceOf(Illuminate\Support\HtmlString::class)
             ->and($scripts->toHtml())->toContain('<script type="module"')
             ->and($scripts->toHtml())->toContain('app-');
     });

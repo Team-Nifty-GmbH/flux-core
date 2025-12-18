@@ -15,12 +15,6 @@ use TallStackUi\Facades\TallStackUi;
 
 class ViewServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        $this->app->singleton(FrontendAssets::class);
-        $this->app->singleton(SupportAutoInjectedAssets::class);
-    }
-
     public static function getRealPackageAssetPath(string $path, string $packageName): string
     {
         $path = ltrim($path, '/');
@@ -46,6 +40,12 @@ class ViewServiceProvider extends ServiceProvider
         $this->bootBladeDirectives();
 
         $this->bootFrontendAssets();
+    }
+
+    public function register(): void
+    {
+        $this->app->singleton(FrontendAssets::class);
+        $this->app->singleton(SupportAutoInjectedAssets::class);
     }
 
     protected function bootFrontendAssets(): void
