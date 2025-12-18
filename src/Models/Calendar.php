@@ -102,6 +102,6 @@ class Calendar extends FluxModel
 
     public function users(): MorphToMany
     {
-        return $this->morphedByMany(User::class, 'calendarable', 'calendarables');
+        return $this->morphedByMany(User::class, 'calendarable', 'calendarable');
     }
 }
