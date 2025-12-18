@@ -2,6 +2,8 @@
 
 namespace FluxErp\Rulesets\EmailTemplate;
 
+use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateEmailTemplateRuleset extends FluxRuleset
@@ -10,6 +12,11 @@ class CreateEmailTemplateRuleset extends FluxRuleset
     {
         return [
             'name' => 'required|string|max:255',
+            'model_type' => [
+                'nullable',
+                'string',
+                app(MorphClassExists::class, ['implements' => OffersPrinting::class]),
+            ],
             'to' => 'nullable|array',
             'to.*' => 'string|email|distinct',
             'cc' => 'nullable|array',
