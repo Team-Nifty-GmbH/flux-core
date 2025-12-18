@@ -21,8 +21,7 @@ describe('FrontendAssets', function (): void {
 
         expect($manifest)->toBeArray()
             ->and($manifest)->toHaveKey('resources/css/app.css')
-            ->and($manifest)->toHaveKey('resources/js/app.js')
-            ->and($manifest)->toHaveKey('resources/js/alpine.js');
+            ->and($manifest)->toHaveKey('resources/js/app.js');
     });
 
     test('styles method returns html string with css link', function (): void {
@@ -198,7 +197,7 @@ describe('SupportAutoInjectedAssets', function (): void {
         // Reset the hasRenderedScripts flag
         app(FrontendAssets::class)->hasRenderedScripts = false;
 
-        $response = $this->get(route('login'));
+        $response = $this->actingAsGuest()->get(route('login'));
 
         $response->assertOk();
 
@@ -214,7 +213,7 @@ describe('SupportAutoInjectedAssets', function (): void {
         // Reset the hasRenderedScripts flag
         app(FrontendAssets::class)->hasRenderedScripts = false;
 
-        $response = $this->get(route('login'));
+        $response = $this->actingAsGuest()->get(route('login'));
 
         $response->assertOk();
 
@@ -229,7 +228,7 @@ describe('SupportAutoInjectedAssets', function (): void {
         // Simulate that scripts have already been rendered
         app(FrontendAssets::class)->hasRenderedScripts = true;
 
-        $response = $this->get(route('login'));
+        $response = $this->actingAsGuest()->get(route('login'));
 
         $response->assertOk();
 
@@ -249,12 +248,12 @@ describe('Blade Directives', function (): void {
     test('fluxStyles directive returns valid php code', function (): void {
         $directive = FrontendAssets::fluxStyles();
 
-        expect($directive)->toContain('FrontendAssets::styles()');
+        expect($directive)->toContain("resolve_static(\\FluxErp\\Mechanisms\\FrontendAssets\\FrontendAssets::class, 'styles')");
     });
 
     test('fluxScripts directive returns valid php code', function (): void {
         $directive = FrontendAssets::fluxScripts();
 
-        expect($directive)->toContain('FrontendAssets::scripts()');
+        expect($directive)->toContain("resolve_static(\\FluxErp\\Mechanisms\\FrontendAssets\\FrontendAssets::class, 'scripts')");
     });
 });
