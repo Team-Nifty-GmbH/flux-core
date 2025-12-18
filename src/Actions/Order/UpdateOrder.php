@@ -44,7 +44,7 @@ class UpdateOrder extends FluxAction
             );
         }
 
-        if (is_array($this->getData('address_delivery'))) {
+        if (is_array($this->getData('address_delivery')) && $this->getData('address_delivery.id')) {
             $this->data['address_delivery_id'] = $this->getData('address_delivery.id');
         }
 
