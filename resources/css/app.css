@@ -29,12 +29,12 @@ strong {
     color: inherit !important;
 }
 
-.no-margin {
+.print-editor-mode {
     @apply p-1;
 }
 
 
-.no-margin p {
+.print-editor-mode p {
     @apply m-0 leading-[10.5px];
 }
 
