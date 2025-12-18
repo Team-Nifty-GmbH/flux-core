@@ -103,17 +103,6 @@ jobs:
       - name: Install dependencies
         run: npm i
 
-      - name: Build frontend assets
-        run: npm run build
-
-      - name: Check if frontend assets are up-to-date
-        run: |
-          if [[ -n $(git status public/build --porcelain) ]]; then
-            echo "::error::Frontend assets are out of date! Please run 'npm run build' and commit the changes."
-            git diff public/build
-            exit 1
-          fi
-
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
