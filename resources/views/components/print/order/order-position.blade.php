@@ -34,7 +34,7 @@
             @endif
         </td>
         <td class="py-2 text-right align-top">
-            @if (bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) > 0)
+            @if (bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) === 1)
                 <div class="whitespace-nowrap text-xs">
                     <div class="line-through">
                         {{ Number::currency($isNet ? $position->total_base_net_price : $position->total_base_gross_price) }}
