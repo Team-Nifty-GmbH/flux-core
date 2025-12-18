@@ -253,6 +253,10 @@ class Order extends Component
     #[Renderless]
     public function refreshAddress(string $type): void
     {
+        if (! in_array($type, ['invoice', 'delivery'])) {
+            return;
+        }
+
         $addressKey = 'address_' . $type;
 
         $address = resolve_static(Address::class, 'query')
@@ -262,7 +266,6 @@ class Order extends Component
 
         if ($address) {
             $addressArray = $address->toArray();
-            $this->order->{$addressKey} = $addressArray;
 
             try {
                 UpdateOrder::make([
@@ -272,6 +275,8 @@ class Order extends Component
                     ->checkPermission()
                     ->validate()
                     ->execute();
+
+                $this->order->{$addressKey} = $addressArray;
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
             }
