@@ -38,4 +38,9 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
     {
         return $this->belongsTo(User::class);
     }
+
+    protected function broadcastToEveryone(): bool
+    {
+        return true;
+    }
 }
