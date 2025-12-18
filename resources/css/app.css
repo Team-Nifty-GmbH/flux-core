@@ -35,7 +35,7 @@ strong {
 
 
 .print-editor-mode p {
-    @apply m-0 leading-[10.5px];
+    @apply m-0 leading-none;
 }
 
 .tiptap {
