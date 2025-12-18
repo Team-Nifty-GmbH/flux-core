@@ -174,6 +174,7 @@ abstract class FolderTree extends Component
         );
     }
 
+    #[Renderless]
     public function moveItem(array $subject, array $target, ?string $subjectPath, ?string $targetPath): bool
     {
         $subjectPath = $this->resolveSubjectPath($subject, $subjectPath);

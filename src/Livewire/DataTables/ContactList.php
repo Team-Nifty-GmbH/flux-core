@@ -16,12 +16,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ContactList extends BaseDataTable
 {
-    use AllowRecordMerging, DataTableHasFormEdit {
-        DataTableHasFormEdit::save as parentSave;
-    }
-
-    #[DataTableForm(modalName: 'create-contact-modal')]
-    public ContactForm $contact;
+    use AllowRecordMerging, DataTableHasFormEdit;
 
     public array $enabledCols = [
         'avatar',
@@ -42,9 +37,38 @@ class ContactList extends BaseDataTable
 
     public ?int $agentId = null;
 
+    #[DataTableForm(
+        only: [
+            'tenant_id',
+            'company',
+            'salutation',
+            'title',
+            'firstname',
+            'lastname',
+            'street',
+            'zip',
+            'city',
+            'country_id',
+            'language_id',
+            'email_primary',
+            'phone',
+            'phone_mobile',
+            'record_origin_id',
+        ],
+    )]
+    public ContactForm $createContactForm;
+
     protected ?string $includeBefore = 'flux::livewire.contact.contact-list';
 
     protected string $model = Contact::class;
+
+    protected function getTableActions(): array
+    {
+        return array_merge(
+            $this->getTableActionsDataTableHasFormEdit(),
+            []
+        );
+    }
 
     protected function getSelectedActions(): array
     {
@@ -62,21 +86,19 @@ class ContactList extends BaseDataTable
     }
 
     #[Renderless]
-    public function resetForm(): void
-    {
-        $this->contact->reset();
-    }
-
-    #[Renderless]
     public function save(): bool
     {
-        $result = $this->parentSave();
+        try {
+            $this->createContactForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-        if ($result) {
-            $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
+            return false;
         }
 
-        return $result;
+        $this->redirectRoute('contacts.id?', ['id' => $this->createContactForm->id], navigate: true);
+
+        return true;
     }
 
     #[Renderless]
