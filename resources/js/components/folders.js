@@ -1,6 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { destroy } from 'filepond';
 
+// Filter out dangerous keys to prevent prototype pollution
+const sanitizeObject = (obj) => {
+    if (typeof obj !== 'object' || obj === null) return obj;
+    const dangerous = ['__proto__', 'constructor', 'prototype'];
+    return Object.fromEntries(
+        Object.entries(obj).filter(([key]) => !dangerous.includes(key)),
+    );
+};
+
 export default function folders(
     getTreePromise,
     property = null,
@@ -276,6 +285,7 @@ export default function folders(
                 .filter((node) => node !== null); // Remove null (non-matching) nodes
         },
         addFolder(node = null, attributes = {}) {
+            attributes = sanitizeObject(attributes);
             let id = attributes.id || uuidv4();
             let target = node ? node.children : this.tree;
 
@@ -302,6 +312,7 @@ export default function folders(
             this.$dispatch('folder-tree-folder-added', this.selected, target);
         },
         updateNode(attributes) {
+            attributes = sanitizeObject(attributes);
             const traverseAndUpdate = (nodes) => {
                 for (let i = 0; i < nodes.length; i++) {
                     if (nodes[i].id === attributes.id) {

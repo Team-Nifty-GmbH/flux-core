@@ -11,6 +11,9 @@ on:
       - 'tailwind.config.js'
       - 'postcss.config.js'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build and Commit Assets
@@ -40,3 +43,4 @@ jobs:
         with:
           commit_message: Build frontend assets
           file_pattern: 'public/build/*'
+          add_options: '-f'

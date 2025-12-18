@@ -249,6 +249,15 @@ function apexCharts($wire) {
                 }
 
                 Object.keys(source).forEach((key) => {
+                    // Prevent prototype pollution
+                    if (
+                        key === '__proto__' ||
+                        key === 'constructor' ||
+                        key === 'prototype'
+                    ) {
+                        return;
+                    }
+
                     const targetValue = target[key];
                     const sourceValue = source[key];
 

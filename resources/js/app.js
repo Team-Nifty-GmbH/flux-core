@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import axios from 'axios';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
@@ -10,8 +9,6 @@ import './components/apex-charts.js';
 import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
-
-window._ = _;
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
