@@ -46,6 +46,7 @@
                 </div>
             </div>
         @endif
+
         @fluxScripts
     </body>
 </html>
