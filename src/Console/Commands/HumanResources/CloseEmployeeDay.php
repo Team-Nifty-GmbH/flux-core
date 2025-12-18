@@ -33,8 +33,8 @@ class CloseEmployeeDay extends Command
                 ])
                     ->validate()
                     ->execute();
-            } catch (Throwable) {
-                continue;
+            } catch (Throwable $e) {
+                report($e);
             }
         }
 
