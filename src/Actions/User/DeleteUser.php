@@ -27,8 +27,6 @@ class DeleteUser extends FluxAction
             ->first();
 
         $user->tokens()->delete();
-        $user->locks()->delete();
-
         $user->children()->update(['parent_id' => $user->parent_id]);
 
         return $user->delete();
@@ -40,7 +38,7 @@ class DeleteUser extends FluxAction
 
         if ($this->getData('id') == Auth::id()) {
             throw ValidationException::withMessages([
-                'id' => [__('Cannot delete yourself')],
+                'id' => ['Cannot delete yourself'],
             ])
                 ->status(403)
                 ->errorBag('deleteUser');

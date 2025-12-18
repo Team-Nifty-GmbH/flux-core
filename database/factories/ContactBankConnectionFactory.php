@@ -12,10 +12,10 @@ class ContactBankConnectionFactory extends Factory
     public function definition(): array
     {
         return [
-            'iban' => $this->faker->iban(),
-            'account_holder' => $this->faker->name,
-            'bank_name' => $this->faker->name,
-            'bic' => $this->faker->bothify('##????##?#?'),
+            'iban' => fake()->iban(),
+            'account_holder' => fake()->name,
+            'bank_name' => fake()->name,
+            'bic' => fake()->bothify('##????##?#?'),
         ];
     }
 }

@@ -27,18 +27,19 @@
                 <x-select.styled
                     multiple
                     x-bind:disabled="!edit"
-                    wire:model.number="product.clients"
-                    :label="__('Clients')"
+                    wire:model.number="product.tenants"
+                    :label="__('Tenants')"
                     :src="'logo_small_url'"
                     select="label:name|value:id"
                     unfiltered
                     :request="[
-                        'url' => route('search', \FluxErp\Models\Client::class),
+                        'url' => route('search', \FluxErp\Models\Tenant::class),
                         'method' => 'POST',
                     ]"
                 />
                 <x-flux::editor
                     wire:model="product.description"
+                    scope="product"
                     :label="__('Description')"
                 />
             </section>
@@ -75,7 +76,6 @@
                 <x-select.styled
                     :label="__('Use price from')"
                     wire:model="productPricesUpdate.base_price_list_id"
-                    :clearable="true"
                     select="label:name|value:id"
                     :options="$selectablePriceLists"
                 />

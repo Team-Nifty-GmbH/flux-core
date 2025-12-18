@@ -12,13 +12,13 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'email' => $this->faker->safeEmail(),
-            'firstname' => $this->faker->firstName(),
-            'lastname' => $this->faker->lastName(),
-            'name' => $this->faker->name(),
+            'email' => fake()->safeEmail(),
+            'firstname' => fake()->firstName(),
+            'lastname' => fake()->lastName(),
+            'name' => fake()->name(),
             'password' => 'password',
-            'user_code' => $this->faker->unique()->userName(),
-            'is_active' => $this->faker->boolean(75),
+            'user_code' => fake()->unique()->userName(),
+            'is_active' => fake()->boolean(75),
         ];
     }
 }

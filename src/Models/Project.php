@@ -6,21 +6,22 @@ use Carbon\Carbon;
 use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\States\Project\ProjectState;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
+use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,11 +31,11 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
+class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+        HasSerialNumberRange, HasStates, HasTags, HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -116,11 +117,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         }
     }
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class, 'client_id');
-    }
-
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'contact_id');
@@ -160,20 +156,34 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->where('start_date', '<=', $end)
-                ->where('end_date', '>=', $start)
-                ->orWhereBetween('created_at', [$start, $end]);
+            $query
+                ->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('end_date', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start_date', '<=', $end)
+                        ->where('end_date', '>=', $start);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start_date')
+                        ->whereNull('end_date')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
         });
     }
 
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -189,6 +199,8 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
             ],
             'allDay' => true,
             'is_editable' => true,

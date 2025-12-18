@@ -3,17 +3,18 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Models\Pivots\OrderTransaction;
-use FluxErp\Traits\Categorizable;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Categorizable;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Transaction extends FluxModel implements InteractsWithDataTables
+class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscribable
 {
     use Categorizable, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasTags,
         HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
@@ -68,6 +69,11 @@ class Transaction extends FluxModel implements InteractsWithDataTables
         }
 
         return $this;
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function getAvatarUrl(): ?string

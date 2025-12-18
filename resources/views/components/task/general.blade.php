@@ -1,6 +1,6 @@
-<div class="space-y-8 divide-y divide-gray-200">
+<div class="flex flex-col gap-4 divide-y divide-gray-200">
     <div
-        class="space-y-2.5"
+        class="flex flex-col gap-2"
         x-data="{
             formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
         }"
@@ -9,7 +9,7 @@
         <x-input
             x-bind:readonly="!edit"
             wire:model="task.name"
-            label="{{ __('Name') }}"
+            :label="__('Name')"
         />
         @section('task.model')
         <x-link
@@ -43,21 +43,14 @@
                 ]"
             >
                 <x-slot:label>
-                    <div class="flex items-center justify-between pb-1">
-                        <x-label :label="__('Project')" />
-                        <x-button
-                            class="pointer-events-auto"
-                            x-cloak
-                            x-show="task.project_id"
-                            color="secondary"
-                            light
-                            sm
-                            wire:navigate
-                            icon="eye"
-                            x-bind:href="'{{ route('projects.id', ':id') }}'.replace(':id', task.project_id)"
-                            href=""
-                        />
-                    </div>
+                    <x-link
+                        icon="link"
+                        :text="__('Project')"
+                        href="#"
+                        class="pointer-events-auto"
+                        wire:navigate
+                        x-bind:href="task.project_id ? '{{ route('projects.id', ':id') }}'.replace(':id', task.project_id) : '#'"
+                    />
                 </x-slot>
             </x-select.styled>
         </div>
@@ -87,18 +80,83 @@
             x-bind:class="!edit && 'pointer-events-none'"
         >
             @section('task-content.dates')
-            <x-date
-                x-bind:readonly="!edit"
-                :without-time="true"
-                wire:model="task.start_date"
-                label="{{ __('Start Date') }}"
-            />
-            <x-date
-                x-bind:readonly="!edit"
-                :without-time="true"
-                wire:model="task.due_date"
-                label="{{ __('Due Date') }}"
-            />
+            @section('task-content.start')
+            <div class="flex flex-col gap-2">
+                <div class="flex flex-row gap-x-4">
+                    <x-date
+                        :label="__('Start Date')"
+                        wire:model="task.start_date"
+                        x-bind:readonly="!edit"
+                    />
+                    <x-input
+                        type="time"
+                        :label="__('Start Time')"
+                        wire:model="task.start_time"
+                        x-bind:readonly="!edit"
+                    />
+                </div>
+                <div
+                    class="flex flex-col gap-2"
+                    x-cloak
+                    x-show="task.start_date"
+                    x-bind:class="!edit && 'pointer-events-none'"
+                >
+                    <x-toggle
+                        :label="__('Start Reminder')"
+                        wire:model="task.has_start_reminder"
+                        x-bind:disabled="!edit"
+                    />
+                    <div x-cloak x-show="$wire.task.has_start_reminder">
+                        <x-number
+                            :label="__('Remind Minutes Before')"
+                            wire:model="task.start_reminder_minutes_before"
+                            x-bind:readonly="!edit"
+                            min="0"
+                            :hint="__('Leave empty for reminder at start time')"
+                        />
+                    </div>
+                </div>
+            </div>
+            @show
+
+            @section('task-content.due')
+            <div class="flex flex-col gap-2">
+                <div class="flex flex-row gap-x-4">
+                    <x-date
+                        :label="__('Due Date')"
+                        wire:model="task.due_date"
+                        x-bind:readonly="!edit"
+                    />
+                    <x-input
+                        type="time"
+                        :label="__('Due Time')"
+                        wire:model="task.due_time"
+                        x-bind:readonly="!edit"
+                    />
+                </div>
+                <div
+                    class="flex flex-col gap-2"
+                    x-cloak
+                    x-show="task.due_date"
+                    x-bind:class="!edit && 'pointer-events-none'"
+                >
+                    <x-toggle
+                        :label="__('Due Reminder')"
+                        wire:model="task.has_due_reminder"
+                        x-bind:disabled="!edit"
+                    />
+                    <div x-cloak x-show="$wire.task.has_due_reminder">
+                        <x-number
+                            :label="__('Remind Minutes Before')"
+                            wire:model="task.due_reminder_minutes_before"
+                            x-bind:readonly="!edit"
+                            min="0"
+                            :hint="__('Leave empty for reminder at due time')"
+                        />
+                    </div>
+                </div>
+            </div>
+            @show
             @show
         </div>
         @section('task-content.multi-selects')
@@ -121,6 +179,7 @@
         <x-flux::editor
             x-model="edit"
             wire:model="task.description"
+            scope="task"
             :label="__('Description')"
         />
         <div x-bind:class="!edit && 'pointer-events-none'">
@@ -220,18 +279,4 @@
         />
         @show
     </div>
-    @section('task-additional-columns')
-    <div class="space-y-2.5">
-        <h3
-            class="text-md text-secondary-700 dark:text-secondary-400 mt-4 whitespace-normal font-medium"
-        >
-            {{ __('Additional Columns') }}
-        </h3>
-        <x-flux::additional-columns
-            :model="\FluxErp\Models\Task::class"
-            :id="$this->task->id"
-            wire="task.additionalColumns"
-        />
-    </div>
-    @show
 </div>

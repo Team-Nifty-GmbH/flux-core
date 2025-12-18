@@ -121,10 +121,21 @@
                         <x-input
                             :prefix="data_get($order->currency, 'symbol')"
                             type="number"
-                            :label="__('Unit price :type', ['type' => ($orderPosition->is_net ?? true) ? __('net') : __('gross')])"
                             wire:model="orderPosition.unit_price"
                             x-on:change="$el.value = parseNumber($el.value)"
-                        />
+                        >
+                            <x-slot:label>
+                                <x-label for="orderPosition.unit_price">
+                                    <span
+                                        x-text="
+                                            $wire.orderPosition.is_net
+                                                ? '{{ __('Unit price :type', ['type' => __('net')]) }}'
+                                                : '{{ __('Unit price :type', ['type' => __('gross')]) }}'
+                                        "
+                                    ></span>
+                                </x-label>
+                            </x-slot>
+                        </x-input>
                         <x-input
                             :prefix="data_get($order->currency, 'symbol')"
                             type="number"
@@ -169,7 +180,7 @@
                         <x-select.styled
                             :label="__('Credit Account')"
                             wire:model.number="orderPosition.credit_account_id"
-                            select="label:bank_name|value:id|description:balance"
+                            select="label:label|value:id|description:description"
                             unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\ContactBankConnection::class),
@@ -180,6 +191,10 @@
                                             'contact_id',
                                             '=',
                                             $order->contact_id,
+                                        ],
+                                        [
+                                            'is_credit_account',
+                                            true,
                                         ],
                                     ],
                                 ],
@@ -221,8 +236,10 @@
                 </div>
                 @section('order-position-detail-modal.content.bottom')
                 <x-flux::editor
-                    :label="__('Description')"
                     wire:model="orderPosition.description"
+                    scope="orderPosition"
+                    :label="__('Description')"
+                    :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\OrderPosition::class)"
                 />
                 @show
             </div>

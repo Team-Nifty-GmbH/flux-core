@@ -8,11 +8,11 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Pivots\OrderSchedule;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
-use FluxErp\Traits\MoneyChartFormattingTrait;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\HasTemporalXAxisFormatter;
+use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
@@ -21,7 +21,7 @@ use Throwable;
 
 class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
 {
-    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
+    use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
 
     public ?array $chart = [
         'type' => 'bar',
@@ -68,8 +68,8 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     ->where('is_active', true);
             })
             ->with([
-                'order:id,client_id,total_net_price',
-                'order.client:id,name',
+                'order:id,tenant_id,total_net_price',
+                'order.tenant:id,name',
                 'schedule:id,cron_expression,ends_at,recurrences,current_recurrence',
             ])
             ->get();
@@ -88,7 +88,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 continue;
             }
 
-            $index = $orderSchedule->order->client_id;
+            $index = $orderSchedule->order->tenant_id;
             $currentRecurrence = $orderSchedule->schedule->current_recurrence;
             while (
                 $nextRun <= $this->getEnd()
@@ -102,9 +102,9 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     || $currentRecurrence < $orderSchedule->schedule->recurrences
                 )
             ) {
-                $client = $orderSchedule->order->client;
+                $tenant = $orderSchedule->order->tenant;
                 if (! data_get($series, $index . '.name')) {
-                    data_set($series, $index . '.name', $client->name);
+                    data_set($series, $index . '.name', $tenant->name);
                 }
 
                 $dates[] = $nextRun->format('Y-m-d');
@@ -175,19 +175,5 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
     public function showTitle(): bool
     {
         return true;
-    }
-
-    #[Js]
-    public function xAxisFormatter(): string
-    {
-        return <<<'JS'
-            let name;
-            if (typeof val === 'string' && val.includes('->')) {
-                name = val.split('->')[1];
-                val = val.split('->')[0];
-            }
-
-            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
-        JS;
     }
 }

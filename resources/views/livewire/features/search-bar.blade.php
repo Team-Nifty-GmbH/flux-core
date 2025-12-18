@@ -1,13 +1,13 @@
 <div
     x-data="{
         init() {
-            $watch('show', (value) => {
+            $watch('showDropdown', (value) => {
                 if (! value) {
                     this.showDetails(null, null)
                 }
             })
         },
-        show: false,
+        showDropdown: false,
         detailModel: null,
         detailId: null,
         showDetails(model, id) {
@@ -20,8 +20,8 @@
             $dispatch('render-search-bar-widget', { model: model, id: id })
         },
     }"
-    x-on:click.outside="show = false"
-    x-on:keydown.escape.window="show = false"
+    x-on:click.outside="showDropdown = false"
+    x-on:keydown.escape.window="showDropdown = false"
     class="relative flex-1"
 >
     <x-input
@@ -29,15 +29,15 @@
         autocomplete="off"
         icon="magnifying-glass"
         class="w-full border-0"
-        x-on:click="show = true"
-        x-on:keydown="show = true"
-        x-on:keydown.enter="show = false"
+        x-on:click="showDropdown = true"
+        x-on:keydown="showDropdown = true"
+        x-on:keydown.enter="showDropdown = false"
         wire:model.live.debounce.500ms="search"
         placeholder="{{ __('Search everywhere...') }}"
     />
     <div
-        class="absolute z-[9] w-full pt-6"
-        x-show="show"
+        class="absolute left-0 z-[9] w-full pt-6"
+        x-show="showDropdown"
         x-transition
         x-cloak
     >
@@ -54,13 +54,13 @@
             </div>
             <x-flux::spinner />
             <div
-                class="dark:divide-secondary-600 flex flex-row divide-x divide-gray-100"
+                class="flex flex-row divide-x divide-gray-100 dark:divide-secondary-600"
             >
                 <ul class="sm:basis-1/2">
                     <template x-for="(items, model) in $wire.return">
                         <li>
                             <div
-                                class="dark:bg-secondary-600 w-full bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-900 dark:text-gray-50"
+                                class="w-full bg-gray-100 px-4 py-2.5 text-xs font-semibold text-gray-900 dark:bg-secondary-600 dark:text-gray-50"
                                 x-text="$wire.modelLabels[model].label"
                             ></div>
                             <ul class="mt-2 text-sm text-gray-800" role="none">
@@ -68,10 +68,7 @@
                                     <li
                                         x-on:mouseover.debounce.500ms="showDetails(model, item.id)"
                                         class="flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:bg-indigo-600 hover:text-white"
-                                        x-on:click="
-                                            show = false
-                                            $wire.showDetail(model, item.id)
-                                        "
+                                        wire:click="showDetail(model, item.id)"
                                     >
                                         <x-avatar
                                             image

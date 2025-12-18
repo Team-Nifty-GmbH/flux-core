@@ -30,7 +30,7 @@ class UpdateOrder extends FluxAction
         $users = Arr::pull($this->data, 'users');
 
         $order = resolve_static(Order::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
         if ($order->shipping_costs_net_price) {
             $order->shipping_costs_vat_rate_percentage = 0.190000000;   // TODO: Make this percentage NOT hardcoded!
@@ -44,10 +44,13 @@ class UpdateOrder extends FluxAction
             );
         }
 
-        if (! ($this->data['address_delivery']['id'] ?? false)) {
-            $this->data['address_delivery_id'] = null;
-        } else {
-            $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
+        if (is_array($this->getData('address_delivery'))) {
+            $this->data['address_delivery_id'] = $this->getData('address_delivery.id');
+        }
+
+        $approvalUserId = $this->getData('approval_user_id', $order->approval_user_id);
+        if ($approvalUserId !== $order->approval_user_id) {
+            $order->approvalUser?->unsubscribeNotificationChannel($order->broadcastChannel());
         }
 
         $order->fill($this->data);
@@ -55,7 +58,10 @@ class UpdateOrder extends FluxAction
 
         if (! is_null($addresses)) {
             $addresses = collect($addresses)
-                ->unique(fn ($address) => $address['address_id'] . '_' . $address['address_type_id'])
+                ->unique(fn (array $address) => data_get($address, 'address_id')
+                    . '_'
+                    . data_get($address, 'address_type_id')
+                )
                 ->keyBy('address_id')
                 ->toArray();
 
@@ -80,7 +86,7 @@ class UpdateOrder extends FluxAction
 
         if ($order->is_locked) {
             $errors += [
-                'is_locked' => [__('Order is locked')],
+                'is_locked' => ['Order is locked'],
             ];
         }
 
@@ -100,13 +106,13 @@ class UpdateOrder extends FluxAction
 
             if (resolve_static(Order::class, 'query')
                 ->where('id', '!=', $this->data['id'])
-                ->where('client_id', $order->client_id)
+                ->where('tenant_id', $order->tenant_id)
                 ->where('invoice_number', $this->data['invoice_number'] ?? $order->invoice_number)
                 ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $order->contact_id))
                 ->exists()
             ) {
                 $errors += [
-                    'invoice_number' => [__('Invoice number already exists')],
+                    'invoice_number' => ['Invoice number already exists'],
                 ];
             }
         }

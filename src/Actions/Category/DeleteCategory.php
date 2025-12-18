@@ -38,13 +38,13 @@ class DeleteCategory extends FluxAction
 
         if ($category->children->count() > 0) {
             $errors += [
-                'children' => [__('Category has children')],
+                'children' => ['Category has children'],
             ];
         }
 
         if ($category->model()?->exists()) {
             $errors += [
-                'model' => [__('Model with this category exists')],
+                'model' => ['Model with this category exists'],
             ];
         }
 

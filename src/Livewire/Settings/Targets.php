@@ -6,7 +6,7 @@ use FluxErp\Contracts\Targetable;
 use FluxErp\Livewire\DataTables\TargetList;
 use FluxErp\Livewire\Forms\TargetForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
@@ -29,6 +29,8 @@ class Targets extends TargetList
     #[Locked]
     public array $ownerColumns = [];
 
+    public array $selectedUserIds = [];
+
     #[DataTableForm]
     public TargetForm $target;
 
@@ -44,6 +46,7 @@ class Targets extends TargetList
         if ($id) {
             $this->updateAggregateColumnOptions($this->target->aggregate_type);
             $this->updateSelectableColumns($this->target->model_type);
+            $this->selectedUserIds = array_column($this->target->users, 'user_id');
         }
     }
 
@@ -60,6 +63,7 @@ class Targets extends TargetList
             /** @var Targetable $model */
             $model = morphed_model($this->target->model_type);
             $this->aggregateColumns = map_values_to_options($model::aggregateColumns($aggregateType));
+            $this->target->aggregate_column = data_get($this->aggregateColumns, '0.value');
         } else {
             $this->aggregateColumns = [];
         }
@@ -82,6 +86,10 @@ class Targets extends TargetList
             $this->timeframeColumns = map_values_to_options($model::timeframeColumns());
             $this->aggregateTypes = map_values_to_options($model::aggregateTypes());
             $this->ownerColumns = map_values_to_options($model::ownerColumns());
+
+            $this->target->timeframe_column = data_get($this->timeframeColumns, '0.value');
+            $this->target->aggregate_type = data_get($this->aggregateTypes, '0.value');
+            $this->target->owner_column = data_get($this->ownerColumns, '0.value');
         }
 
         $this->forceRender();

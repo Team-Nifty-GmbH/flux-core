@@ -16,7 +16,7 @@
     <x-modal
         id="edit-category-modal"
         x-on:open="setCategorySearch(); $focusOn('category-name');"
-        :title="$category->id ? __('Edit Category') : __('Create Category')"
+        :title="__('Category')"
     >
         <div class="flex flex-col gap-1.5">
             @section('modals.edit-category.content')

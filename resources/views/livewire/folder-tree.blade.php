@@ -4,9 +4,9 @@
             <x-flux::checkbox-tree
                 tree="$wire.getTree()"
                 name-attribute="name"
-                moved="$wire.moveItem(item, node?.is_new ? getNodePath(node, 'collection_name') : node?.collection_name)"
+                moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'))"
                 sortable
-                x-sort:item="isLeaf(childNode) ? childNode.id : childNode.collection_name"
+                x-sort:item="childNode"
             >
                 <x-slot:beforeTree>
                     @section('folder-tree.before-tree')
@@ -14,26 +14,22 @@
                 </x-slot>
                 <x-slot:afterTree>
                     @section('folder-tree.after-tree')
-                    @canAction(\FluxErp\Actions\Media\UploadMedia::class)
+                    @canAction(\FluxErp\Actions\MediaFolder\CreateMediaFolder::class)
                         <x-button
+                            class="my-2 w-full whitespace-nowrap"
+                            x-cloak
+                            x-show="!$wire.isReadonly"
                             color="secondary"
                             light
-                            class="my-2 w-full whitespace-nowrap"
                             :text="__('Add folder')"
-                            x-on:click="addFolder(null, {
-                                    is_static: false,
-                                    is_new: true,
-                                    collection_name: 'new_folder',
-                                    name: '{{ __('New folder') }}',
-                                    children: [],
-                                })"
+                            wire:click="saveFolder({name: '{{ __('New folder') }}'}).then((folder) => { if (folder) addFolder(null, folder); })"
                         />
                     @endcanAction
 
                     @show
                 </x-slot>
                 <div
-                    class="flex w-full flex-col gap-3 lg:w-1/2"
+                    class="flex w-full flex-col gap-3"
                     x-data="{
                         ...filePond(
                             $wire,
@@ -57,13 +53,6 @@
                         countChildren() {
                             return this.selectionProxy?.children?.length
                         },
-                        saveFolder() {
-                            $wire.save(this.selection).then(() => {
-                                this.selectionProxy = JSON.parse(JSON.stringify(this.selection))
-
-                                updateNode(this.selectionProxy)
-                            })
-                        },
                         treeSelect(level) {
                             // during file upload, do not allow folder change
                             if (this.isLoadingFiles.length !== 0) {
@@ -84,24 +73,38 @@
                                         this.selectionProxy = level
                                         this.selection = JSON.parse(JSON.stringify(level))
                                         this.selected = true
-                                        this.setCollection(this.selection?.collection_name)
+                                        this.setCollection(
+                                            this.selection?.slug ?? this.selection?.collection_name,
+                                            this.selection?.id,
+                                        )
+
+                                        if (! this.selection.file_name) {
+                                            let path = this.getNodePath(this.selectionProxy, 'slug')
+                                            this.selection.path = path
+                                                ? path[path.length - 1]
+                                                : null
+                                        }
                                     })
 
                                 return
                             }
 
                             if (this.selection.id === level.id) {
-                                this.selected = false
-                                this.selectionProxy = {}
-                                this.selection = {}
-                                this.setCollection(null)
+                                this.resetSelection()
 
                                 return
                             }
 
                             this.selectionProxy = level
                             this.selection = JSON.parse(JSON.stringify(level))
-                            this.setCollection(this.selection?.collection_name)
+                            this.setCollection(
+                                this.selection?.slug ?? this.selection?.collection_name,
+                                this.selection?.id,
+                            )
+                            if (! this.selection.file_name) {
+                                let path = this.getNodePath(this.selectionProxy, 'slug')
+                                this.selection.path = path ? path[path.length - 1] : null
+                            }
                         },
                         filesArray: $wire.entangle('filesArray', true),
                         async uploadSuccess(multipleFileUpload) {
@@ -118,52 +121,52 @@
                                 this.selection = JSON.parse(JSON.stringify(this.selectionProxy))
                             }
                         },
+                        resetSelection() {
+                            this.selected = false
+                            this.selectionProxy = {}
+                            this.selection = {}
+                            this.setCollection(null)
+                        },
                     }"
                     x-on:folder-tree-select.window="treeSelect($event.detail)"
+                    x-on:refresh-tree.window="
+                        $wire.modelId = $event.detail.id
+                        resetSelection()
+                        tree = await $wire.getTree()
+                    "
                 >
                     <div
-                        x-ref="upload"
-                        x-show="! selection.file_name && selected"
                         class="flex w-full flex-col gap-3"
                         x-cloak
+                        x-show="! selection.file_name && selected"
+                        x-ref="upload"
                     >
-                        <div>
+                        <div class="flex flex-wrap gap-2">
                             @section('folder-tree.upload.buttons')
-                            @canAction(\FluxErp\Actions\Media\DeleteMediaCollection::class)
+                            @canAction(\FluxErp\Actions\MediaFolder\DeleteMediaFolder::class)
                                 <x-button
                                     x-cloak
-                                    x-show="! selected?.is_static"
-                                    :text="__('Delete')"
+                                    x-show="!$wire.isReadonly && !readOnly"
                                     color="red"
+                                    :text="__('Delete')"
                                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
-                                    wire:click="deleteCollection(getNodePath('collection_name')).then(() => {
-                                                    try {
-                                                            selected = null;
-                                                            removeNode(selection.id);
-                                                        } catch (error) {
-                                                            console.error(error);
-                                                        }
-                                                    })"
+                                    wire:click="deleteCollection(selection.id, getNodePath(selectionProxy, 'slug')).then((success) => {if (success) { selected = null; removeNode(selection.id); } })"
                                 />
                             @endcanAction
 
-                            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
+                            @canAction(\FluxErp\Actions\MediaFolder\CreateMediaFolder::class)
                                 <x-button
+                                    x-cloak
+                                    x-show="!$wire.isReadonly && multipleFileUpload && !readOnly"
                                     color="secondary"
                                     light
-                                    x-cloak
-                                    x-show="multipleFileUpload && !readOnly"
                                     :text="__('Add folder')"
-                                    x-on:click="addFolder(
-                                                selected,
-                                                {
-                                                    is_static: false,
-                                                    is_new: true,
-                                                    collection_name: 'new_folder',
-                                                    name: '{{ __('New folder') }}',
-                                                    children: [],
-                                                }
-                                            )"
+                                    wire:click="saveFolder({
+                                        parent_id: selection.id,
+                                        name: '{{ __('New folder') }}',
+                                        is_new: true,
+                                        children: []
+                                    }).then((folder) => { if (folder) addFolder(selectionProxy, folder); })"
                                 />
                             @endcanAction
 
@@ -173,37 +176,46 @@
                                     light
                                     loading
                                     :text="__('Download folder')"
-                                    x-on:click="$wire.downloadCollection(getNodePath(selection, 'collection_name'))"
+                                    wire:click="downloadCollection(selection.id, getNodePath(selection, 'slug'))"
                                 />
                             @endcanAction
 
                             @show
                         </div>
                         @section('folder-tree.upload.attributes')
-                        @canAction(\FluxErp\Actions\Media\UpdateMedia::class)
+                        @canAction(\FluxErp\Actions\MediaFolder\UpdateMediaFolder::class)
                             <div
-                                class="flex flex-col items-end justify-end space-y-3 md:flex-row md:space-x-3"
+                                class="flex flex-col gap-3 md:flex-row md:items-end"
                             >
-                                <div class="w-full p-0 md:flex-1">
+                                <div class="w-full md:flex-1">
                                     <x-input
-                                        class="flex-1"
-                                        x-bind:disabled="selected?.is_static"
-                                        :text="__('Name')"
+                                        x-bind:disabled="$wire.isReadonly || readOnly"
+                                        :label="__('Name')"
                                         x-model="selection.name"
                                     />
                                 </div>
                                 <x-button
+                                    class="w-full md:w-auto"
                                     x-cloak
-                                    x-show="! selected?.is_static"
+                                    x-show="!$wire.isReadonly && !readOnly"
                                     color="indigo"
                                     :text="__('Save')"
-                                    x-on:click="saveFolder()"
+                                    wire:click="saveFolder(selection).then((folder) => {
+                                        if (folder) {
+                                            this.selectionProxy = JSON.parse(JSON.stringify(folder))
+                                            updateNode(this.selectionProxy)
+                                        }
+                                    })"
                                 />
                             </div>
                         @endcanAction
 
                         @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                            <div class="flex flex-col items-end">
+                            <div
+                                class="flex flex-col"
+                                x-cloak
+                                x-show="!$wire.isReadonly && !readOnly"
+                            >
                                 <div class="mb-4 w-full">
                                     <input
                                         x-init="loadFilePond(countChildren)"
@@ -212,11 +224,18 @@
                                     />
                                 </div>
                                 <x-button
+                                    class="w-full md:w-auto md:self-end"
                                     x-cloak
                                     x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
                                     :text="__('Save')"
                                     color="indigo"
-                                    x-on:click="submitFiles(selected.is_new ? getNodePath(null, 'collection_name') : selected.collection_name, uploadSuccess)"
+                                    x-on:click="mediaFolderId = Number.isInteger(selection.id) ? selection.id : null;
+                                        submitFiles(
+                                            getNodePath(selectionProxy, 'slug'),
+                                            uploadSuccess,
+                                            mediaFolderId ? '{{ morph_alias(\FluxErp\Models\MediaFolder::class) }}' : null,
+                                            mediaFolderId
+                                        )"
                                 />
                             </div>
                         @endcanAction
@@ -224,26 +243,28 @@
                         @show
                     </div>
                     <div
-                        x-show="selection.file_name && selected"
-                        x-cloak
                         class="flex w-full flex-col gap-3"
+                        x-cloak
+                        x-show="selection.file_name && selected"
                     >
-                        <div class="pb-1.5">
+                        <div class="flex flex-wrap gap-2 pb-1.5">
                             <x-button
                                 color="indigo"
                                 :text="__('Download')"
-                                x-on:click="$wire.download(selected.id)"
+                                x-on:click="$wire.download(selection.id)"
                             />
                             @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                                 <x-button
+                                    x-cloak
+                                    x-show="!$wire.isReadonly && !readOnly"
                                     color="red"
                                     :text="__('Delete')"
                                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
-                                    wire:click="delete(selected.id).then(() => {
+                                    wire:click="delete(selection.id).then(() => {
                                         try {
+                                                removeNode(selection.id);
                                                 this.selected = null;
                                                 this.selection = {};
-                                                removeNode(selection.id);
                                             } catch (error) {
                                                 console.error(error);
                                             }

@@ -8,8 +8,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeletePriceRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = Price::class;
 
     public function rules(): array

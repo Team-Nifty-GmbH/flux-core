@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('product_cross_selling_product', function (Blueprint $table): void {
-            $table->id();
+            $table->id('pivot_id');
             $table->foreignId('product_cross_selling_id')
                 ->constrained('product_cross_sellings')
                 ->cascadeOnDelete();

@@ -1,4 +1,4 @@
-<x-modal :id="$tokenForm->modalName()">
+<x-modal :id="$tokenForm->modalName()" :title="__('Token')">
     <div class="flex flex-col gap-4">
         <x-input wire:model="tokenForm.name" :label="__('Name')" />
         <x-select.styled

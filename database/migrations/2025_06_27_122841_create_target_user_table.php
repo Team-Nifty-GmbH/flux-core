@@ -12,6 +12,8 @@ return new class() extends Migration
             $table->id('pivot_id');
             $table->foreignId('target_id')->constrained('targets')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->decimal('target_share', 40, 10)->nullable();
+            $table->boolean('is_percentage')->nullable();
         });
     }
 

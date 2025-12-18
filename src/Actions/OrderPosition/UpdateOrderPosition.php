@@ -10,7 +10,9 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
+use FluxErp\View\Printing\Order\FinalInvoice;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
@@ -36,10 +38,10 @@ class UpdateOrderPosition extends FluxAction
 
         $order = resolve_static(Order::class, 'query')
             ->whereKey(data_get($this->data, 'order_id', $orderPosition->order_id))
-            ->select(['id', 'client_id', 'price_list_id'])
+            ->select(['id', 'tenant_id', 'price_list_id'])
             ->first();
 
-        $this->data['client_id'] ??= $order->client_id;
+        $this->data['tenant_id'] ??= $order->tenant_id;
         $this->data['price_list_id'] ??= $order->price_list_id;
 
         $orderPosition->fill($this->data);
@@ -79,10 +81,10 @@ class UpdateOrderPosition extends FluxAction
                     $sortNumber++;
 
                     return [
-                        'client_id' => $orderPosition->client_id,
                         'order_id' => $orderPosition->order_id,
                         'parent_id' => $orderPosition->id,
                         'product_id' => $bundleProduct->id,
+                        'tenant_id' => $orderPosition->tenant_id,
                         'vat_rate_id' => $bundleProduct->vat_rate_id,
                         'warehouse_id' => $orderPosition->warehouse_id,
                         'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
@@ -128,7 +130,7 @@ class UpdateOrderPosition extends FluxAction
 
             if ($orderPosition->order->is_locked) {
                 $errors += [
-                    'is_locked' => [__('Order is locked')],
+                    'is_locked' => ['Order is locked'],
                 ];
             }
 
@@ -137,7 +139,7 @@ class UpdateOrderPosition extends FluxAction
                 && Helper::checkCycle(OrderPosition::class, $orderPosition, $this->data['parent_id'])
             ) {
                 $errors += [
-                    'parent_id' => [__('Cycle detected')],
+                    'parent_id' => ['Cycle detected'],
                 ];
             }
 
@@ -154,7 +156,7 @@ class UpdateOrderPosition extends FluxAction
                     ->exists()
                 ) {
                     $errors += [
-                        'price_id' => [__('Price not found in price list')],
+                        'price_id' => ['Price not found in price list'],
                     ];
                 }
             }
@@ -179,11 +181,21 @@ class UpdateOrderPosition extends FluxAction
                     $maxAmount = bcsub(
                         $orderPosition->origin->amount,
                         $orderPosition->siblings()
-                            ->where('id', '!=', $orderPosition->id)
-                            ->sum('amount')
+                            ->whereKeyNot($orderPosition->id)
+                            ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
+                                $join->on('order_positions.id', '=', 'descendants.origin_position_id')
+                                    ->whereNull('descendants.deleted_at');
+                            })
+                            ->selectRaw(
+                                'order_positions.id'
+                                . ', order_positions.amount'
+                                . ' - SUM(COALESCE(descendants.amount, 0)) AS siblingAmount'
+                            )
+                            ->groupBy('order_positions.id')
+                            ->value('siblingAmount')
                     );
 
-                    if (bccomp(data_get($this->data, 'amount', $orderPosition->amount), $maxAmount) > 0) {
+                    if (bccomp(data_get($this->data, 'amount', $orderPosition->amount), $maxAmount) === 1) {
                         throw ValidationException::withMessages([
                             'amount' => [
                                 __('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount]),
@@ -195,6 +207,11 @@ class UpdateOrderPosition extends FluxAction
                 if (
                     $orderPosition->descendants()->exists()
                     && ! $orderPosition->order->orderType->order_type_enum->isSubscription()
+                    && ! in_array(
+                        resolve_static(FinalInvoice::class, 'class'),
+                        $orderPosition->order->getPrintViews(),
+                        true
+                    )
                 ) {
                     $minAmount = $orderPosition->descendants()->sum('amount');
 

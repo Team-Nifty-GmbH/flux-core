@@ -1,253 +1,228 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
-use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class RoleTest extends BaseSetup
-{
-    private array $permissions;
+beforeEach(function (): void {
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.roles.user.{id}.get'),
+        'index' => Permission::findOrCreate('api.roles.get'),
+        'create' => Permission::findOrCreate('api.roles.post'),
+        'update' => Permission::findOrCreate('api.roles.put'),
+        'give' => Permission::findOrCreate('api.roles.give.put'),
+        'revoke' => Permission::findOrCreate('api.roles.revoke.put'),
+        'assignUsers' => Permission::findOrCreate('api.roles.users.assign.put'),
+        'revokeUsers' => Permission::findOrCreate('api.roles.users.revoke.put'),
+        'delete' => Permission::findOrCreate('api.roles.{id}.delete'),
+        'test' => Permission::findOrCreate('api.test'),
+    ];
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('assign role user', function (): void {
+    $role = Role::create(['name' => Str::random()]);
 
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.roles.user.{id}.get'),
-            'index' => Permission::findOrCreate('api.roles.get'),
-            'create' => Permission::findOrCreate('api.roles.post'),
-            'update' => Permission::findOrCreate('api.roles.put'),
-            'give' => Permission::findOrCreate('api.roles.give.put'),
-            'revoke' => Permission::findOrCreate('api.roles.revoke.put'),
-            'assignUsers' => Permission::findOrCreate('api.roles.users.assign.put'),
-            'revokeUsers' => Permission::findOrCreate('api.roles.users.revoke.put'),
-            'delete' => Permission::findOrCreate('api.roles.{id}.delete'),
-            'test' => Permission::findOrCreate('api.test'),
-        ];
+    $roleUsers = [
+        'id' => $role->id,
+        'users' => [
+            'id' => $this->user->id,
+        ],
+    ];
+
+    $this->user->givePermissionTo($this->permissions['assignUsers']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->put('/api/roles/users/assign', $roleUsers);
+    $response->assertOk();
+
+    expect($this->user->fresh()->hasRole($role->name))->toBeTrue();
+});
+
+test('create role', function (): void {
+    $role = [
+        'name' => Str::random(),
+        'guard_name' => $this->permissions['test']->guard_name,
+        'permissions' => [
+            'id' => $this->permissions['test']->id,
+        ],
+    ];
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/roles', $role);
+    $response->assertCreated();
+
+    $responseRole = json_decode($response->getContent())->data;
+
+    expect($responseRole->name)->toEqual($role['name']);
+    expect($responseRole->guard_name)->toEqual($role['guard_name']);
+    expect($responseRole->permissions[0]->id)->toEqual($role['permissions']['id']);
+});
+
+test('create roles validation fails', function (): void {
+    $role = [
+        'guard_name' => $this->permissions['test']->guard_name,
+        'permissions' => [
+            'id' => $this->permissions['test']->id,
+        ],
+    ];
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/roles', $role);
+    $response->assertUnprocessable();
+});
+
+test('delete role', function (): void {
+    $role = Role::create(['name' => Str::random()]);
+
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->delete('/api/roles/' . $role->id);
+    $response->assertNoContent();
+});
+
+test('delete role role not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->delete('/api/roles/' . Role::query()->max('id') + 100);
+    $response->assertNotFound();
+});
+
+test('delete role super admin', function (): void {
+    $role = Role::findOrCreate('Super Admin');
+
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->delete('/api/roles/' . $role->id);
+    $response->assertStatus(423);
+});
+
+test('get roles', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->get('/api/roles');
+    $response->assertOk();
+
+    $roles = json_decode($response->getContent())->data->data;
+
+    foreach ($roles as $role) {
+        expect(Role::where('name', $role->name)->exists())->toBeTrue();
     }
+});
 
-    public function test_assign_role_user(): void
-    {
-        $role = Role::create(['name' => Str::random()]);
+test('get user roles', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $roleUsers = [
-            'id' => $role->id,
-            'users' => [
-                'id' => $this->user->id,
-            ],
-        ];
+    $response = $this->actingAs($this->user)->get('/api/roles/user/' . $this->user->id);
+    $response->assertOk();
 
-        $this->user->givePermissionTo($this->permissions['assignUsers']);
-        Sanctum::actingAs($this->user, ['user']);
+    $roles = json_decode($response->getContent())->data;
 
-        $response = $this->actingAs($this->user)->put('/api/roles/users/assign', $roleUsers);
-        $response->assertStatus(200);
-
-        $this->assertTrue($this->user->fresh()->hasRole($role->name));
+    foreach ($roles as $role) {
+        expect($this->user->hasRole($role->name))->toBeTrue();
     }
+});
 
-    public function test_create_role(): void
-    {
-        $role = [
-            'name' => Str::random(),
-            'guard_name' => $this->permissions['test']->guard_name,
-            'permissions' => [
-                'id' => $this->permissions['test']->id,
-            ],
-        ];
+test('get user roles user not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->get('/api/roles/user/' . ++$this->user->id);
+    $response->assertNotFound();
+});
 
-        $response = $this->actingAs($this->user)->post('/api/roles', $role);
-        $response->assertStatus(201);
+test('give role permission', function (): void {
+    $role = Role::create(['name' => Str::random()]);
 
-        $responseRole = json_decode($response->getContent())->data;
+    $rolePermissions = [
+        'id' => $role->id,
+        'permissions' => [
+            'id' => $this->permissions['test']->id,
+        ],
+    ];
 
-        $this->assertEquals($role['name'], $responseRole->name);
-        $this->assertEquals($role['guard_name'], $responseRole->guard_name);
-        $this->assertEquals($role['permissions']['id'], $responseRole->permissions[0]->id);
-    }
+    $this->user->givePermissionTo($this->permissions['give']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_roles_validation_fails(): void
-    {
-        $role = [
-            'guard_name' => $this->permissions['test']->guard_name,
-            'permissions' => [
-                'id' => $this->permissions['test']->id,
-            ],
-        ];
+    $response = $this->actingAs($this->user)->put('/api/roles/give', $rolePermissions);
+    $response->assertOk();
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect($role->hasPermissionTo($this->permissions['test']))->toBeTrue();
+});
 
-        $response = $this->actingAs($this->user)->post('/api/roles', $role);
-        $response->assertStatus(422);
-    }
+test('revoke role permission', function (): void {
+    $role = Role::create(['name' => Str::random()]);
 
-    public function test_delete_role(): void
-    {
-        $role = Role::create(['name' => Str::random()]);
+    $rolePermissions = [
+        'id' => $role->id,
+        'permissions' => [
+            'id' => $this->permissions['test']->id,
+        ],
+    ];
 
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $this->user->givePermissionTo($this->permissions['revoke']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/' . $role->id);
-        $response->assertStatus(204);
-    }
+    $response = $this->actingAs($this->user)->put('/api/roles/revoke', $rolePermissions);
+    $response->assertOk();
 
-    public function test_delete_role_role_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect($role->hasPermissionTo($this->permissions['test']))->toBeFalse();
+});
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/' . Role::query()->max('id') + 100);
-        $response->assertStatus(404);
-    }
+test('revoke role permission validation fails', function (): void {
+    $rolePermissions = [
+        'id' => Str::random(),
+        'permissions' => [
+            'id' => $this->permissions['test']->id,
+        ],
+    ];
 
-    public function test_delete_role_super_admin(): void
-    {
-        $role = Role::findOrCreate('Super Admin');
+    $this->user->givePermissionTo($this->permissions['revoke']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->put('/api/roles/revoke', $rolePermissions);
+    $response->assertUnprocessable();
+});
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/' . $role->id);
-        $response->assertStatus(423);
-    }
+test('revoke role user', function (): void {
+    $role = Role::create(['name' => Str::random()]);
 
-    public function test_get_roles(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
+    $roleUsers = [
+        'id' => $role->id,
+        'users' => [
+            'id' => $this->user->id,
+        ],
+    ];
 
-        $response = $this->actingAs($this->user)->get('/api/roles');
-        $response->assertStatus(200);
+    $this->user->givePermissionTo($this->permissions['revokeUsers']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $roles = json_decode($response->getContent())->data->data;
+    $response = $this->actingAs($this->user)->put('/api/roles/users/revoke', $roleUsers);
+    $response->assertOk();
 
-        foreach ($roles as $role) {
-            $this->assertTrue(Role::where('name', $role->name)->exists());
-        }
-    }
+    expect($this->user->fresh()->hasRole($role->name))->toBeFalse();
+});
 
-    public function test_get_user_roles(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+test('revoke role user validation fails', function (): void {
+    $roleUsers = [
+        'id' => Str::random(),
+        'users' => [
+            'id' => $this->user->id,
+        ],
+    ];
 
-        $response = $this->actingAs($this->user)->get('/api/roles/user/' . $this->user->id);
-        $response->assertStatus(200);
+    $this->user->givePermissionTo($this->permissions['revokeUsers']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $roles = json_decode($response->getContent())->data;
-
-        foreach ($roles as $role) {
-            $this->assertTrue($this->user->hasRole($role->name));
-        }
-    }
-
-    public function test_get_user_roles_user_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/roles/user/' . ++$this->user->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_give_role_permission(): void
-    {
-        $role = Role::create(['name' => Str::random()]);
-
-        $rolePermissions = [
-            'id' => $role->id,
-            'permissions' => [
-                'id' => $this->permissions['test']->id,
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['give']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/roles/give', $rolePermissions);
-        $response->assertStatus(200);
-
-        $this->assertTrue($role->hasPermissionTo($this->permissions['test']));
-    }
-
-    public function test_revoke_role_permission(): void
-    {
-        $role = Role::create(['name' => Str::random()]);
-
-        $rolePermissions = [
-            'id' => $role->id,
-            'permissions' => [
-                'id' => $this->permissions['test']->id,
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['revoke']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/roles/revoke', $rolePermissions);
-        $response->assertStatus(200);
-
-        $this->assertFalse($role->hasPermissionTo($this->permissions['test']));
-    }
-
-    public function test_revoke_role_permission_validation_fails(): void
-    {
-        $rolePermissions = [
-            'id' => Str::random(),
-            'permissions' => [
-                'id' => $this->permissions['test']->id,
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['revoke']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/roles/revoke', $rolePermissions);
-        $response->assertStatus(422);
-    }
-
-    public function test_revoke_role_user(): void
-    {
-        $role = Role::create(['name' => Str::random()]);
-
-        $roleUsers = [
-            'id' => $role->id,
-            'users' => [
-                'id' => $this->user->id,
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['revokeUsers']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/roles/users/revoke', $roleUsers);
-        $response->assertStatus(200);
-
-        $this->assertFalse($this->user->fresh()->hasRole($role->name));
-    }
-
-    public function test_revoke_role_user_validation_fails(): void
-    {
-        $roleUsers = [
-            'id' => Str::random(),
-            'users' => [
-                'id' => $this->user->id,
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['revokeUsers']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/roles/users/revoke', $roleUsers);
-        $response->assertStatus(422);
-    }
-}
+    $response = $this->actingAs($this->user)->put('/api/roles/users/revoke', $roleUsers);
+    $response->assertUnprocessable();
+});

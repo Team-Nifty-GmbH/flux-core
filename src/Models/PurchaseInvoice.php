@@ -3,15 +3,15 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\HasMediaForeignKey;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
@@ -45,8 +45,10 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
     {
         return [
             'invoice_date' => 'date',
-            'is_net' => 'boolean',
+            'payment_target_date' => 'date',
+            'payment_discount_target_date' => 'date',
             'total_gross_price' => 'decimal:2',
+            'is_net' => 'boolean',
         ];
     }
 
@@ -73,9 +75,9 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
         );
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
     }
 
     public function contact(): BelongsTo

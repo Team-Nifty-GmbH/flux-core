@@ -16,7 +16,6 @@ return new class() extends Migration
             $table->id();
             $table->char('uuid', 36);
             $table->string('name');
-            $table->string('model_type')->nullable()->index();
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();

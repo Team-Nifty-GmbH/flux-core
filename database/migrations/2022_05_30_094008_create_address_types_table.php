@@ -11,14 +11,10 @@ return new class() extends Migration
         Schema::create('address_types', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('client_id');
+            $table->foreignId('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->string('address_type_code')->nullable()
                 ->comment('Used for special queries or functions, eg. order always need an address with address type \'inv\' ( invoice ).');
             $table->string('name');
-            $table->boolean('is_locked')->default(false)
-                ->comment('Determines if record can be deleted. True: can not be deleted.');
-            $table->boolean('is_unique')->default(false)
-                ->comment('Determines if only one of this type can exist in orders or addresses. True: needs to be unique.');
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
@@ -26,8 +22,7 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->foreign('client_id')->references('id')->on('clients')->cascadeOnDelete();
-            $table->unique(['client_id', 'address_type_code']);
+            $table->unique(['tenant_id', 'address_type_code']);
         });
     }
 

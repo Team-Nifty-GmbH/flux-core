@@ -9,7 +9,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\HasCart;
+use FluxErp\Traits\Model\HasCart;
 
 class CreateCartRuleset extends FluxRuleset
 {
@@ -45,7 +45,6 @@ class CreateCartRuleset extends FluxRuleset
             ],
             'session_id' => 'required|string|max:255',
             'name' => 'nullable|string|max:255',
-            'is_portal_public' => 'boolean',
             'is_public' => 'boolean',
             'is_watchlist' => 'boolean',
         ];

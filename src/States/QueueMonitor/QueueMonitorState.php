@@ -2,11 +2,11 @@
 
 namespace FluxErp\States\QueueMonitor;
 
-use FluxErp\States\State;
+use FluxErp\States\EndableState;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class QueueMonitorState extends State implements HasFrontendFormatter
+abstract class QueueMonitorState extends EndableState implements HasFrontendFormatter
 {
     public static function config(): StateConfig
     {

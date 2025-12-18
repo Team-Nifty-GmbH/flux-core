@@ -63,13 +63,17 @@ class ProductPricesUpdate extends FluxAction
             }
 
             if ($this->getData('rounding_method_enum')) {
-                $price->price = RoundingMethodEnum::from($this->getData('rounding_method_enum'))
-                    ->apply(
-                        $price->price,
-                        $this->getData('rounding_precision'),
-                        $this->getData('rounding_number'),
-                        $this->getData('rounding_mode')
-                    );
+                $price->price = resolve_static(
+                    RoundingMethodEnum::class,
+                    'apply',
+                    [
+                        'case' => $this->getData('rounding_method_enum'),
+                        'value' => $price->price,
+                        'precision' => $this->getData('rounding_precision'),
+                        'roundingNumber' => $this->getData('rounding_number'),
+                        'roundingMode' => $this->getData('rounding_mode'),
+                    ]
+                );
             }
 
             UpdatePrice::make([

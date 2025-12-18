@@ -1,74 +1,61 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Models\Permission;
 use FluxErp\Models\Task;
 
-class TasksTest extends BaseSetup
-{
-    private Task $task;
+beforeEach(function (): void {
+    $this->task = Task::factory()->create();
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('tasks id no user', function (): void {
+    $this->actingAsGuest();
 
-        $this->task = Task::factory()->create();
-    }
+    $this->get('/tasks/' . $this->task->id)
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-    public function test_tasks_id_no_user(): void
-    {
-        $this->get('/tasks/' . $this->task->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('tasks id page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('tasks.{id}.get', 'web'));
 
-    public function test_tasks_id_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('tasks.{id}.get', 'web'));
+    $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
-            ->assertStatus(200);
-    }
+test('tasks id task not found', function (): void {
+    $this->task->delete();
 
-    public function test_tasks_id_task_not_found(): void
-    {
-        $this->task->delete();
+    $this->user->givePermissionTo(Permission::findOrCreate('tasks.{id}.get', 'web'));
 
-        $this->user->givePermissionTo(Permission::findOrCreate('tasks.{id}.get', 'web'));
+    $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
+        ->assertNotFound();
+});
 
-        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
-            ->assertStatus(404);
-    }
+test('tasks id without permission', function (): void {
+    Permission::findOrCreate('tasks.{id}.get', 'web');
 
-    public function test_tasks_id_without_permission(): void
-    {
-        Permission::findOrCreate('tasks.{id}.get', 'web');
+    $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
+        ->assertForbidden();
+});
 
-        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
-            ->assertStatus(403);
-    }
+test('tasks list no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_tasks_list_no_user(): void
-    {
-        $this->get('/tasks')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->get('/tasks')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-    public function test_tasks_list_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('tasks.get', 'web'));
+test('tasks list page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('tasks.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/tasks')
-            ->assertStatus(200);
-    }
+    $this->actingAs($this->user, 'web')->get('/tasks')
+        ->assertOk();
+});
 
-    public function test_tasks_list_without_permission(): void
-    {
-        Permission::findOrCreate('tasks.get', 'web');
+test('tasks list without permission', function (): void {
+    Permission::findOrCreate('tasks.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/tasks')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/tasks')
+        ->assertForbidden();
+});

@@ -3,6 +3,7 @@
 namespace FluxErp\Notifications;
 
 use FluxErp\Models\User;
+use FluxErp\Notifications\Channels\FcmChannel;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Channels\BroadcastChannel;
 use Illuminate\Notifications\Channels\DatabaseChannel;
@@ -20,10 +21,12 @@ class Notification extends BaseNotification
                     BroadcastChannel::class,
                     DatabaseChannel::class,
                     MailChannel::class,
+                    FcmChannel::class,
                 ]
                 : [
                     BroadcastChannel::class,
                     DatabaseChannel::class,
+                    FcmChannel::class,
                 ];
     }
 

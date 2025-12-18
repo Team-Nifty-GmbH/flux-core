@@ -2,21 +2,19 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Models\Task;
-use FluxErp\Traits\Livewire\SupportsAutoRender;
+use FluxErp\Settings\ReminderSettings;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class TaskForm extends FluxForm
 {
     use SupportsAutoRender;
-
-    public array $additionalColumns = [];
 
     public ?string $budget = null;
 
@@ -25,6 +23,16 @@ class TaskForm extends FluxForm
     public ?string $description = null;
 
     public ?string $due_date = null;
+
+    public ?string $due_time = null;
+
+    public bool $has_due_reminder = false;
+
+    public ?int $due_reminder_minutes_before = null;
+
+    public bool $has_start_reminder = false;
+
+    public ?int $start_reminder_minutes_before = null;
 
     #[Locked]
     public ?int $id = null;
@@ -49,6 +57,8 @@ class TaskForm extends FluxForm
 
     public ?string $start_date = null;
 
+    public ?string $start_time = null;
+
     public string $state = 'open';
 
     public array $tags = [];
@@ -68,12 +78,20 @@ class TaskForm extends FluxForm
             $values['users'] = array_column($values['users'] ?? [], 'id');
         }
 
-        $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
-            Carbon::parse($values['start_date'])->toDateString() : null;
-        $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
-            Carbon::parse($values['due_date'])->toDateString() : null;
-
         parent::fill($values);
+    }
+
+    public function reset(...$properties): void
+    {
+        parent::reset(...$properties);
+
+        $this->responsible_user_id ??= auth()?->id();
+        $this->users = $this->users ?: array_filter([auth()?->id()]);
+
+        $this->has_due_reminder = app(ReminderSettings::class)->has_end_reminder;
+        $this->has_start_reminder = app(ReminderSettings::class)->has_start_reminder;
+        $this->due_reminder_minutes_before = app(ReminderSettings::class)->end_reminder_minutes_before;
+        $this->start_reminder_minutes_before = app(ReminderSettings::class)->start_reminder_minutes_before;
     }
 
     protected function getActions(): array
@@ -92,7 +110,7 @@ class TaskForm extends FluxForm
         }
 
         if (is_null($data)) {
-            $data = $this->toArray();
+            $data = $this->toActionData();
             $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
         }
 

@@ -1,7 +1,10 @@
 <div class="flex flex-col gap-4 md:flex-row">
     <div class="flex flex-col gap-6" wire:ignore>
         @section('left-side-bar')
-        <div class="max-h-56 min-w-96 overflow-auto md:max-h-none">
+        <div
+            class="max-h-56 min-w-96 overflow-auto md:max-h-none"
+            x-data="{ addressSearch: '' }"
+        >
             <x-card>
                 @canAction(\FluxErp\Actions\Address\CreateAddress::class)
                     <x-slot:header>
@@ -20,14 +23,32 @@
 
                 <div class="flex flex-col gap-1.5">
                     @section('left-side-bar.address-list')
-                    <template x-for="addressItem in $wire.addresses">
+                    <x-input
+                        type="search"
+                        x-model="addressSearch"
+                        :placeholder="__('Search in :model…', ['model' => __('Addresses')])"
+                        icon="magnifying-glass"
+                    />
+                    <template
+                        x-for="
+                            addressItem in
+                                $wire.addresses.filter(
+                                    (a) =>
+                                        ! addressSearch ||
+                                        a.postal_address
+                                            .join(' ')
+                                            .toLowerCase()
+                                            .includes(addressSearch.toLowerCase()),
+                                )
+                        "
+                    >
                         <div
                             wire:click="select(addressItem.id)"
                             x-bind:class="
                                 $wire.address.id === addressItem.id &&
                                     'rounded-lg ring-2 ring-inset ring-primary-500 bg-blue-100 dark:bg-secondary-700'
                             "
-                            class="dark:hover:bg-secondary-800 cursor-pointer space-y-2 p-1.5 hover:bg-blue-50"
+                            class="cursor-pointer space-y-2 p-1.5 hover:bg-blue-50 dark:hover:bg-secondary-800"
                         >
                             <div
                                 class="flex w-full justify-between gap-1.5 dark:text-gray-50"
@@ -132,6 +153,11 @@
                                     'model_type',
                                     '=',
                                     morph_alias(\FluxErp\Models\Contact::class),
+                                ],
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
                                 ],
                             ],
                         ],

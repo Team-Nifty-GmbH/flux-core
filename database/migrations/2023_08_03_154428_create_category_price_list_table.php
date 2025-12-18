@@ -9,23 +9,12 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('category_price_list', function (Blueprint $table): void {
-            $table->unsignedBigInteger('category_id');
-            $table->unsignedBigInteger('price_list_id');
-            $table->unsignedBigInteger('discount_id');
+            $table->id('pivot_id');
+            $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
+            $table->foreignId('discount_id')->constrained('discounts')->cascadeOnDelete();
+            $table->foreignId('price_list_id')->constrained('price_lists')->cascadeOnDelete();
 
-            $table->primary(['category_id', 'price_list_id']);
-            $table->foreign('category_id')
-                ->references('id')
-                ->on('categories')
-                ->cascadeOnDelete();
-            $table->foreign('price_list_id')
-                ->references('id')
-                ->on('price_lists')
-                ->cascadeOnDelete();
-            $table->foreign('discount_id')
-                ->references('id')
-                ->on('discounts')
-                ->cascadeOnDelete();
+            $table->unique(['category_id', 'price_list_id']);
         });
     }
 

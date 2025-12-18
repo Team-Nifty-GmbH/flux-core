@@ -9,7 +9,7 @@ use FluxErp\Console\Commands\Scout\IndexCommand;
 use FluxErp\Console\Commands\Scout\SyncIndexSettingsCommand;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Laravel\Scout\Console\DeleteAllIndexesCommand;

@@ -3,12 +3,15 @@
 namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum CommunicationTypeEnum: string
+class CommunicationTypeEnum extends FluxEnum
 {
     use EnumTrait;
 
-    case Letter = 'letter';
-    case Mail = 'mail';
-    case PhoneCall = 'phone-call';
+    final public const string Mail = 'mail';
+
+    final public const string Letter = 'letter';
+
+    final public const string PhoneCall = 'phone-call';
 }

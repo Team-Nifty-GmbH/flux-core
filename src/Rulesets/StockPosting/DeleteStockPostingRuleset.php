@@ -8,8 +8,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteStockPostingRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = StockPosting::class;
 
     public function rules(): array

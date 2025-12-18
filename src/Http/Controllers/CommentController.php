@@ -4,7 +4,7 @@ namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\Helper;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Model\Commentable;
 use Illuminate\Http\JsonResponse;
 
 class CommentController extends Controller

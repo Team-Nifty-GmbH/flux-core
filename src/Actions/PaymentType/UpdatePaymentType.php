@@ -22,7 +22,7 @@ class UpdatePaymentType extends FluxAction
 
     public function performAction(): Model
     {
-        $clients = Arr::pull($this->data, 'clients');
+        $tenants = Arr::pull($this->data, 'tenants');
 
         $paymentType = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->data['id'])
@@ -31,8 +31,8 @@ class UpdatePaymentType extends FluxAction
         $paymentType->fill($this->data);
         $paymentType->save();
 
-        if (! is_null($clients)) {
-            $paymentType->clients()->sync($clients);
+        if (! is_null($tenants)) {
+            $paymentType->tenants()->sync($tenants);
         }
 
         return $paymentType->withoutRelations()->fresh();

@@ -1,8 +1,7 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Order;
-
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\Accounting;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -12,59 +11,89 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class AccountingTest extends BaseSetup
-{
-    private Order $order;
+beforeEach(function (): void {
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $contact->id,
+    ]);
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
+    $currency = Currency::factory()->create();
+
+    $language = Language::factory()->create();
+
+    $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
+
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+        ->create([
+            'is_active' => true,
         ]);
 
-        $address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
-        ]);
+    $priceList = PriceList::factory()->create();
 
-        $currency = Currency::factory()->create();
+    $this->order = Order::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'address_invoice_id' => $address->id,
+        'address_delivery_id' => $address->id,
+        'is_locked' => false,
+    ]);
+});
 
-        $language = Language::factory()->create();
+test('renders successfully', function (): void {
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
 
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    Livewire::test(Accounting::class, ['order' => $form])
+        ->assertOk();
+});
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create([
-                'is_active' => true,
-            ]);
+test('can reset payment reminder level', function (): void {
+    $this->order->update([
+        'payment_reminder_current_level' => 2,
+        'payment_reminder_next_date' => now()->addDays(7),
+        'invoice_number' => 'INV-123',
+    ]);
 
-        $priceList = PriceList::factory()->create();
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
 
-        $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'address_invoice_id' => $address->id,
-            'address_delivery_id' => $address->id,
-            'is_locked' => false,
-        ]);
-    }
+    Livewire::test(Accounting::class, ['order' => $form])
+        ->set('newPaymentReminderLevel', 0)
+        ->call('resetPaymentReminderLevel')
+        ->assertHasNoErrors()
+        ->assertOk();
 
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Accounting::class, ['orderId' => $this->order->id])
-            ->assertStatus(200);
-    }
-}
+    expect($this->order->fresh()->payment_reminder_current_level)->toBe(0);
+});
+
+test('can set payment reminder level to specific value', function (): void {
+    $this->order->update([
+        'payment_reminder_current_level' => 3,
+        'payment_reminder_next_date' => now()->addDays(7),
+        'invoice_number' => 'INV-123',
+    ]);
+
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
+
+    Livewire::test(Accounting::class, ['order' => $form])
+        ->set('newPaymentReminderLevel', 1)
+        ->call('resetPaymentReminderLevel')
+        ->assertOk();
+
+    expect($this->order->fresh()->payment_reminder_current_level)->toBe(1);
+});

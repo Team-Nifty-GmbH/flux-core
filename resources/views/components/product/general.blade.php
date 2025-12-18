@@ -14,6 +14,7 @@
         <x-flux::editor
             x-model="edit"
             wire:model="product.description"
+            scope="product"
             :label="__('Description')"
         />
         @show
@@ -203,13 +204,13 @@
         <x-select.styled
             multiple
             x-bind:disabled="!edit"
-            wire:model.number="product.clients"
-            :label="__('Clients')"
+            wire:model.number="product.tenants"
+            :label="__('Tenants')"
             select="label:name|value:id"
             :src="'logo_small_url'"
             unfiltered
             :request="[
-                'url' => route('search', \FluxErp\Models\Client::class),
+                'url' => route('search', \FluxErp\Models\Tenant::class),
                 'method' => 'POST',
             ]"
         />
@@ -254,7 +255,7 @@
         />
     </x-card>
     <x-card
-        class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
+        class="space-y-2.5 bg-gray-50 dark:bg-secondary-700"
         :header="__('Product Properties')"
         x-data="{productPropertyGroup: null}"
     >
@@ -384,20 +385,6 @@
         </div>
         @show
     </x-card>
-    @if ($this->additionalColumns)
-        <x-card :header="__('Additional columns')">
-            @section('additional-columns')
-            <div class="flex flex-col gap-4">
-                <x-flux::additional-columns
-                    :table="false"
-                    wire="product"
-                    :model="\FluxErp\Models\Product::class"
-                    :id="$this->product->id"
-                />
-            </div>
-            @show
-        </x-card>
-    @endif
 
     <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
         @section('suppliers')

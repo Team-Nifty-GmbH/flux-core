@@ -8,8 +8,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteContactRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = Contact::class;
 
     public function rules(): array

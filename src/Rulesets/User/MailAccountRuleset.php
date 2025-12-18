@@ -17,6 +17,11 @@ class MailAccountRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => MailAccount::class]),
             ],
+            'default_mail_account_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => MailAccount::class]),
+            ],
         ];
     }
 }

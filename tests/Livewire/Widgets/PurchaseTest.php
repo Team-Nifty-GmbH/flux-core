@@ -1,26 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Widgets;
-
 use FluxErp\Livewire\Widgets\Purchase;
-use FluxErp\Models\Currency;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class PurchaseTest extends TestCase
-{
-    protected string $livewireComponent = Purchase::class;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Currency::factory()->create(['is_default' => true]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Purchase::class)
+        ->assertOk();
+});

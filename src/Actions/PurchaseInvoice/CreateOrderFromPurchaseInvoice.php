@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\PurchaseInvoice;
 
+use Carbon\Carbon;
 use FluxErp\Actions\ContactBankConnection\CreateContactBankConnection;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
@@ -51,9 +52,24 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->execute();
         }
 
+        if (! $this->getData('payment_target_date')) {
+            $this->data['payment_target_date'] = $this->getData('invoice_date');
+        }
+
+        if ($paymentTargetDate = $this->getData('payment_target_date')) {
+            $this->data['payment_target'] = Carbon::parse($this->getData('invoice_date'))
+                ->diffInDays(Carbon::parse($paymentTargetDate));
+        }
+
+        if ($paymentDiscountTargetDate = $this->getData('payment_discount_target_date')) {
+            $this->data['payment_discount_target'] = Carbon::parse($this->getData('invoice_date'))
+                ->diffInDays(Carbon::parse($paymentDiscountTargetDate));
+        }
+
         $order = CreateOrder::make($this->data)->validate()->execute();
 
         foreach (data_get($this->data, 'purchase_invoice_positions', []) as $position) {
+            data_forget($position, 'uuid');
             CreateOrderPosition::make(
                 array_merge(
                     $position,

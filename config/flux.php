@@ -7,10 +7,6 @@ return [
 
     'formal_salutation' => env('FLUX_FORMAL_SALUTATION', true),
 
-    'portal_domain' => env(
-        'PORTAL_DOMAIN',
-        'portal.' . preg_replace('(^https?://)', '', env('APP_URL'))
-    ),
     'flux_url' => env('FLUX_URL'),
 
     'rate_limit' => env('API_RATE_LIMIT', 60),
@@ -28,5 +24,9 @@ return [
         ),
         'reverb_port' => env('VITE_REVERB_PORT', 443),
         'reverb_protocol' => env('VITE_REVERB_SCHEME', 'https'),
+    ],
+
+    'fcm' => [
+        'credentials' => env('FCM_CREDENTIALS_PATH'),
     ],
 ];

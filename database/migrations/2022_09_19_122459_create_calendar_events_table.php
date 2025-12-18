@@ -10,7 +10,7 @@ return new class() extends Migration
     {
         Schema::create('calendar_events', function (Blueprint $table): void {
             $table->id();
-            $table->ulid();
+            $table->char('uuid', 36);
             $table->foreignId('calendar_id')->constrained('calendars')->cascadeOnDelete();
             $table->nullableMorphs('model');
             $table->dateTimeTz('start');

@@ -48,29 +48,84 @@
                 </div>
             </div>
         </div>
-        <div x-transition x-show="Object.values($wire.variants).length > 0">
-            <div>
-                <div>
-                    <span
-                        class="font-bold"
+        <div
+            x-cloak
+            x-show="Object.values($wire.variants).length > 0"
+            x-transition
+            class="flex flex-col gap-4"
+        >
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <x-card class="text-center">
+                    <div
+                        class="text-2xl font-bold text-emerald-600"
                         x-text="$wire.variants?.new?.length ?? 0"
-                    ></span>
-                    <span>{{ __('Variants will be created.') }}</span>
-                </div>
-                <div>
-                    <span
-                        class="font-bold"
+                    ></div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('Variants will be created') }}
+                    </div>
+                </x-card>
+                <x-card class="text-center">
+                    <div
+                        class="text-2xl font-bold text-red-600"
                         x-text="$wire.variants?.delete?.length ?? 0"
-                    ></span>
-                    <span>{{ __('Variants will be deleted.') }}</span>
-                </div>
-                <div>
-                    <span
-                        class="font-bold"
+                    ></div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('Variants will be deleted') }}
+                    </div>
+                </x-card>
+                <x-card class="text-center">
+                    <div
+                        class="text-2xl font-bold text-amber-600"
+                        x-text="$wire.variants?.restore?.filter((v) => v.selected).length ?? 0"
+                    ></div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('Variants will be restored') }}
+                    </div>
+                </x-card>
+                <x-card class="text-center">
+                    <div
+                        class="text-2xl font-bold text-gray-600"
                         x-text="$wire.variants?.existing?.length ?? 0"
-                    ></span>
-                    <span>{{ __('Variants already exist.') }}</span>
-                </div>
+                    ></div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('Variants already exist') }}
+                    </div>
+                </x-card>
+            </div>
+            <div
+                x-cloak
+                x-show="$wire.variants?.restore?.length > 0"
+                x-transition
+            >
+                <x-card :header="__('Restore deleted variants')">
+                    <div class="flex flex-col gap-2">
+                        <div
+                            class="flex items-center gap-3 border-b border-gray-200 pb-2 dark:border-gray-700"
+                        >
+                            <x-toggle
+                                x-bind:checked="$wire.variants.restore.every(v => v.selected)"
+                                x-on:change="$wire.variants.restore.forEach((v, i) => $wire.variants.restore[i].selected = $event.target.checked)"
+                            />
+                            <span class="text-sm font-medium">
+                                {{ __('Select all') }}
+                            </span>
+                        </div>
+                        <template
+                            x-for="(variant, index) in $wire.variants.restore"
+                            x-bind:key="variant.id"
+                        >
+                            <div class="flex items-center gap-3">
+                                <x-toggle
+                                    x-model="$wire.variants.restore[index].selected"
+                                />
+                                <span
+                                    x-text="variant.name"
+                                    class="text-sm"
+                                ></span>
+                            </div>
+                        </template>
+                    </div>
+                </x-card>
             </div>
         </div>
         <x-slot:footer>

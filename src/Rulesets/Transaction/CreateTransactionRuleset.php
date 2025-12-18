@@ -6,6 +6,7 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Transaction;
+use FluxErp\Rules\Bic;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -59,7 +60,11 @@ class CreateTransactionRuleset extends FluxRuleset
                 'max:255',
                 app(Iban::class),
             ],
-            'counterpart_bic' => 'string|max:255|nullable',
+            'counterpart_bic' => [
+                'string',
+                'nullable',
+                app(Bic::class),
+            ],
             'counterpart_bank_name' => 'string|max:255|nullable',
             'is_ignored' => 'boolean',
         ];

@@ -43,11 +43,11 @@ class UpdateLedgerAccount extends FluxAction
 
         $ledgerAccount = resolve_static(LedgerAccount::class, 'query')
             ->whereKey($this->data['id'])
-            ->first(['client_id', 'number', 'ledger_account_type_enum']);
+            ->first(['tenant_id', 'number', 'ledger_account_type_enum']);
 
         if (resolve_static(LedgerAccount::class, 'query')
             ->whereKeyNot($this->getData('id'))
-            ->where('client_id', $ledgerAccount->client_id)
+            ->where('tenant_id', $ledgerAccount->tenant_id)
             ->where('number', $this->getData('number', $ledgerAccount->number))
             ->where(
                 'ledger_account_type_enum',

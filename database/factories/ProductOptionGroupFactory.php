@@ -12,7 +12,7 @@ class ProductOptionGroupFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->randomElement(['color', 'material', 'size', 'gender']),
+            'name' => fake()->randomElement(['color', 'material', 'size', 'gender']),
         ];
     }
 }

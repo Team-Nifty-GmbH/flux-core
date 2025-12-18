@@ -36,7 +36,7 @@ class DeleteCalendar extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'id' => [__('Cannot delete a calendar that has children.')],
+                'id' => ['Cannot delete a calendar that has children.'],
             ])->errorBag('deleteCalendar');
         }
     }

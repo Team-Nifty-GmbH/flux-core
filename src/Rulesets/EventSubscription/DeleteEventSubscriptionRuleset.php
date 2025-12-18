@@ -8,8 +8,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteEventSubscriptionRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = EventSubscription::class;
 
     public function rules(): array
@@ -18,9 +16,7 @@ class DeleteEventSubscriptionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => EventSubscription::class])
-                    ->where('subscribable_type', auth()->user()->getMorphClass())
-                    ->where('subscribable_id', auth()->id()),
+                app(ModelExists::class, ['model' => EventSubscription::class]),
             ],
         ];
     }

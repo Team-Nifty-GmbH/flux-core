@@ -9,6 +9,13 @@
             name-attribute="label"
             :with-search="true"
         >
+            <div
+                x-init.once="
+                    if ({{ ! is_null($setting) }}) {
+                        selected = @js($setting)
+                    }
+                "
+            ></div>
             <x-slot:nodeIcon></x-slot>
         </x-flux::checkbox-tree>
     </x-card>
@@ -17,7 +24,7 @@
             <div x-text="$wire.setting.path"></div>
         </x-slot>
         <x-flux::spinner />
-        @if ($settingComponent = data_get($setting, 'component'))
+        @if ($settingComponent)
             <livewire:is
                 :component="$settingComponent"
                 :key="$settingComponent"

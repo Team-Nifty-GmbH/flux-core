@@ -2,15 +2,24 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Closure;
+use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Models\NotificationSetting;
-use FluxErp\Services\NotificationSettingsService;
+use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use ReflectionFunction;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Notifications extends Component
 {
@@ -34,16 +43,46 @@ class Notifications extends Component
     public function mount(): void
     {
         $this->notificationChannels = config('notifications.channels');
-        $this->notifications = config('notifications.model_notifications');
+        foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
+            foreach (Event::getFacadeRoot()->getListeners($event) as $listener) {
+                /** @var Closure $listener */
+                $notificationClass = data_get(
+                    (new ReflectionFunction($listener))->getStaticVariables(),
+                    'listener.0'
+                );
 
-        $notificationSettings = data_get($this->notifications, '*.*');
+                if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
+                    $this->notifications[] = $notificationClass;
+                }
+            }
+        }
+
+        $this->fetchData();
+    }
+
+    public function render(): View|Factory|Application
+    {
+        return view('flux::livewire.settings.notifications');
+    }
+
+    public function closeModal(): void
+    {
+        $this->detailModal = false;
+
+        $this->skipRender();
+    }
+
+    #[Renderless]
+    public function fetchData(): void
+    {
+        $notificationSettings = $this->notifications;
         $anonymousNotificationSettings = resolve_static(NotificationSetting::class, 'query')
             ->whereNull('notifiable_id')
             ->select([
                 'id',
-                'is_active',
                 'notification_type',
                 'channel',
+                'is_active',
             ])
             ->get()
             ->groupBy('notification_type')
@@ -51,10 +90,14 @@ class Notifications extends Component
             ->toArray();
 
         foreach ($notificationSettings as $notificationSetting) {
+            if (is_null($notificationSetting)) {
+                continue;
+            }
+
             foreach ($this->notificationChannels as $channel) {
-                $channelDriver = $channel['driver'] ?? false;
-                $disabled = (($channel['method'] ?? false))
-                    && ! method_exists($notificationSetting ?? false, $channel['method']);
+                $channelDriver = data_get($channel, 'driver') ?? false;
+                $disabled = (data_get($channel, 'method') ?? false)
+                    && ! method_exists($notificationSetting, data_get($channel, 'method'));
 
                 $userSetting = data_get(
                     $anonymousNotificationSettings,
@@ -81,48 +124,46 @@ class Notifications extends Component
         }
     }
 
-    public function render(): View|Factory|Application
-    {
-        return view('flux::livewire.settings.notifications');
-    }
-
-    public function closeModal(): void
-    {
-        $this->detailModal = false;
-
-        $this->skipRender();
-    }
-
+    #[Renderless]
     public function save(): void
     {
         $this->getDirtyNotificationChannels($this->notification);
 
         array_walk($this->dirtyNotificationChannels, function (&$item): void {
-            $item['channel_value'] = array_values(array_filter(array_unique($item['channel_value'])));
+            $item['channel_value'] = array_values(array_filter(array_unique(data_get($item, 'channel_value'))));
         });
 
         $anonymousNotificationSettings = array_values($this->dirtyNotificationChannels);
 
-        $notificationSettingsService = app(NotificationSettingsService::class);
-        $response = $notificationSettingsService->update($anonymousNotificationSettings, true);
+        $hasErrors = false;
+        DB::transaction(function () use ($anonymousNotificationSettings, &$hasErrors): void {
+            foreach ($anonymousNotificationSettings as $anonymousNotificationSetting) {
+                try {
+                    UpdateNotificationSetting::make(array_merge(
+                        $anonymousNotificationSetting,
+                        ['is_anonymous' => true]
+                    ))
+                        ->validate()
+                        ->execute();
+                } catch (UnauthorizedException|ValidationException $e) {
+                    exception_to_notifications($e, $this);
+                    $hasErrors = true;
 
-        if ($response['status'] !== 200) {
-            foreach ($response as $item) {
-                if ($item['status'] === 422) {
-                    $this->notification()->error(
-                        title: __('Notification setting could not be saved'),
-                        description: implode(', ', Arr::flatten($response['errors']))
-                    )->send();
+                    continue;
                 }
             }
+        });
+
+        if ($hasErrors) {
+            return;
         }
 
         $this->dirtyNotificationChannels = [];
         $this->detailModal = false;
-
-        $this->skipRender();
+        $this->fetchData();
     }
 
+    #[Renderless]
     public function show($notification): void
     {
         $this->notificationType = $notification;
@@ -139,22 +180,30 @@ class Notifications extends Component
                 ->where('channel', $key)
                 ->pluck('channel_value')
                 ->first() ?: [];
+
+            if (! data_get($this->notification, $key . '.channel_value')) {
+                $this->notification[$key]['is_active'] = false;
+            }
         }
 
         $this->dirtyNotificationChannels = $this->notification;
-
-        $this->skipRender();
     }
 
-    private function getDirtyNotificationChannels(array $notification): void
+    #[Renderless]
+    public function translate(string $key): string
     {
-        $dirty = collect(Arr::dot($notification))->where(
-            fn ($value, $key) => $value !== data_get($this->dirtyNotificationChannels, $key)
-        )->toArray();
+        return __(Str::headline(class_basename($key)));
+    }
 
-        $removed = collect(Arr::dot($this->dirtyNotificationChannels))->where(
-            fn ($value, $key) => $value !== data_get($notification, $key)
-        )->toArray();
+    protected function getDirtyNotificationChannels(array $notification): void
+    {
+        $dirty = collect(Arr::dot($notification))
+            ->where(fn ($value, $key) => $value !== data_get($this->dirtyNotificationChannels, $key))
+            ->toArray();
+
+        $removed = collect(Arr::dot($this->dirtyNotificationChannels))
+            ->where(fn ($value, $key) => $value !== data_get($notification, $key))
+            ->toArray();
 
         $dirty = array_merge($removed, $dirty);
 
@@ -163,7 +212,7 @@ class Notifications extends Component
             $path = explode('.', $key);
 
             $data = data_get($notification, $path[0]);
-            $data['channel'] = $data['name'];
+            $data['channel'] = data_get($data, 'name');
             $data['notification_type'] = $this->notificationType;
             $this->dirtyNotificationChannels[$path[0]] = $data;
         }

@@ -15,9 +15,6 @@ return new class() extends Migration
         Schema::create('projects', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('client_id')
-                ->constrained('clients')
-                ->cascadeOnDelete();
             $table->foreignId('contact_id')
                 ->nullable()
                 ->constrained('contacts')
@@ -34,6 +31,9 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
+            $table->foreignId('tenant_id')
+                ->constrained('tenants')
+                ->cascadeOnDelete();
             $table->string('project_number');
             $table->string('name');
             $table->date('start_date')->nullable();

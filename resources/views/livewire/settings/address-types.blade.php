@@ -1,4 +1,4 @@
-<x-modal id="edit-address-type-modal">
+<x-modal id="edit-address-type-modal" :title="__('Address Type')">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="addressType.name" :label="__('Name')" required />
         <x-input
@@ -8,11 +8,11 @@
         />
         <div x-show="! $wire.addressType.id" x-cloak>
             <x-select.styled
-                :label="__('Client')"
+                :label="__('Tenant')"
                 autocomplete="off"
-                wire:model="addressType.client_id"
+                wire:model="addressType.tenant_id"
                 select="label:name|value:id"
-                :options="$clients"
+                :options="$tenants"
             />
         </div>
         <div class="mt-2">

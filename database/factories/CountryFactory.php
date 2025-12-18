@@ -14,7 +14,7 @@ class CountryFactory extends Factory
     {
         $i = 0;
         while (Country::query()
-            ->where('iso_alpha2', $isoAlpha2 = $this->faker->unique()->countryCode())
+            ->where('iso_alpha2', $isoAlpha2 = fake()->unique()->countryCode())
             ->exists() && $i < 100) {
             $i++;
         }
@@ -24,13 +24,13 @@ class CountryFactory extends Factory
         }
 
         return [
-            'name' => $this->faker->country(),
+            'name' => fake()->country(),
             'iso_alpha2' => $isoAlpha2,
-            'iso_alpha3' => $this->faker->countryISOAlpha3(),
-            'iso_numeric' => $this->faker->numerify('###'),
-            'is_active' => $this->faker->boolean(90),
+            'iso_alpha3' => fake()->countryISOAlpha3(),
+            'iso_numeric' => fake()->numerify('###'),
+            'is_active' => fake()->boolean(90),
             'is_default' => false,
-            'is_eu_country' => $this->faker->boolean(66),
+            'is_eu_country' => fake()->boolean(66),
         ];
     }
 }

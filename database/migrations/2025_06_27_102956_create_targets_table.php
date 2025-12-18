@@ -11,7 +11,12 @@ return new class() extends Migration
         Schema::create('targets', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->references('id')
+                ->on('targets')
+                ->cascadeOnDelete();
+            $table->string('name')->nullable();
             $table->decimal('target_value', 40, 4);
             $table->date('start_date');
             $table->date('end_date');
@@ -22,14 +27,13 @@ return new class() extends Migration
             $table->string('owner_column');
             $table->json('constraints')->nullable();
             $table->unsignedTinyInteger('priority')->nullable();
+            $table->boolean('is_group_target')->default(false);
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('parent_id')->references('id')->on('targets')->cascadeOnDelete();
         });
     }
 

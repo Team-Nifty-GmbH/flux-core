@@ -1,11 +1,11 @@
 @extends('flux::livewire.order.order')
 @section('modals')
     @parent
-    <x-modal id="edit-schedule" :title="__('Edit Schedule')">
+    <x-modal id="edit-schedule" :title="__('Edit Schedule')" persistent>
         <div class="flex flex-col gap-1.5">
             <x-select.styled
                 :label="__('Order type')"
-                wire:model="schedule.parameters.orderTypeId"
+                wire:model.live="schedule.parameters.orderTypeId"
                 required
                 select="label:name|value:id"
                 unfiltered
@@ -46,9 +46,9 @@
                 x-cloak
                 x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0"
             >
-                <x-time
+                <x-input
+                    type="time"
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.0"
                 />
             </div>
@@ -71,9 +71,9 @@
                         ['id' => 0, 'name' => __('Sundays')],
                     ]"
                 />
-                <x-time
+                <x-input
+                    type="time"
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.1"
                 />
             </div>
@@ -88,9 +88,9 @@
                     wire:model="schedule.cron.parameters.basic.0"
                     :label="__('Day')"
                 />
-                <x-time
+                <x-input
+                    type="time"
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.1"
                 />
             </div>
@@ -113,9 +113,9 @@
                         :label="__('Day')"
                     />
                 </div>
-                <x-time
+                <x-input
+                    type="time"
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.2"
                 />
             </div>
@@ -151,9 +151,9 @@
                     wire:model.blur="schedule.cron.parameters.basic.1"
                     :label="__('Day')"
                 />
-                <x-time
+                <x-input
+                    type="time"
                     :label="__('Time')"
-                    format="24"
                     wire:model="schedule.cron.parameters.basic.2"
                 />
             </div>
@@ -210,6 +210,55 @@
                 wire:model="schedule.is_active"
                 :label="__('Is Active')"
             />
+
+            <div class="flex flex-col gap-1.5 border-t pt-4">
+                <x-toggle
+                    wire:model="schedule.parameters.autoPrintAndSend"
+                    :label="__('Auto Print and send by mail')"
+                    :hint="__('Automatically generate PDFs and send them via email')"
+                />
+
+                <div
+                    x-cloak
+                    x-show="$wire.schedule.parameters.autoPrintAndSend"
+                    class="flex flex-col gap-1.5"
+                >
+                    <div id="schedule-print-layouts">
+                        <x-select.styled
+                            wire:model="schedule.parameters.printLayouts"
+                            :label="__('Print Layouts')"
+                            :hint="__('Select one or more print layouts to generate when the schedule runs')"
+                            multiple
+                            select="label:label|value:value"
+                            :options="$this->getPrintLayoutOptions()"
+                        />
+                    </div>
+                    <x-select.styled
+                        wire:model="schedule.parameters.emailTemplateId"
+                        :label="__('Email Template')"
+                        :hint="__('Select the email template to use for sending')"
+                        select="value:id"
+                        unfiltered
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\EmailTemplate::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'searchFields' => [
+                                    'name',
+                                    'subject',
+                                ],
+                                'where' => [
+                                    [
+                                        'model_type',
+                                        '=',
+                                        morph_alias(\FluxErp\Models\Order::class),
+                                    ],
+                                ],
+                            ],
+                        ]"
+                    />
+                </div>
+            </div>
         </div>
         <x-slot:footer>
             <x-button

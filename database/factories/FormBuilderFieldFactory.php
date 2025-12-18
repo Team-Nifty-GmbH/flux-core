@@ -12,10 +12,10 @@ class FormBuilderFieldFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
-            'description' => $this->faker->text(),
-            'ordering' => $this->faker->randomNumber(),
-            'options' => $this->faker->words(),
+            'name' => fake()->name(),
+            'description' => fake()->text(),
+            'ordering' => fake()->randomNumber(),
+            'options' => fake()->words(),
         ];
     }
 }

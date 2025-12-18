@@ -1,16 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
 use FluxErp\Livewire\DataTables\QueueMonitorList;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class QueueMonitorListTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(QueueMonitorList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(QueueMonitorList::class)
+        ->assertOk();
+});

@@ -10,15 +10,12 @@ return new class() extends Migration
     {
         Schema::create('event_subscriptions', function (Blueprint $table): void {
             $table->id();
-            $table->string('event')->index();
             $table->morphs('subscribable');
-            $table->string('model_type');
-            $table->unsignedBigInteger('model_id')->nullable();
+            $table->string('channel')->index();
+            $table->string('event')->index();
             $table->boolean('is_broadcast')->default(false);
             $table->boolean('is_notifiable')->default(false);
             $table->timestamps();
-
-            $table->index(['model_type', 'model_id']);
         });
     }
 

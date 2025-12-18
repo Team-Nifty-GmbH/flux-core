@@ -236,12 +236,12 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('toggle-is-billable-modal')"
+                    x-on:click="$modalClose('toggle-is-billable-modal'); isBillable = true;"
                 />
                 <x-button
                     color="indigo"
                     loading
-                    wire:click="toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); })"
+                    wire:click="toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); isBillable = true; })"
                     :text="__('Apply')"
                 />
             </x-slot>

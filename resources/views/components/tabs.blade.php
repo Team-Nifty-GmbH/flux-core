@@ -26,14 +26,14 @@
     </div>
 </div>
 <div
-    {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6 grow flex']) }}
+    {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6 grow flex flex-col xl:flex-row']) }}
 >
     {{ $prepend ?? '' }}
     @if ($attributes->has('wire:loading'))
         <x-flux::spinner {{ $attributes->thatStartWith('wire:loading') }} />
     @endif
 
-    <div class="w-full">
+    <div class="min-w-0 w-full">
         @if ($slot->isNotEmpty())
             {{ $slot }}
         @elseif ($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)

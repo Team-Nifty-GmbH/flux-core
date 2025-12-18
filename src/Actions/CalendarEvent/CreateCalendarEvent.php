@@ -87,7 +87,7 @@ class CreateCalendarEvent extends FluxAction
             && data_get($this->data, 'model_type') !== $calendarModelType
         ) {
             throw ValidationException::withMessages([
-                'model_type' => [__('Model type must match the selected calendar\'s model type')],
+                'model_type' => ['Model type must match the selected calendar\'s model type'],
             ])->errorBag('createCalendarEvent');
         }
     }

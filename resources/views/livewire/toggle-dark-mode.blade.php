@@ -25,13 +25,13 @@
     }"
 >
     <x-icon
-        class="dark:text-secondary-200 h-5 w-5 cursor-pointer text-gray-700"
+        class="h-5 w-5 cursor-pointer text-gray-700 dark:text-secondary-200"
         x-on:click="disable"
         name="sun"
     />
     <x-toggle x-model="dark" id="dark-mode-toggle.{{ $this->getId() }}" />
     <x-icon
-        class="dark:text-secondary-200 h-5 w-5 cursor-pointer text-gray-700"
+        class="h-5 w-5 cursor-pointer text-gray-700 dark:text-secondary-200"
         x-on:click="enable"
         name="moon"
     />

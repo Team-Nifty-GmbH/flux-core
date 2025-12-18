@@ -51,7 +51,7 @@
         <div class="min-w-0 flex-1">
             <div x-ref="upload">
                 <div x-ref="textarea">
-                    <x-flux::editor class="comment-input" />
+                    <x-flux::editor class="comment-input" scope="comment" />
                 </div>
                 <div class="grow pt-4">
                     @canAction(\FluxErp\Actions\Media\UploadMedia::class)

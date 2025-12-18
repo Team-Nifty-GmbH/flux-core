@@ -19,7 +19,7 @@ class OrderPositionForm extends FluxForm
 
     public ?string $amount_packed_products = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $contact_id = null;
 
@@ -140,7 +140,10 @@ class OrderPositionForm extends FluxForm
         $this->purchase_price = $this->product->purchasePrice($this->amount)?->price ?? 0;
 
         $this->warehouse_id ??= resolve_static(Warehouse::class, 'default')?->getKey();
-        $this->description ??= $this->product->description;
+
+        if (! strip_tags($this->description ?? '')) {
+            $this->description = $this->product->description;
+        }
     }
 
     public function getProduct(): Product

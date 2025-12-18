@@ -37,7 +37,7 @@ class DeleteWorkTime extends FluxAction
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'order_position' => [__('The given work time has an order position')],
+                'order_position' => ['The given work time has an order position'],
             ])->errorBag('deleteWorkTime');
         }
     }

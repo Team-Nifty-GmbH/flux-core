@@ -1,11 +1,10 @@
-@use('FluxErp\Enums\TimeFrameEnum')
 <div class="flex items-center gap-4">
-    @if(in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)))
+    @if (in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)) && $canEdit)
         <template x-for="group in allGroups">
             <div class="relative">
                 <x-button
                     wire:loading.attr="disabled"
-                    class="!text-secondary-600 !dark:text-secondary-400 border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
+                    class="!dark:text-secondary-400 border-b-2 border-b-transparent !text-secondary-600 focus:!ring-0 focus:!ring-offset-0"
                     flat
                     x-bind:class="{'!border-b-primary-600 !rounded-b-none': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
                     x-on:click="$wire.set('group', group)"
@@ -51,7 +50,7 @@
                     class="p-2"
                     wire:model.live="params.timeFrame"
                     required
-                    :options="TimeFrameEnum::valuesLocalized()"
+                    :options="resolve_static(\FluxErp\Enums\TimeFrameEnum::class, 'valuesLocalized')"
                 />
             </div>
             <div
@@ -116,7 +115,7 @@
     <x-input
         id="new-group-name"
         x-model="newGroupName"
-        :text="__('Group Name')"
+        :label="__('Group Name')"
     />
 
     <x-slot:footer>

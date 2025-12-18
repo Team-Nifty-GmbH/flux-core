@@ -3,9 +3,9 @@
 namespace FluxErp\Models;
 
 use FluxErp\Support\MediaLibrary\MediaCollection;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

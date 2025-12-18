@@ -10,13 +10,13 @@ return new class() extends Migration
     {
         Schema::create('settings', function (Blueprint $table): void {
             $table->id();
-            $table->char('uuid', 36);
-            $table->string('key');
-            $table->nullableMorphs('model');
-            $table->json('settings')->nullable();
+            $table->string('group');
+            $table->string('name');
+            $table->boolean('locked')->default(false);
+            $table->json('payload');
             $table->timestamps();
 
-            $table->unique(['model_id', 'model_type', 'key']);
+            $table->unique(['group', 'name']);
         });
     }
 

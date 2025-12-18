@@ -45,7 +45,6 @@ class ReplaceMedia extends FluxAction
             ->whereKey($this->getData('id'))
             ->first();
 
-        $customProperties = CustomProperties::get($this->data, $mediaItem->model_type);
         $diskName = $this->getData('disk') ?? (
             $mediaItem->model->getRegisteredMediaCollections()
                 ->where('name', $mediaItem->collection_name)
@@ -65,7 +64,7 @@ class ReplaceMedia extends FluxAction
         $media = $fileAdder
             ->setName($this->getData('name'))
             ->usingFileName($this->getData('file_name'))
-            ->withCustomProperties($customProperties)
+            ->withCustomProperties($this->getData('custom_properties') ?? [])
             ->withProperties(
                 Arr::except(
                     $this->data,
@@ -159,7 +158,7 @@ class ReplaceMedia extends FluxAction
         // check if the media collection is read-only
         if (data_get($mediaItem->getCollection(), 'readOnly') === true && ! $this->force) {
             throw ValidationException::withMessages([
-                'collection_name' => [__('The media collection is read-only and cannot be modified.')],
+                'collection_name' => ['The media collection is read-only and cannot be modified.'],
             ]);
         }
     }

@@ -2,14 +2,14 @@
 
 namespace FluxErp\Rulesets\Address;
 
+use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Address;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\StringOrInteger;
 use FluxErp\Rulesets\FluxRuleset;
 
 class PostalAddressRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = Address::class;
 
     public function rules(): array
@@ -17,7 +17,10 @@ class PostalAddressRuleset extends FluxRuleset
         return [
             'company' => 'string|max:255|nullable',
             'title' => 'string|max:255|nullable',
-            'salutation' => 'string|max:255|nullable',
+            'salutation' => [
+                'nullable',
+                app(EnumRule::class, ['type' => SalutationEnum::class]),
+            ],
             'firstname' => 'string|max:255|nullable',
             'lastname' => 'string|max:255|nullable',
             'addition' => 'string|max:255|nullable',

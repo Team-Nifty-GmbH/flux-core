@@ -13,13 +13,13 @@ use FluxErp\Casts\MorphTo as MorphToCast;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Inviteable;
-use FluxErp\Traits\HasDefaultTargetableColumns;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\HasDefaultTargetableColumns;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -32,7 +32,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class CalendarEvent extends FluxModel implements HasMedia, Targetable
 {
-    use HasDefaultTargetableColumns, HasPackageFactory, HasUlids, HasUserModification, InteractsWithMedia, LogsActivity;
+    use HasDefaultTargetableColumns, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity;
 
     public static function fromCalendarEvent(array $event, string $action): ?FluxAction
     {
@@ -54,6 +54,20 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
             'created_at',
             'updated_at',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::updating(function (CalendarEvent $model): void {
+            if ($model->isDirty(['start', 'excluded'])) {
+                $model->excluded = array_values(array_unique(array_map(
+                    fn (string $item) => Carbon::parse($item)
+                        ->setTimeFromTimeString($model->start->toTimeString())
+                        ->toDateTimeString(),
+                    $model->excluded ?? []
+                ))) ?: null;
+            }
+        });
     }
 
     protected function casts(): array
@@ -228,7 +242,7 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
 
         $calendarEventObject = array_merge(
             [
-                'id' => data_get($this->attributes, 'id', $this->ulid),
+                'id' => data_get($this->attributes, 'id', $this->uuid),
                 'calendar_id' => $this->calendar_id,
                 'model_type' => $this->model_type,
                 'model_id' => $this->model_id,
@@ -267,11 +281,6 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         }
 
         return $calendarEventObject;
-    }
-
-    public function uniqueIds(): array
-    {
-        return ['ulid'];
     }
 
     protected function baseDates(): Attribute

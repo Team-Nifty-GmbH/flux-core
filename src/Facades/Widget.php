@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void register(string $name, string $widget)
  * @method static void unregister(string $name)
  * @method static array all()
- * @method static string|null get(string $name)
+ * @method static string|null get(string $name, array $defaultAttributes = [])
  * @method static void autoDiscoverWidgets(string $directory = null, string $namespace = null)
  *
  * @see WidgetManager

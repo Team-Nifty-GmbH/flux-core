@@ -34,12 +34,12 @@ use Livewire\Component;
 use Livewire\Features\SupportPageComponents\PageComponentConfig;
 use Livewire\Features\SupportPageComponents\SupportPageComponents;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class Product extends Component
 {
     use Actions, WithTabs;
-
-    public array $additionalColumns = [];
 
     public ?array $currency = null;
 
@@ -107,10 +107,17 @@ class Product extends Component
                 'vatRate:id,rate_percentage',
                 'parent',
                 'coverMedia',
-                'clients:id',
+                'tenants:id',
             ])
             ->withCount('children')
             ->firstOrFail();
+
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $product->append('avatar_url');
 
         $this->product->fill($product);
@@ -123,7 +130,6 @@ class Product extends Component
             ->get(['id', 'name'])
             ->toArray();
 
-        $this->additionalColumns = $product->getAdditionalColumns()->toArray();
         $this->recalculateDisplayedProductProperties();
     }
 
@@ -373,7 +379,7 @@ class Product extends Component
                 'vatRate:id,rate_percentage',
                 'parent',
                 'coverMedia',
-                'clients:id',
+                'tenants:id',
             ])
             ->withCount('children')
             ->firstOrFail();

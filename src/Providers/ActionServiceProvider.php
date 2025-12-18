@@ -1,0 +1,22 @@
+<?php
+
+namespace FluxErp\Providers;
+
+use FluxErp\Actions\ActionManager;
+use Illuminate\Support\ServiceProvider;
+
+class ActionServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        $manager = $this->app->make(ActionManager::class);
+
+        $manager->autoDiscover(flux_path('src/Actions'), 'FluxErp\Actions');
+        $manager->autoDiscover();
+    }
+
+    public function register(): void
+    {
+        $this->app->singleton(ActionManager::class);
+    }
+}

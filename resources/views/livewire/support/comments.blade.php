@@ -33,7 +33,7 @@
                         </template>
                     </div>
                     <div
-                        class="soft-scrollbar dark:divide-secondary-700 overflow-auto"
+                        class="overflow-auto soft-scrollbar dark:divide-secondary-700"
                     >
                         <h3 class="pb-4">{{ __('All comments') }}</h3>
                         <div class="tree-container w-full gap-4">

@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\States\Task\TaskState;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -41,7 +41,7 @@ class MyTasks extends Component
                 'tasks' => auth()
                     ->user()
                     ->tasks()
-                    ->with('project:id,name')
+                    ->with(['project:id,name', 'model'])
                     ->whereNotIn('state', $endStates)
                     ->orderByDesc('priority')
                     ->orderByRaw('ISNULL(due_date), due_date ASC')

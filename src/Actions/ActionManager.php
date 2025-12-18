@@ -4,12 +4,10 @@ namespace FluxErp\Actions;
 
 use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionClass;
+use Symfony\Component\Finder\Finder;
 use Throwable;
 
 class ActionManager
@@ -23,10 +21,6 @@ class ActionManager
     public function __construct()
     {
         $this->actions = Collection::make();
-
-        if (app()->bound('events')) {
-            FluxAction::setEventDispatcher(app('events'));
-        }
     }
 
     public function all(): Collection
@@ -50,54 +44,51 @@ class ActionManager
             'namespace' => $namespace,
         ];
 
-        try {
-            $actions = Cache::get('flux.actions.' . $cacheKey);
-        } catch (Throwable) {
-            $actions = null;
+        // Check for PHP-File cache first
+        $cachePath = app()->bootstrapPath('cache/flux-actions.php');
+        $cachedActions = null;
+
+        if (file_exists($cachePath)) {
+            $allCachedActions = require $cachePath;
+            $cachedActions = $allCachedActions[$cacheKey] ?? null;
         }
 
-        if (! is_null($actions) && ! app()->runningInConsole()) {
-            $iterator = [];
-        } else {
-            $actions = [];
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+        if (! is_null($cachedActions) && ! app()->runningInConsole()) {
+            foreach ($cachedActions as $metadata) {
+                if ($name = data_get($metadata, 'name')) {
+                    $this->actions[$name] = $metadata;
+                }
+            }
+
+            return;
         }
+
+        $iterator = Finder::create()
+            ->in($path)
+            ->files()
+            ->name('*.php')
+            ->sortByName();
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
-                $subNameSpace = ! empty($relativePath)
-                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
-                    : '';
-                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+            $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
+            $subNameSpace = ! empty($relativePath)
+                ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                : '';
+            $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (
-                    ! class_exists($class)
-                    || ! is_a($class, FluxAction::class, true)
-                    || (new ReflectionClass($class))->isAbstract()
-                ) {
-                    continue;
-                }
-
-                $actions[$class::name()] = $class;
+            if (
+                ! class_exists($class)
+                || ! is_a($class, FluxAction::class, true)
+                || (new ReflectionClass($class))->isAbstract()
+            ) {
+                continue;
             }
-        }
 
-        foreach ($actions as $name => $class) {
             try {
-                $this->register($name, $class);
+                $this->register($class::name(), $class);
             } catch (Throwable) {
                 // Ignore exceptions during auto-discovery
             }
-        }
-
-        try {
-            Cache::put('flux.actions.' . $cacheKey, $actions);
-        } catch (Throwable) {
-            // Ignore exceptions during cache put
         }
     }
 

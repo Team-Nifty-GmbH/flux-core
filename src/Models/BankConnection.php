@@ -2,17 +2,18 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class BankConnection extends FluxModel
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
+    use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity;
 
     protected static function booted(): void
     {
@@ -31,8 +32,18 @@ class BankConnection extends FluxModel
         ];
     }
 
-    public function clients(): BelongsToMany
+    public function currency(): BelongsTo
     {
-        return $this->belongsToMany(Client::class, 'bank_connection_client');
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function ledgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class);
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'bank_connection_tenant');
     }
 }

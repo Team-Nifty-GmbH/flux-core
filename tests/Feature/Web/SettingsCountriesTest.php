@@ -1,31 +1,25 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Models\Permission;
 
-class SettingsCountriesTest extends BaseSetup
-{
-    public function test_settings_countries_no_user(): void
-    {
-        $this->get('/settings/countries')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('settings countries no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_settings_countries_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('settings.countries.get', 'web'));
+    $this->get('/settings/countries')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/countries')
-            ->assertStatus(200);
-    }
+test('settings countries page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('settings.countries.get', 'web'));
 
-    public function test_settings_countries_without_permission(): void
-    {
-        Permission::findOrCreate('settings.countries.get', 'web');
+    $this->actingAs($this->user, 'web')->get('/settings/countries')
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/countries')
-            ->assertStatus(403);
-    }
-}
+test('settings countries without permission', function (): void {
+    Permission::findOrCreate('settings.countries.get', 'web');
+
+    $this->actingAs($this->user, 'web')->get('/settings/countries')
+        ->assertForbidden();
+});

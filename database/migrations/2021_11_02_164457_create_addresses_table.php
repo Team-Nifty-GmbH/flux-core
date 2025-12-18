@@ -15,10 +15,18 @@ return new class() extends Migration
         Schema::create('addresses', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('client_id')->constrained('clients');
-            $table->unsignedBigInteger('contact_id');
-            $table->unsignedBigInteger('country_id')->nullable();
-            $table->unsignedBigInteger('language_id')->nullable();
+            $table->foreignId('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
+            $table->foreignId('country_id')
+                ->nullable()
+                ->references('id')
+                ->on('countries')
+                ->nullOnDelete();
+            $table->foreignId('language_id')
+                ->nullable()
+                ->references('id')
+                ->on('languages')
+                ->nullOnDelete();
+            $table->foreignId('tenant_id')->constrained('tenants');
             $table->string('company')->nullable();
             $table->string('title')->nullable();
             $table->string('salutation')->nullable();
@@ -44,10 +52,10 @@ return new class() extends Migration
             $table->string('password')->nullable();
             $table->json('search_aliases')->nullable();
             $table->string('advertising_state')->default('open');
+            $table->string('remember_token', 100)->nullable();
             $table->boolean('can_login')->default(false);
             $table->boolean('has_formal_salutation')->default(true);
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_dark_mode')->default(false);
             $table->boolean('is_delivery_address')->default(false);
             $table->boolean('is_invoice_address')->default(false);
             $table->boolean('is_main_address')->default(false);
@@ -57,10 +65,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
-            $table->foreign('country_id')->references('id')->on('countries')->nullOnDelete();
-            $table->foreign('language_id')->references('id')->on('languages')->nullOnDelete();
         });
     }
 

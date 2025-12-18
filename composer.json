@@ -2,7 +2,7 @@
     "name": "team-nifty-gmbh/flux-erp",
     "homepage": "https://flux-erp.com",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "ext-bcmath": "*",
         "ext-intl": "*",
         "ext-json": "*",
@@ -10,8 +10,9 @@
         "ext-zip": "*",
         "barryvdh/laravel-dompdf": "^3.0",
         "dompdf/dompdf": "^3.1.0",
+        "kreait/firebase-php": "^7.23",
         "laravel-notification-channels/webpush": "^10.2",
-        "laravel/framework": "^12.9.0",
+        "laravel/framework": "^12.21.0",
         "laravel/reverb": "^1.0.0",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.0",
@@ -25,6 +26,7 @@
         "spatie/laravel-model-states": "^2.4",
         "spatie/laravel-permission": "^6.0",
         "spatie/laravel-query-builder": "^6.0",
+        "spatie/laravel-settings": "^3.4",
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
@@ -41,9 +43,12 @@
         "nunomaduro/collision": "^8.1",
         "orchestra/testbench": "^10.0",
         "orchestra/testbench-dusk": "^10.0",
+        "pestphp/pest": "^4.0.4",
+        "pestphp/pest-plugin-browser": "^4.0.3",
+        "pestphp/pest-plugin-livewire": "^4.0",
+        "pestphp/pest-plugin-type-coverage": "^4.0",
         "phpstan/phpstan": "^2.0",
-        "phpunit/phpunit": "^12.1",
-        "squizlabs/php_codesniffer": "^3.6",
+        "squizlabs/php_codesniffer": "^4.0",
         "vlucas/phpdotenv": "^5.5"
     },
     "suggest": {
@@ -86,13 +91,12 @@
             "@test-feature",
             "@test-livewire"
         ],
-        "test-browser": "@testbench --configuration=./phpunit.dusk.xml --testsuite Browser",
+        "test-browser": "@testbench --parallel --testsuite Browser",
         "test-feature": "@testbench --parallel --testsuite Feature",
         "test-livewire": "@testbench --parallel --testsuite Livewire",
         "test-unit": "@testbench --parallel --testsuite Unit",
         "test-coverage": "XDEBUG_MODE=coverage @testbench --parallel --coverage-html ./reports",
         "format": "vendor/bin/pint",
-        "dusk:install-chromedriver": "@php vendor/bin/dusk-updater detect --auto-update --ansi",
         "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "build": "@php vendor/bin/testbench workbench:build --ansi",
@@ -117,13 +121,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "FluxErp\\FluxServiceProvider",
-                "FluxErp\\Providers\\BindingServiceProvider",
-                "FluxErp\\Providers\\MorphMapServiceProvider",
-                "FluxErp\\Providers\\AuthServiceProvider",
-                "FluxErp\\Providers\\EventServiceProvider",
-                "FluxErp\\Providers\\BroadcastServiceProvider",
-                "FluxErp\\Providers\\ViewServiceProvider"
+                "FluxErp\\FluxServiceProvider"
             ]
         }
     },

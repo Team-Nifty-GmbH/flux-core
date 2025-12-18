@@ -38,7 +38,7 @@ class DeleteWarehouse extends FluxAction
             ->count() > 0
         ) {
             throw ValidationException::withMessages([
-                'stock_postings' => [__('The given warehouse has stock postings')],
+                'stock_postings' => ['The given warehouse has stock postings'],
             ])->errorBag('deleteWarehouse');
         }
     }

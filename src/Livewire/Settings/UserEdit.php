@@ -7,16 +7,16 @@ use FluxErp\Actions\Permission\UpdateUserPermissions;
 use FluxErp\Actions\Role\UpdateUserRoles;
 use FluxErp\Actions\User\CreateUser;
 use FluxErp\Actions\User\UpdateUser;
-use FluxErp\Actions\User\UpdateUserClients;
+use FluxErp\Actions\User\UpdateUserTenants;
 use FluxErp\Livewire\Forms\PrinterUserForm;
 use FluxErp\Livewire\Forms\UserForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\Language;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Printer;
 use FluxErp\Models\Role;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
@@ -53,18 +53,23 @@ class UserEdit extends Component
     {
         return view('flux::livewire.settings.user-edit',
             [
-                'permissions' => resolve_static(Permission::class, 'query')
-                    ->where('guard_name', '!=', 'address')
-                    ->when($this->searchPermission, fn ($query) => $query->search($this->searchPermission))
+                'permissions' => resolve_static(
+                    Permission::class,
+                    'search',
+                    [
+                        'query' => $this->searchPermission,
+                    ]
+                )
+                    ->query(fn ($query) => $query->where('guard_name', '!=', 'address'))
                     ->paginate(pageName: 'permissionsPage'),
-                'clients' => resolve_static(Client::class, 'query')
-                    ->get(['id', 'name', 'client_code']),
+                'tenants' => resolve_static(Tenant::class, 'query')
+                    ->get(['id', 'name', 'tenant_code']),
                 'roles' => resolve_static(Role::class, 'query')
                     ->whereIn('guard_name', resolve_static(User::class, 'guardNames'))
                     ->get(['id', 'name', 'guard_name'])
                     ->toArray(),
                 'mailAccounts' => resolve_static(MailAccount::class, 'query')
-                    ->get(['id', 'email'])
+                    ->get(['id', 'name'])
                     ->toArray(),
                 'printers' => resolve_static(Printer::class, 'query')
                     ->where('is_active', true)
@@ -171,9 +176,9 @@ class UserEdit extends Component
         }
 
         try {
-            UpdateUserClients::make([
+            UpdateUserTenants::make([
                 'user_id' => $user['id'],
-                'clients' => $this->userForm->clients,
+                'tenants' => $this->userForm->tenants,
             ])
                 ->checkPermission()
                 ->validate()
@@ -229,7 +234,7 @@ class UserEdit extends Component
         $user->loadMissing([
             'roles',
             'mailAccounts:id',
-            'clients:id',
+            'tenants:id',
             'printers:id',
         ]);
 
@@ -246,7 +251,8 @@ class UserEdit extends Component
             ->toArray();
         $this->userForm->roles = $user->roles->pluck('id')->toArray();
         $this->userForm->mail_accounts = $user->mailAccounts->pluck('id')->toArray();
-        $this->userForm->clients = $user->clients->pluck('id')->toArray();
+        $this->userForm->default_mail_account_id = $user->defaultMailAccount()?->getKey();
+        $this->userForm->tenants = $user->tenants->pluck('id')->toArray();
         $this->userForm->printers = $user->printers->pluck('id')->toArray();
 
         $this->updatedUserRoles();

@@ -12,8 +12,9 @@ use FluxErp\Notifications\QueueMonitor\Job\JobStartedNotification;
 use FluxErp\States\QueueMonitor\Failed;
 use FluxErp\States\QueueMonitor\QueueMonitorState;
 use FluxErp\States\QueueMonitor\Succeeded;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\MonitorsQueue;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\MonitorsQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +28,7 @@ use Throwable;
 
 class QueueMonitor extends FluxModel
 {
-    use HasFrontendAttributes, HasStates, MassPrunable;
+    use HasFrontendAttributes, HasPackageFactory, HasStates, MassPrunable;
 
     public static function booted(): void
     {

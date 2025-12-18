@@ -2,8 +2,12 @@
 
 namespace FluxErp\Rulesets\PaymentReminderText;
 
+use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentReminderText;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 
 class CreatePaymentReminderTextRuleset extends FluxRuleset
 {
@@ -13,12 +17,15 @@ class CreatePaymentReminderTextRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:payment_reminders,uuid',
-            'mail_to' => 'nullable|array',
-            'mail_to.*' => 'email',
-            'mail_cc' => 'nullable|array',
-            'mail_cc.*' => 'email',
-            'mail_subject' => 'nullable|string',
-            'mail_body' => 'nullable|string',
+            'email_template_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => EmailTemplate::class])
+                    ->where(function (Builder $query): void {
+                        $query->whereNull('model_type')
+                            ->orWhere('model_type', morph_alias(PaymentReminder::class));
+                    }),
+            ],
             'reminder_subject' => 'nullable|string',
             'reminder_body' => 'required|string',
             'reminder_level' => [

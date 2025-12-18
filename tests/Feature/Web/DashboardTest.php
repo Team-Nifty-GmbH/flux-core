@@ -1,19 +1,14 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
+test('dashboard no user', function (): void {
+    $this->actingAsGuest();
 
-class DashboardTest extends BaseSetup
-{
-    public function test_dashboard_no_user(): void
-    {
-        $this->get('/')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->get('/')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-    public function test_dashboard_page(): void
-    {
-        $this->actingAs($this->user, 'web')->get('/')
-            ->assertStatus(200);
-    }
-}
+test('dashboard page', function (): void {
+    $this->actingAs($this->user, 'web')->get('/')
+        ->assertOk();
+});

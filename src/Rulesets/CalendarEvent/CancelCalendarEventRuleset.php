@@ -8,8 +8,6 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class CancelCalendarEventRuleset extends FluxRuleset
 {
-    protected static bool $addAdditionalColumnRules = false;
-
     protected static ?string $model = CalendarEvent::class;
 
     public function rules(): array

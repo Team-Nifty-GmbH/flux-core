@@ -6,7 +6,7 @@ use FluxErp\Livewire\Project\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Task;
 use FluxErp\Support\Metrics\Charts\Donut;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Livewire\Attributes\Renderless;
 
 class TasksByState extends CircleChart

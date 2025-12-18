@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\ContactIndustry;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\SortableTrait;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\SortableTrait;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Industry extends FluxModel

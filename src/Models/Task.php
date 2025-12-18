@@ -7,23 +7,24 @@ use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\Targetable;
+use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Support\Scout\ScoutCustomize;
-use FluxErp\Traits\Categorizable;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\Categorizable;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
+use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
-use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -34,11 +35,10 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
+class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, Targetable
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        SoftDeletes, Trackable;
+    use Categorizable, Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasStates, HasTags,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -131,6 +131,38 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             if ($task->state::$isEndState) {
                 $task->progress = 1;
             }
+
+            if ($task->start_date) {
+                $newStartDatetime = $task->start_time
+                    ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
+                    : $task->start_date->copy()->startOfDay();
+
+                if ($task->start_datetime?->timestamp !== $newStartDatetime->timestamp) {
+                    $task->start_reminder_sent_at = null;
+                }
+
+                $task->start_datetime = $newStartDatetime;
+            } else {
+                $task->start_time = null;
+                $task->start_datetime = null;
+                $task->start_reminder_sent_at = null;
+            }
+
+            if ($task->due_date) {
+                $newDueDatetime = $task->due_time
+                    ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
+                    : $task->due_date->copy()->endOfDay();
+
+                if ($task->due_datetime?->timestamp !== $newDueDatetime->timestamp) {
+                    $task->due_reminder_sent_at = null;
+                }
+
+                $task->due_datetime = $newDueDatetime;
+            } else {
+                $task->due_time = null;
+                $task->due_datetime = null;
+                $task->due_reminder_sent_at = null;
+            }
         });
 
         static::saved(function (Task $task): void {
@@ -142,10 +174,16 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         return [
             'start_date' => 'date:Y-m-d',
+            'start_reminder_sent_at' => 'datetime',
             'due_date' => 'date:Y-m-d',
+            'due_reminder_sent_at' => 'datetime',
+            'start_datetime' => 'datetime',
+            'due_datetime' => 'datetime',
             'state' => TaskState::class,
             'time_budget' => TimeDuration::class,
             'total_cost' => Money::class,
+            'has_due_reminder' => 'boolean',
+            'has_start_reminder' => 'boolean',
         ];
     }
 
@@ -215,14 +253,23 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->where('start_date', '<=', $end)
-                ->where('due_date', '>=', $start)
-                ->orWhereBetween('created_at', [$start, $end]);
+            $query
+                ->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('due_date', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start_date', '<=', $end)
+                        ->where('due_date', '>=', $start);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start_date')
+                        ->whereNull('due_date')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
         });
     }
 
@@ -239,6 +286,8 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
             ],
             'allDay' => false,
             'is_editable' => true,
@@ -257,6 +306,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'task_user');
+        return $this->belongsToMany(User::class, 'task_user')->using(TaskUser::class);
     }
 }

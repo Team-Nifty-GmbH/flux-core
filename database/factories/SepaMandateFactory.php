@@ -13,8 +13,8 @@ class SepaMandateFactory extends Factory
     public function definition(): array
     {
         return [
-            'sepa_mandate_type_enum' => $this->faker->boolean() ? SepaMandateTypeEnum::BASIC : SepaMandateTypeEnum::B2B,
-            'signed_date' => $this->faker->boolean ? $this->faker->date : null,
+            'sepa_mandate_type_enum' => fake()->boolean() ? SepaMandateTypeEnum::BASIC : SepaMandateTypeEnum::B2B,
+            'signed_date' => fake()->boolean ? fake()->date : null,
         ];
     }
 }

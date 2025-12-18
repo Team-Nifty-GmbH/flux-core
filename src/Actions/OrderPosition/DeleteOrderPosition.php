@@ -40,13 +40,19 @@ class DeleteOrderPosition extends FluxAction
 
         if ($orderPosition->order->is_locked) {
             $errors += [
-                'is_locked' => [__('Order is locked')],
+                'is_locked' => ['Order is locked'],
             ];
         }
 
         if ($orderPosition->is_bundle_position) {
             $errors += [
-                'is_bundle_position' => [__('You cannot delete a bundle position.')],
+                'is_bundle_position' => ['You cannot delete a bundle position.'],
+            ];
+        }
+
+        if ($orderPosition->descendants()->exists()) {
+            $errors += [
+                'has_descendants' => ['You cannot delete an order position that has descendants.'],
             ];
         }
 

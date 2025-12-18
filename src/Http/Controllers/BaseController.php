@@ -5,7 +5,7 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Helpers\ModelFilter;
 use FluxErp\Helpers\QueryBuilder;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Traits\Filterable;
+use FluxErp\Traits\Model\Filterable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;

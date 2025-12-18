@@ -5,6 +5,7 @@ namespace FluxErp\Actions\ContactBankConnection;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Rulesets\ContactBankConnection\CreateContactBankConnectionRuleset;
+use Illuminate\Support\Str;
 
 class CreateContactBankConnection extends FluxAction
 {
@@ -28,5 +29,22 @@ class CreateContactBankConnection extends FluxAction
         $contactBankConnection->save();
 
         return $contactBankConnection->refresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->getData('iban'))) {
+            $this->data['iban'] = Str::of($this->getData('iban'))
+                ->upper()
+                ->remove(' ')
+                ->toString();
+        }
+
+        if (is_string($this->getData('bic'))) {
+            $this->data['bic'] = Str::of($this->getData('bic'))
+                ->upper()
+                ->remove(' ')
+                ->toString();
+        }
     }
 }

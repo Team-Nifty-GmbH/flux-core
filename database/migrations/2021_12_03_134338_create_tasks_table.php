@@ -31,7 +31,15 @@ return new class() extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->date('start_date')->nullable();
+            $table->time('start_time')->nullable();
+            $table->unsignedInteger('start_reminder_minutes_before')->nullable();
+            $table->dateTime('start_reminder_sent_at')->nullable();
             $table->date('due_date')->nullable();
+            $table->time('due_time')->nullable();
+            $table->unsignedInteger('due_reminder_minutes_before')->nullable();
+            $table->dateTime('due_reminder_sent_at')->nullable();
+            $table->dateTime('start_datetime')->nullable();
+            $table->dateTime('due_datetime')->nullable();
             $table->unsignedInteger('priority')->default(0);
             $table->string('state')->default('open');
             $table->decimal('progress', 11, 10)->default(0);
@@ -39,6 +47,8 @@ return new class() extends Migration
                 ->comment('Time budget in minutes.');
             $table->decimal('budget', 40, 10)->nullable();
             $table->decimal('total_cost', 10)->nullable();
+            $table->boolean('has_due_reminder')->default(false);
+            $table->boolean('has_start_reminder')->default(false);
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();

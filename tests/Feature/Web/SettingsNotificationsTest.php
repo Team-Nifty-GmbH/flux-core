@@ -1,31 +1,25 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Models\Permission;
 
-class SettingsNotificationsTest extends BaseSetup
-{
-    public function test_settings_notifications_no_user(): void
-    {
-        $this->get('/settings/notifications')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('settings notifications no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_settings_notifications_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('settings.notifications.get', 'web'));
+    $this->get('/settings/notifications')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/notifications')
-            ->assertStatus(200);
-    }
+test('settings notifications page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('settings.notifications.get', 'web'));
 
-    public function test_settings_notifications_without_permission(): void
-    {
-        Permission::findOrCreate('settings.notifications.get', 'web');
+    $this->actingAs($this->user, 'web')->get('/settings/notifications')
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/notifications')
-            ->assertStatus(403);
-    }
-}
+test('settings notifications without permission', function (): void {
+    Permission::findOrCreate('settings.notifications.get', 'web');
+
+    $this->actingAs($this->user, 'web')->get('/settings/notifications')
+        ->assertForbidden();
+});

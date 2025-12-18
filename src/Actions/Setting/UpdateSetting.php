@@ -3,15 +3,21 @@
 namespace FluxErp\Actions\Setting;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\Setting;
 use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
-use Illuminate\Database\Eloquent\Model;
+use FluxErp\Settings\FluxSettings;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
+use ReflectionIntersectionType;
+use ReflectionNamedType;
+use ReflectionType;
+use ReflectionUnionType;
+use Spatie\LaravelSettings\SettingsConfig;
 
 class UpdateSetting extends FluxAction
 {
     public static function models(): array
     {
-        return [Setting::class];
+        return [];
     }
 
     protected function getRulesets(): string|array
@@ -19,15 +25,99 @@ class UpdateSetting extends FluxAction
         return UpdateSettingRuleset::class;
     }
 
-    public function performAction(): Model
+    public function performAction(): FluxSettings
     {
-        $setting = resolve_static(Setting::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first();
+        $settings = app($this->getData('settings_class'));
 
-        $setting->settings = (object) $this->data['settings'];
-        $setting->save();
+        $properties = $settings
+            ->toCollection()
+            ->keys()
+            ->all();
 
-        return $setting->fresh();
+        $settings->fill(Arr::only($this->getData(), $properties));
+        $settings->save();
+
+        return $settings;
+    }
+
+    public function setRulesFromRulesets(): static
+    {
+        if ($settingsClass = $this->getData('settings_class')) {
+            $this->mergeRules($this->validateSettingsProperties($settingsClass));
+        }
+
+        return parent::setRulesFromRulesets();
+    }
+
+    protected function extractRulesFromType(?ReflectionType $type): array
+    {
+        if (! $type) {
+            return [
+                'sometimes',
+                'required',
+            ];
+        }
+
+        $rules = match (true) {
+            $type instanceof ReflectionUnionType => $this->getRulesForUnionType($type),
+            $type instanceof ReflectionIntersectionType => ['sometimes', 'required', 'object'],
+            $type instanceof ReflectionNamedType => array_merge(
+                ['sometimes', 'required'],
+                $this->getRulesForNamedType($type)
+            ),
+            default => ['sometimes', 'required'],
+        };
+
+        if ($type->allowsNull()) {
+            return array_merge(['nullable'], array_diff($rules, ['sometimes', 'required']));
+        }
+
+        return $rules;
+    }
+
+    protected function getRulesForNamedType(ReflectionNamedType $type): array
+    {
+        if (! $type->isBuiltin()) {
+            return ['object'];
+        }
+
+        return match ($type->getName()) {
+            'bool', 'boolean' => ['boolean'],
+            'int', 'integer' => ['integer'],
+            'float', 'double' => ['numeric'],
+            'string' => ['string'],
+            'array' => ['array'],
+            default => [],
+        };
+    }
+
+    protected function getRulesForUnionType(ReflectionUnionType $type): array
+    {
+        $rules = ['sometimes', 'required'];
+        $types = [];
+
+        foreach ($type->getTypes() as $unionType) {
+            if ($unionType instanceof ReflectionNamedType) {
+                $types = array_merge($types, $this->getRulesForNamedType($unionType));
+            }
+        }
+
+        if ($types) {
+            $rules[] = Rule::anyOf($types);
+        }
+
+        return array_values(array_unique($rules));
+    }
+
+    protected function validateSettingsProperties(string $settingsClass): array
+    {
+        $config = app(SettingsConfig::class, ['settingsClass' => $settingsClass]);
+        $rules = [];
+
+        foreach ($config->getReflectedProperties() as $propertyName => $reflectionProperty) {
+            $rules[$propertyName] = $this->extractRulesFromType($reflectionProperty->getType());
+        }
+
+        return $rules;
     }
 }

@@ -20,7 +20,10 @@ class OrderView extends PrintableView
 
     public function __construct(Order $order)
     {
-        app()->setLocale($order->addressInvoice?->language?->language_code ?? config('app.locale'));
+        app()->setLocale($order->language?->language_code
+            ?? $order->addressInvoice?->language?->language_code
+            ?? config('app.locale')
+        );
         Number::useLocale(app()->getLocale());
         if ($orderCurrency = $order->currency()->withTrashed()->value('iso')) {
             Number::useCurrency($orderCurrency);
@@ -65,7 +68,7 @@ class OrderView extends PrintableView
         ]);
 
         $positions = array_map(
-            fn (array $item) => app(OrderPosition::class)->withoutMeta()->forceFill($item),
+            fn (array $item) => app(OrderPosition::class)->forceFill($item),
             to_flat_tree(
                 resolve_static(OrderPosition::class, 'familyTree')
                     ->where('order_id', $this->model->getKey())

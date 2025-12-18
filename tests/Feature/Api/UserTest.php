@@ -1,300 +1,271 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
 use Carbon\Carbon;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
-use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class UserTest extends BaseSetup
-{
-    private Language $language;
+beforeEach(function (): void {
+    $this->language = Language::factory()->create();
 
-    private array $permissions;
+    $this->users = User::factory()->count(2)->create([
+        'language_id' => $this->language->id,
+    ]);
 
-    private Collection $users;
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.users.{id}.get'),
+        'index' => Permission::findOrCreate('api.users.get'),
+        'create' => Permission::findOrCreate('api.users.post'),
+        'update' => Permission::findOrCreate('api.users.put'),
+        'delete' => Permission::findOrCreate('api.users.{id}.delete'),
+    ];
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->language = Language::factory()->create();
+test('create user', function (): void {
+    $user = User::factory()->make([
+        'language_id' => $this->language->id,
+        'password' => 'asdfdsfdsaf',
+    ])->toArray();
 
-        $this->users = User::factory()->count(2)->create([
-            'language_id' => $this->language->id,
-        ]);
+    // validation requirement: min 8, mixedCase, numbers
+    $user['password'] = 'Test12345';
 
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.users.{id}.get'),
-            'index' => Permission::findOrCreate('api.users.get'),
-            'create' => Permission::findOrCreate('api.users.post'),
-            'update' => Permission::findOrCreate('api.users.put'),
-            'delete' => Permission::findOrCreate('api.users.{id}.delete'),
-        ];
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/users', $user);
+    $response->assertCreated();
+
+    $json = json_decode($response->getContent());
+    $responseUser = $json->data;
+    $dbUser = User::query()
+        ->whereKey($responseUser->id)
+        ->first();
+
+    expect($user)->not->toBeEmpty();
+    expect($dbUser->language_id)->toEqual($user['language_id']);
+    expect($dbUser->email)->toEqual($user['email']);
+    expect($dbUser->firstname)->toEqual($user['firstname']);
+    expect($dbUser->lastname)->toEqual($user['lastname']);
+    expect(Hash::check($user['password'], $dbUser->password))->toBeTrue();
+    expect($dbUser->user_code)->toEqual($user['user_code']);
+    expect($dbUser->is_active)->toEqual($user['is_active']);
+    expect(property_exists($responseUser, 'password'))->toBeFalse();
+});
+
+test('create user validation fails', function (): void {
+    $payload = [
+        'language_id' => $this->language->id,
+        'name' => Str::random(),
+        'user_code' => Str::random(),
+        'password' => '12345678',
+    ];
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/users', $payload);
+    $response->assertUnprocessable();
+});
+
+test('create user without language', function (): void {
+    $user = User::factory()->make()->toArray();
+
+    // validation requirement: min 8, mixedCase, numbers
+    $user['password'] = 'Test12345';
+
+    $this->language->is_default = true;
+    $this->language->save();
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/users', $user);
+    $response->assertCreated();
+
+    $responseUser = json_decode($response->getContent())->data;
+    $dbUser = User::query()
+        ->whereKey($responseUser->id)
+        ->first();
+
+    $defaultLanguage = Language::default();
+
+    expect($user)->not->toBeEmpty();
+    expect($dbUser->firstname)->toEqual($user['firstname']);
+    expect($dbUser->lastname)->toEqual($user['lastname']);
+    expect($dbUser->name)->toEqual($user['firstname'] . ' ' . $user['lastname']);
+    expect($dbUser->email)->toEqual($user['email']);
+    expect(Hash::check($user['password'], $dbUser->password))->toBeTrue();
+    expect($dbUser->user_code)->toEqual($user['user_code']);
+    expect($dbUser->is_active)->toEqual($user['is_active']);
+    expect(property_exists($responseUser, 'password'))->toBeFalse();
+    expect($dbUser->language_id)->toEqual($defaultLanguage?->id);
+});
+
+test('delete user', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[0]->id);
+    $response->assertNoContent();
+
+    $dbUser = User::query()->withTrashed()->whereKey($this->users[0]->id)->first();
+    expect($dbUser->deleted_at)->not->toBeNull();
+});
+
+test('delete user self', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->delete('/api/users/' . $this->user->id);
+    $response->assertForbidden();
+
+    $dbUser = User::query()->whereKey($this->users[0]->id)->first();
+    expect($dbUser)->not->toBeNull();
+});
+
+test('delete user user not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[1]->id + 1);
+    $response->assertNotFound();
+});
+
+test('get user', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->get('/api/users/' . $this->users[0]->id);
+    $response->assertOk();
+
+    $json = json_decode($response->getContent());
+    $jsonUser = $json->data;
+
+    // Check if controller returns the test user.
+    expect($jsonUser)->not->toBeEmpty();
+    expect($jsonUser->id)->toEqual($this->users[0]->id);
+    expect($jsonUser->language_id)->toEqual($this->users[0]->language_id);
+    expect($jsonUser->email)->toEqual($this->users[0]->email);
+    expect($jsonUser->firstname)->toEqual($this->users[0]->firstname);
+    expect($jsonUser->lastname)->toEqual($this->users[0]->lastname);
+    expect(property_exists($jsonUser, 'password'))->toBeFalse();
+    expect($jsonUser->user_code)->toEqual($this->users[0]->user_code);
+    expect($jsonUser->is_active)->toEqual($this->users[0]->is_active);
+    expect(Carbon::parse($jsonUser->created_at))->toEqual(Carbon::parse($this->users[0]->created_at));
+    expect(Carbon::parse($jsonUser->updated_at))->toEqual(Carbon::parse($this->users[0]->updated_at));
+});
+
+test('get user user not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->get('/api/users/' . ++$this->users[1]->id);
+    $response->assertNotFound();
+});
+
+test('get users', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->get('/api/users');
+    $response->assertOk();
+
+    $json = json_decode($response->getContent());
+    $jsonUsers = collect($json->data->data);
+
+    // Check the amount of test users.
+    expect(count($jsonUsers))->toBeGreaterThanOrEqual(2);
+
+    // Check if controller returns the test users.
+    foreach ($this->users as $user) {
+        $jsonUsers->contains(function ($jsonUser) use ($user) {
+            return $jsonUser->id === $user->id &&
+                $jsonUser->language_id === $user->language_id &&
+                $jsonUser->email === $user->email &&
+                $jsonUser->firstname === $user->firstname &&
+                $jsonUser->lastname === $user->lastname &&
+                ! property_exists($jsonUser, 'password') &&
+                $jsonUser->user_code === $user->user_code &&
+                $jsonUser->is_active === $user->is_active &&
+                Carbon::parse($jsonUser->created_at) === Carbon::parse($user->created_at) &&
+                Carbon::parse($jsonUser->updated_at) === Carbon::parse($user->updated_at);
+        });
     }
+});
 
-    public function test_create_user(): void
-    {
-        $user = User::factory()->make([
-            'language_id' => $this->language->id,
-            'password' => 'asdfdsfdsaf',
-        ])->toArray();
+test('update user', function (): void {
+    $user = [
+        'id' => $this->users[0]->id,
+        'email' => 'aRandomEmail@example.de',
+        'password' => 'Asdf1234567',
+    ];
 
-        // validation requirement: min 8, mixedCase, numbers
-        $user['password'] = 'Test12345';
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->put('/api/users', $user);
+    $response->assertOk();
 
-        $response = $this->actingAs($this->user)->post('/api/users', $user);
-        $response->assertStatus(201);
+    $json = json_decode($response->getContent());
+    $responseUser = $json->data;
+    $dbUser = User::query()
+        ->whereKey($responseUser->id)
+        ->first();
 
-        $json = json_decode($response->getContent());
-        $responseUser = $json->data;
-        $dbUser = User::query()
-            ->whereKey($responseUser->id)
-            ->first();
+    expect($dbUser)->not->toBeEmpty();
+    expect($responseUser->id)->toEqual($user['id']);
+    expect($dbUser->language_id)->toEqual($this->users[0]->language_id);
+    expect($dbUser->email)->toEqual($user['email']);
+    expect(Hash::check($user['password'], $dbUser->password))->toBeTrue();
+    expect($dbUser->user_code)->toEqual($this->users[0]->user_code);
+    expect($dbUser->is_active)->toEqual($this->users[0]->is_active);
+    expect(property_exists($responseUser, 'password'))->toBeFalse();
+});
 
-        $this->assertNotEmpty($user);
-        $this->assertEquals($user['language_id'], $dbUser->language_id);
-        $this->assertEquals($user['email'], $dbUser->email);
-        $this->assertEquals($user['firstname'], $dbUser->firstname);
-        $this->assertEquals($user['lastname'], $dbUser->lastname);
-        $this->assertTrue(Hash::check($user['password'], $dbUser->password));
-        $this->assertEquals($user['user_code'], $dbUser->user_code);
-        $this->assertEquals($user['is_active'], $dbUser->is_active);
-        $this->assertFalse(property_exists($responseUser, 'password'));
-    }
+test('update user is active', function (): void {
+    $user = [
+        'id' => $this->users[0]->id,
+        'email' => 'random@mail-example.de',
+        'password' => 'Asdf1234567',
+        'is_active' => true,
+    ];
 
-    public function test_create_user_validation_fails(): void
-    {
-        $payload = [
-            'language_id' => $this->language->id,
-            'name' => Str::random(),
-            'user_code' => Str::random(),
-            'password' => '12345678',
-        ];
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->put('/api/users', $user);
+    $response->assertOk();
 
-        $response = $this->actingAs($this->user)->post('/api/users', $payload);
-        $response->assertStatus(422);
-    }
+    $json = json_decode($response->getContent());
+    $responseUser = $json->data;
+    $dbUser = User::query()
+        ->whereKey($responseUser->id)
+        ->first();
 
-    public function test_create_user_without_language(): void
-    {
-        $user = User::factory()->make()->toArray();
+    expect($dbUser)->not->toBeEmpty();
+    expect($responseUser->id)->toEqual($user['id']);
+    expect($dbUser->language_id)->toEqual($this->users[0]->language_id);
+    expect($dbUser->email)->toEqual($user['email']);
+    expect(Hash::check($user['password'], $dbUser->password))->toBeTrue();
+    expect($dbUser->user_code)->toEqual($this->users[0]->user_code);
+    expect($dbUser->is_active)->toEqual($user['is_active']);
+    expect(property_exists($responseUser, 'password'))->toBeFalse();
+});
 
-        // validation requirement: min 8, mixedCase, numbers
-        $user['password'] = 'Test12345';
+test('update user validation fails', function (): void {
+    $user = [
+        'id' => $this->users[0]->id,
+        'name' => 'a random name',
+        'password' => 'asdf1234567',
+    ];
 
-        $this->language->is_default = true;
-        $this->language->save();
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/users', $user);
-        $response->assertStatus(201);
-
-        $responseUser = json_decode($response->getContent())->data;
-        $dbUser = User::query()
-            ->whereKey($responseUser->id)
-            ->first();
-
-        $defaultLanguage = Language::default();
-
-        $this->assertNotEmpty($user);
-        $this->assertEquals($user['firstname'], $dbUser->firstname);
-        $this->assertEquals($user['lastname'], $dbUser->lastname);
-        $this->assertEquals($user['firstname'] . ' ' . $user['lastname'], $dbUser->name);
-        $this->assertEquals($user['email'], $dbUser->email);
-        $this->assertTrue(Hash::check($user['password'], $dbUser->password));
-        $this->assertEquals($user['user_code'], $dbUser->user_code);
-        $this->assertEquals($user['is_active'], $dbUser->is_active);
-        $this->assertFalse(property_exists($responseUser, 'password'));
-        $this->assertEquals($defaultLanguage?->id, $dbUser->language_id);
-    }
-
-    public function test_delete_user(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[0]->id);
-        $response->assertStatus(204);
-
-        $dbUser = User::query()->withTrashed()->whereKey($this->users[0]->id)->first();
-        $this->assertNotNull($dbUser->deleted_at);
-    }
-
-    public function test_delete_user_self(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/users/' . $this->user->id);
-        $response->assertStatus(403);
-
-        $dbUser = User::query()->whereKey($this->users[0]->id)->first();
-        $this->assertNotNull($dbUser);
-    }
-
-    public function test_delete_user_user_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[1]->id + 1);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_user(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/users/' . $this->users[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonUser = $json->data;
-
-        // Check if controller returns the test user.
-        $this->assertNotEmpty($jsonUser);
-        $this->assertEquals($this->users[0]->id, $jsonUser->id);
-        $this->assertEquals($this->users[0]->language_id, $jsonUser->language_id);
-        $this->assertEquals($this->users[0]->email, $jsonUser->email);
-        $this->assertEquals($this->users[0]->firstname, $jsonUser->firstname);
-        $this->assertEquals($this->users[0]->lastname, $jsonUser->lastname);
-        $this->assertFalse(property_exists($jsonUser, 'password'));
-        $this->assertEquals($this->users[0]->user_code, $jsonUser->user_code);
-        $this->assertEquals($this->users[0]->is_active, $jsonUser->is_active);
-        $this->assertEquals(Carbon::parse($this->users[0]->created_at),
-            Carbon::parse($jsonUser->created_at));
-        $this->assertEquals(Carbon::parse($this->users[0]->updated_at),
-            Carbon::parse($jsonUser->updated_at));
-    }
-
-    public function test_get_user_user_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/users/' . ++$this->users[1]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_users(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/users');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonUsers = collect($json->data->data);
-
-        // Check the amount of test users.
-        $this->assertGreaterThanOrEqual(2, count($jsonUsers));
-
-        // Check if controller returns the test users.
-        foreach ($this->users as $user) {
-            $jsonUsers->contains(function ($jsonUser) use ($user) {
-                return $jsonUser->id === $user->id &&
-                    $jsonUser->language_id === $user->language_id &&
-                    $jsonUser->email === $user->email &&
-                    $jsonUser->firstname === $user->firstname &&
-                    $jsonUser->lastname === $user->lastname &&
-                    ! property_exists($jsonUser, 'password') &&
-                    $jsonUser->user_code === $user->user_code &&
-                    $jsonUser->is_active === $user->is_active &&
-                    Carbon::parse($jsonUser->created_at) === Carbon::parse($user->created_at) &&
-                    Carbon::parse($jsonUser->updated_at) === Carbon::parse($user->updated_at);
-            });
-        }
-    }
-
-    public function test_update_user(): void
-    {
-        $user = [
-            'id' => $this->users[0]->id,
-            'email' => 'aRandomEmail@example.de',
-            'password' => 'Asdf1234567',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/users', $user);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $responseUser = $json->data;
-        $dbUser = User::query()
-            ->whereKey($responseUser->id)
-            ->first();
-
-        $this->assertNotEmpty($dbUser);
-        $this->assertEquals($user['id'], $responseUser->id);
-        $this->assertEquals($this->users[0]->language_id, $dbUser->language_id);
-        $this->assertEquals($user['email'], $dbUser->email);
-        $this->assertTrue(Hash::check($user['password'], $dbUser->password));
-        $this->assertEquals($this->users[0]->user_code, $dbUser->user_code);
-        $this->assertEquals($this->users[0]->is_active, $dbUser->is_active);
-        $this->assertFalse(property_exists($responseUser, 'password'));
-    }
-
-    public function test_update_user_is_active(): void
-    {
-        $user = [
-            'id' => $this->users[0]->id,
-            'email' => 'random@mail-example.de',
-            'password' => 'Asdf1234567',
-            'is_active' => true,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/users', $user);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $responseUser = $json->data;
-        $dbUser = User::query()
-            ->whereKey($responseUser->id)
-            ->first();
-
-        $this->assertNotEmpty($dbUser);
-        $this->assertEquals($user['id'], $responseUser->id);
-        $this->assertEquals($this->users[0]->language_id, $dbUser->language_id);
-        $this->assertEquals($user['email'], $dbUser->email);
-        $this->assertTrue(Hash::check($user['password'], $dbUser->password));
-        $this->assertEquals($this->users[0]->user_code, $dbUser->user_code);
-        $this->assertEquals($user['is_active'], $dbUser->is_active);
-        $this->assertFalse(property_exists($responseUser, 'password'));
-    }
-
-    public function test_update_user_validation_fails(): void
-    {
-        $user = [
-            'id' => $this->users[0]->id,
-            'name' => 'a random name',
-            'password' => 'asdf1234567',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/users', $user);
-        $response->assertStatus(422);
-    }
-}
+    $response = $this->actingAs($this->user)->put('/api/users', $user);
+    $response->assertUnprocessable();
+});

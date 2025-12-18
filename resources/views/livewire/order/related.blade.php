@@ -4,31 +4,17 @@
             <livewire:widgets.order :model-id="$order->parent_id" />
         </x-card>
         <x-card :header="__('Descending from the original order')">
-            <livewire:data-tables.order-list
-                cache-key="order.related.order-list.siblings"
-                :filters="[['parent_id', '=', $order->parent_id], ['id', '!=', $order->id]]"
-            />
+            <livewire:order.related.family-orders :order-id="$order->id" lazy />
         </x-card>
     @endif
 
     <x-card :header="__('Descending from this order')">
-        <livewire:data-tables.order-list
-            cache-key="order.related.order-list.children"
-            :filters="[['parent_id', '=', $order->id]]"
-        />
+        <livewire:order.related.descendant-orders :order-id="$order->id" lazy />
     </x-card>
     <x-card :header="__('Projects')">
-        <livewire:order.projects :order-id="$order->id" />
+        <livewire:order.related.projects :order-id="$order->id" lazy />
     </x-card>
     <x-card :header="__('Tickets')">
-        <livewire:data-tables.ticket-list
-            cache-key="order.related.ticket-list"
-            :filters="[
-                ['model_id', '=', $order->id],
-                ['model_type', '=', morph_alias(\FluxErp\Models\Order::class)]
-            ]"
-            :model-type="\FluxErp\Models\Order::class"
-            :model-id="$order->id"
-        />
+        <livewire:order.related.tickets :model-id="$order->id" lazy />
     </x-card>
 </div>

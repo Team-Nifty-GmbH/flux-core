@@ -12,8 +12,8 @@ class WorkTimeTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word,
-            'is_billable' => $this->faker->boolean(),
+            'name' => fake()->word,
+            'is_billable' => fake()->boolean(),
         ];
     }
 }

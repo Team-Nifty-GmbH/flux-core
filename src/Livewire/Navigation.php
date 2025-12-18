@@ -14,24 +14,6 @@ use Livewire\Component;
 
 class Navigation extends Component
 {
-    public ?string $background;
-
-    public ?array $setting;
-
-    public function mount(?array $setting = null): void
-    {
-        if ($setting) {
-            $setting = $setting['settings'];
-            $this->setting = $setting;
-
-            $this->background = ($setting['nav']['background'] ?? false)
-                ? 'background: linear-gradient(' . ($setting['nav']['background']['angle'] ?? 0) . 'deg, '
-                . ($setting['nav']['background']['start'] ?? 0) . ', '
-                . ($setting['nav']['background']['end'] ?? 0) . ');'
-                : null;
-        }
-    }
-
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.navigation', [
@@ -91,7 +73,7 @@ class Navigation extends Component
 
         $guard = explode('_', Auth::guard()->getName());
 
-        $navigations = Menu::forGuard($guard[1], $guard[1] === 'address' ? 'portal' : null);
+        $navigations = Menu::forGuard($guard[1]);
         data_forget($navigations, 'settings.children');
 
         foreach ($navigations as $group => &$items) {

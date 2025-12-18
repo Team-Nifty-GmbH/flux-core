@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('order_payment_run', function (Blueprint $table): void {
-            $table->id();
+            $table->id('pivot_id');
             $table->foreignId('order_id')
                 ->constrained('orders')
                 ->cascadeOnDelete();

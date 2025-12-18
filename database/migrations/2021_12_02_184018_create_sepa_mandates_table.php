@@ -11,10 +11,13 @@ return new class() extends Migration
         Schema::create('sepa_mandates', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('client_id');
-            $table->unsignedBigInteger('contact_bank_connection_id')->nullable();
-            $table->unsignedBigInteger('contact_id');
-            $table->string('sepa_mandate_type_enum')->nullable();
+            $table->foreignId('contact_bank_connection_id')
+                ->nullable()
+                ->constrained('contact_bank_connections')
+                ->nullOnDelete();
+            $table->foreignId('contact_id')->constrained('contacts')->cascadeOnDelete();
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->string('sepa_mandate_type_enum');
             $table->string('mandate_reference_number');
             $table->date('signed_date')->nullable();
 
@@ -25,20 +28,7 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->foreign('client_id')
-                ->references('id')
-                ->on('clients')
-                ->cascadeOnDelete();
-            $table->foreign('contact_id')
-                ->references('id')
-                ->on('contacts')
-                ->cascadeOnDelete();
-            $table->foreign('contact_bank_connection_id')
-                ->references('id')
-                ->on('contact_bank_connections')
-                ->nullOnDelete();
-
-            $table->unique(['client_id', 'mandate_reference_number']);
+            $table->unique(['tenant_id', 'mandate_reference_number']);
         });
     }
 

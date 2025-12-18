@@ -12,14 +12,14 @@ class TransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'value_date' => $this->faker->date(),
-            'booking_date' => $this->faker->date(),
-            'amount' => $this->faker->randomFloat(),
-            'purpose' => $this->faker->text(),
-            'type' => $this->faker->jobTitle(),
-            'counterpart_name' => $this->faker->name(),
-            'counterpart_iban' => $this->faker->iban(),
-            'counterpart_bank_name' => $this->faker->company(),
+            'value_date' => fake()->date(),
+            'booking_date' => fake()->date(),
+            'amount' => fake()->randomFloat(),
+            'purpose' => fake()->text(),
+            'type' => fake()->jobTitle(),
+            'counterpart_name' => fake()->name(),
+            'counterpart_iban' => fake()->iban(),
+            'counterpart_bank_name' => fake()->company(),
             'bank_connection_id' => \FluxErp\Models\BankConnection::factory(),
             'currency_id' => \FluxErp\Models\Currency::factory(),
         ];

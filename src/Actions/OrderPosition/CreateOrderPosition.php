@@ -5,16 +5,17 @@ namespace FluxErp\Actions\OrderPosition;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -42,8 +43,8 @@ class CreateOrderPosition extends FluxAction
         $this->data['is_net'] ??= $this->getData('priceList.is_net')
             ?? data_get($order, 'priceList.is_net')
             ?? data_get(resolve_static(PriceList::class, 'default'), 'is_net');
-        $this->data['client_id'] ??= data_get($order, 'client_id')
-            ?? resolve_static(Client::class, 'default')?->getKey();
+        $this->data['tenant_id'] ??= data_get($order, 'tenant_id')
+            ?? resolve_static(Tenant::class, 'default')?->getKey();
         $this->data['price_list_id'] ??= data_get($order, 'price_list_id')
             ?? resolve_static(PriceList::class, 'default')?->getKey();
 
@@ -103,10 +104,10 @@ class CreateOrderPosition extends FluxAction
             $product->bundleProducts
                 ->map(function (Product $bundleProduct) use ($orderPosition) {
                     return [
-                        'client_id' => $orderPosition->client_id,
                         'order_id' => $orderPosition->order_id,
                         'parent_id' => $orderPosition->id,
                         'product_id' => $bundleProduct->id,
+                        'tenant_id' => $orderPosition->tenant_id,
                         'vat_rate_id' => $bundleProduct->vat_rate_id,
                         'warehouse_id' => $orderPosition->warehouse_id,
                         'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
@@ -169,7 +170,7 @@ class CreateOrderPosition extends FluxAction
 
         if ($order->is_locked) {
             $errors += [
-                'is_locked' => [__('Order is locked')],
+                'is_locked' => ['Order is locked'],
             ];
         }
 
@@ -185,7 +186,7 @@ class CreateOrderPosition extends FluxAction
         }
 
         // Only allow creation of order_position if exists in parent order and amount not greater than totalAmount
-        if (! $this->getData('is_free_text')) {
+        if (! $this->getData('is_free_text') && ! $this->getData('is_bundle_position')) {
             if ($order?->parent_id
                 && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
             ) {
@@ -201,21 +202,64 @@ class CreateOrderPosition extends FluxAction
                     ->exists()
                 ) {
                     $errors += [
-                        'origin_position_id' => [__('Order position does not exists in parent order.')],
+                        'origin_position_id' => ['Order position does not exists in parent order.'],
                     ];
                 }
 
-                $originPosition = resolve_static(OrderPosition::class, 'query')
-                    ->whereKey($originPositionId)
-                    ->where('order_id', $order->parent_id)
-                    ->withSum('descendants as descendantsAmount', 'amount')
-                    ->first();
-                $maxAmount = bcsub(
-                    $originPosition?->amount ?? 0,
-                    $originPosition?->descendantsAmount ?? 0,
+                $maxAmount = data_get(
+                    array_find(
+                        array_reduce(
+                            DB::select(
+                                'WITH RECURSIVE siblings AS (
+                                    SELECT id, origin_position_id, signed_amount
+                                    FROM order_positions
+                                    WHERE id = ' . $originPositionId
+                                . ' AND order_id = ' . $order->parent_id
+                                . ' UNION ALL
+                                    SELECT op.id, op.origin_position_id, op.signed_amount
+                                    FROM order_positions op
+                                    INNER JOIN siblings s ON s.id = op.origin_position_id
+                                    WHERE op.deleted_at IS NULL
+                                )
+                                SELECT * FROM siblings'
+                            ),
+                            function (?array $carry, object $item) {
+                                $parentKey = array_find_key(
+                                    $carry ?? [],
+                                    fn (array $value) => ! is_null($item->origin_position_id)
+                                        && in_array(
+                                            $item->origin_position_id,
+                                            [
+                                                $value['id'],
+                                                $value['origin_position_id'],
+                                            ]
+                                        )
+                                );
+
+                                if (is_null($parentKey)) {
+                                    $carry[] = (array) $item;
+                                } else {
+                                    $carry[$parentKey] = array_merge(
+                                        $carry[$parentKey],
+                                        [
+                                            'origin_position_id' => $item->id,
+                                            'signed_amount' => bcsub(
+                                                data_get($carry, $parentKey . '.signed_amount'),
+                                                $item->signed_amount
+                                            ),
+                                        ]
+                                    );
+                                }
+
+                                return $carry;
+                            }
+                        ),
+                        fn (array $value) => $value['id'] === $originPositionId
+                    ),
+                    'signed_amount'
                 );
 
-                if (bccomp($this->getData('amount') ?? 1, $maxAmount) > 0) {
+                if (bccomp($this->getData('amount') ?? 1, $maxAmount ?? 0) === 1) {
                     $errors += [
                         'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
                     ];

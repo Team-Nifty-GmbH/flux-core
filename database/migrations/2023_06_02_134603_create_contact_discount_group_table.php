@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('contact_discount_group', function (Blueprint $table): void {
-            $table->id();
+            $table->id('pivot_id');
             $table->unsignedBigInteger('contact_id');
             $table->unsignedBigInteger('discount_group_id');
 

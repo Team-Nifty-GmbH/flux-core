@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Ticket;
 use FluxErp\States\Ticket\TicketState;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;

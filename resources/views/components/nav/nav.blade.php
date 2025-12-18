@@ -1,13 +1,12 @@
 <!-- Static sidebar for desktop -->
 <div
-    style="{!! $background !!}"
     x-on:mouseover.away="closeMenu()"
     x-on:mouseover="showMenu()"
     x-bind:class="menuOpen && '!w-full md:!w-72'"
-    class="soft-scrollbar fixed inset-y-0 top-0 z-20 w-0 overflow-y-auto bg-flux-secondary-500 transition-all duration-500 ease-in-out md:block md:flex md:w-20 md:flex-col"
+    class="fixed inset-y-0 top-0 z-20 w-0 overflow-y-auto bg-flux-secondary-500 transition-all duration-500 ease-in-out soft-scrollbar md:block md:flex md:w-20 md:flex-col"
 >
     <!-- Sidebar component, swap this element with another sidebar if you like -->
-    <div class="soft-scrollbar flex flex-grow flex-col overflow-x-hidden">
+    <div class="flex flex-grow flex-col overflow-x-hidden soft-scrollbar">
         <div class="relative flex h-16 shrink-0 justify-center p-2 px-4">
             <x-flux::logo fill="#D7E3EC" />
             <x-button.circle
@@ -57,6 +56,20 @@
                         <a href="{{ route('my-profile') }}">
                             <x-dropdown.items :text="__('My profile')" />
                         </a>
+
+                        <div>
+                            <div x-show="window.nuxbeAppBridge" x-cloak>
+                                <x-dropdown.items
+                                    x-on:click="async () => {
+                                        if (window.nuxbeAppBridge && window.nuxbeAppBridge.changeServer) {
+                                            await window.nuxbeAppBridge.changeServer();
+                                        }
+                                    }"
+                                    :text="__('Change Server')"
+                                />
+                            </div>
+                        </div>
+
                         <x-dropdown.items
                             x-on:click="document.getElementById('logout-form-desktop').submit()"
                             :text="__('Logout')"

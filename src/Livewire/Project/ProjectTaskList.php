@@ -8,7 +8,7 @@ use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -38,10 +38,6 @@ class ProjectTaskList extends BaseTaskList
         parent::mount();
 
         $this->task->project_id = $this->projectId;
-        $this->task->additionalColumns = array_fill_keys(
-            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
-            null
-        );
 
         $this->availableStates = app(Task::class)->getStatesFor('state')
             ->map(function (string $state) {
@@ -56,24 +52,10 @@ class ProjectTaskList extends BaseTaskList
     #[Renderless]
     public function edit(string|int|null $id = null): void
     {
-        $task = resolve_static(Task::class, 'query')
-            ->where('project_id', $this->projectId)
-            ->when($id, fn (Builder $query) => $query->whereKey($id))
-            ->firstOrFail();
-
         $this->reset('taskTab');
-        $task->project_id = $this->projectId;
-
         $this->editForm($id);
 
-        $this->task->users = $task->users()->pluck('users.id')->toArray();
-        $this->task->additionalColumns = array_intersect_key(
-            $task->toArray(),
-            array_fill_keys(
-                $task->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
+        $this->task->project_id = $this->projectId;
     }
 
     #[Renderless]

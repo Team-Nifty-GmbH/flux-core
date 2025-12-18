@@ -13,11 +13,11 @@ class LedgerAccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'number' => $this->faker->randomNumber(),
-            'name' => $this->faker->name(),
-            'description' => $this->faker->realText(),
-            'ledger_account_type_enum' => $this->faker->randomElement(LedgerAccountTypeEnum::values()),
-            'is_automatic' => $this->faker->boolean(),
+            'number' => fake()->randomNumber(),
+            'name' => fake()->name(),
+            'description' => fake()->realText(),
+            'ledger_account_type_enum' => fake()->randomElement(LedgerAccountTypeEnum::values()),
+            'is_automatic' => fake()->boolean(),
         ];
     }
 }

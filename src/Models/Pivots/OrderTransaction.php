@@ -4,7 +4,7 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
-use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\Model\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderTransaction extends FluxPivot
@@ -24,7 +24,7 @@ class OrderTransaction extends FluxPivot
     protected static function booted(): void
     {
         static::saved(function (OrderTransaction $orderTransaction): void {
-            $originalOrderId = $orderTransaction->getRawOriginal('order_id');
+            $originalOrderId = data_get($orderTransaction->getPrevious(), 'order_id', $orderTransaction->order_id);
             if (
                 $originalOrderId
                 && $originalOrderId !== $orderTransaction->order_id

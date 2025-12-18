@@ -1,31 +1,25 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Models\Permission;
 
-class SettingsLanguagesTest extends BaseSetup
-{
-    public function test_settings_languages_no_user(): void
-    {
-        $this->get('/settings/languages')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('settings languages no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_settings_languages_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('settings.languages.get', 'web'));
+    $this->get('/settings/languages')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/languages')
-            ->assertStatus(200);
-    }
+test('settings languages page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('settings.languages.get', 'web'));
 
-    public function test_settings_languages_without_permission(): void
-    {
-        Permission::findOrCreate('settings.languages.get', 'web');
+    $this->actingAs($this->user, 'web')->get('/settings/languages')
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/languages')
-            ->assertStatus(403);
-    }
-}
+test('settings languages without permission', function (): void {
+    Permission::findOrCreate('settings.languages.get', 'web');
+
+    $this->actingAs($this->user, 'web')->get('/settings/languages')
+        ->assertForbidden();
+});

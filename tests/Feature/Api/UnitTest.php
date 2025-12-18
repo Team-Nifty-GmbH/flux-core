@@ -1,126 +1,107 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
 use FluxErp\Models\Permission;
 use FluxErp\Models\Unit;
-use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class UnitTest extends BaseSetup
-{
-    private Model $unit;
+beforeEach(function (): void {
+    $this->unit = Unit::factory()->create();
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.units.{id}.get'),
+        'index' => Permission::findOrCreate('api.units.get'),
+        'create' => Permission::findOrCreate('api.units.post'),
+        'update' => Permission::findOrCreate('api.units.put'),
+        'delete' => Permission::findOrCreate('api.units.{id}.delete'),
+    ];
+});
 
-        $this->unit = Unit::factory()->create();
+test('create unit', function (): void {
+    $unit = [
+        'name' => Str::random(),
+        'abbreviation' => Str::random(10),
+    ];
 
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.units.{id}.get'),
-            'index' => Permission::findOrCreate('api.units.get'),
-            'create' => Permission::findOrCreate('api.units.post'),
-            'update' => Permission::findOrCreate('api.units.put'),
-            'delete' => Permission::findOrCreate('api.units.{id}.delete'),
-        ];
-    }
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_unit(): void
-    {
-        $unit = [
-            'name' => Str::random(),
-            'abbreviation' => Str::random(10),
-        ];
+    $response = $this->actingAs($this->user)->post('/api/units', $unit);
+    $response->assertCreated();
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $responseUnit = json_decode($response->getContent())->data;
 
-        $response = $this->actingAs($this->user)->post('/api/units', $unit);
-        $response->assertStatus(201);
+    $dbUnit = Unit::query()
+        ->whereKey($responseUnit->id)
+        ->first();
 
-        $responseUnit = json_decode($response->getContent())->data;
+    expect($dbUnit->name)->toEqual($unit['name']);
+    expect($dbUnit->abbreviation)->toEqual($unit['abbreviation']);
+});
 
-        $dbUnit = Unit::query()
-            ->whereKey($responseUnit->id)
-            ->first();
+test('create unit validation fails', function (): void {
+    $unit = [
+        'abbreviation' => Str::random(),
+    ];
 
-        $this->assertEquals($unit['name'], $dbUnit->name);
-        $this->assertEquals($unit['abbreviation'], $dbUnit->abbreviation);
-    }
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_unit_validation_fails(): void
-    {
-        $unit = [
-            'abbreviation' => Str::random(),
-        ];
+    $response = $this->actingAs($this->user)->post('/api/units', $unit);
+    $response->assertUnprocessable();
+});
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+test('delete unit', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/units', $unit);
-        $response->assertStatus(422);
-    }
+    $response = $this->actingAs($this->user)->delete('/api/units/' . $this->unit->id);
+    $response->assertNoContent();
 
-    public function test_delete_unit(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect(Unit::query()->whereKey($this->unit->id)->exists())->toBeFalse();
+});
 
-        $response = $this->actingAs($this->user)->delete('/api/units/' . $this->unit->id);
-        $response->assertStatus(204);
+test('delete unit unit not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertFalse(Unit::query()->whereKey($this->unit->id)->exists());
-    }
+    $response = $this->actingAs($this->user)->delete('/api/units/' . ++$this->unit->id);
+    $response->assertNotFound();
+});
 
-    public function test_delete_unit_unit_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+test('get unit', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/units/' . ++$this->unit->id);
-        $response->assertStatus(404);
-    }
+    $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id);
+    $response->assertOk();
 
-    public function test_get_unit(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+    $unit = json_decode($response->getContent())->data;
 
-        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id);
-        $response->assertStatus(200);
+    expect($unit->id)->toEqual($this->unit->id);
+    expect($unit->name)->toEqual($this->unit->name);
+    expect($unit->abbreviation)->toEqual($this->unit->abbreviation);
+});
 
-        $unit = json_decode($response->getContent())->data;
+test('get unit unit not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertEquals($this->unit->id, $unit->id);
-        $this->assertEquals($this->unit->name, $unit->name);
-        $this->assertEquals($this->unit->abbreviation, $unit->abbreviation);
-    }
+    $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id + 10000);
+    $response->assertNotFound();
+});
 
-    public function test_get_unit_unit_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+test('get units', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id + 10000);
-        $response->assertStatus(404);
-    }
+    $response = $this->actingAs($this->user)->get('/api/units');
+    $response->assertOk();
 
-    public function test_get_units(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
+    $units = json_decode($response->getContent())->data;
 
-        $response = $this->actingAs($this->user)->get('/api/units');
-        $response->assertStatus(200);
-
-        $units = json_decode($response->getContent())->data;
-
-        $this->assertEquals(1, $units->total);
-        $this->assertEquals($this->unit->id, $units->data[0]->id);
-        $this->assertEquals($this->unit->name, $units->data[0]->name);
-        $this->assertEquals($this->unit->abbreviation, $units->data[0]->abbreviation);
-    }
-}
+    expect($units->total)->toEqual(1);
+    expect($units->data[0]->id)->toEqual($this->unit->id);
+    expect($units->data[0]->name)->toEqual($this->unit->name);
+    expect($units->data[0]->abbreviation)->toEqual($this->unit->abbreviation);
+});

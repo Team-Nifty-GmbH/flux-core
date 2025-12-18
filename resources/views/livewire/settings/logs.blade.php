@@ -3,13 +3,13 @@
         log: {},
     }"
     x-on:data-table-row-clicked="
-        $wire.loadLog($event.detail.id).then((result) => {
+        $wire.loadLog($event.detail.record.id).then((result) => {
             log = result
             $modalOpen('show-log-modal')
         })
     "
 >
-    <x-modal id="show-log-modal">
+    <x-modal id="show-log-modal" :title="__('Log')">
         <div class="flex w-full justify-between px-6 py-3">
             <span x-text="formatters.datetime(log?.created_at)"></span>
             <span

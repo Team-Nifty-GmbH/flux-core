@@ -42,6 +42,7 @@ abstract class Dashboard extends Component
                 $widget['height'] ??= data_get($widget, 'defaultHeight');
                 $widget['order_column'] ??= data_get($widget, 'defaultOrderColumn');
                 $widget['order_row'] ??= data_get($widget, 'defaultOrderRow');
+                $widget['group'] ??= null;
 
                 return $widget;
             })

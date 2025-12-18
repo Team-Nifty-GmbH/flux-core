@@ -6,7 +6,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\Printable;
 
 class PrintingRuleset extends FluxRuleset
 {

@@ -13,7 +13,7 @@ class OrderReplicateForm extends FluxForm
 
     public ?int $agent_id = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $contact_id = null;
 
@@ -31,6 +31,8 @@ class OrderReplicateForm extends FluxForm
     public ?int $payment_type_id = null;
 
     public ?int $price_list_id = null;
+
+    public bool $set_new_as_parent = false;
 
     protected function getActions(): array
     {

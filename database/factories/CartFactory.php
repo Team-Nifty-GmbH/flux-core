@@ -12,11 +12,10 @@ class CartFactory extends Factory
     public function definition(): array
     {
         return [
-            'session_id' => $this->faker->uuid,
-            'name' => $this->faker->name,
-            'is_portal_public' => $this->faker->boolean,
-            'is_public' => $this->faker->boolean,
-            'is_watchlist' => $this->faker->boolean,
+            'session_id' => fake()->uuid,
+            'name' => fake()->name,
+            'is_public' => fake()->boolean,
+            'is_watchlist' => fake()->boolean,
         ];
     }
 }

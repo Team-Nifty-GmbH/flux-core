@@ -84,6 +84,10 @@ class Notifications extends Component
     #[Renderless]
     public function sendNotify(array $notify): void
     {
+        if (request()->header('referer') === data_get($notify, 'accept.url')) {
+            return;
+        }
+
         if (! is_null(data_get($notify, 'progress'))) {
             $notify['description'] = Blade::render(<<<'BLADE'
                 {!! data_get($notify, 'description') !!}
@@ -111,7 +115,9 @@ class Notifications extends Component
             $notification->created_at = now();
         }
 
-        $notification->toast($this)->id(data_get($notify, 'contextId'))->send();
+        $notification->toast($this)
+            ->id(data_get($notify, 'contextId'))
+            ->send();
     }
 
     #[Renderless]

@@ -3,72 +3,38 @@
 namespace FluxErp\Notifications\Ticket;
 
 use FluxErp\Models\Ticket;
-use FluxErp\Notifications\Notification;
-use FluxErp\Support\Notification\ToastNotification\NotificationAction;
-use FluxErp\Support\Notification\ToastNotification\ToastNotification;
+use FluxErp\Support\Notification\SubscribableNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
-use NotificationChannels\WebPush\WebPushMessage;
 
-class TicketCreatedNotification extends Notification implements ShouldQueue
+class TicketCreatedNotification extends SubscribableNotification implements ShouldQueue
 {
     use Queueable;
 
-    public Ticket $model;
-
-    /**
-     * Create a new notification instance.
-     *
-     * @return void
-     */
-    public function __construct(Ticket $model)
+    public function subscribe(): array
     {
-        $this->model = $model;
+        return [
+            'eloquent.created: ' . resolve_static(Ticket::class, 'class') => 'sendNotification',
+        ];
     }
 
-    public function toArray(object $notifiable): array
+    protected function getDescription(): ?string
     {
-        $user = $this->model->authenticatable;
-
-        return ToastNotification::make()
-            ->title(__(':username created ticket :id', ['username' => $user->name, 'id' => $this->model->id]))
-            ->description($this->model->title . '<br>' . $this->model->description)
-            ->accept(
-                NotificationAction::make()
-                    ->label(__('View'))
-                    ->url(config('app.url') . $this->model->detailRoute(false))
-            )
-            ->toArray();
+        return $this->model->getLabel();
     }
 
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     */
-    public function toMail(object $notifiable): MailMessage
+    protected function getNotificationIcon(): ?string
     {
-        $notification = $this->toArray($notifiable);
-
-        return (new MailMessage())
-            ->subject($notification['title'])
-            ->line($notification['description'])
-            ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
+        return 'support';
     }
 
-    public function toWebPush(object $notifiable): ?WebPushMessage
+    protected function getTitle(): string
     {
-        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
-            return null;
-        }
-
-        $notification = $this->toArray($notifiable);
-
-        return (new WebPushMessage())
-            ->icon($notification['img'])
-            ->title($notification['title'])
-            ->body($notification['description'])
-            ->data(['url' => $notification['accept']['url'] ?? '']);
+        return __(
+            ':username created a ticket',
+            [
+                'username' => $this->model->getCreatedBy()?->getLabel() ?? __('Unknown'),
+            ],
+        );
     }
 }

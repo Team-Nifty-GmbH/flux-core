@@ -9,6 +9,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Traits\Macroable;
+use Kreait\Firebase\Messaging\Notification as FcmNotification;
 use NotificationChannels\WebPush\WebPushMessage;
 
 class ToastNotification extends Toast implements Arrayable
@@ -124,7 +125,7 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
-    public function image(string $image): static
+    public function image(?string $image = null): static
     {
         $this->data['image'] = $image;
 
@@ -231,7 +232,10 @@ class ToastNotification extends Toast implements Arrayable
     public function toMail(): MailMessage
     {
         $mailMessage = (new MailMessage())
-            ->greeting(__('Hello') . ' ' . $this->notifiable?->name)
+            ->greeting(trim(
+                __('Hello')
+                . (property_exists($this->notifiable, 'name') ? ' ' . $this->notifiable->name : '')
+            ))
             ->subject($this->title ?? '')
             ->line(new HtmlString($this->description));
 
@@ -251,11 +255,55 @@ class ToastNotification extends Toast implements Arrayable
             return null;
         }
 
-        return (new WebPushMessage())
-            ->icon($this->img)
-            ->title($this->title)
-            ->body($this->description)
-            ->data(['url' => $this->accept?->url ?? '']);
+        $webPush = new WebPushMessage()
+            ->title(strip_tags($this->title ?? ''))
+            ->data($this->data)
+            ->badge(url('/pwa-icons/icons-vector.svg'))
+            ->body(strip_tags($this->description ?? ''));
+
+        if ($this->accept) {
+            $webPush->action(strip_tags($this->accept->label ?? ''), $this->accept->url ?? '');
+        }
+
+        if ($this->reject) {
+            $webPush->action(strip_tags($this->reject->label ?? ''), $this->reject->url ?? '');
+        }
+
+        if (data_get($this->data, 'image')) {
+            $webPush->icon(data_get($this->data, 'image'));
+        }
+
+        return $webPush;
+    }
+
+    public function toFcm(): ?FcmNotification
+    {
+        $fcmNotification = FcmNotification::create(
+            strip_tags($this->title ?? ''),
+            strip_tags($this->description ?? '')
+        );
+
+        if ($imageUrl = data_get($this->data, 'image')) {
+            $fcmNotification = $fcmNotification->withImageUrl($imageUrl);
+        }
+
+        return $fcmNotification;
+    }
+
+    public function toFcmData(): array
+    {
+        $url = $this->accept?->url;
+
+        if (! $url) {
+            return [];
+        }
+
+        $parsedUrl = parse_url($url);
+
+        return [
+            'url' => ($parsedUrl['scheme'] ?? 'https') . '://' . ($parsedUrl['host'] ?? ''),
+            'path' => ($parsedUrl['path'] ?? '') . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : ''),
+        ];
     }
 
     public function type(ToastType $type): static

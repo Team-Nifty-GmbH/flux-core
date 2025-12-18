@@ -52,6 +52,8 @@ return new class() extends Migration
             $table->unsignedInteger('score')->default(0);
             $table->decimal('weighted_gross_profit', 40, 10)->nullable();
             $table->decimal('weighted_revenue', 40, 10)->nullable();
+            $table->timestamp('closed_at')->nullable();
+            $table->string('closed_by')->nullable();
 
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();

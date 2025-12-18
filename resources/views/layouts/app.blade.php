@@ -19,7 +19,7 @@
             'dark bg-secondary-800': darkTheme,
             'bg-slate-50': ! darkTheme,
         }"
-        class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
+        class="h-full text-secondary-600 transition duration-300 dark:text-secondary-50"
     >
         @section('wire.navigate.spinner')
         @persist('spinner')
@@ -30,7 +30,7 @@
             >
                 <div
                     id="loading-overlay-spinner"
-                    class="bg-secondary-400 dark:bg-secondary-700 fixed inset-0 flex items-center justify-center bg-opacity-60 opacity-0 transition-opacity duration-200 dark:bg-opacity-60"
+                    class="fixed inset-0 flex items-center justify-center bg-secondary-400 bg-opacity-60 opacity-0 transition-opacity duration-200 dark:bg-secondary-700 dark:bg-opacity-60"
                 >
                     <x-flux::spinner-svg />
                 </div>
@@ -118,13 +118,26 @@
                         @auth('web')
                             <div
                                 x-persist="layout.header.search-bar"
-                                class="grow"
+                                class="hidden grow sm:block"
                             >
                                 <livewire:features.search-bar />
                             </div>
                         @endauth
 
-                        <div class="flex gap-2 overflow-hidden">
+                        <div class="grow sm:hidden"></div>
+
+                        <div class="flex flex-shrink-0 gap-2">
+                            @auth('web')
+                                <div
+                                    x-persist="layout.header.search-bar-mobile"
+                                >
+                                    <livewire:features.search-bar
+                                        :mobile="true"
+                                        lazy
+                                    />
+                                </div>
+                            @endauth
+
                             @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
                                     <livewire:cart.cart lazy />

@@ -178,7 +178,7 @@
     </section>
     <section
         class="grow"
-        x-on:data-table-row-clicked="$wire.showMail($event.detail.id)"
+        x-on:data-table-row-clicked="$wire.showMail($event.detail.record.id)"
     >
         @include('tall-datatables::livewire.data-table')
     </section>

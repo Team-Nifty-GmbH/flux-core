@@ -10,8 +10,9 @@ use FluxErp\Models\OrderType;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -21,10 +22,15 @@ class CreateChildOrder extends Component
 {
     use Actions;
 
+    #[Locked]
+    public array $availableOrderTypes = [];
+
     #[Url]
     public ?int $orderId = null;
 
     public ?array $parentOrder = null;
+
+    public ?float $percentage = null;
 
     public OrderReplicateForm $replicateOrder;
 
@@ -50,10 +56,6 @@ class CreateChildOrder extends Component
             ! $this->orderId
             || ! $this->type
             || ! in_array($this->type, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])
-            || resolve_static(OrderType::class, 'query')
-                ->where('order_type_enum', $this->type)
-                ->where('is_active', true)
-                ->doesntExist()
             || ! $parentOrder
         ) {
             $this->redirectRoute('orders.orders', navigate: true);
@@ -67,14 +69,21 @@ class CreateChildOrder extends Component
         $this->replicateOrder->fill($this->parentOrder);
         $this->replicateOrder->parent_id = $this->orderId;
         $this->replicateOrder->order_positions = [];
-        $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
+
+        $this->availableOrderTypes = resolve_static(OrderType::class, 'query')
+            ->where('tenant_id', $parentOrder->tenant_id)
             ->where('order_type_enum', $this->type)
             ->where('is_active', true)
             ->when(
                 $this->type === OrderTypeEnum::SplitOrder->value,
                 fn (Builder $query) => $query->where('is_hidden', false)
             )
-            ->value('id');
+            ->get(['id', 'name'])
+            ->toArray();
+
+        if (count($this->availableOrderTypes) === 1) {
+            $this->replicateOrder->order_type_id = data_get($this->availableOrderTypes, '0.id');
+        }
     }
 
     public function render(): View
@@ -125,65 +134,118 @@ class CreateChildOrder extends Component
 
     public function takeOrderPositions(): void
     {
-        $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
+        $takeAllWithPercentage = $this->percentage && $this->percentage > 0;
 
-        $newPositionIds = array_diff($this->selectedPositions, $alreadySelectedIds);
+        if ($takeAllWithPercentage) {
+            $this->replicateOrder->order_positions = [];
+        } else {
+            $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
+            $positionIds = array_diff($this->selectedPositions, $alreadySelectedIds, ['*']);
 
-        if (! $newPositionIds) {
-            $this->selectedPositions = [];
+            if (! $positionIds) {
+                $this->selectedPositions = [];
 
-            return;
+                return;
+            }
         }
 
+        $maxAmounts = array_reduce(
+            DB::select(
+                'WITH RECURSIVE siblings AS (
+                    SELECT id, origin_position_id, signed_amount
+                    FROM order_positions
+                    WHERE order_id = ' . $this->orderId
+                . (! $takeAllWithPercentage ? ' AND id IN (' . implode(',', $positionIds) . ')' : '')
+                . ' UNION ALL
+                    SELECT op.id, op.origin_position_id, op.signed_amount
+                    FROM order_positions op
+                    INNER JOIN siblings s ON s.id = op.origin_position_id
+                    WHERE op.deleted_at IS NULL
+                )
+                SELECT * FROM siblings'
+            ),
+            function (?array $carry, object $item) {
+                $parentKey = array_find_key(
+                    $carry ?? [],
+                    fn (array $value) => ! is_null($item->origin_position_id)
+                        && in_array(
+                            $item->origin_position_id,
+                            [
+                                $value['id'],
+                                $value['origin_position_id'],
+                            ]
+                        )
+                );
+
+                if (is_null($parentKey)) {
+                    $carry[] = (array) $item;
+                } else {
+                    $carry[$parentKey] = array_merge(
+                        $carry[$parentKey],
+                        [
+                            'origin_position_id' => $item->id,
+                            'signed_amount' => bcsub(
+                                data_get($carry, $parentKey . '.signed_amount'),
+                                $item->signed_amount
+                            ),
+                        ]
+                    );
+                }
+
+                return $carry;
+            }
+        );
+
         $orderPositions = resolve_static(OrderPosition::class, 'query')
-            ->whereKey($newPositionIds)
-            ->where('order_positions.order_id', $this->orderId)
+            ->whereKey(array_column($maxAmounts, 'id'))
             ->with(['product.unit:id,abbreviation'])
-            ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
-                $join->on('order_positions.id', '=', 'descendants.origin_position_id')
-                    ->whereNull('descendants.deleted_at');
-            })
-            ->selectRaw(
-                'order_positions.id' .
-                ', order_positions.amount' .
-                ', order_positions.name' .
-                ', order_positions.description' .
-                ', order_positions.unit_net_price' .
-                ', order_positions.unit_gross_price' .
-                ', order_positions.total_net_price' .
-                ', order_positions.total_gross_price' .
-                ', order_positions.is_net' .
-                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
-                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
-            )
-            ->groupBy([
-                'order_positions.id',
-                'order_positions.amount',
-                'order_positions.name',
-                'order_positions.description',
-                'order_positions.unit_net_price',
-                'order_positions.unit_gross_price',
-                'order_positions.total_net_price',
-                'order_positions.total_gross_price',
-                'order_positions.is_net',
+            ->select([
+                'id',
+                'product_id',
+                'name',
+                'description',
+                'unit_net_price',
+                'unit_gross_price',
+                'total_net_price',
+                'total_gross_price',
+                'is_net',
             ])
-            ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > descendantAmount')
-            ->get();
+            ->get()
+            ->map(function (OrderPosition $position) use ($maxAmounts) {
+                $position->setRelation(
+                    'maxAmount',
+                    data_get(
+                        array_find($maxAmounts, fn (array $value) => $value['id'] === $position->getKey()),
+                        'signed_amount'
+                    )
+                );
+
+                return $position;
+            });
 
         foreach ($orderPositions as $orderPosition) {
-            $this->replicateOrder->order_positions[] = [
-                'id' => $orderPosition->id,
-                'amount' => $orderPosition->totalAmount,
-                'name' => $orderPosition->name,
-                'description' => $orderPosition->description,
-                'unit_net_price' => $orderPosition->unit_net_price,
-                'unit_gross_price' => $orderPosition->unit_gross_price,
-                'total_net_price' => $orderPosition->total_net_price,
-                'total_gross_price' => $orderPosition->total_gross_price,
-                'is_net' => $orderPosition->is_net,
-                'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
-            ];
+            $amount = $takeAllWithPercentage
+                ? bcround($orderPosition->maxAmount * ($this->percentage / 100), 2)
+                : $orderPosition->maxAmount;
+
+            if (bccomp($amount, 0) === 1) {
+                $this->replicateOrder->order_positions[] = [
+                    'id' => $orderPosition->id,
+                    'amount' => $amount,
+                    'name' => $orderPosition->name,
+                    'description' => $orderPosition->description,
+                    'unit_net_price' => $orderPosition->unit_net_price,
+                    'unit_gross_price' => $orderPosition->unit_gross_price,
+                    'total_net_price' => $orderPosition->total_net_price,
+                    'total_gross_price' => $orderPosition->total_gross_price,
+                    'is_net' => $orderPosition->is_net,
+                    'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
+                ];
+            }
+        }
+
+        if ($takeAllWithPercentage) {
+            $this->percentage = null;
         }
 
         $this->selectedPositions = [];

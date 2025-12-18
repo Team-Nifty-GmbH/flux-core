@@ -546,7 +546,7 @@ class OrderPositions extends OrderPositionList
         return array_merge(
             parent::getReturnKeys(),
             [
-                'client_id',
+                'tenant_id',
                 'ledger_account_id',
                 'order_id',
                 'parent_id',

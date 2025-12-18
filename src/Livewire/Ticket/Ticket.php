@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Ticket;
 
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\TicketForm;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Ticket as TicketModel;
 use FluxErp\Models\TicketType;
@@ -12,7 +11,6 @@ use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -42,6 +40,13 @@ class Ticket extends Component
     public function render(): View
     {
         return view('flux::livewire.ticket.ticket');
+    }
+
+    #[Renderless]
+    public function assignToMe(): void
+    {
+        $this->ticket->users = array_unique(array_merge($this->ticket->users, [auth()->id()]));
+        $this->save();
     }
 
     #[Renderless]
@@ -80,7 +85,6 @@ class Ticket extends Component
                 'users.media',
                 'ticketType:id,name',
                 'authenticatable',
-                'meta:id,additional_column_id,model_type,model_id,key,value',
             ])
             ->whereKey($id)
             ->firstOrFail();
@@ -145,23 +149,6 @@ class Ticket extends Component
         $this->notification()->success(__(':model saved', ['model' => __('Ticket')]))->send();
 
         return true;
-    }
-
-    public function updateAdditionalColumns(?int $id): void
-    {
-        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-            ->where('is_frontend_visible', true)
-            ->where(function (Builder $query) use ($id): void {
-                $query->where('model_type', morph_alias(TicketModel::class))
-                    ->when($id, function (Builder $query) use ($id): void {
-                        $query->orWhere(function (Builder $query) use ($id): void {
-                            $query->where('model_type', morph_alias(TicketType::class))
-                                ->where('model_id', $id);
-                        });
-                    });
-            })
-            ->get()
-            ->toArray();
     }
 
     public function updatedAuthorTypeContact(): void

@@ -13,9 +13,9 @@ return new class() extends Migration
         }
 
         Schema::create('communicatable', function (Blueprint $table): void {
-            $table->id();
-            $table->morphs('communicatable');
+            $table->id('pivot_id');
             $table->foreignId('communication_id')->constrained('communications')->cascadeOnDelete();
+            $table->morphs('communicatable');
 
             $table->unique(
                 ['communicatable_type', 'communicatable_id', 'communication_id'],

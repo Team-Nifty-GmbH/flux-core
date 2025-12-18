@@ -1,4 +1,4 @@
-<x-modal id="edit-payment-type-modal">
+<x-modal id="edit-payment-type-modal" :title="__('Payment Type')">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="paymentType.name" :label="__('Name')" />
         <div class="mt-2">
@@ -28,12 +28,12 @@
             :label="__('Requires Manual Transfer')"
         />
         <x-select.styled
-            :label="__('Client')"
+            :label="__('Tenant')"
             multiple
             autocomplete="off"
-            wire:model="paymentType.clients"
+            wire:model="paymentType.tenants"
             select="label:name|value:id"
-            :options="$clients"
+            :options="$tenants"
         />
         <x-number
             wire:model="paymentType.payment_reminder_days_1"
@@ -61,6 +61,7 @@
         />
         <x-flux::editor
             wire:model="paymentType.description"
+            scope="paymentType"
             :label="__('Description')"
         />
     </div>

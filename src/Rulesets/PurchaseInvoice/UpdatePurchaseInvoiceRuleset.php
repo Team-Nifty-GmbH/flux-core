@@ -2,13 +2,13 @@
 
 namespace FluxErp\Rulesets\PurchaseInvoice;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -49,11 +49,6 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'client_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Client::class]),
-            ],
             'contact_id' => [
                 'nullable',
                 'integer',
@@ -79,7 +74,18 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PaymentType::class]),
             ],
+            'tenant_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
+            ],
             'invoice_date' => 'date',
+            'payment_target_date' => 'nullable|date',
+            'payment_discount_target_date' => 'nullable|date',
+            'payment_discount_percent' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
             'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'invoice_number' => 'nullable|string|max:255',

@@ -1,4 +1,7 @@
-<x-modal id="edit-serial-number-range-modal">
+<x-modal
+    id="edit-serial-number-range-modal"
+    :title="__('Serial Number Range')"
+>
     <div class="flex flex-col gap-1.5">
         <div
             class="flex flex-col gap-1.5"
@@ -11,10 +14,10 @@
                 :options="$models"
             />
             <x-select.styled
-                wire:model="serialNumberRange.client_id"
-                :label="__('Client')"
+                wire:model="serialNumberRange.tenant_id"
+                :label="__('Tenant')"
                 select="label:name|value:id"
-                :options="$clients"
+                :options="$tenants"
             />
         </div>
         <x-input wire:model="serialNumberRange.type" :label="__('Type')" />

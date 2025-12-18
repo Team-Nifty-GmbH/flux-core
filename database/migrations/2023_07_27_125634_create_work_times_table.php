@@ -15,6 +15,7 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('contacts')
                 ->cascadeOnDelete();
+            // employee_id
             $table->foreignId('order_position_id')
                 ->nullable()
                 ->unique()
@@ -24,8 +25,14 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('work_times')
                 ->cascadeOnDelete();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('work_time_type_id')->nullable();
+            $table->foreignId('user_id')
+                ->nullable()
+                ->references('id')
+                ->on('users');
+            $table->foreignId('work_time_type_id')
+                ->nullable()
+                ->references('id')
+                ->on('work_time_types');
             $table->nullableMorphs('trackable');
             $table->dateTime('started_at');
             $table->dateTime('ended_at')->nullable();
@@ -44,9 +51,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('work_time_type_id')->references('id')->on('work_time_types');
         });
     }
 

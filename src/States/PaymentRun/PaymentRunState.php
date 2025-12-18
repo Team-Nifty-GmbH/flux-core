@@ -2,11 +2,11 @@
 
 namespace FluxErp\States\PaymentRun;
 
-use FluxErp\States\State;
+use FluxErp\States\EndableState;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class PaymentRunState extends State implements HasFrontendFormatter
+abstract class PaymentRunState extends EndableState implements HasFrontendFormatter
 {
     public static function config(): StateConfig
     {

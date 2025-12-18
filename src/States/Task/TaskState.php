@@ -2,14 +2,12 @@
 
 namespace FluxErp\States\Task;
 
-use FluxErp\States\State;
+use FluxErp\States\EndableState;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class TaskState extends State implements HasFrontendFormatter
+abstract class TaskState extends EndableState implements HasFrontendFormatter
 {
-    public static bool $isEndState;
-
     abstract public function color(): string;
 
     public static function config(): StateConfig

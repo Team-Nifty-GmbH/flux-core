@@ -9,18 +9,9 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('product_product_option', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('product_option_id');
-
-            $table->foreign('product_id')
-                ->references('id')
-                ->on('products')
-                ->cascadeOnDelete();
-            $table->foreign('product_option_id')
-                ->references('id')
-                ->on('product_options')
-                ->cascadeOnDelete();
+            $table->id('pivot_id');
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('product_option_id')->constrained('product_options')->cascadeOnDelete();
 
             $table->unique(['product_id', 'product_option_id']);
         });

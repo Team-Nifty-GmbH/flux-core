@@ -8,7 +8,6 @@ use FluxErp\Traits\Action\HasActionEvents;
 use FluxErp\Traits\Action\SupportsApiRequests;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -22,8 +21,6 @@ use Throwable;
 abstract class FluxAction
 {
     use Conditionable, HasActionEvents, Makeable, SupportsApiRequests;
-
-    protected static ?Dispatcher $dispatcher;
 
     protected static bool $hasPermission = true;
 

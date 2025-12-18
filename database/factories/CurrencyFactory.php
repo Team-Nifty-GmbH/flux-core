@@ -14,7 +14,7 @@ class CurrencyFactory extends Factory
     {
         $i = 0;
         while (Currency::query()
-            ->where('iso', $iso = $this->faker->unique()->currencyCode())
+            ->where('iso', $iso = fake()->unique()->currencyCode())
             ->exists() && $i < 100) {
             $i++;
         }
@@ -24,9 +24,9 @@ class CurrencyFactory extends Factory
         }
 
         return [
-            'name' => $this->faker->currencyCode(),
+            'name' => fake()->currencyCode(),
             'iso' => $iso,
-            'symbol' => $this->faker->randomElement(['?', '€', '$', '#', '§']),
+            'symbol' => fake()->randomElement(['?', '€', '$', '#', '§']),
             'is_default' => false,
         ];
     }

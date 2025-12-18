@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class EventSubscription extends FluxModel

@@ -1,12 +1,19 @@
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import { create, registerPlugin, setOptions } from 'filepond';
 
-const BASE_LANGUAGE_PATH = '/node_modules/filepond/locale/';
+// Static imports for common locales - these are bundled
+import localeDE from 'filepond/locale/de-de.js';
+import localeEN from 'filepond/locale/en-en.js';
 
-// load all available languages from filepond
-const availableLanguages = import.meta.glob(
-    '/node_modules/filepond/locale/*.js',
-);
+// Bundled locales - no additional requests needed
+const bundledLocales = {
+    de: localeDE,
+    en: localeEN,
+};
+
+function loadLocale(lang) {
+    return bundledLocales[lang] || bundledLocales['en'];
+}
 
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
 
@@ -26,12 +33,14 @@ export default function (
         fileCount: null,
         pond: null,
         multipleFileUpload: true,
-        async setCollection(collectionName) {
+        async setCollection(collectionName, id = null) {
             if (collectionName !== null) {
                 //  on selected - check if collection is single file upload
-                this.multipleFileUpload =
-                    !(await $wire.hasSingleFile(collectionName));
-                this.readOnly = await $wire.readOnly(collectionName);
+                this.multipleFileUpload = !(await $wire.hasSingleFile(
+                    id,
+                    collectionName,
+                ));
+                this.readOnly = await $wire.readOnly(id, collectionName);
                 //  check if collection is read-only - disable file upload if true
             } else {
                 // on deselect - reset to default on init
@@ -50,21 +59,9 @@ export default function (
             });
             this.selectedCollection = collectionName;
         },
-        async loadFilePond(fileCountGetter) {
-            // getting a specific language path - based on a selected language
-            const languageKey =
-                lang === null
-                    ? undefined
-                    : Object.keys(availableLanguages).find((key) =>
-                          key.split('/').pop().includes(lang),
-                      );
-            // fallback is english
-            const moduleLanguage =
-                languageKey !== undefined
-                    ? await availableLanguages[languageKey]()
-                    : await availableLanguages[
-                          `${BASE_LANGUAGE_PATH}en-en.js`
-                      ]();
+        loadFilePond(fileCountGetter) {
+            // Load the bundled locale (de or en, fallback to en)
+            const moduleLanguage = loadLocale(lang);
             // return file-count for the selected folder
             this.fileCount = fileCountGetter.bind(this);
             registerPlugin(FilePondPluginImagePreview);
@@ -169,11 +166,11 @@ export default function (
             });
 
             // set language
-            setOptions(moduleLanguage.default);
+            setOptions(moduleLanguage);
 
             // set initial label - on label change - translation will be discarded
             // need to persist default label
-            this.uploadLabel = moduleLanguage.default.labelIdle;
+            this.uploadLabel = moduleLanguage.labelIdle;
         },
         clearFilesOnLeave() {
             if (this.pond !== null && this.tempFilesId.length > 0) {

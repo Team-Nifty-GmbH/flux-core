@@ -12,10 +12,13 @@ class MoneyTransfer extends DirectDebit
     public array $enabledCols = [
         'invoice_number',
         'invoice_date',
+        'payment_target_date',
+        'payment_discount_target_date',
         'contact.customer_number',
         'address_invoice.name',
         'total_gross_price',
         'balance',
+        'balance_due_discount',
         'commission',
     ];
 

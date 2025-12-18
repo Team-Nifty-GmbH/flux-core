@@ -34,10 +34,6 @@ class UpdateTarget extends FluxAction
 
         if (! is_null($users)) {
             $target->users()->sync($users);
-
-            foreach ($target->children()->get('id') as $child) {
-                $child->users()->sync($users);
-            }
         }
 
         return $target->withoutRelations()->fresh();
@@ -88,7 +84,7 @@ class UpdateTarget extends FluxAction
 
         if ($errors) {
             throw ValidationException::withMessages($errors)
-                ->errorBag('createTarget');
+                ->errorBag('updateTarget');
         }
     }
 }

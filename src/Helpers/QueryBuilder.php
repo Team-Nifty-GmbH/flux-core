@@ -2,11 +2,8 @@
 
 namespace FluxErp\Helpers;
 
-use FluxErp\Models\AdditionalColumn;
-use FluxErp\QueryBuilder\AdditionalColumnFilter;
-use FluxErp\QueryBuilder\AdditionalColumnSort;
 use FluxErp\QueryBuilder\RelatedColumnSort;
-use FluxErp\Traits\Filterable;
+use FluxErp\Traits\Model\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -113,31 +110,12 @@ class QueryBuilder
 
         $modelFilters = self::calculateFilters($model);
 
-        $additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-            ->where('model_type', $modelName)
-            ->get()
-            ->pluck('name')
-            ->toArray();
-
-        $additionalColumnsFilters = [];
-        $additionalColumnsSorts = [];
-        foreach ($additionalColumns as $additionalColumn) {
-            $alias = $modelName . '.' . $additionalColumn;
-            $additionalColumnsFilters[] = AllowedFilter::custom(
-                $additionalColumn, app(AdditionalColumnFilter::class), $alias
-            );
-
-            $additionalColumnsSorts[] = AllowedSort::custom(
-                $additionalColumn, app(AdditionalColumnSort::class), $alias
-            );
-        }
-
-        $filters = array_merge($modelFilters, $additionalColumnsFilters, $relatedAllowedFilters);
+        $filters = array_merge($modelFilters, $relatedAllowedFilters);
         if (count($filters) > 0) {
             $queryBuilder->allowedFilters($filters);
         }
 
-        $sorts = array_merge($allowed->pluck('Field')->toArray(), $additionalColumnsSorts, $relatedAllowedSorts);
+        $sorts = array_merge($allowed->pluck('Field')->toArray(), $relatedAllowedSorts);
         if (count($sorts) > 0) {
             $queryBuilder->allowedSorts($sorts);
         }

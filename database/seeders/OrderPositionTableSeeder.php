@@ -3,11 +3,11 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Actions\OrderPosition\PriceCalculation;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Illuminate\Database\Seeder;
@@ -23,7 +23,7 @@ class OrderPositionTableSeeder extends Seeder
         $suppliers = Contact::all(['id']);
         $warehouses = Warehouse::all(['id']);
         $vatRates = VatRate::all(['id']);
-        $clientId = Client::default()?->id ?? Client::query()->value('id');
+        $tenantId = Tenant::default()?->id ?? Tenant::query()->value('id');
 
         foreach ($orders as $order) {
             $multiplier = $order->orderType->order_type_enum->multiplier();
@@ -38,7 +38,7 @@ class OrderPositionTableSeeder extends Seeder
 
                 if (rand(0, 9) < 7) { // Default order position
                     $orderPosition = OrderPosition::factory()->make([
-                        'client_id' => $order->client_id ?? $clientId,
+                        'tenant_id' => $order->tenant_id ?? $tenantId,
                         'order_id' => $order->id,
                         'parent_id' => rand(0, 1) ?
                             (
@@ -84,7 +84,7 @@ class OrderPositionTableSeeder extends Seeder
                     if ($orderPosition->product_id && $product->is_bundle) {
                         foreach ($product->bundleProducts as $index => $bundleProduct) {
                             OrderPosition::factory()->create([
-                                'client_id' => $orderPosition->client_id,
+                                'tenant_id' => $orderPosition->tenant_id,
                                 'order_id' => $orderPosition->order_id,
                                 'parent_id' => $orderPosition->id,
                                 'product_id' => $bundleProduct->id,
@@ -107,7 +107,7 @@ class OrderPositionTableSeeder extends Seeder
                     }
                 } else { // Block / Free text
                     OrderPosition::factory()->create([
-                        'client_id' => $order->client_id ?? $clientId,
+                        'tenant_id' => $order->tenant_id ?? $tenantId,
                         'order_id' => $order->id,
                         'parent_id' => rand(0, 1) ?
                             ($orderPositions->isEmpty() ?

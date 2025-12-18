@@ -35,7 +35,7 @@ class UpdateProduct extends FluxAction
     {
         $productOptions = Arr::pull($this->data, 'product_options');
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
-        $clients = Arr::pull($this->data, 'clients');
+        $tenants = Arr::pull($this->data, 'tenants');
 
         $productProperties = Arr::mapWithKeys(
             Arr::pull($this->data, 'product_properties', []),
@@ -74,8 +74,8 @@ class UpdateProduct extends FluxAction
             $product->suppliers()->sync($suppliers);
         }
 
-        if ($clients) {
-            $product->clients()->sync($clients);
+        if ($tenants) {
+            $product->tenants()->sync($tenants);
         }
 
         if ($prices) {
@@ -157,7 +157,7 @@ class UpdateProduct extends FluxAction
 
             if (Helper::checkCycle(Product::class, $product, $this->data['parent_id'])) {
                 throw ValidationException::withMessages([
-                    'parent_id' => [__('Cycle detected')],
+                    'parent_id' => ['Cycle detected'],
                 ])->errorBag('updateProduct');
             }
         }

@@ -12,8 +12,8 @@ class ProductCrossSellingFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'is_active' => $this->faker->boolean(80),
+            'name' => fake()->name,
+            'is_active' => fake()->boolean(80),
         ];
     }
 }

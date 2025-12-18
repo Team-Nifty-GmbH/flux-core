@@ -3,7 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\HasMediaForeignKey;
-use FluxErp\Traits\Filterable;
+use FluxErp\Traits\Model\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrintJob extends FluxModel implements HasMediaForeignKey
@@ -37,5 +37,10 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    protected function broadcastToEveryone(): bool
+    {
+        return true;
     }
 }

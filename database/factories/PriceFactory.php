@@ -12,7 +12,7 @@ class PriceFactory extends Factory
     public function definition(): array
     {
         return [
-            'price' => $this->faker->numberBetween(1, 5000) / 100,
+            'price' => fake()->numberBetween(1, 5000) / 100,
         ];
     }
 }

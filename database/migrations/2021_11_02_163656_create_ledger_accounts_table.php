@@ -15,17 +15,22 @@ return new class() extends Migration
         Schema::create('ledger_accounts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('client_id')
-                ->constrained('clients')
+            $table->foreignId('tenant_id')
+                ->constrained('tenants')
                 ->cascadeOnDelete();
             $table->string('number');
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('ledger_account_type_enum');
             $table->boolean('is_automatic')->default(false);
-            $table->timestamps();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
 
-            $table->unique(['number', 'ledger_account_type_enum', 'client_id']);
+            $table->unique(['number', 'ledger_account_type_enum', 'tenant_id']);
         });
     }
 

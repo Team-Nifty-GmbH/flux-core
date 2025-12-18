@@ -12,42 +12,42 @@ class CommunicationFactory extends Factory
 
     public function definition(): array
     {
-        $date = $this->faker->dateTimeBetween('-1 year');
-        $startedAt = $this->faker->boolean(40)
-            ? $this->faker->dateTimeBetween($date)
+        $date = fake()->dateTimeBetween('-1 year');
+        $startedAt = fake()->boolean(40)
+            ? fake()->dateTimeBetween($date)
             : null;
-        $endedAt = $startedAt && $this->faker->boolean(70)
-            ? $this->faker->dateTimeBetween($startedAt)
+        $endedAt = $startedAt && fake()->boolean(70)
+            ? fake()->dateTimeBetween($startedAt)
             : null;
 
         return [
-            'communication_type_enum' => $this->faker->randomElement(CommunicationTypeEnum::cases()),
-            'from' => $this->faker->email(),
+            'communication_type_enum' => fake()->randomElement(CommunicationTypeEnum::cases()),
+            'from' => fake()->email(),
             'to' => $this->generateEmailArray(),
-            'cc' => $this->faker->boolean(30) ? $this->generateEmailArray() : null,
-            'bcc' => $this->faker->boolean(10) ? $this->generateEmailArray() : null,
-            'subject' => $this->faker->sentence(),
-            'text_body' => $this->faker->paragraphs(3, true),
-            'html_body' => $this->faker->boolean(70)
-                ? '<p>' . $this->faker->paragraphs(3, true) . '</p>'
+            'cc' => fake()->boolean(30) ? $this->generateEmailArray() : null,
+            'bcc' => fake()->boolean(10) ? $this->generateEmailArray() : null,
+            'subject' => fake()->sentence(),
+            'text_body' => fake()->paragraphs(3, true),
+            'html_body' => fake()->boolean(70)
+                ? '<p>' . fake()->paragraphs(3, true) . '</p>'
                 : null,
-            'is_seen' => $this->faker->boolean(60),
+            'is_seen' => fake()->boolean(60),
             'date' => $date,
             'started_at' => $startedAt,
             'ended_at' => $endedAt,
-            'total_time_ms' => $this->faker->numberBetween(0, 3600000),
-            'message_id' => $this->faker->boolean() ? $this->faker->uuid() : null,
-            'message_uid' => $this->faker->boolean() ? $this->faker->numberBetween(1, 99999) : null,
+            'total_time_ms' => fake()->numberBetween(0, 3600000),
+            'message_id' => fake()->boolean() ? fake()->uuid() : null,
+            'message_uid' => fake()->boolean() ? fake()->numberBetween(1, 99999) : null,
         ];
     }
 
     private function generateEmailArray(): array
     {
-        $count = $this->faker->numberBetween(1, 4);
+        $count = fake()->numberBetween(1, 4);
         $emails = [];
 
         for ($i = 0; $i < $count; $i++) {
-            $emails[] = $this->faker->email();
+            $emails[] = fake()->email();
         }
 
         return $emails;

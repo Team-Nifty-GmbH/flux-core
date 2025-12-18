@@ -7,7 +7,7 @@ use FluxErp\Livewire\DataTables\TokenList;
 use FluxErp\Livewire\Forms\TokenForm;
 use FluxErp\Models\Permission;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
@@ -45,14 +45,6 @@ class Tokens extends TokenList
             array: $permissions,
             translate: fn (string $key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
         ));
-    }
-
-    #[Renderless]
-    public function modalClose(): void
-    {
-        $this->js(<<<'JS'
-            $modalClose('copy-token-modal')
-        JS);
     }
 
     public function save(): bool

@@ -13,9 +13,9 @@ class SerialNumberRangeFactory extends Factory
     {
         return [
             'current_number' => rand(min: 1, max: 10000),
-            'prefix' => $this->faker->countryISOAlpha3(),
-            'suffix' => $this->faker->countryISOAlpha3(),
-            'description' => $this->faker->text(),
+            'prefix' => fake()->countryISOAlpha3(),
+            'suffix' => fake()->countryISOAlpha3(),
+            'description' => fake()->text(),
         ];
     }
 }

@@ -1,4 +1,4 @@
-<x-modal :id="$leadStateForm->modalName()">
+<x-modal :id="$leadStateForm->modalName()" :title="__('Lead State')">
     <div class="flex flex-col gap-4">
         <x-input :label="__('Name')" wire:model="leadStateForm.name" />
         <x-color :label="__('Color')" wire:model="leadStateForm.color" />

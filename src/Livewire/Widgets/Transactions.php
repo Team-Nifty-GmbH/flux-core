@@ -8,7 +8,7 @@ use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Transaction;
 use FluxErp\Support\Metrics\Charts\Donut;
-use FluxErp\Traits\MoneyChartFormattingTrait;
+use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;

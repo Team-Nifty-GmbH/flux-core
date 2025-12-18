@@ -30,7 +30,7 @@
 
 <x-modal id="edit-role-permissions-modal">
     <div class="flex flex-col gap-1.5">
-        <x-input wire:model="roleForm.name" :text="__('Name')" />
+        <x-input wire:model="roleForm.name" :label="__('Name')" />
         <div x-bind:class="$wire.roleForm.id && 'pointer-events-none'">
             <x-select.styled
                 :label="__('Guard')"

@@ -7,9 +7,11 @@ use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
@@ -22,25 +24,25 @@ use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
-use FluxErp\Traits\CascadeSoftDeletes;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasRelatedModel;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\CascadeSoftDeletes;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasRelatedModel;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Printable;
+use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\DeliveryNote;
+use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
@@ -59,15 +61,16 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Traits\Conditionable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
+class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
-    use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange, HasStates,
+        HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -173,7 +176,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 $order->address_invoice = $addressInvoice;
 
                 // Get additional attributes from address if not explicitly changed
-                $order->language_id = $order->isDirty('language_id')
+                $order->language_id = (! $addressInvoice->language_id || $order->isDirty('language_id'))
                     ? $order->language_id
                     : $addressInvoice->language_id;
                 $order->contact_id = $order->isDirty('contact_id')
@@ -187,9 +190,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 $order->payment_type_id = ! $contact->payment_type_id || $order->isDirty('payment_type_id')
                     ? $order->payment_type_id
                     : $contact->payment_type_id;
-                $order->client_id = ! $contact->client_id || $order->isDirty('client_id')
-                    ? $order->client_id
-                    : $contact->client_id;
+                $order->tenant_id = ! $contact->tenant_id || $order->isDirty('tenant_id')
+                    ? $order->tenant_id
+                    : $contact->tenant_id;
             }
 
             if ($order->isDirty('address_delivery_id')
@@ -209,7 +212,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 $order->getSerialNumber('order_number');
             }
 
-            if ($order->isDirty('invoice_number')) {
+            if ($order->isDirty('invoice_date') || $order->isDirty('payment_target')) {
+                $order->payment_target_date = ($order->invoice_date && ! is_null($order->payment_target))
+                    ? $order->invoice_date->copy()->addDays($order->payment_target)
+                    : null;
+            }
+
+            if ($order->isDirty('invoice_date') || $order->isDirty('payment_discount_target')) {
+                $order->payment_discount_target_date = ($order->invoice_date && ! is_null($order->payment_discount_target))
+                    ? $order->invoice_date->copy()->addDays($order->payment_discount_target)
+                    : null;
+            }
+
+            if ($order->isDirty('invoice_number') && ! is_null($order->invoice_number)) {
                 $orderPositions = $order->orderPositions()
                     ->whereNotNull('credit_account_id')
                     ->where('post_on_credit_account', '!=', 0)
@@ -218,8 +233,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 DB::transaction(function () use ($order, $orderPositions): void {
                     foreach ($orderPositions as $orderPosition) {
                         $multiplier = match (true) {
-                            $orderPosition->post_on_credit_account > 0 => 1,
-                            $orderPosition->post_on_credit_account < 0 => -1,
+                            $orderPosition->post_on_credit_account->value > 0 => 1,
+                            $orderPosition->post_on_credit_account->value < 0 => -1,
                             default => 0,
                         };
 
@@ -260,6 +275,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 }
             }
 
+            if ($order->isDirty('payment_discount_percent')) {
+                $order->calculateBalanceDueDiscount();
+            }
+
             if ($order->isDirty('iban')
                 && $order->iban
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
@@ -286,6 +305,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         static::saved(function (Order $order): void {
             if ($order->wasChanged('is_locked')) {
                 $order->broadcastEvent('locked');
+            }
+
+            if (($order->wasChanged('approval_user_id') || $order->wasRecentlyCreated) && $order->approval_user_id) {
+                $order->approvalUser?->subscribeNotificationChannel($order->broadcastChannel());
+
+                event(OrderApprovalRequestEvent::make($order));
+            }
+
+            if (
+                ($order->wasChanged('responsible_user_id') || $order->wasRecentlyCreated)
+                && $order->responsible_user_id
+            ) {
+                $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
             }
         });
 
@@ -314,6 +346,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'total_purchase_price' => Money::class,
             'total_cost' => Money::class,
             'margin' => Money::class,
+            'subtotal_net_price' => Money::class,
+            'subtotal_gross_price' => Money::class,
+            'subtotal_vats' => 'array',
             'total_net_price' => Money::class,
             'total_gross_price' => Money::class,
             'total_vats' => 'array',
@@ -323,21 +358,17 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'total_position_discount_flat' => Money::class,
             'balance' => Money::class,
             'payment_reminder_next_date' => 'date',
-            'payment_texts' => 'array',
             'order_date' => 'date',
             'invoice_date' => 'date',
+            'payment_target_date' => 'date',
+            'payment_discount_target_date' => 'date',
             'system_delivery_date' => 'date',
             'system_delivery_date_end' => 'date',
             'customer_delivery_date' => 'date',
             'date_of_approval' => 'date',
-            'has_logistic_notify_phone_number' => 'boolean',
-            'has_logistic_notify_number' => 'boolean',
             'is_locked' => 'boolean',
-            'is_new_customer' => 'boolean',
             'is_imported' => 'boolean',
-            'is_merge_invoice' => 'boolean',
             'is_confirmed' => 'boolean',
-            'is_paid' => 'boolean',
             'requires_approval' => 'boolean',
         ];
     }
@@ -370,6 +401,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsTo(User::class, 'agent_id');
     }
 
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
+    }
+
     public function calculateBalance(): static
     {
         $this->balance = bcround(
@@ -380,6 +416,21 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ),
             2
         );
+
+        return $this;
+    }
+
+    public function calculateBalanceDueDiscount(): static
+    {
+        if (! is_null($this->balance)
+            && ! is_null($this->payment_discount_percent)
+            && bccomp($this->payment_discount_percent, 0) > 0
+        ) {
+            $discountAmount = bcmul($this->balance, $this->payment_discount_percent);
+            $this->balance_due_discount = bcsub($this->balance, $discountAmount);
+        } else {
+            $this->balance_due_discount = null;
+        }
 
         return $this;
     }
@@ -416,13 +467,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateMargin(): static
     {
-        $this->total_purchase_price = $this->orderPositions()
-            ->where('is_alternative', false)
-            ->sum('purchase_price');
-
         $this->margin = Rounding::round(
-            bcsub($this->total_net_price, $this->total_purchase_price, 9),
-            2
+            $this->orderPositions()
+                ->where('is_alternative', false)
+                ->sum('margin')
         );
 
         $variableCosts = 0;
@@ -478,27 +526,31 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this
             ->calculateTotalNetPrice()
             ->calculateDiscounts()
+            ->calculateTotalVats()
             ->calculateTotalGrossPrice()
             ->calculateMargin()
-            ->calculateTotalVats();
+            ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
     }
 
     public function calculateTotalGrossPrice(): static
     {
+        $totalVat = array_reduce(
+            $this->total_vats ?? [],
+            fn (string $carry, array $item): string => bcadd($carry, data_get($item, 'total_vat_price', 0)),
+            0
+        );
+
+        $this->total_gross_price = bcround(
+            bcadd($this->total_net_price, $totalVat),
+            2
+        );
+
         $totalBaseGross = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_gross_price = discount(
-            bcround(
-                bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
-                2
-            ),
-            $this->total_discount_percentage
-        );
-
         $this->total_base_gross_price = bcround(
-            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
+            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0),
             2
         );
         $this->total_base_discounted_gross_price = $this->total_gross_price;
@@ -540,45 +592,65 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateTotalVats(): static
     {
-        $vatGroups = $this->orderPositions()
+        $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
-            ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage')
+            ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
+            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
             ->keyBy('vat_rate_percentage');
 
+        $baseAmounts = $positionsByVatRate->map(fn (OrderPosition $item) => $item->total_net_price);
+
         foreach ($this->discounts()->ordered()->get() as $discount) {
             if ($discount->is_percentage) {
-                $vatGroups->transform(function (OrderPosition $item) use ($discount): OrderPosition {
+                $positionsByVatRate->transform(function (OrderPosition $item) use ($discount): OrderPosition {
                     $item->total_net_price = discount($item->total_net_price, $discount->discount);
 
                     return $item;
                 });
             } else {
-                $total = $vatGroups->reduce(function (string $carry, OrderPosition $item): string {
-                    return bcadd($carry, $item->total_net_price, 9);
-                }, '0');
+                $total = $positionsByVatRate->reduce(
+                    fn (string $carry, OrderPosition $item) => bcadd($carry, $item->total_net_price, 9),
+                    0
+                );
 
                 if (bccomp($total, '0', 9) > 0) {
                     $remainingTotal = max(0, bcsub($total, $discount->discount, 9));
 
-                    $vatGroups->transform(function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
-                        $proportion = bcdiv($item->total_net_price, $total, 9);
-                        $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
+                    $positionsByVatRate->transform(
+                        function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
+                            $proportion = bcdiv($item->total_net_price, $total, 9);
+                            $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
 
-                        return $item;
-                    });
+                            return $item;
+                        });
                 }
             }
         }
 
-        $this->total_vats = $vatGroups
-            ->map(function (OrderPosition $item): array {
+        $this->total_vats = $positionsByVatRate
+            ->map(function (OrderPosition $item) use ($baseAmounts): array {
                 return [
                     'vat_rate_percentage' => $item->vat_rate_percentage,
-                    'total_vat_price' => bcround(bcmul($item->total_net_price, $item->vat_rate_percentage, 9), 2),
-                    'total_net_price' => bcround($item->total_net_price, 2),
+                    'vat_rate_id' => $item->vat_rate_id,
+                    'total_vat_price' => bcround(
+                        bcmul(
+                            $item->total_net_price ?? 0,
+                            $item->vat_rate_percentage,
+                            9
+                        ),
+                        2
+                    ),
+                    'total_net_price' => bcround($item->total_net_price ?? 0, 2),
+                    'total_discount' => bcround(
+                        bcsub(
+                            $baseAmounts->get($item->vat_rate_percentage) ?? 0,
+                            $item->total_net_price,
+                            9
+                        ),
+                        2
+                    ),
                 ];
             })
             ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
@@ -604,11 +676,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ->toArray();
 
         return $this;
-    }
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
     }
 
     public function commissions(): HasMany
@@ -651,6 +718,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->morphMany(Discount::class, 'model');
     }
 
+    public function finalInvoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('final-invoice');
+    }
+
     /**
      * @throws Exception
      */
@@ -664,33 +736,58 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return null;
     }
 
+    public function getEmailTemplateModelType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getLabel(): ?string
     {
         return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
     }
 
-    public function getPortalDetailRoute(): string
-    {
-        return route('portal.orders.id', ['id' => $this->id]);
-    }
-
     public function getPrintViews(): array
     {
-        return $this->orderType?->order_type_enum->isPurchase()
-            ? [
+        // This has to be done this way, as this method is also called on order types settings with an empty order.
+        if ($this->orderType?->order_type_enum->isPurchase()) {
+            $printViews = [
                 'supplier-order' => SupplierOrder::class,
-            ]
-            : [
+            ];
+        } else {
+            $printViews = [
                 'invoice' => Invoice::class,
+                'final-invoice' => FinalInvoice::class,
                 'offer' => Offer::class,
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
                 'refund' => Refund::class,
                 'delivery-note' => DeliveryNote::class,
             ];
+        }
+
+        if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
+            $children = $this->children()
+                ->pluck('invoice_number')
+                ->toArray();
+
+            if (
+                $children
+                && count($children) === count(array_filter($children))
+            ) {
+                // If all children have an invoice number, only show final invoice
+                unset($printViews['invoice']);
+            } elseif ($children) {
+                // If the order has children, but not all have an invoice number, remove invoice and final invoice
+                unset($printViews['invoice'], $printViews['final-invoice']);
+            }
+        } elseif ($this->orderType) {
+            unset($printViews['final-invoice']);
+        }
+
+        return $printViews;
     }
 
-    public function getSerialNumber(string|array $types, ?int $clientId = null): static
+    public function getSerialNumber(string|array $types, ?int $tenantId = null): static
     {
         if (in_array('invoice_number', Arr::wrap($types))) {
             $rules = [
@@ -712,7 +809,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             Validator::make($data, $rules, $messages)->validate();
         }
 
-        return $this->hasSerialNumberRangeGetSerialNumber($types, $clientId);
+        return $this->hasSerialNumberRangeGetSerialNumber($types, $tenantId);
     }
 
     public function getUrl(): ?string
@@ -722,12 +819,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
     {
-        return $this->getFirstMedia('invoice');
+        return $this->getFirstMedia('invoice')
+            ?? $this->getFirstMedia('final-invoice')
+            ?? $this->getFirstMedia('refund');
     }
 
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
+    }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class);
     }
 
     public function newCollection(array $models = []): Collection
@@ -835,9 +939,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this;
     }
 
+    public function refund(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('refund');
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
+            ->singleFile()
+            ->readOnly();
+
+        $this->addMediaCollection('final-invoice')
             ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
             ->singleFile()
             ->readOnly();
@@ -909,6 +1023,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function totalPaid(): string|float|int

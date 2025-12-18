@@ -13,17 +13,17 @@ class CalendarEventFactory extends Factory
     public function definition(): array
     {
         $startsAt = Carbon::createFromTimestamp(
-            $this->faker->dateTimeBetween('-90 days', '+90 days')->getTimeStamp()
+            fake()->dateTimeBetween('-90 days', '+90 days')->getTimeStamp()
         );
         $endsAt = $startsAt->clone();
-        $endsAt = $this->faker->boolean(15) ? $endsAt->addDays(rand(0, 5)) : null;
+        $endsAt = fake()->boolean(15) ? $endsAt->addDays(rand(0, 5)) : null;
 
         return [
-            'title' => $this->faker->jobTitle(),
-            'description' => $this->faker->text(),
+            'title' => fake()->jobTitle(),
+            'description' => fake()->text(),
             'start' => $startsAt,
             'end' => $endsAt,
-            'is_all_day' => $this->faker->boolean(),
+            'is_all_day' => fake()->boolean(),
         ];
     }
 }

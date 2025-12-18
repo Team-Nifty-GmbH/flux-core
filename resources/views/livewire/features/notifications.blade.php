@@ -12,11 +12,11 @@
         },
     }"
     x-init.once="
-        window.Echo.private('{{ auth()->user()->broadcastChannel() }}').notification(
-            (notification) => {
-                $wire.sendNotify(notification)
-            },
-        )
+        window.Echo.private(
+            '{{ auth()->user()->receivesBroadcastNotificationsOn() }}',
+        ).notification((notification) => {
+            $wire.sendNotify(notification)
+        })
     "
 >
     <div>

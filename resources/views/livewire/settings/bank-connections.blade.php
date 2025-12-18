@@ -1,4 +1,8 @@
-<x-modal id="bank-connection-modal" class="flex flex-col gap-4">
+<x-modal
+    id="bank-connection-modal"
+    class="flex flex-col gap-4"
+    :title="__('Bank Connection')"
+>
     <div class="flex flex-col gap-4">
         <x-input wire:model="bankConnection.name" :label="__('Name')" />
         <x-select.styled
@@ -11,8 +15,21 @@
         <x-select.styled
             :label="__('Ledger Account')"
             wire:model="bankConnection.ledger_account_id"
-            select="label:name|value:id"
-            :options="$ledgerAccounts"
+            select="label:name|value:id|description:number"
+            unfiltered
+            :request="[
+                'url' => route('search', \FluxErp\Models\LedgerAccount::class),
+                'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'ledger_account_type_enum',
+                            '=',
+                            \FluxErp\Enums\LedgerAccountTypeEnum::Asset,
+                        ],
+                    ],
+                ],
+            ]"
         />
         <x-input
             wire:model="bankConnection.account_holder"

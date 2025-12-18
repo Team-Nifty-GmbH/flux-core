@@ -16,8 +16,6 @@ return new class() extends Migration
             $table->id();
             $table->char('uuid', 36);
 
-            $table->foreignId('client_id')
-                ->constrained('clients');
             $table->foreignId('created_from_id')
                 ->nullable()
                 ->constrained('order_positions')
@@ -53,6 +51,8 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('contacts')
                 ->nullOnDelete();
+            $table->foreignId('tenant_id')
+                ->constrained('tenants');
             $table->foreignId('vat_rate_id')
                 ->nullable()
                 ->constrained('vat_rates')
@@ -65,6 +65,7 @@ return new class() extends Migration
             $table->decimal('amount', 40, 10)
                 ->nullable()
                 ->comment('A decimal containing the accurate amount this order-position uses of its associated product.');
+            $table->decimal('signed_amount', 40, 10)->nullable();
             $table->decimal('amount_bundle', 40, 10)->nullable();
             $table->decimal('discount_percentage', 11, 10)
                 ->nullable()

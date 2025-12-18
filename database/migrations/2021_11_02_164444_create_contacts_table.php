@@ -23,7 +23,6 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->foreignId('client_id')->constrained('clients');
             $table->foreignId('currency_id')
                 ->nullable()
                 ->constrained('currencies')
@@ -48,6 +47,7 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('record_origins')
                 ->nullOnDelete();
+            $table->foreignId('tenant_id')->constrained('tenants');
             $table->foreignId('vat_rate_id')
                 ->nullable()
                 ->constrained('vat_rates')
@@ -78,7 +78,7 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->unique(['customer_number', 'client_id']);
+            $table->unique(['customer_number', 'tenant_id']);
         });
     }
 

@@ -95,9 +95,20 @@
             :label="__('Mail Accounts')"
             wire:model="userForm.mail_accounts"
             multiple
-            select="label:email|value:id"
+            select="label:name|value:id"
             :options="$mailAccounts"
         />
+        @show
+        @section('user-edit.default-mail-account')
+        @if ($userForm->mail_accounts)
+            <x-select.styled
+                :label="__('Default Mail Account')"
+                wire:model="userForm.default_mail_account_id"
+                select="label:name|value:id"
+                :options="collect($mailAccounts)->whereIn('id', $userForm->mail_accounts)->values()->toArray()"
+            />
+        @endif
+
         @show
         @section('user-edit.printers')
         <x-select.styled
@@ -157,15 +168,15 @@
                 {{ __('Permissions') }}
             </div>
             <div
-                x-on:click="active = 'clients'"
+                x-on:click="active = 'tenants'"
                 x-bind:class="
-                    active === 'clients'
+                    active === 'tenants'
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500'
                 "
                 class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
             >
-                {{ __('Clients') }}
+                {{ __('Tenants') }}
             </div>
             <div
                 x-on:click="active = 'commission-rates'"
@@ -251,21 +262,21 @@
             </div>
         @endcanAction
 
-        @canAction(\FluxErp\Actions\User\UpdateUserClients::class)
-            <div x-show="active === 'clients'" x-cloak>
+        @canAction(\FluxErp\Actions\User\UpdateUserTenants::class)
+            <div x-show="active === 'tenants'" x-cloak>
                 <div class="max-h-96 space-y-3 overflow-y-auto">
-                    @foreach ($clients as $client)
+                    @foreach ($tenants as $tenant)
                         <div class="flex">
                             <div class="flex-1 text-sm">
-                                {{ $client['name'] }}
+                                {{ $tenant['name'] }}
                             </div>
                             <div class="flex-1 text-sm">
-                                {{ $client['client_code'] }}
+                                {{ $tenant['tenant_code'] }}
                             </div>
                             <div class="pr-4">
                                 <x-checkbox
-                                    wire:model.number="userForm.clients"
-                                    :value="$client['id']"
+                                    wire:model.number="userForm.tenants"
+                                    :value="$tenant['id']"
                                 />
                             </div>
                         </div>

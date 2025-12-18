@@ -20,7 +20,9 @@ class Login extends Component
     #[Rule(['required', 'email'])]
     public string $email;
 
-    public string $password = '';
+    public ?string $password = null;
+
+    public bool $remember = false;
 
     protected string $dashboardRoute = 'dashboard';
 
@@ -104,10 +106,14 @@ class Login extends Component
 
     protected function tryLogin(): bool
     {
-        return Auth::guard($this->guard)->attempt([
-            'email' => $this->email,
-            'password' => $this->password,
-            'is_active' => true,
-        ]);
+        return Auth::guard($this->guard)
+            ->attempt(
+                [
+                    'email' => $this->email,
+                    'password' => $this->password,
+                    'is_active' => true,
+                ],
+                $this->remember
+            );
     }
 }

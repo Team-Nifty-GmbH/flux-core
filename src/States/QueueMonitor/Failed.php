@@ -4,6 +4,8 @@ namespace FluxErp\States\QueueMonitor;
 
 class Failed extends QueueMonitorState
 {
+    public static bool $isEndState = true;
+
     public static $name = 'failed';
 
     public function color(): string

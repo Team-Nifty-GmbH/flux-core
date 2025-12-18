@@ -4,24 +4,24 @@ namespace FluxErp\Models;
 
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SepaMandateTypeEnum;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\Printable;
-use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Printable;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\View\Printing\SepaMandate\SepaMandateView;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 
 class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
 {
-    use Communicatable, Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification,
+    use Communicatable, Filterable, HasPackageFactory, HasSerialNumberRange, HasTenantAssignment, HasUserModification,
         HasUuid, InteractsWithMedia, LogsActivity, Printable, SoftDeletes;
 
     protected static function booted(): void
@@ -46,11 +46,6 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         ];
     }
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
-
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -59,6 +54,16 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
     public function contactBankConnection(): BelongsTo
     {
         return $this->belongsTo(ContactBankConnection::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function getEmailTemplateModelType(): ?string
+    {
+        return morph_alias(static::class);
     }
 
     public function getPrintViews(): array

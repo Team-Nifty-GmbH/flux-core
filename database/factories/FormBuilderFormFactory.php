@@ -13,12 +13,12 @@ class FormBuilderFormFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
-            'description' => $this->faker->text(),
-            'slug' => $this->faker->slug(),
+            'name' => fake()->name(),
+            'description' => fake()->text(),
+            'slug' => fake()->slug(),
             'start_date' => Carbon::now()->subWeeks(rand(1, 52)),
             'end_date' => Carbon::now()->addWeeks(rand(1, 52)),
-            'is_active' => $this->faker->boolean(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }

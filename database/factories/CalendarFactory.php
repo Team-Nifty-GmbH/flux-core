@@ -12,9 +12,9 @@ class CalendarFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->jobTitle(),
-            'color' => $this->faker->hexColor(),
-            'is_public' => $this->faker->boolean(),
+            'name' => fake()->jobTitle(),
+            'color' => fake()->hexColor(),
+            'is_public' => fake()->boolean(),
         ];
     }
 }

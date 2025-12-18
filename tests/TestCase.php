@@ -3,21 +3,18 @@
 namespace FluxErp\Tests;
 
 use Barryvdh\DomPDF\ServiceProvider;
-use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
-use FluxErp\Providers\BindingServiceProvider;
-use FluxErp\Providers\EventServiceProvider;
-use FluxErp\Providers\MorphMapServiceProvider;
-use FluxErp\Providers\SanctumServiceProvider;
-use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Testing\WithCachedConfig;
+use Illuminate\Foundation\Testing\WithCachedRoutes;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Maatwebsite\Excel\ExcelServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
+use Spatie\LaravelSettings\LaravelSettingsServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
@@ -30,28 +27,18 @@ use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication, RefreshDatabase;
+    use CreatesApplication, RefreshDatabase, WithCachedConfig, WithCachedRoutes;
 
     protected $loadEnvironmentVariables = true;
-
-    protected function setUp(): void
-    {
-        if (file_exists(__DIR__ . '/../../../.env')) {
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
-            $dotenv->load();
-        }
-
-        parent::setUp();
-    }
 
     public function getPackageProviders($app): array
     {
         return [
+            LaravelSettingsServiceProvider::class,
             TranslationServiceProvider::class,
             TranslatableServiceProvider::class,
             LivewireServiceProvider::class,
             TallStackUiServiceProvider::class,
-            ViewServiceProvider::class,
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
@@ -61,11 +48,7 @@ abstract class TestCase extends BaseTestCase
             ActivitylogServiceProvider::class,
             MediaLibraryServiceProvider::class,
             FluxServiceProvider::class,
-            BindingServiceProvider::class,
-            SanctumServiceProvider::class,
             WebPushServiceProvider::class,
-            MorphMapServiceProvider::class,
-            EventServiceProvider::class,
             ServiceProvider::class,
             ExcelServiceProvider::class,
         ];
@@ -73,11 +56,16 @@ abstract class TestCase extends BaseTestCase
 
     protected function defineEnvironment($app): void
     {
+        if (! is_dir(database_path('settings'))) {
+            mkdir(database_path('settings'));
+        }
+
         $app['config']->set('database.default', 'mysql');
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
         $app['config']->set('flux.install_done', true);
         $app['config']->set('auth.defaults.guard', 'sanctum');
         $app['config']->set('cache.default', 'array');
+        $app['config']->set('settings.auto_discover_settings', []);
     }
 
     protected function getPackageAliases($app): array

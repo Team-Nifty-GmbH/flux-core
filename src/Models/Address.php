@@ -9,31 +9,28 @@ use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\SalutationEnum;
-use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Support\Collection\AddressCollection;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\Communicatable;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasCalendars;
-use FluxErp\Traits\HasCart;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasDefaultTargetableColumns;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Lockable;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\MonitorsQueue;
-use FluxErp\Traits\Notifiable;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\Calendar\HasCalendars;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasCart;
+use FluxErp\Traits\Model\HasDefaultTargetableColumns;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\MonitorsQueue;
+use FluxErp\Traits\Model\Notifiable;
+use FluxErp\Traits\Model\Printable;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Address\AddressLabel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -44,25 +41,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Illuminate\Validation\UnauthorizedException;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use Throwable;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
-        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
+    use Commentable, Communicatable, Filterable, HasCalendars, HasCart, HasDefaultTargetableColumns,
+        HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasTenantAssignment,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, MonitorsQueue, Notifiable, Printable,
         SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -76,18 +66,13 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         'id',
     ];
 
-    protected $hidden = [
-        'password',
-    ];
-
     public static function findAddressByEmail(string $email): ?Address
     {
         $address = null;
         if ($email) {
             $address = resolve_static(Address::class, 'query')
                 ->with('contact')
-                ->where('email', $email)
-                ->orWhere('email_primary', $email)
+                ->where('email_primary', $email)
                 ->first();
 
             if (! $address) {
@@ -171,13 +156,14 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
             $contactUpdates = [];
             $addressesUpdates = [];
-            if ($address->isDirty('contact_id') && ! $address->isDirty($address->getKeyName())) {
+            if ($address->wasChanged('contact_id')) {
+                $previousContactId = data_get($address->getPrevious(), 'contact_id');
                 if (! $oldContactHasAddresses = resolve_static(Address::class, 'query')
-                    ->where('contact_id', $address->getRawOriginal('contact_id'))
+                    ->where('contact_id', $previousContactId)
                     ->exists()
                 ) {
                     resolve_static(Contact::class, 'query')
-                        ->whereKey($address->getRawOriginal('contact_id'))
+                        ->whereKey($previousContactId)
                         ->first()
                         ?->delete();
                 }
@@ -187,32 +173,32 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 $oldContactUpdates = [];
                 $oldContactAddressesUpdates = [];
                 $firstAddressId = resolve_static(Address::class, 'query')
-                    ->where('contact_id', $address->getRawOriginal('contact_id'))
+                    ->where('contact_id', $previousContactId)
                     ->value('id');
 
-                if ($address->getRawOriginal('is_main_address')) {
+                if (data_get($address->getPrevious(), 'is_main_address') ?? $address->is_main_address) {
                     $oldContactUpdates['main_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_main_address'] = true;
 
-                    if ($address->isClean('is_main_address')) {
+                    if (! $address->wasChanged('is_main_address')) {
                         $addressUpdates['is_main_address'] = false;
                     }
                 }
 
-                if ($address->getRawOriginal('is_invoice_address')) {
+                if (data_get($address->getPrevious(), 'is_invoice_address') ?? $address->is_invoice_address) {
                     $oldContactUpdates['invoice_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_invoice_address'] = true;
 
-                    if ($address->isClean('is_invoice_address')) {
+                    if (! $address->wasChanged('is_invoice_address')) {
                         $addressUpdates['is_invoice_address'] = false;
                     }
                 }
 
-                if ($address->getRawOriginal('is_delivery_address')) {
+                if (data_get($address->getPrevious(), 'is_delivery_address') ?? $address->is_delivery_address) {
                     $oldContactUpdates['delivery_address_id'] = $firstAddressId;
                     $oldContactAddressesUpdates['is_delivery_address'] = true;
 
-                    if ($address->isClean('is_delivery_address')) {
+                    if (! $address->wasChanged('is_delivery_address')) {
                         $addressUpdates['is_delivery_address'] = false;
                     }
                 }
@@ -227,17 +213,19 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 // Update old contact and its addresses
                 if ($oldContactUpdates && $oldContactHasAddresses) {
                     resolve_static(Contact::class, 'query')
-                        ->whereKey($address->getRawOriginal('contact_id'))
+                        ->whereKey($previousContactId)
                         ->update($oldContactUpdates);
 
                     resolve_static(Address::class, 'query')
                         ->whereKeyNot($address->getKey())
-                        ->where('contact_id', $address->getRawOriginal('contact_id'))
+                        ->where('contact_id', $previousContactId)
                         ->update($oldContactAddressesUpdates);
                 }
             }
 
-            if ($address->isDirty('is_main_address') && $address->is_main_address) {
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_main_address'))
+                && $address->is_main_address
+            ) {
                 $contactUpdates += [
                     'main_address_id' => $address->id,
                 ];
@@ -247,7 +235,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ];
             }
 
-            if ($address->isDirty('is_invoice_address') && $address->is_invoice_address) {
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_invoice_address'))
+                && $address->is_invoice_address
+            ) {
                 $contactUpdates += [
                     'invoice_address_id' => $address->id,
                 ];
@@ -257,7 +247,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ];
             }
 
-            if ($address->isDirty('is_delivery_address') && $address->is_delivery_address) {
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_delivery_address'))
+                && $address->is_delivery_address
+            ) {
                 $contactUpdates += [
                     'delivery_address_id' => $address->id,
                 ];
@@ -293,14 +285,23 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             }
 
             $contactUpdates = [];
-            $addressesUpdates = [];
+            $addressUpdates = [];
+
+            $mainAddressId = $address->contact()
+                ->value('main_address_id');
             $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
-                ->where('is_main_address', true)
-                ->first();
+                ->orderByRaw('id = ' . ($mainAddressId ?? 0) . ' DESC')
+                ->first(['id', 'is_main_address', 'is_invoice_address', 'is_delivery_address']);
 
-            if (! $mainAddress) {
-                return;
+            if ($mainAddress->getKey() !== $mainAddressId) {
+                $contactUpdates += [
+                    'main_address_id' => $mainAddress->id,
+                ];
+
+                $addressUpdates += [
+                    'is_main_address' => true,
+                ];
             }
 
             if ($address->is_invoice_address) {
@@ -308,7 +309,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     'invoice_address_id' => $mainAddress->id,
                 ];
 
-                $addressesUpdates += [
+                $addressUpdates += [
                     'is_invoice_address' => true,
                 ];
             }
@@ -318,7 +319,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     'delivery_address_id' => $mainAddress->id,
                 ];
 
-                $addressesUpdates += [
+                $addressUpdates += [
                     'is_delivery_address' => true,
                 ];
             }
@@ -328,7 +329,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->whereKey($address->contact_id)
                     ->update($contactUpdates);
 
-                $mainAddress->update($addressesUpdates);
+                $mainAddress->update($addressUpdates);
             }
         });
     }
@@ -338,6 +339,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return [
             'date_of_birth' => 'date',
             'advertising_state' => AdvertisingState::class,
+            'password' => 'hashed',
             'search_aliases' => 'array',
             'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
@@ -374,9 +376,22 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
-    public function client(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsToMany(
+            Category::class,
+            'categorizables',
+            'categorizable_id',
+            'category_id',
+            'contact_id',
+            'id'
+        )
+            ->wherePivot('categorizable_type', morph_alias(Contact::class));
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function contact(): BelongsTo
@@ -392,37 +407,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
-    }
-
-    public function createLoginToken(): array
-    {
-        if (! $this->can_login || ! $this->is_active) {
-            throw new UnauthorizedException('Address cannot login');
-        }
-
-        $plaintext = Str::uuid()->toString();
-        $expires = now()->addMinutes(15);
-        Cache::put('login_token_' . $plaintext,
-            [
-                'user' => $this,
-                'guard' => 'address',
-                'intended_url' => Session::get('url.intended', route('portal.dashboard')),
-            ],
-            $expires
-        );
-        URL::forceRootUrl(config('flux.portal_domain'));
-
-        return [
-            'token' => $plaintext,
-            'expires' => $expires,
-            'url' => URL::temporarySignedRoute(
-                'login-link',
-                $expires,
-                [
-                    'token' => $plaintext,
-                ]
-            ),
-        ];
     }
 
     public function detailRouteParams(): array
@@ -446,6 +430,11 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return implode(', ', $this->postal_address);
     }
 
+    public function getEmailTemplateModelType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getLabel(): ?string
     {
         return $this->name;
@@ -461,6 +450,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function getUrl(): ?string
     {
         return $this->detailRoute();
+    }
+
+    public function industries(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Industry::class,
+            'contact_industry',
+            'contact_id',
+            'industry_id',
+            'contact_id',
+            'id'
+        );
     }
 
     public function language(): BelongsTo
@@ -526,37 +527,68 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function salutation(): ?string
     {
-        try {
-            $enum = SalutationEnum::from($this->salutation ?? '');
-        } catch (Throwable) {
-            $enum = SalutationEnum::NO_SALUTATION;
-        }
-
-        return $enum->salutation($this);
+        return resolve_static(
+            SalutationEnum::class,
+            'salutation',
+            [
+                'case' => resolve_static(
+                    SalutationEnum::class,
+                    'tryFrom',
+                    ['value' => $this->salutation]
+                )
+                    ->value ?? SalutationEnum::NoSalutation,
+                'address' => $this,
+            ]
+        );
     }
 
     public function scopeInTimeframe(
         Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
+        Carbon|string $start,
+        Carbon|string $end,
         ?array $info = null
     ): void {
         $start = $start ? Carbon::parse($start) : null;
         $end = $end ? Carbon::parse($end) : null;
 
-        if ($start && $end && $start->greaterThan($end)) {
-            $var = $start;
-            $start = $end;
-            $end = $var;
+        $yearEnd = null;
+        $yearStart = null;
+
+        if ($start && $end) {
+            if ($start->greaterThan($end)) {
+                $var = $start;
+                $start = $end;
+                $end = $var;
+            }
+
+            if ($start->year !== $end->year) {
+                $yearEnd = '1231';
+                $yearStart = '0101';
+            }
         }
 
         $builder
-            ->when($start && $end, function (Builder $builder) use ($start, $end): void {
-                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?", [
-                    $start->format('md'),
-                    $end->format('md'),
-                ]);
-            })
+            ->when($start && $end, fn (Builder $builder) => $builder
+                ->where(function (Builder $query) use ($start, $end, $yearEnd, $yearStart): void {
+                    $query
+                        ->whereRaw(
+                            "REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?",
+                            [
+                                $start->format('md'),
+                                $yearEnd ?? $end->format('md'),
+                            ]
+                        )
+                        ->when($yearStart, fn (Builder $query) => $query
+                            ->orWhereRaw(
+                                "REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?",
+                                [
+                                    $yearStart,
+                                    $end->format('md'),
+                                ]
+                            )
+                        );
+                })
+            )
             ->when($start && ! $end, function (Builder $builder) use ($start): void {
                 $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') >= ?", [
                     $start->format('md'),
@@ -569,26 +601,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             });
     }
 
-    public function sendLoginLink(): void
-    {
-        try {
-            $login = $this->createLoginToken();
-        } catch (UnauthorizedException) {
-            return;
-        }
-
-        // dont queue mail as the address isnt used as auth in the regular app url
-        Mail::to($this->email)->send(MagicLoginLink::make($login['token'], $login['expires']));
-    }
-
     public function serialNumbers(): BelongsToMany
     {
         return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -637,10 +652,20 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
-    protected function password(): Attribute
+    protected function mailAddresses(): Attribute
     {
-        return Attribute::set(
-            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
+        return Attribute::get(
+            fn () => array_unique(
+                array_filter(
+                    array_merge(
+                        [$this->email_primary],
+                        $this->contactOptions
+                            ->where('type', 'email')
+                            ->pluck('value')
+                            ->toArray()
+                    )
+                )
+            )
         );
     }
 

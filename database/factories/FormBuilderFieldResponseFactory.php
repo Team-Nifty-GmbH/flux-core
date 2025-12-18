@@ -12,7 +12,7 @@ class FormBuilderFieldResponseFactory extends Factory
     public function definition(): array
     {
         return [
-            'response' => $this->faker->word(),
+            'response' => fake()->word(),
         ];
     }
 }

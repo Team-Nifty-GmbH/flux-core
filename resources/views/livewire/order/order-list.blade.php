@@ -14,7 +14,7 @@
 >
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
-            <div class="divide-secondary-200 space-y-2.5 divide-y">
+            <div class="space-y-2.5 divide-y divide-secondary-200">
                 @if (! $orderType ?? true)
                     <x-select.styled
                         :label="__('Order type')"
@@ -108,12 +108,12 @@
                 </div>
                 <div class="flex flex-col gap-4 pt-4">
                     <x-select.styled
-                        :label="__('Client')"
+                        :label="__('Tenant')"
                         required
                         autocomplete="off"
-                        wire:model="order.client_id"
+                        wire:model="order.tenant_id"
                         select="label:name|value:id"
-                        :options="$clients"
+                        :options="$tenants"
                     />
                     <x-select.styled
                         :label="__('Price list')"

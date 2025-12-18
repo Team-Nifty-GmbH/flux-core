@@ -9,9 +9,11 @@ use Livewire\Attributes\Locked;
 
 class OrderTypeForm extends FluxForm
 {
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?string $description = null;
+
+    public ?int $email_template_id = null;
 
     #[Locked]
     public ?int $id = null;
@@ -21,10 +23,6 @@ class OrderTypeForm extends FluxForm
     public bool $is_hidden = false;
 
     public bool $is_visible_in_sidebar = true;
-
-    public ?string $mail_body = null;
-
-    public ?string $mail_subject = null;
 
     public ?string $name = null;
 

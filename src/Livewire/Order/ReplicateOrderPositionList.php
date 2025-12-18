@@ -3,8 +3,10 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\DataTables\OrderPositionList;
+use FluxErp\Models\OrderPosition;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Modelable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
@@ -32,6 +34,10 @@ class ReplicateOrderPositionList extends OrderPositionList
     #[Modelable]
     public array $selected = [];
 
+    public string $orderBy = 'slug_position';
+
+    public bool $orderAsc = true;
+
     protected function getSelectedActions(): array
     {
         return [];
@@ -57,13 +63,9 @@ class ReplicateOrderPositionList extends OrderPositionList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder
+        return resolve_static(OrderPosition::class, 'familyTree')
             ->where('order_id', $this->orderId)
-            ->withSum(['descendants as descendantsAmount' => function (Builder $query): void {
-                $query->whereNull('deleted_at');
-            }], 'amount')
-            ->whereNull('parent_id')
-            ->orderBy('sort_number');
+            ->whereNull('parent_id');
     }
 
     protected function getLeftAppends(): array
@@ -78,8 +80,81 @@ class ReplicateOrderPositionList extends OrderPositionList
         $tree = to_flat_tree($query->get()->toArray());
         $returnKeys = $this->getReturnKeys();
 
+        $positionIds = collect($tree)
+            ->filter(
+                fn (array $value) => data_get($value, 'is_free_text') == false
+                    && data_get($value, 'is_bundle_position') == false
+            )
+            ->pluck('id')
+            ->toArray();
+
+        $signedAmounts = DB::select(
+            'WITH RECURSIVE siblings AS (
+                SELECT id, origin_position_id, signed_amount
+                FROM order_positions
+                WHERE order_id = ' . $this->orderId
+            . ' AND id IN (' . implode(',', $positionIds) . ')'
+            . ' UNION ALL
+                SELECT op.id, op.origin_position_id, op.signed_amount
+                FROM order_positions op
+                INNER JOIN siblings s ON s.id = op.origin_position_id
+                WHERE op.deleted_at IS NULL
+            )
+            SELECT * FROM siblings'
+        );
+
+        $maxAmounts = array_reduce(
+            $signedAmounts,
+            function (?array $carry, object $item) {
+                $parentKey = array_find_key(
+                    $carry ?? [],
+                    fn (array $value) => ! is_null($item->origin_position_id)
+                        && in_array(
+                            $item->origin_position_id,
+                            [
+                                $value['id'],
+                                $value['origin_position_id'],
+                            ]
+                        )
+                );
+
+                if (is_null($parentKey)) {
+                    $carry[] = (array) $item;
+                } else {
+                    $carry[$parentKey] = array_merge(
+                        $carry[$parentKey],
+                        [
+                            'origin_position_id' => $item->id,
+                            'signed_amount' => bcsub(
+                                data_get($carry, $parentKey . '.signed_amount'),
+                                $item->signed_amount
+                            ),
+                        ]
+                    );
+                }
+
+                return $carry;
+            }
+        );
+
         foreach ($tree as $key => &$item) {
-            $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
+            if (data_get($item, 'is_free_text')) {
+                continue;
+            }
+
+            if (data_get($item, 'is_bundle_position')) {
+                if (is_null(array_find_key($tree, fn (array $value) => $value['id'] === $item['parent_id']))) {
+                    unset($tree[$key]);
+                }
+
+                continue;
+            }
+
+            $totalAmount = data_get(
+                array_find($maxAmounts, fn (array $value) => $value['id'] === data_get($item, 'id')),
+                'signed_amount'
+            );
+
             if (bccomp($totalAmount, 0) !== 1 || in_array($item['id'], $this->alreadyTakenPositions)) {
                 unset($tree[$key]);
 
@@ -101,7 +176,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             }
         }
 
-        return $tree;
+        return array_values($tree);
     }
 
     protected function getReturnKeys(): array

@@ -11,13 +11,13 @@ class PurchaseInvoicePositionFactory extends Factory
 
     public function definition(): array
     {
-        $amount = $this->faker->boolean() ?
-            $this->faker->numberBetween(100, 11000) / 100 :
-            $this->faker->numberBetween(1, 500);
-        $unitPrice = $this->faker->numberBetween(100, 10000) / 100;
+        $amount = fake()->boolean() ?
+            fake()->numberBetween(100, 11000) / 100 :
+            fake()->numberBetween(1, 500);
+        $unitPrice = fake()->numberBetween(100, 10000) / 100;
 
         return [
-            'name' => $this->faker->jobTitle(),
+            'name' => fake()->jobTitle(),
             'amount' => $amount,
             'unit_price' => $unitPrice,
             'total_price' => bcmul($amount, $unitPrice),

@@ -2,13 +2,13 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,7 +18,7 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class SerialNumberRange extends FluxModel
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     public static function hasPermission(): bool
     {
@@ -32,7 +32,7 @@ class SerialNumberRange extends FluxModel
                 $serialNumberRange->model_type,
                 $serialNumberRange->model_id,
                 $serialNumberRange->type,
-                $serialNumberRange->client_id,
+                $serialNumberRange->tenant_id,
             ]);
         });
     }
@@ -44,9 +44,14 @@ class SerialNumberRange extends FluxModel
         ];
     }
 
-    public function client(): BelongsTo
+    public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
     }
 
     public function getCurrentStyled(): array|string|Translator|Application|null
@@ -57,11 +62,6 @@ class SerialNumberRange extends FluxModel
             $this->suffix,
             $this->variables()
         );
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
     }
 
     private function variables(): array

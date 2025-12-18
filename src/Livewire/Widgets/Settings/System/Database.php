@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Widgets\Settings\System;
 use FluxErp\Console\Commands\PruneCommand;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Console\ShowCommand;
 use Illuminate\Support\Arr;

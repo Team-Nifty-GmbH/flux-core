@@ -1,7 +1,7 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Order;
-
+use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
+use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Order\Order as OrderView;
@@ -10,1030 +10,1311 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Transaction;
 use FluxErp\Models\VatRate;
 use FluxErp\States\Order\DeliveryState\Delivered;
 use FluxErp\States\Order\Open;
 use FluxErp\States\Order\PaymentState\Paid;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
-class OrderTest extends BaseSetup
-{
-    private Order $order;
+beforeEach(function (): void {
+    $this->contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'has_delivery_lock' => false,
+        'credit_line' => null,
+    ]);
 
-    private OrderType $orderType;
+    $this->address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $this->contact->id,
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    ContactBankConnection::factory()->create([
+        'contact_id' => $this->contact->id,
+    ]);
 
-        $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'has_delivery_lock' => false,
-            'credit_line' => null,
-        ]);
+    $currency = Currency::factory()->create();
+    $vatRate = VatRate::factory()->create();
 
-        $this->address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $this->contact->id,
-        ]);
-
-        ContactBankConnection::factory()->create([
-            'contact_id' => $this->contact->id,
-        ]);
-
-        $currency = Currency::factory()->create();
-        $vatRate = VatRate::factory()->create();
-
-        $this->orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
+    $this->orderType = OrderType::factory()
+        ->has(EmailTemplate::factory()->state(['model_type', 'order']), 'emailTemplate')
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'print_layouts' => ['invoice'],
-            'mail_subject' => 'Test Order {{ $order->order_number }}',
-            'mail_body' => '<p>Test order body content</p>',
         ]);
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create();
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+        ->create();
 
-        $priceList = PriceList::factory()->create();
+    $priceList = PriceList::factory()->create();
 
-        $this->order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'unit_gross_price' => 119,
-                    'total_gross_price' => 119,
-                    'total_base_gross_price' => 119,
-                    'total_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_free_text' => false,
-                    'is_alternative' => false,
-                ])
-            )
-            ->for($currency)
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'payment_type_id' => $paymentType->id,
-                'price_list_id' => $priceList->id,
-                'contact_id' => $this->contact->id,
-                'address_invoice_id' => $this->address->id,
-                'address_delivery_id' => $this->address->id,
-                'is_locked' => false,
-            ]);
-
-        $this->order->calculatePrices()->save();
-    }
-
-    public function test_address_update_events(): void
-    {
-        $newAddress = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
+    $this->order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'unit_gross_price' => 119,
+                'total_gross_price' => 119,
+                'total_base_gross_price' => 119,
+                'total_net_price' => 100,
+                'total_base_net_price' => 100,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_free_text' => false,
+                'is_alternative' => false,
+            ])
+        )
+        ->for($currency)
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'payment_type_id' => $paymentType->id,
+            'price_list_id' => $priceList->id,
             'contact_id' => $this->contact->id,
+            'address_invoice_id' => $this->address->id,
+            'address_delivery_id' => $this->address->id,
+            'is_locked' => false,
         ]);
 
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.address_delivery_id', $newAddress->id)
-            ->assertStatus(200)
-            ->assertSet('order.address_delivery_id', $newAddress->id);
+    $this->order->calculatePrices()->save();
+});
 
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.address_invoice_id', $newAddress->id)
-            ->assertStatus(200)
-            ->assertSet('order.address_invoice_id', $newAddress->id)
-            ->assertSet('order.contact_id', $newAddress->contact_id)
-            ->assertSet('order.client_id', $newAddress->client_id);
+test('address update events', function (): void {
+    $newAddress = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $this->contact->id,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.address_delivery_id', $newAddress->id)
+        ->assertOk()
+        ->assertSet('order.address_delivery_id', $newAddress->id);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.address_invoice_id', $newAddress->id)
+        ->assertOk()
+        ->assertSet('order.address_invoice_id', $newAddress->id)
+        ->assertSet('order.contact_id', $newAddress->contact_id)
+        ->assertSet('order.tenant_id', $newAddress->tenant_id);
+});
+
+test('create and manage discount', function (): void {
+    $discountName = 'Test Discount';
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.discounts', [])
+        ->call('editDiscount')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSee('edit-discount')
+        ->assertSet('discount.is_percentage', true)
+        ->set('discount.name', $discountName)
+        ->set('discount.discount', 10)
+        ->call('saveDiscount')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true)
+        ->assertNotSet('order.discounts', []);
+
+    $this->assertDatabaseHas('discounts', [
+        'model_type' => 'order',
+        'model_id' => $this->order->id,
+        'name' => $discountName,
+        'discount' => bcdiv(10, 100),
+        'order_column' => 1,
+        'is_percentage' => 1,
+    ]);
+
+    $discount = Discount::where('model_id', $this->order->id)->first();
+
+    $component
+        ->call('editDiscount', $discount)
+        ->assertOk()
+        ->assertSet('discount.id', $discount->id)
+        ->assertSet('discount.name', $discountName)
+        ->set('discount.discount', 15)
+        ->call('saveDiscount')
+        ->assertOk()
+        ->assertReturned(true);
+
+    $component
+        ->call('deleteDiscount', $discount)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $this->assertSoftDeleted('discounts', ['id' => $discount->id]);
+});
+
+test('create documents', function (): void {
+    Storage::fake();
+
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+    $componentId = strtolower($component->id());
+
+    $component
+        ->assertSet('order.invoice_number', null)
+        ->call('openCreateDocumentsModal')
+        ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+        ->assertSet('printLayouts', [
+            ['layout' => 'invoice', 'label' => 'invoice'],
+        ])
+        ->set([
+            'selectedPrintLayouts' => [
+                'download' => ['invoice'],
+            ],
+        ])
+        ->call('createDocuments')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertNotSet('order.invoice_number', null);
+
+    $invoice = $this->order->invoice();
+    expect($invoice?->getPath())->not->toBeNull();
+});
+
+test('create documents with delivery lock fails', function (): void {
+    $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+    $this->contact->update(['has_delivery_lock' => true, 'credit_line' => 1]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.invoice_number', null)
+        ->call('openCreateDocumentsModal')
+        ->set([
+            'selectedPrintLayouts' => [
+                'download' => ['invoice'],
+            ],
+        ])
+        ->call('createDocuments')
+        ->assertOk()
+        ->assertReturned(null)
+        ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
+        ->assertSet('order.invoice_number', null);
+
+    expect($this->order->refresh()->invoice_number)->toBeNull();
+});
+
+test('delete locked order fails', function (): void {
+    $this->order->update(['is_locked' => true]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('delete')
+        ->assertOk()
+        ->assertNoRedirect()
+        ->assertHasErrors(['is_locked']);
+});
+
+test('delete order successful', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('delete')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertRedirectToRoute('orders.orders');
+
+    $this->assertSoftDeleted('orders', ['id' => $this->order->id]);
+    $this->assertSoftDeleted('order_positions', ['order_id' => $this->order->id]);
+});
+
+test('fetch contact data', function (): void {
+    $newContact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+
+    $newAddress = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $newContact->id,
+    ]);
+
+    $newContact->update([
+        'main_address_id' => $newAddress->id,
+        'invoice_address_id' => $newAddress->id,
+        'delivery_address_id' => $newAddress->id,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.contact_id', $newContact->id)
+        ->call('fetchContactData')
+        ->assertOk()
+        ->assertSet('order.tenant_id', $newContact->tenant_id)
+        ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
+        ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
+});
+
+test('get additional model actions', function (): void {
+    $this->order->update([
+        'invoice_date' => now(),
+    ]);
+
+    OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Retoure,
+        'is_active' => true,
+    ]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+    $actions = $component->instance()->getAdditionalModelActions();
+
+    expect($actions)->not->toBeEmpty();
+    expect($actions)->toHaveCount(4);
+
+    $this->order->update(['invoice_date' => null]);
+
+    OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::SplitOrder,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $actions = $component->instance()->getAdditionalModelActions();
+    expect($actions)->not->toBeEmpty();
+});
+
+test('get tabs structure', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+    $tabs = $component->instance()->getTabs();
+
+    expect($tabs)->toHaveCount(8);
+
+    $expectedTabs = [
+        'order.order-positions',
+        'order.attachments',
+        'order.texts',
+        'order.accounting',
+        'order.comments',
+        'order.communications',
+        'order.related',
+        'order.activities',
+    ];
+
+    foreach ($tabs as $index => $tab) {
+        expect($tab->component)->toEqual($expectedTabs[$index]);
     }
+});
 
-    public function test_create_and_manage_discount(): void
-    {
-        $discountName = 'Test Discount';
+test('mount initializes order data', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.id', $this->order->id)
+        ->assertSet('order.tenant_id', $this->order->tenant_id)
+        ->assertSet('order.contact_id', $this->order->contact_id)
+        ->assertSet('order.order_type_id', $this->order->order_type_id)
+        ->assertSet('order.is_locked', false)
+        ->call('$refresh');
 
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertSet('order.discounts', [])
-            ->call('editDiscount')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertSee('edit-discount')
-            ->assertSet('discount.is_percentage', true)
-            ->set('discount.name', $discountName)
-            ->set('discount.discount', 10)
-            ->call('saveDiscount')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertReturned(true)
-            ->assertNotSet('order.discounts', []);
+    // Refresh to ensure data is loaded
+    // Test the properties are arrays by checking they exist and are not null
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+    expect($component->get('availableStates'))->toBeArray();
+    expect($component->get('states'))->toBeArray();
+    expect($component->get('paymentStates'))->toBeArray();
+    expect($component->get('deliveryStates'))->toBeArray();
+});
 
-        $this->assertDatabaseHas('discounts', [
-            'model_type' => 'order',
-            'model_id' => $this->order->id,
-            'name' => $discountName,
-            'discount' => bcdiv(10, 100),
-            'order_column' => 1,
-            'is_percentage' => 1,
+test('order confirmation toggle', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.is_confirmed', true)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect($this->order->refresh()->is_confirmed)->toBeTrue();
+});
+
+test('order position with credit account', function (): void {
+    Storage::fake();
+
+    Currency::factory()->create(['is_default' => true]);
+
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'has_delivery_lock' => false,
+        'credit_line' => null,
+    ]);
+
+    $creditAccount = ContactBankConnection::factory()
+        ->has(Transaction::factory()->state([
+            'amount' => 1000,
+            'currency_id' => Currency::first()->getKey(),
+            'value_date' => now(),
+            'purpose' => 'Initial balance',
+        ]))
+        ->create([
+            'contact_id' => $contact->getKey(),
+            'is_credit_account' => true,
         ]);
 
-        $discount = Discount::where('model_id', $this->order->id)->first();
+    CalculateContactBankConnectionBalance::make([
+        'id' => $creditAccount->getKey(),
+    ])
+        ->validate()
+        ->execute();
+    $creditAccount->refresh();
 
-        $component
-            ->call('editDiscount', $discount)
-            ->assertStatus(200)
-            ->assertSet('discount.id', $discount->id)
-            ->assertSet('discount.name', $discountName)
-            ->set('discount.discount', 15)
-            ->call('saveDiscount')
-            ->assertStatus(200)
-            ->assertReturned(true);
+    expect(1000.00)->toEqual($creditAccount->balance);
 
-        $component
-            ->call('deleteDiscount', $discount)
-            ->assertStatus(200)
-            ->assertHasNoErrors();
+    $vatRate = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    $currency = Currency::factory()->create();
 
-        $this->assertSoftDeleted('discounts', ['id' => $discount->id]);
-    }
-
-    public function test_create_documents(): void
-    {
-        Storage::fake();
-
-        $this->order->update(['is_locked' => false, 'invoice_number' => null]);
-
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
-        $componentId = strtolower($component->id());
-
-        $component
-            ->assertSet('order.invoice_number', null)
-            ->call('openCreateDocumentsModal')
-            ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
-            ->assertSet('printLayouts', [
-                ['layout' => 'invoice', 'label' => 'invoice'],
+    $order = Order::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'currency_id' => $currency->getKey(),
+        'contact_id' => $contact->getKey(),
+        'address_invoice_id' => Address::factory()
+            ->create([
+                'tenant_id' => $this->dbTenant->getKey(),
+                'contact_id' => $contact->getKey(),
             ])
-            ->set([
-                'selectedPrintLayouts' => [
-                    'download' => ['invoice'],
-                ],
+            ->getKey(),
+        'price_list_id' => PriceList::factory()->create()->getKey(),
+        'payment_type_id' => PaymentType::factory()->create()->getKey(),
+        'is_locked' => false,
+        'invoice_number' => null,
+    ]);
+
+    $orderPosition = OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'credit_account_id' => $creditAccount->getKey(),
+        'post_on_credit_account' => CreditAccountPostingEnum::Credit,
+        'credit_amount' => 250.00,
+        'amount' => 1,
+        'unit_net_price' => 250.00,
+        'unit_gross_price' => 297.50,
+        'total_net_price' => 250.00,
+        'total_gross_price' => 297.50,
+        'total_base_net_price' => 250.00,
+        'total_base_gross_price' => 297.50,
+        'vat_price' => 47.50,
+        'vat_rate_percentage' => 0.19,
+        'is_alternative' => false,
+        'is_free_text' => false,
+    ]);
+
+    $order->calculatePrices()->save();
+
+    expect($orderPosition->credit_account_id)->not->toBeNull();
+    expect($orderPosition->credit_account_id)->toEqual($creditAccount->id);
+    expect($orderPosition->post_on_credit_account)->toEqual(CreditAccountPostingEnum::Credit);
+    expect($orderPosition->credit_amount)->toEqual('250.00');
+
+    expect($creditAccount->is_credit_account)->toBeTrue();
+    expect($creditAccount->contact_id)->toEqual($contact->getKey());
+
+    $initialBalance = $creditAccount->balance;
+
+    $component = Livewire::test(OrderView::class, ['id' => $order->getKey()]);
+    $componentId = strtolower($component->id());
+
+    $component
+        ->assertSet('order.invoice_number', null)
+        ->call('openCreateDocumentsModal')
+        ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+        ->set([
+            'selectedPrintLayouts' => [
+                'download' => ['invoice'],
+            ],
+        ])
+        ->call('createDocuments')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertNotSet('order.invoice_number', null);
+
+    $creditAccount->refresh();
+
+    expect($creditAccount->balance)->toEqual(bcadd($initialBalance, '250.00', 2));
+});
+
+test('order position with credit account debit', function (): void {
+    Storage::fake();
+
+    Currency::factory()->create(['is_default' => true]);
+
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'has_delivery_lock' => false,
+        'credit_line' => null,
+    ]);
+
+    $creditAccount = ContactBankConnection::factory()
+        ->has(Transaction::factory()->state([
+            'amount' => 1000,
+            'currency_id' => Currency::first()->getKey(),
+            'value_date' => now(),
+            'purpose' => 'Initial balance',
+        ]))
+        ->create([
+            'contact_id' => $contact->getKey(),
+            'is_credit_account' => true,
+        ]);
+
+    CalculateContactBankConnectionBalance::make([
+        'id' => $creditAccount->getKey(),
+    ])
+        ->validate()
+        ->execute();
+    $creditAccount->refresh();
+
+    expect(1000.00)->toEqual($creditAccount->balance);
+
+    $vatRate = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    $currency = Currency::factory()->create();
+
+    $order = Order::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $this->orderType->getKey(),
+        'currency_id' => $currency->getKey(),
+        'contact_id' => $contact->getKey(),
+        'address_invoice_id' => Address::factory()
+            ->create([
+                'tenant_id' => $this->dbTenant->getKey(),
+                'contact_id' => $contact->getKey(),
             ])
-            ->call('createDocuments')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertNotSet('order.invoice_number', null);
+            ->getKey(),
+        'price_list_id' => PriceList::factory()->create()->getKey(),
+        'payment_type_id' => PaymentType::factory()->create()->getKey(),
+        'is_locked' => false,
+        'invoice_number' => null,
+    ]);
 
-        $invoice = $this->order->invoice();
-        $this->assertNotNull($invoice?->getPath());
-    }
+    $orderPosition = OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'credit_account_id' => $creditAccount->getKey(),
+        'post_on_credit_account' => CreditAccountPostingEnum::Debit,
+        'credit_amount' => 150.00,
+        'amount' => 1,
+        'unit_net_price' => 150.00,
+        'unit_gross_price' => 178.50,
+        'total_net_price' => 150.00,
+        'total_gross_price' => 178.50,
+        'total_base_net_price' => 150.00,
+        'total_base_gross_price' => 178.50,
+        'vat_price' => 28.50,
+        'vat_rate_percentage' => 0.19,
+        'is_alternative' => false,
+        'is_free_text' => false,
+    ]);
 
-    public function test_create_documents_with_delivery_lock_fails(): void
-    {
-        $this->order->update(['is_locked' => false, 'invoice_number' => null]);
-        $this->contact->update(['has_delivery_lock' => true, 'credit_line' => 1]);
+    $order->calculatePrices()->save();
 
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertSet('order.invoice_number', null)
-            ->call('openCreateDocumentsModal')
-            ->set([
-                'selectedPrintLayouts' => [
-                    'download' => ['invoice'],
-                ],
+    expect($orderPosition->credit_account_id)->not->toBeNull();
+    expect($orderPosition->credit_account_id)->toEqual($creditAccount->id);
+    expect($orderPosition->post_on_credit_account)->toEqual(CreditAccountPostingEnum::Debit);
+    expect($orderPosition->credit_amount)->toEqual('150.00');
+
+    expect($creditAccount->is_credit_account)->toBeTrue();
+    expect($creditAccount->contact_id)->toEqual($contact->getKey());
+
+    $initialBalance = $creditAccount->balance;
+
+    $component = Livewire::test(OrderView::class, ['id' => $order->getKey()]);
+    $componentId = strtolower($component->id());
+
+    $component
+        ->assertSet('order.invoice_number', null)
+        ->call('openCreateDocumentsModal')
+        ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+        ->set([
+            'selectedPrintLayouts' => [
+                'download' => ['invoice'],
+            ],
+        ])
+        ->call('createDocuments')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertNotSet('order.invoice_number', null);
+
+    $creditAccount->refresh();
+
+    expect($creditAccount->balance)->toEqual(bcsub($initialBalance, '150.00', 2));
+});
+
+test('recalculate order totals', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('recalculateOrderTotals')
+        ->assertOk()
+        ->assertNotSet('order.total_net_price', 0)
+        ->assertNotSet('order.total_gross_price', 0);
+});
+
+test('render view data', function (): void {
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+    $viewData = $component->instance()->render()->getData();
+
+    expect($viewData)->toHaveKey('additionalModelActions');
+    expect($viewData)->toHaveKey('priceLists');
+    expect($viewData)->toHaveKey('paymentTypes');
+    expect($viewData)->toHaveKey('languages');
+    expect($viewData)->toHaveKey('tenants');
+    expect($viewData)->toHaveKey('frequencies');
+    expect($viewData)->toHaveKey('contactBankConnections');
+    expect($viewData)->toHaveKey('vatRates');
+
+    expect($viewData['priceLists'])->toBeArray();
+    expect($viewData['paymentTypes'])->toBeArray();
+    expect($viewData['languages'])->toBeArray();
+    expect($viewData['tenants'])->toBeArray();
+    expect($viewData['frequencies'])->toBeArray();
+    expect($viewData['contactBankConnections'])->toBeArray();
+    expect($viewData['vatRates'])->toBeArray();
+});
+
+test('renders subscription order view', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertOk()
+        ->assertViewIs('flux::livewire.order.subscription');
+});
+
+test('renders successfully', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertOk()
+        ->assertViewIs('flux::livewire.order.order')
+        ->assertSet('order.id', $this->order->id)
+        ->assertSet('tab', 'order.order-positions');
+});
+
+test('reorder discount', function (): void {
+    $discount1 = Discount::factory()->create([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->id,
+        'order_column' => 1,
+    ]);
+
+    $discount2 = Discount::factory()->create([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->id,
+        'order_column' => 2,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('reOrderDiscount', $discount1, 1) // Move to position 2
+        ->assertOk()
+        ->assertReturned(true);
+
+    expect($discount1->refresh()->order_column)->toEqual(2);
+    expect($discount2->refresh()->order_column)->toEqual(1);
+});
+
+test('replicate order', function (): void {
+    OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update([
+        'is_locked' => true,
+        'invoice_number' => 'INV-' . Str::uuid(),
+    ]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('replicate')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertExecutesJs("\$modalOpen('replicate-order')")
+        ->call('saveReplicate')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
+
+    expect($replicatedOrder->orderPositions()->count())->toEqual($this->order->orderPositions()->count());
+    expect($replicatedOrder->invoice_number)->toBeNull();
+    expect($replicatedOrder->is_locked)->toBeFalse();
+    expect($replicatedOrder->parent_id)->toBeNull();
+    expect($replicatedOrder->created_from_id)->toEqual($this->order->id);
+    $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
+});
+
+test('save locked order uses update locked action', function (): void {
+    $newCommission = 'Updated commission for locked order';
+    $originalInvoiceNumber = 'INVOICE-123';
+
+    $this->order->update([
+        'is_locked' => true,
+        'invoice_number' => $originalInvoiceNumber,
+    ]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.commission', $newCommission)
+        ->set('order.invoice_number', 'SHOULD-NOT-CHANGE')
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    $this->order->refresh();
+    expect($this->order->commission)->toEqual($newCommission);
+    expect($this->order->invoice_number)->toEqual($originalInvoiceNumber);
+});
+
+test('save order updates successfully', function (): void {
+    $newCommission = 'Updated commission';
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.commission', $newCommission)
+        ->call('save')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->refresh()->commission)->toEqual($newCommission);
+});
+
+test('save states', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set('order.state', Open::class)
+        ->set('order.payment_state', Paid::class)
+        ->set('order.delivery_state', Delivered::class)
+        ->call('saveStates')
+        ->assertOk()
+        ->assertHasNoErrors();
+});
+
+test('subscription schedule functionality', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->assertSet('schedule.id', null)
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertNotSet('schedule.id', null);
+
+    $this->assertDatabaseHas('schedules', [
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => 'invokable',
+        'parameters->orderId' => $this->order->id,
+        'parameters->orderTypeId' => $targetOrderType->id,
+        'is_active' => 1,
+    ]);
+});
+
+test('switch tabs', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('tab', 'order.order-positions')
+        ->set('tab', 'order.attachments')
+        ->assertSet('tab', 'order.attachments')
+        ->set('tab', 'order.texts')
+        ->assertSet('tab', 'order.texts')
+        ->set('tab', 'order.accounting')
+        ->assertSet('tab', 'order.accounting')
+        ->set('tab', 'order.comments')
+        ->assertSet('tab', 'order.comments')
+        ->set('tab', 'order.related')
+        ->assertSet('tab', 'order.related')
+        ->set('tab', 'order.activities')
+        ->assertSet('tab', 'order.activities');
+});
+
+test('toggle lock functionality', function (): void {
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertSet('order.is_locked', false)
+        ->call('toggleLock')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('order.is_locked', true);
+
+    expect($this->order->refresh()->is_locked)->toBeTrue();
+});
+
+test('vat calculation prevents negative amounts', function (): void {
+    // Test that flat discounts don't create negative amounts
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 100,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
             ])
-            ->call('createDocuments')
-            ->assertStatus(200)
-            ->assertReturned(null)
-            ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
-            ->assertSet('order.invoice_number', null);
-
-        $this->assertNull($this->order->refresh()->invoice_number);
-    }
-
-    public function test_delete_locked_order_fails(): void
-    {
-        $this->order->update(['is_locked' => true]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('delete')
-            ->assertStatus(200)
-            ->assertNoRedirect()
-            ->assertHasErrors(['is_locked']);
-    }
-
-    public function test_delete_order_successful(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('delete')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('orders.orders');
-
-        $this->assertSoftDeleted('orders', ['id' => $this->order->id]);
-        $this->assertSoftDeleted('order_positions', ['order_id' => $this->order->id]);
-    }
-
-    public function test_fetch_contact_data(): void
-    {
-        $newContact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        $newAddress = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $newContact->id,
-        ]);
+    // Add flat discount larger than order total
+    $order->discounts()->create([
+        'discount' => 150, // More than the 100 order total
+        'is_percentage' => false,
+        'order_column' => 1,
+    ]);
 
-        $newContact->update([
-            'main_address_id' => $newAddress->id,
-            'invoice_address_id' => $newAddress->id,
-            'delivery_address_id' => $newAddress->id,
-        ]);
+    $order->calculatePrices()->save();
 
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.contact_id', $newContact->id)
-            ->call('fetchContactData')
-            ->assertStatus(200)
-            ->assertSet('order.client_id', $newContact->client_id)
-            ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
-            ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
-    }
+    // Should be 0, not negative
+    expect($order->total_net_price)->toEqual('0.00');
 
-    public function test_get_additional_model_actions(): void
-    {
-        $this->order->update([
-            'invoice_date' => now(),
-        ]);
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    expect($vat19['total_net_price'])->toEqual('0.00');
+    expect($vat19['total_vat_price'])->toEqual('0.00');
+});
 
-        OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Retoure,
-            'is_active' => true,
-        ]);
+test('vat calculation with combined discounts', function (): void {
+    // Test complex scenario: position discount + percentage header + flat header
+    $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
 
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
-        $actions = $component->instance()->getAdditionalModelActions();
-
-        $this->assertNotEmpty($actions);
-        $this->assertCount(2, $actions);
-
-        $this->order->update(['invoice_date' => null]);
-
-        OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::SplitOrder,
-            'is_active' => true,
-            'is_hidden' => false,
-        ]);
-
-        $actions = $component->instance()->getAdditionalModelActions();
-        $this->assertNotEmpty($actions);
-    }
-
-    public function test_get_tabs_structure(): void
-    {
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
-        $tabs = $component->instance()->getTabs();
-
-        $this->assertCount(7, $tabs);
-
-        $expectedTabs = [
-            'order.order-positions',
-            'order.attachments',
-            'order.texts',
-            'order.accounting',
-            'order.comments',
-            'order.related',
-            'order.activities',
-        ];
-
-        foreach ($tabs as $index => $tab) {
-            $this->assertEquals($expectedTabs[$index], $tab->component);
-        }
-    }
-
-    public function test_mount_initializes_order_data(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertSet('order.id', $this->order->id)
-            ->assertSet('order.client_id', $this->order->client_id)
-            ->assertSet('order.contact_id', $this->order->contact_id)
-            ->assertSet('order.order_type_id', $this->order->order_type_id)
-            ->assertSet('order.is_locked', false)
-            ->call('$refresh'); // Refresh to ensure data is loaded
-
-        // Test the properties are arrays by checking they exist and are not null
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
-        $this->assertIsArray($component->get('availableStates'));
-        $this->assertIsArray($component->get('states'));
-        $this->assertIsArray($component->get('paymentStates'));
-        $this->assertIsArray($component->get('deliveryStates'));
-    }
-
-    public function test_order_confirmation_toggle(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.is_confirmed', true)
-            ->assertStatus(200)
-            ->assertHasNoErrors();
-
-        $this->assertTrue($this->order->refresh()->is_confirmed);
-    }
-
-    public function test_recalculate_order_totals(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('recalculateOrderTotals')
-            ->assertStatus(200)
-            ->assertNotSet('order.total_net_price', 0)
-            ->assertNotSet('order.total_gross_price', 0);
-    }
-
-    public function test_render_view_data(): void
-    {
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
-        $viewData = $component->instance()->render()->getData();
-
-        $this->assertArrayHasKey('additionalModelActions', $viewData);
-        $this->assertArrayHasKey('priceLists', $viewData);
-        $this->assertArrayHasKey('paymentTypes', $viewData);
-        $this->assertArrayHasKey('languages', $viewData);
-        $this->assertArrayHasKey('clients', $viewData);
-        $this->assertArrayHasKey('frequencies', $viewData);
-        $this->assertArrayHasKey('contactBankConnections', $viewData);
-        $this->assertArrayHasKey('vatRates', $viewData);
-
-        $this->assertIsArray($viewData['priceLists']);
-        $this->assertIsArray($viewData['paymentTypes']);
-        $this->assertIsArray($viewData['languages']);
-        $this->assertIsArray($viewData['clients']);
-        $this->assertIsArray($viewData['frequencies']);
-        $this->assertIsArray($viewData['contactBankConnections']);
-        $this->assertIsArray($viewData['vatRates']);
-    }
-
-    public function test_renders_subscription_order_view(): void
-    {
-        $subscriptionOrderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Subscription,
-            'is_active' => true,
-            'is_hidden' => false,
-        ]);
-
-        $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertStatus(200)
-            ->assertViewIs('flux::livewire.order.subscription');
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertStatus(200)
-            ->assertViewIs('flux::livewire.order.order')
-            ->assertSet('order.id', $this->order->id)
-            ->assertSet('tab', 'order.order-positions');
-    }
-
-    public function test_reorder_discount(): void
-    {
-        $discount1 = Discount::factory()->create([
-            'model_type' => morph_alias(Order::class),
-            'model_id' => $this->order->id,
-            'order_column' => 1,
-        ]);
-
-        $discount2 = Discount::factory()->create([
-            'model_type' => morph_alias(Order::class),
-            'model_id' => $this->order->id,
-            'order_column' => 2,
-        ]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('reOrderDiscount', $discount1, 1) // Move to position 2
-            ->assertStatus(200)
-            ->assertReturned(true);
-
-        $this->assertEquals(2, $discount1->refresh()->order_column);
-        $this->assertEquals(1, $discount2->refresh()->order_column);
-    }
-
-    public function test_replicate_order(): void
-    {
-        OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-            'is_active' => true,
-            'is_hidden' => false,
-        ]);
-
-        $this->order->update([
-            'is_locked' => true,
-            'invoice_number' => 'INV-' . Str::uuid(),
-        ]);
-
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('replicate')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertExecutesJs("\$modalOpen('replicate-order')")
-            ->call('saveReplicate')
-            ->assertStatus(200)
-            ->assertHasNoErrors();
-
-        $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
-
-        $this->assertEquals($this->order->orderPositions()->count(), $replicatedOrder->orderPositions()->count());
-        $this->assertNull($replicatedOrder->invoice_number);
-        $this->assertFalse($replicatedOrder->is_locked);
-        $this->assertNull($replicatedOrder->parent_id);
-        $this->assertEquals($this->order->id, $replicatedOrder->created_from_id);
-        $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
-    }
-
-    public function test_save_locked_order_uses_update_locked_action(): void
-    {
-        $newCommission = 'Updated commission for locked order';
-        $originalInvoiceNumber = 'INVOICE-123';
-
-        $this->order->update([
-            'is_locked' => true,
-            'invoice_number' => $originalInvoiceNumber,
-        ]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.commission', $newCommission)
-            ->set('order.invoice_number', 'SHOULD-NOT-CHANGE')
-            ->call('save')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertReturned(true);
-
-        $this->order->refresh();
-        $this->assertEquals($newCommission, $this->order->commission);
-        $this->assertEquals($originalInvoiceNumber, $this->order->invoice_number);
-    }
-
-    public function test_save_order_updates_successfully(): void
-    {
-        $newCommission = 'Updated commission';
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.commission', $newCommission)
-            ->call('save')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertReturned(true);
-
-        $this->assertEquals($newCommission, $this->order->refresh()->commission);
-    }
-
-    public function test_save_states(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.state', Open::class)
-            ->set('order.payment_state', Paid::class)
-            ->set('order.delivery_state', Delivered::class)
-            ->call('saveStates')
-            ->assertStatus(200)
-            ->assertHasNoErrors();
-    }
-
-    public function test_subscription_schedule_functionality(): void
-    {
-        $subscriptionOrderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Subscription,
-        ]);
-
-        $targetOrderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-            'is_active' => true,
-            'is_hidden' => false,
-        ]);
-
-        $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set([
-                'schedule.parameters.orderTypeId' => $targetOrderType->id,
-                'schedule.parameters.orderId' => $this->order->id,
-                'schedule.cron.methods.basic' => 'monthlyOn',
-                'schedule.cron.parameters.basic' => ['1', '00:00', null],
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 50, // 50% position discount
+                'discount_percentage' => 0.5,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
             ])
-            ->assertSet('schedule.id', null)
-            ->call('saveSchedule')
-            ->assertReturned(true)
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertNotSet('schedule.id', null);
-
-        $this->assertDatabaseHas('schedules', [
-            'class' => ProcessSubscriptionOrder::class,
-            'type' => 'invokable',
-            'parameters->orderId' => $this->order->id,
-            'parameters->orderTypeId' => $targetOrderType->id,
-            'is_active' => 1,
-        ]);
-    }
-
-    public function test_switch_tabs(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertSet('tab', 'order.order-positions')
-            ->set('tab', 'order.attachments')
-            ->assertSet('tab', 'order.attachments')
-            ->set('tab', 'order.texts')
-            ->assertSet('tab', 'order.texts')
-            ->set('tab', 'order.accounting')
-            ->assertSet('tab', 'order.accounting')
-            ->set('tab', 'order.comments')
-            ->assertSet('tab', 'order.comments')
-            ->set('tab', 'order.related')
-            ->assertSet('tab', 'order.related')
-            ->set('tab', 'order.activities')
-            ->assertSet('tab', 'order.activities');
-    }
-
-    public function test_toggle_lock_functionality(): void
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertSet('order.is_locked', false)
-            ->call('toggleLock')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertSet('order.is_locked', true);
-
-        $this->assertTrue($this->order->refresh()->is_locked);
-    }
-
-    public function test_vat_calculation_prevents_negative_amounts(): void
-    {
-        // Test that flat discounts don't create negative amounts
-        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
-
-        $order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 100,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'currency_id' => Currency::factory()->create()->id,
-                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
-                'price_list_id' => PriceList::factory()->create()->id,
-                'payment_type_id' => PaymentType::factory()->create()->id,
-                'shipping_costs_net_price' => 0,
-                'shipping_costs_gross_price' => 0,
-                'shipping_costs_vat_price' => 0,
-            ]);
-
-        // Add flat discount larger than order total
-        $order->discounts()->create([
-            'discount' => 150, // More than the 100 order total
-            'is_percentage' => false,
-            'order_column' => 1,
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate7)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 100, // no position discount
+                'vat_rate_percentage' => 0.07,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        $order->calculatePrices()->save();
+    // Add 50% header discount first
+    $order->discounts()->create([
+        'discount' => 0.5,
+        'is_percentage' => true,
+        'order_column' => 1,
+    ]);
 
-        // Should be 0, not negative
-        $this->assertEquals('0.00', $order->total_net_price);
+    // Add 37.50 flat discount after percentage
+    $order->discounts()->create([
+        'discount' => 37.5,
+        'is_percentage' => false,
+        'order_column' => 2,
+    ]);
 
-        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-        $this->assertEquals('0.00', $vat19['total_net_price']);
-        $this->assertEquals('0.00', $vat19['total_vat_price']);
-    }
+    $order->calculatePrices()->save();
 
-    public function test_vat_calculation_with_combined_discounts(): void
-    {
-        // Test complex scenario: position discount + percentage header + flat header
-        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
-        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    expect($order->total_net_price)->toEqual('37.50');
 
-        $order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 50, // 50% position discount
-                    'discount_percentage' => 0.5,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->has(OrderPosition::factory()
-                ->for($vatRate7)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 100, // no position discount
-                    'vat_rate_percentage' => 0.07,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'currency_id' => Currency::factory()->create()->id,
-                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
-                'price_list_id' => PriceList::factory()->create()->id,
-                'payment_type_id' => PaymentType::factory()->create()->id,
-                'shipping_costs_net_price' => 0,
-                'shipping_costs_gross_price' => 0,
-                'shipping_costs_vat_price' => 0,
-            ]);
+    // After 50% header: 19% = 25, 7% = 50, total = 75
+    // After 37.50 flat: proportional distribution of remaining 37.50
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
 
-        // Add 50% header discount first
-        $order->discounts()->create([
-            'discount' => 0.5,
-            'is_percentage' => true,
-            'order_column' => 1,
+    // 19% portion: 25/75 * 37.50 = 12.50
+    expect($vat19['total_net_price'])->toEqual('12.50');
+    expect($vat19['total_vat_price'])->toEqual('2.37');
+
+    // 7% portion: 50/75 * 37.50 = 25.00
+    expect($vat7['total_net_price'])->toEqual('25.00');
+    expect($vat7['total_vat_price'])->toEqual('1.75');
+});
+
+test('vat calculation with flat header discount', function (): void {
+    // Create order with flat amount header discount
+    $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 50, // 50% position discount
+                'discount_percentage' => 0.5,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate7)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 100, // no position discount
+                'vat_rate_percentage' => 0.07,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        // Add 37.50 flat discount after percentage
-        $order->discounts()->create([
-            'discount' => 37.5,
-            'is_percentage' => false,
-            'order_column' => 2,
+    // Add 37.50 flat header discount (25% of 150)
+    $order->discounts()->create([
+        'discount' => 37.5,
+        'is_percentage' => false,
+        'order_column' => 1,
+    ]);
+
+    $order->calculatePrices()->save();
+
+    expect($order->total_net_price)->toEqual('112.50');
+
+    // Check proportional distribution of flat discount
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+
+    // 19% portion: 50/150 * 112.50 = 37.50
+    expect($vat19['total_net_price'])->toEqual('37.50');
+    expect($vat19['total_vat_price'])->toEqual('7.12');
+
+    // 7% portion: 100/150 * 112.50 = 75.00
+    expect($vat7['total_net_price'])->toEqual('75.00');
+    expect($vat7['total_vat_price'])->toEqual('5.25');
+});
+
+test('vat calculation with floating point precision', function (): void {
+    // Test with values that typically cause floating point issues
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 0.1,  // Problematic floating point value
+                'total_base_net_price' => 0.1,
+                'total_net_price' => 0.1,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 0.2,  // Another problematic value
+                'total_base_net_price' => 0.2,
+                'total_net_price' => 0.2,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate7)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 0.3,  // 0.1 + 0.2 = 0.3 is a classic floating point problem
+                'total_base_net_price' => 0.3,
+                'total_net_price' => 0.3,
+                'vat_rate_percentage' => 0.07,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        $order->calculatePrices()->save();
+    // Add a flat discount that would cause rounding issues
+    $order->discounts()->create([
+        'discount' => 0.17,  // Discount that doesn't divide evenly
+        'is_percentage' => false,
+        'order_column' => 1,
+    ]);
 
-        $this->assertEquals('37.50', $order->total_net_price);
+    $order->calculatePrices()->save();
 
-        // After 50% header: 19% = 25, 7% = 50, total = 75
-        // After 37.50 flat: proportional distribution of remaining 37.50
-        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    // Total should be 0.60 - 0.17 = 0.43
+    expect($order->total_net_price)->toEqual('0.43');
 
-        // 19% portion: 25/75 * 37.50 = 12.50
-        $this->assertEquals('12.50', $vat19['total_net_price']);
-        $this->assertEquals('2.37', $vat19['total_vat_price']);
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
 
-        // 7% portion: 50/75 * 37.50 = 25.00
-        $this->assertEquals('25.00', $vat7['total_net_price']);
-        $this->assertEquals('1.75', $vat7['total_vat_price']);
-    }
+    // Check that proportional distribution works correctly with bcmath
+    // 19% group had 0.30 out of 0.60 = 50%
+    // So they get 50% of 0.43 = 0.215
+    expect($vat19['total_net_price'])->toEqual('0.22');
+    // Rounded from 0.215
+    expect($vat19['total_vat_price'])->toEqual('0.04');
 
-    public function test_vat_calculation_with_flat_header_discount(): void
-    {
-        // Create order with flat amount header discount
-        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
-        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    // 0.22 * 0.19 = 0.0418
+    // 7% group had 0.30 out of 0.60 = 50%
+    // So they get 50% of 0.43 = 0.215
+    expect($vat7['total_net_price'])->toEqual('0.22');
+    // Rounded from 0.215
+    expect($vat7['total_vat_price'])->toEqual('0.02');
+    // 0.22 * 0.07 = 0.0154
+});
 
-        $order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 50, // 50% position discount
-                    'discount_percentage' => 0.5,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->has(OrderPosition::factory()
-                ->for($vatRate7)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 100, // no position discount
-                    'vat_rate_percentage' => 0.07,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'currency_id' => Currency::factory()->create()->id,
-                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
-                'price_list_id' => PriceList::factory()->create()->id,
-                'payment_type_id' => PaymentType::factory()->create()->id,
-                'shipping_costs_net_price' => 0,
-                'shipping_costs_gross_price' => 0,
-                'shipping_costs_vat_price' => 0,
-            ]);
+test('vat calculation with percentage header discount', function (): void {
+    // Create order with header percentage discount
+    $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
 
-        // Add 37.50 flat header discount (25% of 150)
-        $order->discounts()->create([
-            'discount' => 37.5,
-            'is_percentage' => false,
-            'order_column' => 1,
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 50, // 50% position discount
+                'discount_percentage' => 0.5,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate7)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 100, // no position discount
+                'vat_rate_percentage' => 0.07,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        $order->calculatePrices()->save();
+    // Add 50% header discount
+    $order->discounts()->create([
+        'discount' => 0.5,
+        'is_percentage' => true,
+        'order_column' => 1,
+    ]);
 
-        $this->assertEquals('112.50', $order->total_net_price);
+    $order->calculatePrices()->save();
 
-        // Check proportional distribution of flat discount
-        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    expect($order->total_net_price)->toEqual('75.00');
 
-        // 19% portion: 50/150 * 112.50 = 37.50
-        $this->assertEquals('37.50', $vat19['total_net_price']);
-        $this->assertEquals('7.12', $vat19['total_vat_price']);
+    // Check VAT calculations after header discount
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
 
-        // 7% portion: 100/150 * 112.50 = 75.00
-        $this->assertEquals('75.00', $vat7['total_net_price']);
-        $this->assertEquals('5.25', $vat7['total_vat_price']);
-    }
+    expect($vat19['total_net_price'])->toEqual('25.00');
+    // 50 * 0.5
+    expect($vat19['total_vat_price'])->toEqual('4.75');
+    expect($vat7['total_net_price'])->toEqual('50.00');
+    // 100 * 0.5
+    expect($vat7['total_vat_price'])->toEqual('3.50');
+});
 
-    public function test_vat_calculation_with_floating_point_precision(): void
-    {
-        // Test with values that typically cause floating point issues
-        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
-        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+test('vat calculation with position discounts', function (): void {
+    // Create order with mixed VAT rates and position discounts
+    $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
 
-        $order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 0.1,  // Problematic floating point value
-                    'total_base_net_price' => 0.1,
-                    'total_net_price' => 0.1,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 0.2,  // Another problematic value
-                    'total_base_net_price' => 0.2,
-                    'total_net_price' => 0.2,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->has(OrderPosition::factory()
-                ->for($vatRate7)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 0.3,  // 0.1 + 0.2 = 0.3 is a classic floating point problem
-                    'total_base_net_price' => 0.3,
-                    'total_net_price' => 0.3,
-                    'vat_rate_percentage' => 0.07,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'currency_id' => Currency::factory()->create()->id,
-                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
-                'price_list_id' => PriceList::factory()->create()->id,
-                'payment_type_id' => PaymentType::factory()->create()->id,
-                'shipping_costs_net_price' => 0,
-                'shipping_costs_gross_price' => 0,
-                'shipping_costs_vat_price' => 0,
-            ]);
-
-        // Add a flat discount that would cause rounding issues
-        $order->discounts()->create([
-            'discount' => 0.17,  // Discount that doesn't divide evenly
-            'is_percentage' => false,
-            'order_column' => 1,
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 50, // 50% position discount
+                'discount_percentage' => 0.5,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate7)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 100, // no position discount
+                'vat_rate_percentage' => 0.07,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        $order->calculatePrices()->save();
+    $order->calculatePrices()->save();
 
-        // Total should be 0.60 - 0.17 = 0.43
-        $this->assertEquals('0.43', $order->total_net_price);
+    expect($order->total_net_price)->toEqual('150.00');
+    expect(count($order->total_vats))->toEqual(2);
 
-        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    // Check individual VAT calculations
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
 
-        // Check that proportional distribution works correctly with bcmath
-        // 19% group had 0.30 out of 0.60 = 50%
-        // So they get 50% of 0.43 = 0.215
-        $this->assertEquals('0.22', $vat19['total_net_price']); // Rounded from 0.215
-        $this->assertEquals('0.04', $vat19['total_vat_price']); // 0.22 * 0.19 = 0.0418
+    expect($vat19['total_net_price'])->toEqual('50.00');
+    expect($vat19['total_vat_price'])->toEqual('9.50');
+    expect($vat7['total_net_price'])->toEqual('100.00');
+    expect($vat7['total_vat_price'])->toEqual('7.00');
+});
 
-        // 7% group had 0.30 out of 0.60 = 50%
-        // So they get 50% of 0.43 = 0.215
-        $this->assertEquals('0.22', $vat7['total_net_price']); // Rounded from 0.215
-        $this->assertEquals('0.02', $vat7['total_vat_price']); // 0.22 * 0.07 = 0.0154
-    }
+test('order discount with mixed vat rates and position discounts', function (): void {
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+    $vatRate0 = VatRate::factory()->create(['rate_percentage' => 0.00]);
 
-    public function test_vat_calculation_with_percentage_header_discount(): void
-    {
-        // Create order with header percentage discount
-        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
-        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
-
-        $order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 50, // 50% position discount
-                    'discount_percentage' => 0.5,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->has(OrderPosition::factory()
-                ->for($vatRate7)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 100, // no position discount
-                    'vat_rate_percentage' => 0.07,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'currency_id' => Currency::factory()->create()->id,
-                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
-                'price_list_id' => PriceList::factory()->create()->id,
-                'payment_type_id' => PaymentType::factory()->create()->id,
-                'shipping_costs_net_price' => 0,
-                'shipping_costs_gross_price' => 0,
-                'shipping_costs_vat_price' => 0,
-            ]);
-
-        // Add 50% header discount
-        $order->discounts()->create([
-            'discount' => 0.5,
-            'is_percentage' => true,
-            'order_column' => 1,
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 2650,
+                'unit_gross_price' => 3153.50,
+                'total_base_net_price' => 2650,
+                'total_base_gross_price' => 3153.50,
+                'total_net_price' => 2385,
+                'total_gross_price' => 2838.15,
+                'discount_percentage' => 0.10,
+                'vat_rate_percentage' => 0.19,
+                'vat_price' => 453.15,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate7)
+            ->state([
+                'amount' => 2,
+                'unit_net_price' => 100,
+                'unit_gross_price' => 107,
+                'total_base_net_price' => 200,
+                'total_base_gross_price' => 214,
+                'total_net_price' => 160,
+                'total_gross_price' => 171.20,
+                'discount_percentage' => 0.20,
+                'vat_rate_percentage' => 0.07,
+                'vat_price' => 11.20,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->has(OrderPosition::factory()
+            ->for($vatRate0)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 500,
+                'unit_gross_price' => 500,
+                'total_base_net_price' => 500,
+                'total_base_gross_price' => 500,
+                'total_net_price' => 0,
+                'total_gross_price' => 0,
+                'discount_percentage' => 1.00,
+                'vat_rate_percentage' => 0.00,
+                'vat_price' => 0,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        $order->calculatePrices()->save();
+    $order->discounts()->create([
+        'discount' => 0.10,
+        'is_percentage' => true,
+        'order_column' => 1,
+    ]);
 
-        $this->assertEquals('75.00', $order->total_net_price);
+    $order->calculatePrices()->save();
 
-        // Check VAT calculations after header discount
-        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    expect($order->total_net_price)->toEqual('2290.50');
 
-        $this->assertEquals('25.00', $vat19['total_net_price']); // 50 * 0.5
-        $this->assertEquals('4.75', $vat19['total_vat_price']);
-        $this->assertEquals('50.00', $vat7['total_net_price']); // 100 * 0.5
-        $this->assertEquals('3.50', $vat7['total_vat_price']);
-    }
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    $vat0 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0000000000');
 
-    public function test_vat_calculation_with_position_discounts(): void
-    {
-        // Create order with mixed VAT rates and position discounts
-        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
-        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+    expect($vat19['total_net_price'])->toEqual('2146.50');
+    expect($vat19['total_vat_price'])->toEqual('407.84');
 
-        $order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 50, // 50% position discount
-                    'discount_percentage' => 0.5,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->has(OrderPosition::factory()
-                ->for($vatRate7)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 100, // no position discount
-                    'vat_rate_percentage' => 0.07,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'currency_id' => Currency::factory()->create()->id,
-                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
-                'price_list_id' => PriceList::factory()->create()->id,
-                'payment_type_id' => PaymentType::factory()->create()->id,
-                'shipping_costs_net_price' => 0,
-                'shipping_costs_gross_price' => 0,
-                'shipping_costs_vat_price' => 0,
-            ]);
+    expect($vat7['total_net_price'])->toEqual('144.00');
+    expect($vat7['total_vat_price'])->toEqual('10.08');
 
-        $order->calculatePrices()->save();
+    expect($vat0['total_net_price'])->toEqual('0.00');
+    expect($vat0['total_vat_price'])->toEqual('0.00');
 
-        $this->assertEquals('150.00', $order->total_net_price);
-        $this->assertEquals(2, count($order->total_vats));
+    expect($order->total_gross_price)->toEqual('2708.42');
+});
 
-        // Check individual VAT calculations
-        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+test('vat calculation with repeating decimals', function (): void {
+    // Test with 1/3 values that create repeating decimals
+    $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
 
-        $this->assertEquals('50.00', $vat19['total_net_price']);
-        $this->assertEquals('9.50', $vat19['total_vat_price']);
-        $this->assertEquals('100.00', $vat7['total_net_price']);
-        $this->assertEquals('7.00', $vat7['total_vat_price']);
-    }
-
-    public function test_vat_calculation_with_repeating_decimals(): void
-    {
-        // Test with 1/3 values that create repeating decimals
-        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
-
-        $order = Order::factory()
-            ->has(OrderPosition::factory()
-                ->for($vatRate19)
-                ->state([
-                    'amount' => 1,
-                    'unit_net_price' => 100,
-                    'total_base_net_price' => 100,
-                    'total_net_price' => 100,
-                    'vat_rate_percentage' => 0.19,
-                    'client_id' => $this->dbClient->getKey(),
-                    'is_alternative' => false,
-                ])
-            )
-            ->create([
-                'client_id' => $this->dbClient->getKey(),
-                'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $this->orderType->id,
-                'currency_id' => Currency::factory()->create()->id,
-                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
-                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
-                'price_list_id' => PriceList::factory()->create()->id,
-                'payment_type_id' => PaymentType::factory()->create()->id,
-                'shipping_costs_net_price' => 0,
-                'shipping_costs_gross_price' => 0,
-                'shipping_costs_vat_price' => 0,
-            ]);
-
-        // Add percentage discount that creates repeating decimal (1/3)
-        $order->discounts()->create([
-            'discount' => 0.333333333,  // 33.3333333%
-            'is_percentage' => true,
-            'order_column' => 1,
+    $order = Order::factory()
+        ->has(OrderPosition::factory()
+            ->for($vatRate19)
+            ->state([
+                'amount' => 1,
+                'unit_net_price' => 100,
+                'total_base_net_price' => 100,
+                'total_net_price' => 100,
+                'vat_rate_percentage' => 0.19,
+                'tenant_id' => $this->dbTenant->getKey(),
+                'is_alternative' => false,
+            ])
+        )
+        ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'language_id' => $this->defaultLanguage->id,
+            'order_type_id' => $this->orderType->id,
+            'currency_id' => Currency::factory()->create()->id,
+            'contact_id' => $contact = Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()])->id,
+            'address_invoice_id' => Address::factory()->create(['tenant_id' => $this->dbTenant->getKey(), 'contact_id' => $contact])->id,
+            'price_list_id' => PriceList::factory()->create()->id,
+            'payment_type_id' => PaymentType::factory()->create()->id,
+            'shipping_costs_net_price' => 0,
+            'shipping_costs_gross_price' => 0,
+            'shipping_costs_vat_price' => 0,
         ]);
 
-        $order->calculatePrices()->save();
+    // Add percentage discount that creates repeating decimal (1/3)
+    $order->discounts()->create([
+        'discount' => 0.333333333,  // 33.3333333%
+        'is_percentage' => true,
+        'order_column' => 1,
+    ]);
 
-        // 100 * (1 - 0.333333) = 66.6667, but bcround should round to 66.67
-        $this->assertEquals('66.67', $order->total_net_price);
+    $order->calculatePrices()->save();
 
-        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    // 100 * (1 - 0.333333) = 66.6667, but bcround should round to 66.67
+    expect($order->total_net_price)->toEqual('66.67');
 
-        $this->assertEquals('66.67', $vat19['total_net_price']);
-        $this->assertEquals('12.67', $vat19['total_vat_price']); // 66.67 * 0.19 = 12.6673
-    }
-}
+    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+
+    expect($vat19['total_net_price'])->toEqual('66.67');
+    expect($vat19['total_vat_price'])->toEqual('12.67');
+    // 66.67 * 0.19 = 12.6673
+});

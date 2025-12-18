@@ -11,11 +11,13 @@ return new class() extends Migration
         Schema::create('order_types', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('client_id');
+            $table->foreignId('email_template_id')
+                ->nullable()
+                ->constrained('email_templates')
+                ->nullOnDelete();
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->string('mail_subject')->nullable();
-            $table->text('mail_body')->nullable();
             $table->json('print_layouts')->nullable();
             $table->json('post_stock_print_layouts')->nullable();
             $table->json('reserve_stock_print_layouts')->nullable();
@@ -29,8 +31,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('client_id')->references('id')->on('clients')->cascadeOnDelete();
         });
     }
 

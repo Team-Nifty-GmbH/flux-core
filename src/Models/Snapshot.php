@@ -2,10 +2,10 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
 
 class Snapshot extends FluxModel
 {

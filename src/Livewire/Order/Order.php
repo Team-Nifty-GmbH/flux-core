@@ -22,10 +22,9 @@ use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Forms\DiscountForm;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
-use FluxErp\Livewire\Forms\ScheduleForm;
+use FluxErp\Livewire\Forms\OrderScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Discount;
@@ -36,6 +35,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Schedule;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
@@ -51,7 +51,9 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use Throwable;
 
 class Order extends Component
 {
@@ -61,7 +63,13 @@ class Order extends Component
 
     public array $deliveryStates = [];
 
+    #[Locked]
+    public bool $disableReplicateModalInputs = false;
+
     public DiscountForm $discount;
+
+    #[Locked]
+    public bool $hasFinalInvoice = false;
 
     public OrderForm $order;
 
@@ -69,7 +77,7 @@ class Order extends Component
 
     public OrderReplicateForm $replicateOrder;
 
-    public ScheduleForm $schedule;
+    public OrderScheduleForm $schedule;
 
     public array $states = [];
 
@@ -81,6 +89,12 @@ class Order extends Component
 
     public function mount(?string $id = null): void
     {
+        try {
+            $this->getTabButton($this->tab);
+        } catch (Throwable) {
+            throw new NotFoundHttpException('Tab not found');
+        }
+
         $this->fetchOrder($id);
 
         $orderType = resolve_static(OrderType::class, 'query')
@@ -106,13 +120,13 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->whereRelation('clients', 'id', $this->order->client_id)
+                    ->whereRelation('tenants', 'id', $this->order->tenant_id)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'languages' => resolve_static(Language::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => resolve_static(Client::class, 'query')
+                'tenants' => resolve_static(Tenant::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
                 'frequencies' => array_map(
@@ -344,27 +358,38 @@ class Order extends Component
     #[Renderless]
     public function fetchContactData(bool $replicate = false): void
     {
-        $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
+        $orderFormName = ! $replicate ? 'order' : 'replicateOrder';
 
         $contact = resolve_static(Contact::class, 'query')
-            ->whereKey($this->{$orderVariable}->contact_id)
+            ->whereKey($this->{$orderFormName}->contact_id)
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderVariable}->client_id = $contact?->client_id
-            ?? resolve_static(Client::class, 'default')->getKey();
-        $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
-        $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
-        $this->{$orderVariable}->price_list_id = $contact?->price_list_id;
-        $this->{$orderVariable}->payment_type_id = $contact?->payment_type_id;
+        $this->{$orderFormName}->tenant_id = $contact?->tenant_id
+            ?? resolve_static(Tenant::class, 'default')->getKey();
+        $this->{$orderFormName}->agent_id = $contact?->agent_id ?? $this->{$orderFormName}->agent_id;
+        $this->{$orderFormName}->contact_bank_connection_id = $contact?->contactBankConnections()
+            ->latest()
+            ->value('id');
+        $this->{$orderFormName}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderFormName}->language_id = $contact?->mainAddress?->language_id
+            ?? resolve_static(Language::class, 'default')->getKey();
+        $this->{$orderFormName}->price_list_id = $contact?->price_list_id
+            ?? resolve_static(PriceList::class, 'default')?->getKey();
+        $this->{$orderFormName}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
             $this->order->address_invoice = resolve_static(Address::class, 'query')
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
                 ->first()
-                ?->toArray();
+                ?->postal_address;
+            $this->order->address_delivery = resolve_static(Address::class, 'query')
+                ->whereKey($this->order->address_delivery_id)
+                ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
+                ->first()
+                ?->postal_address;
         }
     }
 
@@ -385,6 +410,7 @@ class Order extends Component
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
             $this->schedule->parameters['orderTypeId'] = resolve_static(OrderType::class, 'query')
+                ->where('tenant_id', $this->order->tenant_id)
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
@@ -400,7 +426,7 @@ class Order extends Component
                 ->color('red')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
-                        && $this->order->invoice_date
+                        && $this->order->invoice_number
                         && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->whereIn('order_type_enum', [
@@ -409,6 +435,7 @@ class Order extends Component
                             ])
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
                             ->exists();
@@ -418,17 +445,41 @@ class Order extends Component
                     'wire:click' => 'replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
                 ]),
             DataTableButton::make()
+                ->text(__('Create Refund'))
+                ->color('red')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && $this->order->invoice_number
+                        && resolve_static(OrderType::class, 'query')
+                            ->whereKey($this->order->order_type_id)
+                            ->whereIn('order_type_enum', [
+                                OrderTypeEnum::Order->value,
+                                OrderTypeEnum::SplitOrder->value,
+                            ])
+                            ->exists()
+                        && resolve_static(OrderType::class, 'query')
+                            ->where('tenant_id', $this->order->tenant_id)
+                            ->where('order_type_enum', OrderTypeEnum::Refund->value)
+                            ->where('is_active', true)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'wire:click' => 'replicate(\'' . OrderTypeEnum::Refund->value . '\')',
+                ]),
+            DataTableButton::make()
                 ->text(__('Create Split-Order'))
                 ->icon('shopping-bag')
                 ->color('indigo')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
-                        && ! $this->order->invoice_date
+                        && ! $this->order->invoice_number
                         && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
                             ->where('is_active', true)
                             ->where('is_hidden', false)
@@ -438,7 +489,54 @@ class Order extends Component
                     'class' => 'w-full',
                     'wire:click' => 'replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
                 ]),
+            DataTableButton::make()
+                ->text(__('New Order for Final Invoice'))
+                ->icon('shopping-bag')
+                ->color('indigo')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && is_null($this->order->parent_id)
+                        && $this->order->invoice_number
+                        && $this->hasFinalInvoice
+                        && resolve_static(OrderType::class, 'query')
+                            ->whereKey($this->order->order_type_id)
+                            ->where('order_type_enum', OrderTypeEnum::Order->value)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'wire:click' => 'replicateForFinalInvoice()',
+                ]),
         ];
+    }
+
+    public function getPrintLayoutOptions(): array
+    {
+        $orderTypeId = $this->schedule->parameters['orderTypeId'] ?? $this->order->order_type_id;
+
+        if (! $orderTypeId) {
+            return [];
+        }
+
+        $orderType = resolve_static(OrderType::class, 'query')
+            ->whereKey($orderTypeId)
+            ->first();
+
+        if (! $orderType->print_layouts) {
+            return [];
+        }
+
+        $tempOrder = app(OrderModel::class);
+        $tempOrder->order_type_id = $orderTypeId;
+        $tempOrder->orderType = $orderType;
+
+        return array_map(
+            fn (string $value) => [
+                'label' => __($value),
+                'value' => $value,
+            ],
+            array_keys($tempOrder->resolvePrintViews())
+        );
     }
 
     public function getTabs(): array
@@ -462,6 +560,10 @@ class Order extends Component
                 ->wireModel('order'),
             TabButton::make('order.comments')
                 ->text(__('Comments'))
+                ->isLivewireComponent()
+                ->wireModel('order.id'),
+            TabButton::make('order.communications')
+                ->text(__('Communications'))
                 ->isLivewireComponent()
                 ->wireModel('order.id'),
             TabButton::make('order.related')
@@ -493,6 +595,8 @@ class Order extends Component
                 'currency_id',
                 'order_type_id',
                 'price_list_id',
+                'payment_discount_percent',
+                'invoice_number',
             ]);
 
         $order->calculatePrices()->save();
@@ -547,7 +651,36 @@ class Order extends Component
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
 
+        if ($orderTypeEnum) {
+            $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
+                ->where('tenant_id', $this->order->tenant_id)
+                ->where('order_type_enum', $orderTypeEnum)
+                ->where('is_active', true)
+                ->value('id');
+        }
+
+        if ($orderTypeEnum === OrderTypeEnum::Refund->value) {
+            $this->replicateOrder->parent_id = $this->order->id;
+        }
+
         $this->replicateOrder->order_positions = null;
+        $this->replicateOrder->set_new_as_parent = false;
+        $this->disableReplicateModalInputs = false;
+
+        $this->js(<<<'JS'
+            $modalOpen('replicate-order');
+        JS);
+    }
+
+    #[Renderless]
+    public function replicateForFinalInvoice(): void
+    {
+        $this->replicateOrder->fill($this->order->toArray());
+        $this->fetchContactData();
+
+        $this->replicateOrder->order_positions = null;
+        $this->replicateOrder->set_new_as_parent = true;
+        $this->disableReplicateModalInputs = true;
 
         $this->js(<<<'JS'
             $modalOpen('replicate-order');
@@ -623,6 +756,9 @@ class Order extends Component
         $this->schedule->parameters = [
             'orderId' => $this->order->id,
             'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
+            'printLayouts' => $this->schedule->parameters['printLayouts'] ?? null,
+            'autoPrintAndSend' => $this->schedule->parameters['autoPrintAndSend'] ?? false,
+            'emailTemplateId' => $this->schedule->parameters['emailTemplateId'] ?? null,
         ];
 
         try {
@@ -692,7 +828,7 @@ class Order extends Component
         $this->order->price_list_id = $this->order->address_invoice['contact']['price_list_id'] ?? null;
         $this->order->language_id = $this->order->address_invoice['language_id'];
         $this->order->contact_id = $this->order->address_invoice['contact_id'];
-        $this->order->client_id = $this->order->address_invoice['client_id'];
+        $this->order->tenant_id = $this->order->address_invoice['tenant_id'];
     }
 
     public function updatedOrderIsConfirmed(): void
@@ -714,13 +850,25 @@ class Order extends Component
         $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
     }
 
+    public function updatedScheduleParametersOrderTypeId(): void
+    {
+        $this->skipRender();
+
+        $this->schedule->parameters['printLayouts'] = [];
+        $layouts = json_encode($this->getPrintLayoutOptions());
+
+        $this->js(<<<JS
+            \$tallstackuiSelect('schedule-print-layouts').setOptions(JSON.parse('{$layouts}'))
+        JS);
+    }
+
     protected function fetchOrder(int $id): void
     {
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($id)
             ->with([
                 'addresses',
-                'client:id,name',
+                'tenant:id,name',
                 'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
                 'contact.contactBankConnections:id,contact_id,iban',
                 'currency:id,iso,name,symbol',
@@ -736,7 +884,7 @@ class Order extends Component
                         'order_column',
                         'is_percentage',
                     ]),
-                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
+                'orderType:id,name,email_template_id,print_layouts,order_type_enum',
                 'priceList:id,name,is_net',
                 'users:id,name',
             ])
@@ -758,6 +906,8 @@ class Order extends Component
                 'mime_type' => $invoice->mime_type,
             ];
         }
+
+        $this->hasFinalInvoice = (bool) $order->getFirstMedia('final-invoice');
     }
 
     protected function getAvailableStates(array|string $fieldNames): void
@@ -798,9 +948,9 @@ class Order extends Component
         );
     }
 
-    protected function getHtmlBody(OffersPrinting $item): string
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
     {
-        return html_entity_decode($item->orderType->mail_body);
+        return $item->orderType?->email_template_id;
     }
 
     protected function getPrintLayouts(): array
@@ -814,9 +964,7 @@ class Order extends Component
 
     protected function getSubject(OffersPrinting $item): string
     {
-        return html_entity_decode(
-            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
-        );
+        return __(Str::headline($item->orderType->name)) . ' ' . $item->order_number;
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
@@ -826,14 +974,7 @@ class Order extends Component
             ? $item->contact->invoiceAddress
             : $item->contact->mainAddress;
 
-        $to = array_merge(
-            [$address->email_primary],
-            $address
-                ->contactOptions()
-                ->where('type', 'email')
-                ->pluck('value')
-                ->toArray()
-        );
+        $to = $address->mail_addresses;
 
         // add primary email address if more than just the invoice is added
         if (array_diff($documents, ['invoice'])) {

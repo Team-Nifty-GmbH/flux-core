@@ -12,9 +12,9 @@ class TicketFactory extends Factory
     public function definition(): array
     {
         return [
-            'ticket_number' => $this->faker->uuid(),
-            'title' => $this->faker->text,
-            'description' => $this->faker->realText,
+            'ticket_number' => fake()->uuid(),
+            'title' => fake()->text,
+            'description' => fake()->realText,
         ];
     }
 }

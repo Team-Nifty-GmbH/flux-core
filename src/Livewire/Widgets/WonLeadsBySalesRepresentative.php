@@ -7,8 +7,8 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\User;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Js;
@@ -62,8 +62,8 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
             '#FF9800',
         ];
 
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        $start = $this->getStart();
+        $end = $this->getEnd();
 
         $leadCounts = resolve_static(User::class, 'query')
             ->withCount([
@@ -71,7 +71,7 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
                     $query->whereHas('leadState', function (Builder $query): void {
                         $query->where('is_won', true);
                     })
-                        ->whereBetween('end', [$start, $end]);
+                        ->whereBetween('closed_at', [$start, $end]);
                 },
             ])
             ->having('total', '>', 0)
@@ -117,21 +117,21 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
                     'name' => data_get($data, 'name'),
                 ],
             ],
-            $this->series
+            $this->series ?? []
         );
     }
 
     #[Renderless]
     public function show(array $params): void
     {
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        $start = $this->getStart();
+        $end = $this->getEnd();
 
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('user_id', data_get($params, 'id'))
-                ->whereBetween('end', [$start, $end])
+                ->whereBetween('closed_at', [$start, $end])
                 ->whereHas(
                     'leadState',
                     fn (Builder $query) => $query->where('is_won', true)

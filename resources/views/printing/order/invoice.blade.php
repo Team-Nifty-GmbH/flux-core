@@ -1,4 +1,4 @@
-@extends('print::order.order')
+@extends('flux::printing.order.order')
 
 @section('first-page-right-block.rows')
     @parent

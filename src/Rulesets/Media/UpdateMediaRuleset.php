@@ -18,11 +18,6 @@ class UpdateMediaRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Media::class]),
             ],
-            'parent_id' => [
-                'integer',
-                'nullable',
-                app(ModelExists::class, ['model' => Media::class]),
-            ],
             'name' => 'sometimes|required|string|max:255',
             'file_name' => 'sometimes|required|string|max:255',
             'collection_name' => 'sometimes|required|string|max:255',

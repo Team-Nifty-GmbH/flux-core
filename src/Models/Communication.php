@@ -7,16 +7,16 @@ use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Support\Scout\ScoutCustomize;
-use FluxErp\Traits\HasDefaultTargetableColumns;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\Printable;
+use FluxErp\Traits\Model\HasDefaultTargetableColumns;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Printable;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Communication\CommunicationView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -146,6 +146,11 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
     public function contacts(): MorphToMany
     {
         return $this->morphedByMany(Contact::class, 'communicatable', 'communicatable');
+    }
+
+    public function getEmailTemplateModelType(): ?string
+    {
+        return morph_alias(static::class);
     }
 
     public function getPrintViews(): array

@@ -9,7 +9,7 @@ use Livewire\Attributes\Locked;
 
 class SerialNumberRangeForm extends FluxForm
 {
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?int $current_number = 0;
 

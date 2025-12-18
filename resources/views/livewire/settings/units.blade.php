@@ -1,6 +1,6 @@
 <div class="p-6">
     <div class="text-2xl font-semibold">
-        <x-modal id="edit-unit-modal">
+        <x-modal id="edit-unit-modal" :title="__('Unit')">
             <div class="flex flex-col gap-1.5">
                 <x-input wire:model="unit.name" :label="__('Name')" />
                 <x-input

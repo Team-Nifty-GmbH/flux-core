@@ -145,6 +145,7 @@ class Permissions extends RoleList
             [
                 'guards' => array_keys(config('auth.guards')),
                 'users' => resolve_static(User::class, 'query')
+                    ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
             ]

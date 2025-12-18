@@ -1,4 +1,4 @@
-<x-modal id="edit-schedule-modal">
+<x-modal id="edit-schedule-modal" :title="__('Schedule')">
     <div class="flex flex-col gap-4">
         <div x-cloak x-show="! $wire.schedule.id">
             <x-select.styled

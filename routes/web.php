@@ -2,6 +2,7 @@
 
 use FluxErp\Http\Controllers\AssetController;
 use FluxErp\Http\Controllers\LoginLinkController;
+use FluxErp\Http\Controllers\MobileController;
 use FluxErp\Livewire\Features\SignaturePublicLink;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')
     ->group(function (): void {
+        Route::get('/login-mobile', [MobileController::class, 'loginMobile'])->name('mobile.login');
+
         Route::middleware('signed')->group(function (): void {
             Route::get('/login-link', LoginLinkController::class)->name('login-link');
             Route::get('/signature-public/{uuid}', SignaturePublicLink::class)->name('signature.public');

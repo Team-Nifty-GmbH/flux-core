@@ -5,12 +5,15 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\RecordOriginList;
 use FluxErp\Livewire\Forms\RecordOriginForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\HasRecordOrigin;
-use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
+use FluxErp\Traits\Model\HasRecordOrigin;
 
 class RecordOrigins extends RecordOriginList
 {
-    use DataTableHasFormEdit;
+    use AllowRecordMerging, DataTableHasFormEdit;
+
+    public bool $isSelectable = true;
 
     #[DataTableForm]
     public RecordOriginForm $recordOriginForm;

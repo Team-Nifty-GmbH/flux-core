@@ -11,13 +11,12 @@ return new class() extends Migration
         Schema::create('carts', function (Blueprint $table): void {
             $table->id();
             $table->uuid();
-            $table->nullableMorphs('authenticatable');
             $table->foreignId('payment_type_id')->nullable()->constrained('payment_types')->nullOnDelete();
             $table->foreignId('price_list_id')->constrained('price_lists')->cascadeOnDelete();
+            $table->nullableMorphs('authenticatable');
             $table->string('session_id')->index();
             $table->string('name')->nullable();
             $table->decimal('total', 40, 10)->nullable();
-            $table->boolean('is_portal_public')->default(false);
             $table->boolean('is_public')->default(false);
             $table->boolean('is_watchlist')->default(false);
             $table->timestamp('created_at')->nullable();

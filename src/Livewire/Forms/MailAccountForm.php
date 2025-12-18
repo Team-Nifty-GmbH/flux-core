@@ -7,10 +7,8 @@ use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\MailAccount;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Locked;
-use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
+use Livewire\Attributes\Renderless;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
 use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
 use Webklex\PHPIMAP\Exceptions\ImapBadRequestException;
@@ -35,6 +33,8 @@ class MailAccountForm extends FluxForm
 
     public bool $is_o_auth = false;
 
+    public ?string $name = null;
+
     public ?string $password = null;
 
     public int $port = 993;
@@ -45,11 +45,19 @@ class MailAccountForm extends FluxForm
 
     public ?string $smtp_encryption = null;
 
+    public ?string $smtp_from_name = null;
+
     public ?string $smtp_host = null;
+
+    public ?string $smtp_mailer = 'smtp';
 
     public ?string $smtp_password = null;
 
     public ?int $smtp_port = 587;
+
+    public ?string $smtp_reply_to = null;
+
+    public ?string $smtp_user = null;
 
     public function save(): void
     {
@@ -58,25 +66,19 @@ class MailAccountForm extends FluxForm
         parent::save();
     }
 
+    #[Renderless]
     public function sendTestMail(?string $to = null): void
     {
         $to ??= auth()->user()->email;
 
-        $mailer = Mail::build([
-            'transport' => 'smtp',
-            'host' => $this->smtp_host,
-            'port' => $this->smtp_port ?? 587,
-            'encryption' => $this->smtp_encryption,
-            'username' => $this->smtp_email,
-            'password' => $this->smtp_password,
-            'timeout' => 15,
-        ]);
-        $mailer->alwaysFrom($this->smtp_email ?: config('mail.from.address'), config('mail.from.name'));
+        $mailAccount = app(MailAccount::class)->fill($this->toArray());
+        $mailer = $mailAccount->mailer();
+
         $mailer->to($to)
             ->sendNow(
                 GenericMail::make([
                     'subject' => __('Test mail'),
-                    'html_body' => new HtmlString('<p>' . __('This is a test mail') . '</p>'),
+                    'html_body' => '<p>' . __('This is a test mail') . '</p>',
                 ])
             );
     }
@@ -92,18 +94,6 @@ class MailAccountForm extends FluxForm
     public function testImapConnection(): void
     {
         app(MailAccount::class)->fill($this->toArray())->connect();
-    }
-
-    /**
-     * @throws \Symfony\Component\Mailer\Exception\TransportExceptionInterface
-     */
-    public function testSmtpConnection(): void
-    {
-        $transport = new EsmtpTransport($this->smtp_host, $this->smtp_port);
-        $transport->setUsername($this->smtp_email);
-        $transport->setPassword($this->smtp_password);
-
-        $transport->start();
     }
 
     protected function getActions(): array

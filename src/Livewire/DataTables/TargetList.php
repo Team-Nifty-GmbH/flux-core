@@ -7,6 +7,7 @@ use FluxErp\Models\Target;
 class TargetList extends BaseDataTable
 {
     public array $enabledCols = [
+        'name',
         'start_date',
         'end_date',
         'model_type',

@@ -1,0 +1,23 @@
+<?php
+
+namespace FluxErp\Livewire\MyEmployeeProfile;
+
+use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
+use FluxErp\Models\AbsenceRequest as AbsenceRequestModel;
+
+class MyAbsenceRequest extends AbsenceRequest
+{
+    public function mount(AbsenceRequestModel $id): void
+    {
+        if ($id->employee_id !== auth()->user()?->employee?->getKey()) {
+            abort(403);
+        }
+
+        parent::mount($id);
+    }
+
+    public function getEmployeeUrl(): string
+    {
+        return route('human-resources.my-employee-profile');
+    }
+}

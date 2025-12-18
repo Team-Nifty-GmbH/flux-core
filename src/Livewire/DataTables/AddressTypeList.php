@@ -8,7 +8,7 @@ class AddressTypeList extends BaseDataTable
 {
     public array $enabledCols = [
         'name',
-        'client.name',
+        'tenant.name',
         'address_type_code',
         'is_locked',
         'is_unique',

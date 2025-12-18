@@ -7,19 +7,18 @@ use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\CreditAccountPostingEnum;
-use FluxErp\Traits\CascadeSoftDeletes;
-use FluxErp\Traits\Commentable;
-use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasTags;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SortableTrait;
+use FluxErp\Traits\Model\CascadeSoftDeletes;
+use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasSerialNumberRange;
+use FluxErp\Traits\Model\HasTags;
+use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,9 +36,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable, Targetable
 {
-    use CascadeSoftDeletes, Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
-        LogsActivity, SortableTrait;
+    use CascadeSoftDeletes, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+        HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity, SortableTrait;
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
@@ -164,11 +162,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             ->where('parent_id', $this->parent_id);
     }
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
-
     public function commission(): HasOne
     {
         return $this->hasOne(Commission::class);
@@ -256,11 +249,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->belongsTo(OrderPosition::class, 'origin_position_id');
     }
 
-    public function price(): BelongsTo
-    {
-        return $this->belongsTo(Price::class);
-    }
-
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);
@@ -291,11 +279,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
     public function siblings(): HasMany
     {
-        return $this->hasMany(
-            OrderPosition::class,
-            'origin_position_id',
-            'origin_position_id'
-        );
+        return $this->hasMany(OrderPosition::class, 'origin_position_id', 'origin_position_id');
     }
 
     public function stockPostings(): HasMany
@@ -306,6 +290,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     public function vatRate(): BelongsTo

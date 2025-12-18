@@ -9,12 +9,9 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('order_user', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('user_id');
-
-            $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->id('pivot_id');
+            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 

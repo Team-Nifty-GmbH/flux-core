@@ -16,7 +16,6 @@ class UpdateNotificationSettingRuleset extends FluxRuleset
             'notification_type' => [
                 'required',
                 'string',
-                Rule::in(data_get(config('notifications.model_notifications'), '*.*')),
             ],
             'channel' => [
                 'required',
@@ -25,7 +24,7 @@ class UpdateNotificationSettingRuleset extends FluxRuleset
             ],
             'channel_value' => 'present|array',
             'is_active' => 'required|boolean',
-            'is_anonymous' => 'sometimes|required|boolean|declined',
+            'is_anonymous' => 'sometimes|required|boolean|accepted',
         ];
     }
 }

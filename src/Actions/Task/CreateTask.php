@@ -2,11 +2,16 @@
 
 namespace FluxErp\Actions\Task;
 
+use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\CreateTaskRuleset;
+use FluxErp\Settings\ReminderSettings;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class CreateTask extends FluxAction
 {
@@ -31,6 +36,16 @@ class CreateTask extends FluxAction
 
         if ($users) {
             $task->users()->attach($users);
+
+            event(TaskAssignedEvent::make($task)
+                ->subscribeChannel(
+                    collect($users)
+                        ->when(
+                            $this->getData('responsible_user_id'),
+                            fn (Collection $users) => $users->add($this->getData('responsible_user_id'))
+                        )
+                )
+            );
         }
 
         if ($orderPositions) {
@@ -46,11 +61,66 @@ class CreateTask extends FluxAction
             $task->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
-        return $task->fresh();
+        return $task->refresh();
     }
 
     protected function prepareForValidation(): void
     {
         $this->data['priority'] ??= 0;
+        $reminderSettings = app(ReminderSettings::class);
+
+        if ($this->getData('start_date')) {
+            $this->data['start_time'] ??= null;
+
+            if (! array_key_exists('start_reminder_minutes_before', $this->data)) {
+                $this->data['start_reminder_minutes_before'] = $reminderSettings->start_reminder_minutes_before;
+            }
+
+            if (! array_key_exists('has_start_reminder', $this->data)) {
+                $this->data['has_start_reminder'] = $reminderSettings->has_start_reminder;
+            }
+        } else {
+            $this->data['start_reminder_minutes_before'] = null;
+            $this->data['has_start_reminder'] = false;
+        }
+
+        if ($this->getData('due_date')) {
+            $this->data['due_time'] ??= null;
+
+            if (! array_key_exists('due_reminder_minutes_before', $this->data)) {
+                $this->data['due_reminder_minutes_before'] = $reminderSettings->end_reminder_minutes_before;
+            }
+
+            if (! array_key_exists('has_due_reminder', $this->data)) {
+                $this->data['has_due_reminder'] = $reminderSettings->has_end_reminder;
+            }
+        } else {
+            $this->data['due_reminder_minutes_before'] = null;
+            $this->data['has_due_reminder'] = false;
+        }
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (
+            $this->getData('start_date')
+            && $this->getData('due_date')
+        ) {
+            $start = Carbon::parse($this->getData('start_date'))
+                ->setTimeFromTimeString($this->getData('start_time') ?? '00:00:00');
+            $end = Carbon::parse($this->getData('due_date'))
+                ->setTimeFromTimeString($this->getData('due_time') ?? '23:59:59');
+
+            if ($end->lt($start)) {
+                throw ValidationException::withMessages([
+                    'due_datetime' => [
+                        __('validation.after', ['attribute' => 'due_time', 'date' => $start->toDateTimeString()]),
+                    ],
+                ])
+                    ->errorBag('createTask');
+            }
+        }
     }
 }

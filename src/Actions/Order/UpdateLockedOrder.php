@@ -31,8 +31,13 @@ class UpdateLockedOrder extends FluxAction
         $users = Arr::pull($this->data, 'users');
 
         $order = resolve_static(Order::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
+
+        $approvalUserId = $this->getData('approval_user_id', $order->approval_user_id);
+        if ($approvalUserId !== $order->approval_user_id) {
+            $order->approvalUser?->unsubscribeNotificationChannel($order->broadcastChannel());
+        }
 
         $order->fill($this->data);
         $order->save();

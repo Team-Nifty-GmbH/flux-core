@@ -2,10 +2,10 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\Notifiable;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\Notifiable;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Models\Role as SpatieRole;

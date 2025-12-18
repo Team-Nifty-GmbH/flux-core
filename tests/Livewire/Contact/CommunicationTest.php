@@ -1,16 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Contact;
-
 use FluxErp\Livewire\Contact\Communication;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class CommunicationTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Communication::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Communication::class)
+        ->assertOk();
+});

@@ -36,11 +36,13 @@ class OrderForm extends FluxForm
 
     public ?string $balance = null;
 
+    public ?string $balance_due_discount = null;
+
     public ?string $bank_name = null;
 
     public ?string $bic = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
     public ?string $commission = null;
 
@@ -118,6 +120,8 @@ class OrderForm extends FluxForm
 
     public ?int $payment_discount_target = null;
 
+    public ?string $payment_discount_target_date = null;
+
     public ?int $payment_reminder_current_level = null;
 
     public ?int $payment_reminder_days_1 = null;
@@ -132,6 +136,8 @@ class OrderForm extends FluxForm
 
     public ?int $payment_target = null;
 
+    public ?string $payment_target_date = null;
+
     public ?array $payment_texts = [];
 
     public ?int $payment_type_id = null;
@@ -141,6 +147,12 @@ class OrderForm extends FluxForm
     public ?int $responsible_user_id = null;
 
     public ?string $state = null;
+
+    public ?string $subtotal_gross_price = null;
+
+    public ?string $subtotal_net_price = null;
+
+    public ?array $subtotal_vats = null;
 
     public ?string $system_delivery_date = null;
 
@@ -243,6 +255,11 @@ class OrderForm extends FluxForm
         parent::fill($values);
 
         $this->hasContactDeliveryLock = data_get($values, 'contact.has_delivery_lock', false);
+
+        // Convert payment discount percent from decimal to percent for display
+        $this->payment_discount_percent = ! is_null($this->payment_discount_percent)
+            ? bcmul($this->payment_discount_percent, 100)
+            : null;
     }
 
     public function getContact(): ?Contact
@@ -276,6 +293,18 @@ class OrderForm extends FluxForm
         } else {
             $this->create();
         }
+    }
+
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+
+        // Convert payment discount percent from percent to decimal for storage
+        $data['payment_discount_percent'] = ! is_null($this->payment_discount_percent)
+            ? bcdiv($this->payment_discount_percent, 100)
+            : null;
+
+        return $data;
     }
 
     public function updateLocked(): void

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use FluxErp\Traits\Scout\Searchable;
 use Spatie\TranslationLoader\LanguageLine as SpatieLanguageLine;
 

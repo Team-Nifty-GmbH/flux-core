@@ -3,7 +3,7 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\Calendar;
-use FluxErp\Traits\HasCalendars;
+use FluxErp\Traits\Model\Calendar\HasCalendars;
 use Illuminate\Database\Seeder;
 
 class CalendarTableSeeder extends Seeder

@@ -10,8 +10,9 @@ use FluxErp\Facades\ProductType;
 use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Livewire\Forms\ProductPricesUpdateForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
@@ -116,7 +117,7 @@ class ProductList extends BaseProductList
     {
         $this->product->reset();
 
-        $this->product->client_id = resolve_static(Client::class, 'default')?->getKey();
+        $this->product->tenant_id = resolve_static(Tenant::class, 'default')?->getKey();
         $this->product->product_type = data_get(ProductType::getDefault(), 'type');
     }
 
@@ -143,6 +144,30 @@ class ProductList extends BaseProductList
         $this->redirect(route('products.id', $this->product->id), true);
 
         return true;
+    }
+
+    #[Renderless]
+    public function restore(int $id): void
+    {
+        $this->product->fill(
+            resolve_static(Product::class, 'query')
+                ->withTrashed()
+                ->whereKey($id)
+                ->first()
+        );
+
+        try {
+            $this->product->restore();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model restored', ['model' => __('Product')]))
+            ->send();
+        $this->loadData();
     }
 
     #[Renderless]
@@ -182,7 +207,7 @@ class ProductList extends BaseProductList
                 'vatRates' => resolve_static(VatRate::class, 'query')
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
-                'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
+                'roundingMethods' => resolve_static(RoundingMethodEnum::class, 'valuesLocalized'),
                 'roundingModes' => [
                     [
                         'label' => __('Round'),

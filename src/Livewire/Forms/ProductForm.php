@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
+use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
@@ -22,9 +23,9 @@ class ProductForm extends FluxForm
 
     public ?int $children_count = null;
 
-    public ?int $client_id = null;
+    public ?int $tenant_id = null;
 
-    public array $clients = [];
+    public array $tenants = [];
 
     public ?int $cover_media_id = null;
 
@@ -124,7 +125,7 @@ class ProductForm extends FluxForm
             $values->loadMissing([
                 'bundleProducts:id',
                 'categories:id',
-                'clients:id',
+                'tenants:id',
                 'coverMedia',
                 'parent',
                 'productProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
@@ -145,7 +146,7 @@ class ProductForm extends FluxForm
 
         $this->categories = array_column($this->categories, 'id');
         $this->tags = array_column($this->tags, 'id');
-        $this->clients = array_column($this->clients, 'id');
+        $this->tenants = array_column($this->tenants, 'id');
         $this->parent = $this->parent
             ? [
                 'label' => $values->parent->getLabel(),
@@ -165,6 +166,7 @@ class ProductForm extends FluxForm
     {
         return [
             'create' => CreateProduct::class,
+            'restore' => RestoreProduct::class,
             'update' => UpdateProduct::class,
             'delete' => DeleteProduct::class,
         ];

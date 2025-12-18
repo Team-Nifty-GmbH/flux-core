@@ -26,8 +26,6 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->foreignId('client_id')
-                ->constrained('clients');
             $table->foreignId('contact_bank_connection_id')
                 ->nullable()
                 ->constrained('contact_bank_connections')
@@ -63,6 +61,8 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
+            $table->foreignId('tenant_id')
+                ->constrained('tenants');
             $table->foreignId('vat_rate_id')
                 ->nullable()
                 ->constrained('vat_rates')
@@ -75,7 +75,9 @@ return new class() extends Migration
             $table->string('delivery_state')->nullable();
 
             $table->integer('payment_target', false, true);
+            $table->date('payment_target_date')->nullable();
             $table->integer('payment_discount_target', false, true)->nullable();
+            $table->date('payment_discount_target_date')->nullable();
             $table->decimal('payment_discount_percent', 40, 10)->nullable();
             $table->decimal('shipping_costs_net_price', 40, 10)->default(0)->nullable()
                 ->comment('A decimal containing the net price of shipping costs.');
@@ -96,6 +98,9 @@ return new class() extends Migration
             $table->decimal('total_purchase_price', 40, 10)->default(0);
             $table->decimal('total_cost', 40, 10)->nullable();
             $table->decimal('margin', 40, 10)->default(0);
+            $table->decimal('subtotal_net_price', 40, 10)->nullable();
+            $table->decimal('subtotal_gross_price', 40, 10)->nullable();
+            $table->json('subtotal_vats')->nullable();
             $table->decimal('total_net_price', 40, 10)->default(0);
             $table->decimal('total_gross_price', 40, 10)->default(0);
             $table->json('total_vats')->nullable();
@@ -104,6 +109,7 @@ return new class() extends Migration
             $table->decimal('total_position_discount_percentage', 40, 10)->nullable();
             $table->decimal('total_position_discount_flat', 40, 10)->nullable();
             $table->decimal('balance', 40, 10)->nullable();
+            $table->decimal('balance_due_discount', 40, 10)->nullable();
             $table->integer('payment_reminder_days_1', false, true);
             $table->integer('payment_reminder_days_2', false, true);
             $table->integer('payment_reminder_days_3', false, true);
@@ -131,11 +137,9 @@ return new class() extends Migration
             $table->date('date_of_approval')->nullable();
 
             // boolean
-            $table->boolean('is_locked')->default(false)
-                ->comment('If set to true this order cant be edited anymore, ' .
-                    'this happens usually when the invoice was printed.');
-            $table->boolean('is_imported')->default(false);
             $table->boolean('is_confirmed')->default(false);
+            $table->boolean('is_imported')->default(false);
+            $table->boolean('is_locked')->default(false);
             $table->boolean('requires_approval')->default(false);
 
             $table->timestamp('created_at')->nullable();
@@ -145,7 +149,7 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->unique(['order_number', 'client_id']);
+            $table->unique(['order_number', 'tenant_id']);
         });
     }
 

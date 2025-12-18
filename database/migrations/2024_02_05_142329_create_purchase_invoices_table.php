@@ -12,7 +12,6 @@ return new class() extends Migration
             $table->id();
             $table->char('uuid', 36);
             $table->foreignId('approval_user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('client_id')->nullable()->constrained('clients')->nullOnDelete();
             $table->foreignId('contact_id')->nullable()->constrained('contacts')->nullOnDelete();
             $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
             $table->foreignId('lay_out_user_id')->nullable()->constrained('users')->nullOnDelete();
@@ -20,7 +19,11 @@ return new class() extends Migration
             $table->foreignId('order_id')->nullable()->constrained('orders')->nullOnDelete();
             $table->foreignId('order_type_id')->nullable()->constrained('order_types')->nullOnDelete();
             $table->foreignId('payment_type_id')->nullable()->constrained('payment_types')->nullOnDelete();
+            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->nullOnDelete();
             $table->date('invoice_date');
+            $table->date('payment_target_date')->nullable();
+            $table->date('payment_discount_target_date')->nullable();
+            $table->decimal('payment_discount_percent', 11, 10)->nullable();
             $table->date('system_delivery_date')->nullable();
             $table->date('system_delivery_date_end')->nullable();
             $table->string('invoice_number')->nullable();

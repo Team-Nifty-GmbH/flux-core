@@ -6,34 +6,34 @@ use Exception;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
-use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasCalendars;
-use FluxErp\Traits\HasCalendarUserSettings;
-use FluxErp\Traits\HasCart;
-use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasParentChildRelations;
-use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
-use FluxErp\Traits\HasWidgets;
-use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\MonitorsQueue;
-use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Model\Calendar\HasCalendars;
+use FluxErp\Traits\Model\Calendar\HasCalendarUserSettings;
+use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasCart;
+use FluxErp\Traits\Model\HasFrontendAttributes;
+use FluxErp\Traits\Model\HasPackageFactory;
+use FluxErp\Traits\Model\HasParentChildRelations;
+use FluxErp\Traits\Model\HasPushSubscriptions;
+use FluxErp\Traits\Model\HasUserModification;
+use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\HasWidgets;
+use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\MonitorsQueue;
+use FluxErp\Traits\Model\Notifiable;
+use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
@@ -42,9 +42,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
-        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+    use Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles, HasUserModification, HasUuid,
+        HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -105,14 +105,19 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         ];
     }
 
+    public function absenceRequests(): HasMany
+    {
+        return $this->hasMany(AbsenceRequest::class);
+    }
+
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');
     }
 
-    public function clients(): BelongsToMany
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class, 'client_user');
+        return $this->belongsToMany(Tenant::class, 'tenant_user');
     }
 
     public function commissionRates(): HasMany
@@ -133,6 +138,18 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    public function defaultMailAccount(): ?MailAccount
+    {
+        return $this->mailAccounts()
+            ->wherePivot('is_default', true)
+            ->first();
+    }
+
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class);
     }
 
     public function favorites(): MorphMany
@@ -178,14 +195,10 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->hasMany(Lead::class);
     }
 
-    public function locks(): MorphMany
-    {
-        return $this->morphMany(Lock::class, 'authenticatable');
-    }
-
     public function mailAccounts(): BelongsToMany
     {
-        return $this->belongsToMany(MailAccount::class, 'mail_account_user');
+        return $this->belongsToMany(MailAccount::class, 'mail_account_user')
+            ->withPivot('is_default');
     }
 
     /**
@@ -232,11 +245,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         );
 
         Mail::to($this->email)->queue(MagicLoginLink::make($plaintext, $expires));
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
     }
 
     public function targets(): BelongsToMany

@@ -1,32 +1,18 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Widgets;
-
 use FluxErp\Livewire\Widgets\ActiveTaskTimes;
 use FluxErp\Models\WorkTime;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class ActiveTaskTimesTest extends BaseSetup
-{
-    protected string $livewireComponent = ActiveTaskTimes::class;
+test('renders successfully', function (): void {
+    WorkTime::factory()
+        ->for($this->user)
+        ->create([
+            'is_daily_work_time' => false,
+            'is_locked' => false,
+        ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        WorkTime::factory()
-            ->for($this->user)
-            ->create([
-                'is_daily_work_time' => false,
-                'is_locked' => false,
-            ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200)
-            ->assertCount('items', 1);
-    }
-}
+    Livewire::test(ActiveTaskTimes::class)
+        ->assertOk()
+        ->assertCount('items', 1);
+});

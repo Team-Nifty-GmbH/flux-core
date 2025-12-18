@@ -31,7 +31,10 @@
                 },
             }"
         >
-            <div class="divide-secondary-200 space-y-2.5 divide-y">
+            <div
+                class="space-y-2.5 divide-y divide-secondary-200"
+                x-bind:class="$wire.disableReplicateModalInputs && 'pointer-events-none'"
+            >
                 <x-select.styled
                     :label="__('Order type')"
                     wire:model="replicateOrder.order_type_id"
@@ -147,12 +150,12 @@
                 </div>
                 <div class="space-y-3 pt-4">
                     <x-select.styled
-                        :label="__('Client')"
+                        :label="__('Tenant')"
                         required
                         autocomplete="off"
-                        wire:model="replicateOrder.client_id"
+                        wire:model="replicateOrder.tenant_id"
                         select="label:name|value:id"
-                        :options="$clients"
+                        :options="$tenants"
                     />
                     <x-select.styled
                         :label="__('Price list')"
@@ -207,7 +210,7 @@
         <div class="flex flex-col gap-1.5">
             <x-input
                 wire:model="discount.name"
-                :text="__('Name')"
+                :label="__('Name')"
                 id="discount-name"
             />
             <div x-cloak x-show="$wire.discount.is_percentage">
@@ -381,7 +384,10 @@
         class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            <section class="relative max-w-96 basis-2/12" wire:ignore>
+            <section
+                class="relative w-full xl:max-w-96 xl:basis-2/12"
+                wire:ignore
+            >
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
                     <x-card>
@@ -562,7 +568,7 @@
                             <livewire:order.additional-addresses
                                 lazy
                                 :order-id="$order->id"
-                                :client-id="$order->client_id"
+                                :tenant-id="$order->tenant_id"
                             />
                         </div>
                     </x-card>
@@ -571,15 +577,15 @@
                         minimize="mount"
                     >
                         <div class="space-y-3 px-2 py-5">
-                            @if (count($clients) > 1)
+                            @if (count($tenants) > 1)
                                 <x-select.styled
                                     disabled
-                                    :label="__('Client')"
+                                    :label="__('Tenant')"
                                     required
                                     autocomplete="off"
-                                    wire:model.live="order.client_id"
+                                    wire:model.live="order.tenant_id"
                                     select="label:name|value:id"
-                                    :options="$clients"
+                                    :options="$tenants"
                                 />
                             @endif
 
@@ -707,8 +713,6 @@
                                     required
                                     autocomplete="off"
                                     wire:model="order.language_id"
-                                    x-bind:disabled="$wire.order.is_locked"
-                                    :disabled="$order->is_locked"
                                     select="label:name|value:id"
                                     :options="$languages"
                                 />
@@ -748,7 +752,10 @@
             </section>
         </x-slot>
         <x-slot:append>
-            <section class="relative max-w-96 basis-2/12" wire:ignore>
+            <section
+                class="relative w-full xl:max-w-96 xl:basis-2/12"
+                wire:ignore
+            >
                 <div class="sticky top-6 space-y-6">
                     @section('content.right')
                     <x-card>
@@ -806,7 +813,7 @@
                             <div
                                 x-cloak
                                 x-show="
-                                    $wire.order.total_net_price !==
+                                    ($wire.order.subtotal_net_price ?? $wire.order.total_net_price) !==
                                         ($wire.order.total_base_net_price ?? '0.0000000000')
                                 "
                             >
@@ -928,6 +935,38 @@
                                     ></span>
                                 </div>
                             </div>
+                            <div
+                                class="flex justify-between p-2.5"
+                                x-cloak
+                                x-show="$wire.order.subtotal_net_price > 0"
+                            >
+                                <div>
+                                    {{ __('Subtotal net') }}
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="formatters.coloredMoney($wire.order.subtotal_net_price)"
+                                    ></span>
+                                </div>
+                            </div>
+                            <div
+                                class="flex justify-between p-2.5 opacity-50"
+                                x-cloak
+                                x-show="$wire.order.subtotal_net_price > 0"
+                            >
+                                <div>
+                                    {{ __('Split Orders net') }}
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="
+                                            formatters.coloredMoney(
+                                                $wire.order.total_net_price - $wire.order.subtotal_net_price,
+                                            )
+                                        "
+                                    ></span>
+                                </div>
+                            </div>
                             <div class="flex justify-between p-2.5">
                                 <div>
                                     {{ __('Sum net') }}
@@ -955,7 +994,7 @@
                                 </div>
                             </template>
                             <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
+                                class="flex justify-between bg-gray-50 p-2.5 dark:bg-secondary-700"
                             >
                                 <div>
                                     {{ __('Total Gross') }}
@@ -967,7 +1006,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
+                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
                             >
                                 <div>
                                     {{ __('Balance') }}
@@ -975,6 +1014,30 @@
                                 <div>
                                     <span
                                         x-html="formatters.coloredMoney($wire.order.balance ?? 0)"
+                                    ></span>
+                                </div>
+                            </div>
+                            <div
+                                x-cloak
+                                x-show="$wire.order.balance_due_discount"
+                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
+                            >
+                                <div>
+                                    {{ __('Balance Due Discount') }}
+                                    <span
+                                        x-show="$wire.order.payment_discount_target_date"
+                                        class="text-xs text-gray-500 dark:text-gray-400"
+                                    >
+                                        ({{ __('until') }}
+                                        <span
+                                            x-text="window.formatters.date($wire.order.payment_discount_target_date)"
+                                        ></span>
+                                        )
+                                    </span>
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="formatters.coloredMoney($wire.order.balance_due_discount ?? 0)"
                                     ></span>
                                 </div>
                             </div>
@@ -1011,7 +1074,7 @@
                                 wire:model="order.invoice_date"
                                 :without-time="true"
                                 :disabled="true"
-                                :text="__('Invoice Date')"
+                                :label="__('Invoice Date')"
                             />
                             <x-date
                                 wire:model="order.system_delivery_date"
