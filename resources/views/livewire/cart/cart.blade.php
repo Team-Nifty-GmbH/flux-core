@@ -115,23 +115,23 @@
                             />
                         </div>
                         @show
-
-                        <x-select.styled
-                            class="w-full"
-                            :label="__('Load a watchlist')"
-                            wire:model.live.numeric="loadWatchlist"
-                            select="label:name|value:id"
-                            :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
-                        />
-                        <x-button
-                            :text="__('Edit watchlists')"
-                            :href="route('watchlists')"
-                            wire:navigate
-                            x-on:click="show = false"
-                            color="indigo"
-                            class="w-full"
-                        />
                     @endif
+
+                    <x-select.styled
+                        class="w-full"
+                        :label="__('Load a watchlist')"
+                        wire:model.live.numeric="loadWatchlist"
+                        select="label:name|value:id"
+                        :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
+                    />
+                    <x-button
+                        :text="__('Edit watchlists')"
+                        :href="route('watchlists')"
+                        wire:navigate
+                        x-on:click="show = false"
+                        color="indigo"
+                        class="w-full"
+                    />
 
                     @show
                 </div>
