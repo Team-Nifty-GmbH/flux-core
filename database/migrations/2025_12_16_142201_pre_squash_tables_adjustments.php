@@ -15,8 +15,14 @@ return new class() extends Migration
             $table->dropPrimary();
             $table->id('pivot_id')->first();
 
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('address_type_id')->references('id')->on('address_types');
+            $table->foreign('address_id')
+                ->references('id')
+                ->on('addresses')
+                ->cascadeOnDelete();
+            $table->foreign('address_type_id')
+                ->references('id')
+                ->on('address_types')
+                ->cascadeOnDelete();
             $table->unique(['address_id', 'address_type_id']);
         });
 
@@ -29,9 +35,18 @@ return new class() extends Migration
             $table->id('pivot_id')->first();
             $table->unsignedBigInteger('order_id')->after('address_type_id')->change();
 
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('address_type_id')->references('id')->on('address_types');
-            $table->foreign('order_id')->references('id')->on('orders');
+            $table->foreign('address_id')
+                ->references('id')
+                ->on('addresses')
+                ->cascadeOnDelete();
+            $table->foreign('address_type_id')
+                ->references('id')
+                ->on('address_types')
+                ->cascadeOnDelete();
+            $table->foreign('order_id')
+                ->references('id')
+                ->on('orders')
+                ->cascadeOnDelete();
             $table->unique(['address_id', 'address_type_id', 'order_id'], 'address_address_type_order_unique');
         });
 
@@ -42,8 +57,8 @@ return new class() extends Migration
             $table->dropPrimary();
             $table->id('pivot_id')->first();
 
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('product_id')->references('id')->on('products');
+            $table->foreign('address_id')->references('id')->on('addresses')->cascadeOnDelete();
+            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
             $table->unique(['address_id', 'product_id']);
         });
 
@@ -54,10 +69,14 @@ return new class() extends Migration
 
         // AddressTypes
         Schema::table('address_types', function (Blueprint $table): void {
+            $table->dropForeign(['tenant_id']);
+            $table->dropIndex('address_types_client_id_address_type_code_unique');
             $table->dropColumn([
                 'is_locked',
                 'is_unique',
             ]);
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->unique(['tenant_id', 'address_type_code']);
         });
 
         // Addresses
@@ -107,7 +126,7 @@ return new class() extends Migration
                 'updated_at',
             ]);
 
-            $table->foreign('calendar_id')->references('id')->on('calendars');
+            $table->foreign('calendar_id')->references('id')->on('calendars')->cascadeOnDelete();
             $table->index(['calendarable_type', 'calendarable_id']);
         });
 
@@ -134,7 +153,7 @@ return new class() extends Migration
         Schema::rename('categorizables', 'categorizable');
         Schema::table('categorizable', function (Blueprint $table): void {
             $table->id('pivot_id')->first();
-            $table->foreign('category_id')->references('id')->on('categories');
+            $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();
             $table->unique(['category_id', 'categorizable_type', 'categorizable_id'], 'categorizable_unique');
         });
 
@@ -146,8 +165,14 @@ return new class() extends Migration
             $table->id('pivot_id')->first();
             $table->unsignedBigInteger('discount_id')->after('category_id')->change();
 
-            $table->foreign('category_id')->references('id')->on('categories');
-            $table->foreign('price_list_id')->references('id')->on('price_lists');
+            $table->foreign('category_id')
+                ->references('id')
+                ->on('categories')
+                ->cascadeOnDelete();
+            $table->foreign('price_list_id')
+                ->references('id')
+                ->on('price_lists')
+                ->cascadeOnDelete();
             $table->unique(['category_id', 'price_list_id']);
         });
 
@@ -190,6 +215,11 @@ return new class() extends Migration
             $table->renameColumn('id', 'pivot_id');
         });
 
+        // ContactIndustry
+        Schema::table('contact_industry', function (Blueprint $table) {
+            $table->unique(['contact_id', 'industry_id']);
+        });
+
         // Contacts
         Schema::table('contacts', function (Blueprint $table): void {
             $table->unsignedBigInteger('agent_id')->nullable()->after('uuid')->change();
@@ -226,6 +256,8 @@ return new class() extends Migration
         // DiscountDiscountGroup
         Schema::table('discount_discount_group', function (Blueprint $table): void {
             $table->renameColumn('id', 'pivot_id');
+            $table->unsignedBigInteger('discount_id')->after('discount_group_id')->change();
+            $table->unique(['discount_group_id', 'discount_id']);
         });
 
         // EventSubscriptions
@@ -262,10 +294,12 @@ return new class() extends Migration
         Schema::table('mail_account_user', function (Blueprint $table): void {
             $table->renameColumn('id', 'pivot_id');
             $table->unsignedBigInteger('user_id')->after('mail_account_id')->change();
+            $table->unique(['mail_account_id', 'user_id']);
         });
 
         // MailAccounts
         Schema::table('mail_accounts', function (Blueprint $table): void {
+            $table->string('name')->after('uuid')->change();
             $table->renameColumn('is_auto_assign', 'has_auto_assign');
             $table->renameColumn('is_o_auth', 'has_o_auth');
         });
@@ -316,6 +350,11 @@ return new class() extends Migration
                 ->change();
         });
 
+        // OrderSchedule
+        Schema::table('order_schedule', function (Blueprint $table) {
+            $table->unique(['order_id', 'schedule_id']);
+        });
+
         // OrderTransaction
         Schema::table('order_transaction', function (Blueprint $table): void {
             $table->unsignedBigInteger('transaction_id')->after('order_id')->change();
@@ -329,6 +368,7 @@ return new class() extends Migration
         // OrderUser
         Schema::table('order_user', function (Blueprint $table): void {
             $table->renameColumn('id', 'pivot_id');
+            $table->unique(['order_id', 'user_id']);
         });
 
         // Orders
@@ -363,6 +403,11 @@ return new class() extends Migration
                 ->change();
         });
 
+        // PaymentTypeTenant
+        Schema::table('payment_type_tenant', function (Blueprint $table) {
+            $table->unique(['payment_type_id', 'tenant_id']);
+        });
+
         // PaymentTypes
         Schema::table('payment_types', function (Blueprint $table): void {
             $table->boolean('is_direct_debit')->default(false)->after('is_default')->change();
@@ -388,8 +433,14 @@ return new class() extends Migration
         Schema::table('bundle_product_product', function (Blueprint $table): void {
             $table->renameColumn('id', 'pivot_id');
             $table->unsignedBigInteger('product_id')->after('bundle_product_id')->change();
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('bundle_product_id')->references('id')->on('products');
+            $table->foreign('bundle_product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
         });
 
         // ProductCrossSellingProduct
@@ -409,20 +460,31 @@ return new class() extends Migration
             $table->dropPrimary();
             $table->id('pivot_id')->first();
             $table->renameColumn('product_prop_id', 'product_property_id');
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('product_property_id')->references('id')->on('product_properties');
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
+            $table->foreign('product_property_id')
+                ->references('id')
+                ->on('product_properties')
+                ->cascadeOnDelete();
             $table->unique(['product_id', 'product_property_id']);
         });
 
         // ProductSupplier
         Schema::table('product_supplier', function (Blueprint $table): void {
+            $table->dropForeign(['product_id']);
+            $table->dropIndex('product_supplier_product_id_contact_id_unique');
             $table->renameColumn('id', 'pivot_id');
             $table->unsignedBigInteger('product_id')->after('contact_id')->change();
+            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
+            $table->unique(['contact_id', 'product_id']);
         });
 
         // ProductTenant
         Schema::table('product_tenant', function (Blueprint $table): void {
             $table->unsignedBigInteger('tenant_id')->after('product_id')->change();
+            $table->unique(['product_id', 'tenant_id']);
         });
 
         // Products
@@ -467,7 +529,10 @@ return new class() extends Migration
         Schema::table('queue_monitorable', function (Blueprint $table): void {
             $table->dropPrimary();
             $table->id('pivot_id')->first();
-            $table->foreign('queue_monitor_id')->references('id')->on('queue_monitors');
+            $table->foreign('queue_monitor_id')
+                ->references('id')
+                ->on('queue_monitors')
+                ->cascadeOnDelete();
             $table->unique(
                 ['queue_monitor_id', 'queue_monitorable_type', 'queue_monitorable_id'],
                 'queue_monitorable_unique'
@@ -480,6 +545,11 @@ return new class() extends Migration
             $table->unsignedBigInteger('tenant_id')->after('contact_id')->change();
         });
 
+        // SerialNumberRanges
+        Schema::table('serial_number_ranges', function (Blueprint $table) {
+            $table->string('unique_key')->after('tenant_id')->change();
+        });
+
         // StockPostings
         Schema::table('stock_postings', function (Blueprint $table): void {
             $table->unsignedBigInteger('parent_id')->nullable()->after('order_position_id')->change();
@@ -490,6 +560,7 @@ return new class() extends Migration
         // TaskUser
         Schema::table('task_user', function (Blueprint $table): void {
             $table->renameColumn('id', 'pivot_id');
+            $table->unique(['task_id', 'user_id']);
         });
 
         // Tasks
@@ -503,8 +574,8 @@ return new class() extends Migration
             $table->dropForeign(['user_id']);
             $table->dropPrimary();
             $table->id('pivot_id')->first();
-            $table->foreign('tenant_id')->references('id')->on('tenants');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->unique(['tenant_id', 'user_id']);
         });
 
@@ -521,8 +592,12 @@ return new class() extends Migration
                 ->change();
             $table->foreign('commission_credit_note_order_type_id')
                 ->references('id')
-                ->on('order_types');
-            $table->foreign('country_id')->references('id')->on('countries');
+                ->on('order_types')
+                ->nullOnDelete();
+            $table->foreign('country_id')
+                ->references('id')
+                ->on('countries')
+                ->nullOnDelete();
             $table->unique('tenant_code');
         });
 
@@ -532,8 +607,8 @@ return new class() extends Migration
             $table->dropForeign(['user_id']);
             $table->dropPrimary();
             $table->id('pivot_id')->first();
-            $table->foreign('ticket_id')->references('id')->on('tickets');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('ticket_id')->references('id')->on('tickets')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->unique(['ticket_id', 'user_id']);
         });
 
@@ -568,8 +643,14 @@ return new class() extends Migration
             $table->dropForeign(['address_type_id']);
             $table->dropUnique('address_address_type_address_id_address_type_id_unique');
             $table->dropColumn('pivot_id');
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('address_type_id')->references('id')->on('address_types');
+            $table->foreign('address_id')
+                ->references('id')
+                ->on('addresses')
+                ->cascadeOnDelete();
+            $table->foreign('address_type_id')
+                ->references('id')
+                ->on('address_types')
+                ->cascadeOnDelete();
             $table->primary(['address_id', 'address_type_id']);
         });
 
@@ -580,9 +661,18 @@ return new class() extends Migration
             $table->dropForeign(['order_id']);
             $table->dropUnique('address_address_type_order_unique');
             $table->dropColumn('pivot_id');
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('address_type_id')->references('id')->on('address_types');
-            $table->foreign('order_id')->references('id')->on('orders');
+            $table->foreign('address_id')
+                ->references('id')
+                ->on('addresses')
+                ->cascadeOnDelete();
+            $table->foreign('address_type_id')
+                ->references('id')
+                ->on('address_types')
+                ->cascadeOnDelete();
+            $table->foreign('order_id')
+                ->references('id')
+                ->on('orders')
+                ->cascadeOnDelete();
             $table->primary(['address_id', 'address_type_id', 'order_id']);
         });
 
@@ -592,8 +682,14 @@ return new class() extends Migration
             $table->dropForeign(['product_id']);
             $table->dropUnique('address_product_address_id_product_id_unique');
             $table->dropColumn('pivot_id');
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('product_id')->references('id')->on('products');
+            $table->foreign('address_id')
+                ->references('id')
+                ->on('addresses')
+                ->cascadeOnDelete();
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
             $table->primary(['address_id', 'product_id']);
         });
 
@@ -604,8 +700,15 @@ return new class() extends Migration
 
         // AddressTypes
         Schema::table('address_types', function (Blueprint $table): void {
+            $table->dropForeign(['tenant_id']);
+            $table->dropIndex('address_types_tenant_id_address_type_code_unique');
             $table->boolean('is_locked')->default(false)->after('name');
             $table->boolean('is_unique')->default(false)->after('is_locked');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->unique(
+                ['tenant_id', 'address_type_code'],
+                'address_types_client_id_address_type_code_unique'
+            );
         });
 
         // Addresses
@@ -619,16 +722,30 @@ return new class() extends Migration
             $table->dropForeign(['tenant_id']);
             $table->dropUnique('bank_connection_tenant_bank_connection_id_tenant_id_unique');
             $table->renameColumn('pivot_id', 'id');
-            $table->foreign('bank_connection_id')->references('id')->on('bank_connections');
-            $table->foreign('tenant_id')->references('id')->on('tenants');
+            $table->foreign('bank_connection_id')
+                ->references('id')
+                ->on('bank_connections')
+                ->cascadeOnDelete();
+            $table->foreign('tenant_id')
+                ->references('id')
+                ->on('tenants')
+                ->cascadeOnDelete();
         });
 
         // CalendarGroups
         Schema::create('calendar_groups', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('parent_id')->nullable()->references('id')->on('calendar_groups');
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->references('id')
+                ->on('calendar_groups')
+                ->cascadeOnDelete();
             $table->morphs('calendarable');
-            $table->foreignId('calendar_id')->nullable()->references('id')->on('calendars');
+            $table->foreignId('calendar_id')
+                ->nullable()
+                ->references('id')
+                ->on('calendars')
+                ->cascadeOnDelete();
             $table->string('name');
             $table->timestamps();
         });
@@ -644,7 +761,7 @@ return new class() extends Migration
             $table->renameColumn('pivot_id', 'id');
             $table->timestamps();
 
-            $table->foreign('calendar_id')->references('id')->on('calendars');
+            $table->foreign('calendar_id')->references('id')->on('calendars')->cascadeOnDelete();
             $table->index(['calendarable_type', 'calendarable_id']);
         });
 
@@ -656,7 +773,7 @@ return new class() extends Migration
         Schema::rename('categorizable', 'categorizables');
         Schema::table('categorizables', function (Blueprint $table): void {
             $table->dropColumn('pivot_id');
-            $table->foreign('category_id')->references('id')->on('categories');
+            $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();
             $table->unique(
                 ['category_id', 'categorizable_id', 'categorizable_type'],
                 'categorizables_ids_type_unique'
@@ -670,8 +787,14 @@ return new class() extends Migration
             $table->dropForeign(['price_list_id']);
             $table->dropUnique('category_price_list_category_id_price_list_id_unique');
             $table->dropColumn('pivot_id');
-            $table->foreign('category_id')->references('id')->on('categories');
-            $table->foreign('price_list_id')->references('id')->on('price_lists');
+            $table->foreign('category_id')
+                ->references('id')
+                ->on('categories')
+                ->cascadeOnDelete();
+            $table->foreign('price_list_id')
+                ->references('id')
+                ->on('price_lists')
+                ->cascadeOnDelete();
             $table->primary(['category_id', 'price_list_id']);
         });
 
@@ -690,9 +813,21 @@ return new class() extends Migration
             $table->renameColumn('pivot_id', 'id');
         });
 
+        Schema::table('contact_industry', function (Blueprint $table) {
+            $table->dropForeign(['contact_id']);
+            $table->dropUnique('contact_industry_contact_id_industry_id_unique');
+            $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
+        });
+
         // DiscountDiscountGroup
         Schema::table('discount_discount_group', function (Blueprint $table): void {
             $table->renameColumn('pivot_id', 'id');
+            $table->dropForeign(['discount_group_id']);
+            $table->dropUnique('discount_discount_group_discount_group_id_discount_id_unique');
+            $table->foreign('discount_group_id')
+                ->references('id')
+                ->on('discount_groups')
+                ->cascadeOnDelete();
         });
 
         // Industries
@@ -708,8 +843,15 @@ return new class() extends Migration
         // Inviteables
         Schema::create('inviteables', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('calendar_event_id')->references('id')->on('calendar_events');
-            $table->foreignId('model_calendar_id')->nullable()->references('id')->on('calendars');
+            $table->foreignId('calendar_event_id')
+                ->references('id')
+                ->on('calendar_events')
+                ->cascadeOnDelete();
+            $table->foreignId('model_calendar_id')
+                ->nullable()
+                ->references('id')
+                ->on('calendars')
+                ->cascadeOnDelete();
             $table->morphs('inviteable');
             $table->string('email')->nullable();
             $table->string('status')->nullable();
@@ -729,6 +871,12 @@ return new class() extends Migration
         // MailAccountUser
         Schema::table('mail_account_user', function (Blueprint $table): void {
             $table->renameColumn('pivot_id', 'id');
+            $table->dropForeign(['mail_account_id']);
+            $table->dropUnique('mail_account_user_mail_account_id_user_id_unique');
+            $table->foreign('mail_account_id')
+                ->references('id')
+                ->on('mail_accounts')
+                ->cascadeOnDelete();
         });
 
         // MailAccounts
@@ -752,9 +900,29 @@ return new class() extends Migration
             $table->renameColumn('pivot_id', 'id');
         });
 
+        // OrderSchedule
+        Schema::table('order_schedule', function (Blueprint $table) {
+            $table->dropForeign(['order_id']);
+            $table->dropUnique('order_schedule_order_id_schedule_id_unique');
+            $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
+        });
+
         // OrderUser
         Schema::table('order_user', function (Blueprint $table): void {
             $table->renameColumn('pivot_id', 'id');
+            $table->dropForeign(['order_id']);
+            $table->dropUnique('order_user_order_id_user_id_unique');
+            $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
+        });
+
+        // PaymentTypeTenant
+        Schema::table('payment_type_tenant', function (Blueprint $table) {
+            $table->dropForeign(['payment_type_id']);
+            $table->dropUnique('payment_type_tenant_payment_type_id_tenant_id_unique');
+            $table->foreign('payment_type_id')
+                ->references('id')
+                ->on('payment_types')
+                ->cascadeOnDelete();
         });
 
         // ProductBundleProduct
@@ -765,8 +933,14 @@ return new class() extends Migration
         Schema::rename('bundle_product_product', 'product_bundle_product');
         Schema::table('product_bundle_product', function (Blueprint $table): void {
             $table->renameColumn('pivot_id', 'id');
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('bundle_product_id')->references('id')->on('products');
+            $table->foreign('bundle_product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
         });
 
         // ProductCrossSellingProduct
@@ -786,14 +960,31 @@ return new class() extends Migration
             $table->dropUnique('product_product_property_product_id_product_property_id_unique');
             $table->dropColumn('pivot_id');
             $table->renameColumn('product_property_id', 'product_prop_id');
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('product_prop_id')->references('id')->on('product_properties');
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
+            $table->foreign('product_prop_id')
+                ->references('id')
+                ->on('product_properties')
+                ->cascadeOnDelete();
             $table->primary(['product_id', 'product_prop_id']);
         });
 
         // ProductSupplier
         Schema::table('product_supplier', function (Blueprint $table): void {
+            $table->dropForeign(['contact_id']);
+            $table->dropIndex('product_supplier_contact_id_product_id_unique');
             $table->renameColumn('pivot_id', 'id');
+            $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
+            $table->unique(['product_id', 'contact_id']);
+        });
+
+        // ProductTenant
+        Schema::table('product_tenant', function (Blueprint $table) {
+            $table->dropForeign(['product_id']);
+            $table->dropUnique('product_tenant_product_id_tenant_id_unique');
+            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
         });
 
         // QueueMonitorable
@@ -804,13 +995,19 @@ return new class() extends Migration
         Schema::rename('queue_monitorable', 'queue_monitorables');
         Schema::table('queue_monitorables', function (Blueprint $table): void {
             $table->dropColumn('pivot_id');
-            $table->foreign('queue_monitor_id')->references('id')->on('queue_monitors');
+            $table->foreign('queue_monitor_id')
+                ->references('id')
+                ->on('queue_monitors')
+                ->cascadeOnDelete();
             $table->primary(['queue_monitor_id', 'queue_monitorable_id', 'queue_monitorable_type']);
         });
 
         // TaskUser
         Schema::table('task_user', function (Blueprint $table): void {
             $table->renameColumn('pivot_id', 'id');
+            $table->dropForeign(['task_id']);
+            $table->dropUnique('task_user_task_id_user_id_unique');
+            $table->foreign('task_id')->references('id')->on('tasks')->cascadeOnDelete();
         });
 
         // TenantUser
@@ -819,8 +1016,8 @@ return new class() extends Migration
             $table->dropForeign(['user_id']);
             $table->dropUnique('tenant_user_tenant_id_user_id_unique');
             $table->dropColumn('pivot_id');
-            $table->foreign('tenant_id')->references('id')->on('tenants');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->primary(['tenant_id', 'user_id']);
         });
 
@@ -834,10 +1031,12 @@ return new class() extends Migration
                 'clients_commission_credit_note_order_type_id_foreign'
             )
                 ->references('id')
-                ->on('order_types');
+                ->on('order_types')
+                ->nullOnDelete();
             $table->foreign('country_id', 'clients_country_id_foreign')
                 ->references('id')
-                ->on('countries');
+                ->on('countries')
+                ->nullOnDelete();
             $table->unique('tenant_code', 'clients_client_code_unique');
         });
 
@@ -847,8 +1046,8 @@ return new class() extends Migration
             $table->dropForeign(['user_id']);
             $table->dropUnique('ticket_user_ticket_id_user_id_unique');
             $table->dropColumn('pivot_id');
-            $table->foreign('ticket_id')->references('id')->on('tickets');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('ticket_id')->references('id')->on('tickets')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->primary(['ticket_id', 'user_id']);
         });
 
