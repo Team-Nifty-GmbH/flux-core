@@ -6,7 +6,6 @@ use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
 use FluxErp\Http\Controllers\SearchController;
-use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
@@ -38,7 +37,6 @@ use FluxErp\Livewire\HumanResources\Dashboard as HrDashboard;
 use FluxErp\Livewire\HumanResources\EmployeeDays;
 use FluxErp\Livewire\HumanResources\Employees;
 use FluxErp\Livewire\HumanResources\WorkTimes;
-use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
@@ -136,9 +134,6 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 Route::middleware('web')
     ->domain(config('flux.flux_url'))
     ->group(function (): void {
-        Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)
-            ->name('flux.install');
-
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
