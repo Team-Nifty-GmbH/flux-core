@@ -1,0 +1,42 @@
+name: Build Frontend Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'resources/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+
+jobs:
+  build:
+    name: Build and Commit Assets
+    runs-on: self-hosted
+    env:
+      PAT: ${{ secrets.PAT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ env.PAT }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Commit built assets
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Build frontend assets
+          file_pattern: 'public/build/*'
