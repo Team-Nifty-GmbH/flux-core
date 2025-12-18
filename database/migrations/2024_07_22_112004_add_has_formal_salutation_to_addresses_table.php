@@ -13,8 +13,6 @@ return new class() extends Migration
         Schema::table('addresses', function (Blueprint $table): void {
             $table->boolean('has_formal_salutation')->default(true)->after('password');
         });
-
-        $this->migrateSalutations();
     }
 
     public function down(): void
@@ -22,16 +20,5 @@ return new class() extends Migration
         Schema::table('addresses', function (Blueprint $table): void {
             $table->dropColumn('has_formal_salutation');
         });
-    }
-
-    private function migrateSalutations(): void
-    {
-        foreach (SalutationEnum::cases() as $salutation) {
-            DB::table('addresses')
-                ->where('salutation', __($salutation->value))
-                ->update([
-                    'salutation' => $salutation->value,
-                ]);
-        }
     }
 };
