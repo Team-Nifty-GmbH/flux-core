@@ -268,7 +268,7 @@ class Order extends Component
             $addressArray = $address->toArray();
 
             try {
-                UpdateOrder::make([
+                $updatedOrder = UpdateOrder::make([
                     'id' => $this->order->id,
                     $addressKey => $addressArray,
                 ])
@@ -276,7 +276,7 @@ class Order extends Component
                     ->validate()
                     ->execute();
 
-                $this->order->{$addressKey} = $addressArray;
+                $this->order->{$addressKey} = $updatedOrder->{$addressKey};
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
             }
