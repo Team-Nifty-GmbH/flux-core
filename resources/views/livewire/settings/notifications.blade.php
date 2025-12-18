@@ -28,7 +28,7 @@
                                 2xs
                                 color="red"
                                 text="-"
-                                x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"
+                                x-on:click.prevent="notificationChannel.channel_value.splice(notificationChannel.channel_value.indexOf(channelValue), 1)"
                             ></x-button.circle>
                         </div>
                         <div class="w-full">
