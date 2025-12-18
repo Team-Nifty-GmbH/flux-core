@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\Targetable;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
+use Throwable;
 
 class WorkTime extends FluxModel implements Calendarable, Targetable
 {
@@ -190,6 +192,36 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
                 $workTime->broadcastEvent('dailyUpdated', toEveryone: true);
             } else {
                 $workTime->broadcastEvent('taskUpdated', toEveryone: true);
+            }
+
+            if ($workTime->employee_id
+                && $workTime->is_daily_work_time
+                && $workTime->is_locked
+            ) {
+                try {
+                    CloseEmployeeDay::make([
+                        'employee_id' => $workTime->employee_id,
+                        'date' => $workTime->started_at,
+                    ])
+                        ->validate()
+                        ->execute();
+                } catch (Throwable) {
+                }
+
+                if ($workTime->wasChanged('started_at')
+                    && Carbon::parse($workTime->started_at)
+                        ->diffInDays($originalStart = $workTime->getOriginal('started_at'), true) >= 1
+                ) {
+                    try {
+                        CloseEmployeeDay::make([
+                            'employee_id' => $workTime->employee_id,
+                            'date' => $originalStart,
+                        ])
+                            ->validate()
+                            ->execute();
+                    } catch (Throwable) {
+                    }
+                }
             }
         });
     }

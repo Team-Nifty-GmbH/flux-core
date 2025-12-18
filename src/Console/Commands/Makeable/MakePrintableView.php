@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Console\Commands;
+namespace FluxErp\Console\Commands\Makeable;
 
 use FluxErp\Contracts\OffersPrinting;
 use Illuminate\Foundation\Console\ComponentMakeCommand;
