@@ -18,11 +18,11 @@ return new class() extends Migration
             $table->foreignId('mail_account_id')
                 ->nullable()
                 ->constrained('mail_accounts')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
             $table->foreignId('mail_folder_id')
                 ->nullable()
                 ->constrained('mail_folders')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
             $table->string('message_id')->nullable()->index();
             $table->integer('message_uid')->nullable()->index();
             $table->json('from')->nullable();

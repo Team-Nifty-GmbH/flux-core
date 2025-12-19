@@ -29,6 +29,7 @@ return new class() extends Migration
             $table->timestamps();
 
             $table->unique(['name', 'guard_name']);
+            $table->index(['name', 'guard_name']);
         });
 
         Schema::create($tableNames['roles'], function (Blueprint $table) use ($teams, $columnNames): void {

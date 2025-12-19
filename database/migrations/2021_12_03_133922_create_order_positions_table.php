@@ -142,8 +142,7 @@ return new class() extends Migration
             $table->boolean('is_alternative')->default(false);
             $table->boolean('is_bundle_position')->default(false);
             $table->boolean('is_free_text')
-                ->default(false)
-                ->comment('A boolean deciding if this order-position is just free text instead of having a product associated.');
+                ->default(false);
             $table->boolean('is_net')
                 ->default(false)
                 ->comment('A boolean deciding if this order-position is calculated in net instead of gross.');
