@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ContactIndustry extends FluxPivot
 {
-    protected $primaryKey = 'pivot_id';
-
     protected $table = 'contact_industry';
 
     public function contact(): BelongsTo

@@ -16,8 +16,8 @@ class StockPostingTableSeeder extends Seeder
 
         for ($i = 0; $i < 20; $i++) {
             StockPosting::factory()->create([
-                'warehouse_id' => $warehouses->random()?->id,
                 'product_id' => $products->random()?->id,
+                'warehouse_id' => $warehouses->random()?->id,
             ]);
         }
     }

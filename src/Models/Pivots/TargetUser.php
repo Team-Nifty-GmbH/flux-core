@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TargetUser extends FluxPivot
 {
-    protected $primaryKey = 'pivot_id';
-
     protected $table = 'target_user';
 
     protected function casts(): array

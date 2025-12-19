@@ -18,9 +18,6 @@ class Calendar extends BaseCalendar
     #[Locked]
     public bool $showCalendars = false;
 
-    #[Locked]
-    public bool $showInvites = false;
-
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -46,7 +43,6 @@ class Calendar extends BaseCalendar
                     auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [],
                     [
                         'showCalendars' => $this->showCalendars,
-                        'showInvites' => $this->showInvites,
                     ]
                 )
             )

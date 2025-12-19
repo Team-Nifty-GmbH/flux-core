@@ -21,10 +21,10 @@ class LeadTableSeeder extends Seeder
 
         foreach (User::all(['id']) as $user) {
             Lead::factory()->create([
-                'lead_state_id' => $leadStates->random()->getKey(),
                 'address_id' => $addresses->random()->getKey(),
-                'record_origin_id' => $leadRecordOrigins->random()->getKey(),
+                'lead_state_id' => $leadStates->random()->getKey(),
                 'recommended_by_address_id' => $addresses->random()->getKey(),
+                'record_origin_id' => $leadRecordOrigins->random()->getKey(),
                 'user_id' => $user->getKey(),
             ]);
         }

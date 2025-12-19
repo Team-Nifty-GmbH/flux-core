@@ -11,12 +11,6 @@ class EmployeeDayWorkTime extends FluxPivot
 {
     use HasPackageFactory;
 
-    public $incrementing = true;
-
-    public $timestamps = false;
-
-    protected $primaryKey = 'pivot_id';
-
     public function employeeDay(): BelongsTo
     {
         return $this->belongsTo(EmployeeDay::class);

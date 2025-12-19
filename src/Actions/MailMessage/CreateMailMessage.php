@@ -62,7 +62,7 @@ class CreateMailMessage extends FluxAction
         }
         config(['media-library.max_file_size' => $maxFileSize]);
 
-        if ($mailMessage->mailAccount->is_auto_assign) {
+        if ($mailMessage->mailAccount->has_auto_assign) {
             $connectedMailAddresses = resolve_static(MailAccount::class, 'query')
                 ->pluck('email')
                 ->toArray();

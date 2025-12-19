@@ -72,7 +72,7 @@ class UserForm extends FluxForm
 
     public bool $is_active = false;
 
-    public bool $is_dark_mode = false;
+    public bool $has_dark_mode = false;
 
     public ?string $job_title = null;
 

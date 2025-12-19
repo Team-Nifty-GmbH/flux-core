@@ -11,8 +11,6 @@ use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Casts\MorphTo as MorphToCast;
 use FluxErp\Contracts\Targetable;
-use FluxErp\Models\Pivots\CalendarEventInvite;
-use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Traits\Model\HasDefaultTargetableColumns;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -21,12 +19,8 @@ use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -148,40 +142,6 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         return $this;
     }
 
-    public function invited(): MorphToMany
-    {
-        return $this->morphedByMany(User::class, 'inviteable')
-            ->using(CalendarEventInvite::class)
-            ->withPivot(['status', 'model_calendar_id']);
-    }
-
-    public function invitedAddresses(): MorphToMany
-    {
-        return $this->morphedByMany(Address::class, 'inviteable', 'inviteables')
-            ->using(CalendarEventInvite::class)
-            ->withPivot(['status', 'model_calendar_id']);
-    }
-
-    public function invitedModels(): Collection
-    {
-        $types = $this->invites()->distinct('inviteable_type')->pluck('inviteable_type')->toArray();
-
-        $invitedModels = collect();
-        foreach ($types as $type) {
-            $invitedModels = $invitedModels->merge(
-                $this->morphedByMany(
-                    Relation::getMorphedModel($type), 'inviteable')->withPivot('status')->get()
-            );
-        }
-
-        return $invitedModels;
-    }
-
-    public function invites(): HasMany
-    {
-        return $this->hasMany(Inviteable::class);
-    }
-
     public function model(): MorphTo
     {
         return $this->morphTo('model');
@@ -254,12 +214,10 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
                 'recurrences' => $this->recurrences,
                 'allDay' => $this->is_all_day,
                 'has_taken_place' => $this->has_taken_place,
-                'editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
-                'is_editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
-                'is_invited' => $this->is_invited,
+                'editable' => ! $this->calendar->is_public && ! $this->isCancelled,
+                'is_editable' => ! $this->calendar->is_public && ! $this->isCancelled,
                 'is_public' => $this->calendar->is_public,
                 'status' => $this->status ?: 'busy',
-                'invited' => $this->invited->toArray(),
                 'interval' => $repeat['interval'] ?? null,
                 'unit' => $repeat['unit'] ?? null,
                 'weekdays' => $repeat['weekdays'] ?? [],

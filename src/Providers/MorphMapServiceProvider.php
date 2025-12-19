@@ -37,11 +37,6 @@ use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\FailedJob;
 use FluxErp\Models\Favorite;
-use FluxErp\Models\FormBuilderField;
-use FluxErp\Models\FormBuilderFieldResponse;
-use FluxErp\Models\FormBuilderForm;
-use FluxErp\Models\FormBuilderResponse;
-use FluxErp\Models\FormBuilderSection;
 use FluxErp\Models\Holiday;
 use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
@@ -69,34 +64,47 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\AbsencePolicyAbsenceType;
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
 use FluxErp\Models\Pivots\AbsenceRequestSubstitute;
+use FluxErp\Models\Pivots\AddressAddressType;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\AddressProduct;
+use FluxErp\Models\Pivots\AddressSerialNumber;
+use FluxErp\Models\Pivots\BankConnectionTenant;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\Calendarable;
-use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
+use FluxErp\Models\Pivots\CategoryPriceList;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Models\Pivots\DiscountDiscountGroup;
 use FluxErp\Models\Pivots\EmployeeDayWorkTime;
 use FluxErp\Models\Pivots\EmployeeDepartmentVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\HolidayLocation;
-use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\LocationVacationBlackout;
+use FluxErp\Models\Pivots\MailAccountUser;
 use FluxErp\Models\Pivots\MediaFolderModel;
+use FluxErp\Models\Pivots\OrderPaymentRun;
+use FluxErp\Models\Pivots\OrderPositionStockPosting;
+use FluxErp\Models\Pivots\OrderPositionTask;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
+use FluxErp\Models\Pivots\OrderUser;
 use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Models\Pivots\PrinterUser;
-use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Models\Pivots\ProductProductProperty;
+use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
+use FluxErp\Models\Pivots\TenantUser;
+use FluxErp\Models\Pivots\TicketUser;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -182,11 +190,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'event_subscription' => EventSubscription::class,
             'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
-            'form_builder_field' => FormBuilderField::class,
-            'form_builder_field_response' => FormBuilderFieldResponse::class,
-            'form_builder_form' => FormBuilderForm::class,
-            'form_builder_response' => FormBuilderResponse::class,
-            'form_builder_section' => FormBuilderSection::class,
             'holiday' => Holiday::class,
             'industry' => Industry::class,
             'job_batch' => JobBatch::class,
@@ -258,34 +261,47 @@ class MorphMapServiceProvider extends ServiceProvider
             'absence_policy_absence_type' => AbsencePolicyAbsenceType::class,
             'absence_request_employee_day' => AbsenceRequestEmployeeDay::class,
             'absence_request_substitute' => AbsenceRequestSubstitute::class,
+            'address_address_type' => AddressAddressType::class,
             'address_address_type_order' => AddressAddressTypeOrder::class,
+            'address_product' => AddressProduct::class,
+            'address_serial_number' => AddressSerialNumber::class,
+            'bank_connection_tenant' => BankConnectionTenant::class,
+            'bundle_product_product' => BundleProductProduct::class,
             'calendarable' => Calendarable::class,
-            'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
+            'category_price_list' => CategoryPriceList::class,
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
             'contact_industry' => ContactIndustry::class,
+            'discount_discount_group' => DiscountDiscountGroup::class,
             'employee_day_work_time' => EmployeeDayWorkTime::class,
             'employee_department_vacation_blackout' => EmployeeDepartmentVacationBlackout::class,
             'employee_vacation_blackout' => EmployeeVacationBlackout::class,
             'employee_work_time_model' => EmployeeWorkTimeModel::class,
             'holiday_location' => HolidayLocation::class,
-            'invitable' => Inviteable::class,
             'job_batchable' => JobBatchable::class,
             'location_vacation_blackout' => LocationVacationBlackout::class,
+            'mail_account_user' => MailAccountUser::class,
             'media_folder_model' => MediaFolderModel::class,
+            'order_payment_run' => OrderPaymentRun::class,
+            'order_position_stock_posting' => OrderPositionStockPosting::class,
+            'order_position_task' => OrderPositionTask::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
+            'order_user' => OrderUser::class,
             'payment_type_tenant' => PaymentTypeTenant::class,
             'printer_user' => PrinterUser::class,
-            'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
+            'product_product_property' => ProductProductProperty::class,
+            'product_supplier' => ProductSupplier::class,
             'product_tenant' => ProductTenant::class,
             'queue_monitorable' => QueueMonitorable::class,
             'target_user' => TargetUser::class,
             'task_user' => TaskUser::class,
+            'tenant_user' => TenantUser::class,
+            'ticket_user' => TicketUser::class,
         ]);
     }
 }

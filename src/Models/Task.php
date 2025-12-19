@@ -281,7 +281,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'start' => ($this->start_date ?? $this->created_at)->toDateTimeString(),
             'end' => $this->due_date?->endOfDay()->toDateTimeString(),
             'status' => $this->state::$name,
-            'invited' => [],
             'description' => $this->description,
             'extendedProps' => [
                 'appendTitle' => $this->state->badge(),
@@ -290,7 +289,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ],
             'allDay' => false,
             'is_editable' => true,
-            'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,
         ];

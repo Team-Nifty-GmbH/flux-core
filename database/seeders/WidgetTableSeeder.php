@@ -14,8 +14,8 @@ class WidgetTableSeeder extends Seeder
             $widgets = rand(1, 10);
             for ($i = 0; $i < $widgets; $i++) {
                 Widget::factory()->create([
-                    'widgetable_id' => $user->id,
                     'widgetable_type' => User::class,
+                    'widgetable_id' => $user->id,
                 ]);
             }
         }

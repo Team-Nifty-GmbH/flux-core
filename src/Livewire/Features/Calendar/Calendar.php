@@ -324,55 +324,17 @@ class Calendar extends Component
                 $query->where('start', '<=', Carbon::parse($info['end']))
                     ->where('end', '>=', Carbon::parse($info['start']));
             })
-            ->with('invited', fn ($query) => $query->withPivot('status'))
-            ->get()
-            ->merge(
-                $calendar->invitesCalendarEvents()
-                    ->addSelect('calendar_events.*')
-                    ->addSelect('inviteables.status')
-                    ->addSelect('inviteables.model_calendar_id AS calendar_id')
-                    ->whereIn('inviteables.status', ['accepted', 'maybe'])
-                    ->get()
-                    ->each(fn ($event) => $event->is_invited = true)
-            );
+            ->get();
 
         return $this->calculateRepeatableEvents($calendar, $calendarEvents)
             ->map(function ($event) use ($calendarAttributes, $calendar) {
-                $invited = $this->getInvited($event);
-
                 return $event->toCalendarEventObject([
                     'is_editable' => $calendarAttributes['permission'] !== 'reader',
-                    'invited' => $invited,
                     'is_repeatable' => $calendar->has_repeatable_events ?? false,
                     'has_repeats' => ! is_null($event->repeat),
                 ]);
             })
             ?->toArray();
-    }
-
-    public function getInvited(Model $event): array
-    {
-        return $event->invitedModels()
-            ->map(
-                function (Model $inviteable) {
-                    return [
-                        'id' => $inviteable->id,
-                        'label' => $inviteable->getLabel(),
-                        'pivot' => $inviteable->pivot,
-                    ];
-                }
-            )
-            ->toArray();
-    }
-
-    #[Renderless]
-    public function getInvites(): ?array
-    {
-        return auth()->user()
-            ?->invites()
-            ->with('calendarEvent:id,start,end,title,is_all_day,calendar_id')
-            ->get()
-            ->toArray();
     }
 
     public function removeCustomProperty(int $index): void
@@ -433,7 +395,6 @@ class Calendar extends Component
             'is_editable' => $this->calendar->is_editable,
             'is_repeatable' => $this->calendar->has_repeatable_events,
             'has_repeats' => false,
-            'invited' => [],
         ]);
     }
 
