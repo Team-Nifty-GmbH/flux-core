@@ -216,7 +216,7 @@ return new class() extends Migration
         });
 
         // ContactIndustry
-        Schema::table('contact_industry', function (Blueprint $table) {
+        Schema::table('contact_industry', function (Blueprint $table): void {
             $table->unique(['contact_id', 'industry_id']);
         });
 
@@ -316,6 +316,9 @@ return new class() extends Migration
                 ->change();
         });
 
+        // ModelRelated
+        Schema::dropIfExists('model_related');
+
         // OrderPaymentRun
         Schema::table('order_payment_run', function (Blueprint $table): void {
             $table->renameColumn('id', 'pivot_id');
@@ -351,7 +354,7 @@ return new class() extends Migration
         });
 
         // OrderSchedule
-        Schema::table('order_schedule', function (Blueprint $table) {
+        Schema::table('order_schedule', function (Blueprint $table): void {
             $table->unique(['order_id', 'schedule_id']);
         });
 
@@ -404,7 +407,7 @@ return new class() extends Migration
         });
 
         // PaymentTypeTenant
-        Schema::table('payment_type_tenant', function (Blueprint $table) {
+        Schema::table('payment_type_tenant', function (Blueprint $table): void {
             $table->unique(['payment_type_id', 'tenant_id']);
         });
 
@@ -546,7 +549,7 @@ return new class() extends Migration
         });
 
         // SerialNumberRanges
-        Schema::table('serial_number_ranges', function (Blueprint $table) {
+        Schema::table('serial_number_ranges', function (Blueprint $table): void {
             $table->string('unique_key')->after('tenant_id')->change();
         });
 
@@ -623,6 +626,9 @@ return new class() extends Migration
             $table->unsignedBigInteger('currency_id')->nullable()->after('contact_id')->change();
             $table->unsignedBigInteger('language_id')->after('currency_id')->change();
             $table->unsignedBigInteger('parent_id')->nullable()->after('language_id')->change();
+            $table->string('phone')->nullable()->after('name')->change();
+            $table->string('user_code')->nullable()->after('phone')->change();
+            $table->string('email')->after('user_code')->change();
             $table->string('remember_token', 100)->nullable()->after('cost_per_hour')->change();
             $table->renameColumn('is_dark_mode', 'has_dark_mode');
             $table->boolean('is_active')->default(true)->after('has_dark_mode')->change();
@@ -813,7 +819,7 @@ return new class() extends Migration
             $table->renameColumn('pivot_id', 'id');
         });
 
-        Schema::table('contact_industry', function (Blueprint $table) {
+        Schema::table('contact_industry', function (Blueprint $table): void {
             $table->dropForeign(['contact_id']);
             $table->dropUnique('contact_industry_contact_id_industry_id_unique');
             $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
@@ -885,6 +891,14 @@ return new class() extends Migration
             $table->renameColumn('has_o_auth', 'is_o_auth');
         });
 
+        // ModelRelated
+        Schema::create('model_related', function (Blueprint $table): void {
+            $table->morphs('model');
+            $table->morphs('related');
+
+            $table->primary(['model_type', 'model_id', 'related_type', 'related_id']);
+        });
+
         // OrderPaymentRun
         Schema::table('order_payment_run', function (Blueprint $table): void {
             $table->renameColumn('pivot_id', 'id');
@@ -901,7 +915,7 @@ return new class() extends Migration
         });
 
         // OrderSchedule
-        Schema::table('order_schedule', function (Blueprint $table) {
+        Schema::table('order_schedule', function (Blueprint $table): void {
             $table->dropForeign(['order_id']);
             $table->dropUnique('order_schedule_order_id_schedule_id_unique');
             $table->foreign('order_id')->references('id')->on('orders')->cascadeOnDelete();
@@ -916,7 +930,7 @@ return new class() extends Migration
         });
 
         // PaymentTypeTenant
-        Schema::table('payment_type_tenant', function (Blueprint $table) {
+        Schema::table('payment_type_tenant', function (Blueprint $table): void {
             $table->dropForeign(['payment_type_id']);
             $table->dropUnique('payment_type_tenant_payment_type_id_tenant_id_unique');
             $table->foreign('payment_type_id')
@@ -981,7 +995,7 @@ return new class() extends Migration
         });
 
         // ProductTenant
-        Schema::table('product_tenant', function (Blueprint $table) {
+        Schema::table('product_tenant', function (Blueprint $table): void {
             $table->dropForeign(['product_id']);
             $table->dropUnique('product_tenant_product_id_tenant_id_unique');
             $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
