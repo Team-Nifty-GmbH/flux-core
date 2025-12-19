@@ -114,6 +114,34 @@ test('create order', function (): void {
     expect($dbOrder->payment_reminder_days_3)->toEqual($order['payment_reminder_days_3']);
 });
 
+test('create order fills address_delivery from address_delivery_id', function (): void {
+    $order = [
+        'address_invoice_id' => $this->addresses[0]->id,
+        'address_delivery_id' => $this->addresses[1]->id,
+        'tenant_id' => $this->tenants[0]->id,
+        'language_id' => $this->languages[0]->id,
+        'order_type_id' => $this->orderTypes[0]->id,
+        'payment_type_id' => $this->paymentTypes[0]->id,
+        'price_list_id' => $this->priceLists[0]->id,
+        'order_date' => date('Y-m-d'),
+    ];
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/orders', $order);
+    $response->assertCreated();
+
+    $responseOrder = json_decode($response->getContent())->data;
+    $dbOrder = Order::query()
+        ->whereKey($responseOrder->id)
+        ->first();
+
+    expect($dbOrder->address_delivery)->not->toBeNull()
+        ->and($dbOrder->address_delivery['id'])->toEqual($this->addresses[1]->id)
+        ->and($dbOrder->address_delivery_id)->toEqual($this->addresses[1]->id);
+});
+
 test('create order validation fails', function (): void {
     $order = [
         'language_id' => $this->languages[0]->id,
