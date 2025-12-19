@@ -9,6 +9,7 @@ use FluxErp\Livewire\DataTables\CategoryList;
 use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Models\Category;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use FluxErp\Traits\Model\Categorizable;
 use Illuminate\Support\Str;
@@ -19,9 +20,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Categories extends CategoryList
 {
-    use Actions, SupportsLocalization;
+    use Actions, AllowRecordMerging, SupportsLocalization;
 
     public CategoryForm $category;
+
+    public bool $isSelectable = true;
 
     protected ?string $includeBefore = 'flux::livewire.settings.categories';
 

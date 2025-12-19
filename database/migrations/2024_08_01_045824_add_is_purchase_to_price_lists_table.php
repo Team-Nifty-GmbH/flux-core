@@ -15,7 +15,7 @@ return new class() extends Migration
 
         DB::table('price_lists')->insert([
             'uuid' => Illuminate\Support\Str::uuid(),
-            'name' => __('Purchase Price'),
+            'name' => 'Purchase Price',
             'price_list_code' => 'purchase',
             'is_purchase' => true,
         ]);

@@ -19,8 +19,6 @@ use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
-use Spatie\Translatable\TranslatableServiceProvider;
-use Spatie\TranslationLoader\TranslationServiceProvider;
 use TallStackUi\Facades\TallStackUi;
 use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
@@ -35,8 +33,6 @@ abstract class TestCase extends BaseTestCase
     {
         return [
             LaravelSettingsServiceProvider::class,
-            TranslationServiceProvider::class,
-            TranslatableServiceProvider::class,
             LivewireServiceProvider::class,
             TallStackUiServiceProvider::class,
             PermissionServiceProvider::class,
