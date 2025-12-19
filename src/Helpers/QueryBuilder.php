@@ -14,7 +14,6 @@ use Illuminate\Support\Collection;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder as LaravelQueryBuilder;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class QueryBuilder
 {
@@ -85,7 +84,7 @@ class QueryBuilder
 
             $relatedAllowedFields = array_merge(
                 $relatedAllowedFields,
-                ModelInfo::forModel($related)->attributes
+                model_attributes($related)
                     ->where('hidden', false)
                     ->where('virtual', false)
                     ->pluck('name')

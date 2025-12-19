@@ -3,13 +3,10 @@
 if (! function_exists('all_models')) {
     function all_models(): Illuminate\Support\Collection
     {
-        return TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()
-            ->merge(
-                TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all(
-                    flux_path('src/Models'),
-                    flux_path('src'),
-                    'FluxErp'
-                )
+        return collect(Illuminate\Database\Eloquent\Relations\Relation::morphMap())
+            ->values()
+            ->filter(fn (string $class) => class_exists($class)
+                && is_subclass_of($class, Illuminate\Database\Eloquent\Model::class)
             );
     }
 }
@@ -17,13 +14,21 @@ if (! function_exists('all_models')) {
 if (! function_exists('model_info_all')) {
     function model_info_all(): Illuminate\Support\Collection
     {
-        return TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels()
-            ->merge(
-                TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels(
-                    flux_path('src/Models'),
-                    flux_path('src'),
-                    'FluxErp')
-            );
+        return Illuminate\Support\Facades\Cache::remember(
+            'flux.model_info_all',
+            now()->addDay(),
+            function () {
+                $morphMap = Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+
+                return collect($morphMap)->map(function (string $class, string $alias) {
+                    return (object) [
+                        'morphClass' => $alias,
+                        'class' => $class,
+                        'traits' => collect(class_uses_recursive($class)),
+                    ];
+                })->values();
+            }
+        );
     }
 }
 
@@ -40,6 +45,117 @@ if (! function_exists('get_models_with_trait')) {
             ])
             ->values()
             ->toArray();
+    }
+}
+
+if (! function_exists('model_attributes')) {
+    /**
+     * Get all attributes/columns for a model.
+     * Uses tall-datatables cache if available, otherwise falls back to Laravel's ModelInspector.
+     *
+     * @param  class-string<Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model  $model
+     */
+    function model_attributes(string|Illuminate\Database\Eloquent\Model $model): Illuminate\Support\Collection
+    {
+        $class = is_string($model) ? $model : $model::class;
+
+        // Try tall-datatables cache first
+        $datatablesCacheKey = config('tall-datatables.cache_key', 'team-nifty.tall-datatables') . '.modelInfo';
+        $cachedModelInfos = Illuminate\Support\Facades\Cache::get($datatablesCacheKey);
+
+        if ($cached = data_get($cachedModelInfos, $class)) {
+            return $cached->attributes;
+        }
+
+        // Fallback to ModelInspector with own cache
+        $cacheKey = config('tall-datatables.cache_key', 'team-nifty.tall-datatables') . '.flux.model_attributes.' . md5($class);
+
+        return Illuminate\Support\Facades\Cache::remember(
+            $cacheKey,
+            now()->addDay(),
+            function () use ($class) {
+                try {
+                    $inspector = app(Illuminate\Database\Eloquent\ModelInspector::class);
+                    $info = $inspector->inspect($class);
+
+                    return collect(data_get($info, 'attributes'))->map(function (array $attr) {
+                        $attr['virtual'] = data_get($attr, 'type') === null;
+
+                        return (object) $attr;
+                    });
+                } catch (Throwable) {
+                    return collect();
+                }
+            }
+        );
+    }
+}
+
+if (! function_exists('model_has_attribute')) {
+    /**
+     * @param  class-string<Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model  $model
+     */
+    function model_has_attribute(string|Illuminate\Database\Eloquent\Model $model, string $attribute): bool
+    {
+        return model_attributes($model)->contains('name', $attribute);
+    }
+}
+
+if (! function_exists('model_relations')) {
+    /**
+     * Get all relations for a model.
+     * Uses tall-datatables cache if available, otherwise falls back to Laravel's ModelInspector.
+     *
+     * @param  class-string<Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model  $model
+     * @param  class-string<Illuminate\Database\Eloquent\Relations\Relation>|null  $type  Filter by relation type
+     */
+    function model_relations(
+        string|Illuminate\Database\Eloquent\Model $model,
+        ?string $type = null
+    ): Illuminate\Support\Collection {
+        $class = is_string($model) ? $model : $model::class;
+
+        // Try tall-datatables cache first
+        $datatablesCacheKey = config('tall-datatables.cache_key', 'team-nifty.tall-datatables') . '.modelInfo';
+        $cachedModelInfos = Illuminate\Support\Facades\Cache::get($datatablesCacheKey);
+
+        if ($cached = data_get($cachedModelInfos, $class)) {
+            $relations = $cached->relations;
+
+            if ($type) {
+                return $relations->filter(fn ($relation) => is_a($relation->type, $type, true));
+            }
+
+            return $relations;
+        }
+
+        // Fallback to ModelInspector with own cache
+        $cacheKey = config('tall-datatables.cache_key', 'team-nifty.tall-datatables') . '.flux.model_relations.' . md5($class);
+
+        $relations = Illuminate\Support\Facades\Cache::remember(
+            $cacheKey,
+            now()->addDay(),
+            function () use ($class) {
+                try {
+                    $inspector = app(Illuminate\Database\Eloquent\ModelInspector::class);
+                    $info = $inspector->inspect($class);
+
+                    return collect(data_get($info, 'relations'))->map(function (array $rel) {
+                        $rel['type'] = 'Illuminate\\Database\\Eloquent\\Relations\\' . data_get($rel, 'type');
+
+                        return (object) $rel;
+                    });
+                } catch (Throwable) {
+                    return collect();
+                }
+            }
+        );
+
+        if ($type) {
+            return $relations->filter(fn ($relation) => is_a($relation->type, $type, true));
+        }
+
+        return $relations;
     }
 }
 

@@ -7,7 +7,6 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 trait HasSerialNumberRange
 {
@@ -27,7 +26,7 @@ trait HasSerialNumberRange
                 ->where('tenant_id', $tenantId);
 
             $store = false;
-            if (ModelInfo::forModel($this)->attribute($type)) {
+            if (model_has_attribute($this, $type)) {
                 $query->whereNull('model_id');
             } else {
                 $store = true;

@@ -15,7 +15,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class WorkTime extends Component
@@ -64,11 +63,11 @@ class WorkTime extends Component
                 ->toArray(),
             'trackableTypes' => model_info_all()
                 ->unique('morphClass')
-                ->filter(fn (ModelInfo $modelInfo) => in_array(
+                ->filter(fn (object $modelInfo) => in_array(
                     Trackable::class,
                     class_uses_recursive($modelInfo->class)
                 ))
-                ->map(fn ($modelInfo) => [
+                ->map(fn (object $modelInfo) => [
                     'label' => __(Str::headline($modelInfo->morphClass)),
                     'value' => $modelInfo->morphClass,
                 ])

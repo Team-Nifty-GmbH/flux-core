@@ -15,7 +15,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use Spatie\ModelInfo\Relations\RelationFinder;
 use Spatie\ModelStates\State;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
@@ -136,8 +135,7 @@ class RecordMerging extends Component
                 fn ($cast) => is_a($cast, State::class, true)
             );
 
-            $belongsTos = RelationFinder::forModel(resolve_static($modelClass, 'class'))
-                ->filter(fn ($relation) => $relation->type === BelongsTo::class);
+            $belongsTos = model_relations(resolve_static($modelClass, 'class'), BelongsTo::class);
         }
 
         $this->records = $records->map(function ($record) use ($casts, $belongsTos) {

@@ -14,7 +14,6 @@ use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class SerialNumberRange extends FluxModel
 {
@@ -64,7 +63,7 @@ class SerialNumberRange extends FluxModel
         );
     }
 
-    private function variables(): array
+    protected function variables(): array
     {
         $defaultAttributes = [
             'current_day' => date('d'),
@@ -77,7 +76,7 @@ class SerialNumberRange extends FluxModel
         }
 
         $modelAttributes = array_fill_keys(
-            ModelInfo::forModel(morphed_model($this->model_type))->attributes->pluck('name')->toArray(),
+            model_attributes(morphed_model($this->model_type))->pluck('name')->toArray(),
             null
         );
 

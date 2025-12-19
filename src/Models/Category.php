@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
-use Spatie\ModelInfo\ModelInfo;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
@@ -49,11 +48,11 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
     protected static function booted(): void
     {
         model_info_all()
-            ->filter(fn (ModelInfo $modelInfo) => in_array(
+            ->filter(fn (object $modelInfo) => in_array(
                 Categorizable::class,
                 class_uses_recursive($modelInfo->class)
             ))
-            ->each(function (ModelInfo $modelInfo): void {
+            ->each(function (object $modelInfo): void {
                 $relationName = Str::of(class_basename($modelInfo->class))->camel()->plural()->toString();
 
                 if (method_exists(static::class, $relationName)) {

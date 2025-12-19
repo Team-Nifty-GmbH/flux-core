@@ -13,7 +13,6 @@ use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -112,8 +111,8 @@ class SerialNumberRanges extends SerialNumberRangeList
             [
                 'models' => model_info_all()
                     ->unique('morphClass')
-                    ->filter(fn (ModelInfo $modelInfo) => $modelInfo->traits->contains(HasSerialNumberRange::class))
-                    ->map(fn ($modelInfo) => [
+                    ->filter(fn (object $modelInfo) => $modelInfo->traits->contains(HasSerialNumberRange::class))
+                    ->map(fn (object $modelInfo) => [
                         'label' => __(Str::headline($modelInfo->morphClass)),
                         'value' => $modelInfo->morphClass,
                     ])
