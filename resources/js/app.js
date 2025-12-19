@@ -1,12 +1,14 @@
-import _ from 'lodash';
 import axios from 'axios';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import nuxbeAppBridge from './nuxbe-bridge.js';
 
-window.nuxbeAppBridge = nuxbeAppBridge;
+// Import all modules into single bundle
+import './components/alpine.js';
+import './components/apex-charts.js';
+import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';
 
-window._ = _;
+window.nuxbeAppBridge = nuxbeAppBridge;
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests

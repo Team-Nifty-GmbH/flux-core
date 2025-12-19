@@ -4,6 +4,8 @@ namespace FluxErp\Providers;
 
 use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
+use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
+use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
@@ -36,6 +38,23 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerViews();
 
         $this->bootBladeDirectives();
+
+        $this->bootFrontendAssets();
+    }
+
+    public function register(): void
+    {
+        $this->app->singleton(FrontendAssets::class);
+        $this->app->singleton(SupportAutoInjectedAssets::class);
+    }
+
+    protected function bootFrontendAssets(): void
+    {
+        app(FrontendAssets::class)->boot();
+
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            app(SupportAutoInjectedAssets::class)->boot();
+        }
     }
 
     protected function bootBladeDirectives(): void

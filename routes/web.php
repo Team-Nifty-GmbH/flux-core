@@ -31,9 +31,6 @@ Route::middleware('web')
                 ->name('avatar');
             Route::get('/manifest.json', [AssetController::class, 'manifest'])->name('manifest');
             Route::get('favicon.svg', [AssetController::class, 'favicon'])->name('favicon');
-            Route::get('/flux-assets/{file}', [AssetController::class, 'asset'])
-                ->where('file', '.+')
-                ->name('flux-asset');
             Route::get('/pwa-service-worker', [AssetController::class, 'pwaServiceWorker'])
                 ->name('pwa-service-worker');
             Route::get('/mail-pixel/{communication:uuid}', [AssetController::class, 'mailPixel'])

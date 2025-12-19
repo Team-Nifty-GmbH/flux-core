@@ -4,7 +4,7 @@ import colors from 'tailwindcss/colors';
 window.colors = colors;
 window.ApexCharts = ApexCharts;
 
-export default function ($wire) {
+function apexCharts($wire) {
     return {
         chart: null,
         chartType: null,
@@ -249,6 +249,15 @@ export default function ($wire) {
                 }
 
                 Object.keys(source).forEach((key) => {
+                    // Prevent prototype pollution
+                    if (
+                        key === '__proto__' ||
+                        key === 'constructor' ||
+                        key === 'prototype'
+                    ) {
+                        return;
+                    }
+
                     const targetValue = target[key];
                     const sourceValue = source[key];
 
@@ -393,3 +402,6 @@ export default function ($wire) {
         },
     };
 }
+
+window.apexCharts = apexCharts;
+export default apexCharts;

@@ -2,41 +2,18 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Facades\Asset;
+use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
 use FluxErp\Models\Communication;
 use FluxErp\Models\Tenant;
-use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Vite;
 use Livewire\Drawer\Utils;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use function Livewire\invade;
 
 class AssetController extends Controller
 {
-    public function asset(string $file)
-    {
-        $path = Asset::path($file);
-
-        if (! is_file($path) || ! file_exists($path)) {
-            abort(404);
-        }
-
-        if (invade(app(\Illuminate\Foundation\Vite::class))->isCssPath($path)) {
-            $mimeType = 'text/css';
-        } else {
-            $mimeType = match (pathinfo($path, PATHINFO_EXTENSION)) {
-                'js' => 'application/javascript',
-                default => File::mimeType($path),
-            };
-        }
-
-        return Utils::pretendResponseIsFile($path, $mimeType);
-    }
-
     public function avatar(Request $request): Response
     {
         $color = $request->input('color', '6366f1');
@@ -128,15 +105,21 @@ class AssetController extends Controller
 
     public function pwaServiceWorker(): Response
     {
-        return response(
-            Vite::content(
-                ViewServiceProvider::getRealPackageAssetPath(
-                    'resources/js/sw.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                'build'
-            )
-        )
+        $manifest = FrontendAssets::getManifest();
+        $entry = data_get($manifest, 'resources/js/sw.js');
+
+        if (! $entry) {
+            abort(404);
+        }
+
+        $buildPath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'build';
+        $path = $buildPath . DIRECTORY_SEPARATOR . data_get($entry, 'file');
+
+        if (! file_exists($path)) {
+            abort(404);
+        }
+
+        return response(file_get_contents($path))
             ->header('Content-Type', 'application/javascript')
             ->header('Cache-Control', 'max-age=3600');
     }

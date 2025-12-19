@@ -74,9 +74,6 @@ pest()
 
 pest()
     ->extend(BrowserTestCase::class)
-    ->beforeAll(function (): void {
-        BrowserTestCase::installAssets();
-    })
     ->in('Browser');
 
 /*

@@ -8,7 +8,6 @@ testbench.yaml
 /vendor
 node_modules
 reports
-vite.config.js
 postcss.config.js
 package-lock.json
-/public/build/
+public/build
