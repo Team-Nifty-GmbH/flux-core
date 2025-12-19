@@ -54,7 +54,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
                 'authenticatable_id',
                 'state',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 

@@ -150,7 +150,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 'contact_id',
                 'is_locked',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 

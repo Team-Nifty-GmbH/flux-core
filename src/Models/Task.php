@@ -94,7 +94,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 'project_id',
                 'state',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 

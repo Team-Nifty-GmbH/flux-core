@@ -23,7 +23,6 @@ class LedgerAccount extends FluxModel
                 'ledger_account_type_enum',
                 'is_automatic',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 
