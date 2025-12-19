@@ -13,25 +13,12 @@ class Tree implements Wireable
 {
     use Makeable;
 
-    protected array $tree = [];
-
-    protected string $key = 'id';
-
-    protected string $parentKey = 'parent_id';
-
-    protected string $childKey = 'children';
-
     public function __construct(
-        array $tree,
-        string $key = 'id',
-        string $parentKey = 'parent_id',
-        string $childKey = 'children'
-    ) {
-        $this->tree = $tree;
-        $this->key = $key;
-        $this->parentKey = $parentKey;
-        $this->childKey = $childKey;
-    }
+        protected array $tree = [],
+        protected string $key = 'id',
+        protected string $parentKey = 'parent_id',
+        protected string $childKey = 'children'
+    ) {}
 
     public static function fromLivewire($value)
     {
