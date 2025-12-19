@@ -8,12 +8,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MediaFolderModel extends FluxPivot
 {
-    public $incrementing = true;
-
-    public $timestamps = false;
-
-    protected $primaryKey = 'pivot_id';
-
     protected $table = 'media_folder_model';
 
     public function mediaFolder(): BelongsTo

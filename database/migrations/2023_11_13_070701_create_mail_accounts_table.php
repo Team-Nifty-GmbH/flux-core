@@ -16,7 +16,7 @@ return new class() extends Migration
             $table->string('email')->nullable()->unique();
             $table->text('password')->nullable();
             $table->string('host')->nullable();
-            $table->unsignedInteger('port')->nullable();
+            $table->integer('port')->nullable();
             $table->string('encryption')->nullable();
 
             $table->string('smtp_mailer')->default('smtp');
@@ -26,7 +26,7 @@ return new class() extends Migration
             $table->string('smtp_user')->nullable();
             $table->text('smtp_password')->nullable();
             $table->string('smtp_host')->nullable();
-            $table->unsignedInteger('smtp_port')->nullable();
+            $table->integer('smtp_port')->nullable();
             $table->string('smtp_encryption')->nullable();
 
             $table->boolean('has_auto_assign')->default(false);

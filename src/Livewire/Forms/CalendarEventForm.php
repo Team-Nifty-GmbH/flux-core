@@ -34,8 +34,6 @@ class CalendarEventForm extends FluxForm
 
     public string|int|null $id = null;
 
-    public array $invited = [];
-
     public bool $is_all_day = false;
 
     public bool $is_cancelled = false;

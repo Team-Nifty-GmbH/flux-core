@@ -8,14 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TaskUser extends FluxPivot
 {
-    public $incrementing = true;
-
-    public $timestamps = false;
-
-    protected $guarded = [
-        'id',
-    ];
-
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);

@@ -3,7 +3,6 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\Calendarable;
-use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Support\Collection\CalendarCollection;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
@@ -75,17 +74,6 @@ class Calendar extends FluxModel
         return ($parent ? $parent . ' -> ' : '') . $this->name;
     }
 
-    public function invitesCalendarEvents()
-    {
-        return $this->hasManyThrough(
-            CalendarEvent::class,
-            Inviteable::class,
-            'model_calendar_id',
-            'id',
-            'id',
-            'calendar_event_id');
-    }
-
     public function newCollection(array $models = []): Collection
     {
         return app(CalendarCollection::class, ['items' => $models]);
@@ -114,6 +102,6 @@ class Calendar extends FluxModel
 
     public function users(): MorphToMany
     {
-        return $this->morphedByMany(User::class, 'calendarable', 'calendarables');
+        return $this->morphedByMany(User::class, 'calendarable', 'calendarable');
     }
 }

@@ -119,7 +119,7 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
     public function model(): MorphToMany
     {
         return $this->model_type
-            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable')
+            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable', 'categorizable')
             : new MorphToMany(
                 static::query(),
                 $this,

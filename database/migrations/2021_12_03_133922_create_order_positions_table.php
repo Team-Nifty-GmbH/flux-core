@@ -52,15 +52,14 @@ return new class() extends Migration
                 ->constrained('contacts')
                 ->nullOnDelete();
             $table->foreignId('tenant_id')
-                ->constrained('tenants');
+                ->constrained('tenants')
+                ->cascadeOnDelete();
             $table->foreignId('vat_rate_id')
                 ->nullable()
-                ->constrained('vat_rates')
-                ->nullOnDelete();
+                ->constrained('vat_rates');
             $table->foreignId('warehouse_id')
                 ->nullable()
-                ->constrained('warehouses')
-                ->nullOnDelete();
+                ->constrained('warehouses');
 
             $table->decimal('amount', 40, 10)
                 ->nullable()

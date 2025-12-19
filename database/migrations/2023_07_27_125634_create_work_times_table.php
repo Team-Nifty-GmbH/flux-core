@@ -15,7 +15,6 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('contacts')
                 ->cascadeOnDelete();
-            // employee_id
             $table->foreignId('order_position_id')
                 ->nullable()
                 ->unique()

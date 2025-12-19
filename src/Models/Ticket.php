@@ -12,7 +12,6 @@ use FluxErp\Traits\Model\Communicatable;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
-use FluxErp\Traits\Model\HasRelatedModel;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
@@ -31,9 +30,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable
 {
-    use Commentable, Communicatable, Filterable, HasFrontendAttributes, HasPackageFactory, HasRelatedModel,
-        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -41,10 +39,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     public static string $iconName = 'chat-bubble-left-right';
 
     protected ?string $detailRouteName = 'tickets.id';
-
-    protected array $relatedCustomEvents = [
-        'ticketType',
-    ];
 
     public static function scoutIndexSettings(): ?array
     {
@@ -54,7 +48,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
                 'authenticatable_id',
                 'state',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 

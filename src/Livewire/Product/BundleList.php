@@ -8,7 +8,7 @@ use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
 use FluxErp\Livewire\DataTables\ProductBundleProductList;
 use FluxErp\Livewire\Forms\ProductBundleProductForm;
 use FluxErp\Livewire\Forms\ProductForm;
-use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Product;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
@@ -108,7 +108,7 @@ class BundleList extends ProductBundleProductList
         }
     }
 
-    public function edit(ProductBundleProduct $productBundleProduct): void
+    public function edit(BundleProductProduct $productBundleProduct): void
     {
         $this->productBundleProductForm->reset();
         $this->productBundleProductForm->fill($productBundleProduct);

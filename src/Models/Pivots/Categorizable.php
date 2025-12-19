@@ -12,7 +12,11 @@ class Categorizable extends MorphPivot
 {
     use ResolvesRelationsThroughContainer;
 
-    protected $table = 'categorizables';
+    protected $table = 'categorizable';
+
+    protected $primaryKey = 'pivot_id';
+
+    protected $guarded = ['pivot_id'];
 
     public function categorizable(): MorphTo
     {

@@ -55,10 +55,10 @@ class EditMail extends Component
             'mailAccounts' => array_merge(
                 auth()
                     ->user()
-                    ->mailAccounts()
+                    ?->mailAccounts()
                     ->whereNotNull('smtp_email')
                     ->get(['mail_accounts.id', 'name'])
-                    ->toArray(),
+                    ->toArray() ?? [],
                 [
                     ['id' => 'default', 'name' => __('Default')],
                 ]

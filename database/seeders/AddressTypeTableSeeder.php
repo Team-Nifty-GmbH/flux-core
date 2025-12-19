@@ -23,8 +23,6 @@ class AddressTypeTableSeeder extends Seeder
                     'tenant_id' => $tenant->id,
                     'address_type_code' => 'inv',
                     'name' => 'invoice',
-                    'is_locked' => true,
-                    'is_unique' => true,
                 ]);
             }
 
@@ -38,8 +36,6 @@ class AddressTypeTableSeeder extends Seeder
                     'tenant_id' => $tenant->id,
                     'address_type_code' => 'del',
                     'name' => 'delivery',
-                    'is_locked' => true,
-                    'is_unique' => true,
                 ]);
             }
 

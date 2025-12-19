@@ -26,7 +26,7 @@ return new class() extends Migration
                 ->references('id')
                 ->on('languages')
                 ->nullOnDelete();
-            $table->foreignId('tenant_id')->constrained('tenants');
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->string('company')->nullable();
             $table->string('title')->nullable();
             $table->string('salutation')->nullable();

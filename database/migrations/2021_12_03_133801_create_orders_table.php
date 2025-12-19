@@ -54,6 +54,7 @@ return new class() extends Migration
                 ->constrained('orders')
                 ->nullOnDelete();
             $table->foreignId('payment_type_id')
+                ->nullable()
                 ->constrained('payment_types');
             $table->foreignId('price_list_id')
                 ->constrained('price_lists');
@@ -62,7 +63,8 @@ return new class() extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
             $table->foreignId('tenant_id')
-                ->constrained('tenants');
+                ->constrained('tenants')
+                ->cascadeOnDelete();
             $table->foreignId('vat_rate_id')
                 ->nullable()
                 ->constrained('vat_rates')
@@ -79,7 +81,7 @@ return new class() extends Migration
             $table->integer('payment_discount_target', false, true)->nullable();
             $table->date('payment_discount_target_date')->nullable();
             $table->decimal('payment_discount_percent', 40, 10)->nullable();
-            $table->decimal('shipping_costs_net_price', 40, 10)->default(0)->nullable()
+            $table->decimal('shipping_costs_net_price', 40, 10)->nullable()
                 ->comment('A decimal containing the net price of shipping costs.');
             $table->decimal('shipping_costs_gross_price', 40, 10)
                 ->nullable()

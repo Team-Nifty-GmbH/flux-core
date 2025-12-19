@@ -27,8 +27,7 @@ return new class() extends Migration
             $table->unsignedInteger('rounding_number')->nullable();
             $table->string('rounding_mode')->nullable();
             $table->boolean('is_default')->default(false);
-            $table->boolean('is_net')->default(true)
-                ->comment('A boolean deciding if this price-list has prices only for net orders instead of gross orders.');
+            $table->boolean('is_net')->default(true);
             $table->boolean('is_purchase')->default(false);
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();

@@ -114,7 +114,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 'is_main_address',
                 'contact_id',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 
@@ -344,7 +343,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
-            'is_dark_mode' => 'boolean',
             'is_delivery_address' => 'boolean',
             'is_active' => 'boolean',
             'can_login' => 'boolean',
@@ -380,7 +378,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     {
         return $this->belongsToMany(
             Category::class,
-            'categorizables',
+            'categorizable',
             'categorizable_id',
             'category_id',
             'contact_id',
@@ -644,10 +642,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'start' => $currentBirthday->toDateString(),
             'end' => $currentBirthday->toDateString(),
             'editable' => false,
-            'invited' => [],
             'allDay' => true,
             'is_editable' => false,
-            'is_invited' => false,
             'is_public' => false,
         ];
     }

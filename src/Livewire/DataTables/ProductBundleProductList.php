@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables;
 
-use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\BundleProductProduct;
 
 class ProductBundleProductList extends BaseDataTable
 {
@@ -11,5 +11,5 @@ class ProductBundleProductList extends BaseDataTable
         'bundle_product.name',
     ];
 
-    protected string $model = ProductBundleProduct::class;
+    protected string $model = BundleProductProduct::class;
 }

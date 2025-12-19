@@ -15,10 +15,7 @@ return new class() extends Migration
             $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
             $table->json('address')->nullable();
 
-            $table->unique(
-                ['address_id', 'address_type_id', 'order_id'],
-                'address_address_type_order_unique'
-            );
+            $table->unique(['address_id', 'address_type_id', 'order_id'], 'address_address_type_order_unique');
         });
     }
 

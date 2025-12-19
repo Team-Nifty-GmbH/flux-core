@@ -13,6 +13,7 @@ return new class() extends Migration
             $table->foreignId('mail_account_id')->constrained('mail_accounts')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->boolean('is_default')->default(false);
+            $table->unique(['mail_account_id', 'user_id']);
         });
     }
 

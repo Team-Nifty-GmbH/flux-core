@@ -10,7 +10,6 @@
     "action.bank-connection.update": "Update a bank connection",
     "action.calendar-event.create": "Create a new calendar event",
     "action.calendar-event.delete": "Delete a calendar event",
-    "action.calendar-event.sync-invites": "Sync invites for a calendar event",
     "action.calendar-event.update": "Update a calendar event",
     "action.calendar.create": "Create a new calendar",
     "action.calendar.delete": "Delete a calendar",

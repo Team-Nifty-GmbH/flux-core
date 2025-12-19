@@ -31,11 +31,11 @@ class TicketTableSeeder extends Seeder
                 $user = $users->random();
 
                 return [
-                    'authenticatable_type' => $user->getMorphClass(),
-                    'authenticatable_id' => $user->id,
                     'ticket_type_id' => rand(0, 1) ?
                         ($ticketTypes->isNotEmpty() ? $ticketTypes->random()->id : null) :
                         null,
+                    'authenticatable_type' => $user->getMorphClass(),
+                    'authenticatable_id' => $user->id,
                 ];
             });
         }

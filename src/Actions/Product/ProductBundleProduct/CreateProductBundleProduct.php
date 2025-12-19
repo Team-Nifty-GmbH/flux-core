@@ -4,7 +4,7 @@ namespace FluxErp\Actions\Product\ProductBundleProduct;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\BundleTypeEnum;
-use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ProductBundleProduct\CreateProductBundleProductRuleset;
 use Illuminate\Validation\Rule;
@@ -13,7 +13,7 @@ class CreateProductBundleProduct extends FluxAction
 {
     public static function models(): array
     {
-        return [ProductBundleProduct::class];
+        return [BundleProductProduct::class];
     }
 
     protected function getRulesets(): string|array
@@ -21,9 +21,9 @@ class CreateProductBundleProduct extends FluxAction
         return CreateProductBundleProductRuleset::class;
     }
 
-    public function performAction(): ProductBundleProduct
+    public function performAction(): BundleProductProduct
     {
-        $productBundleProduct = app(ProductBundleProduct::class, ['attributes' => $this->data]);
+        $productBundleProduct = app(BundleProductProduct::class, ['attributes' => $this->data]);
         $productBundleProduct->save();
 
         resolve_static(Product::class, 'query')
@@ -40,7 +40,7 @@ class CreateProductBundleProduct extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->rules['bundle_product_id'] = [
-            Rule::unique('product_bundle_product', 'bundle_product_id')
+            Rule::unique('bundle_product_product', 'bundle_product_id')
                 ->where('product_id', $this->data['product_id'] ?? 0),
         ];
     }

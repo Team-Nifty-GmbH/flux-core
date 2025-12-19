@@ -1318,3 +1318,63 @@ test('vat calculation with repeating decimals', function (): void {
     expect($vat19['total_vat_price'])->toEqual('12.67');
     // 66.67 * 0.19 = 12.6673
 });
+
+test('refresh invoice address updates address from address model', function (): void {
+    // Update address in database
+    $this->address->update([
+        'company' => 'Updated Company Name',
+        'street' => 'New Street 123',
+        'city' => 'New City',
+    ]);
+
+    // Refresh invoice address
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'invoice')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    // Verify address was updated on order with correct fields
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_invoice['company'])->toEqual('Updated Company Name');
+    expect($refreshedOrder->address_invoice['street'])->toEqual('New Street 123');
+    expect($refreshedOrder->address_invoice['city'])->toEqual('New City');
+});
+
+test('refresh delivery address updates address from address model', function (): void {
+    // Update address in database
+    $this->address->update([
+        'company' => 'Updated Delivery Company',
+        'street' => 'Delivery Street 456',
+        'city' => 'Delivery City',
+    ]);
+
+    // Refresh delivery address
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'delivery')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    // Verify address was updated on order with correct fields
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_delivery['company'])->toEqual('Updated Delivery Company');
+    expect($refreshedOrder->address_delivery['street'])->toEqual('Delivery Street 456');
+    expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
+});
+
+test('refresh invoice address on locked order fails', function (): void {
+    $this->order->update(['is_locked' => true]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'invoice')
+        ->assertOk()
+        ->assertHasErrors();
+});
+
+test('refresh delivery address on locked order fails', function (): void {
+    $this->order->update(['is_locked' => true]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'delivery')
+        ->assertOk()
+        ->assertHasErrors();
+});

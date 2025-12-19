@@ -21,8 +21,8 @@ return new class() extends Migration
             $table->unique(
                 [
                     'queue_monitor_id',
-                    'queue_monitorable_id',
                     'queue_monitorable_type',
+                    'queue_monitorable_id',
                 ],
                 'queue_monitorable_unique'
             );

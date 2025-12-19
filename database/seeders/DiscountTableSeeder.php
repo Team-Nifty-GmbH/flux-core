@@ -16,8 +16,8 @@ class DiscountTableSeeder extends Seeder
         for ($i = 0; $i < 20; $i++) {
             $isNewDiscount = $discounts->isEmpty() ? 1 : rand(0, 1);
             Discount::factory()->create([
-                'model_id' => $isNewDiscount ? $orderPositions->random()->id : null,
                 'model_type' => morph_alias(OrderPosition::class),
+                'model_id' => $isNewDiscount ? $orderPositions->random()->id : null,
             ]);
         }
     }

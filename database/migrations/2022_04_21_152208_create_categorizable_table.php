@@ -19,10 +19,7 @@ return new class() extends Migration
                 ->cascadeOnDelete();
             $table->morphs('categorizable');
 
-            $table->unique(
-                ['category_id', 'categorizable_id', 'categorizable_type'],
-                'categorizable_unique'
-            );
+            $table->unique(['category_id', 'categorizable_type', 'categorizable_id'], 'categorizable_unique');
         });
     }
 

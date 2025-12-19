@@ -58,7 +58,7 @@ class MailAccount extends FluxModel
                 'validate_cert' => $this->has_valid_certificate,
                 'username' => $this->email,
                 'password' => $this->password,
-                'authentication' => $this->is_o_auth ? 'oauth' : null,
+                'authentication' => $this->has_o_auth ? 'oauth' : null,
             ])->connect();
         } catch (AuthFailedException $e) {
             logger($e->getMessage(), ['mail_account_id' => $this->id]);

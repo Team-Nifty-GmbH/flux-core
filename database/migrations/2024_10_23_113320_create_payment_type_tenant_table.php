@@ -16,6 +16,8 @@ return new class() extends Migration
             $table->id('pivot_id');
             $table->foreignId('payment_type_id')->constrained('payment_types')->cascadeOnDelete();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+
+            $table->unique(['payment_type_id', 'tenant_id']);
         });
     }
 

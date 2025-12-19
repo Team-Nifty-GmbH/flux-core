@@ -18,7 +18,8 @@ class CategoryList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->whereNull('parent_id')->with('children');
+        return resolve_static(Category::class, 'familyTree')
+            ->whereNull('parent_id');
     }
 
     protected function getLeftAppends(): array

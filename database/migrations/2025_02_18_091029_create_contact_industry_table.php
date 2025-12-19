@@ -16,6 +16,8 @@ return new class() extends Migration
             $table->foreignId('industry_id')
                 ->constrained('industries')
                 ->cascadeOnDelete();
+
+            $table->unique(['contact_id', 'industry_id']);
         });
     }
 

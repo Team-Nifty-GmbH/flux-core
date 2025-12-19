@@ -30,9 +30,9 @@ class OrderFactory extends Factory
             'customer_delivery_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
             'date_of_approval' => fake()->dateTimeBetween('-1 year', '+1 year'),
 
-            'is_locked' => fake()->boolean(70),
-            'is_imported' => fake()->boolean(),
             'is_confirmed' => fake()->boolean(),
+            'is_imported' => fake()->boolean(),
+            'is_locked' => fake()->boolean(70),
             'requires_approval' => fake()->boolean(),
         ];
     }

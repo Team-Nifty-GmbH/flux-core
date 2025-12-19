@@ -31,7 +31,6 @@ use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
-use FluxErp\Traits\Model\HasRelatedModel;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
@@ -69,8 +68,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasStates, HasTenantAssignment,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -150,7 +149,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 'contact_id',
                 'is_locked',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 
@@ -197,7 +195,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
             if ($order->isDirty('address_delivery_id')
                 && $order->address_delivery_id
-                && ! $order->isDirty('address_delivery')
+                && ! $order->address_delivery
             ) {
                 $order->address_delivery = $order->addressDelivery()->first();
             }

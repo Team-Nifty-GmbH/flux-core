@@ -10,18 +10,10 @@ return new class() extends Migration
     {
         Schema::create('discount_discount_group', function (Blueprint $table): void {
             $table->id('pivot_id');
-            $table->unsignedBigInteger('discount_id');
-            $table->unsignedBigInteger('discount_group_id');
+            $table->foreignId('discount_group_id')->constrained('discount_groups')->cascadeOnDelete();
+            $table->foreignId('discount_id')->constrained('discounts')->cascadeOnDelete();
 
-            $table->foreign('discount_id')
-                ->references('id')
-                ->on('discounts')
-                ->cascadeOnDelete();
-
-            $table->foreign('discount_group_id')
-                ->references('id')
-                ->on('discount_groups')
-                ->cascadeOnDelete();
+            $table->unique(['discount_group_id', 'discount_id']);
         });
     }
 

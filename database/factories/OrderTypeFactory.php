@@ -15,9 +15,9 @@ class OrderTypeFactory extends Factory
         return [
             'name' => fake()->firstName(),
             'description' => fake()->sentence(),
+            'order_type_enum' => fake()->randomElement(OrderTypeEnum::cases())->value,
             'is_active' => fake()->boolean(90),
             'is_hidden' => fake()->boolean(10),
-            'order_type_enum' => fake()->randomElement(OrderTypeEnum::cases())->value,
         ];
     }
 }

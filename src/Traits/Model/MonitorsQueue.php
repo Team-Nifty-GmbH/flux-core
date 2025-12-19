@@ -15,6 +15,6 @@ trait MonitorsQueue
 
     public function queueMonitors(): MorphToMany
     {
-        return $this->morphToMany(QueueMonitor::class, 'queue_monitorable', 'queue_monitorables');
+        return $this->morphToMany(QueueMonitor::class, 'queue_monitorable', 'queue_monitorable');
     }
 }

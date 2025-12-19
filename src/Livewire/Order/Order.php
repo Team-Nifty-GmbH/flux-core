@@ -251,6 +251,39 @@ class Order extends Component
     }
 
     #[Renderless]
+    public function refreshAddress(string $type): void
+    {
+        if (! in_array($type, ['invoice', 'delivery'])) {
+            return;
+        }
+
+        $addressKey = 'address_' . $type;
+
+        $address = resolve_static(Address::class, 'query')
+            ->with('country:id,name')
+            ->whereKey($this->order->{$addressKey . '_id'})
+            ->first();
+
+        if ($address) {
+            $addressArray = $address->toArray();
+
+            try {
+                $updatedOrder = UpdateOrder::make([
+                    'id' => $this->order->id,
+                    $addressKey => $addressArray,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+
+                $this->order->{$addressKey} = $updatedOrder->{$addressKey};
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+    }
+
+    #[Renderless]
     public function evenOutBalance(): void
     {
         $parentOrder = resolve_static(OrderModel::class, 'query')

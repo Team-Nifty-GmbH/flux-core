@@ -12,6 +12,8 @@ return new class() extends Migration
             $table->id('pivot_id');
             $table->foreignId('task_id')->constrained('tasks')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+
+            $table->unique(['task_id', 'user_id']);
         });
     }
 

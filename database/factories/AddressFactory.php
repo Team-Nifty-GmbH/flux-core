@@ -31,9 +31,9 @@ class AddressFactory extends Factory
             'department' => fake()->boolean ? fake()->realText(maxNbChars: 20) : null,
             'email' => uniqid() . fake()->unique()->safeEmail(),
             'password' => 'password',
+            'can_login' => fake()->boolean(80),
             'is_active' => fake()->boolean(90),
             'is_main_address' => fake()->boolean,
-            'can_login' => fake()->boolean(80),
         ];
     }
 }

@@ -18,8 +18,6 @@ use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
-use Spatie\Translatable\TranslatableServiceProvider;
-use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
 use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
@@ -130,8 +128,6 @@ abstract class BrowserTestCase extends TestCase
     protected function getApplicationProviders($app): array
     {
         return array_merge(parent::getApplicationProviders($app), [
-            TranslatableServiceProvider::class,
-            TranslationServiceProvider::class,
             LivewireServiceProvider::class,
             TallStackUiServiceProvider::class,
             ViewServiceProvider::class,
