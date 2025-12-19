@@ -104,12 +104,11 @@ class FluxServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations',
             __DIR__ . '/../database/settings',
         ]);
-        $this->app->bind(
-            'path.lang',
-            fn () => [__DIR__ . '/../lang', base_path('lang')]
-        );
 
+        $this->loadTranslationsFrom(__DIR__ . '/../lang');
+        $this->loadTranslationsFrom(base_path('lang'));
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+        $this->loadJsonTranslationsFrom(base_path('lang'));
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
         $this->registerExtensions();
