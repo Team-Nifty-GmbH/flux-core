@@ -114,7 +114,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 'is_main_address',
                 'contact_id',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 

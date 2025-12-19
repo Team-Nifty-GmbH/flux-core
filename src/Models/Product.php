@@ -79,7 +79,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
                 'is_active',
                 'parent_id',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 

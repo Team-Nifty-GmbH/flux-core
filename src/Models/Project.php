@@ -62,7 +62,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
                 'parent_id',
                 'state',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 
