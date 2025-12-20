@@ -9,6 +9,6 @@ trait HasCalendars
 {
     public function calendars(): MorphToMany
     {
-        return $this->morphToMany(Calendar::class, 'calendarable');
+        return $this->morphToMany(Calendar::class, 'calendarable', 'calendarable');
     }
 }
