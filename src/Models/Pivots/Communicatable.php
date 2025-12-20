@@ -12,6 +12,8 @@ class Communicatable extends MorphPivot
 {
     use ResolvesRelationsThroughContainer;
 
+    public $timestamps = false;
+
     protected $table = 'communicatable';
 
     protected $primaryKey = 'pivot_id';
