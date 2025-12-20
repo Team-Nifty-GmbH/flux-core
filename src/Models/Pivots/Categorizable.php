@@ -12,6 +12,8 @@ class Categorizable extends MorphPivot
 {
     use ResolvesRelationsThroughContainer;
 
+    public $timestamps = false;
+
     protected $table = 'categorizable';
 
     protected $primaryKey = 'pivot_id';
