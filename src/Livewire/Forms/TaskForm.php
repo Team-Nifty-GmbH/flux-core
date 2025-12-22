@@ -9,7 +9,6 @@ use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Models\Task;
 use FluxErp\Settings\ReminderSettings;
 use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
-use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class TaskForm extends FluxForm
@@ -111,7 +110,6 @@ class TaskForm extends FluxForm
 
         if (is_null($data)) {
             $data = $this->toActionData();
-            $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
         }
 
         return parent::makeAction($name, $data);
