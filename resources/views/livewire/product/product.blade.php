@@ -1,6 +1,5 @@
 <div
     x-data="{
-        additionalColumns: $wire.entangle('additionalColumns'),
         edit: false,
         priceLists: $wire.entangle('priceLists'),
     }"

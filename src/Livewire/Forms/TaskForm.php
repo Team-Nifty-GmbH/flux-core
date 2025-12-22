@@ -111,7 +111,6 @@ class TaskForm extends FluxForm
 
         if (is_null($data)) {
             $data = $this->toActionData();
-            $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
         }
 
         return parent::makeAction($name, $data);

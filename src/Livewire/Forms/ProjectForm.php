@@ -54,7 +54,6 @@ class ProjectForm extends Form
         }
 
         $data = $this->toArray();
-        $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
 
         $action = $this->id ? UpdateProject::make($data) : CreateProject::make($data);
 
