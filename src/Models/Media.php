@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\Categorizable;
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\LogsActivity;
@@ -35,7 +36,8 @@ class Media extends BaseMedia
 
     public function category(): MorphToMany
     {
-        return $this->morphToMany(Category::class, 'categorizable');
+        return $this->morphToMany(Category::class, 'categorizable', 'categorizable')
+            ->using(Categorizable::class);
     }
 
     public function getCollection(): ?MediaCollection
