@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
 use FluxErp\Models\Contact;
@@ -15,6 +16,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,6 +48,28 @@ class PurchaseInvoiceList extends BaseDataTable
     public MediaUploadForm $mediaForm;
 
     public PurchaseInvoiceForm $purchaseInvoiceForm;
+
+    #[DataTableForm(
+        only: [
+            'tenant_id',
+            'company',
+            'salutation',
+            'title',
+            'firstname',
+            'lastname',
+            'street',
+            'zip',
+            'city',
+            'country_id',
+            'language_id',
+            'email_primary',
+            'phone',
+            'phone_mobile',
+            'record_origin_id',
+        ],
+        saveMethod: 'saveContact',
+    )]
+    public ContactForm $createContactForm;
 
     protected string $model = PurchaseInvoice::class;
 
@@ -134,6 +158,33 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
 
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+    }
+
+    #[Renderless]
+    public function createContact(): void
+    {
+        $this->createContactForm->reset();
+
+        $this->modalOpen('contact-form-modal');
+    }
+
+    #[Renderless]
+    public function saveContact(): bool
+    {
+        try {
+            $this->createContactForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->purchaseInvoiceForm->contact_id = $this->createContactForm->id;
+        $this->fillFromSelectedContact(
+            resolve_static(Contact::class, 'query')->whereKey($this->createContactForm->id)->first()
+        );
+
+        return true;
     }
 
     #[Renderless]
@@ -283,7 +334,7 @@ class PurchaseInvoiceList extends BaseDataTable
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
                     ->where('is_purchase', true)
-                    ->get(['id', 'name'])
+                    ->get(['id', 'name', 'requires_manual_transfer'])
                     ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')->get(['id', 'name'])->toArray(),
             ]

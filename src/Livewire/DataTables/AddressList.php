@@ -9,6 +9,7 @@ use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Media;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,7 +25,26 @@ class AddressList extends BaseDataTable
 {
     use AllowRecordMerging, CreatesDocuments;
 
-    public ContactForm $contact;
+    #[DataTableForm(
+        only: [
+            'tenant_id',
+            'company',
+            'salutation',
+            'title',
+            'firstname',
+            'lastname',
+            'street',
+            'zip',
+            'city',
+            'country_id',
+            'language_id',
+            'email_primary',
+            'phone',
+            'phone_mobile',
+            'record_origin_id',
+        ],
+    )]
+    public ContactForm $createContactForm;
 
     public array $enabledCols = [
         'avatar',
@@ -67,7 +87,7 @@ class AddressList extends BaseDataTable
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$modalOpen(\'create-contact-modal\')',
+                    'x-on:click' => '$modalOpen(\'contact-form-modal\')',
                 ])
                 ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
         ];
@@ -210,14 +230,14 @@ class AddressList extends BaseDataTable
     #[Renderless]
     public function resetForm(): void
     {
-        $this->contact->reset();
+        $this->createContactForm->reset();
     }
 
     #[Renderless]
     public function save(): bool
     {
         try {
-            $this->contact->save();
+            $this->createContactForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -228,7 +248,7 @@ class AddressList extends BaseDataTable
             ->success(__(':model saved', ['model' => __('Contact')]))
             ->send();
 
-        $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
+        $this->redirectRoute('contacts.id?', ['id' => $this->createContactForm->id], navigate: true);
 
         return true;
     }
