@@ -13,7 +13,7 @@ return new class() extends Migration
             $table->char('uuid', 36);
 
             $table->foreignId('employee_id')
-                ->constrained()
+                ->constrained('employees')
                 ->cascadeOnDelete();
 
             $table->string('type');

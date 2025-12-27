@@ -14,11 +14,11 @@ return new class() extends Migration
 
             $table->foreignId('country_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('countries')
                 ->nullOnDelete();
             $table->foreignId('country_region_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('country_regions')
                 ->nullOnDelete();
 
             $table->string('name');

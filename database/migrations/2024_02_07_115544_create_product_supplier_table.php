@@ -9,15 +9,13 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('product_supplier', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('contact_id');
+            $table->id('pivot_id');
+            $table->foreignId('contact_id')->constrained('contacts')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->string('manufacturer_product_number')->nullable();
             $table->decimal('purchase_price', 40, 10)->nullable();
 
-            $table->unique(['product_id', 'contact_id']);
-            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
-            $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
+            $table->unique(['contact_id', 'product_id']);
         });
     }
 
