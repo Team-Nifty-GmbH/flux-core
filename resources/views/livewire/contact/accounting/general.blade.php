@@ -2,6 +2,7 @@
     class="flex flex-col gap-4"
     x-bind:class="! $wire.$parent.$parent.edit && 'pointer-events-none'"
 >
+    @section('commercial')
     <x-card>
         <div class="flex flex-col gap-1.5">
             <x-select.styled
@@ -76,6 +77,8 @@
             />
         </div>
     </x-card>
+    @show
+    @section('accounting')
     <x-card>
         <div class="flex flex-col gap-1.5">
             <x-toggle
@@ -110,6 +113,8 @@
             />
         </div>
     </x-card>
+    @show
+    @section('terms')
     <x-card>
         <div class="flex flex-col gap-1.5">
             <x-number
@@ -157,6 +162,8 @@
             />
         </div>
     </x-card>
+    @show
+    @section('texts')
     <x-card class="flex flex-col gap-4">
         <x-flux::editor
             wire:model="contact.header"
@@ -169,4 +176,5 @@
             :label="__('Footer')"
         />
     </x-card>
+    @show
 </div>
