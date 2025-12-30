@@ -104,7 +104,9 @@
 
         <div>
             <x-spinner wire:loading />
-            <x-table>
+            <table
+                class="min-w-full divide-y divide-gray-200 dark:divide-dark-500/50"
+            >
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr>
                         <th
@@ -284,7 +286,11 @@
                                             </div>
 
                                             <div
-                                                x-on:click="$wire.showEmployeeDay(employee.days[calDay.date].id)"
+                                                x-on:click="
+                                                    employee.days[calDay.date]?.id
+                                                        ? $wire.showEmployeeDay(employee.days[calDay.date].id)
+                                                        : $wire.showWorkTime(employee.id, calDay.date)
+                                                "
                                                 x-cloak
                                                 x-show="employee.days[calDay.date]?.actual_hours > 0"
                                                 class="flex size-10 items-center justify-center rounded border-green-500 bg-green-500 text-green-50 dark:border-transparent dark:bg-green-700 dark:bg-opacity-80"
@@ -360,7 +366,7 @@
                         </template>
                     </tbody>
                 </template>
-            </x-table>
+            </table>
         </div>
 
         <x-slot:footer>
