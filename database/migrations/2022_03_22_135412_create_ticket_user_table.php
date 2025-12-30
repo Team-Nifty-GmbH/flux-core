@@ -9,12 +9,11 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('ticket_user', function (Blueprint $table): void {
-            $table->unsignedBigInteger('ticket_id');
-            $table->unsignedBigInteger('user_id');
+            $table->id('pivot_id');
+            $table->foreignId('ticket_id')->constrained('tickets')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
 
-            $table->primary(['ticket_id', 'user_id']);
-            $table->foreign('ticket_id')->references('id')->on('tickets');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->unique(['ticket_id', 'user_id']);
         });
     }
 

@@ -13,11 +13,11 @@ return new class() extends Migration
             $table->char('uuid', 36);
 
             $table->foreignId('employee_id')
-                ->constrained()
+                ->constrained('employees')
                 ->cascadeOnDelete();
             $table->foreignId('holiday_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('holidays')
                 ->nullOnDelete();
 
             $table->date('date')->index();

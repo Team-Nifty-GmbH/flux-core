@@ -13,7 +13,7 @@ return new class() extends Migration
             $table->char('uuid', 36);
 
             $table->foreignId('work_time_model_id')
-                ->constrained()
+                ->constrained('work_time_models')
                 ->cascadeOnDelete();
 
             $table->unsignedInteger('week_number');

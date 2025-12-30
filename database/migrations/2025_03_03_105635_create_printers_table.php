@@ -11,6 +11,7 @@ return new class() extends Migration
         Schema::create('printers', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
+            $table->string('alias')->nullable();
             $table->string('spooler_name');
             $table->string('location')->nullable();
             $table->string('make_and_model')->nullable();

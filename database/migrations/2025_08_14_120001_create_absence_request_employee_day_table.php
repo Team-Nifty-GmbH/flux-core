@@ -12,10 +12,10 @@ return new class() extends Migration
             $table->id('pivot_id');
 
             $table->foreignId('absence_request_id')
-                ->constrained()
+                ->constrained('absence_requests')
                 ->cascadeOnDelete();
             $table->foreignId('employee_day_id')
-                ->constrained()
+                ->constrained('employee_days')
                 ->cascadeOnDelete();
 
             $table->unique(['absence_request_id', 'employee_day_id'], 'absence_request_employee_day_unique');

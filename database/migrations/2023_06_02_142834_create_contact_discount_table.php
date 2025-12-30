@@ -6,13 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('contact_discount', function (Blueprint $table): void {
-            $table->id();
+            $table->id('pivot_id');
             $table->unsignedBigInteger('contact_id');
             $table->unsignedBigInteger('discount_id');
 
@@ -29,9 +26,6 @@ return new class() extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('contact_discount');
