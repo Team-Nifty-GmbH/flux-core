@@ -384,6 +384,7 @@
         class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
+            @section('content.left-wrapper')
             <section
                 class="relative w-full xl:max-w-96 xl:basis-2/12"
                 wire:ignore
@@ -811,8 +812,10 @@
                     @show
                 </div>
             </section>
+            @show
         </x-slot>
         <x-slot:append>
+            @section('content.right-wrapper')
             <section
                 class="relative w-full xl:max-w-96 xl:basis-2/12"
                 wire:ignore
@@ -1194,6 +1197,7 @@
                     </x-card>
                 </div>
             </section>
+            @show
         </x-slot>
     </x-flux::tabs>
 </div>
