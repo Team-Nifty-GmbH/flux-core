@@ -102,11 +102,7 @@
         </div>
 
         <div class="mt-6 flex justify-end">
-            <x-button
-                wire:click="save"
-                color="primary"
-                :text="__('Save')"
-            />
+            <x-button wire:click="save" color="primary" :text="__('Save')" />
         </div>
     </x-card>
 </div>
