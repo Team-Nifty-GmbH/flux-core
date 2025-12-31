@@ -8,6 +8,10 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('event_subscriptions')) {
+            return;
+        }
+
         Schema::create('event_subscriptions', function (Blueprint $table): void {
             $table->id();
             $table->morphs('subscribable');
