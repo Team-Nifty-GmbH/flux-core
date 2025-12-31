@@ -51,7 +51,6 @@ class AttendanceOverview extends CircleChart
     public function calculateByTimeFrame(): void
     {
         $this->calculateChart();
-        $this->updateData();
     }
 
     public function calculateChart(): void

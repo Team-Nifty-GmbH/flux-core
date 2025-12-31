@@ -274,7 +274,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
 
     public function employeeDays(): BelongsToMany
     {
-        return $this->belongsToMany(EmployeeDay::class, 'work_time_employee_day')
+        return $this->belongsToMany(EmployeeDay::class, 'employee_day_work_time')
             ->using(EmployeeDayWorkTime::class)
             ->withPivot(['hours_contributed', 'break_minutes_contributed'])
             ->withTimestamps();
