@@ -343,17 +343,20 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             return false;
         }
 
-        if (
-            resolve_static(Holiday::class, 'query')
-                ->isHoliday($date, $this->location_id)
-                ->exists()
-        ) {
+        // Only full-day holidays make it a non-work day
+        // Half-day holidays still require work for the other half
+        $holiday = resolve_static(Holiday::class, 'query')
+            ->isHoliday($date, $this->location_id)
+            ->first();
+
+        if ($holiday && ! $holiday->is_half_day) {
             return false;
         }
 
         $weekday = $date->dayOfWeekIso;
         $isWorkDay = $workTimeModel->workTimeModel->schedules()
             ->where('weekday', $weekday)
+            ->where('work_hours', '>', 0)
             ->exists();
 
         // If no schedule exists default to work_days_per_week

@@ -72,10 +72,21 @@ class CloseEmployeeDay extends FluxAction
             $wasPresent = bccomp($workTimes, 0) === 1;
         }
 
+        // Query holiday early so we can adjust target hours for half-day holidays
+        $holiday = resolve_static(Holiday::class, 'query')
+            ->isHoliday($date, $employee->location_id)
+            ->select(['id', 'is_half_day', 'day_part'])
+            ->first();
+
         $targetHours = 0;
         if ($isWorkDay = $employee->isWorkDay($date)) {
             $workTimeModel = $employee->getWorkTimeModel($date);
             $targetHours = $workTimeModel->getDailyWorkHours($date);
+
+            // Reduce target hours for half-day holidays
+            if ($holiday?->is_half_day) {
+                $targetHours = bcdiv($targetHours, 2);
+            }
         }
 
         $data = [
@@ -160,21 +171,19 @@ class CloseEmployeeDay extends FluxAction
 
         $plusMinusOvertimeHours = bcsub($totalOvertime, Arr::pull($data, 'overtime_used'));
 
-        $holidayId = resolve_static(Holiday::class, 'query')
-            ->isHoliday($date, $employee->location_id)
-            ->value('id');
-
         return collect(array_merge(
             [
-                'holiday_id' => $holidayId,
-                'target_hours' => $targetHours,
+                'holiday_id' => $holiday?->id,
+                'target_hours' => bcround($targetHours, 2),
                 'actual_hours' => bcround($actualHours, 2),
                 'break_minutes' => bcround(bcdiv($pauseTimes, 60000)),
             ],
             $data,
             [
                 'plus_minus_overtime_hours' => bcround($plusMinusOvertimeHours, 2),
-                'is_holiday' => (bool) $holidayId,
+                'is_holiday' => (bool) $holiday,
+                'is_half_day_holiday' => (bool) $holiday?->is_half_day,
+                'holiday_day_part' => $holiday?->day_part?->value ?? $holiday?->day_part,
                 'is_work_day' => $isWorkDay,
 
                 'absence_requests' => $usedAbsenceRequests,

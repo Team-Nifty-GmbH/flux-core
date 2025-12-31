@@ -103,7 +103,7 @@
 
         <div class="mt-6 flex justify-end">
             <x-button
-                wire:click="$parent.save"
+                wire:click="save"
                 color="primary"
                 :text="__('Save')"
             />
