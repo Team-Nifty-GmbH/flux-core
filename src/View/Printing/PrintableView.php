@@ -171,8 +171,8 @@ abstract class PrintableView extends Component
             );
         }
 
-        if (method_exists($this, 'beforePrinting')) {
-            $this->beforePrinting();
+        if (method_exists($this, 'afterPrinting')) {
+            $this->afterPrinting();
         }
 
         if (! $this->preview) {
