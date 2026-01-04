@@ -16,7 +16,7 @@
             style="padding-left: {{ $position->depth * 15 }}px"
         >
             @section('position-name.content')
-            @section('$position-name.content.alternative')
+            @section('position-name.content.alternative')
             @if ($position->is_alternative)
                 <x-badge
                     color="amber"
@@ -27,17 +27,17 @@
             @endif
 
             @show
-            @section('$position-name.content.product-number')
+            @section('position-name.content.product-number')
             <p class="font-italic text-xs">
                 {{ $position->product_number }}
             </p>
             @show
-            @section('$position-name.content.name')
+            @section('position-name.content.name')
             <p class="font-semibold">
                 {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>
             @show
-            @section('$position-name.content.description')
+            @section('position-name.content.description')
             <div class="prose-xs">
                 {{ render_editor_blade($position->description, ['position' => $position]) }}
             </div>
