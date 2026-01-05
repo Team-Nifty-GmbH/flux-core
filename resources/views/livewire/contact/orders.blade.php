@@ -123,8 +123,8 @@
                         select="label:name|value:id"
                         :options="$languages"
                     />
-                    @stack('create-order-modal-fields')
                 </div>
+                @stack('create-order-modal-fields')
             </div>
         </section>
         <x-slot:footer>
