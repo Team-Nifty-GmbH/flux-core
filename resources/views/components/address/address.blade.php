@@ -274,7 +274,7 @@
                                 color="indigo"
                                 flat
                                 squared
-                                x-on:click.prevent="window.open('//' + $wire.address.url)"
+                                x-on:click.prevent="window.open($wire.address.url)"
                             />
                         </div>
                     </x-slot>
