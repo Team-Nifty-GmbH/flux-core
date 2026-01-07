@@ -103,7 +103,11 @@ abstract class Comments extends Component
         /** @var Model $record */
         $record = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
-            ->firstOrFail();
+            ->first();
+
+        if (! $record) {
+            return [];
+        }
 
         resolve_static(Comment::class, 'addGlobalScopes', [
             'scopes' => [
