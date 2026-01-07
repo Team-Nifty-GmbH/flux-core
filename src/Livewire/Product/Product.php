@@ -437,8 +437,8 @@ class Product extends Component
         if ($this->product->is_bundle) {
             $this->product->bundle_products = resolve_static(BundleProductProduct::class, 'query')
                 ->where('product_id', $this->product->id)
-                ->get(['id', 'bundle_product_id', 'count'])
-                ->map(fn ($item) => ['id' => $item->bundle_product_id, 'count' => $item->count])
+                ->get(['pivot_id', 'bundle_product_id', 'count'])
+                ->map(fn (BundleProductProduct $item) => ['id' => $item->bundle_product_id, 'count' => $item->count])
                 ->toArray();
         }
 

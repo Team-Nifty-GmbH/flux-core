@@ -14,10 +14,15 @@ class ProductBundleProductForm extends FluxForm
     public ?float $count = null;
 
     #[Locked]
-    public ?int $id = null;
+    public ?int $pivot_id = null;
 
     #[Locked]
     public ?int $product_id = null;
+
+    protected function getKey(): string
+    {
+        return 'pivot_id';
+    }
 
     protected function getActions(): array
     {

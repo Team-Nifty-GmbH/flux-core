@@ -13,7 +13,7 @@ class DeleteProductBundleProductRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'id' => [
+            'pivot_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => BundleProductProduct::class]),
