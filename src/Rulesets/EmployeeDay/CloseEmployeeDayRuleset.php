@@ -19,7 +19,7 @@ class CloseEmployeeDayRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
             ],
-            'date' => 'required|date|before_or_equal:today',
+            'date' => 'required|date',
         ];
     }
 }
