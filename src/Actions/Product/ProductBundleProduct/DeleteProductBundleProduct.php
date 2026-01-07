@@ -21,7 +21,7 @@ class DeleteProductBundleProduct extends FluxAction
     public function performAction(): ?bool
     {
         $productBundleProduct = resolve_static(BundleProductProduct::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->data['pivot_id'])
             ->first();
 
         return $productBundleProduct->delete();
