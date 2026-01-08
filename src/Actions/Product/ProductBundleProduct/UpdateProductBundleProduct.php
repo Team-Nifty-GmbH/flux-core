@@ -23,7 +23,7 @@ class UpdateProductBundleProduct extends FluxAction
     public function performAction(): Model
     {
         $productBundleProduct = resolve_static(BundleProductProduct::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('pivot_id'))
             ->first();
 
         $productBundleProduct->fill($this->data);
@@ -36,8 +36,8 @@ class UpdateProductBundleProduct extends FluxAction
     {
         $this->rules['bundle_product_id'] = [
             Rule::unique('bundle_product_product', 'bundle_product_id')
-                ->where('product_id', $this->data['product_id'] ?? 0)
-                ->ignore($this->data['id'] ?? 0),
+                ->where('product_id', $this->getData('product_id') ?? 0)
+                ->ignore($this->getData('pivot_id') ?? 0, 'pivot_id'),
         ];
     }
 }
