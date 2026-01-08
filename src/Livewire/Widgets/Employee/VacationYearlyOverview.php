@@ -108,7 +108,7 @@ class VacationYearlyOverview extends Component
             $requestedDays = resolve_static(AbsenceRequest::class, 'query')
                 ->where('employee_id', $employee->getKey())
                 ->where('state', AbsenceRequestStateEnum::Approved)
-                ->where(function (Builder $query) use ($yearStart, $yearEnd) {
+                ->where(function (Builder $query) use ($yearStart, $yearEnd): void {
                     $query->whereBetween('start_date', [$yearStart, $yearEnd])
                         ->orWhereBetween('end_date', [$yearStart, $yearEnd]);
                 })
