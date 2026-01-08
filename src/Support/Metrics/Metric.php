@@ -22,6 +22,10 @@ abstract class Metric
 
     protected GrowthRateTypeEnum $growthRateType = GrowthRateTypeEnum::Percentage;
 
+    protected ?CarbonImmutable $previousEndingDate = null;
+
+    protected ?CarbonImmutable $previousStartingDate = null;
+
     protected Builder $query;
 
     protected ?string $range = null;
@@ -81,6 +85,13 @@ abstract class Metric
 
     public function previousRange(): ?array
     {
+        if ($this->previousStartingDate && $this->previousEndingDate) {
+            return [
+                $this->previousStartingDate,
+                $this->previousEndingDate,
+            ];
+        }
+
         $range = $this->getRange();
 
         if ($this->startingDate && $this->endingDate && $range === TimeFrameEnum::Custom) {
@@ -105,6 +116,24 @@ abstract class Metric
     public function setEndingDate(string|CarbonImmutable|null $endingDate): static
     {
         $this->endingDate = is_string($endingDate) ? CarbonImmutable::parse($endingDate) : $endingDate;
+
+        return $this;
+    }
+
+    public function setPreviousEndingDate(string|CarbonImmutable|null $previousEndingDate): static
+    {
+        $this->previousEndingDate = is_string($previousEndingDate)
+            ? CarbonImmutable::parse($previousEndingDate)
+            : $previousEndingDate;
+
+        return $this;
+    }
+
+    public function setPreviousStartingDate(string|CarbonImmutable|null $previousStartingDate): static
+    {
+        $this->previousStartingDate = is_string($previousStartingDate)
+            ? CarbonImmutable::parse($previousStartingDate)
+            : $previousStartingDate;
 
         return $this;
     }

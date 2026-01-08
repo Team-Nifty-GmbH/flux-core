@@ -43,26 +43,38 @@
         <div
             x-cloak
             x-show="!editGrid"
-            class="flex flex-col items-center gap-2 text-sm md:min-w-96 md:flex-row"
+            class="flex flex-col items-center gap-2 text-sm md:flex-row"
         >
-            <div class="w-full grow">
+            <div class="w-full md:min-w-48">
                 <x-select.styled
                     class="p-2"
                     wire:model.live="params.timeFrame"
+                    :label="__('Time Frame')"
                     required
                     :options="resolve_static(\FluxErp\Enums\TimeFrameEnum::class, 'valuesLocalized')"
                 />
             </div>
             <div
-                class="flex min-w-96 flex-col items-center gap-2 md:flex-row"
+                class="w-full md:min-w-64"
                 x-cloak
                 x-show="$wire.params.timeFrame === 'Custom'"
             >
-                <x-date wire:model.live="params.start" :without-time="true" />
-                <div>
-                    <span class="px-2">{{ __('Till') }}</span>
-                </div>
-                <x-date wire:model.live="params.end" :without-time="true" />
+                <x-date range wire:model.live="params.dateRange" :label="__('Date Range')" :without-time="true" />
+            </div>
+            <div class="w-full md:min-w-52">
+                <x-select.styled
+                    class="p-2"
+                    wire:model.live="params.comparisonType"
+                    :label="__('Comparison')"
+                    :options="resolve_static(\FluxErp\Enums\ComparisonTypeEnum::class, 'valuesLocalized')"
+                />
+            </div>
+            <div
+                class="w-full md:min-w-64"
+                x-cloak
+                x-show="$wire.params.comparisonType === 'Custom'"
+            >
+                <x-date range wire:model.live="params.comparisonRange" :label="__('Comparison Range')" :without-time="true" />
             </div>
         </div>
     @endif

@@ -9,7 +9,6 @@ use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
-use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Traits\Livewire\Widget\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
@@ -49,17 +48,19 @@ class AverageOrderValue extends LineChart implements HasWidgetOptions
             ->setEndingDate($this->getEnd())
             ->setStartingDate($this->getStart());
 
-        $previousMetric = Trend::make($query)
+        $previousMetric = Line::make($query)
             ->setDateColumn('invoice_date')
             ->setEndingDate($this->getEndPrevious())
             ->setStartingDate($this->getStartPrevious())
-            ->setRange(TimeFrameEnum::Custom);
+            ->setRange($this->timeFrame);
 
         $growth = Value::make($query)
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->getEnd())
-            ->setStartingDate($this->getStart())
             ->setDateColumn('invoice_date')
+            ->setStartingDate($this->getStart())
+            ->setEndingDate($this->getEnd())
+            ->setPreviousStartingDate($this->getStartPrevious())
+            ->setPreviousEndingDate($this->getEndPrevious())
+            ->setRange(TimeFrameEnum::Custom)
             ->withGrowthRate()
             ->avg('total_net_price');
 
@@ -123,11 +124,6 @@ class AverageOrderValue extends LineChart implements HasWidgetOptions
             ->store();
 
         $this->redirectRoute('orders.orders', navigate: true);
-    }
-
-    public function showTitle(): bool
-    {
-        return true;
     }
 
     protected function getListeners(): array
