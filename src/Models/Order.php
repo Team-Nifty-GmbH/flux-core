@@ -593,6 +593,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
+            ->reorder()
             ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
             ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
