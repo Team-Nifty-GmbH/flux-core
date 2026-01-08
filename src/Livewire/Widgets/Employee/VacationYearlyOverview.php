@@ -11,6 +11,7 @@ use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -107,7 +108,10 @@ class VacationYearlyOverview extends Component
             $requestedDays = resolve_static(AbsenceRequest::class, 'query')
                 ->where('employee_id', $employee->getKey())
                 ->where('state', AbsenceRequestStateEnum::Approved)
-                ->whereBetween('start_date', [$yearStart, $yearEnd])
+                ->where(function (Builder $query) use ($yearStart, $yearEnd) {
+                    $query->whereBetween('start_date', [$yearStart, $yearEnd])
+                        ->orWhereBetween('end_date', [$yearStart, $yearEnd]);
+                })
                 ->whereHas('absenceType', function ($query): void {
                     $query->where('affects_vacation', true);
                 })

@@ -141,11 +141,6 @@ class Price extends FluxModel
         );
     }
 
-    public function orderPositions(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class);
-    }
-
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);
