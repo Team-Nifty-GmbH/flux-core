@@ -208,16 +208,16 @@ class ContactForm extends FluxForm
             : null;
 
         $flatAddressFields = [
-            'company',
-            'salutation',
-            'title',
-            'firstname',
-            'lastname',
-            'street',
-            'zip',
-            'city',
             'country_id',
             'language_id',
+            'company',
+            'title',
+            'salutation',
+            'firstname',
+            'lastname',
+            'zip',
+            'city',
+            'street',
             'email_primary',
             'phone',
             'phone_mobile',
@@ -227,9 +227,7 @@ class ContactForm extends FluxForm
             if ($this->{$field} !== null) {
                 $data['main_address'][$field] = $this->{$field};
             }
-        }
 
-        foreach ($flatAddressFields as $field) {
             unset($data[$field]);
         }
 
@@ -255,12 +253,12 @@ class ContactForm extends FluxForm
     {
         return match ($propertyName) {
             'tenant_id' => resolve_static(Tenant::class, 'query')->where('is_active', true)->count() > 1,
-            'country_id' => resolve_static(Country::class, 'query')->count() > 1,
-            'language_id' => resolve_static(Language::class, 'query')->count() > 1,
             'record_origin_id' => resolve_static(RecordOrigin::class, 'query')
                 ->where('model_type', morph_alias(Contact::class))
                 ->where('is_active', true)
                 ->exists(),
+            'country_id' => resolve_static(Country::class, 'query')->count() > 1,
+            'language_id' => resolve_static(Language::class, 'query')->count() > 1,
             default => true,
         };
     }

@@ -110,8 +110,16 @@ trait SupportsAutoRender
                 }
 
                 if (count($groupElements) > 0) {
-                    $cols = count($groupElements);
-                    $formElements[] = '<div class="grid grid-cols-' . $cols . ' gap-4">' . implode('', $groupElements) . '</div>';
+                    $cols = min(count($groupElements), 3);
+
+                    $gridClass = match ($cols) {
+                        1 => 'grid-cols-1',
+                        2 => 'grid-cols-2',
+                        3 => 'grid-cols-3',
+                        default => 'grid-cols-1',
+                    };
+
+                    $formElements[] = '<div class="grid ' . $gridClass . ' gap-4">' . implode('', $groupElements) . '</div>';
 
                     if ($hasSeparator) {
                         $formElements[] = '<hr class="my-2" />';
@@ -330,7 +338,12 @@ trait SupportsAutoRender
         $deleteButton = '';
         if ($deleteMethod) {
             $formProperty = $this->getPropertyName();
-            $deleteButton = '<x-button x-cloak x-show="$wire.' . $formProperty . '.id" color="red" :text="__(' . "'Delete'" . ')" wire:flux-confirm.type.error="{{ __(\'wire:confirm.delete\', [\'model\' => \'' . class_basename($this) . '\']) }}" wire:click="' . $deleteMethod . '().then((success) => { if(success) $modalClose(\'' . $modalName . '\')})"/>';
+            $deleteButton = '<x-button x-cloak x-show="$wire.' . $formProperty . '.id" color="red" '
+                . ':text="__(' . "'Delete'" . ')" '
+                . 'wire:flux-confirm.type.error="{{ __(\'wire:confirm.delete\', [\'model\' => \''
+                . class_basename($this) . '\']) }}" '
+                . 'wire:click="' . $deleteMethod . '().then((success) => { if(success) $modalClose(\''
+                . $modalName . '\')})"/>';
         }
 
         return '<div x-on:keydown.enter.prevent="$wire.' . $saveMethod . '().then((success) => { if(success) $modalClose(\'' . $modalName . '\')})" x-on:keydown.escape.prevent="$modalClose(\'' . $modalName . '\')">
@@ -361,13 +374,6 @@ trait SupportsAutoRender
         $attribute = $this->getDataTableFormAttribute();
 
         return $attribute?->deleteMethod;
-    }
-
-    protected function getEditMethod(): ?string
-    {
-        $attribute = $this->getDataTableFormAttribute();
-
-        return $attribute?->editMethod;
     }
 
     protected function isFocusableComponent(string $type): bool

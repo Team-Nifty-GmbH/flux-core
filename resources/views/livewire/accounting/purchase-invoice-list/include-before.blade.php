@@ -88,7 +88,7 @@
                             x-show="! $wire.purchaseInvoiceForm.order_id"
                             color="emerald"
                             icon="plus"
-                            wire:click="createContact"
+                            wire:click="showCreateContactModal"
                         />
                     @endcanAction
                 </div>
@@ -262,11 +262,11 @@
                                     :label="__('Lay out user')"
                                     autocomplete="off"
                                     x-on:select="
-                                            $wire.purchaseInvoiceForm.iban = $event.detail.select?.iban;
-                                            $wire.purchaseInvoiceForm.bic = $event.detail.select?.bic;
-                                            $wire.purchaseInvoiceForm.bank_name = $event.detail.select?.bank_name;
-                                            $wire.purchaseInvoiceForm.account_holder = $event.detail.select?.account_holder
-                                        "
+                                        $wire.purchaseInvoiceForm.iban = $event.detail.select?.iban;
+                                        $wire.purchaseInvoiceForm.bic = $event.detail.select?.bic;
+                                        $wire.purchaseInvoiceForm.bank_name = $event.detail.select?.bank_name;
+                                        $wire.purchaseInvoiceForm.account_holder = $event.detail.select?.account_holder
+                                    "
                                     wire:model="purchaseInvoiceForm.lay_out_user_id"
                                     select="label:label|value:id"
                                     unfiltered
@@ -492,14 +492,14 @@
                                 icon="plus"
                                 :text="__('Add Position')"
                                 x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({
-                                        ledger_account_id: $wire.purchaseInvoiceForm.lastLedgerAccountId,
-                                        vat_rate_id: null,
-                                        product_id: null,
-                                        name: null,
-                                        amount: 1,
-                                        unit_price: 0,
-                                        total_price: 0
-                                    })"
+                                    ledger_account_id: $wire.purchaseInvoiceForm.lastLedgerAccountId,
+                                    vat_rate_id: null,
+                                    product_id: null,
+                                    name: null,
+                                    amount: 1,
+                                    unit_price: 0,
+                                    total_price: 0
+                                })"
                             />
                         @endcanAction
                     </div>

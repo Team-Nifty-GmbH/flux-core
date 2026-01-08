@@ -52,16 +52,16 @@ class PurchaseInvoiceList extends BaseDataTable
     #[DataTableForm(
         only: [
             'tenant_id',
-            'company',
-            'salutation',
-            'title',
-            'firstname',
-            'lastname',
-            'street',
-            'zip',
-            'city',
             'country_id',
             'language_id',
+            'company',
+            'title',
+            'salutation',
+            'firstname',
+            'lastname',
+            'zip',
+            'city',
+            'street',
             'email_primary',
             'phone',
             'phone_mobile',
@@ -161,7 +161,7 @@ class PurchaseInvoiceList extends BaseDataTable
     }
 
     #[Renderless]
-    public function createContact(): void
+    public function showCreateContactModal(): void
     {
         $this->createContactForm->reset();
 
