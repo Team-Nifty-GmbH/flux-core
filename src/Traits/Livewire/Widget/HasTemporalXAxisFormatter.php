@@ -18,16 +18,16 @@ trait HasTemporalXAxisFormatter
                 val = val.split('->')[0];
             }
 
-            if (/^\d{4}\$/.test(val)) {
+            if (/^\d{4}$/.test(val)) {
                 return "'" + val.slice(-2) + (name ? ' (' + name + ')' : '');
             }
 
-            if (/^\d{4}-W\d{2}\$/.test(val)) {
+            if (/^\d{4}-W\d{2}$/.test(val)) {
                 const [year, week] = val.split('-W');
                 return '{$weekLabel} ' + parseInt(week, 10) + " '" + year.slice(-2) + (name ? ' (' + name + ')' : '');
             }
 
-            if (/^\d{4}-\d{2}\$/.test(val)) {
+            if (/^\d{4}-\d{2}$/.test(val)) {
                 const [year, month] = val.split('-');
                 const date = new Date(year, parseInt(month, 10) - 1);
                 return date.toLocaleDateString(document.documentElement.lang, { year: '2-digit', month: 'short' })

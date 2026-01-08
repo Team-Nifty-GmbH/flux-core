@@ -118,9 +118,11 @@ trait IsTimeFrameAwareWidget
         $now = Carbon::now();
 
         return match ($this->timeFrame) {
-            TimeFrameEnum::Today, TimeFrameEnum::Yesterday => $now->endOfDay(),
+            TimeFrameEnum::Today => $now->endOfDay(),
+            TimeFrameEnum::Yesterday => $now->subDay()->endOfDay(),
             TimeFrameEnum::ThisWeek => $now->endOfWeek()->endOfDay(),
-            TimeFrameEnum::ThisMonth, TimeFrameEnum::LastMonth => $now->endOfMonth()->endOfDay(),
+            TimeFrameEnum::ThisMonth => $now->endOfMonth()->endOfDay(),
+            TimeFrameEnum::LastMonth => $now->subMonthNoOverflow()->endOfMonth()->endOfDay(),
             TimeFrameEnum::ThisQuarter => $now->endOfQuarter()->endOfDay(),
             TimeFrameEnum::ThisYear => $now->endOfYear()->endOfDay(),
             default => $now->endOfDay(),

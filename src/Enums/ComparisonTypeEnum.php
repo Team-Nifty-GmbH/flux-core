@@ -24,8 +24,8 @@ class ComparisonTypeEnum extends FluxEnum
     {
         return match ($case) {
             self::PreviousMonth => [
-                $start->subMonthWithoutOverflow()->startOfMonth(),
-                $end->subMonthWithoutOverflow()->endOfMonth(),
+                $start->subMonthNoOverflow()->startOfMonth(),
+                $end->subMonthNoOverflow()->endOfMonth(),
             ],
             self::PreviousQuarter => [
                 $start->subQuarter()->startOfQuarter(),
