@@ -593,7 +593,7 @@ test('add order position uses product translation based on order language', func
         'price_list_id' => $this->priceList->getKey(),
     ]);
 
-    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
@@ -601,7 +601,7 @@ test('add order position uses product translation based on order language', func
         'value' => $englishName,
     ])->validate()->execute();
 
-    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
@@ -652,7 +652,7 @@ test('quick add order position uses product translation based on order language'
         'price_list_id' => $this->priceList->getKey(),
     ]);
 
-    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
@@ -660,7 +660,7 @@ test('quick add order position uses product translation based on order language'
         'value' => $englishName,
     ])->validate()->execute();
 
-    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
