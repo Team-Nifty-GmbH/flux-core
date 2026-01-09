@@ -320,7 +320,7 @@ trait SupportsAutoRender
         return sprintf($baseHtml, $propertyLabel, $propertyName);
     }
 
-    protected function renderAsModalPersistent(): bool
+    protected function isModalPersistent(): bool
     {
         return true;
     }
@@ -330,7 +330,7 @@ trait SupportsAutoRender
         $modalName = $this->modalName();
         $saveMethod = $this->getSaveMethod();
         $deleteMethod = $this->getDeleteMethod();
-        $persistent = $this->renderAsModalPersistent() ? ' persistent' : '';
+        $persistent = $this->isModalPersistent() ? ' persistent' : '';
         $focusOn = ! is_null($this->firstInputFocusId)
             ? ' x-on:open="$focusOn(\'' . $this->firstInputFocusId . '\')"'
             : '';
@@ -346,20 +346,24 @@ trait SupportsAutoRender
                 . $modalName . '\')})"/>';
         }
 
-        return '<div x-on:keydown.enter.prevent="$wire.' . $saveMethod . '().then((success) => { if(success) $modalClose(\'' . $modalName . '\')})" x-on:keydown.escape.prevent="$modalClose(\'' . $modalName . '\')">
-            <x-modal id="' . $modalName . '"' . $persistent . $focusOn . '>
-                ' . $content . '
-                <x-slot:footer>
-                    <div class="flex w-full justify-between">
-                        <div>' . $deleteButton . '</div>
-                        <div class="flex gap-2">
-                            <x-button color="secondary" light flat :text="__(' . "'Cancel'" . ')" x-on:click="$modalClose(\'' . $modalName . '\')"/>
-                            <x-button color="indigo" :text="__(' . "'Save'" . ')" wire:click="' . $saveMethod . '().then((success) => { if(success) $modalClose(\'' . $modalName . '\')})"/>
-                        </div>
-                    </div>
-                </x-slot:footer>
-            </x-modal>
-        </div>';
+        $saveAction = $saveMethod . '().then((success) => { if(success) $modalClose(\'' . $modalName . '\')})';
+        $cancelAction = '$modalClose(\'' . $modalName . '\')';
+
+        return '<div x-on:keydown.enter.prevent="$wire.' . $saveAction . '"'
+            . ' x-on:keydown.escape.prevent="' . $cancelAction . '">'
+            . '<x-modal id="' . $modalName . '"' . $persistent . $focusOn . '>'
+            . $content
+            . '<x-slot:footer>'
+            . '<div class="flex w-full justify-between">'
+            . '<div>' . $deleteButton . '</div>'
+            . '<div class="flex gap-2">'
+            . '<x-button color="secondary" light flat :text="__(' . "'Cancel'" . ')" x-on:click="' . $cancelAction . '"/>'
+            . '<x-button color="indigo" :text="__(' . "'Save'" . ')" wire:click="' . $saveAction . '"/>'
+            . '</div>'
+            . '</div>'
+            . '</x-slot:footer>'
+            . '</x-modal>'
+            . '</div>';
     }
 
     protected function getSaveMethod(): string

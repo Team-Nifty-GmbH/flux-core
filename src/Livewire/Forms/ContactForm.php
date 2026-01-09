@@ -32,7 +32,7 @@ class ContactForm extends FluxForm
             'select' => 'label:name|value:id',
             ':options' => "resolve_static(\FluxErp\Models\Tenant::class, 'query')->where('is_active', true)->get(['id', 'name'])",
         ],
-        label: 'Tenant',
+        label: 'flux::tenant',
     )]
     public ?int $tenant_id = null;
 
@@ -252,13 +252,13 @@ class ContactForm extends FluxForm
     protected function shouldRenderProperty(string $propertyName): bool
     {
         return match ($propertyName) {
-            'tenant_id' => resolve_static(Tenant::class, 'query')->where('is_active', true)->count() > 1,
+            'country_id' => resolve_static(Country::class, 'query')->count() > 1,
+            'language_id' => resolve_static(Language::class, 'query')->count() > 1,
             'record_origin_id' => resolve_static(RecordOrigin::class, 'query')
                 ->where('model_type', morph_alias(Contact::class))
                 ->where('is_active', true)
                 ->exists(),
-            'country_id' => resolve_static(Country::class, 'query')->count() > 1,
-            'language_id' => resolve_static(Language::class, 'query')->count() > 1,
+            'tenant_id' => resolve_static(Tenant::class, 'query')->where('is_active', true)->count() > 1,
             default => true,
         };
     }

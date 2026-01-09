@@ -51,9 +51,9 @@ class PurchaseInvoiceList extends BaseDataTable
 
     #[DataTableForm(
         only: [
-            'tenant_id',
             'country_id',
             'language_id',
+            'tenant_id',
             'company',
             'title',
             'salutation',
