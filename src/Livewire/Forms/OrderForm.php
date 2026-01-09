@@ -7,7 +7,6 @@ use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
-use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
@@ -220,11 +219,6 @@ class OrderForm extends FluxForm
                 'users:id,name',
             ]);
 
-            $addressInvoice = app(Address::class, ['attributes' => $values->address_invoice ?? []])
-                ->postal_address;
-            $addressDelivery = app(Address::class, ['attributes' => $values->address_delivery ?? []])
-                ->postal_address;
-
             $values = array_merge(
                 $values->toArray(),
                 $values->parent
@@ -246,8 +240,6 @@ class OrderForm extends FluxForm
                 [
                     'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
                     'avatarUrl' => $values->contact?->getFirstMediaUrl('avatar'),
-                    'address_invoice' => $addressInvoice,
-                    'address_delivery' => $addressDelivery,
                 ],
             );
         }
