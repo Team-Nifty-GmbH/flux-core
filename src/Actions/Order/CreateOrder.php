@@ -99,7 +99,8 @@ class CreateOrder extends FluxAction
                 ->first();
         }
 
-        if (data_get($this->data, 'address_delivery') && data_get($this->data, 'address_delivery.id')) {
+        if (data_get($this->data, 'address_delivery')) {
+            // Custom address_delivery provided - use its id if present, otherwise null (custom address)
             $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery.id');
         } else {
             $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery_id')

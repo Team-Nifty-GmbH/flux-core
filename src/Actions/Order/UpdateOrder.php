@@ -44,6 +44,11 @@ class UpdateOrder extends FluxAction
             );
         }
 
+        if (data_get($this->data, 'address_delivery')) {
+            // Custom address_delivery provided - use its id if present, otherwise null (custom address)
+            $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery.id');
+        }
+
         $approvalUserId = $this->getData('approval_user_id', $order->approval_user_id);
         if ($approvalUserId !== $order->approval_user_id) {
             $order->approvalUser?->unsubscribeNotificationChannel($order->broadcastChannel());
