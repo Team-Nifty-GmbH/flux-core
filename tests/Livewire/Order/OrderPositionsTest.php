@@ -571,3 +571,119 @@ test('switch view to table', function (): void {
 
     expect($component->get('data'))->not->toBeEmpty();
 });
+
+test('add order position uses product translation based on order language', function (): void {
+    $defaultLanguage = Language::factory()->create(['is_default' => true]);
+    $orderLanguage = Language::factory()->create(['is_default' => false]);
+
+    $germanName = 'Deutsches Produkt';
+    $germanDescription = 'Deutsche Beschreibung';
+    $englishName = 'English Product';
+    $englishDescription = 'English Description';
+
+    $product = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'name' => $germanName,
+        'description' => $germanDescription,
+    ]);
+    $product->tenants()->attach($this->dbTenant->getKey());
+
+    Price::factory()->create([
+        'product_id' => $product->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+    ]);
+
+    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $orderLanguage->getKey(),
+        'model_type' => $product->getMorphClass(),
+        'model_id' => $product->getKey(),
+        'attribute' => 'name',
+        'value' => $englishName,
+    ])->validate()->execute();
+
+    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $orderLanguage->getKey(),
+        'model_type' => $product->getMorphClass(),
+        'model_id' => $product->getKey(),
+        'attribute' => 'description',
+        'value' => $englishDescription,
+    ])->validate()->execute();
+
+    $this->order->update(['language_id' => $orderLanguage->getKey()]);
+    $this->orderForm->fill($this->order->fresh());
+
+    $orderPositionCount = $this->order->orderPositions()->count();
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('orderPosition.product_id', $product->getKey())
+        ->set('orderPosition.amount', 1)
+        ->call('changedProductId', $product)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->orderPositions()->count())->toEqual($orderPositionCount + 1);
+
+    $newPosition = $this->order->orderPositions()->where('product_id', $product->getKey())->first();
+    expect($newPosition)->not->toBeNull();
+    expect($newPosition->name)->toEqual($englishName);
+    expect($newPosition->description)->toEqual($englishDescription);
+});
+
+test('quick add order position uses product translation based on order language', function (): void {
+    $defaultLanguage = Language::factory()->create(['is_default' => true]);
+    $orderLanguage = Language::factory()->create(['is_default' => false]);
+
+    $germanName = 'Deutsches Produkt';
+    $germanDescription = 'Deutsche Beschreibung';
+    $englishName = 'English Product';
+    $englishDescription = 'English Description';
+
+    $product = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'name' => $germanName,
+        'description' => $germanDescription,
+    ]);
+    $product->tenants()->attach($this->dbTenant->getKey());
+
+    Price::factory()->create([
+        'product_id' => $product->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+    ]);
+
+    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $orderLanguage->getKey(),
+        'model_type' => $product->getMorphClass(),
+        'model_id' => $product->getKey(),
+        'attribute' => 'name',
+        'value' => $englishName,
+    ])->validate()->execute();
+
+    \FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $orderLanguage->getKey(),
+        'model_type' => $product->getMorphClass(),
+        'model_id' => $product->getKey(),
+        'attribute' => 'description',
+        'value' => $englishDescription,
+    ])->validate()->execute();
+
+    $this->order->update(['language_id' => $orderLanguage->getKey()]);
+    $this->orderForm->fill($this->order->fresh());
+
+    $orderPositionCount = $this->order->orderPositions()->count();
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('orderPosition.product_id', $product->getKey())
+        ->call('quickAdd')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertReturned(true);
+
+    expect($this->order->orderPositions()->count())->toEqual($orderPositionCount + 1);
+
+    $newPosition = $this->order->orderPositions()->where('product_id', $product->getKey())->first();
+    expect($newPosition)->not->toBeNull();
+    expect($newPosition->name)->toEqual($englishName);
+    expect($newPosition->description)->toEqual($englishDescription);
+});
