@@ -513,12 +513,21 @@
                                 x-html="
                                     [
                                         $wire.order.address_invoice?.company,
-                                        [$wire.order.address_invoice?.firstname, $wire.order.address_invoice?.lastname].filter(Boolean).join(' '),
+                                        [
+                                            $wire.order.address_invoice?.firstname,
+                                            $wire.order.address_invoice?.lastname,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(' '),
                                         $wire.order.address_invoice?.addition,
                                         $wire.order.address_invoice?.street,
-                                        [$wire.order.address_invoice?.zip, $wire.order.address_invoice?.city].filter(Boolean).join(' '),
+                                        [$wire.order.address_invoice?.zip, $wire.order.address_invoice?.city]
+                                            .filter(Boolean)
+                                            .join(' '),
                                         $wire.order.address_invoice?.country?.name,
-                                    ].filter(Boolean).join('<br>')
+                                    ]
+                                        .filter(Boolean)
+                                        .join('<br>')
                                 "
                             ></p>
                         </div>
@@ -585,12 +594,21 @@
                                 x-html="
                                     [
                                         $wire.order.address_delivery?.company,
-                                        [$wire.order.address_delivery?.firstname, $wire.order.address_delivery?.lastname].filter(Boolean).join(' '),
+                                        [
+                                            $wire.order.address_delivery?.firstname,
+                                            $wire.order.address_delivery?.lastname,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(' '),
                                         $wire.order.address_delivery?.addition,
                                         $wire.order.address_delivery?.street,
-                                        [$wire.order.address_delivery?.zip, $wire.order.address_delivery?.city].filter(Boolean).join(' '),
+                                        [$wire.order.address_delivery?.zip, $wire.order.address_delivery?.city]
+                                            .filter(Boolean)
+                                            .join(' '),
                                         $wire.order.address_delivery?.country?.name,
-                                    ].filter(Boolean).join('<br>')
+                                    ]
+                                        .filter(Boolean)
+                                        .join('<br>')
                                 "
                             ></p>
                         </div>
