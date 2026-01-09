@@ -197,6 +197,10 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function changedProductId(Product $product): void
     {
+        if ($this->order->language_id) {
+            $product->localize($this->order->language_id);
+        }
+
         $priceList = $this->orderPosition->price_list_id
             ? resolve_static(PriceList::class, 'query')
                 ->whereKey($this->orderPosition->price_list_id)
@@ -422,7 +426,15 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function quickAdd(): bool
     {
-        $this->orderPosition->fillFromProduct();
+        $product = null;
+        if ($this->orderPosition->product_id && $this->order->language_id) {
+            $product = resolve_static(Product::class, 'query')
+                ->whereKey($this->orderPosition->product_id)
+                ->first()
+                ?->localize($this->order->language_id);
+        }
+
+        $this->orderPosition->fillFromProduct($product);
 
         return $this->addOrderPosition();
     }

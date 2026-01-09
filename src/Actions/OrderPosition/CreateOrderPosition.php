@@ -74,6 +74,10 @@ class CreateOrderPosition extends FluxAction
                 ])
                 ->first();
 
+            if ($order->language_id) {
+                $product->localize($order->language_id);
+            }
+
             data_set($this->data, 'vat_rate_id', $product->vat_rate_id, false);
             data_set($this->data, 'name', $product->name, false);
             data_set($this->data, 'description', $product->description, false);
@@ -101,6 +105,11 @@ class CreateOrderPosition extends FluxAction
 
         if ($product?->bundleProducts?->isNotEmpty()) {
             $product = $orderPosition->product()->with('bundleProducts')->first();
+
+            if ($order->language_id) {
+                $product->bundleProducts->localize($order->language_id);
+            }
+
             $product->bundleProducts
                 ->map(function (Product $bundleProduct) use ($orderPosition) {
                     return [
