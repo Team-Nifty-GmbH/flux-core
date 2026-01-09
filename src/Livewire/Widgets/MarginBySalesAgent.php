@@ -7,6 +7,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Order;
+use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
@@ -66,7 +67,7 @@ class MarginBySalesAgent extends BarChart implements HasWidgetOptions
             ->map(fn (Order $order): array => [
                 'id' => $order->agent_id,
                 'name' => $order->agent->name,
-                'data' => [(float) $order->total_margin],
+                'data' => [Rounding::round($order->total_margin)],
             ])
             ->toArray();
 

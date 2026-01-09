@@ -61,25 +61,28 @@ class OrdersTimeline extends TimelineChart implements HasWidgetOptions
             ->with('orderType:id,name')
             ->select(['id', 'order_number', 'order_type_id', 'system_delivery_date', 'system_delivery_date_end'])
             ->orderBy('system_delivery_date')
-            ->limit(50)
             ->get();
 
-        $this->data = $orders->map(fn (Order $order): array => [
-            'id' => $order->getKey(),
-            'order_number' => $order->order_number,
-            'order_type' => $order->orderType?->name,
-        ])->toArray();
+        $this->data = $orders
+            ->map(fn (Order $order): array => [
+                'id' => $order->getKey(),
+                'order_number' => $order->order_number,
+                'order_type' => $order->orderType?->name,
+            ])
+            ->toArray();
 
         $this->series = [
             [
-                'data' => $orders->map(fn (Order $order): array => [
-                    'x' => __('Order') . ' #' . $order->order_number,
-                    'y' => [
-                        $order->system_delivery_date->timestamp * 1000,
-                        ($order->system_delivery_date_end ?? $order->system_delivery_date)->timestamp * 1000,
-                    ],
-                    'fillColor' => '#3b82f6',
-                ])->toArray(),
+                'data' => $orders
+                    ->map(fn (Order $order): array => [
+                        'x' => __('Order') . ' #' . $order->order_number,
+                        'y' => [
+                            $order->system_delivery_date->timestamp * 1000,
+                            ($order->system_delivery_date_end ?? $order->system_delivery_date)->timestamp * 1000,
+                        ],
+                        'fillColor' => '#3b82f6',
+                    ])
+                    ->toArray(),
             ],
         ];
 
