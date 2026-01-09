@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Metrics;
 
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Support\Calculation\Rounding;
@@ -120,20 +121,20 @@ abstract class Metric
         return $this;
     }
 
-    public function setPreviousEndingDate(string|CarbonImmutable|null $previousEndingDate): static
+    public function setPreviousEndingDate(CarbonInterface|string|null $previousEndingDate): static
     {
-        $this->previousEndingDate = is_string($previousEndingDate)
+        $this->previousEndingDate = $previousEndingDate
             ? CarbonImmutable::parse($previousEndingDate)
-            : $previousEndingDate;
+            : null;
 
         return $this;
     }
 
-    public function setPreviousStartingDate(string|CarbonImmutable|null $previousStartingDate): static
+    public function setPreviousStartingDate(CarbonInterface|string|null $previousStartingDate): static
     {
-        $this->previousStartingDate = is_string($previousStartingDate)
+        $this->previousStartingDate = $previousStartingDate
             ? CarbonImmutable::parse($previousStartingDate)
-            : $previousStartingDate;
+            : null;
 
         return $this;
     }

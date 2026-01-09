@@ -3,7 +3,7 @@
 namespace FluxErp\Traits\Livewire\Widget;
 
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use Livewire\Attributes\Modelable;
@@ -61,7 +61,7 @@ trait IsTimeFrameAwareWidget
             ?->value
             ?? TimeFrameEnum::ThisMonth;
 
-        $dateRange = data_get($params, 'dateRange', []);
+        $dateRange = data_get($params, 'dateRange') ?? [];
         $this->start = $this->timeFrame === TimeFrameEnum::Custom && data_get($dateRange, 0)
             ? Carbon::parse(data_get($dateRange, 0))->toDateString()
             : null;
@@ -77,7 +77,7 @@ trait IsTimeFrameAwareWidget
             ?->value
             ?? ComparisonTypeEnum::Auto;
 
-        $comparisonRange = data_get($params, 'comparisonRange', []);
+        $comparisonRange = data_get($params, 'comparisonRange') ?? [];
         $this->comparisonStart = $this->comparisonType === ComparisonTypeEnum::Custom && data_get($comparisonRange, 0)
             ? Carbon::parse(data_get($comparisonRange, 0))->toDateString()
             : null;
@@ -96,7 +96,7 @@ trait IsTimeFrameAwareWidget
         $this->calculateByTimeFrame();
     }
 
-    protected function getEnd(): Carbon|CarbonImmutable|null
+    protected function getEnd(): ?CarbonInterface
     {
         if ($this->timeFrame === TimeFrameEnum::Custom && $this->end) {
             return Carbon::parse($this->end)->endOfDay();
@@ -113,7 +113,7 @@ trait IsTimeFrameAwareWidget
             ?->endOfDay();
     }
 
-    protected function getFullPeriodEnd(): Carbon|CarbonImmutable|null
+    protected function getFullPeriodEnd(): ?CarbonInterface
     {
         $now = Carbon::now();
 
@@ -129,10 +129,18 @@ trait IsTimeFrameAwareWidget
         };
     }
 
-    protected function getEndPrevious(): Carbon|CarbonImmutable|null
+    protected function getEndPrevious(): ?CarbonInterface
     {
         if ($this->comparisonType === ComparisonTypeEnum::Custom && $this->comparisonEnd) {
             return Carbon::parse($this->comparisonEnd)->endOfDay();
+        }
+
+        if ($this->comparisonType === ComparisonTypeEnum::PreviousDay) {
+            return $this->getEnd()->subDay()->endOfDay();
+        }
+
+        if ($this->comparisonType === ComparisonTypeEnum::PreviousWeek) {
+            return $this->getEnd()->subWeek()->endOfDay();
         }
 
         if ($this->comparisonType === ComparisonTypeEnum::PreviousMonth) {
@@ -140,7 +148,7 @@ trait IsTimeFrameAwareWidget
         }
 
         if ($this->comparisonType === ComparisonTypeEnum::PreviousQuarter) {
-            return $this->getEnd()->subMonthsNoOverflow(3)->endOfDay();
+            return $this->getEnd()->subQuarterNoOverflow()->endOfDay();
         }
 
         if ($this->comparisonType === ComparisonTypeEnum::PreviousYear) {
@@ -167,7 +175,7 @@ trait IsTimeFrameAwareWidget
             ->endOfDay();
     }
 
-    protected function getStart(): Carbon|CarbonImmutable|null
+    protected function getStart(): ?CarbonInterface
     {
         return $this->timeFrame === TimeFrameEnum::Custom && $this->start
             ? Carbon::parse($this->start)->startOfDay()
@@ -178,10 +186,18 @@ trait IsTimeFrameAwareWidget
                 ?->startOfDay();
     }
 
-    protected function getStartPrevious(): Carbon|CarbonImmutable|null
+    protected function getStartPrevious(): ?CarbonInterface
     {
         if ($this->comparisonType === ComparisonTypeEnum::Custom && $this->comparisonStart) {
             return Carbon::parse($this->comparisonStart)->startOfDay();
+        }
+
+        if ($this->comparisonType === ComparisonTypeEnum::PreviousDay) {
+            return $this->getStart()->subDay()->startOfDay();
+        }
+
+        if ($this->comparisonType === ComparisonTypeEnum::PreviousWeek) {
+            return $this->getStart()->subWeek()->startOfDay();
         }
 
         if ($this->comparisonType === ComparisonTypeEnum::PreviousMonth) {
@@ -189,7 +205,7 @@ trait IsTimeFrameAwareWidget
         }
 
         if ($this->comparisonType === ComparisonTypeEnum::PreviousQuarter) {
-            return $this->getStart()->subMonthsNoOverflow(3)->startOfDay();
+            return $this->getStart()->subQuarterNoOverflow()->startOfDay();
         }
 
         if ($this->comparisonType === ComparisonTypeEnum::PreviousYear) {
@@ -216,12 +232,12 @@ trait IsTimeFrameAwareWidget
             ->startOfDay();
     }
 
-    protected function getComparisonEnd(): Carbon|CarbonImmutable|null
+    protected function getComparisonEnd(): ?CarbonInterface
     {
         return $this->getEndPrevious();
     }
 
-    protected function getComparisonStart(): Carbon|CarbonImmutable|null
+    protected function getComparisonStart(): ?CarbonInterface
     {
         return $this->getStartPrevious();
     }

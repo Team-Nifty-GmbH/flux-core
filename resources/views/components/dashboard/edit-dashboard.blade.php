@@ -59,7 +59,7 @@
                 x-cloak
                 x-show="$wire.params.timeFrame === 'Custom'"
             >
-                <x-date range wire:model.live="params.dateRange" :label="__('Date Range')" :without-time="true" />
+                <x-date range wire:model.live="params.dateRange" :label="__('Date Range')" />
             </div>
             <div class="w-full md:min-w-52">
                 <x-select.styled
@@ -74,7 +74,7 @@
                 x-cloak
                 x-show="$wire.params.comparisonType === 'Custom'"
             >
-                <x-date range wire:model.live="params.comparisonRange" :label="__('Comparison Range')" :without-time="true" />
+                <x-date range wire:model.live="params.comparisonRange" :label="__('Comparison Range')" />
             </div>
         </div>
     @endif
