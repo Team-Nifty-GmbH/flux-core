@@ -303,3 +303,57 @@ test('update commission maximum', function (): void {
     expect($dbCommission->commission)->toEqual($commission['commission']);
     expect($this->user->is($dbCommission->getUpdatedBy()))->toBeTrue();
 });
+
+test('create commission credit notes with nested id array structure', function (): void {
+    // Create a default PaymentType and attach to tenant
+    $paymentType = PaymentType::factory()->create(['is_default' => true]);
+    $paymentType->tenants()->attach($this->order->tenant_id);
+
+    // Create a contact with address for the agent
+    $agentContact = Contact::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'payment_type_id' => $paymentType->id,
+    ]);
+    $agentAddress = Address::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'contact_id' => $agentContact->id,
+        'is_main_address' => true,
+    ]);
+    $agentContact->update(['invoice_address_id' => $agentAddress->id]);
+    $this->agent->update(['contact_id' => $agentContact->id]);
+
+    // Create a refund order type
+    OrderType::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'order_type_enum' => OrderTypeEnum::Refund,
+    ]);
+
+    // Ensure order has invoice data (required for Commission::getLabel())
+    $this->order->update([
+        'invoice_date' => now(),
+        'invoice_number' => 'INV-TEST-001',
+    ]);
+
+    // Ensure commissions have order_id set (required for withWhereHas('order', ...) in the action)
+    foreach ($this->commissions as $commission) {
+        $commission->update(['order_id' => $this->order->id]);
+    }
+
+    // Get commission IDs in the format that CommissionList produces: [['id' => 1], ['id' => 2]]
+    $commissionIds = $this->commissions->map(fn ($commission) => ['id' => $commission->id])->toArray();
+
+    $result = FluxErp\Actions\Commission\CreateCommissionCreditNotes::make([
+        'commissions' => $commissionIds,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result)->toBeInstanceOf(FluxErp\Support\Collection\OrderCollection::class);
+    expect($result)->toHaveCount(1);
+
+    // Verify commissions are linked to credit note order positions
+    foreach ($this->commissions as $commission) {
+        $commission->refresh();
+        expect($commission->credit_note_order_position_id)->not->toBeNull();
+    }
+});
