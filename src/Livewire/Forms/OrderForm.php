@@ -7,7 +7,6 @@ use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
-use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
