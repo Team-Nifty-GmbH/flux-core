@@ -220,11 +220,6 @@ class OrderForm extends FluxForm
                 'users:id,name',
             ]);
 
-            $addressInvoice = app(Address::class, ['attributes' => $values->address_invoice ?? []])
-                ->postal_address;
-            $addressDelivery = app(Address::class, ['attributes' => $values->address_delivery ?? []])
-                ->postal_address;
-
             $values = array_merge(
                 $values->toArray(),
                 $values->parent
@@ -246,8 +241,6 @@ class OrderForm extends FluxForm
                 [
                     'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
                     'avatarUrl' => $values->contact?->getFirstMediaUrl('avatar'),
-                    'address_invoice' => $addressInvoice,
-                    'address_delivery' => $addressDelivery,
                 ],
             );
         }

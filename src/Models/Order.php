@@ -169,9 +169,12 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     protected static function booted(): void
     {
         static::saving(function (Order $order): void {
-            if ($order->isDirty('address_invoice_id')) {
+            if ($order->isDirty('address_invoice_id') && $order->address_invoice_id) {
                 $addressInvoice = $order->addressInvoice()->first();
-                $order->address_invoice = $addressInvoice;
+
+                if (! $order->address_invoice) {
+                    $order->address_invoice = $addressInvoice;
+                }
 
                 // Get additional attributes from address if not explicitly changed
                 $order->language_id = (! $addressInvoice->language_id || $order->isDirty('language_id'))

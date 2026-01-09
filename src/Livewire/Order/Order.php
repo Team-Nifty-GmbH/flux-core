@@ -857,11 +857,13 @@ class Order extends Component
             ->first()
             ->toArray();
 
-        $this->order->payment_type_id = $this->order->address_invoice['contact']['payment_type_id'] ?? null;
-        $this->order->price_list_id = $this->order->address_invoice['contact']['price_list_id'] ?? null;
-        $this->order->language_id = $this->order->address_invoice['language_id'];
-        $this->order->contact_id = $this->order->address_invoice['contact_id'];
-        $this->order->tenant_id = $this->order->address_invoice['tenant_id'];
+        $this->order->payment_type_id = data_get($this->order->address_invoice, 'contact.payment_type_id');
+        $this->order->price_list_id = data_get($this->order->address_invoice, 'contact.price_list_id');
+        $this->order->language_id = data_get($this->order->address_invoice, 'language_id')
+            ?? $this->order->language_id
+            ?? resolve_static(Language::class, 'default')?->getKey();
+        $this->order->contact_id = data_get($this->order->address_invoice, 'contact_id');
+        $this->order->tenant_id = data_get($this->order->address_invoice, 'tenant_id');
     }
 
     public function updatedOrderIsConfirmed(): void

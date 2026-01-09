@@ -99,12 +99,12 @@ class CreateOrder extends FluxAction
                 ->first();
         }
 
-        if ($this->data['address_delivery'] ?? false) {
+        if (data_get($this->data, 'address_delivery') && data_get($this->data, 'address_delivery.id')) {
             $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery.id');
         } else {
-            $this->data['address_delivery_id'] = $this->data['address_delivery_id']
+            $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery_id')
                 ?? $contact->delivery_address_id
-                ?? $addressInvoice?->id;
+                ?? $addressInvoice?->getKey();
         }
 
         if (is_null($contact)) {
