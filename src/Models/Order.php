@@ -172,7 +172,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             if ($order->isDirty('address_invoice_id') && $order->address_invoice_id) {
                 $addressInvoice = $order->addressInvoice()->first();
 
-                if (! $order->address_invoice) {
+                if (! $order->exists || ! $order->address_invoice) {
                     $order->address_invoice = $addressInvoice;
                 }
 
