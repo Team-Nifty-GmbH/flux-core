@@ -12,7 +12,6 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Price extends FluxModel
 {
@@ -139,11 +138,6 @@ class Price extends FluxModel
         return Attribute::get(
             fn () => $this->getNet(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
         );
-    }
-
-    public function orderPositions(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class);
     }
 
     public function priceList(): BelongsTo

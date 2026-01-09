@@ -35,7 +35,7 @@ class OvertimeBalanceBox extends ValueBox
             ->whereKey($this->employeeId)
             ->first();
 
-        $this->sum = Number::format($employee->getCurrentOvertimeBalance(), 0) . 'h';
+        $this->sum = Number::format($employee->getCurrentOvertimeBalance(), 2) . 'h';
         $this->previousSum = null;
         $this->growthRate = null;
 
