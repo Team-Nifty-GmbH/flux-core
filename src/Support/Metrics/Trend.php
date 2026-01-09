@@ -40,6 +40,10 @@ class Trend extends Metric
 
     protected function getEndingDate(): CarbonImmutable
     {
+        if ($this->endingDate) {
+            return $this->endingDate;
+        }
+
         if (
             $timeFrameRange = resolve_static(
                 TimeFrameEnum::class,
@@ -48,10 +52,6 @@ class Trend extends Metric
             )
         ) {
             return $timeFrameRange[1];
-        }
-
-        if ($this->endingDate && $this->getRange() === TimeFrameEnum::Custom) {
-            return $this->endingDate;
         }
 
         return CarbonImmutable::now();
@@ -71,7 +71,7 @@ class Trend extends Metric
             'sqlite' => match ($this->unit) {
                 'year' => "strftime('%Y', $dateColumn)",
                 'month' => "strftime('%Y-%m', $dateColumn)",
-                'week' => "strftime('%Y-', $dateColumn) ||
+                'week' => "strftime('%Y-W', $dateColumn) ||
                         printf('%02d', strftime('%W', $dateColumn) + (1 - strftime('%W', strftime('%Y', $dateColumn) || '-01-04')) )",
                 'day' => "strftime('%Y-%m-%d', $dateColumn)",
                 'hour' => "strftime('%Y-%m-%d %H:00', $dateColumn)",
@@ -80,7 +80,7 @@ class Trend extends Metric
             'mysql' => match ($this->unit) {
                 'year' => "date_format($dateColumn, '%Y')",
                 'month' => "date_format($dateColumn, '%Y-%m')",
-                'week' => "date_format($dateColumn, '%x-%v')",
+                'week' => "CONCAT(date_format($dateColumn, '%x'), '-W', LPAD(date_format($dateColumn, '%v'), 2, '0'))",
                 'day' => "date_format($dateColumn, '%Y-%m-%d')",
                 'hour' => "date_format($dateColumn, '%Y-%m-%d %H:00')",
                 'minute' => "date_format($dateColumn, '%Y-%m-%d %H:%i:00')",
@@ -88,7 +88,7 @@ class Trend extends Metric
             'pgsql' => match ($this->unit) {
                 'year' => "to_char($dateColumn, 'YYYY')",
                 'month' => "to_char($dateColumn, 'YYYY-MM')",
-                'week' => "to_char($dateColumn, 'IYYY-IW')",
+                'week' => "to_char($dateColumn, 'IYYY') || '-W' || to_char($dateColumn, 'IW')",
                 'day' => "to_char($dateColumn, 'YYYY-MM-DD')",
                 'hour' => "to_char($dateColumn, 'YYYY-MM-DD HH24:00')",
                 'minute' => "to_char($dateColumn, 'YYYY-MM-DD HH24:mi:00')",
@@ -96,7 +96,7 @@ class Trend extends Metric
             'sqlsrv' => match ($this->unit) {
                 'year' => "FORMAT($dateColumn, 'yyyy')",
                 'month' => "FORMAT($dateColumn, 'yyyy-MM')",
-                'week' => "concat(YEAR($dateColumn), '-', datepart(ISO_WEEK, $dateColumn))",
+                'week' => "concat(YEAR($dateColumn), '-W', RIGHT('0' + CAST(datepart(ISO_WEEK, $dateColumn) AS VARCHAR(2)), 2))",
                 'day' => "FORMAT($dateColumn, 'yyyy-MM-dd')",
                 'hour' => "FORMAT($dateColumn, 'yyyy-MM-dd HH:00')",
                 'minute' => "FORMAT($dateColumn, 'yyyy-MM-dd HH:mm:00')",
@@ -110,7 +110,7 @@ class Trend extends Metric
         return match ($this->unit) {
             'year' => 'Y',
             'month' => 'Y-m',
-            'week' => 'Y-W',
+            'week' => 'o-\WW',
             'day' => 'Y-m-d',
             'hour' => 'Y-m-d H:00',
             'minute' => 'Y-m-d H:i:00',
@@ -120,6 +120,10 @@ class Trend extends Metric
 
     protected function getStartingDate(): CarbonImmutable
     {
+        if ($this->startingDate) {
+            return $this->startingDate;
+        }
+
         if (
             $timeFrameRange = resolve_static(
                 TimeFrameEnum::class,
@@ -128,10 +132,6 @@ class Trend extends Metric
             )
         ) {
             return $timeFrameRange[0];
-        }
-
-        if ($this->startingDate && $this->getRange() === TimeFrameEnum::Custom) {
-            return $this->startingDate;
         }
 
         $now = CarbonImmutable::now();
@@ -203,7 +203,10 @@ class Trend extends Metric
             $diff = $this->startingDate?->diffInDays($this->endingDate ?? now()->addCenturies(2));
 
             $unit = match (true) {
-                $diff <= 31 => 'day',
+                $this->startingDate?->isStartOfYear() && $diff > 92 => 'month',
+                $this->startingDate?->isStartOfQuarter() && $diff > 31 => 'week',
+                $this->startingDate?->isStartOfMonth() || $diff <= 31 => 'day',
+                $diff <= 92 => 'week',
                 $diff <= 365 => 'month',
                 default => 'year',
             };

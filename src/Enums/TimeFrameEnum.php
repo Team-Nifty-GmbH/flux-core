@@ -44,8 +44,8 @@ class TimeFrameEnum extends FluxEnum
                 $now->subWeek(),
             ],
             TimeFrameEnum::ThisMonth => [
-                $now->subMonthWithoutOverflow()->startOfMonth(),
-                $now->subMonthWithoutOverflow(),
+                $now->subMonthNoOverflow()->startOfMonth(),
+                $now->subMonthNoOverflow(),
             ],
             TimeFrameEnum::ThisQuarter => [
                 $now->subQuarter()->startOfQuarter(),
@@ -56,8 +56,8 @@ class TimeFrameEnum extends FluxEnum
                 $now->subYear(),
             ],
             TimeFrameEnum::LastMonth => [
-                $now->subMonthsWithoutOverflow(2)->startOfMonth(),
-                $now->subMonthsWithoutOverflow(2),
+                $now->subMonthsNoOverflow(2)->startOfMonth(),
+                $now->subMonthsNoOverflow(2),
             ],
             default => null,
         };
