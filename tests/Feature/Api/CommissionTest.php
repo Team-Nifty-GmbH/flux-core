@@ -342,13 +342,13 @@ test('create commission credit notes with nested id array structure', function (
     // Get commission IDs in the format that CommissionList produces: [['id' => 1], ['id' => 2]]
     $commissionIds = $this->commissions->map(fn ($commission) => ['id' => $commission->id])->toArray();
 
-    $result = \FluxErp\Actions\Commission\CreateCommissionCreditNotes::make([
+    $result = FluxErp\Actions\Commission\CreateCommissionCreditNotes::make([
         'commissions' => $commissionIds,
     ])
         ->validate()
         ->execute();
 
-    expect($result)->toBeInstanceOf(\FluxErp\Support\Collection\OrderCollection::class);
+    expect($result)->toBeInstanceOf(FluxErp\Support\Collection\OrderCollection::class);
     expect($result)->toHaveCount(1);
 
     // Verify commissions are linked to credit note order positions
