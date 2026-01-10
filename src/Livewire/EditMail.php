@@ -313,7 +313,7 @@ class EditMail extends Component
 
                 if (! $single) {
                     $editedWithoutTo = $editedMailMessage;
-                    unset($editedWithoutTo['to']);
+                    unset($editedWithoutTo['to'], $editedWithoutTo['communicatables'], $editedWithoutTo['attachments']);
                     $data = array_merge($data, array_filter($editedWithoutTo));
                 } else {
                     $data = array_merge($data, array_filter($editedMailMessage));
