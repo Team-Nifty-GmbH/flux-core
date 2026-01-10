@@ -7,6 +7,7 @@ use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
+use FluxErp\Support\Calculation\Rounding;
 use Livewire\Attributes\Locked;
 
 class OrderPositionForm extends FluxForm
@@ -30,6 +31,10 @@ class OrderPositionForm extends FluxForm
     public ?string $customer_delivery_date = null;
 
     public ?string $description = null;
+
+    public ?string $discount_flat = null;
+
+    public bool $discount_is_percentage = true;
 
     public ?string $discount_percentage = null;
 
@@ -111,6 +116,12 @@ class OrderPositionForm extends FluxForm
     {
         parent::fill($values);
 
+        $basePrice = bcmul($this->unit_price ?? 0, $this->amount ?? 1);
+
+        $this->discount_flat = ! is_null($this->discount_percentage) && bccomp($basePrice, 0) === 1
+            ? Rounding::round(bcmul($basePrice, $this->discount_percentage), 2)
+            : null;
+
         $this->discount_percentage = ! is_null($this->discount_percentage)
             ? bcmul($this->discount_percentage, 100)
             : null;
@@ -154,9 +165,24 @@ class OrderPositionForm extends FluxForm
     public function toActionData(): array
     {
         $data = parent::toActionData();
-        $data['discount_percentage'] = ! is_null($this->discount_percentage)
-            ? bcdiv($this->discount_percentage, 100)
-            : null;
+
+        if ($this->discount_is_percentage) {
+            $data['discount_percentage'] = ! is_null($this->discount_percentage)
+                ? bcdiv($this->discount_percentage, 100)
+                : null;
+        } else {
+            $basePrice = $this->total_base_net_price
+                ?? bcmul($this->unit_price ?? 0, $this->amount ?? 1);
+
+            if (! is_null($this->discount_flat) && bccomp($basePrice, 0) === 1) {
+                $discountPercentage = bcdiv($this->discount_flat, $basePrice);
+                $data['discount_percentage'] = bccomp($discountPercentage, 1) === 1 ? 1 : $discountPercentage;
+            } else {
+                $data['discount_percentage'] = null;
+            }
+        }
+
+        unset($data['discount_flat'], $data['discount_is_percentage']);
 
         return $data;
     }
