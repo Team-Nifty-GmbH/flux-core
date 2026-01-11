@@ -93,7 +93,7 @@ class MenuManager
         ?int $order = null,
         ?Closure $closure = null): void
     {
-        $existing = data_get($this->registeredGroups, $path, []);
+        $existing = $this->registeredGroups[$path] ?? [];
 
         $this->registeredGroups[$path] = [
             'label' => $label ?? data_get($existing, 'label'),
