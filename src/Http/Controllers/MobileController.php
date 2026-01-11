@@ -51,6 +51,8 @@ class MobileController extends Controller
             }
 
             session(['url.intended' => url($redirectPath)]);
+
+            return redirect(route('login'));
         }
 
         return redirect(route('dashboard', absolute: false));

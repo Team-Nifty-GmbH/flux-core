@@ -31,8 +31,7 @@ class Settings extends Component
         $this->settings = $this->prepareSettings(data_get(Menu::forGuard('web'), 'settings.children', []));
 
         if ($this->settingComponent) {
-            $this->setting = collect($this->settings)
-                ->firstWhere('component', $this->settingComponent)
+            $this->setting = $this->findSettingByComponent($this->settings, $this->settingComponent)
                 ?? throw new NotFoundHttpException('Settings not found.');
         }
     }
@@ -44,8 +43,27 @@ class Settings extends Component
 
     public function showSetting(array $setting): void
     {
-        $this->settingComponent = $setting['component'];
+        $this->settingComponent = data_get($setting, 'component');
         $this->setting = $setting;
+    }
+
+    protected function findSettingByComponent(array $settings, string $component): ?array
+    {
+        foreach ($settings as $setting) {
+            if (data_get($setting, 'component') === $component) {
+                return $setting;
+            }
+
+            if ($children = data_get($setting, 'children')) {
+                $found = $this->findSettingByComponent($children, $component);
+
+                if ($found) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
     }
 
     protected function prepareSettings(array $settings, array $parent = []): array
@@ -55,9 +73,29 @@ class Settings extends Component
             data_set($settings, $key . '.label', $label);
             data_set($settings, $key . '.id', data_get($setting, 'uri', Str::uuid()->toString()));
 
+            if ($parent) {
+                data_set($settings, $key . '.path', data_get($parent, 'path') . ' -> ' . $label);
+            } else {
+                data_set($settings, $key . '.path', $label);
+            }
+
+            if ($children = data_get($setting, 'children')) {
+                $setting['children'] = $this->prepareSettings($children, $setting);
+
+                if (count($setting['children']) === 0) {
+                    unset($settings[$key]);
+
+                    continue;
+                }
+            }
+
+            if (! data_get($setting, 'uri')) {
+                continue;
+            }
+
             $route = Route::getRoutes()
                 ->match(Request::create(
-                    Str::of(request()->schemeAndHttpHost())->append(parse_url($setting['uri'], PHP_URL_PATH))
+                    Str::of(request()->schemeAndHttpHost())->append(parse_url(data_get($setting, 'uri'), PHP_URL_PATH))
                 ));
             data_set($settings, $key . '.component', app(ComponentRegistry::class)->getName($route->getAction('controller')));
 
@@ -81,18 +119,8 @@ class Settings extends Component
                     continue;
                 }
             }
-
-            if ($parent) {
-                data_set($settings, $key . '.path', data_get($parent, 'path') . ' -> ' . $label);
-            } else {
-                data_set($settings, $key . '.path', $label);
-            }
-
-            if ($children = data_get($setting, 'children')) {
-                $setting['children'] = $this->prepareSettings($children, $setting);
-            }
         }
 
-        return Arr::sort($settings, 'label');
+        return array_values(Arr::sort($settings, 'label'));
     }
 }
