@@ -9,6 +9,7 @@ class PrintJobList extends BaseDataTable
     public array $enabledCols = [
         'user.name',
         'media.name',
+        'media.disk',
         'printer.name',
         'quantity',
         'size',
