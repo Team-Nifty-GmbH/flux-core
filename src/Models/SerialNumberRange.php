@@ -68,8 +68,11 @@ class SerialNumberRange extends FluxModel
     {
         $defaultAttributes = [
             'current_day' => date('d'),
+            'current_week' => date('W'),
             'current_month' => date('m'),
+            'current_quarter' => (string) ceil(date('n') / 3),
             'current_year' => date('Y'),
+            'current_year_short' => date('y'),
         ];
 
         if (! $this->model_type) {
