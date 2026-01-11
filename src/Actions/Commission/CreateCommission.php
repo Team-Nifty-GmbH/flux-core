@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Commission;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Commission;
 use FluxErp\Models\CommissionRate;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Rulesets\Commission\CreateCommissionRuleset;
 
@@ -43,7 +44,25 @@ class CreateCommission extends FluxAction
                 ->first();
 
             $this->data['order_id'] = $orderPosition->order_id;
-            $this->data['total_net_price'] = $orderPosition->total_net_price;
+
+            $order = resolve_static(Order::class, 'query')
+                ->whereKey($orderPosition->order_id)
+                ->first(['id', 'total_base_discounted_net_price', 'total_net_price']);
+
+            $totalNetPrice = $orderPosition->total_net_price;
+
+            if ($order && bccomp($order->total_base_discounted_net_price ?? 0, 0) > 0) {
+                $orderDiscountPercentage = diff_percentage(
+                    $order->total_base_discounted_net_price,
+                    $order->total_net_price
+                );
+
+                if (bccomp($orderDiscountPercentage, 0) > 0) {
+                    $totalNetPrice = discount($totalNetPrice, $orderDiscountPercentage);
+                }
+            }
+
+            $this->data['total_net_price'] = $totalNetPrice;
         }
 
         $this->data['commission'] = bcround(
