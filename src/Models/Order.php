@@ -170,7 +170,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     {
         static::saving(function (Order $order): void {
             if ($order->isDirty('address_invoice_id') && $order->address_invoice_id) {
-                $addressInvoice = $order->addressInvoice()->first();
+                $addressInvoice = $order->addressInvoice()->with('country')->first();
 
                 if (! $order->exists || ! $order->address_invoice) {
                     $order->address_invoice = $addressInvoice;
@@ -200,7 +200,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 && $order->address_delivery_id
                 && ! $order->address_delivery
             ) {
-                $order->address_delivery = $order->addressDelivery()->first();
+                $order->address_delivery = $order->addressDelivery()->with('country')->first();
             }
 
             // reset to original
