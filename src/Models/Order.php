@@ -82,6 +82,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     protected array $cascadeDeletes = [
         'orderPositions',
+        'schedules',
     ];
 
     protected ?string $detailRouteName = 'orders.id';

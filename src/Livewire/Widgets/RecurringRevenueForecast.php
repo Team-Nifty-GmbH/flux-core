@@ -55,6 +55,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
     public function calculateChart(): void
     {
         $orderSchedules = resolve_static(OrderSchedule::class, 'query')
+            ->whereHas('order')
             ->whereHas('schedule', function (Builder $query): void {
                 $query
                     ->where(fn (Builder $query) => $query
