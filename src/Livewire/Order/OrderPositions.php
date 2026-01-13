@@ -31,6 +31,8 @@ class OrderPositions extends OrderPositionList
 
     public ?string $discount = null;
 
+    public bool $discountIsPercentage = true;
+
     public array $enabledCols = [
         'slug_position',
         'name',
@@ -304,12 +306,26 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function discountSelectedPositions(): void
     {
-        $discount = bcdiv($this->discount, 100);
-        foreach ($this->getSelectedModelsQuery()->get(['id']) as $orderPositions) {
+        $positions = $this->getSelectedModelsQuery()->get(['id', 'total_base_net_price']);
+
+        foreach ($positions as $position) {
+            if ($this->discountIsPercentage) {
+                $discountPercentage = bcdiv($this->discount, 100);
+            } else {
+                // Flat: Calculate percentage per position
+                $discountPercentage = bccomp($position->total_base_net_price ?? 0, 0) === 1
+                    ? bcdiv($this->discount, $position->total_base_net_price)
+                    : '0';
+                // Max 100%
+                if (bccomp($discountPercentage, 1) === 1) {
+                    $discountPercentage = '1';
+                }
+            }
+
             try {
                 UpdateOrderPosition::make([
-                    'id' => $orderPositions->id,
-                    'discount_percentage' => $discount,
+                    'id' => $position->id,
+                    'discount_percentage' => $discountPercentage,
                 ])
                     ->checkPermission()
                     ->validate()
@@ -322,6 +338,7 @@ class OrderPositions extends OrderPositionList
         $this->loadData();
         $this->recalculateOrderTotals();
         $this->discount = null;
+        $this->discountIsPercentage = true;
     }
 
     #[Renderless]

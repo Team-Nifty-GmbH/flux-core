@@ -203,7 +203,7 @@ if (! function_exists('discount')) {
             return $price;
         }
 
-        return bcsub($price, bcmul($price, $discount, 4), 9);
+        return bcsub($price, bcmul($price, $discount));
     }
 }
 
@@ -214,7 +214,7 @@ if (! function_exists('diff_percentage')) {
             return '0';
         }
 
-        return bcround(bcdiv(bcsub($old, $new, 9), $old, 9), 4);
+        return bcdiv(bcsub($old, $new), $old);
     }
 }
 
