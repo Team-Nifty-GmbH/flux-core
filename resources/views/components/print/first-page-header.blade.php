@@ -49,6 +49,11 @@
                         <div>
                             {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
                         </div>
+                        @if ($address->country_name ?? null)
+                            <div>
+                                {{ $address->country_name }}
+                            </div>
+                        @endif
                     </address>
                 @endif
                 @show

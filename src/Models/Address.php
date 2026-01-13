@@ -62,6 +62,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     protected ?string $detailRouteName = 'contacts.id?';
 
+    protected $appends = [
+        'country_name',
+    ];
+
     protected $guarded = [
         'id',
     ];
@@ -665,6 +669,13 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         );
     }
 
+    protected function countryName(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->country?->is_default ? null : $this->country?->name
+        );
+    }
+
     protected function postalAddress(): Attribute
     {
         return Attribute::get(
@@ -675,7 +686,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     $this->addition,
                     $this->street,
                     trim($this->zip . ' ' . $this->city),
-                    $this->country?->name,
+                    $this->country_name,
                 ])
             )
         );

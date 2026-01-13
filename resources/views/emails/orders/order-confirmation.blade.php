@@ -24,7 +24,7 @@
         {{ data_get($order->address_invoice, 'addition') }}<br>
         {{ data_get($order->address_invoice, 'street') }}<br>
         {{ data_get($order->address_invoice, 'zip') }} {{ data_get($order->address_invoice, 'city') }}<br>
-        {{ data_get($order->address_invoice, 'country') }}<br>
+        @if(data_get($order->address_invoice, 'country_name')){{ data_get($order->address_invoice, 'country_name') }}<br>@endif
 
         **{{ __('Delivery Address') }}**<br>
         {{ data_get($order->address_delivery, 'company') }}<br>
@@ -32,6 +32,6 @@
         {{ data_get($order->address_delivery, 'addition') }}<br>
         {{ data_get($order->address_delivery, 'street') }}<br>
         {{ data_get($order->address_delivery, 'zip') }} {{ data_get($order->address_delivery, 'city') }}<br>
-        {{ data_get($order->address_delivery, 'country') }}<br>
+        @if(data_get($order->address_delivery, 'country_name')){{ data_get($order->address_delivery, 'country_name') }}<br>@endif
     </x-mail::panel>
 </x-mail::message>
