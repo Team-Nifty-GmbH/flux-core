@@ -169,6 +169,64 @@ test('create commission', function (): void {
     expect($this->user->is($dbCommission->getUpdatedBy()))->toBeTrue();
 });
 
+test('create commission applies order discount to total net price', function (): void {
+    // OrderPosition has total_net_price of 1000 (after position discounts)
+    $this->orderPosition->update(['total_net_price' => 1000]);
+
+    // Set order-level discount (Kopfrabatt) of 10%
+    // total_base_discounted_net_price = price AFTER position discounts, BEFORE order discount
+    // total_net_price = final price AFTER all discounts
+    $this->order->update([
+        'total_base_discounted_net_price' => 1000,
+        'total_net_price' => 900, // 1000 - 10% = 900
+    ]);
+
+    $commissionRate = CommissionRate::factory()->create([
+        'user_id' => $this->agent->id,
+        'commission_rate' => 0.05, // 5%
+    ]);
+
+    $result = FluxErp\Actions\Commission\CreateCommission::make([
+        'user_id' => $this->agent->id,
+        'order_position_id' => $this->orderPosition->id,
+        'commission_rate_id' => $commissionRate->id,
+    ])
+        ->validate()
+        ->execute();
+
+    // Commission should be calculated on discounted price: 1000 * (1 - 0.10) * 0.05 = 900 * 0.05 = 45
+    expect(bccomp($result->total_net_price, '900', 2))->toBe(0);
+    expect(bccomp($result->commission, '45', 2))->toBe(0);
+});
+
+test('create commission without order discount uses full total net price', function (): void {
+    // OrderPosition has total_net_price of 1000
+    $this->orderPosition->update(['total_net_price' => 1000]);
+
+    // No order-level discount - both values are the same
+    $this->order->update([
+        'total_base_discounted_net_price' => 1000,
+        'total_net_price' => 1000, // No discount applied
+    ]);
+
+    $commissionRate = CommissionRate::factory()->create([
+        'user_id' => $this->agent->id,
+        'commission_rate' => 0.05, // 5%
+    ]);
+
+    $result = FluxErp\Actions\Commission\CreateCommission::make([
+        'user_id' => $this->agent->id,
+        'order_position_id' => $this->orderPosition->id,
+        'commission_rate_id' => $commissionRate->id,
+    ])
+        ->validate()
+        ->execute();
+
+    // Commission should be calculated on full price: 1000 * 0.05 = 50
+    expect(bccomp($result->total_net_price, '1000', 2))->toBe(0);
+    expect(bccomp($result->commission, '50', 2))->toBe(0);
+});
+
 test('create commission validation fails', function (): void {
     $commission = [
         'user_id' => 999999,
