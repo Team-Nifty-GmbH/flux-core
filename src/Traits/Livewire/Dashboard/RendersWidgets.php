@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Livewire\Dashboard;
 
+use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
@@ -22,8 +23,9 @@ trait RendersWidgets
 
     public array $params = [
         'timeFrame' => TimeFrameEnum::ThisMonth,
-        'start' => null,
-        'end' => null,
+        'dateRange' => [],
+        'comparisonType' => ComparisonTypeEnum::Auto,
+        'comparisonRange' => [],
     ];
 
     public bool $sync = false;
@@ -114,6 +116,7 @@ trait RendersWidgets
 
     public function updatedParams(): void
     {
+        $this->dispatch('dashboard-params-updated', params: $this->params);
         $this->skipRender();
     }
 
