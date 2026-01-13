@@ -3,6 +3,24 @@
 use FluxErp\Livewire\Settings\Settings;
 use Livewire\Livewire;
 
+function findFirstSettingWithComponent(array $settings): ?array
+{
+    foreach ($settings as $setting) {
+        if (isset($setting['component'])) {
+            return $setting;
+        }
+
+        if (! empty($setting['children'])) {
+            $found = findFirstSettingWithComponent($setting['children']);
+            if ($found) {
+                return $found;
+            }
+        }
+    }
+
+    return null;
+}
+
 test('renders successfully', function (): void {
     Livewire::test(Settings::class)
         ->assertOk();
@@ -17,7 +35,7 @@ test('can show setting', function (): void {
     $component = Livewire::test(Settings::class);
 
     $settings = $component->get('settings');
-    $firstSetting = array_values($settings)[0] ?? null;
+    $firstSetting = findFirstSettingWithComponent($settings);
 
     if ($firstSetting) {
         $component->call('showSetting', $firstSetting)
@@ -29,9 +47,9 @@ test('can show setting', function (): void {
 test('mounts with setting component from url', function (): void {
     $settingsComponent = Livewire::test(Settings::class);
     $settings = $settingsComponent->get('settings');
-    $firstSetting = array_values($settings)[0] ?? null;
+    $firstSetting = findFirstSettingWithComponent($settings);
 
-    if ($firstSetting && isset($firstSetting['component'])) {
+    if ($firstSetting) {
         Livewire::withQueryParams(['setting-entry' => $firstSetting['component']])
             ->test(Settings::class)
             ->assertSet('settingComponent', $firstSetting['component'])
@@ -46,7 +64,11 @@ test('settings have required structure', function (): void {
     foreach ($settings as $setting) {
         expect($setting)->toHaveKey('label');
         expect($setting)->toHaveKey('id');
-        expect($setting)->toHaveKey('component');
         expect($setting)->toHaveKey('path');
+
+        // Settings have either a component (leaf) or children (group)
+        $hasComponent = isset($setting['component']);
+        $hasChildren = isset($setting['children']);
+        expect($hasComponent || $hasChildren)->toBeTrue();
     }
 });

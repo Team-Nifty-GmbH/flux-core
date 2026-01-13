@@ -93,13 +93,17 @@ class MenuManager
         ?int $order = null,
         ?Closure $closure = null): void
     {
-        data_set($this->registeredGroups, $path, [
-            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
-            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
-            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
-            'children' => data_get($this->registeredGroups, $path . '.children', []),
-            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
-        ]);
+        $existing = $this->registeredGroups[$path] ?? [];
+
+        $this->registeredGroups[$path] = [
+            'label' => $label ?? data_get($existing, 'label'),
+            'icon' => $icon ?? data_get($existing, 'icon'),
+            'order' => $order ?? data_get($existing, 'order'),
+            'children' => data_get($existing, 'children', []),
+            'closure' => $closure
+                ? array_merge(data_get($existing, 'closure') ?? [], [$closure])
+                : data_get($existing, 'closure') ?? [],
+        ];
     }
 
     /**
@@ -141,7 +145,7 @@ class MenuManager
                     'label' => $group['label'] ?? Str::afterLast($path, '.'),
                     'icon' => $group['icon'],
                     'order' => $group['order'],
-                    'children' => [],
+                    'children' => data_get($this->resolved, $path . '.children') ?? [],
                 ]
             ));
 
