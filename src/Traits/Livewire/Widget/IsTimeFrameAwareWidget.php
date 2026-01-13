@@ -89,7 +89,10 @@ trait IsTimeFrameAwareWidget
             return;
         }
 
-        if ($this->comparisonType === ComparisonTypeEnum::Custom && ($this->comparisonStart === null || $this->comparisonEnd === null)) {
+        if (
+            $this->comparisonType === ComparisonTypeEnum::Custom
+            && ($this->comparisonStart === null || $this->comparisonEnd === null)
+        ) {
             return;
         }
 
