@@ -37,6 +37,7 @@
                     wire:model="languageId"
                     :label="__('Language')"
                     x-on:select="$wire.localize()"
+                    x-on:remove="$wire.localize()"
                     select="label:name|value:id"
                     :options="$languages"
                 />

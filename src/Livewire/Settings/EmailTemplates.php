@@ -74,14 +74,19 @@ class EmailTemplates extends EmailTemplateList
 
     public function localize(): void
     {
+        $this->languageId = $this->languageId
+            ?? resolve_static(Language::class, 'default')?->getKey();
+
         Session::put('selectedLanguageId', $this->languageId);
 
         if ($this->emailTemplateForm->id) {
-            $this->emailTemplateForm->fill(
-                resolve_static(EmailTemplate::class, 'query')
-                    ->whereKey($this->emailTemplateForm->id)
-                    ->first()
-            );
+            $template = resolve_static(EmailTemplate::class, 'query')
+                ->whereKey($this->emailTemplateForm->id)
+                ->first();
+
+            if ($template) {
+                $this->emailTemplateForm->fill($template);
+            }
         }
     }
 
