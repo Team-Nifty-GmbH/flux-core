@@ -51,13 +51,13 @@ class CreateCommission extends FluxAction
 
             $totalNetPrice = $orderPosition->total_net_price;
 
-            if ($order && bccomp($order->total_base_discounted_net_price ?? 0, 0) > 0) {
+            if ($order && bccomp($order->total_base_discounted_net_price ?? 0, 0) === 1) {
                 $orderDiscountPercentage = diff_percentage(
                     $order->total_base_discounted_net_price,
                     $order->total_net_price
                 );
 
-                if (bccomp($orderDiscountPercentage, 0) > 0) {
+                if (bccomp($orderDiscountPercentage, 0) === 1) {
                     $totalNetPrice = discount($totalNetPrice, $orderDiscountPercentage);
                 }
             }
