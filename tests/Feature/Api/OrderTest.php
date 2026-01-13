@@ -430,3 +430,33 @@ test('update order validation fails', function (): void {
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
     $response->assertUnprocessable();
 });
+
+test('update order address delivery with id validates correctly', function (): void {
+    // Create a new address with an ID that doesn't match any order ID
+    // This tests the fix for the ExistsWithForeign bug where it used the
+    // nested address ID instead of the root order ID for base table lookup
+    $newAddress = Address::factory()->create([
+        'tenant_id' => $this->tenants[0]->getKey(),
+        'contact_id' => $this->orders[0]->contact_id,
+    ]);
+
+    // Ensure address ID is different from order ID (the bug scenario)
+    expect($newAddress->getKey())->not->toBe($this->orders[0]->getKey());
+
+    $order = [
+        'id' => $this->orders[0]->getKey(),
+        'address_delivery' => [
+            'id' => $newAddress->getKey(),
+            'company' => $newAddress->company,
+            'street' => $newAddress->street,
+            'city' => $newAddress->city,
+            'zip' => $newAddress->zip,
+        ],
+    ];
+
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->put('/api/orders', $order);
+    $response->assertOk();
+});
