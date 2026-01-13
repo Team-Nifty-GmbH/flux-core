@@ -242,7 +242,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
     {
         $this->total_cost = Rounding::round(
             bcmul(
-                $this->user->cost_per_hour,
+                $this->user?->cost_per_hour ?? 0,
                 bcdiv($this->total_time_ms, 3600000),
                 9
             )
