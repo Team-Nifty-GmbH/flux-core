@@ -37,7 +37,7 @@
 <x-modal
     id="create-documents-{{ strtolower($this->getId()) }}"
     :title="__('Create Documents')"
-    size="3xl"
+    size="5xl"
 >
     <div class="w-full overflow-hidden overflow-x-auto">
         <div class="grid w-full grid-cols-4 gap-4 text-left text-sm">
