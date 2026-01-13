@@ -203,7 +203,6 @@ class MenuServiceProvider extends ServiceProvider
                 // System
                 Menu::group(path: 'settings.children.system', label: 'System');
                 Menu::register(route: 'settings.activity-logs', path: 'settings.children.system.children.activity-logs');
-                Menu::register(route: 'settings.additional-columns', path: 'settings.children.system.children.additional-columns');
                 Menu::register(route: 'settings.core-settings', path: 'settings.children.system.children.core-settings');
                 Menu::register(route: 'settings.failed-jobs', path: 'settings.children.system.children.failed-jobs');
                 Menu::register(route: 'settings.logs', path: 'settings.children.system.children.logs');

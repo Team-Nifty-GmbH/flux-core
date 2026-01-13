@@ -101,8 +101,8 @@ class MenuManager
             'order' => $order ?? data_get($existing, 'order'),
             'children' => data_get($existing, 'children', []),
             'closure' => $closure
-                ? array_merge(data_get($existing, 'closure', []), [$closure])
-                : data_get($existing, 'closure', []),
+                ? array_merge(data_get($existing, 'closure') ?? [], [$closure])
+                : data_get($existing, 'closure') ?? [],
         ];
     }
 
@@ -145,7 +145,7 @@ class MenuManager
                     'label' => $group['label'] ?? Str::afterLast($path, '.'),
                     'icon' => $group['icon'],
                     'order' => $group['order'],
-                    'children' => data_get($this->resolved, $path . '.children', []),
+                    'children' => data_get($this->resolved, $path . '.children') ?? [],
                 ]
             ));
 
