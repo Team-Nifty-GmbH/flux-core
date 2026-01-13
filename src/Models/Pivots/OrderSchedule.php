@@ -4,18 +4,18 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\Schedule;
-use FluxErp\Traits\Model\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderSchedule extends FluxPivot
 {
-    use CascadeSoftDeletes;
-
     protected $table = 'order_schedule';
 
-    protected array $cascadeDeletes = [
-        'schedule',
-    ];
+    protected static function booted(): void
+    {
+        static::deleting(function (OrderSchedule $pivot): void {
+            $pivot->schedule?->delete();
+        });
+    }
 
     public function order(): BelongsTo
     {
