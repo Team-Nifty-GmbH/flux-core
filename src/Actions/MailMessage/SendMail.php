@@ -78,6 +78,10 @@ class SendMail extends DispatchableFluxAction
     protected function applyTemplate(
         EmailTemplate $template,
     ): void {
+        if ($languageId = $this->getData('language_id')) {
+            $template->localize($languageId);
+        }
+
         $bladeParameters = $this->getData('blade_parameters');
         $templateData = $bladeParameters instanceof SerializableClosure
             ? $bladeParameters->getClosure()()

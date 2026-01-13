@@ -8,10 +8,12 @@ use FluxErp\Facades\Editor;
 use FluxErp\Livewire\DataTables\EmailTemplateList;
 use FluxErp\Livewire\Forms\EmailTemplateForm;
 use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\Language;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -29,6 +31,10 @@ class EmailTemplates extends EmailTemplateList
     #[Locked]
     public string $editorId;
 
+    public ?int $languageId = null;
+
+    public array $languages = [];
+
     #[DataTableForm]
     public EmailTemplateForm $emailTemplateForm;
 
@@ -38,6 +44,14 @@ class EmailTemplates extends EmailTemplateList
     {
         parent::mount();
         $this->editorId = 'editor-' . uniqid();
+
+        $this->languageId = Session::get('selectedLanguageId')
+            ?? resolve_static(Language::class, 'default')?->getKey();
+
+        $this->languages = resolve_static(Language::class, 'query')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->toArray();
     }
 
     public function edit(string|int|null $id = null): void
@@ -52,9 +66,28 @@ class EmailTemplates extends EmailTemplateList
         return array_merge(
             parent::getViewData(),
             [
+                'languages' => $this->languages,
                 'modelTypes' => $this->getModelTypes(),
             ]
         );
+    }
+
+    public function localize(): void
+    {
+        $this->languageId = $this->languageId
+            ?? resolve_static(Language::class, 'default')?->getKey();
+
+        Session::put('selectedLanguageId', $this->languageId);
+
+        if ($this->emailTemplateForm->id) {
+            $template = resolve_static(EmailTemplate::class, 'query')
+                ->whereKey($this->emailTemplateForm->id)
+                ->first();
+
+            if ($template) {
+                $this->emailTemplateForm->fill($template);
+            }
+        }
     }
 
     #[Renderless]
