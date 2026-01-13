@@ -361,7 +361,8 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
 
         // If no schedule exists default to work_days_per_week
         if (! $isWorkDay) {
-            $workDaysPerWeek = $workTimeModel->work_days_per_week ?? ceil($workTimeModel->weekly_hours / 10);
+            $workDaysPerWeek = $workTimeModel->workTimeModel->work_days_per_week
+                ?? ceil($workTimeModel->workTimeModel->weekly_hours / 10);
             for ($i = 1; $i <= $workDaysPerWeek; $i++) {
                 if ($weekday === $i) {
                     return true;
