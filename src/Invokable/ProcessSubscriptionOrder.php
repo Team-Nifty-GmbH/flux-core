@@ -42,12 +42,11 @@ class ProcessSubscriptionOrder implements Repeatable
             return false;
         }
 
-        // Update parent_id and performance period
+        // Update performance period
         $latestChild = $order->children()
             ->select(['id', 'system_delivery_date_end'])
             ->orderBy('system_delivery_date_end', 'DESC')
             ->first();
-        $order->parent_id = $order->id;
         $order->order_type_id = $orderType->id;
         $order->system_delivery_date = $latestChild?->system_delivery_date_end?->addDay() ??
             $order->system_delivery_date ?? $order->order_date;
@@ -82,7 +81,7 @@ class ProcessSubscriptionOrder implements Repeatable
 
             $activity->log(class_basename($e));
 
-            return false;
+            throw $e;
         }
 
         return true;
@@ -162,7 +161,7 @@ class ProcessSubscriptionOrder implements Repeatable
 
             $to = array_values(array_unique(array_filter($to)));
 
-            if (! $to) {
+            if ($to) {
                 $result = SendMail::make([
                     'template_id' => $emailTemplateId,
                     'to' => $to,
