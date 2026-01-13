@@ -312,7 +312,7 @@ class OrderPositions extends OrderPositionList
             if ($this->discountIsPercentage) {
                 $discountPercentage = bcdiv($this->discount, 100);
             } else {
-                // Euro: Calculate percentage per position
+                // Flat: Calculate percentage per position
                 $discountPercentage = bccomp($position->total_base_net_price ?? 0, 0) === 1
                     ? bcdiv($this->discount, $position->total_base_net_price)
                     : '0';
