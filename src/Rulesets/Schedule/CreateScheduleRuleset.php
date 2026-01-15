@@ -29,7 +29,7 @@ class CreateScheduleRuleset extends FluxRuleset
             'cron' => 'required|array',
             'cron.methods' => 'required|array',
             'cron.methods.basic' => [
-                'nullable',
+                'required',
                 Rule::in(FrequenciesEnum::getBasicFrequencies()),
             ],
             'cron.methods.dayConstraint' => [
