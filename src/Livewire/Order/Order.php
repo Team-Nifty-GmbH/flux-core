@@ -788,10 +788,12 @@ class Order extends Component
         $this->schedule->name = ProcessSubscriptionOrder::name();
         $this->schedule->parameters = [
             'orderId' => $this->order->id,
-            'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
-            'printLayouts' => $this->schedule->parameters['printLayouts'] ?? null,
-            'autoPrintAndSend' => $this->schedule->parameters['autoPrintAndSend'] ?? false,
-            'emailTemplateId' => $this->schedule->parameters['emailTemplateId'] ?? null,
+            'orderTypeId' => data_get($this->schedule->parameters, 'orderTypeId'),
+            'printLayouts' => data_get($this->schedule->parameters, 'printLayouts'),
+            'autoPrintAndSend' => data_get($this->schedule->parameters, 'autoPrintAndSend', false),
+            'emailTemplateId' => data_get($this->schedule->parameters, 'emailTemplateId'),
+            'cancellationNoticeValue' => data_get($this->schedule->parameters, 'cancellationNoticeValue'),
+            'cancellationNoticeUnit' => data_get($this->schedule->parameters, 'cancellationNoticeUnit'),
         ];
 
         try {
@@ -803,6 +805,52 @@ class Order extends Component
         }
 
         return true;
+    }
+
+    public function cancelSubscription(string $type, bool $generateDocument, bool $sendEmail): bool
+    {
+        $order = resolve_static(OrderModel::class, 'query')->find($this->order->id);
+        $schedule = $order?->schedules()->first();
+
+        if (! $schedule) {
+            return false;
+        }
+
+        try {
+            if ($type === 'immediate') {
+                $schedule->update([
+                    'is_active' => false,
+                    'ends_at' => now(),
+                ]);
+            } else {
+                $schedule->update([
+                    'ends_at' => $schedule->due_at,
+                ]);
+            }
+
+            if ($generateDocument) {
+                $this->selectedPrintLayouts = [
+                    'print' => [],
+                    'email' => $sendEmail ? ['cancellation-confirmation'] : [],
+                    'download' => [],
+                    'force' => ['cancellation-confirmation'],
+                ];
+
+                $this->createDocumentFromItems($order);
+            }
+
+            $this->schedule->fill($schedule->toArray());
+
+            $this->toast()
+                ->success(__('Subscription cancelled successfully'))
+                ->send();
+
+            return true;
+        } catch (ValidationException|UnauthorizedException|Throwable $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
     }
 
     #[Renderless]

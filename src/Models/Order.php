@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Carbon\Carbon;
 use Exception;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
@@ -16,6 +17,7 @@ use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Rules\Numeric;
+use FluxErp\Settings\SubscriptionSettings;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\Open;
@@ -40,6 +42,7 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
+use FluxErp\View\Printing\Order\CancellationConfirmation;
 use FluxErp\View\Printing\Order\DeliveryNote;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
@@ -752,21 +755,21 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function getPrintViews(): array
     {
         // This has to be done this way, as this method is also called on order types settings with an empty order.
-        if ($this->orderType?->order_type_enum->isPurchase()) {
-            $printViews = [
-                'supplier-order' => SupplierOrder::class,
-            ];
-        } else {
-            $printViews = [
-                'invoice' => Invoice::class,
-                'final-invoice' => FinalInvoice::class,
-                'offer' => Offer::class,
-                'order-confirmation' => OrderConfirmation::class,
-                'retoure' => Retoure::class,
-                'refund' => Refund::class,
-                'delivery-note' => DeliveryNote::class,
-            ];
-        }
+        $printViews = array_filter([
+            'invoice' => Invoice::class,
+            'final-invoice' => FinalInvoice::class,
+            'offer' => Offer::class,
+            'order-confirmation' => OrderConfirmation::class,
+            'retoure' => Retoure::class,
+            'refund' => Refund::class,
+            'delivery-note' => DeliveryNote::class,
+            'supplier-order' => $this->orderType?->order_type_enum->isPurchase()
+                ? SupplierOrder::class
+                : null,
+            'cancellation-confirmation' => $this->orderType?->order_type_enum?->isSubscription()
+                ? CancellationConfirmation::class
+                : null,
+        ]);
 
         if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
             $children = $this->children()
@@ -984,6 +987,29 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function schedules(): BelongsToMany
     {
         return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
+    }
+
+    public function calculateSubscriptionEndDate(): Carbon
+    {
+        $schedule = $this->schedules()->first();
+
+        if (! $schedule) {
+            return now();
+        }
+
+        $settings = app(SubscriptionSettings::class);
+        $parameters = $schedule->parameters ?? [];
+        $noticeValue = $parameters['cancellationNoticeValue'] ?? $settings->default_cancellation_notice_value;
+        $noticeUnit = $parameters['cancellationNoticeUnit'] ?? $settings->default_cancellation_notice_unit;
+
+        $nextRenewal = $schedule->due_at ?? now();
+        $cancellationDeadline = $nextRenewal->copy()->sub($noticeUnit, $noticeValue);
+
+        if (now()->gt($cancellationDeadline)) {
+            return $schedule->ends_at ?? $nextRenewal;
+        }
+
+        return $nextRenewal;
     }
 
     public function scopePaid(Builder $query): Builder
