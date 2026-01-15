@@ -86,6 +86,7 @@ trait HasAttributeTranslations
                     if ($attributeTranslationId = $model->attributeTranslations()
                         ->where('language_id', data_get($translation, 'language_id'))
                         ->where('attribute', data_get($translation, 'attribute'))
+                        ->latest('id')
                         ->value('id')
                     ) {
                         DeleteAttributeTranslation::make([
