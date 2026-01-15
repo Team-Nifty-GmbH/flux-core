@@ -42,7 +42,7 @@
     <div class="w-full overflow-hidden overflow-x-auto">
         <div class="grid w-full grid-cols-4 gap-4 text-left text-sm">
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
-                @if (auth()->user()?->printers()->exists())
+                @if ($printers ?? false)
                     <div
                         class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
                     >
