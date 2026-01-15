@@ -73,69 +73,63 @@
                     @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                         @if ($printers ?? false)
                             <div
-                                class="overflow-hidden text-ellipsis whitespace-nowrap"
+                                class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                             >
                                 <x-checkbox
-                                    class="truncate"
                                     wire:model="selectedPrintLayouts.print"
                                     x-bind:value="printLayout.layout"
                                     x-bind:checked="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
                                     x-bind:disabled="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
-                                >
-                                    <x-slot:label>
-                                        <div
-                                            x-text="printLayout.label"
-                                        ></div>
-                                    </x-slot>
-                                </x-checkbox>
+                                />
+                                <span
+                                    class="truncate"
+                                    x-text="printLayout.label"
+                                ></span>
                             </div>
                         @endif
                     @endcanAction
 
                     <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap"
+                        class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                     >
                         <x-checkbox
-                            class="truncate"
                             wire:model="selectedPrintLayouts.email"
                             x-bind:value="printLayout.layout"
                             x-bind:checked="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
                             x-bind:disabled="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
-                        >
-                            <x-slot:label>
-                                <div x-text="printLayout.label"></div>
-                            </x-slot>
-                        </x-checkbox>
+                        />
+                        <span
+                            class="truncate"
+                            x-text="printLayout.label"
+                        ></span>
                     </div>
                     <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap"
+                        class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                     >
                         <x-checkbox
-                            class="truncate"
                             wire:model="selectedPrintLayouts.download"
                             x-bind:value="printLayout.layout"
                             x-bind:checked="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
                             x-bind:disabled="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
-                        >
-                            <x-slot:label>
-                                <div x-text="printLayout.label"></div>
-                            </x-slot>
-                        </x-checkbox>
+                        />
+                        <span
+                            class="truncate"
+                            x-text="printLayout.label"
+                        ></span>
                     </div>
                     <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap"
+                        class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                     >
                         <x-checkbox
-                            class="truncate"
                             wire:model="selectedPrintLayouts.force"
                             x-bind:value="printLayout.layout"
                             x-bind:checked="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
                             x-bind:disabled="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
-                        >
-                            <x-slot:label>
-                                <div x-text="printLayout.label"></div>
-                            </x-slot>
-                        </x-checkbox>
+                        />
+                        <span
+                            class="truncate"
+                            x-text="printLayout.label"
+                        ></span>
                     </div>
                 </div>
             </template>
