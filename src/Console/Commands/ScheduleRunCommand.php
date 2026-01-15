@@ -35,6 +35,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             ->where(fn (Builder $query) => $query->whereRaw('recurrences > COALESCE(current_recurrence,0)')
                 ->orWhereNull('recurrences')
             )
+            ->whereNotNull('cron->methods->basic')
             ->where('is_active', true)
             ->get();
         foreach ($repeatables as $repeatable) {
