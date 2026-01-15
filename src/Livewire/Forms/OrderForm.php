@@ -190,6 +190,8 @@ class OrderForm extends FluxForm
 
     public ?int $vat_rate_id = null;
 
+    protected ?string $modelClass = Order::class;
+
     protected PriceList $priceList;
 
     public function fill($values): void
