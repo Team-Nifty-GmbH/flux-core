@@ -100,6 +100,7 @@ use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\Targets;
 use FluxErp\Livewire\Settings\Tenants;
+use FluxErp\Livewire\Settings\TicketSettings;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Tokens;
 use FluxErp\Livewire\Settings\Units;
@@ -311,6 +312,7 @@ Route::middleware('web')
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/targets', Targets::class)->name('targets');
                         Route::get('/tenants', Tenants::class)->name('tenants');
+                        Route::get('/ticket-settings', TicketSettings::class)->name('ticket-settings');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/tokens', Tokens::class)->name('tokens');
                         Route::get('/units', Units::class)->name('units');

@@ -136,7 +136,11 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.serial-number-ranges', path: 'settings.children.general.children.serial-number-ranges');
                 Menu::register(route: 'settings.tags', path: 'settings.children.general.children.tags');
                 Menu::register(route: 'settings.tenants', path: 'settings.children.general.children.tenants');
-                Menu::register(route: 'settings.ticket-types', path: 'settings.children.general.children.ticket-types');
+
+                // Tickets
+                Menu::group(path: 'settings.children.tickets', label: 'Tickets');
+                Menu::register(route: 'settings.ticket-settings', path: 'settings.children.tickets.children.ticket-settings');
+                Menu::register(route: 'settings.ticket-types', path: 'settings.children.tickets.children.ticket-types');
 
                 // Orders
                 Menu::group(path: 'settings.children.orders', label: 'Orders');
