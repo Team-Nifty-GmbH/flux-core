@@ -29,7 +29,7 @@
         "spatie/laravel-settings": "^3.4",
         "spatie/laravel-tags": "^4.3",
         "spatie/pdf-to-image": "^3.0",
-        "tallstackui/tallstackui": "^2.12",
+        "tallstackui/tallstackui": "^2.15.1",
         "team-nifty-gmbh/tall-datatables": "^1.0",
         "webklex/laravel-imap": "^6.1"
     },
