@@ -29,6 +29,15 @@ strong {
     color: inherit !important;
 }
 
+.print-editor-mode {
+    @apply p-1;
+}
+
+
+.print-editor-mode p {
+    @apply m-0 leading-none;
+}
+
 .tiptap {
     :first-child {
         margin-top: 0;
