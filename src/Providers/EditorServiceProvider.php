@@ -6,6 +6,7 @@ use FluxErp\Facades\Editor;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Models\Ticket;
 use FluxErp\Support\Editor\EditorManager;
 use FluxErp\View\Components\EditorButtons\AlignCenter;
 use FluxErp\View\Components\EditorButtons\AlignLeft;
@@ -108,6 +109,19 @@ class EditorServiceProvider extends ServiceProvider
                 'Tenant Creditor Identifier' => '$sepaMandate->tenant->creditor_identifier',
             ],
             SepaMandate::class
+        );
+
+        Editor::mergeVariables(
+            [
+                'Ticket Number' => '$ticket->ticket_number',
+                'Ticket Title' => '$ticket->title',
+                'Ticket Description' => '$ticket->description',
+                'Ticket Type' => '$ticket->ticketType?->name',
+                'Customer Name' => '$ticket->authenticatable?->getLabel()',
+                'Customer Email' => '$ticket->authenticatable?->email ?? $ticket->authenticatable?->email_primary',
+                'Created At' => '$ticket->created_at?->isoFormat(\'L LT\')',
+            ],
+            Ticket::class
         );
     }
 
