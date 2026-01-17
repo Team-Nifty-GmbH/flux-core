@@ -8,6 +8,7 @@ use Livewire\Livewire;
 test('can open work time modal', function (): void {
     $task = Task::factory()->create([
         'name' => Str::uuid(),
+        'state' => 'open',
     ]);
     $task->users()->attach($this->user);
 
