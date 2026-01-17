@@ -3,6 +3,7 @@
 namespace FluxErp\Database\Factories;
 
 use FluxErp\Models\Ticket;
+use FluxErp\States\Ticket\TicketState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TicketFactory extends Factory
@@ -15,6 +16,7 @@ class TicketFactory extends Factory
             'ticket_number' => fake()->uuid(),
             'title' => fake()->text,
             'description' => fake()->realText,
+            'state' => fake()->randomElement(TicketState::getStateMapping()->keys()->toArray()),
         ];
     }
 }
