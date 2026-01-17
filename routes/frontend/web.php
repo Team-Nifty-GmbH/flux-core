@@ -96,6 +96,7 @@ use FluxErp\Livewire\Settings\ReminderSettings;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\SubscriptionSettings;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\Targets;
@@ -308,6 +309,7 @@ Route::middleware('web')
                         Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
                         Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/targets', Targets::class)->name('targets');

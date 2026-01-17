@@ -115,6 +115,8 @@ class ProcessSubscriptionOrder implements Repeatable
             'printLayouts' => null,
             'autoPrintAndSend' => false,
             'emailTemplateId' => null,
+            'cancellationNoticeValue' => null,
+            'cancellationNoticeUnit' => null,
         ];
     }
 
