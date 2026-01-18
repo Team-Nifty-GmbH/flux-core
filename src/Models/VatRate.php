@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -13,7 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class VatRate extends FluxModel
 {
-    use Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasDefault, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+        SoftDeletes;
 
     protected function casts(): array
     {
@@ -26,5 +28,13 @@ class VatRate extends FluxModel
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+            'footer_text',
+        ];
     }
 }

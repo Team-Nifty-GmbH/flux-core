@@ -33,16 +33,6 @@
         <div class="flex flex-col gap-4">
             <x-input wire:model="emailTemplateForm.name" :label="__('Name')" />
             <div x-cloak x-show="$wire.emailTemplateForm.id">
-                <x-select.styled
-                    wire:model="languageId"
-                    :label="__('Language')"
-                    x-on:select="$wire.localize()"
-                    x-on:remove="$wire.localize()"
-                    select="label:name|value:id"
-                    :options="$languages"
-                />
-            </div>
-            <div x-cloak x-show="$wire.emailTemplateForm.id">
                 <x-input
                     :label="__('Model Type')"
                     readonly
