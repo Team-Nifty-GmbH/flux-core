@@ -6,7 +6,6 @@ use Exception;
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\EmailTemplate;
-use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -45,8 +44,10 @@ class EditMail extends Component
 
     public ?string $templateModelType = null;
 
+    #[Locked]
     public array $groupedMailMessages = [];
 
+    #[Locked]
     public array $groupKeys = [];
 
     #[Locked]
@@ -474,9 +475,7 @@ class EditMail extends Component
             return;
         }
 
-        $this->currentGroupLabel = resolve_static(Language::class, 'query')
-            ->whereKey($currentKey)
-            ->value('name') ?? __('Group') . ' ' . $currentKey;
+        $this->currentGroupLabel = __('Group') . ' ' . $currentKey;
     }
 
     protected function sendAllGroups(): bool

@@ -444,7 +444,7 @@ trait CreatesDocuments
 
         return $languageId
             ? resolve_static(\FluxErp\Models\Language::class, 'query')->whereKey($languageId)->value('name')
-            : null;
+            : __('Default');
     }
 
     protected function getPreferredLanguageId(OffersPrinting $item): ?int
