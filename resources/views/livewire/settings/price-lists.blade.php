@@ -133,7 +133,7 @@
                             </td>
                             <td class="whitespace-nowrap px-3 py-4 text-center">
                                 <x-toggle
-                                    x-model="category.discounts[0].is_percentage"
+                                    x-model.boolean="category.discounts[0].is_percentage"
                                     :disabled="! ($priceList->id ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                 />
                             </td>
