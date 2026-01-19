@@ -504,23 +504,23 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function resetNameAndDescription(): void
     {
-        $positions = $this->getSelectedModelsQuery()
+        $selectedPositions = $this->getSelectedModelsQuery()
             ->whereHas('product')
             ->where('is_bundle_position', false)
-            ->with([
-                'product:id,name,description',
-                'children' => fn ($query) => $query
-                    ->whereHas('product')
-                    ->with('product:id,name,description'),
-            ])
+            ->get(['id', 'product_id']);
+
+        foreach ($selectedPositions as $position) {
+            $allPositionIds = array_merge($selectedPositions->pluck('id')->toArray(), $position->descendantKeys());
+        }
+
+        $positions = resolve_static(OrderPosition::class, 'query')
+            ->whereKey(array_unique($allPositionIds))
+            ->whereHas('product')
+            ->with('product:id,name,description')
             ->get(['id', 'product_id']);
 
         foreach ($positions as $position) {
             $this->updatePositionNameAndDescription($position);
-
-            foreach ($position->children as $child) {
-                $this->updatePositionNameAndDescription($child);
-            }
         }
 
         $this->loadData();
