@@ -527,28 +527,6 @@ class OrderPositions extends OrderPositionList
         $this->reset('selected');
     }
 
-    protected function updatePositionNameAndDescription(OrderPosition $position): void
-    {
-        $product = $position->product;
-
-        if ($this->order->language_id) {
-            $product->localize($this->order->language_id);
-        }
-
-        try {
-            UpdateOrderPosition::make([
-                'id' => $position->getKey(),
-                'name' => $product->name,
-                'description' => $product->description,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
     #[Renderless]
     public function replicateSelected(): void
     {
@@ -604,6 +582,28 @@ class OrderPositions extends OrderPositionList
         $this->orderPositionsView = $view;
 
         $this->cacheState();
+    }
+
+    protected function updatePositionNameAndDescription(OrderPosition $position): void
+    {
+        $product = $position->product;
+
+        if ($this->order->language_id) {
+            $product->localize($this->order->language_id);
+        }
+
+        try {
+            UpdateOrderPosition::make([
+                'id' => $position->getKey(),
+                'name' => $product->name,
+                'description' => $product->description,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     protected function compileStoredLayout(): array
