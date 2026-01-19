@@ -127,6 +127,17 @@ class OrderPositions extends OrderPositionList
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
                 ]),
             DataTableButton::make()
+                ->text(__('Reset name and description'))
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->attributes([
+                    'wire:flux-confirm.type.warning' => __(
+                        'Reset name and description|Are you sure you want to reset name and description from the linked products?|Cancel|Confirm'
+                    ),
+                    'wire:click' => 'resetNameAndDescription(); showSelectedActions = false;',
+                ]),
+            DataTableButton::make()
                 ->text(__('Discount selected positions'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
@@ -488,6 +499,40 @@ class OrderPositions extends OrderPositionList
         $this->recalculateOrderTotals();
 
         $this->orderPosition->reset();
+    }
+
+    #[Renderless]
+    public function resetNameAndDescription(): void
+    {
+        $positions = $this->getSelectedModelsQuery()
+            ->whereHas('product')
+            ->where('is_bundle_position', false)
+            ->with('product:id,name,description')
+            ->get(['id', 'product_id']);
+
+        foreach ($positions as $position) {
+            $product = $position->product;
+
+            if ($this->order->language_id) {
+                $product->localize($this->order->language_id);
+            }
+
+            try {
+                UpdateOrderPosition::make([
+                    'id' => $position->getKey(),
+                    'name' => $product->name,
+                    'description' => $product->description,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        $this->loadData();
+        $this->reset('selected');
     }
 
     #[Renderless]
