@@ -63,6 +63,7 @@ class CloseEmployeeDay extends FluxAction
         if ($sickLeave !== DayPartEnum::FullDay) {
             $workTimes = $workTimeQuery->clone()
                 ->whereDate('started_at', $date)
+                ->where('is_pause', false)
                 ->sum('total_time_ms');
             $pauseTimes = $workTimeQuery->clone()
                 ->whereDate('started_at', $date)
