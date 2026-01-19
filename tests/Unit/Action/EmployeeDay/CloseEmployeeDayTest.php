@@ -110,3 +110,58 @@ test('overtime is negative when no absence compensates for missing work', functi
     expect($dayData->get('actual_hours'))->toBe('0.00');
     expect($dayData->get('plus_minus_overtime_hours'))->toBe('-8.00');
 });
+
+test('pauses are not subtracted twice from actual hours', function (): void {
+    // Reload employee fresh to ensure relations are loaded
+    $employee = resolve_static(Employee::class, 'query')
+        ->whereKey($this->employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+
+    // Find the next Monday (a work day)
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    // Create main work time entry (10 hours, is_daily_work_time = true, is_pause = false)
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(6, 30),
+        'ended_at' => $testDate->copy()->setTime(16, 30),
+        'total_time_ms' => 10 * 3600000, // 10 hours in ms
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => true,
+    ]);
+
+    // Create pause entries (is_daily_work_time = true, is_pause = true, negative total_time_ms)
+    // Lunch break: 30 minutes
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(12, 0),
+        'ended_at' => $testDate->copy()->setTime(12, 30),
+        'total_time_ms' => -30 * 60000, // -30 minutes in ms
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => true,
+        'is_locked' => true,
+    ]);
+
+    // Coffee break: 15 minutes
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(9, 0),
+        'ended_at' => $testDate->copy()->setTime(9, 15),
+        'total_time_ms' => -15 * 60000, // -15 minutes in ms
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => true,
+        'is_locked' => true,
+    ]);
+
+    // Calculate day data
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    // Expected: 10h - 45min pause = 9.25h actual hours
+    // Before fix: pauses were subtracted twice, resulting in 10h - 45min - 45min = 8.5h
+    expect($dayData->get('target_hours'))->toBe('8.00');
+    expect($dayData->get('actual_hours'))->toBe('9.25');
+    // 9.25h actual - 8h target = +1.25h overtime
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('1.25');
+});
