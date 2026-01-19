@@ -201,7 +201,7 @@ class EditMail extends Component
         }
 
         $grouped = collect($mailMessages)->groupBy(
-            fn (array $message) => (string) (data_get($message, 'group_key') ?? 'default')
+            fn (array $message): string => (string) (data_get($message, 'group_key') ?? 'default')
         );
 
         if ($grouped->count() === 1) {
@@ -398,7 +398,13 @@ class EditMail extends Component
     protected function loadCurrentGroup(): void
     {
         $currentKey = $this->groupKeys[$this->currentGroupIndex] ?? null;
-        $currentMessages = $this->groupedMailMessages[$currentKey] ?? [];
+        $currentMessages = data_get($this->editedGroups, $this->currentGroupIndex . '.mailMessages')
+            ?? $this->groupedMailMessages[$currentKey]
+            ?? [];
+
+        if (! $currentMessages) {
+            return;
+        }
 
         $firstMessage = Arr::first($currentMessages);
         $templateModelType = data_get($firstMessage, 'model_type');
@@ -458,7 +464,13 @@ class EditMail extends Component
         }
 
         $currentKey = $this->groupKeys[$this->currentGroupIndex] ?? null;
-        $currentMessages = $this->groupedMailMessages[$currentKey] ?? [];
+        $currentMessages = data_get($this->editedGroups, $this->currentGroupIndex . '.mailMessages')
+            ?? $this->groupedMailMessages[$currentKey]
+            ?? [];
+
+        if (! $currentMessages) {
+            return;
+        }
 
         $this->currentGroupRecipientCount = count($currentMessages);
 
@@ -492,16 +504,16 @@ class EditMail extends Component
         $totalFailed = 0;
 
         foreach ($this->editedGroups as $group) {
-            $groupMailMessage = data_get($group, 'mailMessage', []);
+            $groupMailMessage = data_get($group, 'mailMessage') ?? [];
             $groupMailMessage['mail_account_id'] = $sharedMailAccountId;
 
             $result = $this->sendGroupMessages(
                 $groupMailMessage,
-                data_get($group, 'mailMessages', []),
+                data_get($group, 'mailMessages') ?? [],
                 data_get($group, 'selectedTemplateId')
             );
-            $totalSuccess += data_get($result, 'success', 0);
-            $totalFailed += data_get($result, 'failed', 0);
+            $totalSuccess += data_get($result, 'success') ?? 0;
+            $totalFailed += data_get($result, 'failed') ?? 0;
         }
 
         $this->reset([
