@@ -507,32 +507,46 @@ class OrderPositions extends OrderPositionList
         $positions = $this->getSelectedModelsQuery()
             ->whereHas('product')
             ->where('is_bundle_position', false)
-            ->with('product:id,name,description')
+            ->with([
+                'product:id,name,description',
+                'children' => fn ($query) => $query
+                    ->whereHas('product')
+                    ->with('product:id,name,description'),
+            ])
             ->get(['id', 'product_id']);
 
         foreach ($positions as $position) {
-            $product = $position->product;
+            $this->updatePositionNameAndDescription($position);
 
-            if ($this->order->language_id) {
-                $product->localize($this->order->language_id);
-            }
-
-            try {
-                UpdateOrderPosition::make([
-                    'id' => $position->getKey(),
-                    'name' => $product->name,
-                    'description' => $product->description,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+            foreach ($position->children as $child) {
+                $this->updatePositionNameAndDescription($child);
             }
         }
 
         $this->loadData();
         $this->reset('selected');
+    }
+
+    protected function updatePositionNameAndDescription(OrderPosition $position): void
+    {
+        $product = $position->product;
+
+        if ($this->order->language_id) {
+            $product->localize($this->order->language_id);
+        }
+
+        try {
+            UpdateOrderPosition::make([
+                'id' => $position->getKey(),
+                'name' => $product->name,
+                'description' => $product->description,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     #[Renderless]
