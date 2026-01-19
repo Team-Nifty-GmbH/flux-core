@@ -32,6 +32,8 @@ class CommunicationForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $language_id = null;
+
     public int|string|null $mail_account_id = null;
 
     public ?int $mail_folder_id = null;

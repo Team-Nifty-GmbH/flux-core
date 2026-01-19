@@ -988,6 +988,11 @@ class Order extends Component
         return $item->orderType?->email_template_id;
     }
 
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->language_id;
+    }
+
     protected function getPrintLayouts(): array
     {
         return resolve_static(OrderModel::class, 'query')

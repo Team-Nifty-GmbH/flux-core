@@ -168,6 +168,7 @@ class AddressList extends BaseDataTable
                 'html_body' => null,
                 'communicatable_type' => $this->getCommunicatableType($model),
                 'communicatable_id' => $this->getCommunicatableId($model),
+                'language_id' => $this->getPreferredLanguageId($model),
             ];
         }
 
@@ -290,6 +291,11 @@ class AddressList extends BaseDataTable
         return Arr::wrap(
             $item->email_primary ?? $item->contactOptions->where('type', 'email')->first()?->value ?? []
         );
+    }
+
+    protected function getPreferredLanguageId(OffersPrinting $item): int
+    {
+        return $item->language_id;
     }
 
     protected function itemToArray($item): array
