@@ -124,7 +124,9 @@ class ScheduleForm extends FluxForm
 
         $action = $this->id ? UpdateSchedule::make($data) : CreateSchedule::make($data);
 
-        $response = $action->validate()->execute();
+        $response = $action->checkPermission()
+            ->validate()
+            ->execute();
 
         $this->fill($response);
     }

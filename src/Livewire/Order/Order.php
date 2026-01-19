@@ -834,6 +834,7 @@ class Order extends Component
             }
 
             $schedule = UpdateSchedule::make($data)
+                ->checkPermission()
                 ->validate()
                 ->execute();
 

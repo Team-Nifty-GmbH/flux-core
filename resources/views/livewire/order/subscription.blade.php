@@ -395,7 +395,6 @@
                     const schedule = $wire.schedule
                     if (! schedule?.due_at) return true
 
-                    const dueAt = new Date(schedule.due_at)
                     const noticeValue =
                         schedule.parameters?.cancellationNoticeValue ||
                         {{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_cancellation_notice_value }}
@@ -405,7 +404,7 @@
 
                     if (! noticeValue) return true
 
-                    const deadline = new Date(dueAt)
+                    const deadline = new Date(schedule.due_at)
                     switch (noticeUnit) {
                         case 'days':
                             deadline.setDate(deadline.getDate() - noticeValue)
