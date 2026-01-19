@@ -53,10 +53,28 @@ class EditorManager
 
     public static function getVariables(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): string|array
     {
+        $morphAlias = static::getMorphAlias($modelClass);
+
+        // Get variables at the requested path
         $data = data_get(
             static::$variables,
-            implode('.', array_filter([static::getMorphAlias($modelClass), $path])),
+            implode('.', array_filter([$morphAlias, $path])),
         ) ?? [];
+
+        // Filter out nested paths (arrays) to only return flat key-value pairs
+        if (is_array($data)) {
+            $data = array_filter($data, fn (mixed $value): bool => is_string($value));
+        }
+
+        // When a path is specified, also include parent level variables
+        if ($path && $modelClass) {
+            $parentData = data_get(static::$variables, $morphAlias) ?? [];
+            if (is_array($parentData)) {
+                $parentData = array_filter($parentData, fn (mixed $value): bool => is_string($value));
+            }
+
+            $data = array_merge($parentData, $data);
+        }
 
         if (! $withGlobals || is_null($modelClass)) {
             return $data;
@@ -64,8 +82,13 @@ class EditorManager
 
         $globals = data_get(
             static::$variables,
-            implode('.', array_filter([static::getMorphAlias(null), $path])),
+            static::getMorphAlias(null),
         ) ?? [];
+
+        // Filter out nested paths from globals as well
+        if (is_array($globals)) {
+            $globals = array_filter($globals, fn (mixed $value): bool => is_string($value));
+        }
 
         return array_merge($data, $globals);
     }

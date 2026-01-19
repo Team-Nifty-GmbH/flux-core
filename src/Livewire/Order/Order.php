@@ -12,11 +12,13 @@ use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\DeleteOrderTransaction;
+use FluxErp\Actions\Schedule\UpdateSchedule;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\SubscriptionCancellationTypeEnum;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Forms\DiscountForm;
@@ -788,10 +790,12 @@ class Order extends Component
         $this->schedule->name = ProcessSubscriptionOrder::name();
         $this->schedule->parameters = [
             'orderId' => $this->order->id,
-            'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
-            'printLayouts' => $this->schedule->parameters['printLayouts'] ?? null,
-            'autoPrintAndSend' => $this->schedule->parameters['autoPrintAndSend'] ?? false,
-            'emailTemplateId' => $this->schedule->parameters['emailTemplateId'] ?? null,
+            'orderTypeId' => data_get($this->schedule->parameters, 'orderTypeId'),
+            'printLayouts' => data_get($this->schedule->parameters, 'printLayouts'),
+            'autoPrintAndSend' => data_get($this->schedule->parameters, 'autoPrintAndSend', false),
+            'emailTemplateId' => data_get($this->schedule->parameters, 'emailTemplateId'),
+            'cancellationNoticeValue' => data_get($this->schedule->parameters, 'cancellationNoticeValue'),
+            'cancellationNoticeUnit' => data_get($this->schedule->parameters, 'cancellationNoticeUnit'),
         ];
 
         try {
@@ -801,6 +805,64 @@ class Order extends Component
 
             return false;
         }
+
+        return true;
+    }
+
+    public function cancelSubscription(
+        string $type,
+        bool $generateDocument = false,
+        bool $sendEmail = false
+    ): bool {
+        if (! $type = SubscriptionCancellationTypeEnum::tryFrom($type)) {
+            return false;
+        }
+
+        $order = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->first();
+        $schedule = $order?->schedules()->first();
+
+        if (! $schedule) {
+            return false;
+        }
+
+        try {
+            $data = ['id' => $schedule->getKey()];
+
+            if ($type === SubscriptionCancellationTypeEnum::Immediate) {
+                $data['ends_at'] = now();
+                $data['is_active'] = false;
+            } else {
+                $data['ends_at'] = $schedule->due_at;
+            }
+
+            $schedule = UpdateSchedule::make($data)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            if ($generateDocument) {
+                $this->selectedPrintLayouts = [
+                    'print' => [],
+                    'email' => $sendEmail ? ['cancellation-confirmation'] : [],
+                    'download' => [],
+                    'force' => ['cancellation-confirmation'],
+                ];
+
+                $this->createDocumentFromItems($order);
+            }
+        } catch (ValidationException|UnauthorizedException|Throwable $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->schedule->fill($schedule->toArray());
+
+        $this->toast()
+            ->success(__('Subscription cancelled successfully'))
+            ->send();
 
         return true;
     }

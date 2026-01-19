@@ -127,7 +127,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     protected static function booted(): void
     {
         static::saving(function (Task $task): void {
-            if ($task->state::$isEndState) {
+            if ($task->state && $task->state::$isEndState) {
                 $task->progress = 1;
             }
 

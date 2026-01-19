@@ -8,5 +8,7 @@ class OrderScheduleForm extends ScheduleForm
         'printLayouts' => [],
         'emailTemplateId' => null,
         'autoPrintAndSend' => false,
+        'cancellationNoticeValue' => null,
+        'cancellationNoticeUnit' => null,
     ];
 }

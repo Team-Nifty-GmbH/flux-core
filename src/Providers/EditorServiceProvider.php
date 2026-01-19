@@ -98,6 +98,16 @@ class EditorServiceProvider extends ServiceProvider
 
         Editor::mergeVariables(
             [
+                'Subscription Start Date' => '$order->order_date?->isoFormat(\'L\')',
+                'Subscription End Date' => '$order->calculateSubscriptionEndDate()->isoFormat(\'L\')',
+                'Subscription Cycle' => '__(\Illuminate\Support\Str::headline(data_get($order->schedules()->first()?->cron, \'methods.basic\') ?? \'\'))',
+            ],
+            Order::class,
+            'subscription'
+        );
+
+        Editor::mergeVariables(
+            [
                 'Salutation' => '$sepaMandate->contact->addressInvoice?->salutation()',
                 'Customer IBAN' => '$sepaMandate->contactBankConnection?->iban',
                 'Customer BIC' => '$sepaMandate->contactBankConnection?->bic',
