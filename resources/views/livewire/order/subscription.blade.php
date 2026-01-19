@@ -365,14 +365,18 @@
     >
         <div
             x-data="{
-                cancellationType: '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}',
+                cancellationType:
+                    '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}',
                 generateDocument: true,
                 sendEmail: false,
                 get effectiveEndDate() {
                     const schedule = $wire.schedule
                     if (! schedule?.due_at) return null
 
-                    if (this.cancellationType === '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::Immediate->value }}') {
+                    if (
+                        this.cancellationType ===
+                        '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::Immediate->value }}'
+                    ) {
                         return new Date().toLocaleDateString('{{ app()->getLocale() }}', {
                             year: 'numeric',
                             month: 'long',
