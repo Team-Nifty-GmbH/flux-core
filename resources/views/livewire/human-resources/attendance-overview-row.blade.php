@@ -157,7 +157,7 @@
                 @endif
 
                 {{-- Unexcused Absence (also show for half-day holidays where no work was done) --}}
-                @if ($dayData && data_get($dayData, 'is_work_day') && empty(data_get($dayData, 'absence_requests')) && data_get($dayData, 'actual_hours', 0) == 0 && (! data_get($dayData, 'is_holiday') || data_get($dayData, 'is_half_day_holiday')) && ! data_get($calDay, 'isFuture'))
+                @if ($dayData && data_get($dayData, 'is_work_day') && empty(data_get($dayData, 'absence_requests')) && data_get($dayData, 'actual_hours', 0) == 0 && (! data_get($dayData, 'is_holiday') || data_get($dayData, 'is_half_day_holiday')) && ! data_get($calDay, 'isFuture') && ! data_get($calDay, 'isToday'))
                     <div
                         x-on:click="{{ data_get($dayData, 'id') ? "\$wire.showEmployeeDay(" . data_get($dayData, 'id') . ')' : '' }}"
                         x-cloak
