@@ -402,7 +402,7 @@
                         schedule.parameters?.cancellationNoticeUnit ||
                         '{{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_cancellation_notice_unit ?? 'months' }}'
 
-                    if (! noticeValue) return true
+                    if (! noticeValue || ! noticeUnit) return true
 
                     const deadline = new Date(schedule.due_at)
                     switch (noticeUnit) {

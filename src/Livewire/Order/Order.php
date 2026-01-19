@@ -810,10 +810,14 @@ class Order extends Component
     }
 
     public function cancelSubscription(
-        SubscriptionCancellationTypeEnum $type,
+        string $type,
         bool $generateDocument = false,
         bool $sendEmail = false
     ): bool {
+        if (! $type = SubscriptionCancellationTypeEnum::tryFrom($type)) {
+            return false;
+        }
+
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
             ->first();
