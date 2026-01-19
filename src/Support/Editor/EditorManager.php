@@ -72,6 +72,7 @@ class EditorManager
             if (is_array($parentData)) {
                 $parentData = array_filter($parentData, fn (mixed $value): bool => is_string($value));
             }
+
             $data = array_merge($parentData, $data);
         }
 

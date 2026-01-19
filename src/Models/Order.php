@@ -755,21 +755,24 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function getPrintViews(): array
     {
         // This has to be done this way, as this method is also called on order types settings with an empty order.
-        $printViews = array_filter([
-            'invoice' => Invoice::class,
-            'final-invoice' => FinalInvoice::class,
-            'offer' => Offer::class,
-            'order-confirmation' => OrderConfirmation::class,
-            'retoure' => Retoure::class,
-            'refund' => Refund::class,
-            'delivery-note' => DeliveryNote::class,
-            'supplier-order' => $this->orderType?->order_type_enum->isPurchase()
-                ? SupplierOrder::class
-                : null,
-            'cancellation-confirmation' => $this->orderType?->order_type_enum?->isSubscription()
-                ? CancellationConfirmation::class
-                : null,
-        ]);
+        if ($this->orderType?->order_type_enum->isPurchase()) {
+            $printViews = [
+                'supplier-order' => SupplierOrder::class,
+            ];
+        } else {
+            $printViews = array_filter([
+                'invoice' => Invoice::class,
+                'final-invoice' => FinalInvoice::class,
+                'offer' => Offer::class,
+                'order-confirmation' => OrderConfirmation::class,
+                'retoure' => Retoure::class,
+                'refund' => Refund::class,
+                'delivery-note' => DeliveryNote::class,
+                'cancellation-confirmation' => $this->orderType?->order_type_enum?->isSubscription()
+                    ? CancellationConfirmation::class
+                    : null,
+            ]);
+        }
 
         if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
             $children = $this->children()

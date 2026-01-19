@@ -358,25 +358,21 @@
             />
         </x-slot>
     </x-modal>
-    <x-modal id="cancel-subscription" :title="__('Cancel Subscription')">
+    <x-modal
+        id="cancel-subscription"
+        :title="__('Cancel Subscription')"
+        x-on:close="cancellationType = '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}'; generateDocument = true; sendEmail = false"
+    >
         <div
             x-data="{
-                cancellationType: 'next_period',
+                cancellationType: '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}',
                 generateDocument: true,
                 sendEmail: false,
                 get effectiveEndDate() {
                     const schedule = $wire.schedule
                     if (! schedule?.due_at) return null
 
-                    const dueAt = new Date(schedule.due_at)
-                    const noticeValue =
-                        schedule.parameters?.cancellationNoticeValue ||
-                        {{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_cancellation_notice_value }}
-                    const noticeUnit =
-                        schedule.parameters?.cancellationNoticeUnit ||
-                        '{{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_cancellation_notice_unit }}'
-
-                    if (this.cancellationType === 'immediate') {
+                    if (this.cancellationType === '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::Immediate->value }}') {
                         return new Date().toLocaleDateString('{{ app()->getLocale() }}', {
                             year: 'numeric',
                             month: 'long',
@@ -384,6 +380,7 @@
                         })
                     }
 
+                    const dueAt = new Date(schedule.due_at)
                     return dueAt.toLocaleDateString('{{ app()->getLocale() }}', {
                         year: 'numeric',
                         month: 'long',
@@ -400,7 +397,7 @@
                         {{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_cancellation_notice_value }}
                     const noticeUnit =
                         schedule.parameters?.cancellationNoticeUnit ||
-                        '{{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_cancellation_notice_unit }}'
+                        '{{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_cancellation_notice_unit ?? 'months' }}'
 
                     if (! noticeValue) return true
 
@@ -449,14 +446,14 @@
                     id="cancel-next-period"
                     name="cancellation-type"
                     :label="__('Cancel at next renewal date')"
-                    value="next_period"
+                    :value="\FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value"
                     x-model="cancellationType"
                 />
                 <x-radio
                     id="cancel-immediate"
                     name="cancellation-type"
                     :label="__('Cancel immediately')"
-                    value="immediate"
+                    :value="\FluxErp\Enums\SubscriptionCancellationTypeEnum::Immediate->value"
                     x-model="cancellationType"
                 />
             </div>

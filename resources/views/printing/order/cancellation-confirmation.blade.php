@@ -1,4 +1,5 @@
 @use(\Illuminate\Support\Fluent)
+@use(\FluxErp\Settings\SubscriptionSettings)
 
 <x-flux::print.first-page-header
     :address="Fluent::make($model->address_invoice)"

@@ -12,11 +12,13 @@ use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\DeleteOrderTransaction;
+use FluxErp\Actions\Schedule\UpdateSchedule;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\SubscriptionCancellationTypeEnum;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Forms\DiscountForm;
@@ -807,9 +809,14 @@ class Order extends Component
         return true;
     }
 
-    public function cancelSubscription(string $type, bool $generateDocument, bool $sendEmail): bool
-    {
-        $order = resolve_static(OrderModel::class, 'query')->find($this->order->id);
+    public function cancelSubscription(
+        SubscriptionCancellationTypeEnum $type,
+        bool $generateDocument = false,
+        bool $sendEmail = false
+    ): bool {
+        $order = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->first();
         $schedule = $order?->schedules()->first();
 
         if (! $schedule) {
@@ -817,16 +824,18 @@ class Order extends Component
         }
 
         try {
-            if ($type === 'immediate') {
-                $schedule->update([
-                    'is_active' => false,
-                    'ends_at' => now(),
-                ]);
+            $data = ['id' => $schedule->getKey()];
+
+            if ($type === SubscriptionCancellationTypeEnum::Immediate) {
+                $data['ends_at'] = now();
+                $data['is_active'] = false;
             } else {
-                $schedule->update([
-                    'ends_at' => $schedule->due_at,
-                ]);
+                $data['ends_at'] = $schedule->due_at;
             }
+
+            $schedule = UpdateSchedule::make($data)
+                ->validate()
+                ->execute();
 
             if ($generateDocument) {
                 $this->selectedPrintLayouts = [
@@ -838,19 +847,19 @@ class Order extends Component
 
                 $this->createDocumentFromItems($order);
             }
-
-            $this->schedule->fill($schedule->toArray());
-
-            $this->toast()
-                ->success(__('Subscription cancelled successfully'))
-                ->send();
-
-            return true;
         } catch (ValidationException|UnauthorizedException|Throwable $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
+
+        $this->schedule->fill($schedule->toArray());
+
+        $this->toast()
+            ->success(__('Subscription cancelled successfully'))
+            ->send();
+
+        return true;
     }
 
     #[Renderless]

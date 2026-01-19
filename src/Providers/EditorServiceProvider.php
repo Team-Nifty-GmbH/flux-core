@@ -99,7 +99,7 @@ class EditorServiceProvider extends ServiceProvider
             [
                 'Subscription Start Date' => '$order->order_date?->isoFormat(\'L\')',
                 'Subscription End Date' => '$order->calculateSubscriptionEndDate()->isoFormat(\'L\')',
-                'Subscription Cycle' => '__(\Illuminate\Support\Str::headline(data_get($order->schedules()->first()?->cron, \'methods.basic\', \'\')))',
+                'Subscription Cycle' => '__(\Illuminate\Support\Str::headline(data_get($order->schedules()->first()?->cron, \'methods.basic\') ?? \'\'))',
             ],
             Order::class,
             'subscription'

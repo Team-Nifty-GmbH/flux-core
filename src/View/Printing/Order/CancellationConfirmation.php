@@ -11,7 +11,7 @@ class CancellationConfirmation extends OrderView
 
     public function render(): View|Factory
     {
-        return view('print::order.cancellation-confirmation', ['model' => $this->model]);
+        return view('flux::printing.order.cancellation-confirmation', ['model' => $this->model]);
     }
 
     public function getSubject(): string
