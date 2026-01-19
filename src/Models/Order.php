@@ -959,6 +959,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->singleFile()
             ->readOnly();
 
+        $this->addMediaCollection('refund')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
+            ->singleFile()
+            ->readOnly();
+
         $this->addMediaCollection('payment-reminders')
             ->acceptsMimeTypes(['application/pdf'])
             ->readOnly();
