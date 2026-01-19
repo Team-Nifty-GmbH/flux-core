@@ -595,7 +595,7 @@ class EditMail extends Component
 
         if (! $mailMessages) {
             if (! $this->mailMessages && ! $this->sessionKey) {
-                $mailMessages = [$this->mailMessage];
+                $mailMessages = [$editedMailMessage];
             } else {
                 $mailMessages = $this->mailMessages ?: session()->pull($this->sessionKey);
             }
