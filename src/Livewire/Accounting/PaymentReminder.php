@@ -7,6 +7,7 @@ use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\DataTables\OrderList;
+use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
@@ -65,11 +66,25 @@ class PaymentReminder extends OrderList
             return null;
         }
 
+        $ordersWithEmail = $orders->filter(
+            fn (Order $order) => ! blank(
+                $order->contact?->invoiceAddress?->email_primary
+                    ?? $order->contact?->mainAddress?->email_primary
+            )
+        );
+
+        $skippedCount = $orders->count() - $ordersWithEmail->count();
+        if ($skippedCount > 0) {
+            $this->notification()->warning(
+                __(':count order(s) skipped due to missing email address.', ['count' => $skippedCount])
+            );
+        }
+
         $documents = collect();
-        foreach ($orders as $order) {
+        foreach ($ordersWithEmail as $order) {
             try {
                 $paymentReminder = CreatePaymentReminder::make([
-                    'order_id' => $order->id,
+                    'order_id' => $order->getKey(),
                 ])
                     ->validate()
                     ->execute();
@@ -169,6 +184,30 @@ class PaymentReminder extends OrderList
             'name' => __($view),
             'attach_relation' => 'order',
         ];
+    }
+
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
+    {
+        return $item->getPaymentReminderText()?->email_template_id;
+    }
+
+    protected function getMailGroupKey(OffersPrinting $item): string
+    {
+        return $this->getPreferredLanguageId($item) . '-' . $item->reminder_level;
+    }
+
+    protected function getMailGroupLabel(OffersPrinting $item): ?string
+    {
+        $languageName = resolve_static(Language::class, 'query')
+            ->whereKey($this->getPreferredLanguageId($item))
+            ->value('name');
+
+        return $languageName . ' - ' . __('Reminder Level') . ' ' . $item->reminder_level;
+    }
+
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->order->language_id;
     }
 
     protected function getPrintLayouts(): array

@@ -149,6 +149,11 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->printLayouts();
     }
 
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->language_id;
+    }
+
     protected function getTo(OffersPrinting $item, array $documents): array
     {
         // add invoice address email if an invoice is being sent

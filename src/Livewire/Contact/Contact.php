@@ -198,6 +198,11 @@ class Contact extends Component
             ->getAvatarUrl();
     }
 
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->mainAddress?->language_id ?? $item->invoiceAddress?->language_id;
+    }
+
     protected function getPrintLayouts(): array
     {
         return app(ContactModel::class)->resolvePrintViews();
