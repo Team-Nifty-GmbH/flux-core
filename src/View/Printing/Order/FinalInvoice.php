@@ -99,7 +99,7 @@ class FinalInvoice extends Invoice
             $totalNetPrice,
             array_reduce(
                 $totalVats,
-                function ($carry, array $vat): string {
+                function (int|string $carry, array $vat): string {
                     return bcadd($carry, data_get($vat, 'total_vat_price') ?? 0);
                 },
                 0
