@@ -9,7 +9,7 @@ use UnitEnum;
 
 class EnumRule extends BaseEnumRule
 {
-    public function __toString()
+    public function __toString(): string
     {
         $cases = ! empty($this->only)
             ? $this->only
