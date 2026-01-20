@@ -4,7 +4,6 @@ namespace FluxErp\View\Printing\Order;
 
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
 
 class FinalInvoice extends Invoice
 {
@@ -28,6 +27,11 @@ class FinalInvoice extends Invoice
         $this->calculateTotals();
     }
 
+    protected function getVatKey(array $vat): int|string
+    {
+        return data_get($vat, 'vat_rate_id') ?? data_get($vat, 'vat_rate_percentage');
+    }
+
     protected function calculateTotals(): void
     {
         if (! is_null($this->model->subtotal_net_price)
@@ -41,7 +45,9 @@ class FinalInvoice extends Invoice
         $this->model->subtotal_gross_price = $this->model->total_gross_price;
         $this->model->subtotal_vats = $this->model->total_vats;
 
-        $totalVats = Arr::keyBy($this->model->total_vats ?? [], 'vat_rate_percentage');
+        $totalVats = collect($this->model->total_vats ?? [])
+            ->keyBy(fn (array $vat): int|string => $this->getVatKey($vat))
+            ->all();
 
         $this->model->setRelation('children', $this->model->getAllDescendantsQuery()->get());
 
@@ -49,22 +55,22 @@ class FinalInvoice extends Invoice
             $totalNetPrice = bcsub($totalNetPrice, $child->total_net_price);
             foreach ($child->total_vats ?? [] as $childVat) {
                 data_set(
-                    $totalVats[data_get($childVat, 'vat_rate_percentage')],
+                    $totalVats[$this->getVatKey($childVat)],
                     'total_vat_price',
                     bcsub(
                         data_get(
-                            $totalVats[data_get($childVat, 'vat_rate_percentage')],
+                            $totalVats[$this->getVatKey($childVat)],
                             'total_vat_price'
                         ) ?? 0,
                         data_get($childVat, 'total_vat_price') ?? 0,
                     )
                 );
                 data_set(
-                    $totalVats[data_get($childVat, 'vat_rate_percentage')],
+                    $totalVats[$this->getVatKey($childVat)],
                     'total_net_price',
                     bcsub(
                         data_get(
-                            $totalVats[data_get($childVat, 'vat_rate_percentage')],
+                            $totalVats[$this->getVatKey($childVat)],
                             'total_net_price'
                         ) ?? 0,
                         data_get($childVat, 'total_net_price') ?? 0,
@@ -86,7 +92,7 @@ class FinalInvoice extends Invoice
             $totalNetPrice,
             array_reduce(
                 $totalVats,
-                function ($carry, $vat) {
+                function ($carry, array $vat): string {
                     return bcadd($carry, data_get($vat, 'total_vat_price') ?? 0);
                 },
                 0
@@ -98,7 +104,7 @@ class FinalInvoice extends Invoice
         $this->model->total_vats = array_values(
             array_filter(
                 $totalVats,
-                fn (array $vat) => bccomp(data_get($vat, 'total_net_price') ?? 0, 0) !== 0
+                fn (array $vat): bool => bccomp(data_get($vat, 'total_net_price') ?? 0, 0) !== 0
             )
         );
     }
