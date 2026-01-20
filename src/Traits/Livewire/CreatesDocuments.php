@@ -6,6 +6,7 @@ use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\PrintJobForm;
+use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Printer;
 use FluxErp\View\Printing\PrintableView;
@@ -443,13 +444,15 @@ trait CreatesDocuments
         $languageId = $this->getPreferredLanguageId($item);
 
         return $languageId
-            ? resolve_static(\FluxErp\Models\Language::class, 'query')->whereKey($languageId)->value('name')
+            ? resolve_static(Language::class, 'query')
+                ->whereKey($languageId)
+                ->value('name')
             : __('Default');
     }
 
     protected function getPreferredLanguageId(OffersPrinting $item): ?int
     {
-        return resolve_static(\FluxErp\Models\Language::class, 'default')?->getKey();
+        return resolve_static(Language::class, 'default')?->getKey();
     }
 
     protected function getSubject(OffersPrinting $item, array $documents): ?string
