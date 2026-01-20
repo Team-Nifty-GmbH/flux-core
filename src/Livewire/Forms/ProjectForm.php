@@ -56,7 +56,9 @@ class ProjectForm extends Form
 
         $action = $this->id ? UpdateProject::make($data) : CreateProject::make($data);
 
-        $response = $action->validate()->execute();
+        $response = $action->checkPermission()
+            ->validate()
+            ->execute();
 
         $this->fill($response);
     }
