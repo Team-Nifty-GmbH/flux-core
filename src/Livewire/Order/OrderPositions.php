@@ -127,6 +127,17 @@ class OrderPositions extends OrderPositionList
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
                 ]),
             DataTableButton::make()
+                ->text(__('Reset name and description'))
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->attributes([
+                    'wire:flux-confirm.type.warning' => __(
+                        'Reset name and description|Are you sure you want to reset name and description from the linked products?|Cancel|Confirm'
+                    ),
+                    'wire:click' => 'resetNameAndDescription(); showSelectedActions = false;',
+                ]),
+            DataTableButton::make()
                 ->text(__('Discount selected positions'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
@@ -491,6 +502,34 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
+    public function resetNameAndDescription(): void
+    {
+        $selectedPositions = $this->getSelectedModelsQuery()
+            ->whereHas('product')
+            ->where('is_bundle_position', false)
+            ->get(['id', 'product_id']);
+
+        $allPositionIds = $selectedPositions->pluck('id')->toArray();
+
+        foreach ($selectedPositions as $position) {
+            $allPositionIds = array_merge($allPositionIds, $position->descendantKeys());
+        }
+
+        $positions = resolve_static(OrderPosition::class, 'query')
+            ->whereKey($allPositionIds)
+            ->whereHas('product')
+            ->with('product:id,name,description')
+            ->get(['id', 'product_id']);
+
+        foreach ($positions as $position) {
+            $this->updatePositionNameAndDescription($position);
+        }
+
+        $this->loadData();
+        $this->reset('selected');
+    }
+
+    #[Renderless]
     public function replicateSelected(): void
     {
         $this->orderPosition->reset();
@@ -545,6 +584,28 @@ class OrderPositions extends OrderPositionList
         $this->orderPositionsView = $view;
 
         $this->cacheState();
+    }
+
+    protected function updatePositionNameAndDescription(OrderPosition $position): void
+    {
+        $product = $position->product;
+
+        if ($this->order->language_id) {
+            $product->localize($this->order->language_id);
+        }
+
+        try {
+            UpdateOrderPosition::make([
+                'id' => $position->getKey(),
+                'name' => $product->name,
+                'description' => $product->description,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     protected function compileStoredLayout(): array
