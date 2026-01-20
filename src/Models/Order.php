@@ -604,9 +604,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
             ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
-            ->keyBy('vat_rate_percentage');
+            ->keyBy(fn (OrderPosition $item) => $item->vat_rate_id ?? $item->vat_rate_percentage);
 
-        $baseAmounts = $positionsByVatRate->map(fn (OrderPosition $item) => $item->total_net_price);
+        $baseAmounts = $positionsByVatRate->mapWithKeys(
+            fn (OrderPosition $item) => [($item->vat_rate_id ?? $item->vat_rate_percentage) => $item->total_net_price]
+        );
 
         foreach ($this->discounts()->ordered()->get() as $discount) {
             if ($discount->is_percentage) {
@@ -651,7 +653,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                     'total_net_price' => bcround($item->total_net_price ?? 0, 2),
                     'total_discount' => bcround(
                         bcsub(
-                            $baseAmounts->get($item->vat_rate_percentage) ?? 0,
+                            $baseAmounts->get($item->vat_rate_id ?? $item->vat_rate_percentage) ?? 0,
                             $item->total_net_price,
                             9
                         ),
