@@ -509,12 +509,14 @@ class OrderPositions extends OrderPositionList
             ->where('is_bundle_position', false)
             ->get(['id', 'product_id']);
 
+        $allPositionIds = $selectedPositions->pluck('id')->toArray();
+
         foreach ($selectedPositions as $position) {
-            $allPositionIds = array_merge($selectedPositions->pluck('id')->toArray(), $position->descendantKeys());
+            $allPositionIds = array_merge($allPositionIds, $position->descendantKeys());
         }
 
         $positions = resolve_static(OrderPosition::class, 'query')
-            ->whereKey(array_unique($allPositionIds))
+            ->whereKey($allPositionIds)
             ->whereHas('product')
             ->with('product:id,name,description')
             ->get(['id', 'product_id']);
