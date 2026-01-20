@@ -54,25 +54,30 @@ class FinalInvoice extends Invoice
         foreach ($this->model->children as $child) {
             $totalNetPrice = bcsub($totalNetPrice, $child->total_net_price);
             foreach ($child->total_vats ?? [] as $childVat) {
+                $vatKey = $this->getVatKey($childVat);
+
+                if (is_null(data_get($totalVats, $vatKey))) {
+                    $totalVats[$vatKey] = [
+                        'vat_rate_id' => data_get($childVat, 'vat_rate_id'),
+                        'vat_rate_percentage' => data_get($childVat, 'vat_rate_percentage'),
+                        'total_vat_price' => 0,
+                        'total_net_price' => 0,
+                    ];
+                }
+
                 data_set(
-                    $totalVats[$this->getVatKey($childVat)],
+                    $totalVats[$vatKey],
                     'total_vat_price',
                     bcsub(
-                        data_get(
-                            $totalVats[$this->getVatKey($childVat)],
-                            'total_vat_price'
-                        ) ?? 0,
+                        data_get($totalVats[$vatKey], 'total_vat_price') ?? 0,
                         data_get($childVat, 'total_vat_price') ?? 0,
                     )
                 );
                 data_set(
-                    $totalVats[$this->getVatKey($childVat)],
+                    $totalVats[$vatKey],
                     'total_net_price',
                     bcsub(
-                        data_get(
-                            $totalVats[$this->getVatKey($childVat)],
-                            'total_net_price'
-                        ) ?? 0,
+                        data_get($totalVats[$vatKey], 'total_net_price') ?? 0,
                         data_get($childVat, 'total_net_price') ?? 0,
                     )
                 );

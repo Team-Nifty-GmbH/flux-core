@@ -50,7 +50,7 @@ class SendMailRuleset extends FluxRuleset
             'bcc' => 'nullable|array',
             'bcc.*' => 'email|distinct',
             'subject' => 'nullable|string|max:255',
-            'text_body' => 'nullable|string',
+            'text_body' => 'exclude_if:text_body,null|nullable|string',
             'html_body' => 'nullable|string',
             'attachments' => 'nullable|array',
             'blade_parameters' => 'nullable',

@@ -6,6 +6,7 @@ use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\PrintJobForm;
+use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Printer;
 use FluxErp\View\Printing\PrintableView;
@@ -323,6 +324,9 @@ trait CreatesDocuments
                 ];
 
                 $mailMessage['model_type'] = $item->getEmailTemplateModelType();
+                $mailMessage['language_id'] = $this->getPreferredLanguageId($item);
+                $mailMessage['group_key'] = $this->getMailGroupKey($item);
+                $mailMessage['group_label'] = $this->getMailGroupLabel($item);
                 if (method_exists($this, 'getDefaultTemplateId')) {
                     $emailTemplateId = $this->getDefaultTemplateId($item);
                     $mailMessage['default_template_id'] = $emailTemplateId;
@@ -428,6 +432,27 @@ trait CreatesDocuments
             'view' => $view,
             'name' => __($view),
         ];
+    }
+
+    protected function getMailGroupKey(OffersPrinting $item): string
+    {
+        return (string) ($this->getPreferredLanguageId($item) ?? 'default');
+    }
+
+    protected function getMailGroupLabel(OffersPrinting $item): ?string
+    {
+        $languageId = $this->getPreferredLanguageId($item);
+
+        return $languageId
+            ? resolve_static(Language::class, 'query')
+                ->whereKey($languageId)
+                ->value('name')
+            : __('Default');
+    }
+
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return resolve_static(Language::class, 'default')?->getKey();
     }
 
     protected function getSubject(OffersPrinting $item, array $documents): ?string

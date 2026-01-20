@@ -162,6 +162,11 @@ class SepaMandates extends SepaMandateList
         return '';
     }
 
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->contact->invoiceAddress?->language_id ?? $item->contact->mainAddress?->language_id;
+    }
+
     protected function getPrintLayouts(): array
     {
         return resolve_static(SepaMandate::class, 'query')

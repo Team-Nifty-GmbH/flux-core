@@ -13,6 +13,7 @@ use FluxErp\Models\Country;
 use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,7 +24,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Tenants extends TenantList
 {
-    use Actions, WithFileUploads, WithTabs;
+    use Actions, SupportsLocalization, WithFileUploads, WithTabs;
 
     public TenantForm $tenant;
 

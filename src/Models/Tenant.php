@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
@@ -24,8 +25,8 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Tenant extends FluxModel implements HasMedia
 {
-    use Filterable, HasDefault, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasDefault, HasPackageFactory, HasTenantAssignment, HasUserModification,
+        HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected $appends = [
         'logo_url',
@@ -123,5 +124,14 @@ class Tenant extends FluxModel implements HasMedia
     public function searchableUsing(): Engine
     {
         return app(EngineManager::class)->engine('collection');
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'sepa_text_basic',
+            'sepa_text_b2b',
+            'terms_and_conditions',
+        ];
     }
 }
