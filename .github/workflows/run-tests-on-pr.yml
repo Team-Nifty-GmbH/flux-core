@@ -13,7 +13,6 @@ jobs:
     env:
       HOME: /github/home
       DB_CONNECTION: sqlite
-      DB_DATABASE: ':memory:'
       BROADCAST_DRIVER: log
       CACHE_DRIVER: redis
       QUEUE_CONNECTION: redis
@@ -91,9 +90,6 @@ jobs:
 
       - name: Clear Orchestra Testbench Cache
         run: ./vendor/bin/testbench view:clear
-
-      - name: Run migrations
-        run: ./vendor/bin/testbench migrate --force
 
       - name: Run Unit Tests
         run: composer test-unit
