@@ -9,6 +9,7 @@ use FluxErp\Models\Holiday;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -185,7 +186,7 @@ class AttendanceOverview extends Component
             ->with([
                 'locations:id',
             ])
-            ->selectRaw('id, name, COALESCE(date, (CONCAT(?, \'-\', month, \'-\', day))) AS date', [$this->year])
+            ->selectRaw($this->getHolidayDateSelectExpression())
             ->get()
             ->map(function (Holiday $holiday) {
                 $holidayArray = $holiday->toArray();
@@ -213,5 +214,14 @@ class AttendanceOverview extends Component
                 'isFuture' => $date->isFuture(),
             ];
         }
+    }
+
+    protected function getHolidayDateSelectExpression(): string
+    {
+        if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
+            return "id, name, COALESCE(date, CONCAT('$this->year', '-', month, '-', day)) AS date";
+        }
+
+        return "id, name, COALESCE(date, '$this->year' || '-' || month || '-' || day) AS date";
     }
 }

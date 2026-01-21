@@ -250,14 +250,20 @@ abstract class FolderTree extends Component
             $replace = Str::replaceLast(Str::afterLast($path, '.'), $attributes['slug'], $path);
 
             if ($path !== $replace) {
+                $substringStart = strlen($path) + 1;
+
+                if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
+                    $expression = "CONCAT('$replace', SUBSTRING(collection_name, $substringStart))";
+                } else {
+                    $expression = "'$replace' || SUBSTR(collection_name, $substringStart)";
+                }
+
                 resolve_static(Media::class, 'query')
                     ->where('model_type', morph_alias($this->modelType))
                     ->where('model_id', $this->modelId)
                     ->where('collection_name', 'like', $path . '%')
                     ->update([
-                        'collection_name' => DB::raw('CONCAT(\'' . $replace
-                            . '\', SUBSTRING(collection_name, ' . strlen($path) + 1 . '))'
-                        ),
+                        'collection_name' => DB::raw($expression),
                     ]);
             }
 
@@ -387,14 +393,21 @@ abstract class FolderTree extends Component
         $newCollectionName = $this->buildCollectionName($subject, $targetPath);
 
         if ($newCollectionName !== $subjectPath) {
+            $substringStart = strlen($subjectPath) + 1;
+            $driver = DB::connection()->getDriverName();
+
+            if (in_array($driver, ['mysql', 'mariadb'])) {
+                $expression = "CONCAT('$newCollectionName', SUBSTRING(collection_name, $substringStart))";
+            } else {
+                $expression = "'$newCollectionName' || SUBSTR(collection_name, $substringStart)";
+            }
+
             resolve_static(Media::class, 'query')
                 ->where('model_type', morph_alias($this->modelType))
                 ->where('model_id', $this->modelId)
                 ->where('collection_name', 'like', $subjectPath . '%')
                 ->update([
-                    'collection_name' => DB::raw(
-                        'CONCAT(\'' . $newCollectionName . '\', SUBSTRING(collection_name, ' . (strlen($subjectPath) + 1) . '))'
-                    ),
+                    'collection_name' => DB::raw($expression),
                 ]);
         }
 

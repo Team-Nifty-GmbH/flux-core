@@ -58,11 +58,17 @@ class MediaFolder extends FluxModel implements HasMedia
             if ($model->wasChanged(['parent_id', 'slug'])) {
                 $original = $model->getRawOriginal('slug');
                 $replace = $model->slug;
+                $substringStart = strlen($original) + 1;
+
+                if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
+                    $expression = "CONCAT('$replace', SUBSTRING(slug, $substringStart))";
+                } else {
+                    $expression = "'$replace' || SUBSTR(slug, $substringStart)";
+                }
+
                 $model->getAllDescendantsQuery()
                     ->update([
-                        'slug' => DB::raw('CONCAT(\'' . $replace
-                            . '\', SUBSTRING(slug, ' . strlen($original) + 1 . '))'
-                        ),
+                        'slug' => DB::raw($expression),
                     ]);
             }
         });

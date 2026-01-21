@@ -12,12 +12,8 @@ jobs:
     runs-on: self-hosted
     env:
       HOME: /github/home
-      DB_CONNECTION: mysql
-      DB_HOST: 127.0.0.1
-      DB_PORT: 33306
-      DB_DATABASE: testing
-      DB_USERNAME: root
-      DB_PASSWORD: password
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
       BROADCAST_DRIVER: log
       CACHE_DRIVER: redis
       QUEUE_CONNECTION: redis
@@ -34,24 +30,6 @@ jobs:
 
     # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: false
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: testing
-        ports:
-          - 33306:3306/tcp
-        options: >-
-          --sysctl net.ipv4.ip_unprivileged_port_start=0
-          --tmpfs /var/lib/mysql
-          --tmpfs /var/log/mysql
-          --tmpfs /tmp
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
       redis:
         image: redis
         ports:
@@ -72,7 +50,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, dom, fileinfo, mysql
+          extensions: mbstring, dom, fileinfo, sqlite3
           coverage: xdebug
 
       - name: Setup Node
@@ -96,7 +74,6 @@ jobs:
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
 
         env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
@@ -124,27 +101,23 @@ jobs:
       - name: Run Unit Tests
         run: composer test-unit
         env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Run Livewire Tests
         run: composer test-livewire
         env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Run Feature Tests
         run: composer test-feature
         env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
       - name: Run Browser Tests
         run: composer test-browser
         env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 

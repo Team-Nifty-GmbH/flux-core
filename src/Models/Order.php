@@ -895,57 +895,13 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function recalculateOrderPositionSlugPositions(): static
     {
-        DB::table('order_positions')
-            ->where('order_id', $this->getKey())
-            ->whereNull('parent_id')
-            ->update([
-                'slug_position' => DB::raw('LPAD(sort_number, 8, "0")'),
-            ]);
+        $driver = DB::connection()->getDriverName();
 
-        $query = "
-            WITH RECURSIVE position_hierarchy AS (
-                SELECT
-                    id,
-                    parent_id,
-                    order_id,
-                    slug_position,
-                    sort_number,
-                    0 AS level
-                FROM
-                    order_positions
-                WHERE
-                    order_id = ? AND parent_id IS NULL
+        if (in_array($driver, ['mysql', 'mariadb'])) {
+            return $this->recalculateOrderPositionSlugPositionsMysql();
+        }
 
-                UNION ALL
-
-                SELECT
-                    c.id,
-                    c.parent_id,
-                    c.order_id,
-                    CONCAT(p.slug_position, '.', LPAD(c.sort_number, 8, '0')) AS slug_position,
-                    c.sort_number,
-                    p.level + 1 AS level
-                FROM
-                    position_hierarchy p
-                JOIN
-                    order_positions c ON p.id = c.parent_id AND c.order_id = ?
-            )
-
-            UPDATE order_positions op,
-                   position_hierarchy ph
-            SET op.slug_position = ph.slug_position
-            WHERE op.id = ph.id
-              AND op.order_id = ?
-              AND op.parent_id IS NOT NULL;
-        ";
-
-        DB::statement($query, [
-            $this->getKey(),
-            $this->getKey(),
-            $this->getKey(),
-        ]);
-
-        return $this;
+        return $this->recalculateOrderPositionSlugPositionsGeneric();
     }
 
     public function refund(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
@@ -1099,6 +1055,103 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             'id',
             'vat_rate_id'
         );
+    }
+
+    protected function recalculateOrderPositionSlugPositionsMysql(): static
+    {
+        DB::table('order_positions')
+            ->where('order_id', $this->getKey())
+            ->whereNull('parent_id')
+            ->update([
+                'slug_position' => DB::raw('LPAD(sort_number, 8, "0")'),
+            ]);
+
+        $query = "
+            WITH RECURSIVE position_hierarchy AS (
+                SELECT
+                    id,
+                    parent_id,
+                    order_id,
+                    slug_position,
+                    sort_number,
+                    0 AS level
+                FROM
+                    order_positions
+                WHERE
+                    order_id = ? AND parent_id IS NULL
+
+                UNION ALL
+
+                SELECT
+                    c.id,
+                    c.parent_id,
+                    c.order_id,
+                    CONCAT(p.slug_position, '.', LPAD(c.sort_number, 8, '0')) AS slug_position,
+                    c.sort_number,
+                    p.level + 1 AS level
+                FROM
+                    position_hierarchy p
+                JOIN
+                    order_positions c ON p.id = c.parent_id AND c.order_id = ?
+            )
+
+            UPDATE order_positions op,
+                   position_hierarchy ph
+            SET op.slug_position = ph.slug_position
+            WHERE op.id = ph.id
+              AND op.order_id = ?
+              AND op.parent_id IS NOT NULL;
+        ";
+
+        DB::statement($query, [
+            $this->getKey(),
+            $this->getKey(),
+            $this->getKey(),
+        ]);
+
+        return $this;
+    }
+
+    protected function recalculateOrderPositionSlugPositionsGeneric(): static
+    {
+        $positions = resolve_static(OrderPosition::class, 'query')
+            ->where('order_id', $this->getKey())
+            ->orderBy('sort_number')
+            ->get(['id', 'parent_id', 'sort_number']);
+
+        $updates = [];
+        $this->buildSlugPositions($positions, null, '', $updates);
+
+        if ($updates) {
+            $cases = collect($updates)
+                ->map(fn (string $slug, int $id): string => "WHEN {$id} THEN '{$slug}'")
+                ->implode(' ');
+
+            DB::statement(
+                'UPDATE order_positions SET slug_position = CASE id ' . $cases . ' END WHERE id IN (' . implode(',', array_keys($updates)) . ')'
+            );
+        }
+
+        return $this;
+    }
+
+    protected function buildSlugPositions(
+        Collection $positions,
+        ?int $parentId,
+        string $parentSlug,
+        array &$updates
+    ): void {
+        $children = $positions->where('parent_id', $parentId);
+
+        foreach ($children as $position) {
+            $slug = $parentSlug
+                ? $parentSlug . '.' . str_pad($position->sort_number, 8, '0', STR_PAD_LEFT)
+                : str_pad($position->sort_number, 8, '0', STR_PAD_LEFT);
+
+            $updates[$position->id] = $slug;
+
+            $this->buildSlugPositions($positions, $position->id, $slug, $updates);
+        }
     }
 
     protected function makeAllSearchableUsing(Builder $query): Builder
