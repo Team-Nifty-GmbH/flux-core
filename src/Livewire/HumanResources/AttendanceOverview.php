@@ -186,7 +186,7 @@ class AttendanceOverview extends Component
             ->with([
                 'locations:id',
             ])
-            ->selectRaw($this->getHolidayDateSelectExpression())
+            ->selectRaw(...$this->getHolidayDateSelectExpression())
             ->get()
             ->map(function (Holiday $holiday) {
                 $holidayArray = $holiday->toArray();
@@ -216,12 +216,12 @@ class AttendanceOverview extends Component
         }
     }
 
-    protected function getHolidayDateSelectExpression(): string
+    protected function getHolidayDateSelectExpression(): array
     {
         if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
-            return "id, name, COALESCE(date, CONCAT('$this->year', '-', month, '-', day)) AS date";
+            return ["id, name, COALESCE(date, CONCAT(?, '-', month, '-', day)) AS date", [$this->year]];
         }
 
-        return "id, name, COALESCE(date, '$this->year' || '-' || month || '-' || day) AS date";
+        return ["id, name, COALESCE(date, ? || '-' || month || '-' || day) AS date", [$this->year]];
     }
 }

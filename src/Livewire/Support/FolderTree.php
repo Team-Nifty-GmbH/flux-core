@@ -250,21 +250,7 @@ abstract class FolderTree extends Component
             $replace = Str::replaceLast(Str::afterLast($path, '.'), $attributes['slug'], $path);
 
             if ($path !== $replace) {
-                $substringStart = strlen($path) + 1;
-
-                if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
-                    $expression = "CONCAT('$replace', SUBSTRING(collection_name, $substringStart))";
-                } else {
-                    $expression = "'$replace' || SUBSTR(collection_name, $substringStart)";
-                }
-
-                resolve_static(Media::class, 'query')
-                    ->where('model_type', morph_alias($this->modelType))
-                    ->where('model_id', $this->modelId)
-                    ->where('collection_name', 'like', $path . '%')
-                    ->update([
-                        'collection_name' => DB::raw($expression),
-                    ]);
+                $this->updateCollectionNames($path, $replace);
             }
 
             return $attributes;
@@ -393,22 +379,7 @@ abstract class FolderTree extends Component
         $newCollectionName = $this->buildCollectionName($subject, $targetPath);
 
         if ($newCollectionName !== $subjectPath) {
-            $substringStart = strlen($subjectPath) + 1;
-            $driver = DB::connection()->getDriverName();
-
-            if (in_array($driver, ['mysql', 'mariadb'])) {
-                $expression = "CONCAT('$newCollectionName', SUBSTRING(collection_name, $substringStart))";
-            } else {
-                $expression = "'$newCollectionName' || SUBSTR(collection_name, $substringStart)";
-            }
-
-            resolve_static(Media::class, 'query')
-                ->where('model_type', morph_alias($this->modelType))
-                ->where('model_id', $this->modelId)
-                ->where('collection_name', 'like', $subjectPath . '%')
-                ->update([
-                    'collection_name' => DB::raw($expression),
-                ]);
+            $this->updateCollectionNames($subjectPath, $newCollectionName);
         }
 
         $this->toast()
@@ -416,6 +387,27 @@ abstract class FolderTree extends Component
             ->send();
 
         return true;
+    }
+
+    protected function updateCollectionNames(string $oldPath, string $newPath): void
+    {
+        $substringStart = strlen($oldPath) + 1;
+        $connection = DB::connection();
+        $quotedNewPath = $connection->getPdo()->quote($newPath);
+
+        if (in_array($connection->getDriverName(), ['mysql', 'mariadb'])) {
+            $expression = "CONCAT({$quotedNewPath}, SUBSTRING(collection_name, {$substringStart}))";
+        } else {
+            $expression = "{$quotedNewPath} || SUBSTR(collection_name, {$substringStart})";
+        }
+
+        resolve_static(Media::class, 'query')
+            ->where('model_type', morph_alias($this->modelType))
+            ->where('model_id', $this->modelId)
+            ->where('collection_name', 'like', $oldPath . '%')
+            ->update([
+                'collection_name' => DB::raw($expression),
+            ]);
     }
 
     protected function moveMedia(array $subject, array $target, string $targetPath, string $targetType): bool

@@ -334,11 +334,37 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             ->orderBy('sort_number')
             ->pluck('id');
 
-        foreach ($siblings as $index => $id) {
-            resolve_static(OrderPosition::class, 'query')
-                ->where('id', $id)
-                ->update(['sort_number' => $index + 1]);
+        if ($siblings->isEmpty()) {
+            return;
         }
+
+        $caseFragments = [];
+        $bindings = [];
+
+        foreach ($siblings as $index => $id) {
+            $caseFragments[] = 'WHEN ? THEN ?';
+            $bindings[] = $id;
+            $bindings[] = $index + 1;
+        }
+
+        $bindings[] = $this->order_id;
+
+        if ($parentId !== null) {
+            $bindings[] = $parentId;
+        }
+
+        $bindings = array_merge($bindings, $siblings->all());
+
+        $this->getConnection()->update(
+            sprintf(
+                'UPDATE %s SET sort_number = CASE id %s END WHERE order_id = ? AND %s AND id IN (%s)',
+                $this->getConnection()->getTablePrefix() . $this->getTable(),
+                implode(' ', $caseFragments),
+                $parentId === null ? 'parent_id IS NULL' : 'parent_id = ?',
+                implode(',', array_fill(0, $siblings->count(), '?'))
+            ),
+            $bindings
+        );
     }
 
     protected function slugPosition(): Attribute
