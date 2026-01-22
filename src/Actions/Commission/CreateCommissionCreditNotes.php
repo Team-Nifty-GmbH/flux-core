@@ -37,6 +37,8 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
     public function performAction(): OrderCollection
     {
+        $commissionIds = collect($this->getData('commissions'))->pluck('id')->toArray();
+
         $orderIds = [];
         foreach ($this->agents as $agentId => $agentData) {
             foreach (data_get($agentData, 'tenant_ids') as $tenantId) {
@@ -57,7 +59,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
                 $commissions = resolve_static(Commission::class, 'query')
                     ->where('user_id', $agentId)
-                    ->whereKey($this->getData('commissions'))
+                    ->whereKey($commissionIds)
                     ->whereDoesntHave('creditNoteOrderPosition')
                     ->withWhereHas(
                         'orderPosition',
@@ -111,10 +113,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
     {
         parent::validateData();
 
-        $commissionIds = collect($this->getData('commissions'))
-            ->pluck('id')
-            ->toArray();
-        $this->data['commissions'] = $commissionIds;
+        $commissionIds = collect($this->getData('commissions'))->pluck('id')->toArray();
 
         $errors = [];
         $agents = resolve_static(User::class, 'query')
