@@ -61,7 +61,10 @@
 <main>
     @section('header')
     <div class="prose-xs pb-4 pt-10">
-        {!! Blade::render(html_entity_decode($model->header ?? ''), ['model' => $model]) !!}
+        {{ render_editor_blade($model->header, ['order' => $model]) }}
+        @if ($model->orderType?->document_header)
+            {{ render_editor_blade($model->orderType->document_header, ['order' => $model]) }}
+        @endif
     </div>
     @show
     <div class="pb-6">
@@ -238,7 +241,11 @@
     @show
     @section('footer')
     <div class="prose-xs break-inside-avoid">
-        {!! Blade::render(html_entity_decode($model->footer ?? ''), ['model' => $model]) !!}
+        {{ render_editor_blade($model->footer, ['order' => $model]) }}
+        @if ($model->orderType?->document_footer)
+            {{ render_editor_blade($model->orderType->document_footer, ['order' => $model]) }}
+        @endif
+
         {!!
             $model
                 ->vatRates()

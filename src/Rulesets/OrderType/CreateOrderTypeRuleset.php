@@ -30,6 +30,8 @@ class CreateOrderTypeRuleset extends FluxRuleset
             ],
             'name' => 'required|string|max:255',
             'description' => 'string|nullable',
+            'document_header' => 'string|nullable',
+            'document_footer' => 'string|nullable',
             'print_layouts' => 'array|nullable',
             'print_layouts.*' => 'required|string',
             'post_stock_print_layouts' => 'array|nullable',
