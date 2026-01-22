@@ -117,12 +117,15 @@ abstract class BrowserTestCase extends TestCase
 
     public function defineEnvironment($app): void
     {
-        $app['config']->set('database.default', 'mysql');
         $app['config']->set('app.debug', true);
-        $app['config']->set('database.connections.mysql.database', 'testing');
         $app['config']->set('auth.defaults.guard', 'web');
         $app['config']->set('flux.install_done', true);
         $app['config']->set('session.driver', 'file');
+
+        // Use SQLite for browser tests (file-based, not :memory:)
+        $dbPath = env('DB_DATABASE', database_path('database.sqlite'));
+        $app['config']->set('database.default', 'sqlite');
+        $app['config']->set('database.connections.sqlite.database', $dbPath);
     }
 
     protected function getApplicationProviders($app): array
