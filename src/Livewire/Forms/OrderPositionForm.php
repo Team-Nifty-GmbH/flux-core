@@ -143,7 +143,7 @@ class OrderPositionForm extends FluxForm
 
         $this->product = $product;
 
-        $this->vat_rate_id = $this->product->vat_rate_id;
+        $this->vat_rate_id ??= $this->product->vat_rate_id;
         $this->name = $this->product->name;
         $this->product_number = $this->product->product_number;
         $this->ean_code = $this->product->ean;

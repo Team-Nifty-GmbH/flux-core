@@ -47,6 +47,7 @@ class CreateOrderPosition extends FluxAction
             ?? resolve_static(Tenant::class, 'default')?->getKey();
         $this->data['price_list_id'] ??= data_get($order, 'price_list_id')
             ?? resolve_static(PriceList::class, 'default')?->getKey();
+        $this->data['vat_rate_id'] = data_get($order, 'vat_rate_id') ?? data_get($this->data, 'vat_rate_id');
 
         if (is_int($this->getData('sort_number'))) {
             $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')

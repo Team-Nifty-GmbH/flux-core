@@ -227,6 +227,7 @@ class OrderPositions extends OrderPositionList
                     'is_net',
                 ])
             : $this->order->getPriceList();
+        $this->orderPosition->vat_rate_id = $this->order->vat_rate_id;
         $this->orderPosition->fillFromProduct($product);
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
@@ -462,6 +463,7 @@ class OrderPositions extends OrderPositionList
                 ?->localize($this->order->language_id);
         }
 
+        $this->orderPosition->vat_rate_id = $this->order->vat_rate_id;
         $this->orderPosition->fillFromProduct($product);
 
         return $this->addOrderPosition();
