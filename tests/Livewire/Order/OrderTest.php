@@ -806,7 +806,7 @@ test('vat calculation prevents negative amounts', function (): void {
     // Should be 0, not negative
     expect($order->total_net_price)->toEqual('0.00');
 
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
     expect($vat19['total_net_price'])->toEqual('0.00');
     expect($vat19['total_vat_price'])->toEqual('0.00');
 });
@@ -876,8 +876,8 @@ test('vat calculation with combined discounts', function (): void {
 
     // After 50% header: 19% = 25, 7% = 50, total = 75
     // After 37.50 flat: proportional distribution of remaining 37.50
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
+    $vat7 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.07', 10) === 0);
 
     // 19% portion: 25/75 * 37.50 = 12.50
     expect($vat19['total_net_price'])->toEqual('12.50');
@@ -945,8 +945,8 @@ test('vat calculation with flat header discount', function (): void {
     expect($order->total_net_price)->toEqual('112.50');
 
     // Check proportional distribution of flat discount
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
+    $vat7 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.07', 10) === 0);
 
     // 19% portion: 50/150 * 112.50 = 37.50
     expect($vat19['total_net_price'])->toEqual('37.50');
@@ -1025,8 +1025,8 @@ test('vat calculation with floating point precision', function (): void {
     // Total should be 0.60 - 0.17 = 0.43
     expect($order->total_net_price)->toEqual('0.43');
 
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
+    $vat7 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.07', 10) === 0);
 
     // Check that proportional distribution works correctly with bcmath
     // 19% group had 0.30 out of 0.60 = 50%
@@ -1101,8 +1101,8 @@ test('vat calculation with percentage header discount', function (): void {
     expect($order->total_net_price)->toEqual('75.00');
 
     // Check VAT calculations after header discount
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
+    $vat7 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.07', 10) === 0);
 
     expect($vat19['total_net_price'])->toEqual('25.00');
     // 50 * 0.5
@@ -1163,8 +1163,8 @@ test('vat calculation with position discounts', function (): void {
     expect(count($order->total_vats))->toEqual(2);
 
     // Check individual VAT calculations
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
+    $vat7 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.07', 10) === 0);
 
     expect($vat19['total_net_price'])->toEqual('50.00');
     expect($vat19['total_vat_price'])->toEqual('9.50');
@@ -1253,9 +1253,9 @@ test('order discount with mixed vat rates and position discounts', function (): 
 
     expect($order->total_net_price)->toEqual('2290.50');
 
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
-    $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
-    $vat0 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0000000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
+    $vat7 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.07', 10) === 0);
+    $vat0 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0', 10) === 0);
 
     expect($vat19['total_net_price'])->toEqual('2146.50');
     expect($vat19['total_vat_price'])->toEqual('407.84');
@@ -1312,7 +1312,7 @@ test('vat calculation with repeating decimals', function (): void {
     // 100 * (1 - 0.333333) = 66.6667, but bcround should round to 66.67
     expect($order->total_net_price)->toEqual('66.67');
 
-    $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+    $vat19 = collect($order->total_vats)->first(fn (array $v): bool => bccomp($v['vat_rate_percentage'], '0.19', 10) === 0);
 
     expect($vat19['total_net_price'])->toEqual('66.67');
     expect($vat19['total_vat_price'])->toEqual('12.67');

@@ -207,11 +207,12 @@ test('toggle daily work time', function (): void {
         ->assertSet('dailyWorkTime.is_daily_work_time', true)
         ->assertSet('dailyWorkTime.is_pause', false);
 
+    $startedAt = $component->get('dailyWorkTime.started_at');
     $this->assertDatabaseHas(
         'work_times',
         [
             'user_id' => $this->user->getKey(),
-            'started_at' => $startedAt = $component->get('dailyWorkTime.started_at'),
+            'started_at' => Carbon::parse($startedAt)->format('Y-m-d H:i:s'),
             'ended_at' => null,
             'is_locked' => false,
             'is_daily_work_time' => true,

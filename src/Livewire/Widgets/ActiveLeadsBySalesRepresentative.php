@@ -61,18 +61,20 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
         $end = $this->getEnd()->toDateString();
 
         $leadCounts = resolve_static(User::class, 'query')
+            ->whereHas('leads', fn (Builder $query) => $query
+                ->whereHas('leadState', fn (Builder $query) => $query
+                    ->where('is_won', false)
+                    ->where('is_lost', false))
+                ->where('start', '<=', $end)
+                ->where('end', '>=', $start))
             ->withCount([
-                'leads as total' => function (Builder $query) use ($start, $end): void {
-                    $query->whereHas('leadState', function (Builder $query): void {
-                        $query
-                            ->where('is_won', false)
-                            ->where('is_lost', false);
-                    })
-                        ->where('start', '<=', $end)
-                        ->where('end', '>=', $start);
-                },
+                'leads as total' => fn (Builder $query) => $query
+                    ->whereHas('leadState', fn (Builder $query) => $query
+                        ->where('is_won', false)
+                        ->where('is_lost', false))
+                    ->where('start', '<=', $end)
+                    ->where('end', '>=', $start),
             ])
-            ->having('total', '>', 0)
             ->orderByDesc('total')
             ->get();
 

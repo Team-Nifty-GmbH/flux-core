@@ -42,7 +42,7 @@ class MyResponsibleTasks extends Component
                     ->whereNotIn('state', $endStates)
                     ->orderByDesc('priority')
                     ->with('users:id,name')
-                    ->orderByRaw('ISNULL(due_date), due_date ASC')
+                    ->orderByRaw('due_date IS NULL, due_date ASC')
                     ->get(),
             ]
         );

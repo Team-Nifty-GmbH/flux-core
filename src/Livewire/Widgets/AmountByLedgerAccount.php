@@ -57,6 +57,8 @@ class AmountByLedgerAccount extends CircleChart implements HasWidgetOptions
             ->with('ledgerAccount:id,name')
             ->selectRaw('ledger_account_id, SUM(total_gross_price) as total')
             ->orderBy('total', 'desc')
+            ->orderByRaw('ledger_account_id IS NULL DESC')
+            ->orderBy('ledger_account_id')
             ->get()
             ->map(fn (Model $orderPosition) => [
                 'id' => $orderPosition->ledger_account_id,
