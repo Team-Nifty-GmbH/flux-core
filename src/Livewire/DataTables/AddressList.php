@@ -68,6 +68,8 @@ class AddressList extends BaseDataTable
 
     public bool $assignToAgent = true;
 
+    public ?int $mapLimit = 100;
+
     public bool $showMap = false;
 
     protected ?string $includeBefore = 'flux::livewire.contact.address-list';
@@ -81,7 +83,9 @@ class AddressList extends BaseDataTable
                 ->text(__('Show on Map'))
                 ->color('indigo')
                 ->icon('globe-alt')
-                ->wireClick('$toggle(\'showMap\', true)'),
+                ->wireClick(<<<'JS'
+                    $toggle('showMap', true)
+                JS),
             DataTableButton::make()
                 ->text(__('Create'))
                 ->color('indigo')
@@ -195,7 +199,7 @@ class AddressList extends BaseDataTable
     public function loadMap(): array
     {
         return $this->buildSearch()
-            ->limit(100)
+            ->when($this->mapLimit, fn (Builder $query): Builder => $query->limit($this->mapLimit))
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->where('is_main_address', true)
@@ -213,7 +217,7 @@ class AddressList extends BaseDataTable
             ])
             ->with([
                 'contact:id',
-                'contact.media' => fn ($query) => $query->where('collection_name', 'avatar'),
+                'contact.media' => fn (Builder $query): Builder => $query->where('collection_name', 'avatar'),
             ])
             ->get()
             ->toMap()

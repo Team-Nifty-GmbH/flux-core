@@ -789,6 +789,7 @@
     "Delete user": "Benutzer löschen",
     "deleted": "hat gelöscht",
     "Deleted :count orders": ":count Aufträge gelöscht",
+    ":count orders without coordinates": ":count Aufträge ohne Koordinaten",
     "Deleted At": "Gelöscht am",
     "Deleted By": "Gelöscht von",
     "Delivery": "Lieferung",

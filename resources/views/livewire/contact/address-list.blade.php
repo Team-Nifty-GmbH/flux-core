@@ -68,29 +68,6 @@
 @endcanAction
 
 @section('map')
-    <div>
-        <div
-            x-on:load-map.window="$nextTick(() => onChange())"
-            class="z-0 py-4"
-            x-data="addressMap($wire, 'loadMap', false, '{{ auth()->user() ?->getAvatarUrl() }}')"
-            x-cloak
-            x-show="$wire.showMap"
-            x-collapse
-        >
-            <x-card class="w-full">
-                <x-slot:header>
-                    <x-button.circle
-                        color="secondary"
-                        light
-                        wire:click="$set('showMap', false, true)"
-                        icon="x-mark"
-                    />
-                </x-slot>
-                <div x-intersect.once="onChange()">
-                    <div id="map" class="h-96 min-w-96"></div>
-                </div>
-            </x-card>
-        </div>
-    </div>
+    <x-flux::map.fullscreen-container />
     @show
 @endsection

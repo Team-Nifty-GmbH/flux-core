@@ -15,6 +15,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\CreatesDocuments;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
@@ -28,15 +29,26 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public ?string $cacheKey = 'order.order-list';
 
+    public ?int $mapLimit = 100;
+
     public OrderForm $order;
 
     public ?int $orderType = null;
+
+    public bool $showMap = false;
 
     protected ?string $includeBefore = 'flux::livewire.order.order-list';
 
     protected function getTableActions(): array
     {
         return [
+            DataTableButton::make()
+                ->text(__('Show on Map'))
+                ->color('indigo')
+                ->icon('globe-alt')
+                ->wireClick(<<<'JS'
+                    $toggle('showMap', true)
+                JS),
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('New order'))
@@ -122,6 +134,51 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->redirect(route('orders.id', $this->order->id), true);
 
         return null;
+    }
+
+    #[Renderless]
+    public function getOrdersWithoutCoordinatesCount(): int
+    {
+        return $this->buildSearch()
+            ->whereHas('addressDelivery', function ($query): void {
+                $query->whereNull('latitude')
+                    ->orWhereNull('longitude');
+            })
+            ->count();
+    }
+
+    #[Renderless]
+    public function loadData(): void
+    {
+        parent::loadData();
+
+        if ($this->showMap) {
+            $this->updatedShowMap();
+        }
+    }
+
+    #[Renderless]
+    public function loadMap(): array
+    {
+        return $this->buildSearch()
+            ->whereHas('addressDelivery', function (Builder $query): void {
+                $query->whereNotNull('latitude')
+                    ->whereNotNull('longitude');
+            })
+            ->when($this->mapLimit, fn (Builder $query): Builder => $query->limit($this->mapLimit))
+            ->with([
+                'addressDelivery:id,company,firstname,lastname,street,zip,city,latitude,longitude',
+                'contact.mainAddress',
+            ])
+            ->get()
+            ->toMap()
+            ->toArray();
+    }
+
+    #[Renderless]
+    public function updatedShowMap(): void
+    {
+        $this->dispatch('load-map');
     }
 
     protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null

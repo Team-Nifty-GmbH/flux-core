@@ -29,6 +29,13 @@ class OrderListByOrderType extends BaseOrderList
     {
         return [
             DataTableButton::make()
+                ->text(__('Show on Map'))
+                ->color('indigo')
+                ->icon('globe-alt')
+                ->wireClick(<<<'JS'
+                    $toggle('showMap', true)
+                    JS),
+            DataTableButton::make()
                 ->color('indigo')
                 ->text(
                     resolve_static(OrderType::class, 'query')
