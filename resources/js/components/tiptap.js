@@ -236,10 +236,12 @@ export default function (
                 element.dataset.tiptapInitialized = 'true';
 
                 this.$watch('editable', (editable) => {
+                    if (!this.proxy) return;
                     this.proxy.setOptions({ editable: editable });
                 });
 
                 this.$watch('content', (content) => {
+                    if (!this.proxy) return;
                     if (content === this.editor().getHTML()) return;
                     this.editor().commands.setContent(content, false);
                 });
