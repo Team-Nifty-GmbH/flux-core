@@ -102,13 +102,21 @@ class Price extends FluxModel
         );
     }
 
-    public function getGross($vat): string
+    public function getGross($vat): ?string
     {
+        if (is_null($this->price)) {
+            return null;
+        }
+
         return $this->is_net ? net_to_gross($this->price, $vat) : $this->price;
     }
 
-    public function getNet($vat): string
+    public function getNet($vat): ?string
     {
+        if (is_null($this->price)) {
+            return null;
+        }
+
         return $this->is_net ? $this->price : gross_to_net($this->price, $vat);
     }
 
