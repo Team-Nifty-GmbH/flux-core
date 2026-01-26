@@ -140,9 +140,18 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     public function getOrdersWithoutCoordinatesCount(): int
     {
         return $this->buildSearch()
-            ->whereHas('addressDelivery', function ($query): void {
-                $query->whereNull('latitude')
-                    ->orWhereNull('longitude');
+            ->where(function (Builder $query): void {
+                $query->where(function (Builder $query): void {
+                    $query->whereDoesntHave('addressDelivery')
+                        ->orWhereHas('addressDelivery', function (Builder $query): void {
+                            $query->whereNull('latitude')
+                                ->orWhereNull('longitude');
+                        });
+                })
+                    ->where(function (Builder $query): void {
+                        $query->whereNull('address_delivery->latitude')
+                            ->orWhereNull('address_delivery->longitude');
+                    });
             })
             ->count();
     }
