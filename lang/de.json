@@ -6,6 +6,7 @@
     ":count jobs have failed": ":count Jobs sind fehlgeschlagen",
     ":count leads created": ":count Leads erstellt",
     ":count order(s) skipped due to missing email address.": ":count Auftrag/Aufträge übersprungen, da keine E-Mail-Adresse vorhanden.",
+    ":count orders without coordinates": ":count Aufträge ohne Koordinaten",
     ":days days available": ":days Tage verfügbar",
     ":days days per week": ":days Tage pro Woche",
     ":job_name is finished": ":job_name ist beendet",
