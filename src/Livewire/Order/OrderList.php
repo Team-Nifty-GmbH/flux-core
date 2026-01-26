@@ -161,13 +161,19 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     public function loadMap(): array
     {
         return $this->buildSearch()
-            ->whereHas('addressDelivery', function (Builder $query): void {
-                $query->whereNotNull('latitude')
-                    ->whereNotNull('longitude');
+            ->where(function (Builder $query): void {
+                $query->whereHas('addressDelivery', function (Builder $query): void {
+                    $query->whereNotNull('latitude')
+                        ->whereNotNull('longitude');
+                })
+                    ->orWhere(function (Builder $query): void {
+                        $query->whereNotNull('address_delivery->latitude')
+                            ->whereNotNull('address_delivery->longitude');
+                    });
             })
             ->when($this->mapLimit, fn (Builder $query): Builder => $query->limit($this->mapLimit))
             ->with([
-                'addressDelivery:id,company,firstname,lastname,street,zip,city,latitude,longitude',
+                'addressDelivery:id,company,firstname,lastname,latitude,longitude,zip,city,street',
                 'contact.mainAddress',
             ])
             ->get()

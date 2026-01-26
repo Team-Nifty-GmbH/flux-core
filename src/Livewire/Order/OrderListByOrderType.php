@@ -34,7 +34,7 @@ class OrderListByOrderType extends BaseOrderList
                 ->icon('globe-alt')
                 ->wireClick(<<<'JS'
                     $toggle('showMap', true)
-                    JS),
+                JS),
             DataTableButton::make()
                 ->color('indigo')
                 ->text(

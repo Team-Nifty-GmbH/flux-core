@@ -1,5 +1,5 @@
 @props([
-    'orders',
+    'orders' => [],
 ])
 
 <div class="flex max-h-64 flex-col gap-3 overflow-y-auto">
