@@ -339,7 +339,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
                 SELECT op.id, op.total_gross_price, op.is_alternative
                 FROM order_positions op
                 INNER JOIN child_items ci ON op.parent_id = ci.id
-                WHERE op.is_alternative = false
+                WHERE op.is_alternative = false AND op.deleted_at IS NULL
             )
             SELECT SUM(total_gross_price) as total
             FROM child_items
@@ -362,7 +362,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
                 SELECT op.id, op.total_net_price, op.is_alternative
                 FROM order_positions op
                 INNER JOIN child_items ci ON op.parent_id = ci.id
-                WHERE op.is_alternative = false
+                WHERE op.is_alternative = false AND op.deleted_at IS NULL
             )
             SELECT SUM(total_net_price) as total
             FROM child_items
@@ -375,7 +375,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     protected function totalGrossPrice(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->is_free_text && ! $value
+            get: fn ($value) => $this->is_free_text
                 ? $this->subTotalGross() ?: null
                 : $value
         );
@@ -384,7 +384,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     protected function totalNetPrice(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->is_free_text && ! $value
+            get: fn ($value) => $this->is_free_text
                 ? $this->subTotalNet() ?: null
                 : $value
         );
