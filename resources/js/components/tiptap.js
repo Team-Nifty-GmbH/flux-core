@@ -31,6 +31,19 @@ export default function (
             setIsClickListenerSet(value) {
                 this.isClickListenerSet = value;
             },
+            destroy() {
+                if (_editor) {
+                    _editor.destroy();
+                    _editor = null;
+                }
+
+                if (this.floatingElement) {
+                    this.floatingElement.remove();
+                    this.floatingElement = null;
+                }
+
+                this.proxy = null;
+            },
             async updateFloatingPosition(referenceElement) {
                 if (!this.floatingElement || !referenceElement) return;
 
@@ -60,6 +73,26 @@ export default function (
                 const popUp = this.$refs[`popWindow-${id}`];
                 const controlPanel = this.$refs[`controlPanel-${id}`];
                 const commands = this.$refs[`commands-${id}`];
+
+                if (_editor) {
+                    this.destroy();
+                }
+
+                const existingEditor = element.querySelector('.ProseMirror');
+                if (existingEditor) {
+                    existingEditor.remove();
+                }
+
+                const existingFloating =
+                    element.parentElement?.querySelector('.floating-dropdown');
+                if (existingFloating) {
+                    existingFloating.remove();
+                }
+
+                if (controlPanel && controlPanel.children.length > 0) {
+                    controlPanel.innerHTML = '';
+                }
+
                 let actions = null;
 
                 if (showTooltipDropdown && popUp !== null) {
@@ -200,11 +233,15 @@ export default function (
 
                 this.proxy = Alpine.raw(_editor);
 
+                element.dataset.tiptapInitialized = 'true';
+
                 this.$watch('editable', (editable) => {
+                    if (!this.proxy) return;
                     this.proxy.setOptions({ editable: editable });
                 });
 
                 this.$watch('content', (content) => {
+                    if (!this.proxy) return;
                     if (content === this.editor().getHTML()) return;
                     this.editor().commands.setContent(content, false);
                 });
