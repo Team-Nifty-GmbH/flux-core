@@ -11,6 +11,16 @@
                         wire:model="orderType.description"
                         :label="__('Description')"
                     />
+                    <x-flux::editor
+                        wire:model="orderType.document_header"
+                        :label="__('Document Header')"
+                        :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\Order::class)"
+                    />
+                    <x-flux::editor
+                        wire:model="orderType.document_footer"
+                        :label="__('Document Footer')"
+                        :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\Order::class)"
+                    />
                     <x-select.styled
                         :label="__('Tenant')"
                         :placeholder="__('Select a Tenant')"

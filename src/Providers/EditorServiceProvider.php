@@ -92,6 +92,8 @@ class EditorServiceProvider extends ServiceProvider
                 'Invoice Number' => '$order->invoice_number',
                 'Invoice Date' => '$order->invoice_date?->isoFormat(\'L\')',
                 'Tenant Name' => '$order->tenant?->name',
+                'Agent Name' => '$order->agent?->name',
+                'Responsible User Name' => '$order->responsibleUser?->name',
             ],
             Order::class
         );

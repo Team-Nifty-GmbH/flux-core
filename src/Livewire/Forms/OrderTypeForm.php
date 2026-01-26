@@ -13,6 +13,10 @@ class OrderTypeForm extends FluxForm
 
     public ?string $description = null;
 
+    public ?string $document_footer = null;
+
+    public ?string $document_header = null;
+
     public ?int $email_template_id = null;
 
     #[Locked]

@@ -11,6 +11,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -18,7 +19,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderTypes extends OrderTypeList
 {
-    use Actions;
+    use Actions, SupportsLocalization;
 
     public OrderTypeForm $orderType;
 
