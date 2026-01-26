@@ -9,8 +9,8 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('order_types', function (Blueprint $table): void {
-            $table->text('document_footer')->nullable()->after('description');
             $table->text('document_header')->nullable()->after('description');
+            $table->text('document_footer')->nullable()->after('document_header');
         });
     }
 
