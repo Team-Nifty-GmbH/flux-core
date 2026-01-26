@@ -3,6 +3,8 @@
 namespace FluxErp\Traits\Model;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 trait Printable
 {
@@ -30,7 +32,22 @@ trait Printable
 
     public function resolvePrintViews(): array
     {
-        $printViews = array_merge($this->getPrintViews(), static::$registeredPrintViews);
+        $printViews = array_merge(
+            array_filter(
+                $this->getPrintViews(),
+                function (string|int $key) {
+                    try {
+                        return Auth::user()
+                            ?->hasPermissionTo(print_view_to_permission($key, $this->getMorphClass()))
+                            ?? true;
+                    } catch (PermissionDoesNotExist) {
+                        return true;
+                    }
+                },
+                ARRAY_FILTER_USE_KEY
+            ),
+            static::$registeredPrintViews
+        );
 
         foreach ($printViews as $name => $view) {
             if (is_string($view)) {

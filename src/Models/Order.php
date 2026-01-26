@@ -756,46 +756,17 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function getPrintViews(): array
     {
-        // This has to be done this way, as this method is also called on order types settings with an empty order.
-        if ($this->orderType?->order_type_enum->isPurchase()) {
-            $printViews = [
-                'supplier-order' => SupplierOrder::class,
-            ];
-        } else {
-            $printViews = array_filter([
-                'invoice' => Invoice::class,
-                'final-invoice' => FinalInvoice::class,
-                'offer' => Offer::class,
-                'order-confirmation' => OrderConfirmation::class,
-                'retoure' => Retoure::class,
-                'refund' => Refund::class,
-                'delivery-note' => DeliveryNote::class,
-                'cancellation-confirmation' => $this->orderType?->order_type_enum?->isSubscription()
-                    ? CancellationConfirmation::class
-                    : null,
-            ]);
-        }
-
-        if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
-            $children = $this->children()
-                ->pluck('invoice_number')
-                ->toArray();
-
-            if (
-                $children
-                && count($children) === count(array_filter($children))
-            ) {
-                // If all children have an invoice number, only show final invoice
-                unset($printViews['invoice']);
-            } elseif ($children) {
-                // If the order has children, but not all have an invoice number, remove invoice and final invoice
-                unset($printViews['invoice'], $printViews['final-invoice']);
-            }
-        } elseif ($this->orderType) {
-            unset($printViews['final-invoice']);
-        }
-
-        return $printViews;
+        return [
+            'invoice' => Invoice::class,
+            'final-invoice' => FinalInvoice::class,
+            'offer' => Offer::class,
+            'order-confirmation' => OrderConfirmation::class,
+            'retoure' => Retoure::class,
+            'refund' => Refund::class,
+            'delivery-note' => DeliveryNote::class,
+            'cancellation-confirmation' => CancellationConfirmation::class,
+            'supplier-order' => SupplierOrder::class,
+        ];
     }
 
     public function getSerialNumber(string|array $types, ?int $tenantId = null): static
@@ -985,6 +956,52 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function resolvePrintViews(): array
     {
         $printViews = $this->printableResolvePrintViews();
+
+        // This has to be done this way, as this method is also called on order types settings with an empty order.
+        if ($this->orderType?->order_type_enum->isPurchase()) {
+            $printViews = array_intersect_assoc(
+                $printViews,
+                array_merge(['supplier-order' => SupplierOrder::class], static::$registeredPrintViews)
+            );
+        } else {
+            $printViews = array_intersect_assoc(
+                $printViews,
+                array_merge(
+                    [
+                        'invoice' => Invoice::class,
+                        'final-invoice' => FinalInvoice::class,
+                        'offer' => Offer::class,
+                        'order-confirmation' => OrderConfirmation::class,
+                        'retoure' => Retoure::class,
+                        'refund' => Refund::class,
+                        'delivery-note' => DeliveryNote::class,
+                        'cancellation-confirmation' => $this->orderType?->order_type_enum?->isSubscription()
+                            ? CancellationConfirmation::class
+                            : null,
+                    ],
+                    static::$registeredPrintViews
+                )
+            );
+        }
+
+        if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
+            $children = $this->children()
+                ->pluck('invoice_number')
+                ->toArray();
+
+            if (
+                $children
+                && count($children) === count(array_filter($children))
+            ) {
+                // If all children have an invoice number, only show final invoice
+                unset($printViews['invoice']);
+            } elseif ($children) {
+                // If the order has children, but not all have an invoice number, remove invoice and final invoice
+                unset($printViews['invoice'], $printViews['final-invoice']);
+            }
+        } elseif ($this->orderType) {
+            unset($printViews['final-invoice']);
+        }
 
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
     }

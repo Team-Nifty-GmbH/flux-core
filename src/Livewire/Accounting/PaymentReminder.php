@@ -14,7 +14,6 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder as PaymentReminderModel;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Traits\Livewire\CreatesDocuments;
-use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
@@ -212,13 +211,13 @@ class PaymentReminder extends OrderList
 
     protected function getPrintLayouts(): array
     {
-        return [
-            'payment-reminder' => PaymentReminderView::class,
-        ];
+        return app(PaymentReminderModel::class)->resolvePrintViews();
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        return [$item->order->contact->invoiceAddress->email_primary ?? $item->order->contact->mainAddress->email_primary];
+        return [
+            $item->order->contact->invoiceAddress->email_primary ?? $item->order->contact->mainAddress->email_primary,
+        ];
     }
 }

@@ -4,6 +4,7 @@ namespace FluxErp\Console\Commands\Init;
 
 use Closure;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
@@ -43,6 +44,7 @@ class InitPermissions extends Command
         $this->registerRoutePermissions();
         $this->registerWidgetPermissions();
         $this->registerTabPermissions();
+        $this->registerPrintPermissions();
 
         resolve_static(Permission::class, 'query')
             ->whereIntegerInRaw('id', array_keys($this->currentPermissions))
@@ -50,73 +52,7 @@ class InitPermissions extends Command
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
-    public function registerTabPermissions(): void
-    {
-        $this->info('Registering tab permissions…');
-        $registry = app(ComponentRegistry::class);
-        foreach (invade($registry)->aliases as $component) {
-            if (! in_array(WithTabs::class, class_uses_recursive($component))) {
-                continue;
-            }
-
-            $componentInstance = new $component();
-
-            foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
-                $permission = resolve_static(
-                    Permission::class,
-                    'findOrCreate',
-                    [
-                        'name' => 'tab.' . $tab->component,
-                        'guardName' => 'web',
-                    ]
-                );
-                unset($this->currentPermissions[$permission->id]);
-            }
-        }
-    }
-
-    /**
-     * Determine if the route uses a framework controller.
-     */
-    protected function isFrameworkController(\Illuminate\Routing\Route $route): bool
-    {
-        return in_array($route->getControllerClass(), [
-            '\Illuminate\Routing\RedirectController',
-            '\Illuminate\Routing\ViewController',
-        ], true);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    protected function isVendorRoute(\Illuminate\Routing\Route $route): bool
-    {
-        if (array_search('permission', $route->getAction('middleware'))) {
-            return false;
-        }
-
-        if ($route->action['uses'] instanceof Closure) {
-            $path = (new ReflectionFunction($route->action['uses']))
-                ->getFileName();
-        } elseif (is_string($route->action['uses']) &&
-            str_contains($route->action['uses'], 'SerializableClosure')) {
-            return false;
-        } elseif (is_string($route->action['uses'])) {
-            if ($this->isFrameworkController($route)) {
-                return false;
-            }
-
-            $path = (new ReflectionClass($route->getControllerClass()))
-                ->getFileName();
-        } else {
-            return false;
-        }
-
-        return str_starts_with($path, base_path('vendor'))
-            && ! str_starts_with($path, base_path('vendor/team-nifty-gmbh/flux-erp'));
-    }
-
-    private function registerActionPermission(string $guardName = 'web'): void
+    protected function registerActionPermission(string $guardName = 'web'): void
     {
         $this->info('Registering action permissions for guard ' . $guardName . '…');
         foreach (Action::all() as $action) {
@@ -134,7 +70,7 @@ class InitPermissions extends Command
         }
     }
 
-    private function registerModelGetPermission(): void
+    protected function registerModelGetPermission(): void
     {
         $this->info('Registering model get permissions…');
         $roles = resolve_static(Role::class, 'query')
@@ -171,7 +107,7 @@ class InitPermissions extends Command
         }
     }
 
-    private function registerRoutePermissions(): void
+    protected function registerRoutePermissions(): void
     {
         $routes = Route::getRoutes()->getRoutes();
 
@@ -228,7 +164,7 @@ class InitPermissions extends Command
         $this->info('Permissions initiated!');
     }
 
-    private function registerWidgetPermissions(): void
+    protected function registerWidgetPermissions(): void
     {
         $this->info('Registering widget permissions…');
         foreach (Widget::all() as $widget) {
@@ -242,5 +178,109 @@ class InitPermissions extends Command
             );
             unset($this->currentPermissions[$permission->id]);
         }
+    }
+
+    protected function registerTabPermissions(): void
+    {
+        $this->info('Registering tab permissions…');
+        $registry = app(ComponentRegistry::class);
+        foreach (invade($registry)->aliases as $component) {
+            if (! in_array(WithTabs::class, class_uses_recursive($component))) {
+                continue;
+            }
+
+            $componentInstance = new $component();
+
+            foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
+                $permission = resolve_static(
+                    Permission::class,
+                    'findOrCreate',
+                    [
+                        'name' => 'tab.' . $tab->component,
+                        'guardName' => 'web',
+                    ]
+                );
+                unset($this->currentPermissions[$permission->id]);
+            }
+        }
+    }
+
+    protected function registerPrintPermissions(): void
+    {
+        $this->info('Registering print permissions…');
+        $roles = resolve_static(Role::class, 'query')
+            ->where('guard_name', 'web')
+            ->get();
+        $newPermissions = [];
+
+        foreach (Relation::morphMap() as $alias => $class) {
+            $model = app($class);
+            if ($model instanceof OffersPrinting) {
+                foreach ($model->getPrintViews() as $key => $view) {
+                    $permission = resolve_static(
+                        Permission::class,
+                        'findOrCreate',
+                        [
+                            'name' => print_view_to_permission($key, $alias),
+                            'guardName' => 'web',
+                        ]
+                    );
+
+                    if (is_null(data_get($this->currentPermissions, $permission->id))) {
+                        $newPermissions[] = $permission->getKey();
+                    }
+
+                    unset($this->currentPermissions[$permission->id]);
+                }
+            }
+        }
+
+        if ($newPermissions) {
+            foreach ($roles as $role) {
+                /** @var Role $role */
+                $role->givePermissionTo($newPermissions);
+            }
+        }
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    protected function isVendorRoute(\Illuminate\Routing\Route $route): bool
+    {
+        if (array_search('permission', $route->getAction('middleware'))) {
+            return false;
+        }
+
+        if ($route->action['uses'] instanceof Closure) {
+            $path = (new ReflectionFunction($route->action['uses']))
+                ->getFileName();
+        } elseif (is_string($route->action['uses']) &&
+            str_contains($route->action['uses'], 'SerializableClosure')) {
+            return false;
+        } elseif (is_string($route->action['uses'])) {
+            if ($this->isFrameworkController($route)) {
+                return false;
+            }
+
+            $path = (new ReflectionClass($route->getControllerClass()))
+                ->getFileName();
+        } else {
+            return false;
+        }
+
+        return str_starts_with($path, base_path('vendor'))
+            && ! str_starts_with($path, base_path('vendor/team-nifty-gmbh/flux-erp'));
+    }
+
+    /**
+     * Determine if the route uses a framework controller.
+     */
+    protected function isFrameworkController(\Illuminate\Routing\Route $route): bool
+    {
+        return in_array($route->getControllerClass(), [
+            '\Illuminate\Routing\RedirectController',
+            '\Illuminate\Routing\ViewController',
+        ], true);
     }
 }

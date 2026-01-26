@@ -153,6 +153,13 @@ if (! function_exists('channel_to_permission')) {
     }
 }
 
+if (! function_exists('print_view_to_permission')) {
+    function print_view_to_permission(string $printView, string $morphAlias): string
+    {
+        return 'print.' . $morphAlias . '.' . $printView;
+    }
+}
+
 if (! function_exists('qualify_model')) {
     function qualify_model(?string $model = null): ?string
     {

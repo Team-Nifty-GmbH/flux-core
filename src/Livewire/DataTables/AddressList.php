@@ -273,7 +273,7 @@ class AddressList extends BaseDataTable
 
     protected function getPrintLayouts(): array
     {
-        return app(Address::class)->getPrintViews();
+        return app(Address::class)->resolvePrintViews();
     }
 
     protected function getReturnKeys(): array
