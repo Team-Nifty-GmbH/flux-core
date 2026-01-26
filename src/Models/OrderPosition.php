@@ -112,15 +112,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         static::saved(function (OrderPosition $orderPosition): void {
             if ($orderPosition->isDirty('sort_number') || $orderPosition->isDirty('parent_id')) {
                 if ($orderPosition->isDirty('parent_id')) {
-                    DB::statement('SET @row_number = 0');
-
-                    resolve_static(OrderPosition::class, 'query')
-                        ->where('order_id', $orderPosition->order_id)
-                        ->where('parent_id', $orderPosition->getOriginal('parent_id'))
-                        ->orderBy('sort_number')
-                        ->update([
-                            'sort_number' => DB::raw('(@row_number:=@row_number+1)'),
-                        ]);
+                    $orderPosition->recalculateSiblingsSortNumbers($orderPosition->getOriginal('parent_id'));
                 }
 
                 $orderPosition->order->recalculateOrderPositionSlugPositions();
@@ -160,6 +152,15 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return static::query()
             ->where('order_id', $this->order_id)
             ->where('parent_id', $this->parent_id);
+    }
+
+    public function recalculateSiblingsSortNumbers(?int $parentId): void
+    {
+        if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
+            $this->recalculateSiblingsSortNumbersMysql($parentId);
+        } else {
+            $this->recalculateSiblingsSortNumbersGeneric($parentId);
+        }
     }
 
     public function commission(): HasOne
@@ -310,6 +311,60 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function workTime(): HasOne
     {
         return $this->hasOne(WorkTime::class);
+    }
+
+    protected function recalculateSiblingsSortNumbersMysql(?int $parentId): void
+    {
+        DB::statement('SET @row_number = 0');
+
+        resolve_static(OrderPosition::class, 'query')
+            ->where('order_id', $this->order_id)
+            ->where('parent_id', $parentId)
+            ->orderBy('sort_number')
+            ->update([
+                'sort_number' => DB::raw('(@row_number:=@row_number+1)'),
+            ]);
+    }
+
+    protected function recalculateSiblingsSortNumbersGeneric(?int $parentId): void
+    {
+        $siblings = resolve_static(OrderPosition::class, 'query')
+            ->where('order_id', $this->order_id)
+            ->where('parent_id', $parentId)
+            ->orderBy('sort_number')
+            ->pluck('id');
+
+        if ($siblings->isEmpty()) {
+            return;
+        }
+
+        $caseFragments = [];
+        $bindings = [];
+
+        foreach ($siblings as $index => $id) {
+            $caseFragments[] = 'WHEN ? THEN ?';
+            $bindings[] = $id;
+            $bindings[] = $index + 1;
+        }
+
+        $bindings[] = $this->order_id;
+
+        if ($parentId !== null) {
+            $bindings[] = $parentId;
+        }
+
+        $bindings = array_merge($bindings, $siblings->all());
+
+        $this->getConnection()->update(
+            sprintf(
+                'UPDATE %s SET sort_number = CASE id %s END WHERE order_id = ? AND %s AND id IN (%s)',
+                $this->getConnection()->getTablePrefix() . $this->getTable(),
+                implode(' ', $caseFragments),
+                $parentId === null ? 'parent_id IS NULL' : 'parent_id = ?',
+                implode(',', array_fill(0, $siblings->count(), '?'))
+            ),
+            $bindings
+        );
     }
 
     protected function slugPosition(): Attribute

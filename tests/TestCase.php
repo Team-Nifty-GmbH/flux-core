@@ -56,12 +56,12 @@ abstract class TestCase extends BaseTestCase
             mkdir(database_path('settings'));
         }
 
-        $app['config']->set('database.default', 'mysql');
-        $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
         $app['config']->set('flux.install_done', true);
         $app['config']->set('auth.defaults.guard', 'sanctum');
         $app['config']->set('cache.default', 'array');
         $app['config']->set('settings.auto_discover_settings', []);
+        $app['config']->set('webpush.table_name', 'push_subscriptions');
+        $app['config']->set('webpush.database_connection', null);
     }
 
     protected function getPackageAliases($app): array

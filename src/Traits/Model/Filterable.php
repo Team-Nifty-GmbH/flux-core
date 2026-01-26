@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -21,9 +22,24 @@ trait Filterable
 
     public static function getColumns(bool $showHidden = false): Collection
     {
-        $collection = collect(DB::select('DESCRIBE `' . (app(static::class))->getTable() . '`;'));
+        $model = app(static::class);
+        $table = $model->getTable();
 
-        return $showHidden ? $collection : $collection->whereNotIn('Field', (app(static::class))->getHidden());
+        if (in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
+            $collection = collect(DB::select('DESCRIBE `' . $table . '`;'));
+        } else {
+            $columns = Schema::getColumns($table);
+            $collection = collect($columns)->map(fn (array $column): object => (object) [
+                'Field' => $column['name'],
+                'Type' => $column['type'],
+                'Null' => $column['nullable'] ? 'YES' : 'NO',
+                'Key' => '',
+                'Default' => $column['default'],
+                'Extra' => $column['auto_increment'] ? 'auto_increment' : '',
+            ]);
+        }
+
+        return $showHidden ? $collection : $collection->whereNotIn('Field', $model->getHidden());
     }
 
     /**

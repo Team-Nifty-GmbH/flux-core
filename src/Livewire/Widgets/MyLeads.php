@@ -46,7 +46,7 @@ class MyLeads extends Component implements HasWidgetOptions
                     ->leads()
                     ->with(['address:id,name', 'leadState:id,name,color'])
                     ->whereIntegerInRaw('lead_state_id', $endStates)
-                    ->orderByRaw('ISNULL(end), end ASC')
+                    ->orderByRaw('end IS NULL, end ASC')
                     ->orderByDesc('probability_percentage')
                     ->orderByDesc('score')
                     ->get(),
@@ -78,7 +78,7 @@ class MyLeads extends Component implements HasWidgetOptions
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query->where('user_id', auth()->id())
                 ->whereIntegerInRaw('lead_state_id', $endStates)
-                ->orderByRaw('ISNULL(end), end ASC')
+                ->orderByRaw('end IS NULL, end ASC')
                 ->orderByDesc('probability_percentage')
                 ->orderByDesc('score'),
             __(static::getLabel()),

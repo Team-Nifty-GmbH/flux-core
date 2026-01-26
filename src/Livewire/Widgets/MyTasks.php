@@ -44,7 +44,7 @@ class MyTasks extends Component
                     ->with(['project:id,name', 'model'])
                     ->whereNotIn('state', $endStates)
                     ->orderByDesc('priority')
-                    ->orderByRaw('ISNULL(due_date), due_date ASC')
+                    ->orderByRaw('due_date IS NULL, due_date ASC')
                     ->get(),
             ]
         );

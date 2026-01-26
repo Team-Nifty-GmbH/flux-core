@@ -61,33 +61,32 @@ class ConversionRateByLeadOrigin extends BarChart
         $leadsWithWonOrLostLeadState = resolve_static(RecordOrigin::class, 'query')
             ->select(['id', 'name'])
             ->where('model_type', morph_alias(Lead::class))
+            ->whereHas('leads', fn (Builder $query) => $query
+                ->whereHas('leadState', fn (Builder $query) => $query
+                    ->where('is_won', true)
+                    ->orWhere('is_lost', true))
+                ->whereBetween('end', [$start, $end]))
             ->withCount([
-                'leads as total' => function (Builder $query) use ($start, $end): void {
-                    $query->whereHas('leadState', function (Builder $query): void {
-                        $query
-                            ->where('is_won', true)
-                            ->orWhere('is_lost', true);
-                    })
-                        ->whereBetween('end', [$start, $end]);
-                },
+                'leads as total' => fn (Builder $query) => $query
+                    ->whereHas('leadState', fn (Builder $query) => $query
+                        ->where('is_won', true)
+                        ->orWhere('is_lost', true))
+                    ->whereBetween('end', [$start, $end]),
             ])
-            ->having('total', '>', 0)
             ->orderByDesc('total')
             ->get();
 
         $leadsWithWonLeadState = resolve_static(RecordOrigin::class, 'query')
             ->select(['id', 'name'])
             ->where('model_type', morph_alias(Lead::class))
+            ->whereHas('leads', fn (Builder $query) => $query
+                ->whereHas('leadState', fn (Builder $query) => $query->where('is_won', true))
+                ->whereBetween('end', [$start, $end]))
             ->withCount([
-                'leads as total' => function (Builder $query) use ($start, $end): void {
-                    $query->whereHas('leadState', function (Builder $query): void {
-                        $query
-                            ->where('is_won', true);
-                    })
-                        ->whereBetween('end', [$start, $end]);
-                },
+                'leads as total' => fn (Builder $query) => $query
+                    ->whereHas('leadState', fn (Builder $query) => $query->where('is_won', true))
+                    ->whereBetween('end', [$start, $end]),
             ])
-            ->having('total', '>', 0)
             ->orderByDesc('total')
             ->get();
 
