@@ -64,6 +64,7 @@ beforeEach(function (): void {
     $this->orderPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'tenant_id' => $dbTenant->id,
+        'is_free_text' => false,
     ]);
 
     CommissionRate::factory()->create([
