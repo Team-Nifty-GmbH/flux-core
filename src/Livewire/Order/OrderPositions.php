@@ -411,11 +411,15 @@ class OrderPositions extends OrderPositionList
             },
         ]);
 
-        return resolve_static(OrderPosition::class, 'familyTree')
-            ->where('order_id', $this->order->id)
-            ->whereNull('parent_id')
-            ->get()
-            ->toArray();
+        try {
+            return resolve_static(OrderPosition::class, 'familyTree')
+                ->where('order_id', $this->order->id)
+                ->whereNull('parent_id')
+                ->get()
+                ->toArray();
+        } finally {
+            resolve_static(OrderPosition::class, 'withoutGlobalScope', ['scope' => 'sorted']);
+        }
     }
 
     public function getViewData(): array
