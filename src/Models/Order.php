@@ -378,6 +378,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         ];
     }
 
+    public function mappableDeliveryAddress(): array|object|null
+    {
+        if (data_get($this->address_delivery, 'latitude') && data_get($this->address_delivery, 'longitude')) {
+            return $this->address_delivery;
+        }
+
+        if ($this->addressDelivery?->latitude && $this->addressDelivery?->longitude) {
+            return $this->addressDelivery;
+        }
+
+        return $this->address_delivery ?? $this->addressDelivery;
+    }
+
     public function addressDelivery(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'address_delivery_id');

@@ -21,43 +21,63 @@ class OrderCollection extends Collection
 
     public function toMap(): BaseCollection
     {
-        return $this->groupBy(fn (Order $order) => $order->addressDelivery?->latitude . ',' . $order->addressDelivery?->longitude)
-            ->filter(fn (Collection $orders, string $key) => $key !== ',')
-            ->map(function (Collection $orders) {
-                $firstOrder = $orders->first();
-                $address = $firstOrder->addressDelivery;
-
-                return [
-                    'id' => $orders->pluck('id')->implode(','),
-                    'count' => $orders->count(),
-                    'tooltip' => $this->buildTooltip($orders),
-                    'popup' => $this->buildPopup($orders),
-                    'icon' => $this->buildIcon($orders),
-                    'latitude' => $address->latitude,
-                    'longitude' => $address->longitude,
-                ];
-            })
+        return $this->mapWithAddress()
+            ->groupBy(fn (array $item) => $this->getCoordinateKey(data_get($item, 'address')))
+            ->filter(fn (BaseCollection $items, string $key) => $key !== ',')
+            ->map(fn (BaseCollection $items) => [
+                'id' => $items->pluck('order.id')->implode(','),
+                'count' => $items->count(),
+                'tooltip' => $this->buildTooltip($items),
+                'popup' => $this->buildPopup($items),
+                'icon' => $this->buildIcon($items),
+                'latitude' => data_get($items->first(), 'address.latitude'),
+                'longitude' => data_get($items->first(), 'address.longitude'),
+            ])
             ->values();
     }
 
-    protected function buildTooltip(Collection $orders): string
+    protected function mapWithAddress(): BaseCollection
     {
-        return '<div>' . $orders->first()->addressDelivery?->postal_address . (($count = $orders->count()) > 1 ? ' (' . $count . ' ' . __('Orders') . ')' : '') . '</div>';
+        return $this->map(fn (Order $order): array => [
+            'order' => $order,
+            'address' => $order->mappableDeliveryAddress(),
+        ]);
     }
 
-    protected function buildPopup(Collection $orders): string
+    protected function getCoordinateKey(array|object|null $address): string
+    {
+        return data_get($address, 'latitude') . ',' . data_get($address, 'longitude');
+    }
+
+    protected function buildTooltip(BaseCollection $items): string
+    {
+        $address = data_get($items->first(), 'address');
+        $postalAddress = data_get($address, 'postal_address')
+            ?? trim(
+                data_get($address, 'street') . ', ' .
+                data_get($address, 'zip') . ' ' .
+                data_get($address, 'city'),
+                ', '
+            );
+
+        $count = $items->count();
+
+        return '<div>' . $postalAddress . ($count > 1 ? ' (' . $count . ' ' . __('Orders') . ')' : '') . '</div>';
+    }
+
+    protected function buildPopup(BaseCollection $items): string
     {
         return Blade::render(
             'flux::components.order.map-popup',
-            ['orders' => $orders]
+            ['orders' => $items]
         );
     }
 
-    protected function buildIcon(Collection $orders): string
+    protected function buildIcon(BaseCollection $items): string
     {
         return Blade::render(
             'flux::components.order.map-marker',
-            ['count' => $orders->count()]
+            ['count' => $items->count()]
         );
     }
 }
