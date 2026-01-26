@@ -22,7 +22,13 @@ class TimeFrameEnum extends FluxEnum
 
     final public const string ThisYear = 'This Year';
 
+    final public const string LastWeek = 'Last Week';
+
     final public const string LastMonth = 'Last Month';
+
+    final public const string LastQuarter = 'Last Quarter';
+
+    final public const string LastYear = 'Last Year';
 
     final public const string Custom = 'Custom';
 
@@ -55,9 +61,21 @@ class TimeFrameEnum extends FluxEnum
                 $now->subYear()->startOfYear(),
                 $now->subYear(),
             ],
+            TimeFrameEnum::LastWeek => [
+                $now->subWeeks(2)->startOfWeek(),
+                $now->subWeeks(2)->endOfWeek(),
+            ],
             TimeFrameEnum::LastMonth => [
                 $now->subMonthsNoOverflow(2)->startOfMonth(),
-                $now->subMonthsNoOverflow(2),
+                $now->subMonthsNoOverflow(2)->endOfMonth(),
+            ],
+            TimeFrameEnum::LastQuarter => [
+                $now->subQuarters(2)->startOfQuarter(),
+                $now->subQuarters(2)->endOfQuarter(),
+            ],
+            TimeFrameEnum::LastYear => [
+                $now->subYears(2)->startOfYear(),
+                $now->subYears(2)->endOfYear(),
             ],
             default => null,
         };
@@ -92,9 +110,21 @@ class TimeFrameEnum extends FluxEnum
                 $now->startOfYear(),
                 $now,
             ],
+            TimeFrameEnum::LastWeek => [
+                $now->subWeek()->startOfWeek(),
+                $now->subWeek()->endOfWeek(),
+            ],
             TimeFrameEnum::LastMonth => [
                 $now->subMonth()->startOfMonth(),
                 $now->subMonth()->endOfMonth(),
+            ],
+            TimeFrameEnum::LastQuarter => [
+                $now->subQuarter()->startOfQuarter(),
+                $now->subQuarter()->endOfQuarter(),
+            ],
+            TimeFrameEnum::LastYear => [
+                $now->subYear()->startOfYear(),
+                $now->subYear()->endOfYear(),
             ],
             default => null,
         };
@@ -107,9 +137,10 @@ class TimeFrameEnum extends FluxEnum
             TimeFrameEnum::Yesterday,
             TimeFrameEnum::ThisMonth,
             TimeFrameEnum::LastMonth,
+            TimeFrameEnum::LastWeek,
             TimeFrameEnum::ThisWeek => 'day',
-            TimeFrameEnum::ThisQuarter => 'week',
-            TimeFrameEnum::ThisYear => 'month',
+            TimeFrameEnum::ThisQuarter, TimeFrameEnum::LastQuarter => 'week',
+            TimeFrameEnum::ThisYear, TimeFrameEnum::LastYear => 'month',
             default => null,
         };
     }
