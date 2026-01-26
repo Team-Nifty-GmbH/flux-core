@@ -57,7 +57,7 @@ class CreateCommission extends FluxAction
                     $order->total_net_price
                 );
 
-                if (bccomp($orderDiscountPercentage, 0) === 1) {
+                if (! is_null($totalNetPrice) && bccomp($orderDiscountPercentage, 0) === 1) {
                     $totalNetPrice = discount($totalNetPrice, $orderDiscountPercentage);
                 }
             }
