@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
@@ -233,18 +234,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 
     public function sendLoginLink(): void
     {
-        $plaintext = Str::uuid()->toString();
-        $expires = now()->addMinutes(15);
-        Cache::put('login_token_' . $plaintext,
-            [
-                'user' => $this,
-                'guard' => 'web',
-                'intended_url' => Session::get('url.intended', route('dashboard')),
-            ],
-            $expires
-        );
-
-        Mail::to($this->email)->queue(MagicLoginLink::make($plaintext, $expires));
+        Mail::to($this->email)->queue(MagicLoginLink::make($this->generateLoginLink()));
     }
 
     public function targets(): BelongsToMany
@@ -276,6 +266,28 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     {
         return Attribute::set(
             fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
+        );
+    }
+
+    protected function generateLoginLink(): string
+    {
+        $plaintextToken = Str::uuid()->toString();
+        $expires = now()->addMinutes(15);
+        Cache::put('login_token_' . $plaintextToken,
+            [
+                'user' => $this,
+                'guard' => 'web',
+                'intended_url' => Session::get('url.intended', route('dashboard')),
+            ],
+            $expires
+        );
+
+        return URL::temporarySignedRoute(
+            'login-link',
+            $expires,
+            [
+                'token' => $plaintextToken,
+            ]
         );
     }
 }
