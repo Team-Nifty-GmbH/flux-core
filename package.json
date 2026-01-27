@@ -49,7 +49,7 @@
         "playwright": "^1.55.0",
         "postcss": "^8.4.32",
         "postcss-import": "^16.1.0",
-        "prettier": "3.6.2",
+        "prettier": "3.8.1",
         "prettier-plugin-blade": "^2.1.21",
         "prettier-plugin-tailwindcss": "^0.6.11",
         "pusher-js": "^8.4.0-rc2",
