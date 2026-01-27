@@ -447,7 +447,11 @@
         <x-slot:footer>
             @section('event-edit.footer')
             <div class="flex w-full justify-between gap-2">
-                <div class="flex justify-start gap-2">
+                <div
+                    class="flex justify-start gap-2"
+                    x-show="$wire.event.is_editable"
+                    x-cloak
+                >
                     <x-button
                         :text="__('Delete')"
                         color="red"
@@ -465,17 +469,18 @@
                     />
                 </div>
                 <div class="flex w-full justify-end gap-2">
-                    @canAction(\FluxErp\Actions\CalendarEvent\CancelCalendarEvent::class)
-                        <x-button
-                            :text="__('Cancel')"
-                            color="secondary"
-                            light
-                            flat
-                            x-on:click="$modalClose('edit-event-modal')"
-                        />
-                    @endcanAction
+                    <x-button
+                        :text="__('Close')"
+                        color="secondary"
+                        light
+                        flat
+                        x-on:click="$modalClose('edit-event-modal')"
+                    />
 
-                    <div x-show="!$wire.event.is_cancelled" x-cloak>
+                    <div
+                        x-show="$wire.event.is_editable && !$wire.event.is_cancelled"
+                        x-cloak
+                    >
                         <x-button
                             :text="__('Save')"
                             primary
@@ -483,7 +488,10 @@
                         />
                     </div>
                     @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)
-                        <div x-show="$wire.event.is_cancelled" x-cloak>
+                        <div
+                            x-show="$wire.event.is_editable && $wire.event.is_cancelled"
+                            x-cloak
+                        >
                             <x-button
                                 :text="__('Reactivate')"
                                 primary
