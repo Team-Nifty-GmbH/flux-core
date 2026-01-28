@@ -404,14 +404,14 @@ class OrderPositions extends OrderPositionList
 
     public function getSortableOrderPositions(): array
     {
-        resolve_static(OrderPosition::class, 'addGlobalScope', [
-            'scope' => 'sorted',
-            'implementation' => function (Builder $query): void {
-                $query->ordered();
-            },
-        ]);
-
         try {
+            resolve_static(OrderPosition::class, 'addGlobalScope', [
+                'scope' => 'sorted',
+                'implementation' => function (Builder $query): void {
+                    $query->ordered();
+                },
+            ]);
+
             return resolve_static(OrderPosition::class, 'familyTree')
                 ->where('order_id', $this->order->id)
                 ->whereNull('parent_id')
