@@ -13,9 +13,9 @@ use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rule;
 
 class CreateEmployeeRuleset extends FluxRuleset
 {
@@ -60,7 +60,7 @@ class CreateEmployeeRuleset extends FluxRuleset
             ],
             'salutation' => [
                 'nullable',
-                Rule::enum(SalutationEnum::class),
+                app(EnumRule::class, ['type' => SalutationEnum::class]),
             ],
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
