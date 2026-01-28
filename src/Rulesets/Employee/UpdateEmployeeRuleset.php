@@ -8,9 +8,9 @@ use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\Location;
 use FluxErp\Models\VacationCarryoverRule;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 

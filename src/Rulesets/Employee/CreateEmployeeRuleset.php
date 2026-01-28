@@ -11,9 +11,9 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\WorkTimeModel;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
