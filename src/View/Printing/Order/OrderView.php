@@ -58,16 +58,16 @@ class OrderView extends PrintableView
 
     public function prepareModel(): void
     {
-        resolve_static(OrderPosition::class, 'addGlobalScope', [
-            'scope' => 'sorted',
-            'implementation' => function (Builder $query): void {
-                $query->ordered()
-                    ->with(['tags', 'product.unit:id,name,abbreviation'])
-                    ->when(! $this->showAlternatives, fn (Builder $query) => $query->whereNot('is_alternative', true));
-            },
-        ]);
-
         try {
+            resolve_static(OrderPosition::class, 'addGlobalScope', [
+                'scope' => 'sorted',
+                'implementation' => function (Builder $query): void {
+                    $query->ordered()
+                        ->with(['tags', 'product.unit:id,name,abbreviation'])
+                        ->when(! $this->showAlternatives, fn (Builder $query) => $query->whereNot('is_alternative', true));
+                },
+            ]);
+
             $positions = array_map(
                 fn (array $item) => app(OrderPosition::class)->forceFill($item),
                 to_flat_tree(
