@@ -67,16 +67,20 @@ class OrderView extends PrintableView
             },
         ]);
 
-        $positions = array_map(
-            fn (array $item) => app(OrderPosition::class)->forceFill($item),
-            to_flat_tree(
-                resolve_static(OrderPosition::class, 'familyTree')
-                    ->where('order_id', $this->model->getKey())
-                    ->whereNull('parent_id')
-                    ->get()
-                    ->toArray()
-            )
-        );
+        try {
+            $positions = array_map(
+                fn (array $item) => app(OrderPosition::class)->forceFill($item),
+                to_flat_tree(
+                    resolve_static(OrderPosition::class, 'familyTree')
+                        ->where('order_id', $this->model->getKey())
+                        ->whereNull('parent_id')
+                        ->get()
+                        ->toArray()
+                )
+            );
+        } finally {
+            resolve_static(OrderPosition::class, 'withoutGlobalScope', ['scope' => 'sorted']);
+        }
 
         $flattened = app(OrderPosition::class)->newCollection($positions);
 
