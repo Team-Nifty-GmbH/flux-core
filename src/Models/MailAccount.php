@@ -8,6 +8,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
 use Illuminate\Contracts\Mail\Mailer;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Mail;
 use Webklex\IMAP\Facades\Client as ImapClient;
@@ -98,6 +99,12 @@ class MailAccount extends FluxModel
     public function mailFolders(): HasMany
     {
         return $this->hasMany(MailFolder::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'mail_account_user')
+            ->withPivot('is_default');
     }
 
     public function mailMessages(): HasMany
