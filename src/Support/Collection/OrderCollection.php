@@ -2,6 +2,7 @@
 
 namespace FluxErp\Support\Collection;
 
+use FluxErp\Models\Address;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
@@ -52,13 +53,14 @@ class OrderCollection extends Collection
     protected function buildTooltip(BaseCollection $items): string
     {
         $address = data_get($items->first(), 'address');
-        $postalAddress = data_get($address, 'postal_address')
-            ?? trim(
+        $postalAddress = $address instanceof Address
+            ? $address->getDescription()
+            : (data_get($address, 'postal_address') ?? trim(
                 data_get($address, 'street') . ', ' .
                 data_get($address, 'zip') . ' ' .
                 data_get($address, 'city'),
                 ', '
-            );
+            ));
 
         $count = $items->count();
 
