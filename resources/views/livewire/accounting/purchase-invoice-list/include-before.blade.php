@@ -367,7 +367,7 @@
                                         : 'text-emerald-500'
                                 "
                                 x-text="
-                                    positionsSum.toLocaleString('de-DE', {
+                                    positionsSum.toLocaleString(document.documentElement.lang, {
                                         style: 'currency',
                                         currency: currencyIso,
                                     })
