@@ -92,7 +92,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
             $index = $orderSchedule->order->tenant_id;
             $currentRecurrence = $orderSchedule->schedule->current_recurrence;
             while (
-                $nextRun <= $this->getEnd()
+                $nextRun <= $this->getFullPeriodEnd()
                 && $nextRun >= $this->getStart()
                 && (
                     is_null($orderSchedule->schedule->ends_at)

@@ -327,7 +327,9 @@ class PurchaseInvoiceList extends BaseDataTable
             parent::getViewData(),
             [
                 'tenants' => resolve_static(Tenant::class, 'query')->get(['id', 'name'])->toArray(),
-                'currencies' => resolve_static(Currency::class, 'query')->get(['id', 'name'])->toArray(),
+                'currencies' => resolve_static(Currency::class, 'query')
+                    ->get(['id', 'name', 'iso'])
+                    ->toArray(),
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->whereIn('order_type_enum', $purchaseOrderTypes)
                     ->get(['id', 'name'])
@@ -336,7 +338,9 @@ class PurchaseInvoiceList extends BaseDataTable
                     ->where('is_purchase', true)
                     ->get(['id', 'name', 'requires_manual_transfer'])
                     ->toArray(),
-                'vatRates' => resolve_static(VatRate::class, 'query')->get(['id', 'name'])->toArray(),
+                'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->get(['id', 'name', 'rate_percentage'])
+                    ->toArray(),
             ]
         );
     }

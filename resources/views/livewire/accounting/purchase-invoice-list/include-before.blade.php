@@ -305,10 +305,32 @@
                 <div
                     class="border-t border-gray-200 pt-4 dark:border-gray-700"
                     x-data="{
+                        vatRates: @js($vatRates),
+                        currencies: @js($currencies),
                         get positionsSum() {
-                            return (
+                            const positions =
                                 $wire.purchaseInvoiceForm.purchase_invoice_positions || []
-                            ).reduce((sum, pos) => sum + (parseFloat(pos.total_price) || 0), 0)
+                            const isNet = $wire.purchaseInvoiceForm.is_net
+
+                            return positions.reduce((sum, pos) => {
+                                let total = parseFloat(pos.total_price) || 0
+
+                                if (isNet) {
+                                    const vatRate = this.vatRates.find(
+                                        (v) => v.id === pos.vat_rate_id,
+                                    )
+                                    const rate = vatRate ? parseFloat(vatRate.rate_percentage) : 0
+                                    total = total * (1 + rate)
+                                }
+
+                                return sum + total
+                            }, 0)
+                        },
+                        get currencyIso() {
+                            const currency = this.currencies.find(
+                                (c) => c.id === $wire.purchaseInvoiceForm.currency_id,
+                            )
+                            return currency ? currency.iso : 'EUR'
                         },
                         recalculatePrices(position, $event) {
                             const attribute = $event.target.getAttribute('x-model.number')
@@ -346,9 +368,9 @@
                                 "
                                 x-text="
                                     positionsSum.toLocaleString('de-DE', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    }) + ' €'
+                                        style: 'currency',
+                                        currency: currencyIso,
+                                    })
                                 "
                             ></div>
                         </div>
@@ -389,7 +411,9 @@
                                     @endcanAction
                                 </div>
 
-                                <div class="mb-3 grid grid-cols-2 gap-4">
+                                <div
+                                    class="mb-3 grid grid-cols-1 gap-4 lg:grid-cols-2"
+                                >
                                     <x-input
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-model="position.name"
@@ -418,7 +442,9 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3 grid grid-cols-4 gap-4">
+                                <div
+                                    class="mb-3 grid grid-cols-1 gap-4 lg:grid-cols-4"
+                                >
                                     <x-number
                                         step="0.01"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
