@@ -4,10 +4,12 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use Exception;
+use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
@@ -68,7 +70,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
+class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasStates, HasTenantAssignment,
@@ -167,6 +169,58 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             'date_of_approval',
             'created_at',
             'updated_at',
+        ];
+    }
+
+    public static function fromCalendarEvent(array $event, string $action): UpdateOrder
+    {
+        return UpdateOrder::make([
+            'id' => data_get($event, 'id'),
+            'system_delivery_date' => data_get($event, 'start'),
+            'system_delivery_date_end' => data_get($event, 'end'),
+        ]);
+    }
+
+    public static function toCalendar(): array
+    {
+        $bluePrint = [
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'other',
+            'isVirtual' => true,
+            'color' => '#3b82f6',
+        ];
+
+        return [
+            array_merge(
+                $bluePrint,
+                [
+                    'id' => base64_encode(morph_alias(static::class)),
+                    'modelType' => morph_alias(static::class),
+                    'name' => __('Orders'),
+                    'hasNoEvents' => true,
+                    'children' => resolve_static(OrderType::class, 'query')
+                        ->where('is_active', true)
+                        ->get([
+                            'id',
+                            'name',
+                        ])
+                        ->map(fn (OrderType $orderType) => array_merge(
+                            $bluePrint,
+                            [
+                                'id' => base64_encode(morph_alias(static::class) . ':' . $orderType->getKey()),
+                                'modelType' => morph_alias(static::class),
+                                'name' => $orderType->name,
+                                'order_type_id' => $orderType->getKey(),
+                            ]
+                        ))
+                        ->values()
+                        ->toArray(),
+                ]
+            ),
         ];
     }
 
@@ -1131,6 +1185,54 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             'id',
             'vat_rate_id'
         );
+    }
+
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('system_delivery_date', [$start, $end])
+                ->orWhereBetween('system_delivery_date_end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('system_delivery_date', '<=', $end)
+                        ->where('system_delivery_date_end', '>=', $start);
+                });
+        });
+
+        if ($orderTypeId = data_get($info, 'order_type_id')) {
+            $builder->where('order_type_id', $orderTypeId);
+        }
+    }
+
+    public function toCalendarEvent(?array $info = null): array
+    {
+        $isEditable = ! $this->is_locked;
+
+        return [
+            'id' => $this->getKey(),
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $this->getLabel(),
+            'start' => $this->system_delivery_date?->toDateTimeString(),
+            'end' => $this->system_delivery_date_end?->endOfDay()->toDateTimeString(),
+            'status' => $this->state::$name ?? null,
+            'description' => $this->header,
+            'extendedProps' => [
+                'appendTitle' => $this->state?->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
+            ],
+            'allDay' => true,
+            'editable' => $isEditable,
+            'startEditable' => $isEditable,
+            'durationEditable' => $isEditable,
+            'is_editable' => $isEditable,
+            'is_public' => false,
+            'is_repeatable' => false,
+        ];
     }
 
     protected function makeAllSearchableUsing(Builder $query): Builder
