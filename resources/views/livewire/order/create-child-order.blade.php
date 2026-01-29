@@ -128,7 +128,7 @@
                                         <div class="ml-4 text-right">
                                             <div class="font-semibold">
                                                 <span
-                                                    x-text="calculatePositionTotal($wire.replicateOrder.order_positions?.[{{ $index }}] || {}).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})"
+                                                    x-text="calculatePositionTotal($wire.replicateOrder.order_positions?.[{{ $index }}] || {}).toLocaleString(document.documentElement.lang, {minimumFractionDigits: 2, maximumFractionDigits: 2})"
                                                 ></span>
                                                 {{ data_get($parentOrder, "currency.symbol") }}
                                             </div>
