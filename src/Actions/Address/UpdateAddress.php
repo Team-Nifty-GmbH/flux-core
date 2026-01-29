@@ -79,7 +79,7 @@ class UpdateAddress extends FluxAction
         $address->save();
 
         if (! is_null($tags)) {
-            $address->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $address->syncTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
         }
 
         if (! is_null($permissions)) {
@@ -100,7 +100,7 @@ class UpdateAddress extends FluxAction
 
         if ($this->data['address_types'] ?? false) {
             $addressTypes = resolve_static(AddressType::class, 'query')
-                ->whereIntegerInRaw('id', $this->data['address_types'])
+                ->whereKey($this->data['address_types'])
                 ->where('is_unique', true)
                 ->whereHas('addresses', fn (Builder $query) => $query->where('contact_id', $this->data['contact_id'])
                     ->where('id', '!=', $this->data['id'])

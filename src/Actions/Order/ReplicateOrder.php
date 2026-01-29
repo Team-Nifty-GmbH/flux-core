@@ -193,7 +193,7 @@ class ReplicateOrder extends FluxAction
 
         if ($orderPositions) {
             if (resolve_static(OrderPosition::class, 'query')
-                ->whereIntegerInRaw('id', $ids)
+                ->whereKey($ids)
                 ->where('order_id', '!=', $this->data['id'])
                 ->exists()
             ) {

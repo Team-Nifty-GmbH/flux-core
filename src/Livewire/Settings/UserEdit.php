@@ -220,7 +220,7 @@ class UserEdit extends Component
         }
 
         $lockedPermissions = resolve_static(Role::class, 'query')
-            ->whereIntegerInRaw('id', $this->userForm->roles)
+            ->whereKey($this->userForm->roles)
             ->with('permissions')
             ->get()
             ->pluck('permissions.*.id')

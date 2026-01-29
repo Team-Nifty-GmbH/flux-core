@@ -105,7 +105,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
         }
 
         return resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw('id', $orderIds)
+            ->whereKey($orderIds)
             ->get();
     }
 

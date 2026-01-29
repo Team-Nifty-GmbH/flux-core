@@ -476,7 +476,7 @@ class OrderPositions extends OrderPositionList
     public function recalculateOrderPositions(): void
     {
         $products = resolve_static(Product::class, 'query')
-            ->whereIntegerInRaw('id', $this->getSelectedModelsQuery()->pluck('product_id'))
+            ->whereKey($this->getSelectedModelsQuery()->pluck('product_id'))
             ->get(['id', 'vat_rate_id'])
             ->keyBy('id');
 

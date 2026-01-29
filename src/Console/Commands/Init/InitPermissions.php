@@ -47,7 +47,7 @@ class InitPermissions extends Command
         $this->registerPrintPermissions();
 
         resolve_static(Permission::class, 'query')
-            ->whereIntegerInRaw('id', array_keys($this->currentPermissions))
+            ->whereKey(array_keys($this->currentPermissions))
             ->delete();
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }

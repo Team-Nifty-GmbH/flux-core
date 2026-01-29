@@ -66,7 +66,7 @@ class CreateAddress extends FluxAction
         $address->save();
 
         if ($tags) {
-            $address->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $address->attachTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
         }
 
         if ($permissions) {
@@ -84,7 +84,7 @@ class CreateAddress extends FluxAction
 
         if ($this->data['address_types'] ?? false) {
             $addressTypes = resolve_static(AddressType::class, 'query')
-                ->whereIntegerInRaw('id', $this->data['address_types'])
+                ->whereKey($this->data['address_types'])
                 ->where('is_unique', true)
                 ->whereHas(
                     'addresses',

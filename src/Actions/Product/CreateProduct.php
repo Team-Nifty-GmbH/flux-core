@@ -53,7 +53,7 @@ class CreateProduct extends FluxAction
         }
 
         if ($tags) {
-            $product->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $product->attachTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
         }
 
         if ($tenants) {

@@ -17,7 +17,7 @@ class ProductCrossSellingTableSeeder extends Seeder
             ->get()
             ->toArray();
 
-        foreach (Product::query()->whereIntegerInRaw('id', $productIds)->get(['id']) as $product) {
+        foreach (Product::query()->whereKey($productIds)->get(['id']) as $product) {
             $product->productCrossSellings()->createMany(
                 ProductCrossSelling::factory()->count(3)->make()->toArray()
             );
