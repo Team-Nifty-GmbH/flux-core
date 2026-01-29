@@ -514,12 +514,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         } else {
             if (
                 bccomp(
-                    bcround(
-                        $this->transactions()
-                            ->withPivot('amount')
-                            ->sum('order_transaction.amount'),
-                        2
-                    ),
+                    bcround($this->totalPaid(), 2),
                     bcround($this->total_gross_price, 2),
                     2
                 ) === 0
@@ -1102,8 +1097,16 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function totalPaid(): string|float|int
     {
         return $this->transactions()
-            ->withPivot('amount')
-            ->sum('order_transaction.amount');
+            ->withPivot('amount', 'order_currency_amount')
+            ->get()
+            ->reduce(
+                fn (string $carry, Transaction $transaction) => bcadd(
+                    $carry,
+                    $transaction->pivot->order_currency_amount ?? $transaction->pivot->amount,
+                    9
+                ),
+                '0'
+            );
     }
 
     public function transactions(): BelongsToMany

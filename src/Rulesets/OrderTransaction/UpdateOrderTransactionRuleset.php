@@ -22,6 +22,14 @@ class UpdateOrderTransactionRuleset extends FluxRuleset
                 'required',
                 app(Numeric::class),
             ],
+            'exchange_rate' => [
+                'nullable',
+                app(Numeric::class),
+            ],
+            'order_currency_amount' => [
+                'nullable',
+                app(Numeric::class),
+            ],
             'is_accepted' => 'boolean',
         ];
     }

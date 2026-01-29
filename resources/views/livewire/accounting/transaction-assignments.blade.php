@@ -97,14 +97,67 @@
             id="order-transaction-modal"
             x-on:open="$focusOn('order-transaction-amount')"
         >
-            <x-number
-                id="order-transaction-amount"
-                :label="__('Amount')"
-                wire:model="orderTransactionForm.amount"
-                step="0.01"
-                :corner-hint="__('Amount')"
-                placeholder="0.00"
-            />
+            <div
+                class="flex flex-col gap-4"
+                x-data="{
+                    calcOrderCurrencyAmount() {
+                        const amount = parseFloat($wire.orderTransactionForm.amount)
+                        const rate = parseFloat($wire.orderTransactionForm.exchange_rate)
+                        if (amount && rate && rate !== 0) {
+                            $wire.orderTransactionForm.order_currency_amount = parseFloat(
+                                (amount * rate).toFixed(10),
+                            )
+                        }
+                    },
+                    calcExchangeRate() {
+                        const amount = parseFloat($wire.orderTransactionForm.amount)
+                        const orderAmount = parseFloat(
+                            $wire.orderTransactionForm.order_currency_amount,
+                        )
+                        if (amount && orderAmount && amount !== 0) {
+                            $wire.orderTransactionForm.exchange_rate = parseFloat(
+                                (orderAmount / amount).toFixed(10),
+                            )
+                        }
+                    },
+                }"
+            >
+                <x-number
+                    id="order-transaction-amount"
+                    :label="__('Amount')"
+                    wire:model="orderTransactionForm.amount"
+                    step="0.01"
+                    :corner-hint="__('Amount')"
+                    placeholder="0.00"
+                />
+                <div
+                    x-cloak
+                    x-show="$wire.orderTransactionForm.orderCurrencyIso"
+                    class="flex flex-col gap-4"
+                >
+                    <x-number
+                        :label="__('Exchange Rate')"
+                        wire:model="orderTransactionForm.exchange_rate"
+                        step="0.0001"
+                        placeholder="0.0000"
+                        x-on:change="calcOrderCurrencyAmount()"
+                    />
+                    <x-number
+                        wire:model="orderTransactionForm.order_currency_amount"
+                        step="0.01"
+                        placeholder="0.00"
+                        x-on:change="calcExchangeRate()"
+                    >
+                        <x-slot:label>
+                            {{ __('Order Currency Amount') }} (
+                            <span
+                                x-text="$wire.orderTransactionForm.orderCurrencyIso"
+                            ></span>
+                            )
+                        </x-slot>
+                    </x-number>
+                </div>
+            </div>
             <x-slot:footer>
                 <x-button
                     color="secondary"
@@ -331,6 +384,19 @@
                                                         class="flex w-full justify-end font-semibold"
                                                         x-html="formatters.coloredMoney(order.pivot.amount)"
                                                     ></div>
+                                                    <div
+                                                        x-cloak
+                                                        x-show="order.pivot.order_currency_amount"
+                                                        class="flex w-full justify-end text-xs text-slate-500"
+                                                    >
+                                                        <span
+                                                            x-text="
+                                                                (order.currency?.iso ?? '') +
+                                                                    ' ' +
+                                                                    parseFloat(order.pivot.order_currency_amount || 0).toFixed(2)
+                                                            "
+                                                        ></span>
+                                                    </div>
                                                     <div
                                                         class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
                                                     >
