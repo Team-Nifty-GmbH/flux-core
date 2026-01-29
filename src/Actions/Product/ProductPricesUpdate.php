@@ -27,7 +27,7 @@ class ProductPricesUpdate extends FluxAction
     public function performAction(): Collection
     {
         $products = resolve_static(Product::class, 'query')
-            ->whereIntegerInRaw('id', $this->getData('products'))
+            ->whereKey($this->getData('products'))
             ->get();
         $priceList = resolve_static(PriceList::class, 'query')
             ->whereKey($this->getData('price_list_id'))

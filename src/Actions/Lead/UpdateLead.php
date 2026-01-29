@@ -34,7 +34,7 @@ class UpdateLead extends FluxAction
         if (! is_null($tags)) {
             $lead->syncTags(
                 resolve_static(Tag::class, 'query')
-                    ->whereIntegerInRaw('id', $tags)
+                    ->whereKey($tags)
                     ->get()
             );
         }

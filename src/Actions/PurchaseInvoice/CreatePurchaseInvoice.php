@@ -67,7 +67,7 @@ class CreatePurchaseInvoice extends FluxAction
 
         if ($tags) {
             $purchaseInvoice->attachTags(
-                resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get()
+                resolve_static(Tag::class, 'query')->whereKey($tags)->get()
             );
         }
 

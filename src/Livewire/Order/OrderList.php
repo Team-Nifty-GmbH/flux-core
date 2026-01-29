@@ -215,7 +215,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     protected function getPrintLayouts(): array
     {
         return resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw('id', $this->selected)
+            ->whereKey($this->getSelectedValues())
             ->with('orderType')
             ->get(['id', 'order_type_id'])
             ->printLayouts();

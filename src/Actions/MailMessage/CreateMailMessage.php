@@ -41,7 +41,7 @@ class CreateMailMessage extends FluxAction
         if ($tags) {
             $mailMessage->attachTags(
                 resolve_static(Tag::class, 'query')
-                    ->whereIntegerInRaw('id', $tags)
+                    ->whereKey($tags)
                     ->get(),
                 morph_alias(Communication::class)
             );

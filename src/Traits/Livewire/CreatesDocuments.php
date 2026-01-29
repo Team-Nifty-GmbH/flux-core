@@ -358,7 +358,7 @@ trait CreatesDocuments
         if ($downloadIds || $downloadItems) {
             /** @var \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection $files */
             $files = resolve_static(Media::class, 'query')
-                ->whereIntegerInRaw('id', $downloadIds)
+                ->whereKey($downloadIds)
                 ->get();
 
             foreach ($downloadItems as $downloadItem) {

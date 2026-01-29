@@ -59,7 +59,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
                 $productOptions instanceof ProductOptionCollection
                     ? $productOptions->pluck('name')->toArray()
                     : resolve_static(ProductOption::class, 'query')
-                        ->whereIntegerInRaw('id', $productOptions)
+                        ->whereKey($productOptions)
                         ->pluck('name')
                         ->toArray()
             );
