@@ -2,9 +2,11 @@
 
 namespace FluxErp\Actions\Order;
 
+use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Discount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
@@ -94,6 +96,8 @@ class ReplicateOrder extends FluxAction
             ->validate()
             ->execute();
 
+        $this->replicateDiscounts(morph_alias(Order::class), $originalOrder->getKey(), $order->getKey());
+
         if (! $getOrderPositionsFromOrigin) {
             $replicateOrderPositions = collect($this->data['order_positions']);
             $orderPositions = resolve_static(OrderPosition::class, 'query')
@@ -101,14 +105,17 @@ class ReplicateOrder extends FluxAction
                 ->where('is_bundle_position', false)
                 ->orderBy('slug_position')
                 ->get()
-                ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions, $orderTypeEnum) {
-                    $position = $replicateOrderPositions->first(fn ($item) => $item['id'] === $orderPosition->id);
+                ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions, $orderTypeEnum): OrderPosition {
+                    $position = $replicateOrderPositions->first(
+                        fn (array $item): bool => data_get($item, 'id') === $orderPosition->getKey()
+                    );
 
                     if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
-                        $orderPosition->origin_position_id = $orderPosition->id;
+                        $orderPosition->origin_position_id = $orderPosition->getKey();
                     }
 
-                    $orderPosition->amount = $position['amount'];
+                    $orderPosition->original_amount = $orderPosition->amount;
+                    $orderPosition->amount = data_get($position, 'amount');
 
                     return $orderPosition;
                 })
@@ -116,8 +123,8 @@ class ReplicateOrder extends FluxAction
         } else {
             if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
                 $orderPositions = array_map(
-                    function ($position) {
-                        $position['origin_position_id'] = $position['id'];
+                    function (array $position): array {
+                        $position['origin_position_id'] = data_get($position, 'id');
 
                         return $position;
                     },
@@ -138,21 +145,66 @@ class ReplicateOrder extends FluxAction
                     ?->getKey();
             }
 
-            $orderPosition['created_from_id'] = data_get($orderPosition, 'id');
+            $originalPositionId = data_get($orderPosition, 'id');
+            $orderPosition['created_from_id'] = $originalPositionId;
+
+            if (
+                ! data_get($orderPosition, 'is_free_text')
+                && is_null(data_get($orderPosition, 'discount_percentage'))
+            ) {
+                $originalTotal = data_get($orderPosition, 'is_net')
+                    ? bcabs(data_get($orderPosition, 'total_net_price') ?? 0)
+                    : bcabs(data_get($orderPosition, 'total_gross_price') ?? 0);
+
+                $originalAmount = data_get($orderPosition, 'original_amount')
+                    ?? data_get($orderPosition, 'amount') ?? 0;
+
+                $expectedOriginalTotal = data_get($orderPosition, 'is_net')
+                    ? bcmul(
+                        data_get($orderPosition, 'unit_net_price') ?? 0,
+                        $originalAmount
+                    )
+                    : bcmul(
+                        data_get($orderPosition, 'unit_gross_price') ?? 0,
+                        $originalAmount
+                    );
+
+                if (bccomp($expectedOriginalTotal, 0) === 1
+                    && bccomp($expectedOriginalTotal, $originalTotal) !== 0
+                ) {
+                    $orderPosition['discount_percentage'] = diff_percentage($expectedOriginalTotal, $originalTotal);
+                }
+            }
 
             unset(
                 $orderPosition['id'],
                 $orderPosition['uuid'],
                 $orderPosition['sort_number'],
                 $orderPosition['amount_packed_products'],
+                $orderPosition['original_amount'],
+                $orderPosition['total_net_price'],
+                $orderPosition['total_gross_price'],
             );
 
-            $newOrderPositions->push(
-                CreateOrderPosition::make($orderPosition)
-                    ->checkPermission()
-                    ->validate()
-                    ->execute()
+            $orderPosition['signed_amount'] = bcmul(
+                data_get($orderPosition, 'amount') ?? 0,
+                $orderTypeEnum->multiplier()
             );
+
+            if (! data_get($orderPosition, 'is_free_text')) {
+                $orderPosition['unit_price'] = data_get($orderPosition, 'is_net')
+                    ? data_get($orderPosition, 'unit_net_price')
+                    : data_get($orderPosition, 'unit_gross_price');
+            }
+
+            $newPosition = CreateOrderPosition::make($orderPosition)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $newOrderPositions->push($newPosition);
+
+            $this->replicateDiscounts(morph_alias(OrderPosition::class), $originalPositionId, $newPosition->getKey());
         }
 
         $order->calculatePrices()->save();
@@ -203,5 +255,24 @@ class ReplicateOrder extends FluxAction
                     ->errorBag('replicateOrder');
             }
         }
+    }
+
+    private function replicateDiscounts(string $modelType, int $fromModelId, int $toModelId): void
+    {
+        resolve_static(Discount::class, 'query')
+            ->where('model_type', $modelType)
+            ->where('model_id', $fromModelId)
+            ->get()
+            ->each(function (Discount $discount) use ($modelType, $toModelId): void {
+                CreateDiscount::make([
+                    'model_type' => $modelType,
+                    'model_id' => $toModelId,
+                    'name' => $discount->name,
+                    'discount' => $discount->getRawOriginal('discount'),
+                    'is_percentage' => $discount->is_percentage,
+                ])
+                    ->validate()
+                    ->execute();
+            });
     }
 }
