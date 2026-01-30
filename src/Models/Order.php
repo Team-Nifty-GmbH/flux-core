@@ -509,15 +509,19 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function calculateDiscounts(): static
     {
+        $multiplier = $this->orderType?->order_type_enum?->multiplier() ?? 1;
+
         $this->total_net_price = bcround(
             $this->discounts()
                 ->ordered()
                 ->get(['id', 'discount', 'is_percentage'])
                 ->reduce(
-                    function (string|float|int $previous, Discount $discount): string|float|int {
+                    function (string|float|int $previous, Discount $discount) use ($multiplier): string|float|int {
                         $new = $discount->is_percentage
-                            ? max(0, discount($previous, $discount->discount))
-                            : max(0, bcsub($previous, $discount->discount, 9));
+                            ? discount($previous, $discount->discount)
+                            : bcsub($previous, $discount->discount, 9);
+
+                        $new = bccomp($multiplier, 1) === 0 ? max(0, $new) : min(0, $new);
 
                         $discount->update([
                             'discount_percentage' => diff_percentage($previous, $new),

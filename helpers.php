@@ -217,8 +217,12 @@ if (! function_exists('discount')) {
 if (! function_exists('diff_percentage')) {
     function diff_percentage(string $old, string $new): string
     {
-        if (bccomp($old, 0) === 0 || bccomp($new, 0) === 0) {
+        if (bccomp($old, 0) === 0) {
             return '0';
+        }
+
+        if (bccomp($new, 0) === 0) {
+            return '1';
         }
 
         return bcdiv(bcsub($old, $new), $old);

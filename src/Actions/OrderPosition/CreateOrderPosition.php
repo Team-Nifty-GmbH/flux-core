@@ -14,6 +14,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
+use FluxErp\Traits\CalculatesPositionAvailability;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -21,6 +22,8 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderPosition extends FluxAction
 {
+    use CalculatesPositionAvailability;
+
     public static function models(): array
     {
         return [OrderPosition::class];
@@ -216,9 +219,10 @@ class CreateOrderPosition extends FluxAction
                     ];
                 }
 
+                $multiplier = $order->orderType?->order_type_enum?->multiplier() ?? 1;
                 $maxAmount = data_get(
                     array_find(
-                        array_reduce(
+                        $this->calculateMaxAmounts(
                             DB::select(
                                 'WITH RECURSIVE siblings AS (
                                     SELECT id, origin_position_id, signed_amount
@@ -233,36 +237,7 @@ class CreateOrderPosition extends FluxAction
                                 )
                                 SELECT * FROM siblings'
                             ),
-                            function (?array $carry, object $item) {
-                                $parentKey = array_find_key(
-                                    $carry ?? [],
-                                    fn (array $value) => ! is_null($item->origin_position_id)
-                                        && in_array(
-                                            $item->origin_position_id,
-                                            [
-                                                $value['id'],
-                                                $value['origin_position_id'],
-                                            ]
-                                        )
-                                );
-
-                                if (is_null($parentKey)) {
-                                    $carry[] = (array) $item;
-                                } else {
-                                    $carry[$parentKey] = array_merge(
-                                        $carry[$parentKey],
-                                        [
-                                            'origin_position_id' => $item->id,
-                                            'signed_amount' => bcsub(
-                                                data_get($carry, $parentKey . '.signed_amount'),
-                                                $item->signed_amount
-                                            ),
-                                        ]
-                                    );
-                                }
-
-                                return $carry;
-                            }
+                            $multiplier
                         ),
                         fn (array $value) => $value['id'] === $originPositionId
                     ),

@@ -6,10 +6,12 @@
         }
 
         const unitPrice = position.is_net ? position.unit_net_price : position.unit_gross_price;
+        const subtotal = parseFloat(position.amount || 0) * parseFloat(unitPrice || 0);
+        const discount = parseFloat(position.discount_percentage || 0);
 
-        return parseFloat(position.amount || 0) * parseFloat(unitPrice || 0);
+        return subtotal * (1 - discount);
     },
-    getTotalAmount() {
+    getSubtotal() {
         if (! $wire.replicateOrder?.order_positions) {
             return 0;
         }
@@ -17,6 +19,19 @@
         return $wire.replicateOrder.order_positions.reduce((total, position) => {
             return total + this.calculatePositionTotal(position);
         }, 0);
+    },
+    getTotalAmount() {
+        let total = this.getSubtotal();
+
+        for (const discount of ($wire.parentOrder?.discounts || [])) {
+            if (discount.is_percentage) {
+                total = total * (1 - parseFloat(discount.discount));
+            } else {
+                total = total - parseFloat(discount.discount);
+            }
+        }
+
+        return total;
     }
 }"
 >
@@ -88,6 +103,7 @@
                         <livewire:order.replicate-order-position-list
                             :order-id="$orderId"
                             :already-taken-positions="array_column($replicateOrder->order_positions, 'id')"
+                            :type="$type"
                             wire:model="selectedPositions"
                             lazy
                         />
@@ -135,9 +151,17 @@
                                             <div
                                                 class="text-sm text-gray-600 dark:text-gray-400"
                                             >
-                                                {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso", "EUR"), "de") }}@if (data_get($position, "unit_abbreviation"))/ {{ data_get($position, "unit_abbreviation") }}
+                                                {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso")) }}@if (data_get($position, "unit_abbreviation"))/ {{ data_get($position, "unit_abbreviation") }}
                                                 @endif
                                             </div>
+                                            @if (data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
+                                                <div
+                                                    class="text-sm text-red-500"
+                                                >
+                                                    -{{ Number::percentage(bcmul(data_get($position, "discount_percentage") ?? 0, 100), 2) }}
+                                                    {{ __("Discount") }}
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </x-slot>
@@ -166,6 +190,35 @@
                         x-show="$wire.replicateOrder.order_positions.length > 0"
                         x-cloak
                     >
+                        @if (count(data_get($parentOrder, "discounts") ?? []) > 0)
+                            <div
+                                class="flex items-center justify-between text-gray-600 dark:text-gray-400"
+                            >
+                                <span>{{ __("Subtotal net") }}:</span>
+                                <span
+                                    x-html="window.formatters.coloredMoney(getSubtotal(), '{{ data_get($parentOrder, 'currency.symbol') }}')"
+                                ></span>
+                            </div>
+                            @foreach (data_get($parentOrder, "discounts") ?? [] as $discount)
+                                <div
+                                    class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400"
+                                >
+                                    <span>
+                                        {{ data_get($discount, "name") ?? __("Discount") }}
+                                    </span>
+                                    <span class="text-red-500">
+                                        @if (data_get($discount, "is_percentage"))
+                                            -{{ Number::percentage(bcmul(data_get($discount, "discount") ?? 0, 100), 2) }}
+                                        @else
+                                            -{{ Number::currency(data_get($discount, "discount"), data_get($parentOrder, "currency.iso")) }}
+                                        @endif
+                                    </span>
+                                </div>
+                            @endforeach
+
+                            <hr class="my-2" />
+                        @endif
+
                         <div class="flex items-center justify-between">
                             <span class="font-semibold">
                                 {{ __("Total") }}:
