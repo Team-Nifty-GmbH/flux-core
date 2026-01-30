@@ -111,13 +111,10 @@ class Calendar extends Component
     #[On('calendar-event-change')]
     public function editEvent(array $event, ?string $trigger = null): void
     {
-        if (
-            (
-                data_get($event, 'id')
-                && ! data_get($event, 'extendedProps.is_editable')
-            )
-            || ! data_get($this->calendar, 'is_editable')
-        ) {
+        $isEditable = data_get($event, 'extendedProps.is_editable', true)
+            && data_get($this->calendar, 'is_editable', true);
+
+        if ($trigger === 'event-change' && ! $isEditable) {
             return;
         }
 
@@ -137,6 +134,14 @@ class Calendar extends Component
             $event
         ));
         $this->event->original_start = data_get($event, 'start');
+        $this->event->is_editable = $isEditable;
+
+        if (! $this->event->model && data_get($event, 'extendedProps.modelUrl')) {
+            $this->event->model = [
+                'url' => data_get($event, 'extendedProps.modelUrl'),
+                'label' => data_get($event, 'extendedProps.modelLabel'),
+            ];
+        }
 
         if (data_get($this->event, 'id')) {
             $explodedId = explode('|', $this->event->id);
@@ -363,6 +368,13 @@ class Calendar extends Component
             ->send();
 
         return true;
+    }
+
+    #[Renderless]
+    #[On('calendar-view-did-mount')]
+    public function viewChanged(array $view): void
+    {
+        $this->storeViewSettings($view);
     }
 
     #[Renderless]
