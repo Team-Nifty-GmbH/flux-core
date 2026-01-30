@@ -92,7 +92,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         return $this->mailAccount->uuid;
     }
 
-    private function resolveStartUid(MailFolder $folder): ?int
+    protected function resolveStartUid(MailFolder $folder): ?int
     {
         $maxUid = resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->mailAccount->getKey())
@@ -126,10 +126,8 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             return max($firstMessage->getUid() - 1, 0) ?: null;
         }
 
-        $uidnext = $imapFolder->examine()['uidnext'] ?? null;
-
-        return $uidnext
-            ? (max($uidnext - 1, 0) ?: null)
+        return ! is_null($uidnext = data_get($imapFolder->examine(), 'uidnext'))
+            ? max($uidnext - 1, 0)
             : null;
     }
 }
