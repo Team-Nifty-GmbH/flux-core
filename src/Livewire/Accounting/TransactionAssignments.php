@@ -121,8 +121,8 @@ class TransactionAssignments extends Component
 
                 if ($order->currency_id !== $transactionCurrencyId) {
                     $data['order_currency_amount'] = $order->balance;
-                    $data['amount'] = $this->transactionForm->amount ?? 0;
-                    $data['exchange_rate'] = bccomp($this->transactionForm->amount, 0, 9) !== 0
+                    $data['amount'] = $this->transactionForm->amount;
+                    $data['exchange_rate'] = bccomp($this->transactionForm->amount ?? 0, 0, 9) !== 0
                         ? bcdiv($order->balance, $this->transactionForm->amount, 9)
                         : null;
                     $data['is_accepted'] = false;
