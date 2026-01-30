@@ -78,7 +78,12 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 }
 
                 $builder->fetch()->store();
-                $folder->messages()->unseen()->fetch()->syncReadStatus();
+
+                $builder
+                    ->reset()
+                    ->unseen()
+                    ->fetch()
+                    ->syncReadStatus();
             });
     }
 
@@ -118,9 +123,13 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             ?->first();
 
         if ($firstMessage) {
-            return max($firstMessage->getUid() - 1, 0);
+            return max($firstMessage->getUid() - 1, 0) ?: null;
         }
 
-        return max(($imapFolder->examine()['uidnext'] ?? 0) - 1, 0);
+        $uidnext = $imapFolder->examine()['uidnext'] ?? null;
+
+        return $uidnext
+            ? (max($uidnext - 1, 0) ?: null)
+            : null;
     }
 }

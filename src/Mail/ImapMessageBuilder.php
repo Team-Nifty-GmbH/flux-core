@@ -44,9 +44,19 @@ class ImapMessageBuilder
         return $this;
     }
 
-    public function newSince(int $uid): static
+    public function newSince(?int $uid): static
     {
         $this->sinceUid = $uid;
+
+        return $this;
+    }
+
+    public function reset(): static
+    {
+        $this->filterSeen = false;
+        $this->filterUnseen = false;
+        $this->sinceUid = null;
+        $this->messages = new Collection();
 
         return $this;
     }
@@ -75,7 +85,7 @@ class ImapMessageBuilder
             $this->fetchNewMessages($imapFolder);
         }
 
-        if ($this->filterUnseen || $this->filterSeen) {
+        if ($this->filterUnseen || $this->filterSeen || is_null($this->sinceUid)) {
             $this->fetchFilteredMessages($imapFolder);
         }
 
@@ -119,8 +129,8 @@ class ImapMessageBuilder
         resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->folder->mailAccount->getKey())
             ->where('mail_folder_id', $this->folder->getKey())
-            ->where('is_seen', false)
             ->whereIntegerNotInRaw('message_uid', $unreadUids)
+            ->where('is_seen', false)
             ->each(
                 fn (Communication $message) => UpdateCommunication::make([
                     'id' => $message->getKey(),
@@ -133,8 +143,8 @@ class ImapMessageBuilder
         resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->folder->mailAccount->getKey())
             ->where('mail_folder_id', $this->folder->getKey())
-            ->where('is_seen', true)
             ->whereIntegerInRaw('message_uid', $unreadUids)
+            ->where('is_seen', true)
             ->each(
                 fn (Communication $message) => UpdateCommunication::make([
                     'id' => $message->getKey(),
