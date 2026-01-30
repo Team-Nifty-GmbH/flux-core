@@ -1,4 +1,12 @@
 <div class="grid grid-cols-1 gap-8">
+    <x-card :header="__('Family Tree')">
+        <livewire:family-tree
+            :model-type="\FluxErp\Models\Order::class"
+            :model-id="$order->id"
+            lazy
+        />
+    </x-card>
+
     @if ($order->parent_id)
         <x-card>
             <livewire:widgets.order :model-id="$order->parent_id" />
