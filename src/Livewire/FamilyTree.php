@@ -39,7 +39,9 @@ class FamilyTree extends Component
                     ->whereKey($rootId)
                     ->first();
 
-            $tree = blank($root) ? [] : $this->buildTree($root);
+            $tree = blank($root)
+                ? []
+                : $this->buildTree($root);
         }
 
         return view('flux::livewire.family-tree', ['tree' => $tree]);
@@ -65,12 +67,14 @@ class FamilyTree extends Component
     {
         $label = method_exists($node, 'getLabel')
             ? ($node->getLabel() ?? (string) $node->getKey())
-            : (data_get($node, 'name') ?? (string) $node->getKey());
+            : data_get($node, 'name') ?? (string) $node->getKey();
 
         return [
             'id' => $node->getKey(),
             'label' => $label,
-            'url' => method_exists($node, 'getUrl') ? $node->getUrl() : null,
+            'url' => method_exists($node, 'getUrl')
+                ? $node->getUrl()
+                : null,
             'is_current' => $node->getKey() === $this->modelId,
             'children' => (! is_null($this->maxDepth) && $depth >= $this->maxDepth)
                 ? []
