@@ -174,7 +174,9 @@ class CreateChildOrder extends Component
             $allPositions,
             $takeAllWithPercentage
                 ? array_column(
-                    array_filter($allPositions, fn (array $p): bool => is_null(data_get($p, 'origin_position_id'))),
+                    array_filter($allPositions, fn (array $position): bool => is_null(
+                        data_get($position, 'origin_position_id')
+                    )),
                     'id'
                 )
                 : $positionIds

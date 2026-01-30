@@ -221,6 +221,10 @@ if (! function_exists('diff_percentage')) {
             return '0';
         }
 
+        if (bccomp($new, 0) === 0) {
+            return '1';
+        }
+
         return bcdiv(bcsub($old, $new), $old);
     }
 }

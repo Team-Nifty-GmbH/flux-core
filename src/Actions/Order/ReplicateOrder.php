@@ -105,7 +105,7 @@ class ReplicateOrder extends FluxAction
                 ->where('is_bundle_position', false)
                 ->orderBy('slug_position')
                 ->get()
-                ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions, $orderTypeEnum): OrderPosition {
+                ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions, $orderTypeEnum): array {
                     $position = $replicateOrderPositions->first(
                         fn (array $item): bool => data_get($item, 'id') === $orderPosition->getKey()
                     );
@@ -114,12 +114,15 @@ class ReplicateOrder extends FluxAction
                         $orderPosition->origin_position_id = $orderPosition->getKey();
                     }
 
-                    $orderPosition->original_amount = $orderPosition->amount;
+                    $originalAmount = $orderPosition->amount;
                     $orderPosition->amount = data_get($position, 'amount');
 
-                    return $orderPosition;
+                    $array = $orderPosition->toArray();
+                    $array['original_amount'] = $originalAmount;
+
+                    return $array;
                 })
-                ->toArray();
+                ->all();
         } else {
             if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
                 $orderPositions = array_map(
@@ -152,22 +155,22 @@ class ReplicateOrder extends FluxAction
                 ! data_get($orderPosition, 'is_free_text')
                 && is_null(data_get($orderPosition, 'discount_percentage'))
             ) {
-                $originalTotal = data_get($orderPosition, 'is_net')
-                    ? bcabs(data_get($orderPosition, 'total_net_price') ?? 0)
-                    : bcabs(data_get($orderPosition, 'total_gross_price') ?? 0);
-
                 $originalAmount = data_get($orderPosition, 'original_amount')
                     ?? data_get($orderPosition, 'amount') ?? 0;
 
-                $expectedOriginalTotal = data_get($orderPosition, 'is_net')
-                    ? bcmul(
+                if (data_get($orderPosition, 'is_net')) {
+                    $originalTotal = bcabs(data_get($orderPosition, 'total_net_price') ?? 0);
+                    $expectedOriginalTotal = bcmul(
                         data_get($orderPosition, 'unit_net_price') ?? 0,
                         $originalAmount
-                    )
-                    : bcmul(
+                    );
+                } else {
+                    $originalTotal = bcabs(data_get($orderPosition, 'total_gross_price') ?? 0);
+                    $expectedOriginalTotal = bcmul(
                         data_get($orderPosition, 'unit_gross_price') ?? 0,
                         $originalAmount
                     );
+                }
 
                 if (bccomp($expectedOriginalTotal, 0) === 1
                     && bccomp($expectedOriginalTotal, $originalTotal) !== 0
@@ -184,11 +187,6 @@ class ReplicateOrder extends FluxAction
                 $orderPosition['original_amount'],
                 $orderPosition['total_net_price'],
                 $orderPosition['total_gross_price'],
-            );
-
-            $orderPosition['signed_amount'] = bcmul(
-                data_get($orderPosition, 'amount') ?? 0,
-                $orderTypeEnum->multiplier()
             );
 
             if (! data_get($orderPosition, 'is_free_text')) {
@@ -257,7 +255,7 @@ class ReplicateOrder extends FluxAction
         }
     }
 
-    private function replicateDiscounts(string $modelType, int $fromModelId, int $toModelId): void
+    private function replicateDiscounts(string $modelType, int|string $fromModelId, int|string $toModelId): void
     {
         resolve_static(Discount::class, 'query')
             ->where('model_type', $modelType)

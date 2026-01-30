@@ -4,18 +4,24 @@ namespace FluxErp\Traits\Livewire;
 
 trait CalculatesPositionAvailability
 {
-    protected function calculateMaxAmounts(array $allPositions, array $rootPositionIds): array
+    protected function calculateMaxAmounts(array $allPositions, array $originPositionIds): array
     {
         $maxAmounts = [];
 
-        foreach ($rootPositionIds as $rootId) {
-            $root = array_find($allPositions, fn (array $p): bool => data_get($p, 'id') === $rootId);
+        foreach ($originPositionIds as $rootId) {
+            $root = array_find(
+                $allPositions,
+                fn (array $position): bool => data_get($position, 'id') === $rootId
+            );
             if (! $root) {
                 continue;
             }
 
             $consumed = '0';
-            foreach (array_filter($allPositions, fn (array $p): bool => data_get($p, 'origin_position_id') === $rootId) as $child) {
+            foreach (array_filter(
+                $allPositions,
+                fn (array $position): bool => data_get($position, 'origin_position_id') === $rootId
+            ) as $child) {
                 if (bccomp(data_get($child, 'signed_amount'), 0) === -1) {
                     $consumed = bcadd($consumed, bcabs(data_get($child, 'signed_amount')));
                 } else {
@@ -44,7 +50,10 @@ trait CalculatesPositionAvailability
     {
         $returned = '0';
 
-        foreach (array_filter($allPositions, fn (array $p): bool => data_get($p, 'origin_position_id') === $positionId) as $child) {
+        foreach (array_filter(
+            $allPositions,
+            fn (array $position): bool => data_get($position, 'origin_position_id') === $positionId
+        ) as $child) {
             $returned = bccomp(data_get($child, 'signed_amount'), 0) === -1
                 ? bcadd($returned, bcabs(data_get($child, 'signed_amount')))
                 : bcadd($returned, $this->calculateReturnedAmount($allPositions, data_get($child, 'id')));
