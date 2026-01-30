@@ -27,22 +27,24 @@ class FamilyTree extends Component
         if (in_array(HasParentChildRelations::class, class_uses_recursive($this->modelType))) {
             $model = resolve_static($this->modelType, 'query')
                 ->whereKey($this->modelId)
-                ->firstOrFail();
+                ->first();
 
-            $rootId = $model->familyRootKey() ?? $this->modelId;
+            if ($model) {
+                $rootId = $model->familyRootKey() ?? $this->modelId;
 
-            $eagerLoad = $this->buildEagerLoadString();
+                $eagerLoad = $this->buildEagerLoadString();
 
-            $root = $rootId === $model->getKey()
-                ? $model->load($eagerLoad ? [$eagerLoad] : [])
-                : resolve_static($this->modelType, 'query')
-                    ->with($eagerLoad ? [$eagerLoad] : [])
-                    ->whereKey($rootId)
-                    ->first();
+                $root = $rootId === $model->getKey()
+                    ? $model->load($eagerLoad ? [$eagerLoad] : [])
+                    : resolve_static($this->modelType, 'query')
+                        ->whereKey($rootId)
+                        ->with($eagerLoad ? [$eagerLoad] : [])
+                        ->first();
 
-            $tree = blank($root)
-                ? []
-                : $this->buildTree($root);
+                $tree = ! blank($root)
+                    ? $this->buildTree($root)
+                    : [];
+            }
         }
 
         return view('flux::livewire.family-tree', ['tree' => $tree]);
