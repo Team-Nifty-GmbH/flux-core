@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Mail\ImapMessageBuilder;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUuid;
@@ -20,5 +21,10 @@ class MailFolder extends FluxModel
     public function mailMessages(): HasMany
     {
         return $this->hasMany(Communication::class);
+    }
+
+    public function messages(): ImapMessageBuilder
+    {
+        return new ImapMessageBuilder($this);
     }
 }
