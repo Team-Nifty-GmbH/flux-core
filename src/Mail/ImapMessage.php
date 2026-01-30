@@ -25,20 +25,23 @@ final readonly class ImapMessage
         public array $attachments,
     ) {}
 
-    public static function fromImapMessage(Message $message): ImapMessage
+    public static function fromImapMessage(Message $message, bool $withBody = true): ImapMessage
     {
-        $message->parseBody();
-
         $attachments = [];
-        foreach ($message->getAttachments() as $attachment) {
-            /** @var Attachment $attachment */
-            $attachments[] = [
-                'file_name' => Str::between($attachment->getName(), '=?', '=?'),
-                'mime_type' => $attachment->getMimeType(),
-                'name' => $attachment->getName(),
-                'media_type' => 'string',
-                'media' => $attachment->getContent(),
-            ];
+
+        if ($withBody) {
+            $message->parseBody();
+
+            foreach ($message->getAttachments() as $attachment) {
+                /** @var Attachment $attachment */
+                $attachments[] = [
+                    'file_name' => Str::between($attachment->getName(), '=?', '=?'),
+                    'mime_type' => $attachment->getMimeType(),
+                    'name' => $attachment->getName(),
+                    'media_type' => 'string',
+                    'media' => $attachment->getContent(),
+                ];
+            }
         }
 
         return new ImapMessage(
@@ -49,8 +52,12 @@ final readonly class ImapMessage
             to: $message->getTo()->toArray(),
             cc: $message->getCc()->toArray(),
             bcc: $message->getBcc()->toArray(),
-            textBody: $message->getTextBody(),
-            htmlBody: $message->getHtmlBody(),
+            textBody: $withBody
+                ? $message->getTextBody()
+                : null,
+            htmlBody: $withBody
+                ? $message->getHtmlBody()
+                : null,
             date: CarbonImmutable::parse($message->getDate()->toDate()),
             isSeen: $message->hasFlag('seen'),
             flags: $message->getFlags()->toArray(),
