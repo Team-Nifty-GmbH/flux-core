@@ -66,7 +66,8 @@ class MailAccount extends FluxModel
                 'username' => $this->email,
                 'password' => $this->password,
                 'authentication' => $this->has_o_auth ? 'oauth' : null,
-            ])->connect();
+            ])
+                ->connect();
         } catch (AuthFailedException $e) {
             logger($e->getMessage(), ['mail_account_id' => $this->id]);
         }
@@ -99,12 +100,14 @@ class MailAccount extends FluxModel
         }
 
         resolve_static(MailFolder::class, 'query')
+            ->whereKeyNot(array_values($folderIds))
             ->where('mail_account_id', $this->getKey())
-            ->whereIntegerNotInRaw('id', array_values($folderIds))
             ->get('id')
-            ->each(fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->getKey()])
-                ->validate()
-                ->execute());
+            ->each(
+                fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->getKey()])
+                    ->validate()
+                    ->execute()
+            );
 
         return $folderIds;
     }
@@ -153,7 +156,7 @@ class MailAccount extends FluxModel
         return $this->hasMany(Communication::class);
     }
 
-    private function syncFolder(Folder $folder, ?int $parentId = null): array
+    protected function syncFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];
         $mailFolder = resolve_static(MailFolder::class, 'query')

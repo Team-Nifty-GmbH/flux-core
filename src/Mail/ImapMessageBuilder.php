@@ -14,16 +14,16 @@ use Webklex\PHPIMAP\Folder;
 
 class ImapMessageBuilder
 {
-    private bool $filterUnseen = false;
+    protected bool $filterUnseen = false;
 
-    private bool $filterSeen = false;
+    protected bool $filterSeen = false;
 
-    private ?int $sinceUid = null;
+    protected ?int $sinceUid = null;
 
     /** @var Collection<int, ImapMessage> */
-    private Collection $messages;
+    protected Collection $messages;
 
-    public function __construct(private readonly MailFolder $folder)
+    public function __construct(protected readonly MailFolder $folder)
     {
         $this->messages = new Collection();
     }
@@ -61,15 +61,21 @@ class ImapMessageBuilder
             return $this;
         }
 
-        $imapFolder = $client->getFolders(false, $this->folder->slug)->first();
+        $imapFolder = $client
+            ->getFolders(false, $this->folder->slug)
+            ->first();
 
         if (! $imapFolder) {
             return $this;
         }
 
+        $this->messages = new Collection();
+
         if (! is_null($this->sinceUid)) {
             $this->fetchNewMessages($imapFolder);
-        } elseif ($this->filterUnseen || $this->filterSeen) {
+        }
+
+        if ($this->filterUnseen || $this->filterSeen) {
             $this->fetchFilteredMessages($imapFolder);
         }
 
@@ -152,7 +158,7 @@ class ImapMessageBuilder
         return $this->messages->count();
     }
 
-    private function fetchNewMessages(Folder $imapFolder): void
+    protected function fetchNewMessages(Folder $imapFolder): void
     {
         try {
             $query = $imapFolder->messages()
@@ -174,7 +180,7 @@ class ImapMessageBuilder
         } while ($page !== $messages->lastPage());
     }
 
-    private function fetchFilteredMessages(Folder $imapFolder): void
+    protected function fetchFilteredMessages(Folder $imapFolder): void
     {
         try {
             $query = $imapFolder->messages()
@@ -184,9 +190,7 @@ class ImapMessageBuilder
 
             if ($this->filterUnseen) {
                 $query->unseen();
-            }
-
-            if ($this->filterSeen) {
+            } elseif ($this->filterSeen) {
                 $query->seen();
             }
         } catch (ResponseException) {
@@ -204,7 +208,7 @@ class ImapMessageBuilder
         } while ($page !== $messages->lastPage());
     }
 
-    private function createMessage(ImapMessage $imapMessage): void
+    protected function createMessage(ImapMessage $imapMessage): void
     {
         $tagIds = $this->resolveTagIds($imapMessage->flags);
 
@@ -230,7 +234,7 @@ class ImapMessageBuilder
             ->execute();
     }
 
-    private function resolveTagIds(array $flags): array
+    protected function resolveTagIds(array $flags): array
     {
         $tagIds = [];
         $type = morph_alias(Communication::class);

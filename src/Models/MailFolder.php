@@ -25,6 +25,6 @@ class MailFolder extends FluxModel
 
     public function messages(): ImapMessageBuilder
     {
-        return new ImapMessageBuilder($this);
+        return app(ImapMessageBuilder::class, ['folder' => $this]);
     }
 }

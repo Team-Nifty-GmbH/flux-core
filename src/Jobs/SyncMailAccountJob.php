@@ -71,7 +71,13 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             ->each(function (MailFolder $folder): void {
                 $startUid = $this->resolveStartUid($folder);
 
-                $folder->messages()->newSince($startUid)->fetch()->store();
+                $builder = $folder->messages();
+
+                if (! is_null($startUid)) {
+                    $builder->newSince($startUid);
+                }
+
+                $builder->fetch()->store();
                 $folder->messages()->unseen()->fetch()->syncReadStatus();
             });
     }
@@ -81,7 +87,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         return $this->mailAccount->uuid;
     }
 
-    private function resolveStartUid(MailFolder $folder): int
+    private function resolveStartUid(MailFolder $folder): ?int
     {
         $maxUid = resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->mailAccount->getKey())
@@ -92,17 +98,16 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             return (int) $maxUid;
         }
 
-        // No messages stored yet - determine starting UID from IMAP
         $client = $this->mailAccount->getImapClient();
 
         if (! $client) {
-            return 0;
+            return null;
         }
 
         $imapFolder = $client->getFolders(false, $folder->slug)->first();
 
         if (! $imapFolder) {
-            return 0;
+            return null;
         }
 
         $firstMessage = $imapFolder->messages()
