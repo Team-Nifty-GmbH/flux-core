@@ -94,6 +94,18 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function calcExchangeRate(): void
+    {
+        $this->orderTransactionForm->calcExchangeRate();
+    }
+
+    #[Renderless]
+    public function calcOrderCurrencyAmount(): void
+    {
+        $this->orderTransactionForm->calcOrderCurrencyAmount();
+    }
+
+    #[Renderless]
     public function assignOrders(array $orders): void
     {
         $transactionCurrencyId = $this->transactionForm->currency_id;
@@ -109,7 +121,7 @@ class TransactionAssignments extends Component
 
                 if ($order->currency_id !== $transactionCurrencyId) {
                     $data['order_currency_amount'] = $order->balance;
-                    $data['amount'] = $this->transactionForm->amount;
+                    $data['amount'] = $this->transactionForm->amount ?? 0;
                     $data['exchange_rate'] = bccomp($this->transactionForm->amount, 0, 9) !== 0
                         ? bcdiv($order->balance, $this->transactionForm->amount, 9)
                         : null;
@@ -230,7 +242,7 @@ class TransactionAssignments extends Component
                         'invoice_date',
                         'total_gross_price',
                     ])
-                        ->withPivot('pivot_id', 'is_accepted', 'amount', 'exchange_rate', 'order_currency_amount');
+                        ->withPivot(['pivot_id', 'amount', 'exchange_rate', 'order_currency_amount', 'is_accepted']);
                 },
                 'orders.addressInvoice:id,name',
                 'orders.currency:id,iso,symbol',

@@ -60,6 +60,18 @@ class Accounting extends OrderTransactionList
     }
 
     #[Renderless]
+    public function calcExchangeRate(): void
+    {
+        $this->orderTransactionForm->calcExchangeRate();
+    }
+
+    #[Renderless]
+    public function calcOrderCurrencyAmount(): void
+    {
+        $this->orderTransactionForm->calcOrderCurrencyAmount();
+    }
+
+    #[Renderless]
     public function editTransaction(?Transaction $transaction): void
     {
         $this->transactionForm->reset();

@@ -97,31 +97,7 @@
             id="order-transaction-modal"
             x-on:open="$focusOn('order-transaction-amount')"
         >
-            <div
-                class="flex flex-col gap-4"
-                x-data="{
-                    calcOrderCurrencyAmount() {
-                        const amount = parseFloat($wire.orderTransactionForm.amount)
-                        const rate = parseFloat($wire.orderTransactionForm.exchange_rate)
-                        if (amount && rate && rate !== 0) {
-                            $wire.orderTransactionForm.order_currency_amount = parseFloat(
-                                (amount * rate).toFixed(10),
-                            )
-                        }
-                    },
-                    calcExchangeRate() {
-                        const amount = parseFloat($wire.orderTransactionForm.amount)
-                        const orderAmount = parseFloat(
-                            $wire.orderTransactionForm.order_currency_amount,
-                        )
-                        if (amount && orderAmount && amount !== 0) {
-                            $wire.orderTransactionForm.exchange_rate = parseFloat(
-                                (orderAmount / amount).toFixed(10),
-                            )
-                        }
-                    },
-                }"
-            >
+            <div class="flex flex-col gap-4">
                 <x-number
                     id="order-transaction-amount"
                     :label="__('Amount')"
@@ -140,13 +116,13 @@
                         wire:model="orderTransactionForm.exchange_rate"
                         step="0.0001"
                         placeholder="0.0000"
-                        x-on:change="calcOrderCurrencyAmount()"
+                        x-on:change="$wire.calcOrderCurrencyAmount()"
                     />
                     <x-number
                         wire:model="orderTransactionForm.order_currency_amount"
                         step="0.01"
                         placeholder="0.00"
-                        x-on:change="calcExchangeRate()"
+                        x-on:change="$wire.calcExchangeRate()"
                     >
                         <x-slot:label>
                             {{ __('Order Currency Amount') }} (

@@ -14,6 +14,7 @@ test('can create new order', function (): void {
         ->create([
             'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
             'is_hidden' => false,
         ]);
 

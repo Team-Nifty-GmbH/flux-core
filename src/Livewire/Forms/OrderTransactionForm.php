@@ -33,6 +33,20 @@ class OrderTransactionForm extends FluxForm
     #[Locked]
     public ?int $transaction_id = null;
 
+    public function calcExchangeRate(): void
+    {
+        if ($this->amount && $this->order_currency_amount && bccomp($this->amount, 0, 10) !== 0) {
+            $this->exchange_rate = bcdiv($this->order_currency_amount, $this->amount, 10);
+        }
+    }
+
+    public function calcOrderCurrencyAmount(): void
+    {
+        if ($this->amount && $this->exchange_rate && bccomp($this->exchange_rate, 0, 10) !== 0) {
+            $this->order_currency_amount = bcmul($this->amount, $this->exchange_rate, 10);
+        }
+    }
+
     public function fill($values): void
     {
         parent::fill($values);

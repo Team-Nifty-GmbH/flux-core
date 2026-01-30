@@ -1097,7 +1097,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function totalPaid(): string|float|int
     {
         return $this->transactions()
-            ->withPivot('amount', 'order_currency_amount')
+            ->withPivot(['amount', 'order_currency_amount'])
             ->get()
             ->reduce(
                 fn (string $carry, Transaction $transaction) => bcadd(
