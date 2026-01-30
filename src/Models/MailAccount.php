@@ -2,6 +2,9 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Actions\MailFolder\CreateMailFolder;
+use FluxErp\Actions\MailFolder\DeleteMailFolder;
+use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Events\MailAccount\Connecting;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -19,6 +22,7 @@ use Webklex\PHPIMAP\Exceptions\ImapBadRequestException;
 use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Exceptions\RuntimeException;
+use Webklex\PHPIMAP\Folder;
 
 class MailAccount extends FluxModel
 {
@@ -30,6 +34,8 @@ class MailAccount extends FluxModel
         'password',
         'smtp_password',
     ];
+
+    private ?Client $imapClient = null;
 
     protected function casts(): array
     {
@@ -60,12 +66,50 @@ class MailAccount extends FluxModel
                 'username' => $this->email,
                 'password' => $this->password,
                 'authentication' => $this->has_o_auth ? 'oauth' : null,
-            ])->connect();
+            ])
+                ->connect();
         } catch (AuthFailedException $e) {
             logger($e->getMessage(), ['mail_account_id' => $this->id]);
         }
 
         return null;
+    }
+
+    public function getImapClient(): ?Client
+    {
+        if (is_null($this->imapClient)) {
+            $this->imapClient = $this->connect();
+        }
+
+        return $this->imapClient;
+    }
+
+    public function syncFolders(): array
+    {
+        $client = $this->getImapClient();
+
+        if (! $client) {
+            return [];
+        }
+
+        $folderIds = [];
+        $folders = $client->getFolders($this->supportsHierarchicalFolders, soft_fail: true);
+
+        foreach ($folders as $folder) {
+            $folderIds = array_merge($folderIds, $this->syncFolder($folder));
+        }
+
+        resolve_static(MailFolder::class, 'query')
+            ->whereKeyNot(array_values($folderIds))
+            ->where('mail_account_id', $this->getKey())
+            ->get('id')
+            ->each(
+                fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->getKey()])
+                    ->validate()
+                    ->execute()
+            );
+
+        return $folderIds;
     }
 
     public function mailer(): Mailer
@@ -110,5 +154,38 @@ class MailAccount extends FluxModel
     public function mailMessages(): HasMany
     {
         return $this->hasMany(Communication::class);
+    }
+
+    protected function syncFolder(Folder $folder, ?int $parentId = null): array
+    {
+        $folderIds = [];
+        $mailFolder = resolve_static(MailFolder::class, 'query')
+            ->where('mail_account_id', $this->getKey())
+            ->where('slug', $folder->path)
+            ->first();
+
+        $action = $mailFolder?->getKey()
+            ? UpdateMailFolder::class
+            : CreateMailFolder::class;
+
+        $mailFolder = $action::make([
+            'id' => $mailFolder?->getKey(),
+            'mail_account_id' => $this->getKey(),
+            'parent_id' => $parentId,
+            'name' => $folder->name,
+            'slug' => $folder->path,
+        ])
+            ->validate()
+            ->execute();
+
+        $folderIds[$folder->path] = $mailFolder->getKey();
+
+        if ($folder->hasChildren()) {
+            foreach ($folder->getChildren() as $child) {
+                $folderIds = array_merge($folderIds, $this->syncFolder($child, $mailFolder->getKey()));
+            }
+        }
+
+        return $folderIds;
     }
 }

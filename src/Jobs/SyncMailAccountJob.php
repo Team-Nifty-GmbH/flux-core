@@ -3,34 +3,20 @@
 namespace FluxErp\Jobs;
 
 use Cron\CronExpression;
-use FluxErp\Actions\Communication\UpdateCommunication;
-use FluxErp\Actions\MailFolder\CreateMailFolder;
-use FluxErp\Actions\MailFolder\DeleteMailFolder;
-use FluxErp\Actions\MailFolder\UpdateMailFolder;
-use FluxErp\Actions\MailMessage\CreateMailMessage;
-use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\Tag;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Str;
-use Webklex\PHPIMAP\Attachment;
-use Webklex\PHPIMAP\Exceptions\ResponseException;
-use Webklex\PHPIMAP\Folder;
-use Webklex\PHPIMAP\Message;
 
 class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    private array $folderIds = [];
 
     private readonly MailAccount $mailAccount;
 
@@ -72,86 +58,33 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         ];
     }
 
-    public function getUnseenMessages(Folder $folder): void
-    {
-        try {
-            $query = $folder->messages()
-                ->setFetchBody(false)
-                ->leaveUnread()
-                ->unseen()
-                ->since($this->mailAccount->created_at);
-        } catch (ResponseException) {
-            return;
-        }
-
-        $unreadUids = [];
-
-        $page = 0;
-        do {
-            $page++;
-            $messages = $query->paginate(100, $page);
-            $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
-        } while ($page !== $messages->lastPage());
-
-        resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->where('mail_folder_id', $this->folderIds[$folder->path])
-            ->where('is_seen', false)
-            ->whereIntegerNotInRaw('message_uid', $unreadUids)
-            ->each(
-                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => true])
-                    ->validate()
-                    ->execute()
-            );
-
-        resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->where('mail_folder_id', $this->folderIds[$folder->path])
-            ->where('is_seen', true)
-            ->whereIntegerInRaw('message_uid', $unreadUids)
-            ->each(
-                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => false])
-                    ->validate()
-                    ->execute()
-            );
-    }
-
     public function handle(): void
     {
-        $client = $this->mailAccount->connect();
-
-        if (! $client) {
-            return;
-        }
-
-        $folders = $client->getFolders($this->mailAccount->supportsHierarchicalFolders, soft_fail: true);
-        foreach ($folders as $folder) {
-            $this->folderIds = array_merge($this->folderIds, $this->createFolder($folder));
-        }
-
-        resolve_static(MailFolder::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->whereIntegerNotInRaw('id', array_values($this->folderIds))
-            ->get('id')
-            ->each(fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute());
+        $this->mailAccount->syncFolders();
 
         if ($this->onlyFolders) {
             return;
         }
 
-        foreach ($folders->reverse() as $folder) {
-            if (! resolve_static(MailFolder::class, 'query')
-                ->where('mail_account_id', $this->mailAccount->id)
-                ->where('slug', $folder->path)
-                ->first()
-                ?->is_active
-            ) {
-                continue;
-            }
+        $this->mailAccount->mailFolders()
+            ->where('is_active', true)
+            ->each(function (MailFolder $folder): void {
+                $startUid = $this->resolveStartUid($folder);
 
-            $this->getNewMessages($folder);
-            $this->getUnseenMessages($folder);
-        }
+                $builder = $folder->messages();
+
+                if (! is_null($startUid)) {
+                    $builder->newSince($startUid);
+                }
+
+                $builder->fetch()->store();
+
+                $builder
+                    ->reset()
+                    ->unseen()
+                    ->fetch()
+                    ->syncReadStatus();
+            });
     }
 
     public function uniqueId(): string
@@ -159,140 +92,42 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         return $this->mailAccount->uuid;
     }
 
-    protected function createFolder(Folder $folder, ?int $parentId = null): array
+    protected function resolveStartUid(MailFolder $folder): ?int
     {
-        $folderIds = [];
-        $mailFolder = resolve_static(MailFolder::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->where('slug', $folder->path)
-            ->first();
+        $maxUid = resolve_static(Communication::class, 'query')
+            ->where('mail_account_id', $this->mailAccount->getKey())
+            ->where('mail_folder_id', $folder->getKey())
+            ->max('message_uid');
 
-        $action = $mailFolder?->id ? UpdateMailFolder::class : CreateMailFolder::class;
-
-        $mailFolder = $action::make(
-            [
-                'id' => $mailFolder?->id,
-                'mail_account_id' => $this->mailAccount->id,
-                'parent_id' => $parentId,
-                'name' => $folder->name,
-                'slug' => $folder->path,
-            ]
-        )->validate()->execute();
-
-        $folderIds[$folder->path] = $mailFolder->id;
-
-        if ($folder->hasChildren()) {
-            foreach ($folder->getChildren() as $child) {
-                $folderIds = array_merge($folderIds, $this->createFolder($child, $mailFolder->id));
-            }
+        if ($maxUid) {
+            return (int) $maxUid;
         }
 
-        return $folderIds;
-    }
+        $client = $this->mailAccount->getImapClient();
 
-    protected function getNewMessages(Folder $folder): void
-    {
-        $startUid = resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->where('mail_folder_id', $this->folderIds[$folder->path])
-            ->max('message_uid')
-            ?? max(($folder->messages()->all()
-                ->since($this->mailAccount->created_at)
-                ->limit(1)
-                ->get()
-                ?->first()
-                ?->getUid() ?? 0) - 1, 0)
-            ?: max(($folder->examine()['uidnext'] ?? 0) - 1, 0);
-
-        try {
-            $query = $folder->messages()
-                ->setFetchBody(false)
-                ->leaveUnread()
-                ->getByUidGreater($startUid);
-        } catch (ResponseException) {
-            return;
+        if (! $client) {
+            return null;
         }
 
-        $page = 0;
-        do {
-            $page++;
-            $messages = $query->paginate(100, $page);
+        $imapFolder = $client->getFolders(false, $folder->slug)->first();
 
-            foreach ($messages as $message) {
-                $this->storeMessage($message, $this->folderIds[$folder->path]);
-            }
-        } while ($page !== $messages->lastPage());
-    }
-
-    protected function storeMessage(Message $message, int $folderId): void
-    {
-        $messageModel = resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->where('message_id', $message->getMessageId())
-            ->first();
-
-        if (! $messageModel) {
-            $message->parseBody();
-
-            $attachments = [];
-            foreach ($message->getAttachments() as $attachment) {
-                /** @var Attachment $attachment */
-                $attachments[] = [
-                    'file_name' => Str::between($attachment->getName(), '=?', '=?'),
-                    'mime_type' => $attachment->getMimeType(),
-                    'name' => $attachment->getName(),
-                    'media_type' => 'string',
-                    'media' => $attachment->getContent(),
-                ];
-            }
-
-            $tags = $message->getFlags()->toArray();
-            $tagIds = [];
-            $type = morph_alias(Communication::class);
-            $existingTags = resolve_static(Tag::class, 'query')
-                ->whereIn('name', $tags)
-                ->where('type', $type)
-                ->pluck('id', 'name')
-                ->toArray();
-
-            foreach ($tags as $tag) {
-                if ($existingTag = data_get($existingTags, $tag)) {
-                    $tagIds[] = $existingTag;
-                } else {
-                    $tagIds[] = CreateTag::make(['name' => $tag, 'type' => $type])->validate()->execute()->id;
-                }
-            }
-
-            CreateMailMessage::make([
-                'mail_account_id' => $this->mailAccount->id,
-                'mail_folder_id' => $folderId,
-                'message_id' => $message->getMessageId()->toString(),
-                'message_uid' => $message->getUid(),
-                'from' => $message->getFrom()[0]->full,
-                'to' => $message->getTo()->toArray(),
-                'cc' => $message->getCc()->toArray(),
-                'bcc' => $message->getBcc()->toArray(),
-                'communication_type_enum' => 'mail',
-                'date' => $message->getDate()->toDate(),
-                'subject' => $message->getSubject()->toString(),
-                'text_body' => $message->getTextBody(),
-                'html_body' => $message->getHtmlBody(),
-                'is_seen' => $message->hasFlag('seen'),
-                'tags' => $tagIds,
-                'attachments' => $attachments,
-            ])
-                ->validate()
-                ->execute();
-        } else {
-            UpdateCommunication::make([
-                'id' => $messageModel->id,
-                'mail_folder_id' => $folderId,
-                'message_uid' => $message->getUid(),
-                'communication_type_enum' => 'mail',
-                'is_seen' => $message->hasFlag('seen'),
-            ])
-                ->validate()
-                ->execute();
+        if (! $imapFolder) {
+            return null;
         }
+
+        $firstMessage = $imapFolder->messages()
+            ->all()
+            ->since($this->mailAccount->created_at)
+            ->limit(1)
+            ->get()
+            ?->first();
+
+        if ($firstMessage) {
+            return max($firstMessage->getUid() - 1, 0) ?: null;
+        }
+
+        return ! is_null($uidnext = data_get($imapFolder->examine(), 'uidnext'))
+            ? max($uidnext - 1, 0)
+            : null;
     }
 }
