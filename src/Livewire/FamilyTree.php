@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
+
 #[Lazy]
 class FamilyTree extends Component
 {
