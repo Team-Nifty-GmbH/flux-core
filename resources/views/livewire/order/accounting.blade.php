@@ -169,14 +169,44 @@
             id="order-transaction-modal"
             x-on:open="$focusOn('order-transaction-amount')"
         >
-            <x-number
-                id="order-transaction-amount"
-                :label="__('Amount')"
-                wire:model="orderTransactionForm.amount"
-                step="0.01"
-                :corner-hint="__('Amount')"
-                placeholder="0.00"
-            />
+            <div class="flex flex-col gap-4">
+                <x-number
+                    id="order-transaction-amount"
+                    :label="__('Amount')"
+                    wire:model="orderTransactionForm.amount"
+                    step="0.01"
+                    :corner-hint="__('Amount')"
+                    placeholder="0.00"
+                />
+                <div
+                    x-cloak
+                    x-show="$wire.orderTransactionForm.orderCurrencyIso"
+                    class="flex flex-col gap-4"
+                >
+                    <x-number
+                        :label="__('Exchange Rate')"
+                        wire:model="orderTransactionForm.exchange_rate"
+                        step="0.0001"
+                        placeholder="0.0000"
+                        x-on:change="$wire.calcOrderCurrencyAmount()"
+                    />
+                    <x-number
+                        wire:model="orderTransactionForm.order_currency_amount"
+                        step="0.01"
+                        placeholder="0.00"
+                        x-on:change="$wire.calcExchangeRate()"
+                    >
+                        <x-slot:label>
+                            {{ __('Order Currency Amount') }}
+                            (
+                            <span
+                                x-text="$wire.orderTransactionForm.orderCurrencyIso"
+                            ></span>
+                            )
+                        </x-slot>
+                    </x-number>
+                </div>
+            </div>
             <x-slot:footer>
                 <x-button
                     color="secondary"
