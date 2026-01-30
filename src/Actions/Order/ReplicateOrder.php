@@ -156,7 +156,8 @@ class ReplicateOrder extends FluxAction
                 && is_null(data_get($orderPosition, 'discount_percentage'))
             ) {
                 $originalAmount = data_get($orderPosition, 'original_amount')
-                    ?? data_get($orderPosition, 'amount') ?? 0;
+                    ?? data_get($orderPosition, 'amount')
+                    ?? 0;
 
                 if (data_get($orderPosition, 'is_net')) {
                     $originalTotal = bcabs(data_get($orderPosition, 'total_net_price') ?? 0);
@@ -202,7 +203,11 @@ class ReplicateOrder extends FluxAction
 
             $newOrderPositions->push($newPosition);
 
-            $this->replicateDiscounts(morph_alias(OrderPosition::class), $originalPositionId, $newPosition->getKey());
+            $this->replicateDiscounts(
+                morph_alias(OrderPosition::class),
+                $originalPositionId,
+                $newPosition->getKey()
+            );
         }
 
         $order->calculatePrices()->save();

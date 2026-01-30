@@ -7,8 +7,8 @@ use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
+use FluxErp\Traits\CalculatesPositionAvailability;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Livewire\CalculatesPositionAvailability;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -152,8 +152,10 @@ class CreateChildOrder extends Component
             }
         }
 
-        $allPositions = array_map(
-            fn (object $item): array => (array) $item,
+        $multiplier = OrderTypeEnum::tryFrom($this->type)
+            ?->multiplier()
+            ?? 1;
+        $maxAmounts = $this->calculateMaxAmounts(
             DB::select(
                 'WITH RECURSIVE siblings AS (
                     SELECT id, origin_position_id, signed_amount
@@ -167,19 +169,8 @@ class CreateChildOrder extends Component
                     WHERE op.deleted_at IS NULL
                 )
                 SELECT * FROM siblings'
-            )
-        );
-
-        $maxAmounts = $this->calculateMaxAmounts(
-            $allPositions,
-            $takeAllWithPercentage
-                ? array_column(
-                    array_filter($allPositions, fn (array $position): bool => is_null(
-                        data_get($position, 'origin_position_id')
-                    )),
-                    'id'
-                )
-                : $positionIds
+            ),
+            $multiplier
         );
 
         $orderPositions = resolve_static(OrderPosition::class, 'query')

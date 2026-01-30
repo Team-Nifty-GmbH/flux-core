@@ -103,6 +103,7 @@
                         <livewire:order.replicate-order-position-list
                             :order-id="$orderId"
                             :already-taken-positions="array_column($replicateOrder->order_positions, 'id')"
+                            :type="$type"
                             wire:model="selectedPositions"
                             lazy
                         />

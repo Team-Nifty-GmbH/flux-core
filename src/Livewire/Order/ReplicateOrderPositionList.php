@@ -2,13 +2,15 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Models\OrderPosition;
-use FluxErp\Traits\Livewire\CalculatesPositionAvailability;
+use FluxErp\Traits\CalculatesPositionAvailability;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\ComponentAttributeBag;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
@@ -33,6 +35,9 @@ class ReplicateOrderPositionList extends OrderPositionList
     public bool $isSelectable = true;
 
     public ?int $orderId;
+
+    #[Locked]
+    public ?string $type = null;
 
     #[Modelable]
     public array $selected = [];
@@ -91,24 +96,25 @@ class ReplicateOrderPositionList extends OrderPositionList
             ->pluck('id')
             ->toArray();
 
-        $signedAmounts = DB::select(
-            'WITH RECURSIVE siblings AS (
-                SELECT id, origin_position_id, signed_amount
-                FROM order_positions
-                WHERE order_id = ' . $this->orderId
-            . ' AND id IN (' . implode(',', $positionIds) . ')'
-            . ' UNION ALL
-                SELECT op.id, op.origin_position_id, op.signed_amount
-                FROM order_positions op
-                INNER JOIN siblings s ON s.id = op.origin_position_id
-                WHERE op.deleted_at IS NULL
-            )
-            SELECT * FROM siblings'
-        );
-
+        $multiplier = OrderTypeEnum::tryFrom($this->type)
+            ?->multiplier()
+            ?? 1;
         $maxAmounts = $this->calculateMaxAmounts(
-            array_map(fn (object $item): array => (array) $item, $signedAmounts),
-            $positionIds
+            DB::select(
+                'WITH RECURSIVE siblings AS (
+                    SELECT id, origin_position_id, signed_amount
+                    FROM order_positions
+                    WHERE order_id = ' . $this->orderId
+                . ' AND id IN (' . implode(',', $positionIds) . ')'
+                . ' UNION ALL
+                    SELECT op.id, op.origin_position_id, op.signed_amount
+                    FROM order_positions op
+                    INNER JOIN siblings s ON s.id = op.origin_position_id
+                    WHERE op.deleted_at IS NULL
+                )
+                SELECT * FROM siblings'
+            ),
+            $multiplier
         );
 
         foreach ($tree as $key => &$item) {
