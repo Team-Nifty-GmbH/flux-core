@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
-use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-
 #[Lazy]
 class FamilyTree extends Component
 {
@@ -38,9 +36,10 @@ class FamilyTree extends Component
                 ? $model->load($eagerLoad ? [$eagerLoad] : [])
                 : resolve_static($this->modelType, 'query')
                     ->with($eagerLoad ? [$eagerLoad] : [])
-                    ->findOrFail($rootId);
+                    ->whereKey($rootId)
+                    ->first();
 
-            $tree = $this->buildTree($root);
+            $tree = blank($root) ? [] : $this->buildTree($root);
         }
 
         return view('flux::livewire.family-tree', ['tree' => $tree]);
@@ -51,7 +50,7 @@ class FamilyTree extends Component
         return view('flux::livewire.placeholders.box');
     }
 
-    private function buildEagerLoadString(): string
+    protected function buildEagerLoadString(): string
     {
         if (! is_null($this->maxDepth) && $this->maxDepth <= 0) {
             return '';
@@ -62,20 +61,22 @@ class FamilyTree extends Component
         return implode('.', array_fill(0, $depth, 'children'));
     }
 
-    private function buildTree(Model $node, int $depth = 0): array
+    protected function buildTree(Model $node, int $depth = 0): array
     {
-        $label = $node instanceof InteractsWithDataTables
+        $label = method_exists($node, 'getLabel')
             ? ($node->getLabel() ?? (string) $node->getKey())
             : (data_get($node, 'name') ?? (string) $node->getKey());
 
         return [
             'id' => $node->getKey(),
             'label' => $label,
-            'url' => $node instanceof InteractsWithDataTables ? $node->getUrl() : null,
+            'url' => method_exists($node, 'getUrl') ? $node->getUrl() : null,
             'is_current' => $node->getKey() === $this->modelId,
             'children' => (! is_null($this->maxDepth) && $depth >= $this->maxDepth)
                 ? []
-                : $node->children->map(fn (Model $child) => $this->buildTree($child, $depth + 1))->toArray(),
+                : $node->children
+                    ->map(fn (Model $child) => $this->buildTree($child, $depth + 1))
+                    ->toArray(),
         ];
     }
 }
