@@ -2,6 +2,7 @@
 
 namespace FluxErp\Mail;
 
+use Closure;
 use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Actions\Tag\CreateTag;
@@ -17,6 +18,8 @@ class ImapMessageBuilder
     protected bool $filterUnseen = false;
 
     protected bool $filterSeen = false;
+
+    protected bool $fetchBody = true;
 
     protected ?int $sinceUid = null;
 
@@ -44,6 +47,20 @@ class ImapMessageBuilder
         return $this;
     }
 
+    public function withBody(): static
+    {
+        $this->fetchBody = true;
+
+        return $this;
+    }
+
+    public function withoutBody(): static
+    {
+        $this->fetchBody = false;
+
+        return $this;
+    }
+
     public function newSince(?int $uid): static
     {
         $this->sinceUid = $uid;
@@ -55,6 +72,7 @@ class ImapMessageBuilder
     {
         $this->filterSeen = false;
         $this->filterUnseen = false;
+        $this->fetchBody = true;
         $this->sinceUid = null;
         $this->messages = new Collection();
 
@@ -63,17 +81,7 @@ class ImapMessageBuilder
 
     public function fetch(): static
     {
-        $client = $this->folder
-            ->mailAccount
-            ->getImapClient();
-
-        if (! $client) {
-            return $this;
-        }
-
-        $imapFolder = $client
-            ->getFolders(false, $this->folder->slug)
-            ->first();
+        $imapFolder = $this->resolveImapFolder();
 
         if (! $imapFolder) {
             return $this;
@@ -92,27 +100,33 @@ class ImapMessageBuilder
         return $this;
     }
 
+    public function fetchAndStore(): static
+    {
+        $imapFolder = $this->resolveImapFolder();
+
+        if (! $imapFolder) {
+            return $this;
+        }
+
+        $onMessage = function (ImapMessage $imapMessage): void {
+            $this->storeMessage($imapMessage);
+        };
+
+        if (! is_null($this->sinceUid)) {
+            $this->fetchNewMessages($imapFolder, $onMessage);
+        }
+
+        if ($this->filterUnseen || $this->filterSeen || is_null($this->sinceUid)) {
+            $this->fetchFilteredMessages($imapFolder, $onMessage);
+        }
+
+        return $this;
+    }
+
     public function store(): static
     {
         foreach ($this->messages as $imapMessage) {
-            $existing = resolve_static(Communication::class, 'query')
-                ->where('mail_account_id', $this->folder->mailAccount->getKey())
-                ->where('message_id', $imapMessage->messageId)
-                ->first();
-
-            if (! $existing) {
-                $this->createMessage($imapMessage);
-            } else {
-                UpdateCommunication::make([
-                    'id' => $existing->getKey(),
-                    'mail_folder_id' => $this->folder->getKey(),
-                    'message_uid' => $imapMessage->uid,
-                    'communication_type_enum' => 'mail',
-                    'is_seen' => $imapMessage->isSeen,
-                ])
-                    ->validate()
-                    ->execute();
-            }
+            $this->storeMessage($imapMessage);
         }
 
         return $this;
@@ -168,7 +182,22 @@ class ImapMessageBuilder
         return $this->messages->count();
     }
 
-    protected function fetchNewMessages(Folder $imapFolder): void
+    protected function resolveImapFolder(): ?Folder
+    {
+        $client = $this->folder
+            ->mailAccount
+            ->getImapClient();
+
+        if (! $client) {
+            return null;
+        }
+
+        return $client
+            ->getFolders(false, $this->folder->slug)
+            ->first();
+    }
+
+    protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void
     {
         try {
             $query = $imapFolder->messages()
@@ -185,12 +214,18 @@ class ImapMessageBuilder
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
-                $this->messages->push(ImapMessage::fromImapMessage($message));
+                $imapMessage = ImapMessage::fromImapMessage($message, $this->fetchBody);
+
+                if ($onMessage) {
+                    $onMessage($imapMessage);
+                } else {
+                    $this->messages->push($imapMessage);
+                }
             }
         } while ($page !== $messages->lastPage());
     }
 
-    protected function fetchFilteredMessages(Folder $imapFolder): void
+    protected function fetchFilteredMessages(Folder $imapFolder, ?Closure $onMessage = null): void
     {
         try {
             $query = $imapFolder->messages()
@@ -213,9 +248,37 @@ class ImapMessageBuilder
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
-                $this->messages->push(ImapMessage::fromImapMessage($message));
+                $imapMessage = ImapMessage::fromImapMessage($message, $this->fetchBody);
+
+                if ($onMessage) {
+                    $onMessage($imapMessage);
+                } else {
+                    $this->messages->push($imapMessage);
+                }
             }
         } while ($page !== $messages->lastPage());
+    }
+
+    protected function storeMessage(ImapMessage $imapMessage): void
+    {
+        $existing = resolve_static(Communication::class, 'query')
+            ->where('mail_account_id', $this->folder->mailAccount->getKey())
+            ->where('message_id', $imapMessage->messageId)
+            ->first();
+
+        if (! $existing) {
+            $this->createMessage($imapMessage);
+        } else {
+            UpdateCommunication::make([
+                'id' => $existing->getKey(),
+                'mail_folder_id' => $this->folder->getKey(),
+                'message_uid' => $imapMessage->uid,
+                'communication_type_enum' => 'mail',
+                'is_seen' => $imapMessage->isSeen,
+            ])
+                ->validate()
+                ->execute();
+        }
     }
 
     protected function createMessage(ImapMessage $imapMessage): void

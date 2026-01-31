@@ -77,11 +77,12 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                     $builder->newSince($startUid);
                 }
 
-                $builder->fetch()->store();
+                $builder->fetchAndStore();
 
                 $builder
                     ->reset()
                     ->unseen()
+                    ->withoutBody()
                     ->fetch()
                     ->syncReadStatus();
             });
