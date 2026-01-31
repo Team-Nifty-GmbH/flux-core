@@ -54,7 +54,9 @@ class CreateMailMessage extends FluxAction
             $attachment['model_id'] = $mailMessage->id;
             $attachment['model_type'] = app(Communication::class)->getMorphClass();
             $attachment['collection_name'] = 'attachments';
-            $attachment['media_type'] = 'string';
+            $attachment['media_type'] ??= is_file(data_get($attachment, 'media', ''))
+                ? null
+                : 'string';
 
             UploadMedia::make($attachment)
                 ->validate()

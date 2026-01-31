@@ -4,6 +4,7 @@ namespace FluxErp\Mail;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Webklex\PHPIMAP\Attachment;
 use Webklex\PHPIMAP\Message;
 
@@ -34,12 +35,19 @@ final readonly class ImapMessage
 
             foreach ($message->getAttachments() as $attachment) {
                 /** @var Attachment $attachment */
+                $tempPath = tempnam(sys_get_temp_dir(), 'imap_');
+
+                if (! $tempPath || file_put_contents($tempPath, $attachment->getContent()) === false) {
+                    report(new RuntimeException('Failed to write IMAP attachment to temporary file'));
+
+                    continue;
+                }
+
                 $attachments[] = [
                     'file_name' => Str::between($attachment->getName(), '=?', '=?'),
                     'mime_type' => $attachment->getMimeType(),
                     'name' => $attachment->getName(),
-                    'media_type' => 'string',
-                    'media' => $attachment->getContent(),
+                    'media' => $tempPath,
                 ];
             }
         }
