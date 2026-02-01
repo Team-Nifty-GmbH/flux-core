@@ -8,6 +8,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +50,7 @@ it('applies temporary scopes during eager loading and removes them after', funct
         'tenant_id' => $this->dbTenant->getKey(),
         'order_type_id' => $orderType->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'price_list_id' => $this->dbTenant->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
         'contact_id' => $contact->getKey(),
         'address_invoice_id' => $address->getKey(),
     ]);
