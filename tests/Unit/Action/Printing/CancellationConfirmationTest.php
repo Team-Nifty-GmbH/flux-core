@@ -36,9 +36,8 @@ beforeEach(function (): void {
         'is_default' => true,
     ]);
 
-    $language = Language::factory()->create([
-        'language_code' => 'de',
-    ]);
+    $language = Language::query()->where('language_code', 'de')->first()
+        ?? Language::factory()->create(['language_code' => 'de']);
 
     $orderType = OrderType::factory()
         ->create([
