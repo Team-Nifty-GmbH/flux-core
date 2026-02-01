@@ -5,10 +5,13 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\OrderType\CreateOrderType;
 use FluxErp\Actions\OrderType\DeleteOrderType;
 use FluxErp\Actions\OrderType\UpdateOrderType;
+use FluxErp\Traits\Livewire\Form\SupportsAutoRender;
 use Livewire\Attributes\Locked;
 
 class OrderTypeForm extends FluxForm
 {
+    use SupportsAutoRender;
+
     public ?int $tenant_id = null;
 
     public ?string $description = null;
