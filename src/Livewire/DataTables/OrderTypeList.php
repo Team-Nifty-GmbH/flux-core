@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\OrderType;
 use Illuminate\Database\Eloquent\Builder;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderTypeList extends BaseDataTable
 {
