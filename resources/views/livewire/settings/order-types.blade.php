@@ -1,4 +1,4 @@
-<x-modal id="edit-order-type-modal" :title="__('Order Type')">
+<x-modal id="order-type-form-modal" :title="__('Order Type')">
     <div class="space-y-8 divide-y divide-gray-200">
         <div>
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">

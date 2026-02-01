@@ -18,19 +18,6 @@ class OrderTypeList extends BaseDataTable
 
     protected string $model = OrderType::class;
 
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->color('indigo')
-                ->text(__('Create'))
-                ->icon('plus')
-                ->attributes([
-                    'x-on:click' => '$dispatch(\'data-table-row-clicked\')',
-                ]),
-        ];
-    }
-
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with('tenant:id,name');
