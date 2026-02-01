@@ -7,6 +7,7 @@ use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use FluxErp\Traits\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 
 class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TracksSchedule;
 
     private readonly MailAccount $mailAccount;
 
