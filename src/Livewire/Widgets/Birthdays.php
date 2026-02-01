@@ -21,7 +21,7 @@ class Birthdays extends ValueList
             ->whereNotNull('date_of_birth')
             ->whereMonth('date_of_birth', now()->month)
             ->whereDay('date_of_birth', now()->day)
-            ->get(['id', 'name', 'date_of_birth']);
+            ->get(['id', 'contact_id', 'name', 'date_of_birth']);
 
         $this->items = $query->map(fn (Address $item) => [
             'id' => $item->id,
