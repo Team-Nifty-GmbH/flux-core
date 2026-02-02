@@ -250,6 +250,8 @@
             $model
                 ->vatRates()
                 ->distinct()
+                ->get()
+                ->each->localize($model->language_id)
                 ->pluck('footer_text')
                 ->filter()
                 ->map(fn (string $text) => render_editor_blade($text, ['order' => $model])->toHtml())
