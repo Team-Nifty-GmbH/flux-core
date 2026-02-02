@@ -7,6 +7,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\VatRate;
 use FluxErp\Support\Editor\EditorManager;
 use FluxErp\View\Components\EditorButtons\AlignCenter;
 use FluxErp\View\Components\EditorButtons\AlignLeft;
@@ -94,8 +95,26 @@ class EditorServiceProvider extends ServiceProvider
                 'Tenant Name' => '$order->tenant?->name',
                 'Agent Name' => '$order->agent?->name',
                 'Responsible User Name' => '$order->responsibleUser?->name',
+                'Contact Vat Id' => '$order->contact->vat_id',
             ],
             Order::class
+        );
+
+        Editor::mergeVariables(
+            [
+                'Salutation' => '$order->addressInvoice->salutation()',
+                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->addressInvoice->language)',
+                'Balance' => 'format_money($order->balance, $order->currency, $order->addressInvoice->language)',
+                'Order Number' => '$order->order_number',
+                'Order Date' => '$order->order_date?->isoFormat(\'L\')',
+                'Invoice Number' => '$order->invoice_number',
+                'Invoice Date' => '$order->invoice_date?->isoFormat(\'L\')',
+                'Tenant Name' => '$order->tenant?->name',
+                'Agent Name' => '$order->agent?->name',
+                'Responsible User Name' => '$order->responsibleUser?->name',
+                'Contact Vat Id' => '$order->contact->vat_id',
+            ],
+            VatRate::class
         );
 
         Editor::mergeVariables(
