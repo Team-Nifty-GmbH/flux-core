@@ -113,7 +113,7 @@ abstract class Comments extends Component
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
-                FamilyTreeScope::class => app(FamilyTreeScope::class),
+                resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
             ],
         ]);
 
@@ -145,7 +145,7 @@ abstract class Comments extends Component
                     'scopes' => [
                         'media',
                         'ordered',
-                        FamilyTreeScope::class,
+                        resolve_static(FamilyTreeScope::class, 'class'),
                     ],
                 ]
             );
@@ -172,7 +172,8 @@ abstract class Comments extends Component
                 'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
             ],
-        ])->where('model_type', morph_alias($this->modelType))
+        ])
+            ->where('model_type', morph_alias($this->modelType))
             ->where('model_id', $this->modelId)
             ->when(
                 ! Auth::user() instanceof User,

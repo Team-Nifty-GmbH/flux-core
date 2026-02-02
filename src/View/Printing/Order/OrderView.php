@@ -72,7 +72,7 @@ class OrderView extends PrintableView
                                     fn (Builder $query) => $query->whereNot('is_alternative', true)
                                 );
                         },
-                        FamilyTreeScope::class => app(FamilyTreeScope::class),
+                        resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
                     ],
                 ])
                     ->where('order_id', $this->model->getKey())

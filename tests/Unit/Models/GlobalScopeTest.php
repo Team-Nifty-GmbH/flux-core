@@ -14,17 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 beforeEach(function (): void {
-    $scopes = OrderPosition::getAllGlobalScopes();
-    unset($scopes[OrderPosition::class]['sorted']);
-    unset($scopes[OrderPosition::class][FamilyTreeScope::class]);
-    OrderPosition::setAllGlobalScopes($scopes);
-});
-
-afterEach(function (): void {
-    $scopes = OrderPosition::getAllGlobalScopes();
-    unset($scopes[OrderPosition::class]['sorted']);
-    unset($scopes[OrderPosition::class][FamilyTreeScope::class]);
-    OrderPosition::setAllGlobalScopes($scopes);
+    OrderPosition::removeGlobalScopes(['sorted', FamilyTreeScope::class]);
 });
 
 it('applies temporary scopes during eager loading and removes them after', function (): void {

@@ -21,7 +21,9 @@ abstract class FluxModel extends Model
     public static function removeGlobalScopes(array $scopes): void
     {
         foreach ($scopes as $scope) {
-            unset(static::$globalScopes[static::class][$scope]);
+            if (isset(static::$globalScopes[static::class][$scope])) {
+                unset(static::$globalScopes[static::class][$scope]);
+            }
         }
     }
 

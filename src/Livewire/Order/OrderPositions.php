@@ -410,7 +410,7 @@ class OrderPositions extends OrderPositionList
                 'sorted' => function (Builder $query): void {
                     $query->ordered();
                 },
-                FamilyTreeScope::class => app(FamilyTreeScope::class),
+                resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
             ],
         ])
             ->where('order_id', $this->order->id)
