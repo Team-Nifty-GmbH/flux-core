@@ -23,8 +23,8 @@ class UpdateScheduleRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Schedule::class]),
             ],
             'description' => 'string|nullable',
-            'cron' => 'required|array',
-            'cron.methods' => 'required|array',
+            'cron' => 'sometimes|required|array',
+            'cron.methods' => 'sometimes|required|array',
             'cron.methods.basic' => [
                 'nullable',
                 Rule::in(FrequenciesEnum::getBasicFrequencies()),
@@ -37,7 +37,7 @@ class UpdateScheduleRuleset extends FluxRuleset
                 'nullable',
                 Rule::in(FrequenciesEnum::getTimeConstraints()),
             ],
-            'cron.parameters' => 'required|array',
+            'cron.parameters' => 'sometimes|required|array',
             'cron.parameters.basic' => [
                 'array',
                 app(Frequency::class, ['frequencyKey' => 'cron.methods.basic']),
