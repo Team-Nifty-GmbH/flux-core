@@ -49,7 +49,7 @@
         />
         <x-number
             wire:model="paymentType.payment_target"
-            :label="__('Payment Target')"
+            :label="__('Payment Target Days')"
         />
         <x-number
             wire:model="paymentType.payment_discount_target"
