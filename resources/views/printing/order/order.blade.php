@@ -252,8 +252,8 @@
                 ->distinct()
                 ->pluck('footer_text')
                 ->filter()
-                ->map(fn (string $text) => Blade::render(html_entity_decode($text), ['model' => $model]))
-                ->implode('<br>')
+                ->map(fn (string $text) => render_editor_blade($text, ['order' => $model])->toHtml())
+                ->pipe(fn (\Illuminate\Support\Collection $items) => $items->isNotEmpty() ? '<br>' . $items->implode('<br>') : '')
         !!}
     </div>
     @show
