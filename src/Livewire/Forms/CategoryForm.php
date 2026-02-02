@@ -16,11 +16,11 @@ class CategoryForm extends FluxForm
 
     public ?string $model_type = null;
 
-    public ?string $name;
+    public ?string $name = null;
 
-    public ?int $parent_id;
+    public ?int $parent_id = null;
 
-    public ?int $sort_number;
+    public ?int $sort_number = null;
 
     protected function getActions(): array
     {
