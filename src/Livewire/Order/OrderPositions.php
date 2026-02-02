@@ -13,6 +13,7 @@ use FluxErp\Livewire\Forms\OrderPositionForm;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\Builder;
@@ -404,22 +405,18 @@ class OrderPositions extends OrderPositionList
 
     public function getSortableOrderPositions(): array
     {
-        try {
-            resolve_static(OrderPosition::class, 'addGlobalScope', [
-                'scope' => 'sorted',
-                'implementation' => function (Builder $query): void {
+        return resolve_static(OrderPosition::class, 'withTemporaryGlobalScopes', [
+            'scopes' => [
+                'sorted' => function (Builder $query): void {
                     $query->ordered();
                 },
-            ]);
-
-            return resolve_static(OrderPosition::class, 'familyTree')
-                ->where('order_id', $this->order->id)
-                ->whereNull('parent_id')
-                ->get()
-                ->toArray();
-        } finally {
-            resolve_static(OrderPosition::class, 'withoutGlobalScope', ['scope' => 'sorted']);
-        }
+                resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
+            ],
+        ])
+            ->where('order_id', $this->order->id)
+            ->whereNull('parent_id')
+            ->get()
+            ->toArray();
     }
 
     public function getViewData(): array

@@ -113,7 +113,7 @@ abstract class Comments extends Component
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
-                FamilyTreeScope::class,
+                resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
             ],
         ]);
 
@@ -138,7 +138,17 @@ abstract class Comments extends Component
 
             return $comments->setCollection($data)->toArray();
         } finally {
-            resolve_static(Comment::class, 'withoutGlobalScopes', ['scopes' => ['media', 'ordered', FamilyTreeScope::class]]);
+            resolve_static(
+                Comment::class,
+                'removeGlobalScopes',
+                [
+                    'scopes' => [
+                        'media',
+                        'ordered',
+                        resolve_static(FamilyTreeScope::class, 'class'),
+                    ],
+                ]
+            );
         }
     }
 
@@ -157,33 +167,27 @@ abstract class Comments extends Component
             return [];
         }
 
-        resolve_static(Comment::class, 'addGlobalScopes', [
+        return resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
             ],
-        ]);
+        ])
+            ->where('model_type', morph_alias($this->modelType))
+            ->where('model_id', $this->modelId)
+            ->when(
+                ! Auth::user() instanceof User,
+                fn (Builder $query) => $query->where('is_internal', false)
+            )
+            ->where('is_sticky', true)
+            ->get()
+            ->map(function (Comment $comment) {
+                $comment->is_current_user = $comment->getRawOriginal('created_by')
+                    === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
-        try {
-            return resolve_static(Comment::class, 'query')
-                ->where('model_type', morph_alias($this->modelType))
-                ->where('model_id', $this->modelId)
-                ->when(
-                    ! Auth::user() instanceof User,
-                    fn (Builder $query) => $query->where('is_internal', false)
-                )
-                ->where('is_sticky', true)
-                ->get()
-                ->map(function (Comment $comment) {
-                    $comment->is_current_user = $comment->getRawOriginal('created_by')
-                        === auth()->user()?->getMorphClass() . ':' . auth()->id();
-
-                    return $comment;
-                })
-                ->toArray();
-        } finally {
-            resolve_static(Comment::class, 'withoutGlobalScopes', ['scopes' => ['media', 'ordered']]);
-        }
+                return $comment;
+            })
+            ->toArray();
     }
 
     #[Renderless]
