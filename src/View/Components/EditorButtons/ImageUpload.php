@@ -12,7 +12,10 @@ class ImageUpload extends Component implements EditorButton
 
     public function command(): ?string
     {
-        return <<<'JS'
+        $errorTitle = __('Error');
+        $errorMessage = __('Image upload failed.');
+
+        return <<<JS
             (() => {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -20,12 +23,22 @@ class ImageUpload extends Component implements EditorButton
                 input.onchange = (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-                    $wire.upload('editorImage', file, () => {
-                        $wire.processEditorImage().then(url => {
-                            if (!url) return;
-                            editor().chain().focus().setImage({ src: url }).run();
-                        });
-                    });
+                    \$wire.upload(
+                        'editorImage',
+                        file,
+                        () => {
+                            \$wire.processEditorImage().then(url => {
+                                if (!url) return;
+                                editor().chain().focus().setImage({ src: url }).run();
+                            });
+                        },
+                        () => {
+                            \$interaction('toast')
+                                .error('{$errorTitle}', '{$errorMessage}')
+                                .send();
+                        }
+                    );
+                    input.value = '';
                 };
                 input.click();
             })()

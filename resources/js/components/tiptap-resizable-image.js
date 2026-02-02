@@ -6,10 +6,15 @@ export const ResizableImage = Image.extend({
             ...this.parent?.(),
             width: {
                 default: null,
-                parseHTML: (element) =>
-                    element.getAttribute('width') ||
-                    element.style.width?.replace('px', '') ||
-                    null,
+                parseHTML: (element) => {
+                    const raw =
+                        element.getAttribute('width') ||
+                        element.style.width?.replace('px', '') ||
+                        null;
+                    if (raw == null) return null;
+                    const value = parseInt(raw, 10);
+                    return Number.isNaN(value) ? null : value;
+                },
                 renderHTML: (attributes) => {
                     if (!attributes.width) return {};
                     return { width: attributes.width };
@@ -17,10 +22,15 @@ export const ResizableImage = Image.extend({
             },
             height: {
                 default: null,
-                parseHTML: (element) =>
-                    element.getAttribute('height') ||
-                    element.style.height?.replace('px', '') ||
-                    null,
+                parseHTML: (element) => {
+                    const raw =
+                        element.getAttribute('height') ||
+                        element.style.height?.replace('px', '') ||
+                        null;
+                    if (raw == null) return null;
+                    const value = parseInt(raw, 10);
+                    return Number.isNaN(value) ? null : value;
+                },
                 renderHTML: (attributes) => {
                     if (!attributes.height) return {};
                     return { height: attributes.height };
@@ -43,10 +53,8 @@ export const ResizableImage = Image.extend({
             img.src = node.attrs.src;
             if (node.attrs.alt) img.alt = node.attrs.alt;
             if (node.attrs.title) img.title = node.attrs.title;
-            if (node.attrs.width)
-                img.style.width = `${node.attrs.width}px`;
-            if (node.attrs.height)
-                img.style.height = `${node.attrs.height}px`;
+            if (node.attrs.width) img.style.width = `${node.attrs.width}px`;
+            if (node.attrs.height) img.style.height = `${node.attrs.height}px`;
             img.style.maxWidth = '100%';
             img.style.display = 'block';
 
@@ -88,28 +96,22 @@ export const ResizableImage = Image.extend({
                     e.preventDefault();
                     e.stopPropagation();
                     startX = e.clientX;
-                    startWidth = img.offsetWidth;
-                    aspectRatio = img.offsetHeight / img.offsetWidth;
+                    startWidth = img.offsetWidth || img.naturalWidth || 1;
+                    const startHeight =
+                        img.offsetHeight || img.naturalHeight || 1;
+                    aspectRatio = startHeight / startWidth;
 
                     const onMouseMove = (moveEvent) => {
                         const dx = moveEvent.clientX - startX;
                         const newWidth = Math.max(50, startWidth + dx);
-                        const newHeight = Math.round(
-                            newWidth * aspectRatio,
-                        );
+                        const newHeight = Math.round(newWidth * aspectRatio);
                         img.style.width = `${newWidth}px`;
                         img.style.height = `${newHeight}px`;
                     };
 
                     const onMouseUp = () => {
-                        document.removeEventListener(
-                            'mousemove',
-                            onMouseMove,
-                        );
-                        document.removeEventListener(
-                            'mouseup',
-                            onMouseUp,
-                        );
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
 
                         if (typeof getPos === 'function') {
                             const pos = getPos();
