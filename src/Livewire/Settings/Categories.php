@@ -12,7 +12,6 @@ use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use FluxErp\Traits\Model\Categorizable;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -110,17 +109,7 @@ class Categories extends CategoryList
     protected function getViewData(): array
     {
         return array_merge(parent::getViewData(), [
-            'models' => model_info_all()
-                ->filter(fn ($modelInfo) => in_array(
-                    Categorizable::class,
-                    class_uses_recursive($modelInfo->class)
-                ))
-                ->unique('morphClass')
-                ->map(fn ($modelInfo) => [
-                    'label' => __(Str::headline($modelInfo->morphClass)),
-                    'value' => $modelInfo->morphClass,
-                ])
-                ->toArray(),
+            'models' => get_models_with_trait(Categorizable::class),
         ]);
     }
 }
