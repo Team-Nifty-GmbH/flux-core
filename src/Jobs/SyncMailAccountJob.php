@@ -7,7 +7,7 @@ use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Traits\TracksSchedule;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;

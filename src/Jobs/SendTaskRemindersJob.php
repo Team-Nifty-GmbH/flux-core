@@ -7,7 +7,7 @@ use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Events\Task\TaskReminderEvent;
 use FluxErp\Models\Task;
 use FluxErp\States\Task\TaskState;
-use FluxErp\Traits\TracksSchedule;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

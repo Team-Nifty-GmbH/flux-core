@@ -9,7 +9,7 @@ use FluxErp\Events\Scheduling\ScheduleTasksRegistered;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistering;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Models\Schedule as ScheduleModel;
-use FluxErp\Traits\TracksSchedule;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Console\Scheduling\ScheduleRunCommand as BaseScheduleRunCommand;

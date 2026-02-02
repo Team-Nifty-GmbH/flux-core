@@ -5,7 +5,7 @@ namespace FluxErp\Jobs;
 use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Models\MailAccount;
-use FluxErp\Traits\TracksSchedule;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

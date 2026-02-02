@@ -5,7 +5,7 @@ use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Facades\Repeatable as RepeatableFacade;
 use FluxErp\Models\Schedule;
-use FluxErp\Traits\TracksSchedule;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

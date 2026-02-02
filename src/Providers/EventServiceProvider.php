@@ -26,7 +26,7 @@ use FluxErp\Notifications\Ticket\TicketAssignedNotification;
 use FluxErp\Notifications\Ticket\TicketCreatedNotification;
 use FluxErp\Notifications\Ticket\TicketUpdatedNotification;
 use FluxErp\Support\QueueMonitor\QueueMonitorManager;
-use FluxErp\Traits\TracksSchedule;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\Events\KeyWritten;
