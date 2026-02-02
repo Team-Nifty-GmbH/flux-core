@@ -5,6 +5,7 @@ namespace FluxErp\Jobs;
 use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Models\MailAccount;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,7 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 
 class SyncAllMailAccountsJob implements Repeatable, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable, TracksSchedule;
 
     public function __construct()
     {

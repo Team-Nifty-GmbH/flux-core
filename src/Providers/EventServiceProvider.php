@@ -15,6 +15,7 @@ use FluxErp\Listeners\RegisterMobilePushToken;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
 use FluxErp\Models\Comment;
+use FluxErp\Models\Schedule;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Notifications\Order\DocumentSignedNotification;
 use FluxErp\Notifications\Order\OrderApprovalRequestNotification;
@@ -25,6 +26,7 @@ use FluxErp\Notifications\Ticket\TicketAssignedNotification;
 use FluxErp\Notifications\Ticket\TicketCreatedNotification;
 use FluxErp\Notifications\Ticket\TicketUpdatedNotification;
 use FluxErp\Support\QueueMonitor\QueueMonitorManager;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\Events\KeyWritten;
@@ -38,6 +40,7 @@ use Illuminate\Queue\QueueManager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use TallStackUi\View\Components\Form\Date;
+use Throwable;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -93,6 +96,39 @@ class EventServiceProvider extends ServiceProvider
 
         $manager->after(static function (JobProcessed $event): void {
             QueueMonitorManager::handle($event);
+
+            $command = data_get($event->job->payload(), 'data.command');
+
+            if (! is_string($command)) {
+                return;
+            }
+
+            try {
+                $job = unserialize($command);
+            } catch (Throwable) {
+                return;
+            }
+
+            if (! in_array(TracksSchedule::class, class_uses_recursive($job))
+                || is_null($job->scheduleId)
+            ) {
+                return;
+            }
+
+            $schedule = resolve_static(Schedule::class, 'query')
+                ->whereKey($job->scheduleId)
+                ->first();
+
+            if (! $schedule) {
+                return;
+            }
+
+            if ($schedule->recurrences) {
+                $schedule->current_recurrence++;
+            }
+
+            $schedule->last_success = now();
+            $schedule->save();
         });
 
         $manager->failing(static function (JobFailed $event): void {

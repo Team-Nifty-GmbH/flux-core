@@ -3,10 +3,13 @@
 namespace FluxErp\Console\Commands;
 
 use Cron\CronExpression;
+use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistered;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistering;
+use FluxErp\Facades\Repeatable;
 use FluxErp\Models\Schedule as ScheduleModel;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Console\Scheduling\ScheduleRunCommand as BaseScheduleRunCommand;
@@ -47,17 +50,9 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 continue;
             }
 
-            $event = match ($repeatable->type) {
-                RepeatableTypeEnum::Command => $schedule->command($repeatable->class, $repeatable->parameters ?? []),
-                RepeatableTypeEnum::Job => $schedule->job($repeatable->parameters ?
-                        new $repeatable->class(...$repeatable->parameters) : new $repeatable->class()
-                ),
-                RepeatableTypeEnum::Invokable => $schedule->call(
-                    new $repeatable->class(), $repeatable->parameters ?? []
-                ),
-                RepeatableTypeEnum::Shell => $schedule->exec($repeatable->class, $repeatable->parameters ?? []),
-                default => null
-            };
+            $event = $this->makeScheduleEvent(
+                $schedule, $repeatable->type, $repeatable->class, $repeatable->parameters, $repeatable->getKey()
+            );
 
             if (is_null($event)) {
                 continue;
@@ -75,7 +70,13 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 }
             }
 
-            $nextRunDate = (new CronExpression($event->expression))->getNextRunDate();
+            if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
+                $parts = explode(' ', $event->expression);
+                $nextRunDate = now()->addMonthNoOverflow()->endOfMonth()
+                    ->setTime((int) $parts[1], (int) $parts[0]);
+            } else {
+                $nextRunDate = (new CronExpression($event->expression))->getNextRunDate(now());
+            }
 
             // Mark event as overdue
             if ($repeatable->due_at &&
@@ -94,6 +95,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             });
 
             $event->onSuccess(function () use ($repeatable): void {
+                if ($repeatable->type === RepeatableTypeEnum::Job) {
+                    return;
+                }
+
                 if ($repeatable->recurrences) {
                     $repeatable->current_recurrence++;
                 }
@@ -107,6 +112,35 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $repeatable->save();
             });
         }
+
+        // Register repeatables with defaultCron that aren't in the DB
+        $scheduledClasses = $repeatables->pluck('class')->all();
+
+        Repeatable::all()->each(function (array $repeatable) use ($schedule, $scheduledClasses): void {
+            if (in_array($repeatable['class'], $scheduledClasses)) {
+                return;
+            }
+
+            if (! $repeatable['class']::isRepeatable()) {
+                return;
+            }
+
+            $defaultCron = $repeatable['class']::defaultCron();
+
+            if (is_null($defaultCron)) {
+                return;
+            }
+
+            $event = $this->makeScheduleEvent(
+                $schedule, $repeatable['type'], $repeatable['class'], $repeatable['parameters']
+            );
+
+            if (is_null($event)) {
+                return;
+            }
+
+            $event->cron($defaultCron->getExpression());
+        });
 
         $dispatcher->dispatch(new ScheduleTasksRegistered($schedule));
 
@@ -126,5 +160,28 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $this->runEvent($overdueEvent);
             }
         }
+    }
+
+    protected function makeScheduleEvent(
+        Schedule $schedule,
+        RepeatableTypeEnum $type,
+        string $class,
+        ?array $parameters,
+        ?int $scheduleId = null
+    ): mixed {
+        return match ($type) {
+            RepeatableTypeEnum::Command => $schedule->command($class, $parameters ?? []),
+            RepeatableTypeEnum::Job => $schedule->job(tap(
+                $parameters ? new $class(...$parameters) : new $class(),
+                function ($job) use ($scheduleId): void {
+                    if ($scheduleId && in_array(TracksSchedule::class, class_uses_recursive($job))) {
+                        $job->scheduleId = $scheduleId;
+                    }
+                }
+            )),
+            RepeatableTypeEnum::Invokable => $schedule->call(new $class(), $parameters ?? []),
+            RepeatableTypeEnum::Shell => $schedule->exec($class, $parameters ?? []),
+            default => null,
+        };
     }
 }
