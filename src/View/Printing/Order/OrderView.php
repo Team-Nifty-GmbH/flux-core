@@ -31,6 +31,7 @@ class OrderView extends PrintableView
         }
 
         $this->model = $order;
+        $this->model->orderType?->localize($order->language_id);
         $this->prepareModel();
     }
 
