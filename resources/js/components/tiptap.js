@@ -4,6 +4,7 @@ import { FontSizeLineHeightColorConfig } from './tiptap-font-size-line-height-co
 import { TextAlignConfig } from './tiptap-text-align-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import { ResizableImage } from './tiptap-resizable-image.js';
 import { MentionConfig } from './tiptap-mention-handler.js';
 import { BladeVariableConfig } from './tiptap-blade-variable.js';
 import { computePosition, flip, shift, offset } from '@floating-ui/dom';
@@ -128,6 +129,9 @@ export default function (
                             HTMLAttributes: {
                                 class: 'text-primary-600 dark:text-primary-400 underline hover:text-primary-700 dark:hover:text-primary-300',
                             },
+                        }),
+                        ResizableImage.configure({
+                            allowBase64: false,
                         }),
                         FontSizeLineHeightColorConfig,
                         LiteralTab,
