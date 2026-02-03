@@ -176,10 +176,13 @@ window.fileSizeHumanReadable = function (sizeBytes) {
 
 window.$openDetailModal = (url, hideNavigation = true) => {
     let urlObj = new URL(url);
-    urlObj.searchParams.set(
-        'no-navigation',
-        hideNavigation === true ? 'true' : 'false',
-    );
+
+    if (!urlObj.searchParams.has('signature')) {
+        urlObj.searchParams.set(
+            'no-navigation',
+            hideNavigation === true ? 'true' : 'false',
+        );
+    }
 
     document.getElementById('detail-modal-iframe').src = urlObj.href;
     $modalOpen('detail-modal');
