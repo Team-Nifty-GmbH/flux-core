@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -10,6 +11,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Schedule;
 use FluxErp\Models\Tenant;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -137,3 +139,57 @@ test('process subscription order throws exception on validation error', function
         orderTypeId: $this->targetOrderType->getKey()
     );
 })->throws(Illuminate\Validation\ValidationException::class);
+
+test('process subscription order sets correct performance period from schedule', function (): void {
+    $orderDate = now()->startOfYear();
+
+    $this->subscriptionOrder->update([
+        'order_date' => $orderDate,
+        'system_delivery_date' => null,
+        'system_delivery_date_end' => null,
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'yearly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 1 1 *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->first();
+
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($orderDate->format('Y-m-d'))
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfYear()->format('Y-m-d'));
+});
