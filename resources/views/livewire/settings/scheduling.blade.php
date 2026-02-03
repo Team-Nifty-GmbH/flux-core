@@ -4,6 +4,7 @@
             <x-select.styled
                 :label="__('Name')"
                 required
+                searchable
                 autocomplete="off"
                 wire:model.live="schedule.name"
                 select="label:name|value:id"
