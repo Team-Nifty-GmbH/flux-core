@@ -153,11 +153,17 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 
         $invoicePdf = $order->invoice();
 
-        $address = $order->addressInvoice
-            ?? $order->contact->invoiceAddress
-            ?? $order->contact->mainAddress;
+        $address = match (true) {
+            filled($order->addressInvoice?->email_primary) => $order->addressInvoice,
+            filled($order->contact->invoiceAddress?->email_primary) => $order->contact->invoiceAddress,
+            default => $order->contact->mainAddress,
+        };
+
         $to = $paymentReminderText->mail_to ?? [];
-        $to[] = $address?->email_primary ?? $order->contact->mainAddress?->email_primary;
+
+        if ($email = $address?->email_primary) {
+            $to[] = $email;
+        }
         $cc = $paymentReminderText->mail_cc ?? [];
         $to = array_values(array_unique(array_filter($to)));
         $cc = array_values(array_unique(array_filter($cc)));
