@@ -301,3 +301,77 @@ test('process subscription order sets correct performance period for quarterly s
         ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($orderDate->format('Y-m-d'))
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfQuarter()->format('Y-m-d'));
 });
+
+test('process subscription order calculates next period from existing child order', function (): void {
+    $orderDate = now()->startOfYear();
+
+    $this->subscriptionOrder->update([
+        'order_date' => $orderDate,
+        'system_delivery_date' => $orderDate,
+        'system_delivery_date_end' => $orderDate->copy()->endOfYear(),
+    ]);
+
+    // Create an existing child order linked via created_from_id (not parent_id)
+    $existingChild = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->targetOrderType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'created_from_id' => $this->subscriptionOrder->getKey(),
+        'parent_id' => null,
+        'system_delivery_date' => $orderDate,
+        'system_delivery_date_end' => $orderDate->copy()->endOfYear(),
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'yearly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 1 1 *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $nextYear = $orderDate->copy()->addYear();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->whereKeyNot($existingChild->getKey())
+        ->first();
+
+    // Next period should start the day after the existing child's end date
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($nextYear->format('Y-m-d'))
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($nextYear->copy()->endOfYear()->format('Y-m-d'));
+});

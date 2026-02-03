@@ -44,7 +44,7 @@ class ProcessSubscriptionOrder implements Repeatable
         }
 
         // Update performance period
-        $latestChild = $order->children()
+        $latestChild = $order->createdOrders()
             ->select(['id', 'system_delivery_date_end'])
             ->orderBy('system_delivery_date_end', 'DESC')
             ->first();
