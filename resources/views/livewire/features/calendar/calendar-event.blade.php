@@ -71,7 +71,14 @@
                         type="date"
                         x-bind:disabled="! $wire.event.is_editable ?? false"
                         x-bind:value="dayjs($wire.event.start).format('YYYY-MM-DD')"
-                        x-on:change="setDateTime('start', $event)"
+                        x-on:change="
+                            setDateTime('start', $event);
+                            let end = dayjs($wire.event.end);
+                            $wire.event.end = dayjs($wire.event.start)
+                                .set('hour', end.hour())
+                                .set('minute', end.minute())
+                                .format()
+                        "
                     />
                 </div>
                 <div x-cloak x-show="! $wire.event.is_all_day">
