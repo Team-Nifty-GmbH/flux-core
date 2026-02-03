@@ -441,20 +441,7 @@ if (! function_exists('faker')) {
 if (! function_exists('livewire_component_exists')) {
     function livewire_component_exists(string $classOrAlias): bool
     {
-        $componentRegistry = app(Livewire\Mechanisms\ComponentRegistry::class);
-        try {
-            $class = $componentRegistry->getClass($classOrAlias);
-        } catch (Livewire\Exceptions\ComponentNotFoundException) {
-            $class = false;
-        }
-
-        try {
-            $alias = $componentRegistry->getName($classOrAlias);
-        } catch (Livewire\Exceptions\ComponentNotFoundException) {
-            $alias = false;
-        }
-
-        return $class || is_string($alias);
+        return app('livewire.factory')->exists($classOrAlias);
     }
 }
 

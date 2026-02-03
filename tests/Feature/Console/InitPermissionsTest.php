@@ -9,8 +9,8 @@ use FluxErp\Models\Permission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
+use Livewire\Finder\Finder;
 use Livewire\Livewire;
-use Livewire\Mechanisms\ComponentRegistry;
 use function Livewire\invade;
 
 test('init permissions', function (): void {
@@ -21,10 +21,9 @@ test('init permissions', function (): void {
         }
     }
 
-    /** @var ComponentRegistry $registry */
-    $registry = app(ComponentRegistry::class);
+    $finder = app(Finder::class);
     $componentTabs = [];
-    foreach (invade($registry)->aliases as $component) {
+    foreach (invade($finder)->classComponents as $component) {
         if (! in_array(WithTabs::class, class_uses_recursive($component))) {
             continue;
         }

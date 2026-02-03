@@ -7,7 +7,8 @@ use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
-use Livewire\Mechanisms\ComponentRegistry;
+use Livewire\Factory\Factory as LivewireFactory;
+use Livewire\Finder\Finder as LivewireFinder;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 
@@ -24,7 +25,7 @@ class WidgetManager
 
     public function autoDiscoverWidgets(?string $directory = null, ?string $namespace = null): void
     {
-        $componentRegistry = app(ComponentRegistry::class);
+        $finder = app(LivewireFinder::class);
         $namespace = $namespace ?: config('livewire.class_namespace') . '\\Widgets';
         $path = $directory ?: app_path('Livewire/Widgets');
 
@@ -70,7 +71,7 @@ class WidgetManager
             // Check if the class is a valid Livewire component
             if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
                 if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), $namespace)) {
-                    $componentName = $componentRegistry->getName($class);
+                    $componentName = $finder->normalizeName($class);
                 } else {
                     continue;
                 }
@@ -106,8 +107,7 @@ class WidgetManager
      */
     public function register(string $name, string $widget): void
     {
-        $componentRegistry = app(ComponentRegistry::class);
-        $componentClass = $componentRegistry->getClass($widget);
+        $componentClass = app(LivewireFactory::class)->resolveComponentClass($widget);
 
         if (! class_exists($componentClass)) {
             throw new Exception("The provided widget class '{$componentClass}' does not exist.");
