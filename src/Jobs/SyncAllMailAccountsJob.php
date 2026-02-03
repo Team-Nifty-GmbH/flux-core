@@ -50,10 +50,8 @@ class SyncAllMailAccountsJob implements Repeatable, ShouldQueue
      */
     public function handle(): void
     {
-        $mailAccounts = MailAccount::all();
-
-        foreach ($mailAccounts as $mailAccount) {
-            SyncMailAccountJob::dispatch($mailAccount);
-        }
+        resolve_static(MailAccount::class, 'query')
+            ->whereNotNull('host')
+            ->each(fn (MailAccount $mailAccount) => SyncMailAccountJob::dispatch($mailAccount));
     }
 }
