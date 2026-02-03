@@ -193,3 +193,111 @@ test('process subscription order sets correct performance period from schedule',
         ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($orderDate->format('Y-m-d'))
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfYear()->format('Y-m-d'));
 });
+
+test('process subscription order sets correct performance period for monthly schedule', function (): void {
+    $orderDate = now()->startOfMonth();
+
+    $this->subscriptionOrder->update([
+        'order_date' => $orderDate,
+        'system_delivery_date' => null,
+        'system_delivery_date_end' => null,
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 1 * *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->first();
+
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($orderDate->format('Y-m-d'))
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfMonth()->format('Y-m-d'));
+});
+
+test('process subscription order sets correct performance period for quarterly schedule', function (): void {
+    $orderDate = now()->startOfQuarter();
+
+    $this->subscriptionOrder->update([
+        'order_date' => $orderDate,
+        'system_delivery_date' => null,
+        'system_delivery_date_end' => null,
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'quarterly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 0 1 1,4,7,10 *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->first();
+
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($orderDate->format('Y-m-d'))
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfQuarter()->format('Y-m-d'));
+});
