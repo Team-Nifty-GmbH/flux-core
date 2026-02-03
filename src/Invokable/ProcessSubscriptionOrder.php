@@ -2,6 +2,7 @@
 
 namespace FluxErp\Invokable;
 
+use Carbon\Carbon;
 use Cron\CronExpression;
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\Order\ReplicateOrder;
@@ -51,13 +52,19 @@ class ProcessSubscriptionOrder implements Repeatable
         $order->system_delivery_date = $latestChild?->system_delivery_date_end?->addDay() ??
             $order->system_delivery_date ?? $order->order_date;
 
-        $currentDate = now();
-        if ($currentDate->startOfDay()->equalTo($order->system_delivery_date)) {
-            $order->system_delivery_date_end = $currentDate->addDay();
-        } elseif ($currentDate->startOfDay()->isBefore($order->system_delivery_date)) {
-            $order->system_delivery_date_end = $order->system_delivery_date->copy()->addDay();
+        $schedule = $order->schedules()
+            ->where('class', static::class)
+            ->where('is_active', true)
+            ->first();
+
+        if ($schedule?->cron_expression) {
+            $cronExpression = new CronExpression($schedule->cron_expression);
+            $nextRunDate = $cronExpression->getNextRunDate(
+                $order->system_delivery_date->toDateTime()
+            );
+            $order->system_delivery_date_end = Carbon::instance($nextRunDate)->subDay();
         } else {
-            $order->system_delivery_date_end = $currentDate;
+            $order->system_delivery_date_end = $order->system_delivery_date;
         }
 
         try {
