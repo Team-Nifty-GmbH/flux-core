@@ -130,7 +130,7 @@ test('cancellation text variables are replaced', function (): void {
 
     $html = $result->toHtml();
 
-    $this->assertStringContainsString($this->address->fresh()->name, $html);
+    $this->assertStringContainsString(e($this->address->fresh()->name), $html);
     $this->assertStringContainsString('TEST-2024-001', $html);
     $this->assertStringNotContainsString('data-type="blade-variable"', $html);
 });
