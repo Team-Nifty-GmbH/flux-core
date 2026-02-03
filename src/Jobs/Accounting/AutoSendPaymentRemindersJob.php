@@ -71,15 +71,23 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 
         resolve_static(Order::class, 'query')
             ->when($this->orderIds, fn (Builder $query) => $query->whereKey($this->orderIds))
-            ->with(['orderType:id,order_type_enum', 'contact.mainAddress', 'contact.invoiceAddress'])
+            ->with(['orderType:id,order_type_enum', 'addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress'])
             ->whereNotNull('invoice_number')
             ->where('is_locked', true)
             ->where('balance', '!=', 0)
             ->whereDate('payment_reminder_next_date', '<=', now()->toDateString())
-            ->whereHas('contact', function (Builder $query): void {
-                $query->whereHas('mainAddress', function (Builder $query): void {
+            ->where(function (Builder $query): void {
+                $query->whereHas('addressInvoice', function (Builder $query): void {
                     $query->whereNotNull('email_primary');
-                });
+                })
+                    ->orWhereHas('contact', function (Builder $query): void {
+                        $query->whereHas('invoiceAddress', function (Builder $query): void {
+                            $query->whereNotNull('email_primary');
+                        })
+                            ->orWhereHas('mainAddress', function (Builder $query): void {
+                                $query->whereNotNull('email_primary');
+                            });
+                    });
             })
             ->cursor()
             ->each(function (Order $order): void {
@@ -145,7 +153,9 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 
         $invoicePdf = $order->invoice();
 
-        $address = $order->contact->invoiceAddress ?? $order->contact->mainAddress;
+        $address = $order->addressInvoice
+            ?? $order->contact->invoiceAddress
+            ?? $order->contact->mainAddress;
         $to = $paymentReminderText->mail_to ?? [];
         $to[] = $address?->email_primary ?? $order->contact->mainAddress?->email_primary;
         $cc = $paymentReminderText->mail_cc ?? [];
