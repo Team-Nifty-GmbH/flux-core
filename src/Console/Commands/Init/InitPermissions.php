@@ -13,7 +13,6 @@ use FluxErp\Traits\Model\HasModelPermission;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Route;
-use Livewire\Finder\Finder;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
@@ -183,7 +182,7 @@ class InitPermissions extends Command
     protected function registerTabPermissions(): void
     {
         $this->info('Registering tab permissions…');
-        $finder = app(Finder::class);
+        $finder = app('livewire.finder');
         foreach (invade($finder)->classComponents as $component) {
             if (! in_array(WithTabs::class, class_uses_recursive($component))) {
                 continue;

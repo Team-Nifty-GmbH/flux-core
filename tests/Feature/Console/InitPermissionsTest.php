@@ -9,7 +9,6 @@ use FluxErp\Models\Permission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
-use Livewire\Finder\Finder;
 use Livewire\Livewire;
 use function Livewire\invade;
 
@@ -21,7 +20,7 @@ test('init permissions', function (): void {
         }
     }
 
-    $finder = app(Finder::class);
+    $finder = app('livewire.finder');
     $componentTabs = [];
     foreach (invade($finder)->classComponents as $component) {
         if (! in_array(WithTabs::class, class_uses_recursive($component))) {

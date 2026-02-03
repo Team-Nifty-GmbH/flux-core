@@ -7,8 +7,6 @@ use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
-use Livewire\Factory\Factory as LivewireFactory;
-use Livewire\Finder\Finder as LivewireFinder;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 
@@ -25,7 +23,7 @@ class WidgetManager
 
     public function autoDiscoverWidgets(?string $directory = null, ?string $namespace = null): void
     {
-        $finder = app(LivewireFinder::class);
+        $finder = app('livewire.finder');
         $namespace = $namespace ?: config('livewire.class_namespace') . '\\Widgets';
         $path = $directory ?: app_path('Livewire/Widgets');
 
@@ -107,7 +105,7 @@ class WidgetManager
      */
     public function register(string $name, string $widget): void
     {
-        $componentClass = app(LivewireFactory::class)->resolveComponentClass($widget);
+        $componentClass = app('livewire.factory')->resolveComponentClass($widget);
 
         if (! class_exists($componentClass)) {
             throw new Exception("The provided widget class '{$componentClass}' does not exist.");
