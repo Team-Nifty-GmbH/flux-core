@@ -158,14 +158,21 @@ class ProcessSubscriptionOrder implements Repeatable
         }
 
         if ($emailTemplateId && count($attachments) > 0 && $order->contact) {
-            $address = in_array('invoice', $printLayouts) && $order->contact->invoiceAddress
-                ? $order->contact->invoiceAddress
-                : $order->contact->mainAddress;
+            $printViews = $order->getPrintViews();
 
-            $to = $address->mail_addresses ?? [];
+            $invoiceDocs = array_filter(
+                $printLayouts,
+                fn (string $doc) => is_string(data_get($printViews, $doc)) && $printViews[$doc]::isInvoice()
+            );
 
-            if (array_diff($printLayouts, ['invoice'])) {
-                $to[] = $order->contact->mainAddress?->email_primary;
+            $address = $invoiceDocs
+                ? $order->resolveMailableInvoiceAddress()
+                : $order->contact?->mainAddress;
+
+            $to = $address?->mail_addresses ?? [];
+
+            if (array_diff($printLayouts, $invoiceDocs)) {
+                $to[] = $order->contact?->mainAddress?->email_primary;
             }
 
             $to = array_values(array_unique(array_filter($to)));

@@ -15,6 +15,7 @@ use FluxErp\Models\PaymentReminder as PaymentReminderModel;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\Support\MediaStream;
@@ -55,8 +56,6 @@ class PaymentReminder extends OrderList
 
     public function createDocuments(): null|MediaStream|Media
     {
-        $orders = $this->getSelectedModels();
-
         try {
             resolve_static(CreatePaymentReminder::class, 'canPerformAction', [true]);
         } catch (UnauthorizedException $e) {
@@ -65,14 +64,11 @@ class PaymentReminder extends OrderList
             return null;
         }
 
-        $ordersWithEmail = $orders->filter(
-            fn (Order $order) => ! blank(
-                $order->contact?->invoiceAddress?->email_primary
-                    ?? $order->contact?->mainAddress?->email_primary
-            )
-        );
+        $ordersWithEmail = $this->getSelectedModelsQuery()
+            ->whereHasMailableInvoiceAddress()
+            ->get();
 
-        $skippedCount = $orders->count() - $ordersWithEmail->count();
+        $skippedCount = $this->getSelectedModelsQuery()->count() - $ordersWithEmail->count();
         if ($skippedCount > 0) {
             $this->notification()->warning(
                 __(':count order(s) skipped due to missing email address.', ['count' => $skippedCount])
@@ -216,8 +212,6 @@ class PaymentReminder extends OrderList
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        return [
-            $item->order->contact->invoiceAddress->email_primary ?? $item->order->contact->mainAddress->email_primary,
-        ];
+        return array_filter(Arr::wrap($item->order->resolveMailableInvoiceAddress()?->email_primary));
     }
 }

@@ -71,16 +71,12 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 
         resolve_static(Order::class, 'query')
             ->when($this->orderIds, fn (Builder $query) => $query->whereKey($this->orderIds))
-            ->with(['orderType:id,order_type_enum', 'contact.mainAddress', 'contact.invoiceAddress'])
+            ->with(['orderType:id,order_type_enum'])
             ->whereNotNull('invoice_number')
             ->where('is_locked', true)
             ->where('balance', '!=', 0)
             ->whereDate('payment_reminder_next_date', '<=', now()->toDateString())
-            ->whereHas('contact', function (Builder $query): void {
-                $query->whereHas('mainAddress', function (Builder $query): void {
-                    $query->whereNotNull('email_primary');
-                });
-            })
+            ->whereHasMailableInvoiceAddress()
             ->cursor()
             ->each(function (Order $order): void {
                 if ($order->orderType->order_type_enum->isPurchase()
@@ -145,9 +141,14 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 
         $invoicePdf = $order->invoice();
 
-        $address = $order->contact->invoiceAddress ?? $order->contact->mainAddress;
+        $address = $order->resolveMailableInvoiceAddress();
+
         $to = $paymentReminderText->mail_to ?? [];
-        $to[] = $address?->email_primary ?? $order->contact->mainAddress?->email_primary;
+
+        if ($email = $address?->email_primary) {
+            $to[] = $email;
+        }
+
         $cc = $paymentReminderText->mail_cc ?? [];
         $to = array_values(array_unique(array_filter($to)));
         $cc = array_values(array_unique(array_filter($cc)));

@@ -50,6 +50,11 @@ abstract class PrintableView extends Component
         static::$layout = $layout;
     }
 
+    public static function isInvoice(): bool
+    {
+        return false;
+    }
+
     public static function shouldForceDownload(): bool
     {
         return false;
