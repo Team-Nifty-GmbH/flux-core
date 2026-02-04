@@ -58,6 +58,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 continue;
             }
 
+            $event->description($repeatable->class . ':' . $repeatable->getKey());
+
+            if (method_exists($repeatable->class, 'withoutOverlapping') && $repeatable->class::withoutOverlapping()) {
+                $event->withoutOverlapping();
+            }
+
             foreach ($repeatable->cron['methods'] as $key => $method) {
                 if (! $method) {
                     continue;
