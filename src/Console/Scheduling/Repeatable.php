@@ -15,4 +15,6 @@ interface Repeatable
     public static function name(): string;
 
     public static function parameters(): array;
+
+    public static function withoutOverlapping(): bool;
 }

@@ -44,6 +44,11 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
         return [];
     }
 
+    public static function withoutOverlapping(): bool
+    {
+        return true;
+    }
+
     public function handle(): void
     {
         $endStates = TaskState::all()

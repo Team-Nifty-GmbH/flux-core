@@ -59,6 +59,11 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         ];
     }
 
+    public static function withoutOverlapping(): bool
+    {
+        return true;
+    }
+
     public function handle(): void
     {
         $this->mailAccount->syncFolders();

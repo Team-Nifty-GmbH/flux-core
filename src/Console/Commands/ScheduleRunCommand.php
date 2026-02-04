@@ -60,10 +60,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
 
             $event->description($repeatable->class . ':' . $repeatable->getKey());
 
-            if (method_exists($repeatable->class, 'withoutOverlapping')
-                && (new \ReflectionMethod($repeatable->class, 'withoutOverlapping'))->isStatic()
-                && $repeatable->class::withoutOverlapping()
-            ) {
+            if ($repeatable->class::withoutOverlapping()) {
                 $event->withoutOverlapping();
             }
 
