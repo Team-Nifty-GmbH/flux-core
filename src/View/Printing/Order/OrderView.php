@@ -35,6 +35,11 @@ class OrderView extends PrintableView
         $this->prepareModel();
     }
 
+    public static function isInvoice(): bool
+    {
+        return false;
+    }
+
     public function render(): View|Factory
     {
         return view('print::order.order', [

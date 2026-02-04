@@ -10,6 +10,11 @@ class Invoice extends OrderView
 {
     protected bool $showAlternatives = false;
 
+    public static function isInvoice(): bool
+    {
+        return true;
+    }
+
     public function render(): View|Factory
     {
         return view('flux::printing.order.invoice', [

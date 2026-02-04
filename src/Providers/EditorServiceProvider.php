@@ -69,9 +69,9 @@ class EditorServiceProvider extends ServiceProvider
 
         Editor::mergeVariables(
             [
-                'Salutation' => '$paymentReminder->order->addressInvoice->salutation()',
-                'Total Gross Price' => 'format_money($paymentReminder->order->total_gross_price, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
-                'Balance' => 'format_money($paymentReminder->order->balance, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
+                'Salutation' => '$paymentReminder->order->resolveMailableInvoiceAddress()?->salutation()',
+                'Total Gross Price' => 'format_money($paymentReminder->order->total_gross_price, $paymentReminder->order->currency, $paymentReminder->order->resolveMailableInvoiceAddress()?->language)',
+                'Balance' => 'format_money($paymentReminder->order->balance, $paymentReminder->order->currency, $paymentReminder->order->resolveMailableInvoiceAddress()?->language)',
                 'Payment Reminder Dates' => '$paymentReminder->order?->paymentReminders()->pluck(\'created_at\')->map(fn ($date) => $date->isoFormat(\'L\'))->join(\', \')',
                 'Last Payment Reminder Date' => '$paymentReminder->order?->paymentReminders()->latest()->whereNot(\'id\', $paymentReminder->id)->first()?->created_at?->isoFormat(\'L\')',
                 'Order Number' => '$paymentReminder->order?->order_number',
@@ -85,9 +85,9 @@ class EditorServiceProvider extends ServiceProvider
 
         Editor::mergeVariables(
             [
-                'Salutation' => '$order->addressInvoice->salutation()',
-                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->addressInvoice->language)',
-                'Balance' => 'format_money($order->balance, $order->currency, $order->addressInvoice->language)',
+                'Salutation' => '$order->resolveMailableInvoiceAddress()?->salutation()',
+                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
+                'Balance' => 'format_money($order->balance, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
                 'Order Number' => '$order->order_number',
                 'Order Date' => '$order->order_date?->isoFormat(\'L\')',
                 'Invoice Number' => '$order->invoice_number',
@@ -102,9 +102,9 @@ class EditorServiceProvider extends ServiceProvider
 
         Editor::mergeVariables(
             [
-                'Salutation' => '$order->addressInvoice->salutation()',
-                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->addressInvoice->language)',
-                'Balance' => 'format_money($order->balance, $order->currency, $order->addressInvoice->language)',
+                'Salutation' => '$order->resolveMailableInvoiceAddress()?->salutation()',
+                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
+                'Balance' => 'format_money($order->balance, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
                 'Order Number' => '$order->order_number',
                 'Order Date' => '$order->order_date?->isoFormat(\'L\')',
                 'Invoice Number' => '$order->invoice_number',
