@@ -8,6 +8,7 @@ use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistered;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistering;
+use FluxErp\Console\Scheduling\Repeatable as RepeatableInterface;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Models\Schedule as ScheduleModel;
 use FluxErp\Traits\Job\TracksSchedule;
@@ -64,7 +65,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
 
             $event->description($repeatable->class . ':' . $repeatable->getKey());
 
-            if ($repeatable->class::withoutOverlapping()) {
+            if (is_a($repeatable->class, RepeatableInterface::class, true) && $repeatable->class::withoutOverlapping()) {
                 $event->withoutOverlapping();
             }
 
