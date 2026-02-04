@@ -95,7 +95,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     #[Renderless]
     public function createDocuments(): null|MediaStream|Media
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $response = $this->createDocumentFromItems($this->getSelectedModels());
         $this->loadData();
         $this->reset('selected');
 
@@ -241,6 +241,11 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         }
 
         return array_values(array_unique(array_filter($to)));
+    }
+
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
     }
 
     protected function getViewData(): array

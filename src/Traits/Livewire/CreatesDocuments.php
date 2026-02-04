@@ -5,13 +5,12 @@ namespace FluxErp\Traits\Livewire;
 use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Jobs\CreateDocumentsJob;
 use FluxErp\Livewire\Forms\PrintJobForm;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Printer;
-use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -34,6 +33,7 @@ trait CreatesDocuments
         'email' => [],
         'download' => [],
         'force' => [],
+        'preview' => [],
     ];
 
     #[Locked]
@@ -48,6 +48,7 @@ trait CreatesDocuments
         'email' => [],
         'download' => [],
         'force' => [],
+        'preview' => [],
     ];
 
     abstract public function createDocuments(): null|MediaStream|Media;
@@ -192,7 +193,6 @@ trait CreatesDocuments
 
     protected function createDocumentFromItems(
         Collection|OffersPrinting $items,
-        bool $async = false,
         ?string $model = null
     ): null|MediaStream|Media {
         $items = $items instanceof Collection ? $items : collect([$items]);
@@ -201,197 +201,162 @@ trait CreatesDocuments
             return null;
         }
 
-        $downloadIds = [];
-        $downloadItems = [];
-        $printIds = [];
         $mailMessages = [];
         $defaultTemplateIds = [];
+        $jobItems = [];
 
         foreach ($items as $item) {
-            match ($item) {
-                is_a($item, OffersPrinting::class, true) => $item->fresh(),
-                is_int($item) && $model => $item = resolve_static($model, 'query')->whereKey($item)->first(),
-                default => null,
-            };
-
+            $item = $this->resolveItem($item, $model);
             if (! $item) {
                 continue;
             }
 
-            $mailAttachments = [];
-            $createDocuments = array_unique(
-                array_intersect(
-                    Arr::flatten($this->selectedPrintLayouts),
-                    array_keys($item->resolvePrintViews())
-                )
+            $this->collectMailMessages($item, $mailMessages, $defaultTemplateIds);
+
+            $queueLayouts = collect(['force', 'print', 'download', 'preview'])
+                ->flatMap(fn (string $key) => data_get($this->selectedPrintLayouts, $key, []))
+                ->intersect(array_keys($item->resolvePrintViews()))
+                ->unique()
+                ->values()
+                ->all();
+
+            if ($queueLayouts) {
+                $jobItems[] = [
+                    'model_type' => $item->getMorphClass(),
+                    'model_id' => $item->getKey(),
+                    'layouts' => $queueLayouts,
+                ];
+            }
+        }
+
+        $this->dispatchMailMessages($mailMessages, $defaultTemplateIds);
+
+        if ($jobItems) {
+            $job = new CreateDocumentsJob(
+                $jobItems,
+                $this->selectedPrintLayouts,
+                auth()->user()->getMorphClass() . ':' . auth()->id(),
+                $this->printJobForm->printer_id,
+                $this->printJobForm->size,
+                $this->printJobForm->quantity,
             );
 
-            // create the documents
-            foreach ($createDocuments as $createDocument) {
-                $media = is_a($item, HasMedia::class) ? $item->getMedia($createDocument)->last() : null;
-                $isDownload = in_array($createDocument, data_get($this->selectedPrintLayouts, 'download', []));
-                $isPrint = in_array($createDocument, data_get($this->selectedPrintLayouts, 'print', []));
-                $isForce = in_array($createDocument, data_get($this->selectedPrintLayouts, 'force', []));
-                $isEmail = in_array($createDocument, data_get($this->selectedPrintLayouts, 'email', []));
+            if ($items->count() > 1) {
+                dispatch($job);
 
-                if ((! $media && ($isDownload || $isPrint)) || $isForce || (! $async && ! $media)) {
-                    try {
-                        /** @var PrintableView $file */
-                        $file = Printing::make([
-                            'model_type' => $item->getMorphClass(),
-                            'model_id' => $item->getKey(),
-                            'view' => $createDocument,
-                        ])
-                            ->checkPermission()
-                            ->validate()
-                            ->execute();
-
-                        if ($file->shouldStore()) {
-                            $media = $file->attachToModel($item);
-                        } else {
-                            $fileName = tempnam(sys_get_temp_dir(), 'flux-print-') . '.pdf';
-                            $file->savePDF($fileName);
-
-                            $media = app(Media::class, ['attributes' => [
-                                'name' => $file->getFileName(),
-                                'file_name' => $file->getFileName() . '.pdf',
-                                'mime_type' => 'application/pdf',
-                                'disk' => 'local',
-                                'conversions_disk' => 'local',
-                            ]])
-                                ->setPath($fileName)
-                                ->setIsTemporary()
-                                ->setKeyType('string');
-                            $media->id = Str::uuid()->toString();
-                        }
-                    } catch (ValidationException|UnauthorizedException $e) {
-                        exception_to_notifications($e, $this);
-
-                        continue;
-                    }
-                }
-
-                if ($isDownload) {
-                    if ($media->getKey() && ! $media->isTemporary) {
-                        $downloadIds[] = $media->getKey();
-                    } else {
-                        $downloadItems[] = $media;
-                    }
-                }
-
-                if ($isPrint) {
-                    $printIds[] = $media->getKey();
-                }
-
-                if ($isEmail) {
-                    if ($media && ! $media->isTemporary) {
-                        $mailAttachments[] = [
-                            'name' => $media->file_name,
-                            'id' => $media->getKey(),
-                        ];
-                    } else {
-                        $mailAttachments[] = $this->getCreateAttachmentArray($item, $createDocument);
-                    }
-                }
+                $this->toast()
+                    ->success(
+                        __('Documents are being created'),
+                        __('You will be notified when they are ready.')
+                    )
+                    ->send();
+            } else {
+                dispatch_sync($job);
             }
-
-            if (data_get($this->selectedPrintLayouts, 'email', false) && $mailAttachments) {
-                $item->refresh();
-                $bladeParameters = method_exists($this, 'getBladeParameters')
-                    ? $this->getBladeParameters($item)
-                    : [];
-
-                if ($bladeParameters instanceof SerializableClosure) {
-                    $bladeParameters = serialize($bladeParameters);
-                }
-
-                $mailAttachments[] = $this->getAttachments($item);
-                $mailMessage = [
-                    'to' => $this->getTo($item, $createDocuments),
-                    'cc' => $this->getCc($item),
-                    'bcc' => $this->getBcc($item),
-                    'subject' => $this->getSubject($item, $createDocuments),
-                    'attachments' => array_filter($mailAttachments),
-                    'html_body' => null,
-                    'blade_parameters_serialized' => is_string($bladeParameters),
-                    'blade_parameters' => $bladeParameters,
-                    'communicatables' => [
-                        [
-                            'communicatable_type' => $this->getCommunicatableType($item),
-                            'communicatable_id' => $this->getCommunicatableId($item),
-                        ],
-                    ],
-                ];
-
-                $mailMessage['model_type'] = $item->getEmailTemplateModelType();
-                $mailMessage['language_id'] = $this->getPreferredLanguageId($item);
-                $mailMessage['group_key'] = $this->getMailGroupKey($item);
-                $mailMessage['group_label'] = $this->getMailGroupLabel($item);
-                if (method_exists($this, 'getDefaultTemplateId')) {
-                    $emailTemplateId = $this->getDefaultTemplateId($item);
-                    $mailMessage['default_template_id'] = $emailTemplateId;
-                    if ($emailTemplateId !== null) {
-                        $defaultTemplateIds[] = $emailTemplateId;
-                    }
-                }
-
-                $mailMessages[] = $mailMessage;
-            }
-        }
-
-        if ($mailMessages) {
-            // Check if all items have the same default template ID
-            $uniqueTemplateIds = collect($defaultTemplateIds)->unique();
-            if ($uniqueTemplateIds->count() === 1 && count($mailMessages) > 1) {
-                // Set the common template ID for all messages
-                $commonTemplateId = $uniqueTemplateIds->first();
-                foreach ($mailMessages as &$mailMessage) {
-                    $mailMessage['default_template_id'] = $commonTemplateId;
-                }
-            }
-
-            $sessionKey = 'mail_' . Str::uuid()->toString();
-            session()->put($sessionKey, $mailMessages);
-            $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
-        }
-
-        if ($downloadIds || $downloadItems) {
-            /** @var \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection $files */
-            $files = resolve_static(Media::class, 'query')
-                ->whereKey($downloadIds)
-                ->get();
-
-            foreach ($downloadItems as $downloadItem) {
-                $files->add($downloadItem);
-            }
-
-            if ($files->count() === 1) {
-                return $files->first();
-            }
-
-            return MediaStream::create(
-                __(Str::of(class_basename(static::class))->headline()->snake()->toString())
-                . '_' . now()->toDateString() . '.zip'
-            )
-                ->addMedia($files);
-        }
-
-        if ($printIds && $this->printJobForm->printer_id) {
-            foreach ($printIds as $printId) {
-                $this->printJobForm->reset('id');
-                $this->printJobForm->media_id = $printId;
-
-                try {
-                    $this->printJobForm->save();
-                } catch (ValidationException|UnauthorizedException $e) {
-                    exception_to_notifications($e, $this);
-                }
-            }
-
-            $this->printJobForm->reset();
         }
 
         return null;
+    }
+
+    protected function collectMailMessages(
+        OffersPrinting $item,
+        array &$mailMessages,
+        array &$defaultTemplateIds
+    ): void {
+        $emailLayouts = data_get($this->selectedPrintLayouts, 'email', []);
+        $emailDocuments = collect($emailLayouts)
+            ->intersect(array_keys($item->resolvePrintViews()))
+            ->unique()
+            ->all();
+
+        $mailAttachments = [];
+        foreach ($emailDocuments as $createDocument) {
+            $media = $item instanceof HasMedia ? $item->getMedia($createDocument)->last() : null;
+
+            if ($media && ! $media->isTemporary) {
+                $mailAttachments[] = [
+                    'name' => $media->file_name,
+                    'id' => $media->getKey(),
+                ];
+            } else {
+                $mailAttachments[] = $this->getCreateAttachmentArray($item, $createDocument);
+            }
+        }
+
+        if (! $emailLayouts || ! $mailAttachments) {
+            return;
+        }
+
+        $item->refresh();
+        $bladeParameters = method_exists($this, 'getBladeParameters')
+            ? $this->getBladeParameters($item)
+            : [];
+
+        if ($bladeParameters instanceof SerializableClosure) {
+            $bladeParameters = serialize($bladeParameters);
+        }
+
+        $mailAttachments[] = $this->getAttachments($item);
+        $mailMessage = [
+            'to' => $this->getTo($item, $emailDocuments),
+            'cc' => $this->getCc($item),
+            'bcc' => $this->getBcc($item),
+            'subject' => $this->getSubject($item, $emailDocuments),
+            'attachments' => array_filter($mailAttachments),
+            'html_body' => null,
+            'blade_parameters_serialized' => is_string($bladeParameters),
+            'blade_parameters' => $bladeParameters,
+            'communicatables' => [
+                [
+                    'communicatable_type' => $this->getCommunicatableType($item),
+                    'communicatable_id' => $this->getCommunicatableId($item),
+                ],
+            ],
+        ];
+
+        $mailMessage['model_type'] = $item->getEmailTemplateModelType();
+        $mailMessage['language_id'] = $this->getPreferredLanguageId($item);
+        $mailMessage['group_key'] = $this->getMailGroupKey($item);
+        $mailMessage['group_label'] = $this->getMailGroupLabel($item);
+        if (method_exists($this, 'getDefaultTemplateId')) {
+            $emailTemplateId = $this->getDefaultTemplateId($item);
+            $mailMessage['default_template_id'] = $emailTemplateId;
+            if ($emailTemplateId !== null) {
+                $defaultTemplateIds[] = $emailTemplateId;
+            }
+        }
+
+        $mailMessages[] = $mailMessage;
+    }
+
+    protected function dispatchMailMessages(array $mailMessages, array $defaultTemplateIds): void
+    {
+        if (! $mailMessages) {
+            return;
+        }
+
+        $uniqueTemplateIds = collect($defaultTemplateIds)->unique();
+        if ($uniqueTemplateIds->count() === 1 && count($mailMessages) > 1) {
+            $commonTemplateId = $uniqueTemplateIds->first();
+            foreach ($mailMessages as &$mailMessage) {
+                $mailMessage['default_template_id'] = $commonTemplateId;
+            }
+        }
+
+        $sessionKey = 'mail_' . Str::uuid()->toString();
+        session()->put($sessionKey, $mailMessages);
+        $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
+    }
+
+    protected function resolveItem(mixed $item, ?string $model = null): ?OffersPrinting
+    {
+        $item = match (true) {
+            is_a($item, OffersPrinting::class) => $item,
+            is_int($item) && $model => resolve_static($model, 'query')->whereKey($item)->first(),
+            default => null,
+        };
+
+        return $item instanceof OffersPrinting ? $item : null;
     }
 
     protected function getAttachments(OffersPrinting $item): array

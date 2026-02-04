@@ -120,7 +120,7 @@ class AddressList extends BaseDataTable
     #[Renderless]
     public function createDocuments(): null|MediaStream|Media
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $response = $this->createDocumentFromItems($this->getSelectedModels());
         $this->loadData();
         $this->reset('selected');
 

@@ -94,7 +94,7 @@ class PaymentReminder extends OrderList
             }
         }
 
-        $response = $this->createDocumentFromItems($documents, true);
+        $response = $this->createDocumentFromItems($documents);
 
         $this->loadData();
         $this->reset('selected');
