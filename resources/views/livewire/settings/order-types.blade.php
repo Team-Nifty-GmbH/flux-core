@@ -1,4 +1,4 @@
-<x-modal id="order-type-form-modal" :title="__('Order Type')">
+<x-modal :id="$orderType->modalName()" :title="__('Order Type')">
     <div class="space-y-8 divide-y divide-gray-200">
         <div>
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
@@ -104,12 +104,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-order-type-modal')"
+            x-on:click="$modalClose('{{ $orderType->modalName() }}')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => {if (success) $modalClose('edit-order-type-modal');})"
+            wire:click="save().then((success) => {if (success) $modalClose('{{ $orderType->modalName() }}');})"
         />
     </x-slot>
 </x-modal>
