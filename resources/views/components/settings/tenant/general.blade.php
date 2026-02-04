@@ -102,7 +102,7 @@
                         <x-flux::table.head-cell></x-flux::table.head-cell>
                     </x-slot>
                     <template
-                        x-for="(hours, index) in $wire.tenant.opening_hours"
+                        x-for="(hours, index) in ($wire.tenant.opening_hours ?? [])"
                     >
                         <tr>
                             <td>

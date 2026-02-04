@@ -27,7 +27,13 @@ class CreateDiscountRuleset extends FluxRuleset
                 app(MorphExists::class),
             ],
             'name' => 'nullable|string|max:255',
-            'discount' => 'required|numeric',
+            'discount' => [
+                'required',
+                'numeric',
+                fn ($attribute, $value, $fail) => bccomp($value, '0', 10) === 0
+                    ? $fail(__('validation.not_in', ['attribute' => __('validation.attributes.' . $attribute)]))
+                    : null,
+            ],
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',
             'order_column' => 'nullable|integer|min:1',

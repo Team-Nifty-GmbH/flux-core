@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Tenant\CreateTenant;
 use FluxErp\Actions\Tenant\UpdateTenant;
-use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TenantList;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\TenantForm;
@@ -15,7 +14,6 @@ use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use FluxErp\Traits\Livewire\WithFileUploads;
-use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -24,7 +22,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Tenants extends TenantList
 {
-    use Actions, SupportsLocalization, WithFileUploads, WithTabs;
+    use Actions, SupportsLocalization, WithFileUploads;
 
     public TenantForm $tenant;
 
@@ -78,20 +76,6 @@ class Tenants extends TenantList
         $this->loadData();
 
         return true;
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            TabButton::make('general')
-                ->text(__('General')),
-            TabButton::make('settings.tenant.logos')
-                ->text(__('Logos')),
-            TabButton::make('settings.tenant.terms-and-conditions')
-                ->text(__('Terms and Conditions')),
-            TabButton::make('settings.tenant.sepa')
-                ->text(__('SEPA')),
-        ];
     }
 
     #[Renderless]
@@ -153,11 +137,6 @@ class Tenants extends TenantList
         $this->js(<<<'JS'
             $modalOpen('edit-tenant');
         JS);
-    }
-
-    public function updatingTab(): void
-    {
-        $this->forceRender();
     }
 
     protected function getBuilder(Builder $builder): Builder
