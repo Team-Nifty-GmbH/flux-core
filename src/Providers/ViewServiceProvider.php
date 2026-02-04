@@ -126,6 +126,7 @@ class ViewServiceProvider extends ServiceProvider
         Blade::component(Printing::class, 'flux::layouts.print');
         config([
             'livewire.layout' => 'flux::layouts.app',
+            'livewire.component_layout' => 'flux::layouts.app',
         ]);
 
         // Register Printing views as blade components
