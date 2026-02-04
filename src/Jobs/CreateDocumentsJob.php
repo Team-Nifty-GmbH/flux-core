@@ -22,6 +22,8 @@ class CreateDocumentsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
+    protected bool $throwOnError = false;
+
     public function __construct(
         protected array $items,
         protected array $selectedPrintLayouts,
@@ -30,6 +32,13 @@ class CreateDocumentsJob implements ShouldQueue
         protected ?string $printerSize = null,
         protected int $printerQuantity = 1,
     ) {}
+
+    public function throwOnError(bool $throw = true): static
+    {
+        $this->throwOnError = $throw;
+
+        return $this;
+    }
 
     public function handle(): void
     {
@@ -80,6 +89,10 @@ class CreateDocumentsJob implements ShouldQueue
                             'file_name' => Str::finish($file->getFileName(), '.pdf'),
                         ];
                     } catch (Throwable $e) {
+                        if ($this->throwOnError) {
+                            throw $e;
+                        }
+
                         report($e);
                     }
 
@@ -105,6 +118,10 @@ class CreateDocumentsJob implements ShouldQueue
                             $media = $file->attachToModel($item);
                         }
                     } catch (Throwable $e) {
+                        if ($this->throwOnError) {
+                            throw $e;
+                        }
+
                         report($e);
 
                         continue;
@@ -137,6 +154,10 @@ class CreateDocumentsJob implements ShouldQueue
                         ->validate()
                         ->execute();
                 } catch (Throwable $e) {
+                    if ($this->throwOnError) {
+                        throw $e;
+                    }
+
                     report($e);
                 }
             }

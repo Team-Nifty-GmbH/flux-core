@@ -251,7 +251,11 @@ trait CreatesDocuments
                     )
                     ->send();
             } else {
-                dispatch_sync($job);
+                try {
+                    dispatch_sync($job->throwOnError());
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
+                }
             }
         }
 
