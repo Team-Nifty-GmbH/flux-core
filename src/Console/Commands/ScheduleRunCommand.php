@@ -3,6 +3,7 @@
 namespace FluxErp\Console\Commands;
 
 use Cron\CronExpression;
+use FluxErp\Console\Scheduling\Repeatable as RepeatableInterface;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistered;
@@ -56,6 +57,15 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
 
             if (is_null($event)) {
                 continue;
+            }
+
+            $event->description($repeatable->class . ':' . $repeatable->getKey());
+
+            if (
+                is_a($repeatable->class, RepeatableInterface::class, true)
+                && $repeatable->class::withoutOverlapping()
+            ) {
+                $event->withoutOverlapping();
             }
 
             foreach ($repeatable->cron['methods'] as $key => $method) {

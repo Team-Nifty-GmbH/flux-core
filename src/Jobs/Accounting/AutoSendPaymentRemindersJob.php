@@ -58,6 +58,11 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
         return [];
     }
 
+    public static function withoutOverlapping(): bool
+    {
+        return true;
+    }
+
     public static function repeatableType(): RepeatableTypeEnum
     {
         return RepeatableTypeEnum::Invokable;

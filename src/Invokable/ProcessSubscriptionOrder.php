@@ -109,6 +109,11 @@ class ProcessSubscriptionOrder implements Repeatable
         return true;
     }
 
+    public static function withoutOverlapping(): bool
+    {
+        return true;
+    }
+
     public static function name(): string
     {
         return class_basename(static::class);

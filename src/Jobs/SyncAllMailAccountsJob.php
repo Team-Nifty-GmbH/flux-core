@@ -45,6 +45,11 @@ class SyncAllMailAccountsJob implements Repeatable, ShouldQueue
         return [];
     }
 
+    public static function withoutOverlapping(): bool
+    {
+        return true;
+    }
+
     /**
      * Execute the job.
      */
