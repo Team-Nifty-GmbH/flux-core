@@ -21,7 +21,8 @@ class ProcessSubscriptionOrder implements Repeatable
         int|string $orderId,
         int|string $orderTypeId,
         ?array $printLayouts = null,
-        ?bool $autoPrintAndSend = false,
+        ?bool $autoPrint = false,
+        ?bool $autoSend = false,
         ?int $emailTemplateId = null
     ): bool {
         $order = Order::query()
@@ -70,8 +71,8 @@ class ProcessSubscriptionOrder implements Repeatable
         try {
             $newOrder = ReplicateOrder::make($order)->validate()->execute();
 
-            if ($autoPrintAndSend && $printLayouts && count($printLayouts) > 0) {
-                $this->processPrintAndSend($newOrder, $printLayouts, $emailTemplateId);
+            if (($autoPrint || $autoSend) && $printLayouts && count($printLayouts) > 0) {
+                $this->processPrintAndSend($newOrder, $printLayouts, $autoSend ? $emailTemplateId : null);
             }
         } catch (Throwable $e) {
             $activity = activity()
@@ -125,7 +126,8 @@ class ProcessSubscriptionOrder implements Repeatable
             'orderId' => null,
             'orderTypeId' => null,
             'printLayouts' => null,
-            'autoPrintAndSend' => false,
+            'autoPrint' => false,
+            'autoSend' => false,
             'emailTemplateId' => null,
             'cancellationNoticeValue' => null,
             'cancellationNoticeUnit' => null,
