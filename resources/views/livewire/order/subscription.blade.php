@@ -296,14 +296,14 @@
 
             <div class="flex flex-col gap-1.5 border-t pt-4">
                 <x-toggle
-                    wire:model="schedule.parameters.autoPrintAndSend"
-                    :label="__('Auto Print and send by mail')"
-                    :hint="__('Automatically generate PDFs and send them via email')"
+                    wire:model="schedule.parameters.autoPrint"
+                    :label="__('Auto Print')"
+                    :hint="__('Automatically generate PDFs when the schedule runs')"
                 />
 
                 <div
                     x-cloak
-                    x-show="$wire.schedule.parameters.autoPrintAndSend"
+                    x-show="$wire.schedule.parameters.autoPrint || $wire.schedule.parameters.autoSend"
                     class="flex flex-col gap-1.5"
                 >
                     <div id="schedule-print-layouts">
@@ -316,6 +316,19 @@
                             :options="$this->getPrintLayoutOptions()"
                         />
                     </div>
+                </div>
+
+                <x-toggle
+                    wire:model="schedule.parameters.autoSend"
+                    :label="__('Auto Send')"
+                    :hint="__('Automatically send generated PDFs via email')"
+                />
+
+                <div
+                    x-cloak
+                    x-show="$wire.schedule.parameters.autoSend"
+                    class="flex flex-col gap-1.5"
+                >
                     <x-select.styled
                         wire:model="schedule.parameters.emailTemplateId"
                         :label="__('Email Template')"

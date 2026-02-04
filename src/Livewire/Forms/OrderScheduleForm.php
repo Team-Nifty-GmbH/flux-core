@@ -7,7 +7,8 @@ class OrderScheduleForm extends ScheduleForm
     public array $parameters = [
         'printLayouts' => [],
         'emailTemplateId' => null,
-        'autoPrintAndSend' => false,
+        'autoPrint' => false,
+        'autoSend' => false,
         'cancellationNoticeValue' => null,
         'cancellationNoticeUnit' => null,
     ];
