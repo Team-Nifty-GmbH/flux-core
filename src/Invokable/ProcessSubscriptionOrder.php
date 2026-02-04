@@ -162,7 +162,13 @@ class ProcessSubscriptionOrder implements Repeatable
 
             $invoiceDocs = array_filter(
                 $printLayouts,
-                fn (string $doc) => is_string(data_get($printViews, $doc)) && $printViews[$doc]::isInvoice()
+                function (string $doc) use ($printViews) {
+                    try {
+                        return resolve_static(data_get($printViews, $doc), 'isInvoice');
+                    } catch (Throwable) {
+                        return false;
+                    }
+                }
             );
 
             $address = $invoiceDocs

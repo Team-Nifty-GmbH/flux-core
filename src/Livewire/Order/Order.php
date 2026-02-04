@@ -1075,7 +1075,13 @@ class Order extends Component
 
         $invoiceDocs = array_filter(
             $documents,
-            fn (string $doc) => is_string($printViews[$doc] ?? null) && $printViews[$doc]::isInvoice()
+            function (string $doc) use ($printViews) {
+                try {
+                    return resolve_static(data_get($printViews, $doc), 'isInvoice');
+                } catch (Throwable) {
+                    return false;
+                }
+            }
         );
 
         $address = $invoiceDocs

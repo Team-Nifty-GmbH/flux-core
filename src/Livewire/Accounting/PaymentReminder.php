@@ -64,11 +64,13 @@ class PaymentReminder extends OrderList
             return null;
         }
 
-        $ordersWithEmail = $this->getSelectedModelsQuery()
+        $baseQuery = $this->getSelectedModelsQuery();
+
+        $ordersWithEmail = (clone $baseQuery)
             ->whereHasMailableInvoiceAddress()
             ->get();
 
-        $skippedCount = $this->getSelectedModelsQuery()->count() - $ordersWithEmail->count();
+        $skippedCount = (clone $baseQuery)->count() - $ordersWithEmail->count();
         if ($skippedCount > 0) {
             $this->notification()->warning(
                 __(':count order(s) skipped due to missing email address.', ['count' => $skippedCount])

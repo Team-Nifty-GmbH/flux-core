@@ -22,6 +22,7 @@ use Livewire\Attributes\Renderless;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use Throwable;
 
 class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
@@ -232,7 +233,13 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
         $invoiceDocs = array_filter(
             $documents,
-            fn (string $doc) => is_string(data_get($printViews, $doc)) && $printViews[$doc]::isInvoice()
+            function (string $doc) use ($printViews) {
+                try {
+                    return resolve_static(data_get($printViews, $doc), 'isInvoice');
+                } catch (Throwable) {
+                    return false;
+                }
+            }
         );
 
         $address = $invoiceDocs
