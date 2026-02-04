@@ -44,10 +44,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             ->where('is_active', true)
             ->get();
         foreach ($repeatables as $repeatable) {
-            if (
-                ! is_a($repeatable->class, RepeatableInterface::class, true)
-                || ! $repeatable->class::isRepeatable()
-            ) {
+            if (method_exists($repeatable->class, 'isRepeatable') && ! $repeatable->class::isRepeatable()) {
                 continue;
             }
 
@@ -65,7 +62,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
 
             $event->description($repeatable->class . ':' . $repeatable->getKey());
 
-            if (is_a($repeatable->class, RepeatableInterface::class, true) && $repeatable->class::withoutOverlapping()) {
+            if (
+                is_a($repeatable->class, RepeatableInterface::class, true)
+                && $repeatable->class::withoutOverlapping()
+            ) {
                 $event->withoutOverlapping();
             }
 
