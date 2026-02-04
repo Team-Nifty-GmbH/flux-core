@@ -69,6 +69,11 @@ class ScheduleRunTestDefaultCronInvokable implements Repeatable
     {
         return [];
     }
+
+    public static function withoutOverlapping(): bool
+    {
+        return false;
+    }
 }
 
 it('does not set last_success when a scheduled job fails', function (): void {
