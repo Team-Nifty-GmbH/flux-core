@@ -44,8 +44,8 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             ->get();
         foreach ($repeatables as $repeatable) {
             if (
-                is_a($repeatable->class, RepeatableInterface::class, true)
-                && ! $repeatable->class::isRepeatable()
+                ! is_a($repeatable->class, RepeatableInterface::class, true)
+                || ! $repeatable->class::isRepeatable()
             ) {
                 continue;
             }
