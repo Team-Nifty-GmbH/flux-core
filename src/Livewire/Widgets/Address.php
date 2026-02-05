@@ -18,6 +18,11 @@ class Address extends Component
 
     public bool $withoutHeader = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Contacts';
+    }
+
     public function mount(int $modelId): void
     {
         $address = resolve_static(AddressModel::class, 'query')

@@ -25,6 +25,11 @@ class VacationYearlyOverview extends Component
 
     public array $yearlyData = [];
 
+    public static function getCategory(): ?string
+    {
+        return 'Employee';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

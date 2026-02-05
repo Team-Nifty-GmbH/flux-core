@@ -19,6 +19,11 @@ class ProjectMargin extends ValueBox implements HasWidgetOptions
 {
     public ?int $projectId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Revenue';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

@@ -10,6 +10,11 @@ class UserLeadWonLostRatio extends MyLeadWonLostRatio
 {
     public bool $showDonutOptions = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Leads';
+    }
+
     public function render(): View|Factory
     {
         return view('flux::livewire.widgets.user-lead-won-lost-ratio');

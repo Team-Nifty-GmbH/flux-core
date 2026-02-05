@@ -22,6 +22,11 @@ class Transactions extends CircleChart implements HasWidgetOptions
         'type' => 'donut',
     ];
 
+    public static function getCategory(): ?string
+    {
+        return 'Finance';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

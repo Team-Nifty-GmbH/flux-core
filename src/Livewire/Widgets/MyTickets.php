@@ -19,6 +19,11 @@ class MyTickets extends Component
 
     protected ?Collection $tickets = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Tasks';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
