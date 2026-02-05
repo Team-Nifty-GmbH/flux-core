@@ -14,8 +14,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Spatie\MediaLibrary\HasMedia;
 use RuntimeException;
+use Spatie\MediaLibrary\HasMedia;
 use Throwable;
 use ZipArchive;
 
