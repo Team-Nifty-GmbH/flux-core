@@ -192,7 +192,7 @@ class ImapMessageBuilder
             return null;
         }
 
-        return $client->getFolderByPath($this->folder->slug);
+        return $client->getFolderByPath($this->folder->slug, utf7: true);
     }
 
     protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void
