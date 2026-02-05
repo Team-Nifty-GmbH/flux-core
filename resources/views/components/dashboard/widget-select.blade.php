@@ -13,23 +13,13 @@
                     class="h-6 w-6 animate-spin rounded-full border-4 border-primary-200 border-t-primary-500 dark:border-white dark:border-t-gray-400"
                 ></div>
             </div>
-            @forelse ($this->availableWidgets as $widget)
-                <div
-                    x-on:click="isLoading ? null : selectWidget('{{ $widget['component_name'] }}')"
-                    class="mb-2 w-full cursor-pointer rounded border p-2"
-                    :class="isLoading ? 'bg-gray-200 dark:bg-secondary-800 cursor-wait' : 'dark:hover:bg-secondary-900 hover:bg-gray-100'"
-                >
-                    {{ __($widget['label']) }}
-                </div>
-            @empty
-                <div
-                    class="mx-auto flex h-full flex-col items-center justify-center"
-                >
-                    <h2 class="text-2xl font-medium">
-                        {{ __('No widgets available') }}
-                    </h2>
-                </div>
-            @endforelse
+            <x-flux::checkbox-tree
+                tree="$wire.availableWidgetsTree"
+                name-attribute="label"
+                :with-search="true"
+                :hide-icon="true"
+                x-on:folder-tree-select="if (! $event.detail.children) { isLoading ? null : selectWidget($event.detail.component_name); }"
+            />
         </div>
         <x-slot:footer>
             <div class="flex justify-end">

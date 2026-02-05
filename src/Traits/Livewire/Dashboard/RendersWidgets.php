@@ -21,6 +21,8 @@ trait RendersWidgets
 
     public array $availableWidgets = [];
 
+    public array $availableWidgetsTree = [];
+
     public array $params = [
         'timeFrame' => TimeFrameEnum::ThisMonth,
         'dateRange' => [],
@@ -50,6 +52,7 @@ trait RendersWidgets
     public function mountRendersWidgets(): void
     {
         $this->availableWidgets = $this->filterWidgets(Widget::all());
+        $this->availableWidgetsTree = $this->availableWidgetsTree();
         $this->widgets();
     }
 
@@ -164,6 +167,40 @@ trait RendersWidgets
     public function wireModel(): string
     {
         return 'params';
+    }
+
+    protected function availableWidgetsTree(): array
+    {
+        $toNode = fn (array $widget) => [
+            'id' => 'widget-' . $widget['component_name'],
+            'label' => __($widget['label']),
+            'component_name' => $widget['component_name'],
+        ];
+
+        $widgets = collect($this->availableWidgets);
+
+        $categorized = $widgets
+            ->whereNotNull('category')
+            ->groupBy('category')
+            ->sortKeys()
+            ->map(fn ($children, $category) => [
+                'id' => 'category-' . $category,
+                'label' => __($category),
+                'children' => $children
+                    ->map($toNode)
+                    ->sortBy('label', SORT_STRING | SORT_FLAG_CASE)
+                    ->values()
+                    ->all(),
+            ])
+            ->values();
+
+        $uncategorized = $widgets
+            ->whereNull('category')
+            ->map($toNode)
+            ->sortBy('label', SORT_STRING | SORT_FLAG_CASE)
+            ->values();
+
+        return $categorized->merge($uncategorized)->all();
     }
 
     protected function filterWidgets(array $widgets): array
