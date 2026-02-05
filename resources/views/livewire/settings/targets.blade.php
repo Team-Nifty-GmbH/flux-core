@@ -33,6 +33,7 @@
             wire:model="target.model_type"
             x-on:select="$wire.updateSelectableColumns($event.detail.select.value)"
             :options="$modelTypes"
+            searchable
         />
         <x-select.native
             :label="__('Timeframe Column')"

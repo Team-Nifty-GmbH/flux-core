@@ -41,11 +41,18 @@ class Targets extends TargetList
 
     public function edit(string|int|null $id = null): void
     {
+        $this->reset('selectedUserIds');
         $this->baseEdit($id);
 
         if ($id) {
-            $this->updateAggregateColumnOptions($this->target->aggregate_type);
-            $this->updateSelectableColumns($this->target->model_type);
+            /** @var Targetable $model */
+            $model = morphed_model($this->target->model_type);
+
+            $this->timeframeColumns = map_values_to_options($model::timeframeColumns());
+            $this->aggregateTypes = map_values_to_options($model::aggregateTypes());
+            $this->ownerColumns = map_values_to_options($model::ownerColumns());
+            $this->aggregateColumns = map_values_to_options($model::aggregateColumns($this->target->aggregate_type));
+
             $this->selectedUserIds = array_column($this->target->users, 'user_id');
         }
     }
