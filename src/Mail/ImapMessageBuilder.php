@@ -192,9 +192,7 @@ class ImapMessageBuilder
             return null;
         }
 
-        return $client
-            ->getFolders(false, $this->folder->slug)
-            ->first();
+        return $client->getFolderByPath($this->folder->slug);
     }
 
     protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void

@@ -116,7 +116,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             return null;
         }
 
-        $imapFolder = $client->getFolders(false, $folder->slug)->first();
+        $imapFolder = $client->getFolderByPath($folder->slug);
 
         if (! $imapFolder) {
             return null;
