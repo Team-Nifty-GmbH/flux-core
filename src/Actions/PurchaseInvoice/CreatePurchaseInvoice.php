@@ -76,7 +76,7 @@ class CreatePurchaseInvoice extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')->getKey();
+        $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')?->getKey();
     }
 
     protected function validateData(): void

@@ -47,7 +47,7 @@ class Outstanding extends ValueBox implements HasWidgetOptions
     #[Renderless]
     public function calculateSum(): void
     {
-        $symbol = resolve_static(Currency::class, 'default')->symbol;
+        $symbol = resolve_static(Currency::class, 'default')?->symbol;
         $this->subValue = '<span class="text-red-600">'
             . Number::abbreviate(
                 $this->getOverdueQuery(resolve_static(Order::class, 'query'))->sum('balance'),
