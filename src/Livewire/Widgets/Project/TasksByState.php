@@ -21,6 +21,11 @@ class TasksByState extends CircleChart
 
     public bool $showTotals = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Projects';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

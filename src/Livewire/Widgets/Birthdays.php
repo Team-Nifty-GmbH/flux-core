@@ -9,6 +9,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Birthdays extends ValueList
 {
+    public static function getCategory(): ?string
+    {
+        return 'Contacts';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

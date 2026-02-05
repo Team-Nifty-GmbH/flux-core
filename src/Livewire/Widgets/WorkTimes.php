@@ -9,6 +9,11 @@ class WorkTimes extends MyWorkTimes
 {
     public ?int $userId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Time Tracking';
+    }
+
     public function render(): View|Factory
     {
         return view('flux::livewire.widgets.work-times');

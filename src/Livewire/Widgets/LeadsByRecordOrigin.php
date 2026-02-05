@@ -29,6 +29,11 @@ class LeadsByRecordOrigin extends CircleChart implements HasWidgetOptions
 
     public bool $showTotals = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Leads';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

@@ -26,6 +26,11 @@ class OrdersTimeline extends TimelineChart implements HasWidgetOptions
         ],
     ];
 
+    public static function getCategory(): ?string
+    {
+        return 'Orders';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

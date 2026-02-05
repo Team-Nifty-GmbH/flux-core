@@ -18,6 +18,11 @@ class TopProductsByRevenue extends ValueList
 {
     use IsTimeFrameAwareWidget;
 
+    public static function getCategory(): ?string
+    {
+        return 'Products';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

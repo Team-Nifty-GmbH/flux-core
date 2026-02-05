@@ -22,6 +22,11 @@ class AverageOrderValue extends LineChart implements HasWidgetOptions
 {
     use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
+    public static function getCategory(): ?string
+    {
+        return 'Revenue';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

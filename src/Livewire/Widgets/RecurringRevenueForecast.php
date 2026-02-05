@@ -39,6 +39,11 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
 
     public bool $showTotals = true;
 
+    public static function getCategory(): ?string
+    {
+        return 'Revenue';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

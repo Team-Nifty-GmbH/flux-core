@@ -13,6 +13,11 @@ class VacationBalanceBox extends ValueBox
     #[Locked]
     public ?int $employeeId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Employee';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

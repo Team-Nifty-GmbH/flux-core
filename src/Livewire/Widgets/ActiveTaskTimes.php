@@ -8,6 +8,11 @@ use FluxErp\Models\WorkTime;
 
 class ActiveTaskTimes extends ValueList
 {
+    public static function getCategory(): ?string
+    {
+        return 'Time Tracking';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

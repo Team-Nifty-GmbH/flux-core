@@ -19,6 +19,11 @@ class MyLeads extends Component implements HasWidgetOptions
 {
     use Widgetable;
 
+    public static function getCategory(): ?string
+    {
+        return 'Leads';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

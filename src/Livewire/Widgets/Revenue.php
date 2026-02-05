@@ -20,6 +20,11 @@ class Revenue extends ValueBox implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget;
 
+    public static function getCategory(): ?string
+    {
+        return 'Revenue';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
