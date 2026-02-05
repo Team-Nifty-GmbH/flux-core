@@ -15,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
+use RuntimeException;
 use Throwable;
 use ZipArchive;
 
@@ -201,7 +202,10 @@ class CreateDocumentsJob implements ShouldQueue
         $tmpZip = tempnam(sys_get_temp_dir(), 'flux-preview-') . '.zip';
 
         $zip = new ZipArchive();
-        $zip->open($tmpZip, ZipArchive::CREATE);
+
+        if ($zip->open($tmpZip, ZipArchive::CREATE) !== true) {
+            throw new RuntimeException('Failed to create ZIP archive: ' . $tmpZip);
+        }
 
         foreach ($files as $file) {
             $zip->addFromString($file['file_name'], $file['output']);
@@ -238,7 +242,10 @@ class CreateDocumentsJob implements ShouldQueue
         $tmpZip = tempnam(sys_get_temp_dir(), 'flux-docs-') . '.zip';
 
         $zip = new ZipArchive();
-        $zip->open($tmpZip, ZipArchive::CREATE);
+
+        if ($zip->open($tmpZip, ZipArchive::CREATE) !== true) {
+            throw new RuntimeException('Failed to create ZIP archive: ' . $tmpZip);
+        }
 
         foreach ($files as $media) {
             $zip->addFile($media->getPath(), $media->file_name);
