@@ -103,7 +103,10 @@ class MenuServiceProvider extends ServiceProvider
             icon: 'users',
             label: 'Human Resources',
             closure: function (): void {
-                Menu::register(route: 'human-resources.my-employee-profile');
+                Menu::register(
+                    route: 'human-resources.my-employee-profile',
+                    when: fn () => auth()->user()?->employee,
+                );
                 Menu::register(route: 'human-resources.dashboard');
                 Menu::register(route: 'human-resources.attendance-overview');
                 Menu::register(route: 'human-resources.employees');

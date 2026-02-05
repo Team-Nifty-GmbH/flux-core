@@ -64,7 +64,7 @@ class PaymentRunPreview extends Component
                 'payment_discount_target_date' => $order->payment_discount_target_date?->format('Y-m-d'),
                 'payment_discount_percent' => $order->payment_discount_percent,
                 'currency_iso' => $order->currency?->iso
-                    ?? resolve_static(Currency::class, 'default')->iso,
+                    ?? resolve_static(Currency::class, 'default')?->iso,
                 'amount' => $this->calculateAmount($order),
                 'multiplier' => bccomp($order->balance, 0),
                 'type' => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum ?? null,

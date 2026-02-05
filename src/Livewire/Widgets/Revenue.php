@@ -42,7 +42,7 @@ class Revenue extends ValueBox implements HasWidgetOptions
             ->withGrowthRate()
             ->sum('total_net_price');
 
-        $symbol = resolve_static(Currency::class, 'default')->symbol;
+        $symbol = resolve_static(Currency::class, 'default')?->symbol;
         $this->sum = Number::abbreviate($metric->getValue(), 2) . ' ' . $symbol;
         $this->previousSum = Number::abbreviate($metric->getPreviousValue(), 2) . ' ' . $symbol;
         $this->growthRate = $metric->getGrowthRate();
