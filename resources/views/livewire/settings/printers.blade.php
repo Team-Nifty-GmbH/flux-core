@@ -1,6 +1,11 @@
 <x-modal id="edit-printer-modal" :title="__('Edit Printer')">
-    <div class="flex flex-col gap-1.5">
+    <div class="flex flex-col gap-4">
         <x-input wire:model="printerForm.alias" :label="__('Alias')" />
+        <x-toggle
+            wire:model.boolean="printerForm.is_visible"
+            :label="__('Visible')"
+            :hint="__('Show this printer in selection lists for users')"
+        />
     </div>
     <x-slot:footer>
         <x-button

@@ -16,7 +16,13 @@ class Printer extends FluxModel
         return [
             'media_sizes' => 'array',
             'is_active' => 'boolean',
+            'is_visible' => 'boolean',
         ];
+    }
+
+    public function scopeVisible($query)
+    {
+        return $query->where('is_visible', true);
     }
 
     public function printerUsers(): HasMany

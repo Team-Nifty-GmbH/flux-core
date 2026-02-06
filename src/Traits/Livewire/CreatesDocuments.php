@@ -164,6 +164,7 @@ trait CreatesDocuments
                 'printers' => auth()->user()
                     ?->printers()
                     ->where('is_active', true)
+                    ->where('is_visible', true)
                     ->get([
                         'id',
                         'name',
