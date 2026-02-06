@@ -73,6 +73,7 @@ class UserEdit extends Component
                     ->toArray(),
                 'printers' => resolve_static(Printer::class, 'query')
                     ->where('is_active', true)
+                    ->where('is_visible', true)
                     ->get(['id', 'name', 'location', 'media_sizes'])
                     ->toArray(),
                 'userPrinters' => resolve_static(PrinterUser::class, 'query')
@@ -188,11 +189,30 @@ class UserEdit extends Component
         }
 
         if ($this->printerUserForm->pivot_id) {
-            try {
-                $this->printerUserForm->is_default = true;
-                $this->printerUserForm->save();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+            $printerId = $this->printerUserForm->printer_id;
+            if (! $printerId) {
+                $oldPivot = resolve_static(PrinterUser::class, 'query')
+                    ->whereKey($this->printerUserForm->pivot_id)
+                    ->first();
+                $printerId = $oldPivot?->printer_id;
+            }
+
+            if ($printerId) {
+                $newPivot = resolve_static(PrinterUser::class, 'query')
+                    ->where('user_id', $user['id'])
+                    ->where('printer_id', $printerId)
+                    ->first();
+
+                if ($newPivot) {
+                    try {
+                        $this->printerUserForm->pivot_id = $newPivot->getKey();
+                        $this->printerUserForm->printer_id = $printerId;
+                        $this->printerUserForm->is_default = true;
+                        $this->printerUserForm->save();
+                    } catch (ValidationException|UnauthorizedException $e) {
+                        exception_to_notifications($e, $this);
+                    }
+                }
             }
         }
 
@@ -240,6 +260,7 @@ class UserEdit extends Component
 
         if ($defaultPrinter = $user->printerUsers()->where('is_default', true)->first()) {
             $this->printerUserForm->fill($defaultPrinter);
+            $this->printerUserForm->pivot_id = $defaultPrinter->getKey();
         }
 
         $this->userForm->fill($user);
