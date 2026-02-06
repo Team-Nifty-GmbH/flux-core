@@ -129,6 +129,8 @@ class PaymentRunPreview extends Component
     #[Renderless]
     public function createPaymentRun(): void
     {
+        $paymentRunTypeEnum = PaymentRunTypeEnum::from($this->paymentRunTypeEnum);
+
         $orderPayments = collect($this->orders)
             ->map(fn (array $order, int $orderId) => [
                 'order_id' => $orderId,
@@ -138,18 +140,21 @@ class PaymentRunPreview extends Component
                 ),
                 'type' => data_get($order, 'type', '__NO_TYPE__'),
             ])
-            ->values()
-            ->groupBy('type')
-            ->toArray();
-        $paymentRunTypeEnum = PaymentRunTypeEnum::from($this->paymentRunTypeEnum);
+            ->values();
+
+        $groupedPayments = $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
+            ? $orderPayments->groupBy('type')->toArray()
+            : [null => $orderPayments->toArray()];
 
         $paymentRuns = [];
-        foreach ($orderPayments as $type => $payments) {
+        foreach ($groupedPayments as $type => $payments) {
             try {
                 $paymentRuns[] = CreatePaymentRun::make([
                     'state' => Open::$name,
                     'payment_run_type_enum' => $paymentRunTypeEnum,
-                    'sepa_mandate_type_enum' => SepaMandateTypeEnum::tryFrom($type) ?? SepaMandateTypeEnum::BASIC,
+                    'sepa_mandate_type_enum' => $paymentRunTypeEnum === PaymentRunTypeEnum::DirectDebit
+                        ? SepaMandateTypeEnum::tryFrom($type) ?? SepaMandateTypeEnum::BASIC
+                        : null,
                     'orders' => $payments,
                 ])
                     ->checkPermission()
