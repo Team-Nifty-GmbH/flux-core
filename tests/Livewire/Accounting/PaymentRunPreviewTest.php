@@ -2,15 +2,18 @@
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\SepaMandate;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -288,4 +291,95 @@ test('shows notification on successful creation', function (): void {
     Livewire::test(PaymentRunPreview::class)
         ->call('createPaymentRun')
         ->assertRedirect();
+});
+
+test('money transfer creates single payment run regardless of sepa mandate types', function (): void {
+    $bankConnection1 = ContactBankConnection::factory()->create([
+        'contact_id' => $this->contact->id,
+    ]);
+
+    SepaMandate::factory()->create([
+        'contact_id' => $this->contact->id,
+        'contact_bank_connection_id' => $bankConnection1->id,
+        'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC,
+        'signed_date' => now(),
+        'tenant_id' => $this->dbTenant->id,
+    ]);
+
+    $bankConnection2 = ContactBankConnection::factory()->create([
+        'contact_id' => $this->contact->id,
+    ]);
+
+    SepaMandate::factory()->create([
+        'contact_id' => $this->contact->id,
+        'contact_bank_connection_id' => $bankConnection2->id,
+        'sepa_mandate_type_enum' => SepaMandateTypeEnum::B2B,
+        'signed_date' => now(),
+        'tenant_id' => $this->dbTenant->id,
+    ]);
+
+    $this->orders[0]->update(['contact_bank_connection_id' => $bankConnection1->id]);
+    $this->orders[1]->update(['contact_bank_connection_id' => $bankConnection2->id]);
+
+    session([
+        'payment_run_preview_orders' => [$this->orders[0]->id, $this->orders[1]->id],
+        'payment_run_type_enum' => PaymentRunTypeEnum::MoneyTransfer,
+    ]);
+
+    Livewire::test(PaymentRunPreview::class)
+        ->call('createPaymentRun')
+        ->assertRedirect();
+
+    expect(PaymentRun::count())->toEqual(1);
+    expect(PaymentRun::first()->orders)->toHaveCount(2);
+});
+
+test('direct debit creates separate payment runs per sepa mandate type', function (): void {
+    $directDebitPaymentType = PaymentType::factory()->create([
+        'is_direct_debit' => true,
+    ]);
+
+    $bankConnection1 = ContactBankConnection::factory()->create([
+        'contact_id' => $this->contact->id,
+    ]);
+
+    SepaMandate::factory()->create([
+        'contact_id' => $this->contact->id,
+        'contact_bank_connection_id' => $bankConnection1->id,
+        'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC,
+        'signed_date' => now(),
+        'tenant_id' => $this->dbTenant->id,
+    ]);
+
+    $bankConnection2 = ContactBankConnection::factory()->create([
+        'contact_id' => $this->contact->id,
+    ]);
+
+    SepaMandate::factory()->create([
+        'contact_id' => $this->contact->id,
+        'contact_bank_connection_id' => $bankConnection2->id,
+        'sepa_mandate_type_enum' => SepaMandateTypeEnum::B2B,
+        'signed_date' => now(),
+        'tenant_id' => $this->dbTenant->id,
+    ]);
+
+    $this->orders[0]->update([
+        'contact_bank_connection_id' => $bankConnection1->id,
+        'payment_type_id' => $directDebitPaymentType->id,
+    ]);
+    $this->orders[1]->update([
+        'contact_bank_connection_id' => $bankConnection2->id,
+        'payment_type_id' => $directDebitPaymentType->id,
+    ]);
+
+    session([
+        'payment_run_preview_orders' => [$this->orders[0]->id, $this->orders[1]->id],
+        'payment_run_type_enum' => PaymentRunTypeEnum::DirectDebit,
+    ]);
+
+    Livewire::test(PaymentRunPreview::class)
+        ->call('createPaymentRun')
+        ->assertRedirect();
+
+    expect(PaymentRun::count())->toEqual(2);
 });
