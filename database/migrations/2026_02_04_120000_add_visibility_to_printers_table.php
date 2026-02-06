@@ -9,9 +9,15 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('printers', function (Blueprint $table): void {
-            $table->boolean('is_visible')->default(false)->after('is_active');
-            $table->string('system_name')->nullable()->after('name');
-            $table->string('uri')->nullable()->after('system_name');
+            $table->boolean('is_visible')
+                ->default(false)
+                ->after('is_active');
+            $table->string('system_name')
+                ->nullable()
+                ->after('name');
+            $table->string('uri')
+                ->nullable()
+                ->after('system_name');
         });
     }
 

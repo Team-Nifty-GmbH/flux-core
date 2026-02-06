@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Traits\Model\Filterable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -20,7 +21,7 @@ class Printer extends FluxModel
         ];
     }
 
-    public function scopeVisible($query)
+    public function scopeVisible(Builder $query): Builder
     {
         return $query->where('is_visible', true);
     }
