@@ -23,8 +23,9 @@ class PaymentType extends FluxModel
     {
         return [
             'is_active' => 'boolean',
-            'is_direct_debit' => 'boolean',
+            'is_cash' => 'boolean',
             'is_default' => 'boolean',
+            'is_direct_debit' => 'boolean',
             'is_purchase' => 'boolean',
             'is_sales' => 'boolean',
             'requires_manual_transfer' => 'boolean',

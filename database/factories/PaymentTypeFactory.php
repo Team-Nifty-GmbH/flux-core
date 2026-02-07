@@ -24,6 +24,7 @@ class PaymentTypeFactory extends Factory
             'payment_discount_percentage' => fake()->numberBetween(10, 50) / 100,
             'is_active' => $default ?: fake()->boolean(90),
             'is_default' => $default,
+            'is_cash' => false,
             'is_direct_debit' => fake()->boolean(),
             'is_purchase' => fake()->boolean(),
             'is_sales' => $default ?: fake()->boolean(),

@@ -27,6 +27,10 @@
             wire:model.boolean="paymentType.requires_manual_transfer"
             :label="__('Requires Manual Transfer')"
         />
+        <x-toggle
+            wire:model.boolean="paymentType.is_cash"
+            :label="__('Is Cash')"
+        />
         <x-select.styled
             :label="__('Tenant')"
             multiple
