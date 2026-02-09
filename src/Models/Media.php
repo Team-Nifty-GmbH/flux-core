@@ -69,14 +69,13 @@ class Media extends BaseMedia
         return $this;
     }
 
-    public function stream()
+    public function stream(string $conversion = '')
     {
         if ($this->path) {
-            // return a resource
             return fopen($this->path, 'rb');
         }
 
-        return parent::stream();
+        return parent::stream($conversion);
     }
 
     public function temporaryUpload(): BelongsTo
