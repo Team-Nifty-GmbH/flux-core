@@ -270,6 +270,30 @@
                 :label="__('Is Active')"
             />
             <div>
+                <x-label :label="__('Minimum Contract Duration')" />
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('Leave empty to use the default from settings.') }}
+                </p>
+                <div class="mt-2 grid grid-cols-2 gap-4">
+                    <x-number
+                        wire:model="schedule.parameters.minimumDurationValue"
+                        :label="__('Value')"
+                        :min="0"
+                    />
+                    <x-select.styled
+                        wire:model="schedule.parameters.minimumDurationUnit"
+                        :label="__('Unit')"
+                        select="label:label|value:value"
+                        :options="[
+                            ['value' => 'days', 'label' => __('Days')],
+                            ['value' => 'weeks', 'label' => __('Weeks')],
+                            ['value' => 'months', 'label' => __('Months')],
+                            ['value' => 'years', 'label' => __('Years')],
+                        ]"
+                    />
+                </div>
+            </div>
+            <div>
                 <x-label :label="__('Cancellation Notice Period')" />
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ __('Leave empty to use the default from settings.') }}
@@ -386,23 +410,60 @@
                     const schedule = $wire.schedule
                     if (! schedule?.due_at) return null
 
-                    if (
-                        this.cancellationType ===
-                        '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::Immediate->value }}'
-                    ) {
-                        return new Date().toLocaleDateString('{{ app()->getLocale() }}', {
+                    const formatDate = (date) =>
+                        date.toLocaleDateString('{{ app()->getLocale() }}', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
                         })
+
+                    if (
+                        this.cancellationType ===
+                        '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::Immediate->value }}'
+                    ) {
+                        return formatDate(new Date())
                     }
 
-                    const dueAt = new Date(schedule.due_at)
-                    return dueAt.toLocaleDateString('{{ app()->getLocale() }}', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                    })
+                    let endFromNotice = new Date(schedule.due_at)
+
+                    const minDurationValue =
+                        schedule.parameters?.minimumDurationValue ||
+                        {{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_minimum_duration_value }}
+                    const minDurationUnit =
+                        schedule.parameters?.minimumDurationUnit ||
+                        '{{ app(\FluxErp\Settings\SubscriptionSettings::class)->default_minimum_duration_unit }}'
+
+                    let endFromMinDuration = new Date()
+                    if (minDurationValue > 0) {
+                        const orderDate = new Date($wire.order.order_date)
+                        switch (minDurationUnit) {
+                            case 'days':
+                                orderDate.setDate(orderDate.getDate() + minDurationValue)
+                                break
+                            case 'weeks':
+                                orderDate.setDate(
+                                    orderDate.getDate() + minDurationValue * 7
+                                )
+                                break
+                            case 'months':
+                                orderDate.setMonth(
+                                    orderDate.getMonth() + minDurationValue
+                                )
+                                break
+                            case 'years':
+                                orderDate.setFullYear(
+                                    orderDate.getFullYear() + minDurationValue
+                                )
+                                break
+                        }
+                        endFromMinDuration = orderDate
+                    }
+
+                    const effectiveEnd =
+                        endFromNotice > endFromMinDuration
+                            ? endFromNotice
+                            : endFromMinDuration
+                    return formatDate(effectiveEnd)
                 },
                 get isWithinNoticePeriod() {
                     const schedule = $wire.schedule

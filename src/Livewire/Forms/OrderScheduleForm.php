@@ -11,5 +11,7 @@ class OrderScheduleForm extends ScheduleForm
         'autoSend' => false,
         'cancellationNoticeValue' => null,
         'cancellationNoticeUnit' => null,
+        'minimumDurationValue' => null,
+        'minimumDurationUnit' => null,
     ];
 }
