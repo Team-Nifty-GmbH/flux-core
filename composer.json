@@ -21,7 +21,7 @@
         "nesbot/carbon": "^3.8",
         "php-http/discovery": "^1.15",
         "spatie/laravel-activitylog": "^4.6",
-        "spatie/laravel-medialibrary": "^11.0",
+        "spatie/laravel-medialibrary": "^11.18",
         "spatie/laravel-model-info": "^2.0",
         "spatie/laravel-model-states": "^2.4",
         "spatie/laravel-permission": "^6.0",
