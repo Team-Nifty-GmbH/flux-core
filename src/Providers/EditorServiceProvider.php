@@ -5,6 +5,7 @@ namespace FluxErp\Providers;
 use FluxErp\Facades\Editor;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentType;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\VatRate;
@@ -125,6 +126,29 @@ class EditorServiceProvider extends ServiceProvider
             ],
             Order::class,
             'subscription'
+        );
+
+        Editor::mergeVariables(
+            [
+                'Salutation' => '$model->addressInvoice->salutation()',
+                'Total Gross Price' => 'format_money($model->total_gross_price, $model->currency, $model->addressInvoice->language)',
+                'Balance' => 'format_money($model->balance, $model->currency, $model->addressInvoice->language)',
+                'Order Number' => '$model->order_number',
+                'Order Date' => '$model->order_date?->isoFormat(\'L\')',
+                'Invoice Number' => '$model->invoice_number',
+                'Invoice Date' => '$model->invoice_date?->isoFormat(\'L\')',
+                'Tenant Name' => '$model->tenant?->name',
+                'Tenant Creditor Identifier' => '$model->tenant?->creditor_identifier',
+                'Customer IBAN' => 'Str::iban($model->contactBankConnection?->iban)',
+                'Customer Account Holder' => '$model->contactBankConnection?->account_holder',
+                'Customer Bank Name' => '$model->contactBankConnection?->bank_name',
+                'Customer BIC' => '$model->contactBankConnection?->bic',
+                'Payment Target Days' => '$model->payment_target',
+                'Payment Discount Target' => '$model->payment_discount_target',
+                'Payment Discount Percent' => 'Number::percentage(bcmul($model->payment_discount_percent ?? 0, 100), precision: 2, locale: app()->getLocale())',
+                'Balance Due Discount' => 'format_money($model->balance_due_discount, $model->currency, $model->addressInvoice->language)',
+            ],
+            PaymentType::class
         );
 
         Editor::mergeVariables(
