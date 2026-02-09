@@ -45,7 +45,7 @@ class DeleteWorkTimeModel extends FluxAction
 
         if ($hasActiveAssignments) {
             throw ValidationException::withMessages([
-                'employees' => [__('This work time model is still assigned to employees.')],
+                'employees' => ['This work time model is still assigned to employees.'],
             ])
                 ->errorBag('deleteWorkTimeModel');
         }
