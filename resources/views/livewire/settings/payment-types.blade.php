@@ -67,6 +67,7 @@
             wire:model="paymentType.description"
             scope="paymentType"
             :label="__('Description')"
+            :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\PaymentType::class)"
         />
     </div>
     <x-slot:footer>
