@@ -33,17 +33,19 @@ class DeleteWorkTimeModel extends FluxAction
     {
         parent::validateData();
 
+        $now = now();
+
         $hasActiveAssignments = resolve_static(EmployeeWorkTimeModel::class, 'query')
             ->where('work_time_model_id', $this->getData('id'))
-            ->where('valid_from', '<=', now())
+            ->where('valid_from', '<=', $now)
             ->where(fn (Builder $query): Builder => $query->whereNull('valid_until')
-                ->orWhere('valid_until', '>=', now())
+                ->orWhere('valid_until', '>=', $now)
             )
             ->exists();
 
         if ($hasActiveAssignments) {
             throw ValidationException::withMessages([
-                'employees' => ['This work time model is still assigned to employees.'],
+                'employees' => [__('This work time model is still assigned to employees.')],
             ])
                 ->errorBag('deleteWorkTimeModel');
         }
