@@ -55,6 +55,6 @@ class EmployeeWorkTimeModel extends FluxPivot
 
     public function workTimeModel(): BelongsTo
     {
-        return $this->belongsTo(WorkTimeModel::class);
+        return $this->belongsTo(WorkTimeModel::class)->withTrashed();
     }
 }
