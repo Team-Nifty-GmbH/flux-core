@@ -145,7 +145,7 @@ class EditorServiceProvider extends ServiceProvider
                 'Customer BIC' => '$model->contactBankConnection?->bic',
                 'Payment Target Days' => '$model->payment_target',
                 'Payment Discount Target' => '$model->payment_discount_target',
-                'Payment Discount Percent' => 'Number::percentage(bcmul($model->payment_discount_percent ?? 0, 100), precision: 2, locale: app()->getLocale())',
+                'Payment Discount Percent' => 'Number::percentage(bcmul($model->payment_discount_percent ?? 0, 100), precision: 2, locale: $model->addressInvoice->language)',
                 'Balance Due Discount' => 'format_money($model->balance_due_discount, $model->currency, $model->addressInvoice->language)',
             ],
             PaymentType::class
