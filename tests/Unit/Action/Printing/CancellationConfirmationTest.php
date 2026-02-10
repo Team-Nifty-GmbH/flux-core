@@ -76,6 +76,8 @@ test('can render cancellation confirmation html', function (): void {
         'cancellation_text' => '<p>Your subscription has been cancelled.</p>',
         'default_cancellation_notice_value' => 30,
         'default_cancellation_notice_unit' => 'days',
+        'default_minimum_duration_value' => 0,
+        'default_minimum_duration_unit' => 'months',
     ]);
 
     $result = Printing::make([
@@ -106,6 +108,8 @@ test('cancellation text variables are replaced', function (): void {
         'cancellation_text' => $cancellationText,
         'default_cancellation_notice_value' => 30,
         'default_cancellation_notice_unit' => 'days',
+        'default_minimum_duration_value' => 0,
+        'default_minimum_duration_unit' => 'months',
     ]);
 
     $schedule = Schedule::query()->create([
@@ -142,6 +146,8 @@ test('empty cancellation text renders without error', function (): void {
         'cancellation_text' => null,
         'default_cancellation_notice_value' => 0,
         'default_cancellation_notice_unit' => 'days',
+        'default_minimum_duration_value' => 0,
+        'default_minimum_duration_unit' => 'months',
     ]);
 
     $result = Printing::make([
