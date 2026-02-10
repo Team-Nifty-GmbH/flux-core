@@ -797,6 +797,8 @@ class Order extends Component
             'emailTemplateId' => data_get($this->schedule->parameters, 'emailTemplateId'),
             'cancellationNoticeValue' => data_get($this->schedule->parameters, 'cancellationNoticeValue'),
             'cancellationNoticeUnit' => data_get($this->schedule->parameters, 'cancellationNoticeUnit'),
+            'minimumDurationValue' => data_get($this->schedule->parameters, 'minimumDurationValue'),
+            'minimumDurationUnit' => data_get($this->schedule->parameters, 'minimumDurationUnit'),
         ];
 
         try {
@@ -835,7 +837,7 @@ class Order extends Component
                 $data['ends_at'] = now();
                 $data['is_active'] = false;
             } else {
-                $data['ends_at'] = $schedule->due_at;
+                $data['ends_at'] = $order->calculateSubscriptionEndDate();
             }
 
             $schedule = UpdateSchedule::make($data)

@@ -14,6 +14,8 @@ test('loads settings on mount', function (): void {
         'cancellation_text' => '<p>Test cancellation text</p>',
         'default_cancellation_notice_value' => 3,
         'default_cancellation_notice_unit' => 'months',
+        'default_minimum_duration_value' => 0,
+        'default_minimum_duration_unit' => 'months',
     ]);
 
     Livewire::test(SubscriptionSettings::class)
@@ -27,6 +29,8 @@ test('can save settings', function (): void {
         'cancellation_text' => null,
         'default_cancellation_notice_value' => 0,
         'default_cancellation_notice_unit' => 'days',
+        'default_minimum_duration_value' => 0,
+        'default_minimum_duration_unit' => 'months',
     ]);
 
     Livewire::test(SubscriptionSettings::class)
