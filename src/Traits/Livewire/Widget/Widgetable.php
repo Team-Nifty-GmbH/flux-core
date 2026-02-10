@@ -13,6 +13,11 @@ trait Widgetable
 
     abstract public static function dashboardComponent(): array|string;
 
+    public static function getCategory(): ?string
+    {
+        return null;
+    }
+
     public static function getLabel(): string
     {
         if (app()->runningInConsole()) {

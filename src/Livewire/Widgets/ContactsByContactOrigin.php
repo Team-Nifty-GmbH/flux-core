@@ -29,6 +29,11 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
 
     public bool $showTotals = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Contacts';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

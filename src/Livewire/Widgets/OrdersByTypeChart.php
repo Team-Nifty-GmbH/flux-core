@@ -24,6 +24,11 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
 {
     use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget, SupportsWidgetConfig, Widgetable;
 
+    public static function getCategory(): ?string
+    {
+        return 'Orders';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

@@ -9,6 +9,11 @@ class MyLeadWonLostRatio extends OverallLeadWonLostRatio
 {
     public ?int $userId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Leads';
+    }
+
     public function mount(): void
     {
         parent::mount();

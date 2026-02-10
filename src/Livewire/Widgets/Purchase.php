@@ -22,6 +22,11 @@ class Purchase extends ValueBox implements HasWidgetOptions
 
     public bool $shouldBePositive = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Orders';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

@@ -13,6 +13,11 @@ class MyOverdueTasks extends Component
 {
     use Widgetable;
 
+    public static function getCategory(): ?string
+    {
+        return 'Tasks';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

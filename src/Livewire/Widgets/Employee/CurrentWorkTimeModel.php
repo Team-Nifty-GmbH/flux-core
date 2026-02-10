@@ -14,6 +14,11 @@ class CurrentWorkTimeModel extends ValueBox
     #[Locked]
     public ?int $employeeId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Employees';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

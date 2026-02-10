@@ -26,6 +26,11 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
     #[Locked]
     public array $data = [];
 
+    public static function getCategory(): ?string
+    {
+        return 'Leads';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

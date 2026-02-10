@@ -30,6 +30,11 @@ class AmountByLedgerAccount extends CircleChart implements HasWidgetOptions
 
     public bool $showTotals = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Finance';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
