@@ -22,6 +22,7 @@ use Livewire\Attributes\Renderless;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use Throwable;
 
 class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
@@ -228,16 +229,27 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        // add invoice address email if an invoice is being sent
-        $address = in_array('invoice', $documents) && $item->contact->invoiceAddress
-            ? $item->contact->invoiceAddress
-            : $item->contact->mainAddress;
+        $printViews = $item->getPrintViews();
 
-        $to = $address->mail_addresses;
+        $invoiceDocs = array_filter(
+            $documents,
+            function (string $doc) use ($printViews) {
+                try {
+                    return resolve_static(data_get($printViews, $doc), 'isInvoice');
+                } catch (Throwable) {
+                    return false;
+                }
+            }
+        );
 
-        // add primary email address if more than just the invoice is added
-        if (array_diff($documents, ['invoice'])) {
-            $to[] = $item->contact->mainAddress->email_primary;
+        $address = $invoiceDocs
+            ? $item->resolveMailableInvoiceAddress()
+            : $item->contact?->mainAddress;
+
+        $to = $address?->mail_addresses ?? [];
+
+        if (array_diff($documents, $invoiceDocs)) {
+            $to[] = $item->contact?->mainAddress?->email_primary;
         }
 
         return array_values(array_unique(array_filter($to)));

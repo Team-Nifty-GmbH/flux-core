@@ -1142,6 +1142,28 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->whereNot('balance', 0);
     }
 
+    public function scopeWhereHasMailableInvoiceAddress(Builder $query): Builder
+    {
+        return $query
+            ->with(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                ->orWhereHas('contact', fn (Builder $query) => $query
+                    ->whereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                )
+            );
+    }
+
+    public function resolveMailableInvoiceAddress(): ?Address
+    {
+        return match (true) {
+            filled($this->addressInvoice?->email_primary) => $this->addressInvoice,
+            filled($this->contact?->invoiceAddress?->email_primary) => $this->contact->invoiceAddress,
+            default => $this->contact?->mainAddress,
+        };
+    }
+
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
