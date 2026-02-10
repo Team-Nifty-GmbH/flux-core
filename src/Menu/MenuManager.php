@@ -48,7 +48,7 @@ class MenuManager
             $this->resolved,
             function (array $value) use ($guard, $ignorePermissions) {
                 $routeName = data_get($value, 'route_name');
-                if ($routeName && ($when = $this->whenCallbacks[$routeName] ?? null) && ! $when()) {
+                if ($routeName && ($when = data_get($this->whenCallbacks, $routeName)) && ! $when()) {
                     return false;
                 }
 
