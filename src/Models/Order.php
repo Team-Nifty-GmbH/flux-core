@@ -1107,11 +1107,14 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ? ($schedule->ends_at ?? $nextRenewal)
             : $nextRenewal;
 
-        $endFromMinDuration = $minDurationValue > 0
-            ? Carbon::parse($this->order_date)->add($minDurationUnit, $minDurationValue)
-            : $now;
+        if ($minDurationValue > 0) {
+            $endFromMinDuration = Carbon::parse($this->order_date)
+                ->add($minDurationUnit, $minDurationValue);
 
-        return $endFromNotice->gt($endFromMinDuration) ? $endFromNotice : $endFromMinDuration;
+            return $endFromNotice->gt($endFromMinDuration) ? $endFromNotice : $endFromMinDuration;
+        }
+
+        return $endFromNotice;
     }
 
     public function scopePaid(Builder $query): Builder
