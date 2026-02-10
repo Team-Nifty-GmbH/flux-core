@@ -23,9 +23,13 @@ return new class() extends Migration
                 ->value('id');
 
             if ($defaultLanguageId) {
-                DB::table('users')->whereNull('language_id')->update(['language_id' => $defaultLanguageId]);
+                DB::table('users')
+                    ->whereNull('language_id')
+                    ->update(['language_id' => $defaultLanguageId]);
             } else {
-                DB::table('users')->whereNull('language_id')->delete();
+                DB::table('users')
+                    ->whereNull('language_id')
+                    ->delete();
             }
 
             Schema::table('users', function (Blueprint $table): void {
