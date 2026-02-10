@@ -1099,16 +1099,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         $minDurationValue = $parameters['minimumDurationValue'] ?? $settings->default_minimum_duration_value;
         $minDurationUnit = $parameters['minimumDurationUnit'] ?? $settings->default_minimum_duration_unit;
 
-        $nextRenewal = $schedule->due_at ?? now();
+        $now = now();
+        $nextRenewal = $schedule->due_at ?? $now;
         $cancellationDeadline = $nextRenewal->copy()->sub($noticeUnit, $noticeValue);
 
-        $endFromNotice = now()->gt($cancellationDeadline)
+        $endFromNotice = $now->gt($cancellationDeadline)
             ? ($schedule->ends_at ?? $nextRenewal)
             : $nextRenewal;
 
         $endFromMinDuration = $minDurationValue > 0
             ? Carbon::parse($this->order_date)->add($minDurationUnit, $minDurationValue)
-            : now();
+            : $now;
 
         return $endFromNotice->gt($endFromMinDuration) ? $endFromNotice : $endFromMinDuration;
     }

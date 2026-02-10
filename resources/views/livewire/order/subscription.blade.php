@@ -463,6 +463,7 @@
                         endFromNotice > endFromMinDuration
                             ? endFromNotice
                             : endFromMinDuration
+
                     return formatDate(effectiveEnd)
                 },
                 get isWithinNoticePeriod() {
