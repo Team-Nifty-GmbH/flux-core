@@ -61,7 +61,7 @@ if (! function_exists('exception_to_notifications')) {
 }
 
 if (! function_exists('cart')) {
-    function cart(): FluxErp\Models\Cart
+    function cart(): ?FluxErp\Models\Cart
     {
         return auth()
             ->user()
@@ -81,9 +81,11 @@ if (! function_exists('cart')) {
                 ->with(['cartItems', 'cartItems.product.coverMedia'])
                 ->withSum('cartItems', 'total')
                 ->first()
-            ?? FluxErp\Actions\Cart\CreateCart::make()
-                ->validate()
-                ->execute();
+            ?? (
+                resolve_static(FluxErp\Models\PriceList::class, 'default')
+                    ? FluxErp\Actions\Cart\CreateCart::make()->validate()->execute()
+                    : null
+            );
     }
 }
 

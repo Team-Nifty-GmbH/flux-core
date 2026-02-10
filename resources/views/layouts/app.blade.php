@@ -138,11 +138,13 @@
                                 </div>
                             @endauth
 
-                            @persist('layout.header.cart')
-                                @canAction(\FluxErp\Actions\Cart\CreateCart::class)
-                                    <livewire:cart.cart lazy />
-                                @endcanAction
-                            @endpersist
+                            @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
+                                @persist('layout.header.cart')
+                                    @canAction(\FluxErp\Actions\Cart\CreateCart::class)
+                                        <livewire:cart.cart lazy />
+                                    @endcanAction
+                                @endpersist
+                            @endif
 
                             @auth('web')
                                 @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
