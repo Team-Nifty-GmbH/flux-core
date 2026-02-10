@@ -16,16 +16,21 @@ return new class() extends Migration
 
     public function down(): void
     {
-        $defaultLanguageId = DB::table('languages')->value('id');
+        DB::transaction(function (): void {
+            $defaultLanguageId = DB::table('languages')
+                ->whereNull('deleted_at')
+                ->orderByDesc('is_default')
+                ->value('id');
 
-        if ($defaultLanguageId) {
-            DB::table('users')->whereNull('language_id')->update(['language_id' => $defaultLanguageId]);
-        } else {
-            DB::table('users')->whereNull('language_id')->delete();
-        }
+            if ($defaultLanguageId) {
+                DB::table('users')->whereNull('language_id')->update(['language_id' => $defaultLanguageId]);
+            } else {
+                DB::table('users')->whereNull('language_id')->delete();
+            }
 
-        Schema::table('users', function (Blueprint $table): void {
-            $table->foreignId('language_id')->nullable(false)->change();
+            Schema::table('users', function (Blueprint $table): void {
+                $table->foreignId('language_id')->nullable(false)->change();
+            });
         });
     }
 };
