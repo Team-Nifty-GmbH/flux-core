@@ -14,7 +14,7 @@ class UnassignedTickets extends MyTickets
 
     public static function getCategory(): ?string
     {
-        return 'Tasks';
+        return 'Tickets';
     }
 
     public static function dashboardComponent(): array|string

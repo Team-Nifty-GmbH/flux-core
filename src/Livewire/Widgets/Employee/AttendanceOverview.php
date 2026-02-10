@@ -30,7 +30,7 @@ class AttendanceOverview extends CircleChart
 
     public static function getCategory(): ?string
     {
-        return 'Employee';
+        return 'Employees';
     }
 
     public static function dashboardComponent(): array|string
