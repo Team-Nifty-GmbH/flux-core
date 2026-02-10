@@ -442,17 +442,15 @@
                                 break
                             case 'weeks':
                                 orderDate.setDate(
-                                    orderDate.getDate() + minDurationValue * 7
+                                    orderDate.getDate() + minDurationValue * 7,
                                 )
                                 break
                             case 'months':
-                                orderDate.setMonth(
-                                    orderDate.getMonth() + minDurationValue
-                                )
+                                orderDate.setMonth(orderDate.getMonth() + minDurationValue)
                                 break
                             case 'years':
                                 orderDate.setFullYear(
-                                    orderDate.getFullYear() + minDurationValue
+                                    orderDate.getFullYear() + minDurationValue,
                                 )
                                 break
                         }
