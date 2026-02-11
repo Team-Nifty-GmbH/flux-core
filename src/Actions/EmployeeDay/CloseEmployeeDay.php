@@ -113,8 +113,9 @@ class CloseEmployeeDay extends FluxAction
                 }
 
                 $hours = $absenceRequest->calculateWorkHoursAffected($date);
+                $usedAbsenceRequests->push($absenceRequest);
+
                 if (bccomp($hours, 0) === 1) {
-                    $usedAbsenceRequests->push($absenceRequest);
                     $data['sick_hours_used'] = bcadd($data['sick_hours_used'], $hours);
                 }
             } elseif (data_get($absenceRequest, 'absenceType.affects_vacation')) {
@@ -131,20 +132,23 @@ class CloseEmployeeDay extends FluxAction
                 }
 
                 $hours = $absenceRequest->calculateWorkHoursAffected($date);
+                $usedAbsenceRequests->push($absenceRequest);
+
                 if (bccomp($hours, 0) === 1) {
-                    $usedAbsenceRequests->push($absenceRequest);
                     $data['vacation_hours_used'] = bcadd($data['vacation_hours_used'], $hours);
                 }
             } elseif (data_get($absenceRequest, 'absenceType.affects_overtime')) {
                 $hours = $absenceRequest->calculateWorkHoursAffected($date);
+                $usedAbsenceRequests->push($absenceRequest);
+
                 if (bccomp($hours, 0) === 1) {
-                    $usedAbsenceRequests->push($absenceRequest);
                     $data['overtime_used'] = bcadd($data['overtime_used'], $hours);
                 }
             } else {
                 $hours = $absenceRequest->calculateWorkHoursAffected($date);
+                $usedAbsenceRequests->push($absenceRequest);
+
                 if (bccomp($hours, 0) === 1) {
-                    $usedAbsenceRequests->push($absenceRequest);
                     $data['plus_minus_absence_hours'] = bcadd($data['plus_minus_absence_hours'], $hours);
                 }
             }

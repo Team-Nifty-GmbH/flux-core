@@ -271,7 +271,7 @@ class AttendanceOverviewRow extends Component
                 }
 
                 return [
-                    $day => array_merge($dayData->toArray(), $data),
+                    $day => array_merge($data, $dayData->toArray()),
                 ];
             })
             ->toArray();
