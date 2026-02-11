@@ -196,7 +196,7 @@ trait CreatesDocuments
         $items = $items instanceof Collection ? $items : collect([$items]);
 
         if ($items->isEmpty()) {
-            return null;
+            return;
         }
 
         $mailMessages = [];
