@@ -670,7 +670,7 @@ if (! function_exists('render_editor_blade')) {
 
                 return '{{ ' . $value . ' }}';
             },
-            $html
+            html_entity_decode($html)
         );
 
         return new Illuminate\Support\HtmlString(Illuminate\Support\Facades\Blade::render($converted, $data));
