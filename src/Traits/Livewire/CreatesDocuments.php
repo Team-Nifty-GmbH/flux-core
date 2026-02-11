@@ -8,7 +8,6 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Jobs\CreateDocumentsJob;
 use FluxErp\Livewire\Forms\PrintJobForm;
 use FluxErp\Models\Language;
-use FluxErp\Models\Media;
 use FluxErp\Models\Printer;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -19,7 +18,6 @@ use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -51,7 +49,7 @@ trait CreatesDocuments
         'preview' => [],
     ];
 
-    abstract public function createDocuments(): null|MediaStream|Media;
+    abstract public function createDocuments(): void;
 
     abstract protected function getPrintLayouts(): array;
 
@@ -194,7 +192,7 @@ trait CreatesDocuments
     protected function createDocumentFromItems(
         Collection|OffersPrinting $items,
         ?string $model = null
-    ): null|MediaStream|Media {
+    ): void {
         $items = $items instanceof Collection ? $items : collect([$items]);
 
         if ($items->isEmpty()) {
@@ -214,7 +212,7 @@ trait CreatesDocuments
             $this->collectMailMessages($item, $mailMessages, $defaultTemplateIds);
 
             $queueLayouts = collect(['force', 'print', 'download', 'preview'])
-                ->flatMap(fn (string $key) => data_get($this->selectedPrintLayouts, $key, []))
+                ->flatMap(fn (string $key) => data_get($this->selectedPrintLayouts, $key) ?? [])
                 ->intersect(array_keys($item->resolvePrintViews()))
                 ->unique()
                 ->values()
@@ -232,14 +230,14 @@ trait CreatesDocuments
         $this->dispatchMailMessages($mailMessages, $defaultTemplateIds);
 
         if ($jobItems) {
-            $job = new CreateDocumentsJob(
-                $jobItems,
-                $this->selectedPrintLayouts,
-                auth()->user()->getMorphClass() . ':' . auth()->id(),
-                $this->printJobForm->printer_id,
-                $this->printJobForm->size,
-                $this->printJobForm->quantity,
-            );
+            $job = app(CreateDocumentsJob::class, [
+                'items' => $jobItems,
+                'selectedPrintLayouts' => $this->selectedPrintLayouts,
+                'userMorph' => auth()->user()->getMorphClass() . ':' . auth()->id(),
+                'printerId' => $this->printJobForm->printer_id,
+                'printerSize' => $this->printJobForm->size,
+                'printerQuantity' => $this->printJobForm->quantity,
+            ]);
 
             if ($items->count() > 1) {
                 dispatch($job);
@@ -252,14 +250,12 @@ trait CreatesDocuments
                     ->send();
             } else {
                 try {
-                    dispatch_sync($job->throwOnError());
+                    dispatch_sync($job->throwException());
                 } catch (ValidationException|UnauthorizedException $e) {
                     exception_to_notifications($e, $this);
                 }
             }
         }
-
-        return null;
     }
 
     protected function collectMailMessages(
@@ -267,7 +263,7 @@ trait CreatesDocuments
         array &$mailMessages,
         array &$defaultTemplateIds
     ): void {
-        $emailLayouts = data_get($this->selectedPrintLayouts, 'email', []);
+        $emailLayouts = data_get($this->selectedPrintLayouts, 'email') ?? [];
         $emailDocuments = collect($emailLayouts)
             ->intersect(array_keys($item->resolvePrintViews()))
             ->unique()
@@ -322,6 +318,7 @@ trait CreatesDocuments
         $mailMessage['language_id'] = $this->getPreferredLanguageId($item);
         $mailMessage['group_key'] = $this->getMailGroupKey($item);
         $mailMessage['group_label'] = $this->getMailGroupLabel($item);
+
         if (method_exists($this, 'getDefaultTemplateId')) {
             $emailTemplateId = $this->getDefaultTemplateId($item);
             $mailMessage['default_template_id'] = $emailTemplateId;

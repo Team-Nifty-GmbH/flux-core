@@ -8,7 +8,6 @@ use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\DataTables\OrderList;
 use FluxErp\Models\Language;
-use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder as PaymentReminderModel;
@@ -17,7 +16,6 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -53,7 +51,7 @@ class PaymentReminder extends OrderList
         ];
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
         $orders = $this->getSelectedModels();
 
@@ -62,7 +60,7 @@ class PaymentReminder extends OrderList
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return null;
+            return;
         }
 
         $ordersWithEmail = $orders->filter(
@@ -94,12 +92,10 @@ class PaymentReminder extends OrderList
             }
         }
 
-        $response = $this->createDocumentFromItems($documents);
+        $this->createDocumentFromItems($documents);
 
         $this->loadData();
         $this->reset('selected');
-
-        return $response;
     }
 
     public function markAsPaid(): void

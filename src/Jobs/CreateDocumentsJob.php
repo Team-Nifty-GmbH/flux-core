@@ -23,7 +23,7 @@ class CreateDocumentsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    protected bool $throwOnError = false;
+    protected bool $throwException = false;
 
     public function __construct(
         protected array $items,
@@ -34,9 +34,9 @@ class CreateDocumentsJob implements ShouldQueue
         protected int $printerQuantity = 1,
     ) {}
 
-    public function throwOnError(bool $throw = true): static
+    public function throwException(bool $throw = true): static
     {
-        $this->throwOnError = $throw;
+        $this->throwException = $throw;
 
         return $this;
     }
@@ -68,10 +68,10 @@ class CreateDocumentsJob implements ShouldQueue
                     continue;
                 }
 
-                $isForce = in_array($layout, data_get($this->selectedPrintLayouts, 'force', []));
-                $isDownload = in_array($layout, data_get($this->selectedPrintLayouts, 'download', []));
-                $isPrint = in_array($layout, data_get($this->selectedPrintLayouts, 'print', []));
-                $isPreview = in_array($layout, data_get($this->selectedPrintLayouts, 'preview', []));
+                $isForce = in_array($layout, data_get($this->selectedPrintLayouts, 'force') ?? []);
+                $isDownload = in_array($layout, data_get($this->selectedPrintLayouts, 'download') ?? []);
+                $isPrint = in_array($layout, data_get($this->selectedPrintLayouts, 'print') ?? []);
+                $isPreview = in_array($layout, data_get($this->selectedPrintLayouts, 'preview') ?? []);
 
                 if ($isPreview) {
                     try {
@@ -90,7 +90,7 @@ class CreateDocumentsJob implements ShouldQueue
                             'file_name' => Str::finish($file->getFileName(), '.pdf'),
                         ];
                     } catch (Throwable $e) {
-                        if ($this->throwOnError) {
+                        if ($this->throwException) {
                             throw $e;
                         }
 
@@ -115,11 +115,11 @@ class CreateDocumentsJob implements ShouldQueue
                             ->validate()
                             ->execute();
 
-                        if ($file->shouldStore()) {
-                            $media = $file->attachToModel($item);
-                        }
+                        $media = $file->shouldStore() || $isDownload || $isPrint
+                            ? $file->attachToModel($item)
+                            : null;
                     } catch (Throwable $e) {
-                        if ($this->throwOnError) {
+                        if ($this->throwException) {
                             throw $e;
                         }
 

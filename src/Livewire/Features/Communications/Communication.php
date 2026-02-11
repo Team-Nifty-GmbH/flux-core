@@ -15,7 +15,6 @@ use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Communication as CommunicationModel;
-use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Model\Communicatable;
@@ -28,7 +27,6 @@ use Laravel\Scout\Searchable;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -149,16 +147,14 @@ abstract class Communication extends CommunicationList
     }
 
     #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        $response = $this->createDocumentFromItems(
+        $this->createDocumentFromItems(
             resolve_static(CommunicationModel::class, 'query')
                 ->whereKey($this->communication->id)
                 ->first()
         );
         $this->loadData();
-
-        return $response;
     }
 
     #[Renderless]

@@ -31,7 +31,6 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Discount;
 use FluxErp\Models\Language;
-use FluxErp\Models\Media;
 use FluxErp\Models\Order as OrderModel;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
@@ -51,7 +50,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -163,14 +161,14 @@ class Order extends Component
         );
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
         $hadInvoiceNumber = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
             ->whereNotNull('invoice_number')
             ->exists();
 
-        $createDocuments = $this->createDocumentFromItems(
+        $this->createDocumentFromItems(
             resolve_static(OrderModel::class, 'query')
                 ->whereKey($this->order->id)
                 ->first()
@@ -204,8 +202,6 @@ class Order extends Component
                 ->cancel(__('Cancel'))
                 ->send();
         }
-
-        return $createDocuments;
     }
 
     #[Renderless]
