@@ -450,6 +450,52 @@ const calendar = () => {
                 eventsSet: (eventsSetInfo) => {
                     this.dispatchCalendarEvents('eventsSet', eventsSetInfo);
                 },
+                datesSet: (info) => {
+                    const titleEl =
+                        calendarEl.querySelector('.fc-toolbar-title');
+                    if (titleEl) {
+                        const getISOWeek = (date) => {
+                            const d = new Date(
+                                Date.UTC(
+                                    date.getFullYear(),
+                                    date.getMonth(),
+                                    date.getDate(),
+                                ),
+                            );
+                            const dayNum = d.getUTCDay() || 7;
+                            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+                            const yearStart = new Date(
+                                Date.UTC(d.getUTCFullYear(), 0, 1),
+                            );
+                            return Math.ceil(
+                                ((d - yearStart) / 86400000 + 1) / 7,
+                            );
+                        };
+
+                        const start = info.view.currentStart;
+                        const end = new Date(info.view.currentEnd);
+                        end.setDate(end.getDate() - 1);
+
+                        const startWeek = getISOWeek(start);
+                        const endWeek = getISOWeek(end);
+
+                        const cw = this.config.calendarWeekAbbreviation || 'CW';
+                        const kwText =
+                            startWeek === endWeek
+                                ? `(${cw} ${startWeek})`
+                                : `(${cw} ${startWeek}\u2013${endWeek})`;
+
+                        titleEl.textContent =
+                            titleEl.textContent.replace(
+                                new RegExp(`\\s*\\(${cw}.*?\\)`),
+                                '',
+                            ) +
+                            ' ' +
+                            kwText;
+                    }
+
+                    this.dispatchCalendarEvents('datesSet', info);
+                },
                 eventContent(info) {
                     let eventContent = document.createElement('div');
                     eventContent.className =
