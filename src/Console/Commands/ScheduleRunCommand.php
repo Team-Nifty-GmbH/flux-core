@@ -94,6 +94,14 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 && $repeatable->due_at->lessThan(now())
             ) {
                 $overdueEvents[] = $event;
+
+                if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
+                    $parts = explode(' ', $event->expression);
+                    $nextRunDate = $nextRunDate->copy()->addMonthNoOverflow()->endOfMonth()
+                        ->setTime((int) $parts[1], (int) $parts[0]);
+                } else {
+                    $nextRunDate = (new CronExpression($event->expression))->getNextRunDate($nextRunDate);
+                }
             }
 
             $repeatable->cron_expression = $event->expression;
