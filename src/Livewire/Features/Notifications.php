@@ -41,9 +41,7 @@ class Notifications extends Component
         JS);
 
         if (data_get($accept, 'url')) {
-            $this->redirect(data_get($accept, 'url'), navigate: data_get($accept, 'download') ? false : true);
-
-            return;
+            $this->redirect(data_get($accept, 'url'), navigate: ! data_get($accept, 'download'));
         }
     }
 
@@ -108,9 +106,7 @@ class Notifications extends Component
             ->whereKey(data_get($notify, 'id'))
             ->firstOrNew();
 
-        if ($notification->exists) {
-            $notification->markAsRead();
-        } else {
+        if (! $notification->exists) {
             $notification->data = $notify;
             $notification->created_at = now();
         }
