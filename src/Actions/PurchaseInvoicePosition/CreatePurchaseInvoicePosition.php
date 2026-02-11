@@ -25,4 +25,21 @@ class CreatePurchaseInvoicePosition extends FluxAction
 
         return $purchaseInvoicePosition->fresh();
     }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->getData('unit_price')
+            && $this->getData('total_price')
+            && $this->getData('amount')
+        ) {
+            data_set(
+                $this->data,
+                'unit_price',
+                bcdiv(
+                    $this->getData('total_price'),
+                    $this->getData('amount')
+                )
+            );
+        }
+    }
 }
