@@ -109,9 +109,7 @@ class Notifications extends Component
         if (! $notification->exists) {
             $notification->data = $notify;
             $notification->created_at = now();
-        }
-
-        if (data_get($notify, 'markAsRead')) {
+        } elseif (data_get($notify, 'markAsRead')) {
             $notification->markAsRead();
         }
 
