@@ -456,9 +456,10 @@ const calendar = () => {
                     if (titleEl) {
                         const start = dayjs(info.view.currentStart);
                         const currentEnd = dayjs(info.view.currentEnd);
-                        const end = currentEnd.diff(start, 'day') > 1
-                            ? currentEnd.subtract(1, 'day')
-                            : start;
+                        const end =
+                            currentEnd.diff(start, 'day') > 1
+                                ? currentEnd.subtract(1, 'day')
+                                : start;
 
                         const startWeek = start.isoWeek();
                         const endWeek = end.isoWeek();
