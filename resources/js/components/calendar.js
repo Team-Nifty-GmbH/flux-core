@@ -297,11 +297,14 @@ const calendar = () => {
             this.calendar.getEventSourceById(calendar.id)?.remove();
         },
         init() {
-            this.$wire.getCalendars().then((calendars) => {
-                this.calendars = calendars;
-            });
-            this.$wire.getConfig().then((config) => {
-                this.config = config;
+            Promise.all([
+                this.$wire.getCalendars().then((calendars) => {
+                    this.calendars = calendars;
+                }),
+                this.$wire.getConfig().then((config) => {
+                    this.config = config;
+                }),
+            ]).then(() => {
                 this.initCalendar();
             });
         },
@@ -532,7 +535,7 @@ const calendar = () => {
                 },
             };
 
-            const { activeCalendars, ...filteredConfig } = this.config;
+            const { activeCalendars, showCalendars, ...filteredConfig } = this.config;
 
             this.calendar = new Calendar(calendarEl, {
                 ...defaultConfig,
