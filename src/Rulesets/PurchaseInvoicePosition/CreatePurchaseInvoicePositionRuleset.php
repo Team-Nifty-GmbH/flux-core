@@ -49,7 +49,7 @@ class CreatePurchaseInvoicePositionRuleset extends FluxRuleset
                 app(Numeric::class),
             ],
             'unit_price' => [
-                'nullable',
+                'required',
                 app(Numeric::class),
             ],
             'total_price' => [

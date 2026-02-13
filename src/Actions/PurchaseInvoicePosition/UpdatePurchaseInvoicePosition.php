@@ -44,14 +44,14 @@ class UpdatePurchaseInvoicePosition extends FluxAction
                 $totalPrice = $this->getData('total_price') ?? $position->total_price;
                 $amount = $this->getData('amount') ?? $position->amount;
 
-                if (bccomp($amount, 0) !== 0) {
+                if (is_numeric($totalPrice)
+                    && is_numeric($amount)
+                    && bccomp($amount, 0) !== 0
+                ) {
                     data_set(
                         $this->data,
                         'unit_price',
-                        bcdiv(
-                            $totalPrice,
-                            $amount
-                        )
+                        bcdiv($totalPrice, $amount)
                     );
                 }
             }
