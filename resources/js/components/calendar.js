@@ -454,32 +454,17 @@ const calendar = () => {
                     const titleEl =
                         calendarEl.querySelector('.fc-toolbar-title');
                     if (titleEl) {
-                        const getISOWeek = (date) => {
-                            const d = new Date(
-                                Date.UTC(
-                                    date.getFullYear(),
-                                    date.getMonth(),
-                                    date.getDate(),
-                                ),
-                            );
-                            const dayNum = d.getUTCDay() || 7;
-                            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-                            const yearStart = new Date(
-                                Date.UTC(d.getUTCFullYear(), 0, 1),
-                            );
-                            return Math.ceil(
-                                ((d - yearStart) / 86400000 + 1) / 7,
-                            );
-                        };
+                        const start = dayjs(info.view.currentStart);
+                        const end = dayjs(info.view.currentEnd).subtract(
+                            1,
+                            'day',
+                        );
 
-                        const start = info.view.currentStart;
-                        const end = new Date(info.view.currentEnd);
-                        end.setDate(end.getDate() - 1);
+                        const startWeek = start.isoWeek();
+                        const endWeek = end.isoWeek();
 
-                        const startWeek = getISOWeek(start);
-                        const endWeek = getISOWeek(end);
-
-                        const cw = this.config.calendarWeekAbbreviation || 'CW';
+                        const cw =
+                            this.config.calendarWeekAbbreviation || 'CW';
                         const kwText =
                             startWeek === endWeek
                                 ? `(${cw} ${startWeek})`

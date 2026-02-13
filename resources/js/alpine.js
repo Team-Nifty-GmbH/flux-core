@@ -26,8 +26,10 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import isoWeek from 'dayjs/plugin/isoWeek';
 
 dayjs.extend(utc);
+dayjs.extend(isoWeek);
 
 window.dayjs = dayjs;
 window.calendar = calendar;
