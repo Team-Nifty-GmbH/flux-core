@@ -275,6 +275,7 @@ class Calendar extends Component
                             'center' => 'timeGridDay,timeGridWeek,dayGridMonth',
                         ],
                         'nowIndicator' => true,
+                        'calendarWeekAbbreviation' => __('CW'),
                         'buttonText' => [
                             'today' => __('Today'),
                             'month' => __('Month'),

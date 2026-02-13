@@ -453,6 +453,37 @@ const calendar = () => {
                 eventsSet: (eventsSetInfo) => {
                     this.dispatchCalendarEvents('eventsSet', eventsSetInfo);
                 },
+                datesSet: (info) => {
+                    const titleEl =
+                        calendarEl.querySelector('.fc-toolbar-title');
+                    if (titleEl) {
+                        const start = dayjs(info.view.currentStart);
+                        const currentEnd = dayjs(info.view.currentEnd);
+                        const end =
+                            currentEnd.diff(start, 'day') > 1
+                                ? currentEnd.subtract(1, 'day')
+                                : start;
+
+                        const startWeek = start.isoWeek();
+                        const endWeek = end.isoWeek();
+
+                        const cw = this.config.calendarWeekAbbreviation || 'CW';
+                        const cwText =
+                            startWeek === endWeek
+                                ? `(${cw} ${startWeek})`
+                                : `(${cw} ${startWeek}\u2013${endWeek})`;
+
+                        titleEl.textContent =
+                            titleEl.textContent.replace(
+                                new RegExp(`\\s*\\(${cw}.*?\\)`),
+                                '',
+                            ) +
+                            ' ' +
+                            cwText;
+                    }
+
+                    this.dispatchCalendarEvents('datesSet', info);
+                },
                 eventContent(info) {
                     let eventContent = document.createElement('div');
                     eventContent.className =
