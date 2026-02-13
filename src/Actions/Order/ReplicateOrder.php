@@ -188,6 +188,7 @@ class ReplicateOrder extends FluxAction
                 $orderPosition['original_amount'],
                 $orderPosition['total_net_price'],
                 $orderPosition['total_gross_price'],
+                $orderPosition['vat_rate_id'],
             );
 
             if (! data_get($orderPosition, 'is_free_text')) {

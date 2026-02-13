@@ -38,7 +38,7 @@ class UpdateOrderPosition extends FluxAction
 
         $order = resolve_static(Order::class, 'query')
             ->whereKey(data_get($this->data, 'order_id', $orderPosition->order_id))
-            ->select(['id', 'tenant_id', 'price_list_id'])
+            ->select(['id', 'tenant_id', 'price_list_id', 'vat_rate_id'])
             ->first();
 
         $this->data['tenant_id'] ??= $order->tenant_id;
@@ -56,7 +56,7 @@ class UpdateOrderPosition extends FluxAction
                 ->first();
 
             $orderPosition->vat_rate_id = $orderPosition->isDirty('vat_rate_id') ?
-                $orderPosition->vat_rate_id : $product->vat_rate_id;
+                $orderPosition->vat_rate_id : ($order->vat_rate_id ?? $product->vat_rate_id);
             $orderPosition->name = $orderPosition->isDirty('name') ?
                 $orderPosition->name : $product->name;
             $orderPosition->description = $orderPosition->isDirty('description') ?
