@@ -535,7 +535,8 @@ const calendar = () => {
                 },
             };
 
-            const { activeCalendars, showCalendars, ...filteredConfig } = this.config;
+            const { activeCalendars, showCalendars, ...filteredConfig } =
+                this.config;
 
             this.calendar = new Calendar(calendarEl, {
                 ...defaultConfig,
