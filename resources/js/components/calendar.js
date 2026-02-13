@@ -463,9 +463,8 @@ const calendar = () => {
                         const startWeek = start.isoWeek();
                         const endWeek = end.isoWeek();
 
-                        const cw =
-                            this.config.calendarWeekAbbreviation || 'CW';
-                        const kwText =
+                        const cw = this.config.calendarWeekAbbreviation || 'CW';
+                        const cwText =
                             startWeek === endWeek
                                 ? `(${cw} ${startWeek})`
                                 : `(${cw} ${startWeek}\u2013${endWeek})`;
@@ -476,7 +475,7 @@ const calendar = () => {
                                 '',
                             ) +
                             ' ' +
-                            kwText;
+                            cwText;
                     }
 
                     this.dispatchCalendarEvents('datesSet', info);
