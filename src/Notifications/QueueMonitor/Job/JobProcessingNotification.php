@@ -32,6 +32,7 @@ class JobProcessingNotification extends Notification implements HasToastNotifica
             )
             ->persistent()
             ->progress($this->model->jobBatch?->progress ?? $this->model->progress)
+            ->markAsRead()
             ->attributes([
                 'state' => $this->model->state,
             ]);

@@ -109,6 +109,8 @@ class Notifications extends Component
         if (! $notification->exists) {
             $notification->data = $notify;
             $notification->created_at = now();
+        } elseif (data_get($notify, 'markAsRead')) {
+            $notification->markAsRead();
         }
 
         $notification->toast($this)

@@ -30,6 +30,7 @@ class JobStartedNotification extends Notification implements HasToastNotificatio
             ->description($this->model->message)
             ->timeout(0)
             ->progress($this->model->jobBatch?->progress ?? $this->model->progress)
+            ->markAsRead()
             ->attributes([
                 'state' => $this->model->state,
             ]);
