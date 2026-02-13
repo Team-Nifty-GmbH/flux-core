@@ -115,9 +115,16 @@ class CreateDocumentsJob implements ShouldQueue
                             ->validate()
                             ->execute();
 
-                        $media = $file->shouldStore() || $isDownload || $isPrint
-                            ? $file->attachToModel($item)
-                            : null;
+                        if ($file->shouldStore() || $isPrint) {
+                            $media = $file->attachToModel($item);
+                        }
+
+                        if (! $media && $isDownload) {
+                            $previewFiles[] = [
+                                'output' => $file->pdf->output(),
+                                'file_name' => Str::finish($file->getFileName(), '.pdf'),
+                            ];
+                        }
                     } catch (Throwable $e) {
                         if ($this->throwException) {
                             throw $e;
@@ -129,15 +136,11 @@ class CreateDocumentsJob implements ShouldQueue
                     }
                 }
 
-                if (! $media) {
-                    continue;
-                }
-
-                if ($isDownload && $media->getKey()) {
+                if ($isDownload && $media && $media->getKey()) {
                     $downloadFiles[] = $media;
                 }
 
-                if ($isPrint && $media->getKey()) {
+                if ($isPrint && $media && $media->getKey()) {
                     $printMediaIds[] = $media->getKey();
                 }
             }
@@ -155,7 +158,7 @@ class CreateDocumentsJob implements ShouldQueue
                         ->validate()
                         ->execute();
                 } catch (Throwable $e) {
-                    if ($this->throwOnError) {
+                    if ($this->throwException) {
                         throw $e;
                     }
 
@@ -171,67 +174,35 @@ class CreateDocumentsJob implements ShouldQueue
 
         $filePath = null;
 
-        if ($previewFiles) {
-            $filePath = $this->storePreviewDownloads($previewFiles);
-        } elseif ($downloadFiles) {
-            $filePath = $this->storeDownloads($downloadFiles);
+        if ($previewFiles || $downloadFiles) {
+            $filePath = $this->storeFiles($previewFiles, $downloadFiles);
         }
 
-        $totalCount = count($previewFiles) ?: count($downloadFiles) ?: count($this->items);
+        $totalCount = (count($previewFiles) + count($downloadFiles)) ?: count($this->items);
 
         $user->notify(DocumentsReady::make($totalCount, $filePath));
     }
 
     /**
-     * @param  array<array{output: string, file_name: string}>  $files
+     * @param  array<array{output: string, file_name: string}>  $previewFiles
+     * @param  Media[]  $downloadFiles
      */
-    protected function storePreviewDownloads(array $files): string
+    protected function storeFiles(array $previewFiles, array $downloadFiles): string
     {
         $folder = 'documents/' . str_replace(':', '_', $this->userMorph) . '/';
         $disk = Storage::disk();
+        $totalFiles = count($previewFiles) + count($downloadFiles);
 
-        if (count($files) === 1) {
-            $filePath = $folder . $files[0]['file_name'];
-            $disk->put($filePath, $files[0]['output']);
+        if ($totalFiles === 1) {
+            if ($previewFiles) {
+                $filePath = $folder . $previewFiles[0]['file_name'];
+                $disk->put($filePath, $previewFiles[0]['output']);
 
-            return $filePath;
-        }
+                return $filePath;
+            }
 
-        $zipName = __('Preview') . '_' . now()->toDateString() . '.zip';
-        $zipPath = $folder . str_replace(['<', '>', ':', '"', '/', '\\', '|', '?', '*'], '_', $zipName);
-        $tmpZip = tempnam(sys_get_temp_dir(), 'flux-preview-') . '.zip';
-
-        $zip = new ZipArchive();
-
-        if ($zip->open($tmpZip, ZipArchive::CREATE) !== true) {
-            throw new RuntimeException('Failed to create ZIP archive: ' . $tmpZip);
-        }
-
-        foreach ($files as $file) {
-            $zip->addFromString($file['file_name'], $file['output']);
-        }
-
-        $zip->close();
-
-        $disk->put($zipPath, file_get_contents($tmpZip));
-        unlink($tmpZip);
-
-        return $zipPath;
-    }
-
-    /**
-     * @param  Media[]  $files
-     */
-    protected function storeDownloads(array $files): string
-    {
-        $folder = 'documents/' . str_replace(':', '_', $this->userMorph) . '/';
-        $disk = Storage::disk();
-
-        if (count($files) === 1) {
-            $media = $files[0];
-            $fileName = Str::finish($media->file_name, '.pdf');
-            $filePath = $folder . $fileName;
-
+            $media = $downloadFiles[0];
+            $filePath = $folder . Str::finish($media->file_name, '.pdf');
             $disk->put($filePath, file_get_contents($media->getPath()));
 
             return $filePath;
@@ -247,7 +218,11 @@ class CreateDocumentsJob implements ShouldQueue
             throw new RuntimeException('Failed to create ZIP archive: ' . $tmpZip);
         }
 
-        foreach ($files as $media) {
+        foreach ($previewFiles as $file) {
+            $zip->addFromString($file['file_name'], $file['output']);
+        }
+
+        foreach ($downloadFiles as $media) {
             $zip->addFile($media->getPath(), $media->file_name);
         }
 

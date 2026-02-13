@@ -322,6 +322,7 @@ trait CreatesDocuments
         if (method_exists($this, 'getDefaultTemplateId')) {
             $emailTemplateId = $this->getDefaultTemplateId($item);
             $mailMessage['default_template_id'] = $emailTemplateId;
+
             if ($emailTemplateId !== null) {
                 $defaultTemplateIds[] = $emailTemplateId;
             }
