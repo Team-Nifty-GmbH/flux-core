@@ -66,12 +66,6 @@ abstract class Chart extends Component
 
     abstract public function calculateChart(): void;
 
-    #[Renderless]
-    public function getWidgetOptions(): array
-    {
-        return $this instanceof HasWidgetOptions ? $this->options() : [];
-    }
-
     public static function getDefaultHeight(): int
     {
         return 2;
@@ -112,6 +106,12 @@ abstract class Chart extends Component
     public function rendering(): void
     {
         $this->options ??= $this->getOptions();
+    }
+
+    #[Renderless]
+    public function getWidgetOptions(): array
+    {
+        return $this instanceof HasWidgetOptions ? $this->options() : [];
     }
 
     #[Renderless]
