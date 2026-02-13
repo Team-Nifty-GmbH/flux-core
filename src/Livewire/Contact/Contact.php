@@ -7,7 +7,6 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Contact as ContactModel;
-use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -19,7 +18,6 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -72,9 +70,9 @@ class Contact extends Component
         $this->contact->fill(resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->first());
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        return $this->createDocumentFromItems(
+        $this->createDocumentFromItems(
             resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->firstOrFail(),
         );
     }

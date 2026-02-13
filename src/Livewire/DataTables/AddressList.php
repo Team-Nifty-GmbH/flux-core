@@ -8,7 +8,6 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Models\Address;
-use FluxErp\Models\Media;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
@@ -17,7 +16,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -118,13 +116,11 @@ class AddressList extends BaseDataTable
     }
 
     #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->createDocumentFromItems($this->getSelectedModels());
         $this->loadData();
         $this->reset('selected');
-
-        return $response;
     }
 
     #[Renderless]

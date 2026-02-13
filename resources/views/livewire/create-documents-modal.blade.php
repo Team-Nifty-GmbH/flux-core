@@ -37,10 +37,12 @@
 <x-modal
     id="create-documents-{{ strtolower($this->getId()) }}"
     :title="__('Create Documents')"
-    size="5xl"
+    size="7xl"
 >
     <div class="w-full overflow-hidden overflow-x-auto">
-        <div class="grid w-full grid-cols-4 gap-4 text-left text-sm">
+        <div
+            class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 text-left text-sm"
+        >
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                 @if ($printers ?? false)
                     <div
@@ -61,6 +63,14 @@
             >
                 {{ __('Download') }}
             </div>
+            @if ($supportsDocumentPreview)
+                <div
+                    class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                >
+                    {{ __('Preview') }}
+                </div>
+            @endif
+
             <div
                 class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
@@ -69,7 +79,9 @@
         </div>
         <div class="w-full divide-y divide-slate-300 dark:divide-slate-700">
             <template x-for="printLayout in $wire.printLayouts">
-                <div class="grid w-full grid-cols-4 gap-4 py-2">
+                <div
+                    class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 py-2"
+                >
                     @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                         @if ($printers ?? false)
                             <div
@@ -117,6 +129,23 @@
                             x-text="printLayout.label"
                         ></span>
                     </div>
+                    @if ($supportsDocumentPreview)
+                        <div
+                            class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
+                        >
+                            <x-checkbox
+                                wire:model="selectedPrintLayouts.preview"
+                                x-bind:value="printLayout.layout"
+                                x-bind:checked="$wire.forcedPrintLayouts.preview.includes(printLayout.layout)"
+                                x-bind:disabled="$wire.forcedPrintLayouts.preview.includes(printLayout.layout)"
+                            />
+                            <span
+                                class="truncate"
+                                x-text="printLayout.label"
+                            ></span>
+                        </div>
+                    @endif
+
                     <div
                         class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                     >

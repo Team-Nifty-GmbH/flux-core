@@ -8,7 +8,6 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
-use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
@@ -19,7 +18,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use Throwable;
@@ -94,13 +92,11 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     }
 
     #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->createDocumentFromItems($this->getSelectedModels());
         $this->loadData();
         $this->reset('selected');
-
-        return $response;
     }
 
     #[Renderless]
@@ -253,6 +249,11 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         }
 
         return array_values(array_unique(array_filter($to)));
+    }
+
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
     }
 
     protected function getViewData(): array
