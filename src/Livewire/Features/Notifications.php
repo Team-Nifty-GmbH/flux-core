@@ -111,6 +111,10 @@ class Notifications extends Component
             $notification->created_at = now();
         }
 
+        if (data_get($notify, 'markAsRead')) {
+            $notification->markAsRead();
+        }
+
         $notification->toast($this)
             ->id(data_get($notify, 'contextId'))
             ->send();

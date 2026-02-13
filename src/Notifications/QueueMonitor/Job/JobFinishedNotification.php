@@ -47,6 +47,7 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
             ->accept(unserialize($this->model->accept) ?: null)
             ->reject(unserialize($this->model->reject) ?: null)
             ->progress($this->model->jobBatch?->progress ?? $this->model->progress)
+            ->markAsRead()
             ->attributes([
                 'state' => $this->model->state,
             ]);
