@@ -160,6 +160,19 @@ class Tenants extends TenantList
         $this->forceRender();
     }
 
+    #[Renderless]
+    public function openPreview(string $printView, string $modelType, int|string $modelId): string
+    {
+        $previewData = [
+            'model_type' => $modelType,
+            'model_id' => $modelId,
+            'view' => $printView,
+            'preview' => true,
+        ];
+
+        return  route('print.render', $previewData);
+    }
+
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->withoutGlobalScope(UserTenantScope::class);
