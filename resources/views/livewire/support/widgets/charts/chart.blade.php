@@ -22,13 +22,32 @@
             @section('options')
             @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
                 <div class="flex-none">
-                    <x-dropdown icon="ellipsis-vertical" static>
-                        @foreach ($this->options() ?? [] as $option)
-                            <x-dropdown.items
-                                :text="data_get($option, 'label')"
-                                wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
-                            />
-                        @endforeach
+                    <x-dropdown
+                        icon="ellipsis-vertical"
+                        static
+                        x-on:open="
+                            $el.closest('.grid-stack-item-content').style.overflow = $event.detail.status ? 'visible' : 'hidden';
+                            if ($event.detail.status) await loadWidgetOptions();
+                        "
+                    >
+                        <div class="max-h-60 overflow-y-auto">
+                            <template
+                                x-for="option in widgetOptions"
+                                x-bind:key="option.label"
+                            >
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    tabindex="0"
+                                    class="focus:outline-hidden flex w-full cursor-pointer items-center whitespace-nowrap px-4 py-2 text-sm text-secondary-600 transition-colors duration-150 hover:bg-gray-100 focus:bg-gray-100 dark:text-dark-300 dark:hover:bg-dark-600 dark:focus:bg-dark-600"
+                                    x-on:click="
+                                        $wire.call(option.method, option.params ?? [])
+                                        $refs.dropdown.dispatchEvent(new CustomEvent('select'))
+                                    "
+                                    x-text="option.label"
+                                ></button>
+                            </template>
+                        </div>
                     </x-dropdown>
                 </div>
             @endif

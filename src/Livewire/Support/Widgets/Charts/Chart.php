@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Support\Widgets\Charts;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use ReflectionClass;
@@ -105,6 +106,12 @@ abstract class Chart extends Component
     public function rendering(): void
     {
         $this->options ??= $this->getOptions();
+    }
+
+    #[Renderless]
+    public function getWidgetOptions(): array
+    {
+        return $this instanceof HasWidgetOptions ? $this->options() : [];
     }
 
     #[Renderless]
