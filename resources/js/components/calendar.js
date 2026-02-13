@@ -455,10 +455,10 @@ const calendar = () => {
                         calendarEl.querySelector('.fc-toolbar-title');
                     if (titleEl) {
                         const start = dayjs(info.view.currentStart);
-                        const end = dayjs(info.view.currentEnd).subtract(
-                            1,
-                            'day',
-                        );
+                        const currentEnd = dayjs(info.view.currentEnd);
+                        const end = currentEnd.diff(start, 'day') > 1
+                            ? currentEnd.subtract(1, 'day')
+                            : start;
 
                         const startWeek = start.isoWeek();
                         const endWeek = end.isoWeek();
