@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Support\Widgets\Charts;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use ReflectionClass;
@@ -64,6 +65,12 @@ abstract class Chart extends Component
     public ?array $yaxis = null;
 
     abstract public function calculateChart(): void;
+
+    #[Renderless]
+    public function getWidgetOptions(): array
+    {
+        return $this instanceof HasWidgetOptions ? $this->options() : [];
+    }
 
     public static function getDefaultHeight(): int
     {
