@@ -32,11 +32,12 @@ class UpdatePurchaseInvoicePosition extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if (($this->getData('total_price') || $this->getData('amount'))
-            && ! $this->getData('unit_price')
+        if ((! is_null($this->getData('total_price')) || ! is_null($this->getData('amount')))
+            && is_null($this->getData('unit_price'))
         ) {
             $position = resolve_static(PurchaseInvoicePosition::class, 'query')
                 ->whereKey($this->getData('id'))
+                ->select(['id', 'total_price', 'amount'])
                 ->first();
 
             if ($position) {

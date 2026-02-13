@@ -28,9 +28,10 @@ class CreatePurchaseInvoicePosition extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if (! $this->getData('unit_price')
-            && $this->getData('total_price')
-            && $this->getData('amount')
+        if (is_null($this->getData('unit_price'))
+            && ! is_null($this->getData('total_price'))
+            && ! is_null($this->getData('amount'))
+            && bccomp($this->getData('amount'), 0) !== 0
         ) {
             data_set(
                 $this->data,
