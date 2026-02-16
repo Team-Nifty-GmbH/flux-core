@@ -170,7 +170,7 @@ class Tenants extends TenantList
             'preview' => true,
         ];
 
-        return  route('print.render', $previewData);
+        return route('print.render', $previewData);
     }
 
     protected function getBuilder(Builder $builder): Builder

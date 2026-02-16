@@ -5,19 +5,13 @@
 
     $printView =  $model->getPrintViews()['sepa-mandate'];
     $modelId = $model->id;
-    $modelType = get_class($model);
+    $modelType = morph_alias($model::class);
 
-    $this->openPreview($printView, $modelType, $modelId);
+    $route = $this->openPreview('sepa-mandate', $modelType, $modelId);
 
 @endphp
 
 <div
-    x-data="{
-        onInit() {
-
-        }
-    }"
-    x-init="onInit()"
     class="flex flex-col gap-2">
     <x-input
         :label="__('Creditor Identifier')"
@@ -31,12 +25,21 @@
         :label="__('Sepa Text B2B')"
         wire:model="tenant.sepa_text_b2b"
     />
-    <div class="flex flex-col w-full gap-4">
+    <div
+        x-data="{
+        onInit() {
+        this.$nextTick(() => {
+            this.$refs.frame.src = '{{ $route }}'
+           })
+        }
+    }"
+        x-init="onInit()"
+        class="flex flex-col w-full gap-4 h-[800px]">
         <div>{{ __('Preview') }}</div>
         <iframe
             x-ref="frame"
             loading="lazy"
-            src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
+            class="h-full"
         ></iframe>
         <x-button class="w-32">
             Download
