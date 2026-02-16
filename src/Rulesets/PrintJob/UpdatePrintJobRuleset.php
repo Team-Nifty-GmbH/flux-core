@@ -32,9 +32,11 @@ class UpdatePrintJobRuleset extends FluxRuleset
                 'boolean',
             ],
             'cups_job_id' => [
+                'nullable',
                 'integer',
             ],
             'status' => [
+                'nullable',
                 app(EnumRule::class, ['type' => PrintJobStatusEnum::class]),
             ],
             'error_message' => [

@@ -4,11 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('print_jobs', function (Blueprint $table) {
+        Schema::table('print_jobs', function (Blueprint $table): void {
             $table->unsignedInteger('cups_job_id')->nullable()->after('is_completed');
             $table->string('status', 50)->nullable()->after('cups_job_id');
             $table->text('error_message')->nullable()->after('status');
@@ -18,7 +18,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('print_jobs', function (Blueprint $table) {
+        Schema::table('print_jobs', function (Blueprint $table): void {
             $table->dropColumn(['cups_job_id', 'status', 'error_message', 'printed_at']);
         });
     }
