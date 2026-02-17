@@ -9,7 +9,6 @@ use FluxErp\Enums\OvertimeCompensationEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Employee;
-use FluxErp\Models\EmployeeDay;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\WorkTimeModel;
 
