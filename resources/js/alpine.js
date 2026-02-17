@@ -1,4 +1,5 @@
 import folders from './components/folders';
+import sepaPreview from './components/sepa-preview.js';
 import setupEditor from './components/tiptap';
 import floatingUiDropdown from './components/tiptap-dropdown.js';
 import tiptapExpandable from './components/tiptap-expandable.js';
@@ -42,6 +43,7 @@ window.familyTree = familyTree;
 window.filePond = filePond;
 window.$tallstackuiSelect = selectComponent;
 window.$tallstackuiToast = toastComponent;
+window.sepaPreview = sepaPreview;
 
 window.Calendar = Calendar;
 window.dayGridPlugin = dayGridPlugin;

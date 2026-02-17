@@ -26,18 +26,7 @@
         wire:model="tenant.sepa_text_b2b"
     />
     <div
-        x-data="{
-        tenant: @entangle('tenant'),
-        onInit() {
-        this.$nextTick(() => {
-            this.$refs.frame.src = '{{ $route }}'
-           });
-
-         this.$watch(tennant.id,(old,new) => {
-            console.log('tenant changed',old,new);
-         })
-        }
-    }"
+        x-data="sepaPreview($wire,$refs)"
         x-init="onInit()"
         class="flex flex-col w-full gap-4 h-[800px]">
         <div>{{ __('Preview') }}</div>
