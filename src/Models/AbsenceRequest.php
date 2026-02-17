@@ -54,7 +54,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         });
 
         static::saved(function (AbsenceRequest $absenceRequest): void {
-            if (! $absenceRequest->wasChanged('state')) {
+            if (! $absenceRequest->wasChanged('state') && ! $absenceRequest->wasRecentlyCreated) {
                 return;
             }
 
