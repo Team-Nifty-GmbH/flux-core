@@ -21,9 +21,9 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
     protected function casts(): array
     {
         return [
-            'is_completed' => 'boolean',
             'status' => PrintJobStatusEnum::class,
             'printed_at' => 'datetime',
+            'is_completed' => 'boolean',
         ];
     }
 

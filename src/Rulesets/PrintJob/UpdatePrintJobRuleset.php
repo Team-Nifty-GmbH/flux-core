@@ -18,6 +18,10 @@ class UpdatePrintJobRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PrintJob::class]),
             ],
+            'cups_job_id' => [
+                'nullable',
+                'integer',
+            ],
             'quantity' => [
                 'integer',
                 'min:1',
@@ -27,13 +31,6 @@ class UpdatePrintJobRuleset extends FluxRuleset
                 'required',
                 'string',
                 'max:255',
-            ],
-            'is_completed' => [
-                'boolean',
-            ],
-            'cups_job_id' => [
-                'nullable',
-                'integer',
             ],
             'status' => [
                 'nullable',
@@ -46,6 +43,9 @@ class UpdatePrintJobRuleset extends FluxRuleset
             'printed_at' => [
                 'nullable',
                 'date',
+            ],
+            'is_completed' => [
+                'boolean',
             ],
         ];
     }

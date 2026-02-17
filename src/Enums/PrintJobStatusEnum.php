@@ -3,13 +3,11 @@
 namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
+use FluxErp\Enums\Traits\HasBadge;
 
 enum PrintJobStatusEnum: string
 {
-    use EnumTrait;
+    use EnumTrait, HasBadge;
 
     case Queued = 'queued';
 
@@ -21,22 +19,13 @@ enum PrintJobStatusEnum: string
 
     case Cancelled = 'cancelled';
 
-    public function badge(): HtmlString
+    public function color(): string
     {
-        return new HtmlString(
-            Blade::render(
-                html_entity_decode('<x-badge :$text :$color />'),
-                [
-                    'color' => match ($this) {
-                        self::Queued => 'gray',
-                        self::Processing => 'amber',
-                        self::Completed => 'emerald',
-                        self::Failed => 'red',
-                        self::Cancelled => 'gray',
-                    },
-                    'text' => __(Str::headline($this->value)),
-                ]
-            )
-        );
+        return match ($this) {
+            self::Queued, self::Cancelled => 'gray',
+            self::Processing => 'amber',
+            self::Completed => 'emerald',
+            self::Failed => 'red',
+        };
     }
 }
