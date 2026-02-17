@@ -27,10 +27,15 @@
     />
     <div
         x-data="{
+        tenant: @entangle('tenant'),
         onInit() {
         this.$nextTick(() => {
             this.$refs.frame.src = '{{ $route }}'
-           })
+           });
+
+         this.$watch(tennant.id,(old,new) => {
+            console.log('tenant changed',old,new);
+         })
         }
     }"
         x-init="onInit()"
