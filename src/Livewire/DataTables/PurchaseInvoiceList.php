@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Jobs\ProcessScannedDocumentJob;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
@@ -20,6 +21,8 @@ use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
@@ -82,12 +85,6 @@ class PurchaseInvoiceList extends BaseDataTable
                 ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])
                     && resolve_static(CreatePurchaseInvoice::class, 'canPerformAction', [false])
                 )
-                ->wireClick('edit'),
-            DataTableButton::make()
-                ->text(__('Bulk PDF Upload'))
-                ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])
-                    && resolve_static(CreatePurchaseInvoice::class, 'canPerformAction', [false])
-                )
                 ->xOnClick(<<<'JS'
                     $modalOpen('bulk-pdf-upload-modal')
                 JS),
@@ -114,7 +111,7 @@ class PurchaseInvoiceList extends BaseDataTable
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'))->send();
+            $this->toast()->error(__('The file does not exist anymore.'))->send();
 
             return false;
         }
@@ -224,7 +221,7 @@ class PurchaseInvoiceList extends BaseDataTable
     public function processBulkUpload(array $tempFileNames): bool
     {
         if (! $tempFileNames) {
-            $this->notification()
+            $this->toast()
                 ->error(__('Please select at least one PDF file.'))
                 ->send();
 
@@ -236,7 +233,7 @@ class PurchaseInvoiceList extends BaseDataTable
         });
 
         if (! $filesToProcess) {
-            $this->notification()
+            $this->toast()
                 ->error(__('No valid files found for upload.'))->send();
 
             return false;
@@ -263,18 +260,59 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         if ($successCount > 0) {
-            $this->notification()
+            $this->toast()
                 ->success(__(':count PDF(s) successfully uploaded.', ['count' => $successCount]))
                 ->send();
         }
 
         if ($errorCount > 0) {
-            $this->notification()
+            $this->toast()
                 ->error(__(':count PDF(s) could not be uploaded.', ['count' => $errorCount]))
                 ->send();
         }
 
         return $successCount > 0;
+    }
+
+    #[Renderless]
+    public function submitScan(string $imageData): bool
+    {
+        if (! preg_match(
+            '#^data:image/(jpeg|png|gif|webp);base64,#',
+            $imageData
+        )) {
+            return false;
+        }
+
+        $base64Part = substr($imageData, strpos($imageData, ',') + 1);
+        $decoded = base64_decode($base64Part, true);
+
+        if ($decoded === false || ! getimagesizefromstring($decoded)) {
+            return false;
+        }
+
+        $storagePath = 'scans/' . Str::uuid() . '.img';
+        Storage::put($storagePath, $decoded);
+
+        dispatch(app(ProcessScannedDocumentJob::class, ['imagePath' => $storagePath]));
+
+        return true;
+    }
+
+    #[Renderless]
+    public function notifyScanResults(int $successCount, int $errorCount): void
+    {
+        if ($successCount > 0) {
+            $this->toast()
+                ->success(__(':count document(s) queued for processing.', ['count' => $successCount]))
+                ->send();
+        }
+
+        if ($errorCount > 0) {
+            $this->toast()
+                ->error(__(':count document(s) could not be uploaded.', ['count' => $errorCount]))
+                ->send();
+        }
     }
 
     #[Renderless]

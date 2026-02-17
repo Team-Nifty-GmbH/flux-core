@@ -146,7 +146,7 @@ class Ticket extends Component
             )
             ->toArray();
 
-        $this->notification()->success(__(':model saved', ['model' => __('Ticket')]))->send();
+        $this->toast()->success(__(':model saved', ['model' => __('Ticket')]))->send();
 
         return true;
     }

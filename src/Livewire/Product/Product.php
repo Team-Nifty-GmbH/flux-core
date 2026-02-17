@@ -450,7 +450,7 @@ class Product extends Component
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Product')]))->send();
+        $this->toast()->success(__(':model saved', ['model' => __('Product')]))->send();
 
         return true;
     }

@@ -69,7 +69,7 @@ class MediaList extends BaseDataTable
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'))->send();
+            $this->toast()->error(__('The file does not exist anymore.'))->send();
 
             return false;
         }

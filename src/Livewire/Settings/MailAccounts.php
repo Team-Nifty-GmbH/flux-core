@@ -165,7 +165,7 @@ class MailAccounts extends MailAccountList
 
             $this->mailAccount->sendTestMail($to);
 
-            $this->notification()->success(__('Test mail sent'))->send();
+            $this->toast()->success(__('Test mail sent'))->send();
         } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }
@@ -184,7 +184,7 @@ class MailAccounts extends MailAccountList
         try {
             $this->mailAccount->testImapConnection();
 
-            $this->notification()->success(__('Connection successful'))->send();
+            $this->toast()->success(__('Connection successful'))->send();
         } catch (
             ValidationException
             |ImapBadRequestException
@@ -204,7 +204,7 @@ class MailAccounts extends MailAccountList
         try {
             $this->mailAccount->testSmtpConnection();
 
-            $this->notification()->success(__('Connection successful'))->send();
+            $this->toast()->success(__('Connection successful'))->send();
         } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }

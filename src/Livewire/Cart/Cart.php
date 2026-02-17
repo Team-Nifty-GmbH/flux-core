@@ -58,7 +58,7 @@ class Cart extends Component
 
         unset($this->cart);
 
-        $this->notification()->success(count(Arr::wrap($products)) > 1
+        $this->toast()->success(count(Arr::wrap($products)) > 1
             ? __('Products added to cart')
             : __('Product added to cart')
         )->send();
@@ -135,7 +135,7 @@ class Cart extends Component
         }
 
         $this->reset('selectedWatchlist', 'watchlistName');
-        $this->notification()->success(__('Cart saved to watchlist'))->send();
+        $this->toast()->success(__('Cart saved to watchlist'))->send();
         $this->mount();
 
         return true;
