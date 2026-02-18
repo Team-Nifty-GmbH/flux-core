@@ -81,6 +81,7 @@ class CreateDocumentsJob implements ShouldQueue
                             'model_id' => $item->getKey(),
                             'view' => $layout,
                             'preview' => true,
+                            'params' => data_get($itemData, 'params') ?? [],
                         ])
                             ->validate()
                             ->execute();
@@ -111,6 +112,7 @@ class CreateDocumentsJob implements ShouldQueue
                             'model_type' => $item->getMorphClass(),
                             'model_id' => $item->getKey(),
                             'view' => $layout,
+                            'params' => data_get($itemData, 'params') ?? [],
                         ])
                             ->validate()
                             ->execute();

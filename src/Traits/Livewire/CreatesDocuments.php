@@ -220,11 +220,19 @@ trait CreatesDocuments
                 ->all();
 
             if ($queueLayouts) {
-                $jobItems[] = [
+                $jobItem = [
                     'model_type' => $item->getMorphClass(),
                     'model_id' => $item->getKey(),
                     'layouts' => $queueLayouts,
                 ];
+
+                $params = $this->getDocumentParams($item);
+
+                if ($params) {
+                    $jobItem['params'] = $params;
+                }
+
+                $jobItems[] = $jobItem;
             }
         }
 
@@ -400,6 +408,11 @@ trait CreatesDocuments
             'view' => $view,
             'name' => __($view),
         ];
+    }
+
+    protected function getDocumentParams(OffersPrinting $item): array
+    {
+        return [];
     }
 
     protected function getMailGroupKey(OffersPrinting $item): string

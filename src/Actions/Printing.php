@@ -40,9 +40,10 @@ class Printing extends FluxAction
             ->print()
             ->preview($this->getData('preview') && ! $this->getData('html'));
         $printClass = $this->printable->getViewClass($this->getData('view'));
+        $params = $this->getData('params') ?? [];
 
         return $this->getData('html')
-            ? $this->printable->renderView($printClass)
-            : $this->printable->printView($printClass);
+            ? $this->printable->renderView($printClass, ...$params)
+            : $this->printable->printView($printClass, ...$params);
     }
 }
