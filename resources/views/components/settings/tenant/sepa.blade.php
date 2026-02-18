@@ -1,16 +1,3 @@
-@php
-    $model = resolve_static(\FluxErp\Models\SepaMandate::class,'query')
-        ->where('tenant_id',$this->tenant->id)
-        ->first();
-
-    $printView =  $model->getPrintViews()['sepa-mandate'];
-    $modelId = $model->id;
-    $modelType = morph_alias($model::class);
-
-    $route = $this->openPreview('sepa-mandate', $modelType, $modelId);
-
-@endphp
-
 <div
     class="flex flex-col gap-2">
     <x-input
@@ -27,16 +14,29 @@
     />
     <div
         x-data="sepaPreview($wire,$refs)"
-        x-init="onInit()"
-        class="flex flex-col w-full gap-4 h-[800px]">
-        <div>{{ __('Preview') }}</div>
-        <iframe
-            x-ref="frame"
-            loading="lazy"
-            class="h-full"
-        ></iframe>
-        <x-button class="w-32">
-            Download
-        </x-button>
+        x-init="onInit(@json($this->tenant->id))"
+        class="flex flex-col w-full gap-4 min-h-[600px] max-h-[800px]">
+            <div>{{ __('Preview') }}</div>
+            <div
+                x-cloak
+                x-show="!route"
+                class="flex-1 flex items-center justify-center text-gray-500">
+                <div>{{ __('Sepa Mandate not existing, please create one') }}</div>
+            </div>
+            <iframe
+                x-cloak
+                x-show="route"
+                x-ref="frame"
+                class="flex-1"
+                loading="lazy"
+            ></iframe>
+            <x-button
+                x-cloak
+                x-show="route"
+                class="w-32"
+                loading
+                color="indigo"
+                :text="__('Download')"
+            />
     </div>
 </div>
