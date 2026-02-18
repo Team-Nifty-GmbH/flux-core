@@ -445,11 +445,7 @@
                         x-bind:readonly="!edit"
                         x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
                         x-model="contactOption.type"
-                        :options="[
-                            ['label' => __('Email'), 'value' => 'email'],
-                            ['label' => __('Phone'), 'value' => 'phone'],
-                            ['label' => __('Website'), 'value' => 'website'],
-                        ]"
+                        :options="resolve_static(\FluxErp\Enums\ContactOptionTypeEnum::class, 'valuesLocalized')"
                         required
                     />
                 </div>
