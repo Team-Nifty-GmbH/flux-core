@@ -165,3 +165,72 @@ test('pauses are not subtracted twice from actual hours', function (): void {
     // 9.25h actual - 8h target = +1.25h overtime
     expect($dayData->get('plus_minus_overtime_hours'))->toBe('1.25');
 });
+
+test('close employee day syncs absence request pivot entries', function (): void {
+    $absenceType = app(AbsenceType::class)->create([
+        'name' => 'Krank',
+        'code' => 'KRK',
+        'color' => '#ef4444',
+        'employee_can_create' => EmployeeCanCreateEnum::Yes,
+        'affects_overtime' => false,
+        'affects_sick_leave' => true,
+        'affects_vacation' => false,
+        'is_active' => true,
+    ]);
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    $absenceRequest = app(AbsenceRequest::class)->create([
+        'employee_id' => $this->employee->getKey(),
+        'absence_type_id' => $absenceType->getKey(),
+        'start_date' => $testDate,
+        'end_date' => $testDate,
+        'day_part' => AbsenceRequestDayPartEnum::FullDay,
+        'state' => AbsenceRequestStateEnum::Approved,
+    ]);
+
+    $employeeDay = CloseEmployeeDay::make([
+        'employee_id' => $this->employee->getKey(),
+        'date' => $testDate,
+    ])->validate()->execute();
+
+    expect($employeeDay->sick_days_used)->toBe('1.00');
+    expect($employeeDay->absenceRequests()->count())->toBe(1);
+    expect($employeeDay->absenceRequests()->first()->getKey())->toBe($absenceRequest->getKey());
+});
+
+test('close employee day sets sick days for multi day absence request', function (): void {
+    $absenceType = app(AbsenceType::class)->create([
+        'name' => 'Krank',
+        'code' => 'KRK',
+        'color' => '#ef4444',
+        'employee_can_create' => EmployeeCanCreateEnum::Yes,
+        'affects_overtime' => false,
+        'affects_sick_leave' => true,
+        'affects_vacation' => false,
+        'is_active' => true,
+    ]);
+
+    $startDate = Carbon::now()->next(Carbon::MONDAY);
+    $endDate = $startDate->copy()->addDays(4); // Mon-Fri
+
+    app(AbsenceRequest::class)->create([
+        'employee_id' => $this->employee->getKey(),
+        'absence_type_id' => $absenceType->getKey(),
+        'start_date' => $startDate,
+        'end_date' => $endDate,
+        'day_part' => AbsenceRequestDayPartEnum::FullDay,
+        'state' => AbsenceRequestStateEnum::Approved,
+    ]);
+
+    // Close a day in the middle of the range
+    $wednesday = $startDate->copy()->addDays(2);
+    $employeeDay = CloseEmployeeDay::make([
+        'employee_id' => $this->employee->getKey(),
+        'date' => $wednesday,
+    ])->validate()->execute();
+
+    expect($employeeDay->sick_days_used)->toBe('1.00');
+    expect($employeeDay->is_work_day)->toBeTrue();
+    expect($employeeDay->absenceRequests()->count())->toBe(1);
+});
