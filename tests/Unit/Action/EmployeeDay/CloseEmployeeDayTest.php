@@ -234,3 +234,38 @@ test('close employee day sets sick days for multi day absence request', function
     expect($employeeDay->is_work_day)->toBeTrue();
     expect($employeeDay->absenceRequests()->count())->toBe(1);
 });
+
+test('percentage deduction is applied when calculating overtime used', function (): void {
+    // "Halber Tag Frei" - affects overtime with 50% deduction
+    $absenceType = app(AbsenceType::class)->create([
+        'name' => 'Halber Tag Frei',
+        'code' => 'HALBER_TAG_FREI',
+        'color' => '#0891b2',
+        'employee_can_create' => EmployeeCanCreateEnum::Yes,
+        'affects_overtime' => true,
+        'affects_sick_leave' => false,
+        'affects_vacation' => false,
+        'percentage_deduction' => 0.5,
+        'is_active' => true,
+    ]);
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    app(AbsenceRequest::class)->create([
+        'employee_id' => $this->employee->getKey(),
+        'absence_type_id' => $absenceType->getKey(),
+        'start_date' => $testDate,
+        'end_date' => $testDate,
+        'day_part' => AbsenceRequestDayPartEnum::FullDay,
+        'state' => AbsenceRequestStateEnum::Approved,
+    ]);
+
+    $dayData = CloseEmployeeDay::calculateDayData($this->employee, $testDate);
+
+    // 8h target, 0h actual, percentage_deduction=0.50
+    // overtime_used = 8h * 0.50 = 4h
+    // totalOvertime = (0 + 0 + 0 - 8) + 0 = -8
+    // plusMinusOvertimeHours = -8 + 4 = -4
+    expect($dayData->get('target_hours'))->toBe('8.00');
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('-4.00');
+});
