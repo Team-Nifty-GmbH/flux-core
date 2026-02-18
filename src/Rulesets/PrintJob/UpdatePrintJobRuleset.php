@@ -2,7 +2,9 @@
 
 namespace FluxErp\Rulesets\PrintJob;
 
+use FluxErp\Enums\PrintJobStatusEnum;
 use FluxErp\Models\PrintJob;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -14,8 +16,11 @@ class UpdatePrintJobRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => PrintJob::class])
-                    ->where('is_completed', false),
+                app(ModelExists::class, ['model' => PrintJob::class]),
+            ],
+            'cups_job_id' => [
+                'nullable',
+                'integer',
             ],
             'quantity' => [
                 'integer',
@@ -26,6 +31,18 @@ class UpdatePrintJobRuleset extends FluxRuleset
                 'required',
                 'string',
                 'max:255',
+            ],
+            'status' => [
+                'nullable',
+                app(EnumRule::class, ['type' => PrintJobStatusEnum::class]),
+            ],
+            'error_message' => [
+                'nullable',
+                'string',
+            ],
+            'printed_at' => [
+                'nullable',
+                'date',
             ],
             'is_completed' => [
                 'boolean',

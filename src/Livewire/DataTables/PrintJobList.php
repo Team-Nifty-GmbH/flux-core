@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\PrintJob;
+use Illuminate\Database\Eloquent\Builder;
 
 class PrintJobList extends BaseDataTable
 {
@@ -13,8 +14,14 @@ class PrintJobList extends BaseDataTable
         'printer.name',
         'quantity',
         'size',
+        'status',
         'is_completed',
     ];
 
     protected string $model = PrintJob::class;
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->with('media');
+    }
 }
