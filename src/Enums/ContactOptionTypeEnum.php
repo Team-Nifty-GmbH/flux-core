@@ -9,9 +9,9 @@ class ContactOptionTypeEnum extends FluxEnum
 {
     use EnumTrait;
 
-    final public const string Phone = 'phone';
-
     final public const string Email = 'email';
+
+    final public const string Phone = 'phone';
 
     final public const string Website = 'website';
 }
