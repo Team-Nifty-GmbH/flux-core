@@ -66,7 +66,6 @@ use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
-use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
@@ -813,19 +812,18 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ?? resolve_static(Currency::class, 'default')?->iso
             ?? '';
 
-        return Str::of(
-            ($this->invoice_number ?? $this->order_number)
-            . ' - '
-            . $this->commission
-            . ' - '
-            . Number::currency($this->total_gross_price, $currencyIso, app()->getLocale())
-            . ' ('
-            . Number::currency($this->total_net_price, $currencyIso, app()->getLocale())
-            . ' ' . __('net')
-            . ')'
-        )
-            ->deduplicate(' - ')
-            ->toString();
+        $parts = array_filter([
+            $this->invoice_number ?? $this->order_number,
+            $this->commission,
+            sprintf(
+                '%s (%s %s)',
+                Number::currency($this->total_gross_price, $currencyIso, app()->getLocale()),
+                Number::currency($this->total_net_price, $currencyIso, app()->getLocale()),
+                __('net'),
+            ),
+        ], static fn ($part) => ! is_null($part) && $part !== '');
+
+        return implode(' - ', $parts);
     }
 
     public function getEmailTemplateModelType(): ?string
