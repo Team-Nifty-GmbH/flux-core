@@ -6,7 +6,7 @@ import nuxbeAppBridge from './nuxbe-bridge.js';
 // Import all modules into single bundle
 import './components/alpine.js';
 import './components/apex-charts.js';
-import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';
+import '../../../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
 
@@ -178,10 +178,13 @@ window.fileSizeHumanReadable = function (sizeBytes) {
 
 window.$openDetailModal = (url, hideNavigation = true) => {
     let urlObj = new URL(url);
-    urlObj.searchParams.set(
-        'no-navigation',
-        hideNavigation === true ? 'true' : 'false',
-    );
+
+    if (!urlObj.searchParams.has('signature')) {
+        urlObj.searchParams.set(
+            'no-navigation',
+            hideNavigation === true ? 'true' : 'false',
+        );
+    }
 
     document.getElementById('detail-modal-iframe').src = urlObj.href;
     $modalOpen('detail-modal');

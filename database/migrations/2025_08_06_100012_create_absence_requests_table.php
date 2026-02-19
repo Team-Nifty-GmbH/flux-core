@@ -19,7 +19,7 @@ return new class() extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
             $table->foreignId('employee_id')
-                ->constrained()
+                ->constrained('employees')
                 ->cascadeOnDelete();
             $table->foreignId('rejected_by_id')
                 ->nullable()

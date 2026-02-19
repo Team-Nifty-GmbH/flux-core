@@ -384,6 +384,7 @@
         class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
+            @section('content.left-wrapper')
             <section
                 class="relative w-full xl:max-w-96 xl:basis-2/12"
                 wire:ignore
@@ -462,14 +463,23 @@
                             >
                                 <div>{{ __('Invoice Address') }}</div>
                                 @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
-                                    <x-button
-                                        color="secondary"
-                                        light
-                                        wire:navigate
-                                        light
-                                        icon="eye"
-                                        :href="route('address.id', $invoiceAddressId)"
-                                    />
+                                    <div class="flex gap-1">
+                                        <x-button
+                                            x-cloak
+                                            x-show="! $wire.order.is_locked"
+                                            color="secondary"
+                                            light
+                                            icon="arrow-path"
+                                            wire:click="refreshAddress('invoice')"
+                                        />
+                                        <x-button
+                                            color="secondary"
+                                            light
+                                            wire:navigate
+                                            icon="eye"
+                                            :href="route('address.id', $invoiceAddressId)"
+                                        />
+                                    </div>
                                 @endif
                             </div>
                         </x-slot>
@@ -500,7 +510,25 @@
                         <div class="text-sm">
                             <p
                                 class="truncate first-line:font-semibold"
-                                x-html="$wire.order.address_invoice.join('<br>')"
+                                x-html="
+                                    [
+                                        $wire.order.address_invoice?.company,
+                                        [
+                                            $wire.order.address_invoice?.firstname,
+                                            $wire.order.address_invoice?.lastname,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(' '),
+                                        $wire.order.address_invoice?.addition,
+                                        $wire.order.address_invoice?.street,
+                                        [$wire.order.address_invoice?.zip, $wire.order.address_invoice?.city]
+                                            .filter(Boolean)
+                                            .join(' '),
+                                        $wire.order.address_invoice?.country?.name,
+                                    ]
+                                        .filter(Boolean)
+                                        .join('<br>')
+                                "
                             ></p>
                         </div>
                     </x-card>
@@ -513,14 +541,23 @@
                             >
                                 <div>{{ __('Delivery Address') }}</div>
                                 @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
-                                    <x-button
-                                        color="secondary"
-                                        light
-                                        wire:navigate
-                                        light
-                                        icon="eye"
-                                        :href="route('address.id', $deliveryAddressId)"
-                                    />
+                                    <div class="flex gap-1">
+                                        <x-button
+                                            x-cloak
+                                            x-show="! $wire.order.is_locked"
+                                            color="secondary"
+                                            light
+                                            icon="arrow-path"
+                                            wire:click="refreshAddress('delivery')"
+                                        />
+                                        <x-button
+                                            color="secondary"
+                                            light
+                                            wire:navigate
+                                            icon="eye"
+                                            :href="route('address.id', $deliveryAddressId)"
+                                        />
+                                    </div>
                                 @endif
                             </div>
                         </x-slot>
@@ -554,7 +591,25 @@
                         >
                             <p
                                 class="truncate first-line:font-semibold"
-                                x-html="$wire.order.address_delivery.join('<br>')"
+                                x-html="
+                                    [
+                                        $wire.order.address_delivery?.company,
+                                        [
+                                            $wire.order.address_delivery?.firstname,
+                                            $wire.order.address_delivery?.lastname,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(' '),
+                                        $wire.order.address_delivery?.addition,
+                                        $wire.order.address_delivery?.street,
+                                        [$wire.order.address_delivery?.zip, $wire.order.address_delivery?.city]
+                                            .filter(Boolean)
+                                            .join(' '),
+                                        $wire.order.address_delivery?.country?.name,
+                                    ]
+                                        .filter(Boolean)
+                                        .join('<br>')
+                                "
                             ></p>
                         </div>
                     </x-card>
@@ -750,8 +805,10 @@
                     @show
                 </div>
             </section>
+            @show
         </x-slot>
         <x-slot:append>
+            @section('content.right-wrapper')
             <section
                 class="relative w-full xl:max-w-96 xl:basis-2/12"
                 wire:ignore
@@ -1133,6 +1190,7 @@
                     </x-card>
                 </div>
             </section>
+            @show
         </x-slot>
     </x-flux::tabs>
 </div>

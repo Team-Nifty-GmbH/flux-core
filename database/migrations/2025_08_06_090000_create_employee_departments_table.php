@@ -14,7 +14,7 @@ return new class() extends Migration
 
             $table->foreignId('location_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('locations')
                 ->nullOnDelete();
             $table->foreignId('parent_id')
                 ->nullable()

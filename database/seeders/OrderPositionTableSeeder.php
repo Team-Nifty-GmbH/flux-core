@@ -37,8 +37,8 @@ class OrderPositionTableSeeder extends Seeder
                 $sortNumber = $orderPositions->count();
 
                 if (rand(0, 9) < 7) { // Default order position
+                    $productId = rand(0, 3) < 3 ? ($product->id ?? null) : null;
                     $orderPosition = OrderPosition::factory()->make([
-                        'tenant_id' => $order->tenant_id ?? $tenantId,
                         'order_id' => $order->id,
                         'parent_id' => rand(0, 1) ?
                             (
@@ -56,10 +56,10 @@ class OrderPositionTableSeeder extends Seeder
                                         ->where('is_free_text', true)
                                         ->random()->id
                             ) : null,
-                        'product_id' => $productId = rand(0, 3) < 3 ? ($product->id ?? null) : null,
-                        'price_id' => $productId ? ($price->id ?? null) : null,
                         'price_list_id' => $productId ? ($price->price_list_id ?? null) : null,
+                        'product_id' => $productId,
                         'supplier_contact_id' => $supplier->id ?? null,
+                        'tenant_id' => $order->tenant_id ?? $tenantId,
                         'vat_rate_id' => $vatRate->id ?? null,
                         'warehouse_id' => $warehouse->id ?? null,
                         'vat_rate_percentage' => $vatRate->rate_percentage ?? null,
@@ -84,10 +84,10 @@ class OrderPositionTableSeeder extends Seeder
                     if ($orderPosition->product_id && $product->is_bundle) {
                         foreach ($product->bundleProducts as $index => $bundleProduct) {
                             OrderPosition::factory()->create([
-                                'tenant_id' => $orderPosition->tenant_id,
                                 'order_id' => $orderPosition->order_id,
                                 'parent_id' => $orderPosition->id,
                                 'product_id' => $bundleProduct->id,
+                                'tenant_id' => $orderPosition->tenant_id,
                                 'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
                                 'amount_bundle' => $bundleProduct->pivot->count,
                                 'discount_percentage' => null,
@@ -100,19 +100,19 @@ class OrderPositionTableSeeder extends Seeder
                                 'name' => $bundleProduct->name,
                                 'product_number' => $bundleProduct->product_number,
                                 'sort_number' => $sortNumber + $index + 1,
-                                'is_free_text' => true,
                                 'is_bundle_position' => true,
+                                'is_free_text' => true,
                             ]);
                         }
                     }
                 } else { // Block / Free text
                     OrderPosition::factory()->create([
-                        'tenant_id' => $order->tenant_id ?? $tenantId,
                         'order_id' => $order->id,
                         'parent_id' => rand(0, 1) ?
                             ($orderPositions->isEmpty() ?
                                 null : $orderPositions->random()->id
                             ) : null,
+                        'tenant_id' => $order->tenant_id ?? $tenantId,
                         'amount' => null,
                         'discount_percentage' => null,
                         'margin' => null,

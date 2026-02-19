@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Models\Tenant;
-use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
 
@@ -54,11 +53,12 @@ class ProjectForm extends Form
         }
 
         $data = $this->toArray();
-        $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
 
         $action = $this->id ? UpdateProject::make($data) : CreateProject::make($data);
 
-        $response = $action->validate()->execute();
+        $response = $action->checkPermission()
+            ->validate()
+            ->execute();
 
         $this->fill($response);
     }

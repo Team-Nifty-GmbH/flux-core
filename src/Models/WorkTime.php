@@ -242,7 +242,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
     {
         $this->total_cost = Rounding::round(
             bcmul(
-                $this->user->cost_per_hour,
+                $this->user?->cost_per_hour ?? 0,
                 bcdiv($this->total_time_ms, 3600000),
                 9
             )
@@ -274,7 +274,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
 
     public function employeeDays(): BelongsToMany
     {
-        return $this->belongsToMany(EmployeeDay::class, 'work_time_employee_day')
+        return $this->belongsToMany(EmployeeDay::class, 'employee_day_work_time')
             ->using(EmployeeDayWorkTime::class)
             ->withPivot(['hours_contributed', 'break_minutes_contributed'])
             ->withTimestamps();
@@ -340,12 +340,10 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
             'start' => $this->started_at->toDateTimeString(),
             'end' => $this->ended_at?->toDateTimeString(),
             'color' => $this->user->color ?? '#0891b2',
-            'invited' => [],
             'description' => $this->description,
             'allDay' => false,
             'editable' => ! $this->is_locked,
             'is_editable' => ! $this->is_locked,
-            'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,
         ];

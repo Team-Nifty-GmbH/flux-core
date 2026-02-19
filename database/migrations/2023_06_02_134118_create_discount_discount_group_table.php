@@ -6,31 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('discount_discount_group', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('discount_id');
-            $table->unsignedBigInteger('discount_group_id');
+            $table->id('pivot_id');
+            $table->foreignId('discount_group_id')->constrained('discount_groups')->cascadeOnDelete();
+            $table->foreignId('discount_id')->constrained('discounts')->cascadeOnDelete();
 
-            $table->foreign('discount_id')
-                ->references('id')
-                ->on('discounts')
-                ->cascadeOnDelete();
-
-            $table->foreign('discount_group_id')
-                ->references('id')
-                ->on('discount_groups')
-                ->cascadeOnDelete();
+            $table->unique(['discount_group_id', 'discount_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('discount_discount_group');

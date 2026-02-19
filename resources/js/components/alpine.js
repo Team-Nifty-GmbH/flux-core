@@ -14,6 +14,7 @@ import collapse from '@alpinejs/collapse';
 import navigationSpinner from './navigation-spinner.js';
 import wireNavigation from './wire-navigation.js';
 import comments from './comments.js';
+import familyTree from './family-tree.js';
 import selectComponent from './tallstackui/select.js';
 import toastComponent from './tallstackui/toast.js';
 
@@ -25,8 +26,10 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import isoWeek from 'dayjs/plugin/isoWeek';
 
 dayjs.extend(utc);
+dayjs.extend(isoWeek);
 
 window.dayjs = dayjs;
 window.calendar = calendar;
@@ -37,6 +40,7 @@ window.workTime = workTime;
 window.dashboard = dashboard;
 window.addressMap = addressMap;
 window.signature = signature;
+window.familyTree = familyTree;
 window.filePond = filePond;
 window.$tallstackuiSelect = selectComponent;
 window.$tallstackuiToast = toastComponent;

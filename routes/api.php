@@ -100,20 +100,6 @@ use FluxErp\Actions\EmployeeWorkTimeModel\UpdateEmployeeWorkTimeModel;
 use FluxErp\Actions\EventSubscription\CreateEventSubscription;
 use FluxErp\Actions\EventSubscription\DeleteEventSubscription;
 use FluxErp\Actions\EventSubscription\UpdateEventSubscription;
-use FluxErp\Actions\FormBuilderField\CreateFormBuilderField;
-use FluxErp\Actions\FormBuilderField\DeleteFormBuilderField;
-use FluxErp\Actions\FormBuilderField\UpdateFormBuilderField;
-use FluxErp\Actions\FormBuilderFieldResponse\CreateFormBuilderFieldResponse;
-use FluxErp\Actions\FormBuilderFieldResponse\DeleteFormBuilderFieldResponse;
-use FluxErp\Actions\FormBuilderFieldResponse\UpdateFormBuilderFieldResponse;
-use FluxErp\Actions\FormBuilderForm\CreateFormBuilderForm;
-use FluxErp\Actions\FormBuilderForm\DeleteFormBuilderForm;
-use FluxErp\Actions\FormBuilderForm\UpdateFormBuilderForm;
-use FluxErp\Actions\FormBuilderResponse\CreateFormBuilderResponse;
-use FluxErp\Actions\FormBuilderResponse\DeleteFormBuilderResponse;
-use FluxErp\Actions\FormBuilderSection\CreateFormBuilderSection;
-use FluxErp\Actions\FormBuilderSection\DeleteFormBuilderSection;
-use FluxErp\Actions\FormBuilderSection\UpdateFormBuilderSection;
 use FluxErp\Actions\Holiday\CreateHoliday;
 use FluxErp\Actions\Holiday\DeleteHoliday;
 use FluxErp\Actions\Holiday\UpdateHoliday;
@@ -123,9 +109,6 @@ use FluxErp\Actions\Industry\UpdateIndustry;
 use FluxErp\Actions\Language\CreateLanguage;
 use FluxErp\Actions\Language\DeleteLanguage;
 use FluxErp\Actions\Language\UpdateLanguage;
-use FluxErp\Actions\LanguageLine\CreateLanguageLine;
-use FluxErp\Actions\LanguageLine\DeleteLanguageLine;
-use FluxErp\Actions\LanguageLine\UpdateLanguageLine;
 use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Actions\Lead\DeleteLead;
 use FluxErp\Actions\Lead\UpdateLead;
@@ -355,15 +338,9 @@ use FluxErp\Models\EmployeeBalanceAdjustment;
 use FluxErp\Models\EmployeeDay;
 use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\EventSubscription;
-use FluxErp\Models\FormBuilderField;
-use FluxErp\Models\FormBuilderFieldResponse;
-use FluxErp\Models\FormBuilderForm;
-use FluxErp\Models\FormBuilderResponse;
-use FluxErp\Models\FormBuilderSection;
 use FluxErp\Models\Holiday;
 use FluxErp\Models\Industry;
 use FluxErp\Models\Language;
-use FluxErp\Models\LanguageLine;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
@@ -380,10 +357,10 @@ use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
-use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -403,7 +380,6 @@ use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
-use FluxErp\Models\Setting;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Target;
@@ -729,50 +705,6 @@ Route::prefix('api')
                 // Events
                 Route::get('/events', [EventSubscriptionController::class, 'getEvents']);
 
-                // FormBuilderForm
-                Route::get('/form-builder/forms/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', FormBuilderForm::class);
-                Route::get('/form-builder/forms', [BaseController::class, 'index'])
-                    ->defaults('model', FormBuilderForm::class);
-                Route::post('/form-builder/forms', CreateFormBuilderForm::class);
-                Route::put('/form-builder/forms', UpdateFormBuilderForm::class);
-                Route::delete('/form-builder/forms/{id}', DeleteFormBuilderForm::class);
-
-                // FormBuilderSection
-                Route::get('/form-builder/sections/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', FormBuilderSection::class);
-                Route::get('/form-builder/sections', [BaseController::class, 'index'])
-                    ->defaults('model', FormBuilderSection::class);
-                Route::post('/form-builder/sections', CreateFormBuilderSection::class);
-                Route::put('/form-builder/sections', UpdateFormBuilderSection::class);
-                Route::delete('/form-builder/sections/{id}', DeleteFormBuilderSection::class);
-
-                // FormBuilderField
-                Route::get('/form-builder/fields/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', FormBuilderField::class);
-                Route::get('/form-builder/fields', [BaseController::class, 'index'])
-                    ->defaults('model', FormBuilderField::class);
-                Route::post('/form-builder/fields', CreateFormBuilderField::class);
-                Route::put('/form-builder/fields', UpdateFormBuilderField::class);
-                Route::delete('/form-builder/fields/{id}', DeleteFormBuilderField::class);
-
-                // FormBuilderResponse
-                Route::get('/form-builder/responses/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', FormBuilderResponse::class);
-                Route::get('/form-builder/responses', [BaseController::class, 'index'])
-                    ->defaults('model', FormBuilderResponse::class);
-                Route::post('/form-builder/responses', CreateFormBuilderResponse::class);
-                Route::delete('/form-builder/responses/{id}', DeleteFormBuilderResponse::class);
-
-                // FormBuilderFieldsResponse
-                Route::get('/form-builder/fields-responses/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', FormBuilderFieldResponse::class);
-                Route::get('/form-builder/fields-responses', [BaseController::class, 'index'])
-                    ->defaults('model', FormBuilderFieldResponse::class);
-                Route::post('/form-builder/fields-responses', CreateFormBuilderFieldResponse::class);
-                Route::put('/form-builder/fields-responses', UpdateFormBuilderFieldResponse::class);
-                Route::delete('/form-builder/fields-responses/{id}', DeleteFormBuilderFieldResponse::class);
-
                 // Holidays
                 Route::get('/holidays/{id}', [BaseController::class, 'show'])
                     ->defaults('model', Holiday::class);
@@ -1006,9 +938,9 @@ Route::prefix('api')
 
                 // Product bundle products
                 Route::get('/product-bundle-products/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', ProductBundleProduct::class);
+                    ->defaults('model', BundleProductProduct::class);
                 Route::get('/product-bundle-products', [BaseController::class, 'index'])
-                    ->defaults('model', ProductBundleProduct::class);
+                    ->defaults('model', BundleProductProduct::class);
                 Route::post('/product-bundle-products', CreateProductBundleProduct::class);
                 Route::put('/product-bundle-products', UpdateProductBundleProduct::class);
                 Route::delete('/product-bundle-products/{id}', DeleteProductBundleProduct::class);
@@ -1133,7 +1065,7 @@ Route::prefix('api')
                 Route::delete('/serial-numbers/{id}', DeleteSerialNumber::class);
 
                 // Settings
-                Route::get('/settings', [BaseController::class, 'index'])->defaults('model', Setting::class);
+                Route::get('/settings', [SettingController::class, 'getSettings']);
                 Route::put('/settings', UpdateSetting::class);
 
                 // Subscriptions
@@ -1222,12 +1154,6 @@ Route::prefix('api')
                 Route::post('/time-tracking-types', CreateWorkTimeType::class);
                 Route::put('/time-tracking-types', UpdateWorkTimeType::class);
                 Route::delete('/time-tracking-types/{id}', DeleteWorkTimeType::class);
-
-                // Translations
-                Route::get('/language-lines', [BaseController::class, 'index'])->defaults('model', LanguageLine::class);
-                Route::post('/language-lines', CreateLanguageLine::class);
-                Route::put('/language-lines', UpdateLanguageLine::class);
-                Route::delete('/language-lines/{id}', DeleteLanguageLine::class);
 
                 // Units
                 Route::get('/units/{id}', [BaseController::class, 'show'])->defaults('model', Unit::class);

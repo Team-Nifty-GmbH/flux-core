@@ -9,13 +9,14 @@ use FluxErp\Livewire\DataTables\VatRateList;
 use FluxErp\Livewire\Forms\VatRateForm;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class VatRates extends VatRateList
 {
-    use Actions;
+    use Actions, SupportsLocalization;
 
     public ?string $includeBefore = 'flux::livewire.settings.vat-rates';
 

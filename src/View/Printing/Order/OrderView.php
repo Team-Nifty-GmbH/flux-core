@@ -4,6 +4,7 @@ namespace FluxErp\View\Printing\Order;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -30,7 +31,13 @@ class OrderView extends PrintableView
         }
 
         $this->model = $order;
+        $this->model->orderType?->localize($order->language_id);
         $this->prepareModel();
+    }
+
+    public static function isInvoice(): bool
+    {
+        return false;
     }
 
     public function render(): View|Factory
@@ -58,19 +65,22 @@ class OrderView extends PrintableView
 
     public function prepareModel(): void
     {
-        resolve_static(OrderPosition::class, 'addGlobalScope', [
-            'scope' => 'sorted',
-            'implementation' => function (Builder $query): void {
-                $query->ordered()
-                    ->with(['tags', 'product.unit:id,name,abbreviation'])
-                    ->when(! $this->showAlternatives, fn (Builder $query) => $query->whereNot('is_alternative', true));
-            },
-        ]);
-
         $positions = array_map(
             fn (array $item) => app(OrderPosition::class)->forceFill($item),
             to_flat_tree(
-                resolve_static(OrderPosition::class, 'familyTree')
+                resolve_static(OrderPosition::class, 'withTemporaryGlobalScopes', [
+                    'scopes' => [
+                        'sorted' => function (Builder $query): void {
+                            $query->ordered()
+                                ->with(['tags', 'product.unit:id,name,abbreviation'])
+                                ->when(
+                                    ! $this->showAlternatives,
+                                    fn (Builder $query) => $query->whereNot('is_alternative', true)
+                                );
+                        },
+                        resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
+                    ],
+                ])
                     ->where('order_id', $this->model->getKey())
                     ->whereNull('parent_id')
                     ->get()

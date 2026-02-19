@@ -153,6 +153,13 @@ if (! function_exists('channel_to_permission')) {
     }
 }
 
+if (! function_exists('print_view_to_permission')) {
+    function print_view_to_permission(string $printView, string $morphAlias): string
+    {
+        return 'print.' . $morphAlias . '.' . $printView;
+    }
+}
+
 if (! function_exists('qualify_model')) {
     function qualify_model(?string $model = null): ?string
     {
@@ -203,18 +210,22 @@ if (! function_exists('discount')) {
             return $price;
         }
 
-        return bcsub($price, bcmul($price, $discount, 4), 9);
+        return bcsub($price, bcmul($price, $discount));
     }
 }
 
 if (! function_exists('diff_percentage')) {
     function diff_percentage(string $old, string $new): string
     {
-        if (bccomp($old, 0) === 0 || bccomp($new, 0) === 0) {
+        if (bccomp($old, 0) === 0) {
             return '0';
         }
 
-        return bcround(bcdiv(bcsub($old, $new, 9), $old, 9), 4);
+        if (bccomp($new, 0) === 0) {
+            return '1';
+        }
+
+        return bcdiv(bcsub($old, $new), $old);
     }
 }
 
@@ -659,7 +670,7 @@ if (! function_exists('render_editor_blade')) {
 
                 return '{{ ' . $value . ' }}';
             },
-            $html
+            html_entity_decode($html)
         );
 
         return new Illuminate\Support\HtmlString(Illuminate\Support\Facades\Blade::render($converted, $data));

@@ -39,6 +39,11 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
 
     public bool $showTotals = true;
 
+    public static function getCategory(): ?string
+    {
+        return 'Revenue';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -55,6 +60,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
     public function calculateChart(): void
     {
         $orderSchedules = resolve_static(OrderSchedule::class, 'query')
+            ->whereHas('order')
             ->whereHas('schedule', function (Builder $query): void {
                 $query
                     ->where(fn (Builder $query) => $query
@@ -91,7 +97,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
             $index = $orderSchedule->order->tenant_id;
             $currentRecurrence = $orderSchedule->schedule->current_recurrence;
             while (
-                $nextRun <= $this->getEnd()
+                $nextRun <= $this->getFullPeriodEnd()
                 && $nextRun >= $this->getStart()
                 && (
                     is_null($orderSchedule->schedule->ends_at)

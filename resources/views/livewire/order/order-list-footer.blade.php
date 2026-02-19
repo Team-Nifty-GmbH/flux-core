@@ -33,6 +33,13 @@
                         'method' => 'POST',
                         'params' => [
                             'whereDoesntHave' => 'children',
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
+                            ],
                             'fields' => [
                                 'id',
                                 'name',

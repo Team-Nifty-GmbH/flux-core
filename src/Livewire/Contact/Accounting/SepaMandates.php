@@ -11,7 +11,6 @@ use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\SepaMandateForm;
 use FluxErp\Models\ContactBankConnection;
-use FluxErp\Models\Media;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
@@ -20,7 +19,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -51,7 +49,17 @@ class SepaMandates extends SepaMandateList
 
     protected function getRowActions(): array
     {
+        $layout = array_key_first($this->getPrintLayouts());
+        $type = morph_alias($this->getModel());
+
         return [
+            DataTableButton::make()
+                ->text(__('Preview'))
+                ->icon('magnifying-glass')
+                ->color('indigo')
+                ->wireClick(<<<JS
+                    openPreview('{$layout}','{$type}',record.id)
+            JS),
             DataTableButton::make()
                 ->text(__('Edit'))
                 ->icon('pencil')
@@ -76,16 +84,14 @@ class SepaMandates extends SepaMandateList
     }
 
     #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        $response = $this->createDocumentFromItems(
+        $this->createDocumentFromItems(
             resolve_static(SepaMandate::class, 'query')
                 ->whereKey($this->sepaMandate->id)
                 ->first()
         );
         $this->loadData();
-
-        return $response;
     }
 
     #[Renderless]
@@ -162,11 +168,24 @@ class SepaMandates extends SepaMandateList
         return '';
     }
 
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->contact->invoiceAddress?->language_id ?? $item->contact->mainAddress?->language_id;
+    }
+
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
+    }
+
     protected function getPrintLayouts(): array
     {
         return resolve_static(SepaMandate::class, 'query')
-            ->whereKey($this->sepaMandate->id)
-            ->first(['id'])
+            ->when(
+                $this->sepaMandate->id,
+                fn (Builder $query) => $query->whereKey($this->sepaMandate->id)
+            )
+            ->firstOrNew()
             ->resolvePrintViews();
     }
 

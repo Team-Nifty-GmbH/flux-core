@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
@@ -17,7 +18,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, Searchable;
+    use HasAttributeTranslations, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, Searchable;
 
     protected $guarded = [
         'id',
@@ -71,5 +72,14 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
     public function orderTypes(): HasMany
     {
         return $this->hasMany(OrderType::class);
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'subject',
+            'html_body',
+            'text_body',
+        ];
     }
 }

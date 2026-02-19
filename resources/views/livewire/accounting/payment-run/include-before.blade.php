@@ -54,6 +54,7 @@
                 @section('payment-properties')
                 <x-select.styled
                     wire:model="paymentRunForm.bank_connection_id"
+                    searchable
                     :label="__('Account')"
                     select="label:name|value:id|description:iban"
                     :options="$accounts"

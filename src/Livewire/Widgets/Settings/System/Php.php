@@ -22,6 +22,11 @@ class Php extends Component
 
     public ?string $version = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'System';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return System::class;

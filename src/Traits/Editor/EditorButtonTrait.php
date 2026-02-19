@@ -120,7 +120,8 @@ trait EditorButtonTrait
 
         if ($isActive = $this->isActive()) {
             $attributes = $attributes->merge([
-                'x-bind:class' => "{ 'bg-primary-100 dark:bg-primary-900': editorState >= 0 && ($isActive) }",
+                'x-bind:class' => "{ 'bg-primary-100 dark:bg-primary-900': "
+                    . "typeof editorState !== 'undefined' && editorState >= 0 && ($isActive) }",
             ]);
         }
 

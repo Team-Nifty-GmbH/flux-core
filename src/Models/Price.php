@@ -12,7 +12,6 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Price extends FluxModel
 {
@@ -103,13 +102,21 @@ class Price extends FluxModel
         );
     }
 
-    public function getGross($vat): string
+    public function getGross($vat): ?string
     {
+        if (is_null($this->price)) {
+            return null;
+        }
+
         return $this->is_net ? net_to_gross($this->price, $vat) : $this->price;
     }
 
-    public function getNet($vat): string
+    public function getNet($vat): ?string
     {
+        if (is_null($this->price)) {
+            return null;
+        }
+
         return $this->is_net ? $this->price : gross_to_net($this->price, $vat);
     }
 
@@ -139,11 +146,6 @@ class Price extends FluxModel
         return Attribute::get(
             fn () => $this->getNet(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
         );
-    }
-
-    public function orderPositions(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class);
     }
 
     public function priceList(): BelongsTo

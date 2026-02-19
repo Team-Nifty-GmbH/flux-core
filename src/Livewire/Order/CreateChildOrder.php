@@ -7,9 +7,11 @@ use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
+use FluxErp\Traits\CalculatesPositionAvailability;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -20,7 +22,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class CreateChildOrder extends Component
 {
-    use Actions;
+    use Actions, CalculatesPositionAvailability;
 
     #[Locked]
     public array $availableOrderTypes = [];
@@ -47,6 +49,7 @@ class CreateChildOrder extends Component
                 'addresses',
                 'contact',
                 'currency',
+                'discounts' => fn (MorphMany $query): MorphMany => $query->ordered(),
                 'orderType',
                 'priceList',
             ])
@@ -149,7 +152,10 @@ class CreateChildOrder extends Component
             }
         }
 
-        $maxAmounts = array_reduce(
+        $multiplier = OrderTypeEnum::tryFrom($this->type)
+            ?->multiplier()
+            ?? 1;
+        $maxAmounts = $this->calculateMaxAmounts(
             DB::select(
                 'WITH RECURSIVE siblings AS (
                     SELECT id, origin_position_id, signed_amount
@@ -164,36 +170,7 @@ class CreateChildOrder extends Component
                 )
                 SELECT * FROM siblings'
             ),
-            function (?array $carry, object $item) {
-                $parentKey = array_find_key(
-                    $carry ?? [],
-                    fn (array $value) => ! is_null($item->origin_position_id)
-                        && in_array(
-                            $item->origin_position_id,
-                            [
-                                $value['id'],
-                                $value['origin_position_id'],
-                            ]
-                        )
-                );
-
-                if (is_null($parentKey)) {
-                    $carry[] = (array) $item;
-                } else {
-                    $carry[$parentKey] = array_merge(
-                        $carry[$parentKey],
-                        [
-                            'origin_position_id' => $item->id,
-                            'signed_amount' => bcsub(
-                                data_get($carry, $parentKey . '.signed_amount'),
-                                $item->signed_amount
-                            ),
-                        ]
-                    );
-                }
-
-                return $carry;
-            }
+            $multiplier
         );
 
         $orderPositions = resolve_static(OrderPosition::class, 'query')
@@ -208,14 +185,18 @@ class CreateChildOrder extends Component
                 'unit_gross_price',
                 'total_net_price',
                 'total_gross_price',
+                'discount_percentage',
                 'is_net',
             ])
             ->get()
-            ->map(function (OrderPosition $position) use ($maxAmounts) {
+            ->map(function (OrderPosition $position) use ($maxAmounts): OrderPosition {
                 $position->setRelation(
                     'maxAmount',
                     data_get(
-                        array_find($maxAmounts, fn (array $value) => $value['id'] === $position->getKey()),
+                        array_find(
+                            $maxAmounts,
+                            fn (array $value): bool => data_get($value, 'id') === $position->getKey()
+                        ),
                         'signed_amount'
                     )
                 );
@@ -225,12 +206,12 @@ class CreateChildOrder extends Component
 
         foreach ($orderPositions as $orderPosition) {
             $amount = $takeAllWithPercentage
-                ? bcround($orderPosition->maxAmount * ($this->percentage / 100), 2)
+                ? bcround(bcmul($orderPosition->maxAmount, bcdiv($this->percentage, 100)), 2)
                 : $orderPosition->maxAmount;
 
             if (bccomp($amount, 0) === 1) {
                 $this->replicateOrder->order_positions[] = [
-                    'id' => $orderPosition->id,
+                    'id' => $orderPosition->getKey(),
                     'amount' => $amount,
                     'name' => $orderPosition->name,
                     'description' => $orderPosition->description,
@@ -238,6 +219,7 @@ class CreateChildOrder extends Component
                     'unit_gross_price' => $orderPosition->unit_gross_price,
                     'total_net_price' => $orderPosition->total_net_price,
                     'total_gross_price' => $orderPosition->total_gross_price,
+                    'discount_percentage' => $orderPosition->discount_percentage,
                     'is_net' => $orderPosition->is_net,
                     'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
                 ];

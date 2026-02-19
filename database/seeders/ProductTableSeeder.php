@@ -27,12 +27,11 @@ class ProductTableSeeder extends Seeder
         $createdProducts = collect();
         for ($i = 0; $i < 20; $i++) {
             $createdProducts->push(Product::factory()->create([
-                'unit_id' => $units->random()?->id,
-                'tenant_id' => $tenants->random()?->id,
+                'parent_id' => rand(0, 1) ? ($products->isEmpty() ? null : $products->random()->id) : null,
                 'purchase_unit_id' => $units->random()?->id,
                 'reference_unit_id' => $units->random()?->id,
+                'unit_id' => $units->random()?->id,
                 'vat_rate_id' => $vatRates->random()?->id,
-                'parent_id' => rand(0, 1) ? ($products->isEmpty() ? null : $products->random()->id) : null,
             ]));
         }
 
@@ -43,6 +42,7 @@ class ProductTableSeeder extends Seeder
             ->get();
 
         foreach ($createdProducts as $product) {
+            $product->tenants()->attach($tenants->random()?->id);
             $product->productOptions()->sync($productOptions->random(rand(5, count($productOptions))));
             $product->productProperties()
                 ->syncWithPivotValues(
@@ -64,8 +64,8 @@ class ProductTableSeeder extends Seeder
 
             foreach ($priceLists as $priceList) {
                 Price::factory()->create([
-                    'product_id' => $product->id,
                     'price_list_id' => $priceList->id,
+                    'product_id' => $product->id,
                 ]);
             }
         }

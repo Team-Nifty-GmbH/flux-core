@@ -25,6 +25,11 @@ class MyTargetProgresses extends RadialBarChart
     #[Locked]
     public ?int $userId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Targets';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

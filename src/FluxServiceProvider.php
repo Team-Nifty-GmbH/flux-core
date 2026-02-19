@@ -51,7 +51,6 @@ use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
-use Spatie\Translatable\Facades\Translatable;
 use Symfony\Component\Finder\Finder;
 use Throwable;
 
@@ -105,19 +104,14 @@ class FluxServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations',
             __DIR__ . '/../database/settings',
         ]);
-        $this->app->bind(
-            'path.lang',
-            fn () => [__DIR__ . '/../lang', base_path('lang')]
-        );
 
+        $this->loadTranslationsFrom(__DIR__ . '/../lang');
+        $this->loadTranslationsFrom(base_path('lang'));
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+        $this->loadJsonTranslationsFrom(base_path('lang'));
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
         $this->registerExtensions();
-
-        Translatable::fallback(
-            fallbackAny: true,
-        );
 
         app('livewire')->componentHook(SupportFormObjects::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);

@@ -12,6 +12,11 @@ class PurchaseInvoiceApproval extends Component
 {
     use Widgetable;
 
+    public static function getCategory(): ?string
+    {
+        return 'Finance';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

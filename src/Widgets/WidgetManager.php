@@ -138,6 +138,7 @@ class WidgetManager
             'component_name' => $widget,
             'dashboard_component' => $componentClass::dashboardComponent(),
             'label' => $componentClass::getLabel(),
+            'category' => $componentClass::getCategory(),
             'class' => ltrim($componentClass, '\\'),
             'defaultWidth' => method_exists($componentClass, 'getDefaultWidth')
                 ? $componentClass::getDefaultWidth()

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Carbon\Carbon;
 use DateTime;
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
 use FluxErp\Enums\SalutationEnum;
@@ -18,6 +19,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,10 +32,10 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
+class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Communicatable, HasFrontendAttributes, HasTenantAssignment, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Notifiable, Searchable, SoftDeletes;
+        InteractsWithMedia, LogsActivity, Notifiable, Printable, Searchable, SoftDeletes;
 
     public static string $iconName = 'user';
 
@@ -130,6 +132,11 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
         ]);
 
         return implode(', ', $parts) ?: null;
+    }
+
+    public function getEmailTemplateModelType(): ?string
+    {
+        return morph_alias(static::class);
     }
 
     public function getLabel(): ?string
@@ -343,22 +350,26 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables
             return false;
         }
 
-        if (
-            resolve_static(Holiday::class, 'query')
-                ->isHoliday($date, $this->location_id)
-                ->exists()
-        ) {
+        // Only full-day holidays make it a non-work day
+        // Half-day holidays still require work for the other half
+        $holiday = resolve_static(Holiday::class, 'query')
+            ->isHoliday($date, $this->location_id)
+            ->first();
+
+        if ($holiday && ! $holiday->is_half_day) {
             return false;
         }
 
         $weekday = $date->dayOfWeekIso;
         $isWorkDay = $workTimeModel->workTimeModel->schedules()
             ->where('weekday', $weekday)
+            ->where('work_hours', '>', 0)
             ->exists();
 
         // If no schedule exists default to work_days_per_week
         if (! $isWorkDay) {
-            $workDaysPerWeek = $workTimeModel->work_days_per_week ?? ceil($workTimeModel->weekly_hours / 10);
+            $workDaysPerWeek = $workTimeModel->workTimeModel->work_days_per_week
+                ?? ceil($workTimeModel->workTimeModel->weekly_hours / 10);
             for ($i = 1; $i <= $workDaysPerWeek; $i++) {
                 if ($weekday === $i) {
                     return true;

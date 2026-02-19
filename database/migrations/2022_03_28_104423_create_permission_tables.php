@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         $teams = config('permission.teams');
@@ -28,9 +25,11 @@ return new class() extends Migration
             $table->bigIncrements('id'); // permission id
             $table->string('name');       // For MySQL 8.0 use string('name', 125);
             $table->string('guard_name'); // For MySQL 8.0 use string('guard_name', 125);
+            $table->boolean('is_locked')->default(false);
             $table->timestamps();
 
             $table->unique(['name', 'guard_name']);
+            $table->index(['name', 'guard_name']);
         });
 
         Schema::create($tableNames['roles'], function (Blueprint $table) use ($teams, $columnNames): void {
@@ -117,9 +116,6 @@ return new class() extends Migration
             ->forget(config('permission.cache.key'));
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         $tableNames = config('permission.table_names');

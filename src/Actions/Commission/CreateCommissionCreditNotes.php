@@ -37,6 +37,8 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
     public function performAction(): OrderCollection
     {
+        $commissionIds = collect($this->getData('commissions'))->pluck('id')->toArray();
+
         $orderIds = [];
         foreach ($this->agents as $agentId => $agentData) {
             foreach (data_get($agentData, 'tenant_ids') as $tenantId) {
@@ -57,7 +59,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
                 $commissions = resolve_static(Commission::class, 'query')
                     ->where('user_id', $agentId)
-                    ->whereIntegerInRaw('id', $this->data)
+                    ->whereKey($commissionIds)
                     ->whereDoesntHave('creditNoteOrderPosition')
                     ->withWhereHas(
                         'orderPosition',
@@ -103,7 +105,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
         }
 
         return resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw('id', $orderIds)
+            ->whereKey($orderIds)
             ->get();
     }
 
@@ -111,9 +113,11 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
     {
         parent::validateData();
 
+        $commissionIds = collect($this->getData('commissions'))->pluck('id')->toArray();
+
         $errors = [];
         $agents = resolve_static(User::class, 'query')
-            ->whereHas('commissions', fn (Builder $query) => $query->whereIntegerInRaw('id', $this->data))
+            ->whereHas('commissions', fn (Builder $query) => $query->whereKey($commissionIds))
             ->get(['id', 'name', 'contact_id']);
 
         $tenantIds = [];
@@ -121,7 +125,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
             $this->agents[$agent->id] = [
                 'contact_id' => $agent->contact_id,
                 'tenant_ids' => resolve_static(OrderPosition::class, 'query')
-                    ->whereHas('commission', fn (Builder $query) => $query->whereIntegerInRaw('id', $this->data)
+                    ->whereHas('commission', fn (Builder $query) => $query->whereKey($commissionIds)
                         ->where('user_id', $agent->id)
                     )
                     ->distinct('tenant_id')
@@ -129,7 +133,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
                     ->toArray(),
             ];
 
-            $tenantIds = array_merge($tenantIds, $this->agents[$agent->id]['tenant_ids']);
+            $tenantIds = array_merge($tenantIds, data_get($this->agents, $agent->id . '.tenant_ids', []));
 
             if (! $agent->contact) {
                 $errors += [

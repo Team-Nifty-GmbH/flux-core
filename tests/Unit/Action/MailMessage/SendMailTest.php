@@ -443,3 +443,158 @@ test('send mail with custom mail account and queue sends immediately', function 
     // Should NOT be queued
     $fakeMail->assertNotQueued(GenericMail::class);
 });
+
+test('send mail with template in different language', function (): void {
+    Mail::fake();
+
+    $defaultLanguage = FluxErp\Models\Language::factory()->create(['is_default' => true]);
+    $germanLanguage = FluxErp\Models\Language::factory()->create([
+        'name' => 'German',
+        'iso_name' => 'de',
+        'language_code' => 'de_DE',
+        'is_default' => false,
+    ]);
+
+    $template = EmailTemplate::factory()->create([
+        'subject' => 'English Subject',
+        'html_body' => '<p>English Body</p>',
+        'text_body' => 'English Text Body',
+    ]);
+
+    // Create German translation
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $germanLanguage->id,
+        'model_type' => morph_alias(EmailTemplate::class),
+        'model_id' => $template->id,
+        'attribute' => 'subject',
+        'value' => 'Deutscher Betreff',
+    ])->validate()->execute();
+
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $germanLanguage->id,
+        'model_type' => morph_alias(EmailTemplate::class),
+        'model_id' => $template->id,
+        'attribute' => 'html_body',
+        'value' => '<p>Deutscher Inhalt</p>',
+    ])->validate()->execute();
+
+    $action = SendMail::make([
+        'to' => ['german-customer@example.com'],
+        'template_id' => $template->id,
+        'language_id' => $germanLanguage->id,
+    ]);
+
+    $result = $action->validate()->execute();
+
+    expect($result['success'])->toBeTrue();
+
+    Mail::assertSent(GenericMail::class, function ($mail) {
+        return $mail->hasTo('german-customer@example.com');
+    });
+});
+
+test('send mail with template falls back to default language when translation missing', function (): void {
+    Mail::fake();
+
+    $defaultLanguage = FluxErp\Models\Language::factory()->create(['is_default' => true]);
+    $frenchLanguage = FluxErp\Models\Language::factory()->create([
+        'name' => 'French',
+        'iso_name' => 'fr',
+        'language_code' => 'fr_FR',
+        'is_default' => false,
+    ]);
+
+    $template = EmailTemplate::factory()->create([
+        'subject' => 'Default English Subject',
+        'html_body' => '<p>Default English Body</p>',
+        'text_body' => 'Default English Text',
+    ]);
+
+    // No French translation exists - should fall back to default
+
+    $action = SendMail::make([
+        'to' => ['french-customer@example.com'],
+        'template_id' => $template->id,
+        'language_id' => $frenchLanguage->id,
+    ]);
+
+    $result = $action->validate()->execute();
+
+    expect($result['success'])->toBeTrue();
+
+    Mail::assertSent(GenericMail::class, function ($mail) {
+        return $mail->hasTo('french-customer@example.com');
+    });
+});
+
+test('batch emails with different languages use correct translations', function (): void {
+    Mail::fake();
+
+    $defaultLanguage = FluxErp\Models\Language::factory()->create(['is_default' => true]);
+    $germanLanguage = FluxErp\Models\Language::factory()->create([
+        'name' => 'German',
+        'iso_name' => 'de',
+        'language_code' => 'de_DE',
+        'is_default' => false,
+    ]);
+    $spanishLanguage = FluxErp\Models\Language::factory()->create([
+        'name' => 'Spanish',
+        'iso_name' => 'es',
+        'language_code' => 'es_ES',
+        'is_default' => false,
+    ]);
+
+    $template = EmailTemplate::factory()->create([
+        'subject' => 'English Welcome',
+        'html_body' => '<p>Welcome!</p>',
+    ]);
+
+    // German translation
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $germanLanguage->id,
+        'model_type' => morph_alias(EmailTemplate::class),
+        'model_id' => $template->id,
+        'attribute' => 'subject',
+        'value' => 'Willkommen',
+    ])->validate()->execute();
+
+    // Spanish translation
+    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+        'language_id' => $spanishLanguage->id,
+        'model_type' => morph_alias(EmailTemplate::class),
+        'model_id' => $template->id,
+        'attribute' => 'subject',
+        'value' => 'Bienvenido',
+    ])->validate()->execute();
+
+    // Send to German customer
+    $germanResult = SendMail::make([
+        'to' => ['german@example.com'],
+        'template_id' => $template->id,
+        'language_id' => $germanLanguage->id,
+    ])->validate()->execute();
+
+    expect($germanResult['success'])->toBeTrue();
+
+    // Send to Spanish customer
+    $spanishResult = SendMail::make([
+        'to' => ['spanish@example.com'],
+        'template_id' => $template->id,
+        'language_id' => $spanishLanguage->id,
+    ])->validate()->execute();
+
+    expect($spanishResult['success'])->toBeTrue();
+
+    // Send to English customer (default/no language_id)
+    $englishResult = SendMail::make([
+        'to' => ['english@example.com'],
+        'template_id' => $template->id,
+    ])->validate()->execute();
+
+    expect($englishResult['success'])->toBeTrue();
+
+    Mail::assertSent(GenericMail::class, 3);
+    Mail::assertSent(GenericMail::class, fn ($mail) => $mail->hasTo('german@example.com'));
+    Mail::assertSent(GenericMail::class, fn ($mail) => $mail->hasTo('spanish@example.com'));
+    Mail::assertSent(GenericMail::class, fn ($mail) => $mail->hasTo('english@example.com'));
+});

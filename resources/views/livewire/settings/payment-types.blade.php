@@ -27,6 +27,10 @@
             wire:model.boolean="paymentType.requires_manual_transfer"
             :label="__('Requires Manual Transfer')"
         />
+        <x-toggle
+            wire:model.boolean="paymentType.is_cash"
+            :label="__('Is Cash')"
+        />
         <x-select.styled
             :label="__('Tenant')"
             multiple
@@ -49,7 +53,7 @@
         />
         <x-number
             wire:model="paymentType.payment_target"
-            :label="__('Payment Target')"
+            :label="__('Payment Target Days')"
         />
         <x-number
             wire:model="paymentType.payment_discount_target"
@@ -63,6 +67,7 @@
             wire:model="paymentType.description"
             scope="paymentType"
             :label="__('Description')"
+            :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\PaymentType::class)"
         />
     </div>
     <x-slot:footer>

@@ -48,7 +48,7 @@ class BladeVariables extends Component implements EditorDropdownButton, EditorTo
     {
         return [
             new HtmlString(<<<'HTML'
-                <template x-for="variable in Object.values(bladeVariables || {})" :key="variable.value">
+                <template x-for="variable in Object.values(bladeVariables || {})" :key="variable.label">
                     <button
                         type="button"
                         class="flex w-full items-center gap-2 rounded p-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"

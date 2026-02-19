@@ -23,6 +23,11 @@ class Storage extends Component
 
     public ?string $view_cache_space = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'System';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return System::class;

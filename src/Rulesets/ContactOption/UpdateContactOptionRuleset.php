@@ -2,10 +2,11 @@
 
 namespace FluxErp\Rulesets\ContactOption;
 
+use FluxErp\Enums\ContactOptionTypeEnum;
 use FluxErp\Models\ContactOption;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rule;
 
 class UpdateContactOptionRuleset extends FluxRuleset
 {
@@ -22,8 +23,7 @@ class UpdateContactOptionRuleset extends FluxRuleset
             'type' => [
                 'sometimes',
                 'required',
-                'string',
-                Rule::in(['phone', 'email', 'website']),
+                app(EnumRule::class, ['type' => ContactOptionTypeEnum::class]),
             ],
             'label' => 'sometimes|required|string|max:255',
             'value' => 'sometimes|required|string|max:255',

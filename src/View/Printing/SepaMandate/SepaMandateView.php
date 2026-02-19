@@ -3,6 +3,7 @@
 namespace FluxErp\View\Printing\SepaMandate;
 
 use FluxErp\Models\SepaMandate;
+use FluxErp\Models\Tenant;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -18,8 +19,13 @@ class SepaMandateView extends PrintableView
 
     public function render(): View|Factory
     {
+        /** @var Tenant $tenant */
+        $tenant = $this->model->tenant;
+        $tenant->localize($this->model->mainAddress?->language_id);
+
         return view('print::sepa-mandate.sepa-mandate', [
             'model' => $this->model,
+            'tenant' => $tenant,
         ]);
     }
 

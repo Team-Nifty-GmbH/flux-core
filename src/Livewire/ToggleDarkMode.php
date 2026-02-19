@@ -27,6 +27,6 @@ class ToggleDarkMode extends Component
     {
         session()->put('dark', $enabled);
 
-        auth()->user()?->update(['is_dark_mode' => $enabled]);
+        auth()->user()?->update(['has_dark_mode' => $enabled]);
     }
 }

@@ -5,6 +5,7 @@ namespace FluxErp\Listeners\MailMessage;
 use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
+use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\Address;
@@ -15,6 +16,7 @@ use FluxErp\Models\Media;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
+use FluxErp\Settings\TicketSettings;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -125,6 +127,44 @@ class CreateMailExecutedSubscriber
                 /** @var Media $attachment */
                 $attachment->copy($ticket);
             } catch (Throwable) {
+            }
+        }
+
+        if ($templateId = app(TicketSettings::class)->auto_reply_email_template_id) {
+            try {
+                SendMail::make([
+                    'template_id' => $templateId,
+                    'to' => [Str::between($communication->from, '<', '>') ?: $communication->from],
+                    'blade_parameters' => [
+                        'ticket' => $ticket,
+                    ],
+                    'communicatables' => [
+                        [
+                            'model_type' => $ticket->getMorphClass(),
+                            'model_id' => $ticket->getKey(),
+                        ],
+                    ],
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (Throwable $e) {
+                $activity = activity()
+                    ->event('ticket_auto_reply_failed')
+                    ->performedOn($ticket);
+
+                if ($e instanceof ValidationException) {
+                    $activity->withProperties([
+                        'errors' => $e->errors(),
+                        'template_id' => $templateId,
+                    ]);
+                } else {
+                    $activity->withProperties([
+                        'error' => $e->getMessage(),
+                        'template_id' => $templateId,
+                    ]);
+                }
+
+                $activity->log(class_basename($e));
             }
         }
 
