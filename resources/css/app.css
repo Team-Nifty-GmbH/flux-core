@@ -1,144 +1,210 @@
-@import '/node_modules/@fontsource/inter/latin-300.css';
-@import '/node_modules/@fontsource/inter/latin-400.css';
-@import '/node_modules/@fontsource/inter/latin-600.css';
-@import '/node_modules/@fontsource/inter/latin-900.css';
-@import '/node_modules/leaflet/dist/leaflet.css';
-@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.css';
-@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css';
+@import '@fontsource/inter/latin-300.css' layer(base);
+@import '@fontsource/inter/latin-400.css' layer(base);
+@import '@fontsource/inter/latin-600.css' layer(base);
+@import '@fontsource/inter/latin-900.css' layer(base);
+@import '/node_modules/leaflet/dist/leaflet.css' layer(base);
+@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.css' layer(base);
+@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css'
+  layer(base);
 
-@import '/node_modules/gridstack/dist/gridstack.min.css';
-@import './components/grid-stack.css';
-@import './components/apex-charts.css';
-@import './components/full-calendar.css';
+@import '/node_modules/gridstack/dist/gridstack.min.css' layer(base);
+@import './components/grid-stack.css' layer(base);
+@import './components/apex-charts.css' layer(base);
+@import './components/full-calendar.css' layer(base);
 
-@import '/node_modules/@phosphor-icons/web/src/regular/style.css';
+@import '/node_modules/@phosphor-icons/web/src/regular/style.css' layer(base);
 
-@import '/node_modules/filepond/dist/filepond.css';
-@import '/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+@import '/node_modules/filepond/dist/filepond.css' layer(base);
+@import '/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
+  layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-[x-cloak] {
+@config '../../tailwind.config.mjs';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility indent-icon {
+  @apply after:content-['↳'];
+
+  &::before {
+    @apply pr-1;
+  }
+}
+
+@utility sortable-chosen {
+  @apply border-2 border-dashed! border-indigo-500! bg-indigo-100!;
+}
+
+@utility sortable-selected {
+  @apply border-2 border-dashed! border-indigo-500! bg-indigo-100!;
+}
+
+@utility sortable-to {
+  @apply border-2 border-dashed! border-indigo-500! bg-indigo-100!;
+}
+
+@utility text-slate-400 {
+  @apply text-gray-200;
+}
+
+@utility text-gray-400 {
+  @apply text-gray-200;
+}
+
+@utility dropdown-full-w {
+  & > div:first-child {
+    @apply w-full;
+  }
+}
+
+@utility content-editable-placeholder {
+  &:empty:before {
+    content: attr(placeholder);
+    @apply pointer-events-none text-slate-400;
+  }
+}
+
+@utility prose-xs {
+  @apply text-xs;
+}
+
+@utility blade-variable {
+  @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300;
+}
+
+@utility mention {
+  @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300;
+}
+
+@utility blade-variable-pill {
+  @apply inline-flex items-center gap-1 rounded-md bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700 transition-all duration-150 hover:bg-indigo-200 hover:shadow-xs dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-800;
+  user-select: none;
+}
+
+@utility blade-variable-label {
+  @apply inline-block;
+}
+
+@utility suggestion-popup {
+  @apply pointer-events-auto overflow-hidden rounded-md border border-slate-200 bg-slate-100 shadow-lg transition-all dark:border-slate-600 dark:bg-slate-800;
+  max-width: 300px;
+  min-width: 200px;
+}
+
+@utility suggestion-item {
+  @apply relative flex cursor-pointer items-center justify-between px-3 py-2 text-slate-600 duration-150 ease-in-out hover:bg-indigo-500 hover:text-white focus:bg-indigo-100 focus:text-indigo-800 focus:outline-hidden dark:text-slate-400 dark:hover:bg-slate-700 dark:focus:bg-slate-700;
+}
+
+@layer utilities {
+  [x-cloak] {
     display: none !important;
-}
+  }
 
-/* tiptap related --- start --- */
-strong {
+  /* tiptap related --- start --- */
+  strong {
     color: inherit !important;
-}
+  }
 
-.tiptap {
+  .tiptap {
     :first-child {
-        margin-top: 0;
+      margin-top: 0;
     }
 
     p {
-        margin: 0;
+      margin: 0;
     }
 
     /* Table-specific styling */
     table {
-        border-collapse: collapse;
-        margin: 0;
-        overflow: hidden;
-        table-layout: fixed;
-        width: 100%;
+      border-collapse: collapse;
+      margin: 0;
+      overflow: hidden;
+      table-layout: fixed;
+      width: 100%;
 
-        td,
-        th {
-            @apply border border-solid border-gray-300 dark:border-gray-600;
-            box-sizing: border-box;
-            min-width: 1em;
-            padding: 6px 8px;
-            position: relative;
-            vertical-align: top;
+      td,
+      th {
+        @apply border border-solid border-gray-300 dark:border-gray-600;
+        box-sizing: border-box;
+        min-width: 1em;
+        padding: 6px 8px;
+        position: relative;
+        vertical-align: top;
 
-            > * {
-                margin-bottom: 0;
-            }
+        > * {
+          margin-bottom: 0;
         }
+      }
 
-        th {
-            background-color: gray;
-            font-weight: bold;
-            text-align: left;
-        }
+      th {
+        background-color: gray;
+        font-weight: bold;
+        text-align: left;
+      }
 
-        .selectedCell:after {
-            background: gray;
-            opacity: 0.3;
-            content: '';
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            pointer-events: none;
-            position: absolute;
-            z-index: 2;
-        }
+      .selectedCell:after {
+        background: gray;
+        opacity: 0.3;
+        content: '';
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        pointer-events: none;
+        position: absolute;
+        z-index: 2;
+      }
 
-        .column-resize-handle {
-            background-color: gray;
-            bottom: -2px;
-            pointer-events: none;
-            position: absolute;
-            right: -2px;
-            top: 0;
-            width: 4px;
-        }
+      .column-resize-handle {
+        background-color: gray;
+        bottom: -2px;
+        pointer-events: none;
+        position: absolute;
+        right: -2px;
+        top: 0;
+        width: 4px;
+      }
     }
 
     .tableWrapper {
-        margin: 1.5rem 0;
-        overflow-x: auto;
+      margin: 1.5rem 0;
+      overflow-x: auto;
     }
 
     &.resize-cursor {
-        cursor: col-resize;
+      cursor: col-resize;
     }
-}
+  }
 
-.ProseMirror {
+  .ProseMirror {
     @apply text-gray-900 dark:text-white;
-}
+  }
 
-.ProseMirror p {
+  .ProseMirror p {
     @apply text-gray-900 dark:text-white;
-}
+  }
 
-/* tiptap related --- end --- */
+  /* tiptap related --- end --- */
+}
 
 @layer components {
-    .indent-icon {
-        @apply after:content-['↳'];
-    }
-
-    .indent-icon::before {
-        @apply pr-1;
-    }
-
-    .sortable-chosen {
-        @apply border-2 !border-dashed !border-indigo-500 !bg-indigo-100;
-    }
-
-    .sortable-selected {
-        @apply border-2 !border-dashed !border-indigo-500 !bg-indigo-100;
-    }
-
-    .sortable-to {
-        @apply border-2 !border-dashed !border-indigo-500 !bg-indigo-100;
-    }
-
-    .text-slate-400,
-    .text-gray-400 {
-        @apply text-gray-200;
-    }
-
-    .dropdown-full-w > div:first-child {
-        @apply w-full;
-    }
 
     input:read-only {
         @apply bg-gray-50 dark:bg-slate-600;
@@ -152,44 +218,11 @@ strong {
         @apply bg-gray-50 dark:bg-slate-600;
     }
 
-    .content-editable-placeholder:empty:before {
-        content: attr(placeholder);
-        @apply pointer-events-none text-slate-400;
-    }
-
-    .prose-xs {
-        @apply text-xs;
-    }
-
     #map {
         @apply z-0 h-96;
-    }
-
-    .blade-variable,
-    .mention {
-        @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300;
-    }
-
-    .blade-variable-pill {
-        @apply inline-flex items-center gap-1 rounded-md bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700 transition-all duration-150 hover:bg-indigo-200 hover:shadow-sm dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-800;
-        user-select: none;
-    }
-
-    .blade-variable-label {
-        @apply inline-block;
-    }
-
-    .suggestion-popup {
-        @apply pointer-events-auto overflow-hidden rounded-md border border-slate-200 bg-slate-100 shadow-lg transition-all dark:border-slate-600 dark:bg-slate-800;
-        max-width: 300px;
-        min-width: 200px;
-    }
-
-    .suggestion-item {
-        @apply relative flex cursor-pointer items-center justify-between px-3 py-2 text-slate-600 duration-150 ease-in-out hover:bg-indigo-500 hover:text-white focus:bg-indigo-100 focus:text-indigo-800 focus:outline-none dark:text-slate-400 dark:hover:bg-slate-700 dark:focus:bg-slate-700;
     }
 }
 
 .sortable-ghost {
-    @apply border-2 !border-dashed !border-indigo-500 !bg-indigo-100 !opacity-75;
+    @apply border-2 border-dashed! border-indigo-500! bg-indigo-100! opacity-75!;
 }
