@@ -188,12 +188,17 @@ class Cart extends Component
 
     protected function getListeners(): array
     {
-        return [
-            'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
+        $listeners = [
             'cart:add' => 'add',
             'cart:remove' => 'remove',
             'cart:refresh' => 'refresh',
         ];
+
+        if ($cart = $this->cart()) {
+            $listeners['echo-private:' . $cart->broadcastChannel() . ',.CartUpdated'] = 'refresh';
+        }
+
+        return $listeners;
     }
 
     protected function getWatchLists(): void

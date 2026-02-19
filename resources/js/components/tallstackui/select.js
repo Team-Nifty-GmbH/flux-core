@@ -68,6 +68,10 @@ class TallstackUISelect {
         );
     }
 
+    clear() {
+        this.alpineComponent?.clear();
+    }
+
     getSelect() {
         return document
             .getElementById(this.id)

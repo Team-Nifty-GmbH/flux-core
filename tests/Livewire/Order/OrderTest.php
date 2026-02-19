@@ -16,6 +16,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Schedule;
 use FluxErp\Models\Transaction;
 use FluxErp\Models\VatRate;
 use FluxErp\States\Order\DeliveryState\Delivered;
@@ -735,6 +736,91 @@ test('subscription schedule functionality', function (): void {
     ]);
 });
 
+test('cancel subscription immediately deactivates schedule', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $scheduleId = $component->get('schedule.id');
+
+    $component
+        ->call('cancelSubscription', 'immediate')
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $schedule = Schedule::query()->whereKey($scheduleId)->first();
+    expect($schedule)
+        ->is_active->toBeFalse()
+        ->and($schedule->ends_at)->not->toBeNull();
+});
+
+test('cancel subscription next period sets ends_at to due date', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Subscription,
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $scheduleId = $component->get('schedule.id');
+
+    $dueAt = now()->addMonth();
+    Schedule::query()->whereKey($scheduleId)->update(['due_at' => $dueAt]);
+
+    $component
+        ->call('cancelSubscription', 'next_period')
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $schedule = Schedule::query()->whereKey($scheduleId)->first();
+    expect($schedule)
+        ->is_active->toBeTrue()
+        ->and($schedule->ends_at->toDateTimeString())->toBe($dueAt->toDateTimeString());
+});
+
 test('switch tabs', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->assertSet('tab', 'order.order-positions')
@@ -1317,4 +1403,64 @@ test('vat calculation with repeating decimals', function (): void {
     expect($vat19['total_net_price'])->toEqual('66.67');
     expect($vat19['total_vat_price'])->toEqual('12.67');
     // 66.67 * 0.19 = 12.6673
+});
+
+test('refresh invoice address updates address from address model', function (): void {
+    // Update address in database
+    $this->address->update([
+        'company' => 'Updated Company Name',
+        'street' => 'New Street 123',
+        'city' => 'New City',
+    ]);
+
+    // Refresh invoice address
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'invoice')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    // Verify address was updated on order with correct fields
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_invoice['company'])->toEqual('Updated Company Name');
+    expect($refreshedOrder->address_invoice['street'])->toEqual('New Street 123');
+    expect($refreshedOrder->address_invoice['city'])->toEqual('New City');
+});
+
+test('refresh delivery address updates address from address model', function (): void {
+    // Update address in database
+    $this->address->update([
+        'company' => 'Updated Delivery Company',
+        'street' => 'Delivery Street 456',
+        'city' => 'Delivery City',
+    ]);
+
+    // Refresh delivery address
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'delivery')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    // Verify address was updated on order with correct fields
+    $refreshedOrder = $this->order->fresh();
+    expect($refreshedOrder->address_delivery['company'])->toEqual('Updated Delivery Company');
+    expect($refreshedOrder->address_delivery['street'])->toEqual('Delivery Street 456');
+    expect($refreshedOrder->address_delivery['city'])->toEqual('Delivery City');
+});
+
+test('refresh invoice address on locked order fails', function (): void {
+    $this->order->update(['is_locked' => true]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'invoice')
+        ->assertOk()
+        ->assertHasErrors();
+});
+
+test('refresh delivery address on locked order fails', function (): void {
+    $this->order->update(['is_locked' => true]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->call('refreshAddress', 'delivery')
+        ->assertOk()
+        ->assertHasErrors();
 });

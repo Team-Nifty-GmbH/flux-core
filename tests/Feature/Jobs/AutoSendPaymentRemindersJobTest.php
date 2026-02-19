@@ -240,6 +240,246 @@ test('does not send payment reminders for orders at maximum reminder level', fun
     expect(PaymentReminder::query()->where('order_id', $maxLevelOrder->id)->exists())->toBeFalse();
 });
 
+test('falls back to contact invoice address when order address has no email', function (): void {
+    $addressWithoutEmail = Address::factory()
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'email_primary' => null,
+            'is_main_address' => false,
+            'is_invoice_address' => false,
+            'is_delivery_address' => false,
+        ])
+        ->for($this->contact, 'contact')
+        ->create();
+
+    $contactInvoiceAddress = Address::factory()
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'email_primary' => 'invoice@example.com',
+            'is_main_address' => false,
+            'is_invoice_address' => false,
+            'is_delivery_address' => false,
+        ])
+        ->for($this->contact, 'contact')
+        ->create();
+
+    $this->contact->update([
+        'invoice_address_id' => $contactInvoiceAddress->id,
+    ]);
+
+    $order = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $addressWithoutEmail->id,
+            'invoice_number' => Str::uuid(),
+            'is_locked' => true,
+            'balance' => 100.00,
+            'payment_reminder_current_level' => 0,
+            'payment_reminder_next_date' => now()->subDay()->toDateString(),
+            'payment_reminder_days_1' => 14,
+            'payment_reminder_days_2' => 14,
+            'payment_reminder_days_3' => 14,
+        ])
+        ->create();
+
+    $order->update(['balance' => 100.00]);
+
+    $job = new AutoSendPaymentRemindersJob();
+    $job->handle();
+
+    expect(PaymentReminder::query()->where('order_id', $order->id)->exists())->toBeTrue();
+});
+
+test('falls back to contact main address when no invoice addresses have email', function (): void {
+    $addressWithoutEmail = Address::factory()
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'email_primary' => null,
+            'is_main_address' => false,
+            'is_invoice_address' => false,
+            'is_delivery_address' => false,
+        ])
+        ->for($this->contact, 'contact')
+        ->create();
+
+    $order = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $addressWithoutEmail->id,
+            'invoice_number' => Str::uuid(),
+            'is_locked' => true,
+            'balance' => 100.00,
+            'payment_reminder_current_level' => 0,
+            'payment_reminder_next_date' => now()->subDay()->toDateString(),
+            'payment_reminder_days_1' => 14,
+            'payment_reminder_days_2' => 14,
+            'payment_reminder_days_3' => 14,
+        ])
+        ->create();
+
+    $order->update(['balance' => 100.00]);
+
+    $job = new AutoSendPaymentRemindersJob();
+    $job->handle();
+
+    expect(PaymentReminder::query()->where('order_id', $order->id)->exists())->toBeTrue();
+});
+
+test('does not send payment reminders when no address has email', function (): void {
+    $addressWithoutEmail = Address::factory()
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'email_primary' => null,
+            'is_main_address' => false,
+            'is_invoice_address' => false,
+            'is_delivery_address' => false,
+        ])
+        ->for($this->contact, 'contact')
+        ->create();
+
+    $this->contact->update([
+        'main_address_id' => $addressWithoutEmail->id,
+    ]);
+
+    $this->address->update(['email_primary' => null]);
+
+    $order = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $addressWithoutEmail->id,
+            'invoice_number' => Str::uuid(),
+            'is_locked' => true,
+            'balance' => 100.00,
+            'payment_reminder_current_level' => 0,
+            'payment_reminder_next_date' => now()->subDay()->toDateString(),
+        ])
+        ->create();
+
+    $job = new AutoSendPaymentRemindersJob();
+    $job->handle();
+
+    expect(PaymentReminder::query()->where('order_id', $order->id)->exists())->toBeFalse();
+});
+
+test('resolveMailableInvoiceAddress prefers order invoice address', function (): void {
+    $order = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $this->address->id,
+        ])
+        ->create();
+
+    $order->load(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress']);
+
+    expect($order->resolveMailableInvoiceAddress()->getKey())->toBe($this->address->getKey());
+});
+
+test('resolveMailableInvoiceAddress falls back to contact invoice address', function (): void {
+    $addressWithoutEmail = Address::factory()
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'email_primary' => null,
+            'is_main_address' => false,
+            'is_invoice_address' => false,
+            'is_delivery_address' => false,
+        ])
+        ->for($this->contact, 'contact')
+        ->create();
+
+    $contactInvoiceAddress = Address::factory()
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'email_primary' => 'invoice@example.com',
+            'is_main_address' => false,
+            'is_invoice_address' => false,
+            'is_delivery_address' => false,
+        ])
+        ->for($this->contact, 'contact')
+        ->create();
+
+    $this->contact->update([
+        'invoice_address_id' => $contactInvoiceAddress->id,
+    ]);
+
+    $order = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $addressWithoutEmail->id,
+        ])
+        ->create();
+
+    $order->load(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress']);
+
+    expect($order->resolveMailableInvoiceAddress()->getKey())->toBe($contactInvoiceAddress->getKey());
+});
+
+test('resolveMailableInvoiceAddress falls back to contact main address', function (): void {
+    $addressWithoutEmail = Address::factory()
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'email_primary' => null,
+            'is_main_address' => false,
+            'is_invoice_address' => false,
+            'is_delivery_address' => false,
+        ])
+        ->for($this->contact, 'contact')
+        ->create();
+
+    $order = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $addressWithoutEmail->id,
+        ])
+        ->create();
+
+    $order->load(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress']);
+
+    expect($order->resolveMailableInvoiceAddress()->getKey())->toBe($this->address->getKey());
+});
+
 test('processes only specified order ids when provided', function (): void {
     $order1 = Order::factory()
         ->for(Currency::factory(), 'currency')

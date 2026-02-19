@@ -22,6 +22,11 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
 {
     use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget, Widgetable;
 
+    public static function getCategory(): ?string
+    {
+        return 'Orders';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -52,15 +57,17 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
             ->setDateColumn('invoice_date')
             ->setEndingDate($this->getEndPrevious())
             ->setStartingDate($this->getStartPrevious())
-            ->setRange(TimeFrameEnum::Custom);
+            ->setRange($this->timeFrame);
 
         $growth = Value::make($query)
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->getEnd())
-            ->setStartingDate($this->getStart())
             ->setDateColumn('invoice_date')
+            ->setStartingDate($this->getStart())
+            ->setEndingDate($this->getEnd())
+            ->setPreviousStartingDate($this->getStartPrevious())
+            ->setPreviousEndingDate($this->getEndPrevious())
+            ->setRange(TimeFrameEnum::Custom)
             ->withGrowthRate()
-            ->count('total_net_price');
+            ->count();
 
         $revenue = $metric->count();
         $previousRevenue = $previousMetric->count();

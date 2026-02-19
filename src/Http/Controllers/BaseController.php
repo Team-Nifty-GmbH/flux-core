@@ -72,7 +72,7 @@ class BaseController extends Controller
         $includes = [];
         if ($validated['include'] ?? false) {
             $includes = explode(',', trim($validated['include'], " \t\n\r\0\x0B,"));
-            $allowedIncludes = array_diff(array_keys($model->relationships()), ['additionalColumns']);
+            $allowedIncludes = array_keys($model->relationships());
             $notAllowedIncludes = array_diff($includes, $allowedIncludes);
 
             if (count($notAllowedIncludes) > 0) {

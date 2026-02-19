@@ -135,6 +135,10 @@ class UpdateOrderRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Lead::class]),
             ],
 
+            'address_invoice' => [
+                'array',
+                'nullable',
+            ],
             'address_delivery' => [
                 'array',
                 'nullable',

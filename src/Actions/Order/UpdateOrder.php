@@ -44,7 +44,8 @@ class UpdateOrder extends FluxAction
             );
         }
 
-        if (is_array($this->getData('address_delivery'))) {
+        if ($this->getData('address_delivery')) {
+            // Custom address_delivery provided - use its id if present, otherwise null (custom address)
             $this->data['address_delivery_id'] = $this->getData('address_delivery.id');
         }
 

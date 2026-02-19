@@ -58,7 +58,7 @@ class CreateTask extends FluxAction
         }
 
         if ($tags) {
-            $task->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $task->attachTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
         }
 
         return $task->refresh();

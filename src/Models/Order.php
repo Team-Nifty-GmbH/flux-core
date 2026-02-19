@@ -2,11 +2,14 @@
 
 namespace FluxErp\Models;
 
+use Carbon\Carbon;
 use Exception;
+use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
@@ -16,6 +19,7 @@ use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Rules\Numeric;
+use FluxErp\Settings\SubscriptionSettings;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\Open;
@@ -31,7 +35,6 @@ use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
-use FluxErp\Traits\Model\HasRelatedModel;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
@@ -41,6 +44,7 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
+use FluxErp\View\Printing\Order\CancellationConfirmation;
 use FluxErp\View\Printing\Order\DeliveryNote;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
@@ -66,11 +70,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
+class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasStates, HasTenantAssignment,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -83,6 +87,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     protected array $cascadeDeletes = [
         'orderPositions',
+        'schedules',
     ];
 
     protected ?string $detailRouteName = 'orders.id';
@@ -150,7 +155,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                 'contact_id',
                 'is_locked',
             ],
-            'sortableAttributes' => ['*'],
         ];
     }
 
@@ -168,12 +172,67 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         ];
     }
 
+    public static function fromCalendarEvent(array $event, string $action): UpdateOrder
+    {
+        return UpdateOrder::make([
+            'id' => data_get($event, 'id'),
+            'system_delivery_date' => data_get($event, 'start'),
+            'system_delivery_date_end' => data_get($event, 'end'),
+        ]);
+    }
+
+    public static function toCalendar(): array
+    {
+        $bluePrint = [
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'other',
+            'isVirtual' => true,
+            'color' => '#3b82f6',
+        ];
+
+        return [
+            array_merge(
+                $bluePrint,
+                [
+                    'id' => base64_encode(morph_alias(static::class)),
+                    'modelType' => morph_alias(static::class),
+                    'name' => __('Orders'),
+                    'hasNoEvents' => true,
+                    'children' => resolve_static(OrderType::class, 'query')
+                        ->where('is_active', true)
+                        ->get([
+                            'id',
+                            'name',
+                        ])
+                        ->map(fn (OrderType $orderType) => array_merge(
+                            $bluePrint,
+                            [
+                                'id' => base64_encode(morph_alias(static::class) . ':' . $orderType->getKey()),
+                                'modelType' => morph_alias(static::class),
+                                'name' => $orderType->name,
+                                'order_type_id' => $orderType->getKey(),
+                            ]
+                        ))
+                        ->values()
+                        ->toArray(),
+                ]
+            ),
+        ];
+    }
+
     protected static function booted(): void
     {
         static::saving(function (Order $order): void {
-            if ($order->isDirty('address_invoice_id')) {
-                $addressInvoice = $order->addressInvoice()->first();
-                $order->address_invoice = $addressInvoice;
+            if ($order->isDirty('address_invoice_id') && $order->address_invoice_id) {
+                $addressInvoice = $order->addressInvoice()->with('country')->first();
+
+                if (! $order->exists || ! $order->address_invoice) {
+                    $order->address_invoice = $addressInvoice;
+                }
 
                 // Get additional attributes from address if not explicitly changed
                 $order->language_id = (! $addressInvoice->language_id || $order->isDirty('language_id'))
@@ -197,9 +256,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
             if ($order->isDirty('address_delivery_id')
                 && $order->address_delivery_id
-                && ! $order->isDirty('address_delivery')
+                && ! $order->address_delivery
             ) {
-                $order->address_delivery = $order->addressDelivery()->first();
+                $order->address_delivery = $order->addressDelivery()->with('country')->first();
             }
 
             // reset to original
@@ -373,6 +432,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         ];
     }
 
+    public function mappableDeliveryAddress(): array|object|null
+    {
+        if (data_get($this->address_delivery, 'latitude') && data_get($this->address_delivery, 'longitude')) {
+            return $this->address_delivery;
+        }
+
+        if ($this->addressDelivery?->latitude && $this->addressDelivery?->longitude) {
+            return $this->addressDelivery;
+        }
+
+        return $this->address_delivery ?? $this->addressDelivery;
+    }
+
     public function addressDelivery(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'address_delivery_id');
@@ -437,15 +509,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function calculateDiscounts(): static
     {
+        $multiplier = $this->orderType?->order_type_enum?->multiplier() ?? 1;
+
         $this->total_net_price = bcround(
             $this->discounts()
                 ->ordered()
                 ->get(['id', 'discount', 'is_percentage'])
                 ->reduce(
-                    function (string|float|int $previous, Discount $discount): string|float|int {
+                    function (string|float|int $previous, Discount $discount) use ($multiplier): string|float|int {
                         $new = $discount->is_percentage
-                            ? max(0, discount($previous, $discount->discount))
-                            : max(0, bcsub($previous, $discount->discount, 9));
+                            ? discount($previous, $discount->discount)
+                            : bcsub($previous, $discount->discount, 9);
+
+                        $new = bccomp($multiplier, 1) === 0 ? max(0, $new) : min(0, $new);
 
                         $discount->update([
                             'discount_percentage' => diff_percentage($previous, $new),
@@ -496,12 +572,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         } else {
             if (
                 bccomp(
-                    bcround(
-                        $this->transactions()
-                            ->withPivot('amount')
-                            ->sum('order_transaction.amount'),
-                        2
-                    ),
+                    bcround($this->totalPaid(), 2),
                     bcround($this->total_gross_price, 2),
                     2
                 ) === 0
@@ -595,12 +666,15 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
+            ->reorder()
             ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
             ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage, vat_rate_id')
             ->get()
-            ->keyBy('vat_rate_percentage');
+            ->keyBy(fn (OrderPosition $item) => $item->vat_rate_id ?? $item->vat_rate_percentage);
 
-        $baseAmounts = $positionsByVatRate->map(fn (OrderPosition $item) => $item->total_net_price);
+        $baseAmounts = $positionsByVatRate->mapWithKeys(
+            fn (OrderPosition $item) => [($item->vat_rate_id ?? $item->vat_rate_percentage) => $item->total_net_price]
+        );
 
         foreach ($this->discounts()->ordered()->get() as $discount) {
             if ($discount->is_percentage) {
@@ -645,7 +719,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
                     'total_net_price' => bcround($item->total_net_price ?? 0, 2),
                     'total_discount' => bcround(
                         bcsub(
-                            $baseAmounts->get($item->vat_rate_percentage) ?? 0,
+                            $baseAmounts->get($item->vat_rate_id ?? $item->vat_rate_percentage) ?? 0,
                             $item->total_net_price,
                             9
                         ),
@@ -748,43 +822,17 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
 
     public function getPrintViews(): array
     {
-        // This has to be done this way, as this method is also called on order types settings with an empty order.
-        if ($this->orderType?->order_type_enum->isPurchase()) {
-            $printViews = [
-                'supplier-order' => SupplierOrder::class,
-            ];
-        } else {
-            $printViews = [
-                'invoice' => Invoice::class,
-                'final-invoice' => FinalInvoice::class,
-                'offer' => Offer::class,
-                'order-confirmation' => OrderConfirmation::class,
-                'retoure' => Retoure::class,
-                'refund' => Refund::class,
-                'delivery-note' => DeliveryNote::class,
-            ];
-        }
-
-        if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
-            $children = $this->children()
-                ->pluck('invoice_number')
-                ->toArray();
-
-            if (
-                $children
-                && count($children) === count(array_filter($children))
-            ) {
-                // If all children have an invoice number, only show final invoice
-                unset($printViews['invoice']);
-            } elseif ($children) {
-                // If the order has children, but not all have an invoice number, remove invoice and final invoice
-                unset($printViews['invoice'], $printViews['final-invoice']);
-            }
-        } elseif ($this->orderType) {
-            unset($printViews['final-invoice']);
-        }
-
-        return $printViews;
+        return [
+            'invoice' => Invoice::class,
+            'final-invoice' => FinalInvoice::class,
+            'offer' => Offer::class,
+            'order-confirmation' => OrderConfirmation::class,
+            'retoure' => Retoure::class,
+            'refund' => Refund::class,
+            'delivery-note' => DeliveryNote::class,
+            'cancellation-confirmation' => CancellationConfirmation::class,
+            'supplier-order' => SupplierOrder::class,
+        ];
     }
 
     public function getSerialNumber(string|array $types, ?int $tenantId = null): static
@@ -956,6 +1004,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->singleFile()
             ->readOnly();
 
+        $this->addMediaCollection('refund')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
+            ->singleFile()
+            ->readOnly();
+
         $this->addMediaCollection('payment-reminders')
             ->acceptsMimeTypes(['application/pdf'])
             ->readOnly();
@@ -970,6 +1023,52 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     {
         $printViews = $this->printableResolvePrintViews();
 
+        // This has to be done this way, as this method is also called on order types settings with an empty order.
+        if ($this->orderType?->order_type_enum->isPurchase()) {
+            $printViews = array_intersect_assoc(
+                $printViews,
+                array_merge(['supplier-order' => SupplierOrder::class], static::$registeredPrintViews)
+            );
+        } else {
+            $printViews = array_intersect_assoc(
+                $printViews,
+                array_merge(
+                    [
+                        'invoice' => Invoice::class,
+                        'final-invoice' => FinalInvoice::class,
+                        'offer' => Offer::class,
+                        'order-confirmation' => OrderConfirmation::class,
+                        'retoure' => Retoure::class,
+                        'refund' => Refund::class,
+                        'delivery-note' => DeliveryNote::class,
+                        'cancellation-confirmation' => $this->orderType?->order_type_enum?->isSubscription()
+                            ? CancellationConfirmation::class
+                            : null,
+                    ],
+                    static::$registeredPrintViews
+                )
+            );
+        }
+
+        if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
+            $children = $this->children()
+                ->pluck('invoice_number')
+                ->toArray();
+
+            if (
+                $children
+                && count($children) === count(array_filter($children))
+            ) {
+                // If all children have an invoice number, only show final invoice
+                unset($printViews['invoice']);
+            } elseif ($children) {
+                // If the order has children, but not all have an invoice number, remove invoice and final invoice
+                unset($printViews['invoice'], $printViews['final-invoice']);
+            }
+        } elseif ($this->orderType) {
+            unset($printViews['final-invoice']);
+        }
+
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
     }
 
@@ -981,6 +1080,41 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function schedules(): BelongsToMany
     {
         return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
+    }
+
+    public function calculateSubscriptionEndDate(): Carbon
+    {
+        $schedule = $this->schedules()->first();
+
+        if (! $schedule) {
+            return now();
+        }
+
+        $settings = app(SubscriptionSettings::class);
+        $parameters = $schedule->parameters ?? [];
+
+        $noticeValue = $parameters['cancellationNoticeValue'] ?? $settings->default_cancellation_notice_value;
+        $noticeUnit = $parameters['cancellationNoticeUnit'] ?? $settings->default_cancellation_notice_unit;
+
+        $minDurationValue = $parameters['minimumDurationValue'] ?? $settings->default_minimum_duration_value;
+        $minDurationUnit = $parameters['minimumDurationUnit'] ?? $settings->default_minimum_duration_unit;
+
+        $now = now();
+        $nextRenewal = $schedule->due_at ?? $now;
+        $cancellationDeadline = $nextRenewal->copy()->sub($noticeUnit, $noticeValue);
+
+        $endFromNotice = $now->gt($cancellationDeadline)
+            ? ($schedule->ends_at ?? $nextRenewal)
+            : $nextRenewal;
+
+        if ($minDurationValue > 0) {
+            $endFromMinDuration = Carbon::parse($this->order_date)
+                ->add($minDurationUnit, $minDurationValue);
+
+            return $endFromNotice->gt($endFromMinDuration) ? $endFromNotice : $endFromMinDuration;
+        }
+
+        return $endFromNotice;
     }
 
     public function scopePaid(Builder $query): Builder
@@ -1020,6 +1154,28 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             ->whereNot('balance', 0);
     }
 
+    public function scopeWhereHasMailableInvoiceAddress(Builder $query): Builder
+    {
+        return $query
+            ->with(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                ->orWhereHas('contact', fn (Builder $query) => $query
+                    ->whereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                )
+            );
+    }
+
+    public function resolveMailableInvoiceAddress(): ?Address
+    {
+        return match (true) {
+            filled($this->addressInvoice?->email_primary) => $this->addressInvoice,
+            filled($this->contact?->invoiceAddress?->email_primary) => $this->contact->invoiceAddress,
+            default => $this->contact?->mainAddress,
+        };
+    }
+
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
@@ -1033,8 +1189,16 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
     public function totalPaid(): string|float|int
     {
         return $this->transactions()
-            ->withPivot('amount')
-            ->sum('order_transaction.amount');
+            ->withPivot(['amount', 'order_currency_amount'])
+            ->get()
+            ->reduce(
+                fn (string $carry, Transaction $transaction) => bcadd(
+                    $carry,
+                    $transaction->pivot->order_currency_amount ?? $transaction->pivot->amount,
+                    9
+                ),
+                '0'
+            );
     }
 
     public function transactions(): BelongsToMany
@@ -1062,6 +1226,54 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             'id',
             'vat_rate_id'
         );
+    }
+
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('system_delivery_date', [$start, $end])
+                ->orWhereBetween('system_delivery_date_end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('system_delivery_date', '<=', $end)
+                        ->where('system_delivery_date_end', '>=', $start);
+                });
+        });
+
+        if ($orderTypeId = data_get($info, 'order_type_id')) {
+            $builder->where('order_type_id', $orderTypeId);
+        }
+    }
+
+    public function toCalendarEvent(?array $info = null): array
+    {
+        $isEditable = ! $this->is_locked;
+
+        return [
+            'id' => $this->getKey(),
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $this->getLabel(),
+            'start' => $this->system_delivery_date?->toDateTimeString(),
+            'end' => $this->system_delivery_date_end?->endOfDay()->toDateTimeString(),
+            'status' => $this->state::$name ?? null,
+            'description' => $this->header,
+            'extendedProps' => [
+                'appendTitle' => $this->state?->badge(),
+                'modelUrl' => $this->getUrl(),
+                'modelLabel' => $this->getLabel(),
+            ],
+            'allDay' => true,
+            'editable' => $isEditable,
+            'startEditable' => $isEditable,
+            'durationEditable' => $isEditable,
+            'is_editable' => $isEditable,
+            'is_public' => false,
+            'is_repeatable' => false,
+        ];
     }
 
     protected function makeAllSearchableUsing(Builder $query): Builder

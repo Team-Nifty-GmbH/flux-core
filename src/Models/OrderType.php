@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
@@ -15,8 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderType extends FluxModel
 {
-    use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity,
-        SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
+        LogsActivity, SoftDeletes;
 
     public static function hasPermission(): bool
     {
@@ -49,5 +50,14 @@ class OrderType extends FluxModel
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+            'document_header',
+            'document_footer',
+        ];
     }
 }

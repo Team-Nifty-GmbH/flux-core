@@ -9,6 +9,10 @@
         margin-bottom: 2px;
     }
 
+    p:empty {
+        min-height: 1em;
+    }
+
     li {
         list-style-type: disc;
     }

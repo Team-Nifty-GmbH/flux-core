@@ -7,6 +7,7 @@ use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Events\Task\TaskReminderEvent;
 use FluxErp\Models\Task;
 use FluxErp\States\Task\TaskState;
+use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 
 class SendTaskRemindersJob implements Repeatable, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable, TracksSchedule;
 
     public function __construct() {}
 
@@ -41,6 +42,11 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
     public static function parameters(): array
     {
         return [];
+    }
+
+    public static function withoutOverlapping(): bool
+    {
+        return true;
     }
 
     public function handle(): void

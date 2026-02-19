@@ -4,17 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAddressProductTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
         Schema::create('address_product', function (Blueprint $table): void {
-            $table->unsignedBigInteger('address_id');
-            $table->unsignedBigInteger('product_id');
+            $table->id('pivot_id');
+            $table->foreignId('address_id')->constrained('addresses')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
 
-            $table->primary(['address_id', 'product_id']);
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('product_id')->references('id')->on('products');
+            $table->unique(['address_id', 'product_id']);
         });
     }
 
@@ -22,4 +21,4 @@ class CreateAddressProductTable extends Migration
     {
         Schema::dropIfExists('address_product');
     }
-}
+};

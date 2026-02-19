@@ -10,6 +10,7 @@ use FluxErp\Livewire\Forms\EmailTemplateForm;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
@@ -21,7 +22,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class EmailTemplates extends EmailTemplateList
 {
-    use DataTableHasFormEdit, WithFilePond {
+    use DataTableHasFormEdit, SupportsLocalization, WithFilePond {
         DataTableHasFormEdit::save as baseSave;
         DataTableHasFormEdit::edit as baseEdit;
     }

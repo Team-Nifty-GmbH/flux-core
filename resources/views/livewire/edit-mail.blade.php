@@ -23,6 +23,15 @@
                 $event.target.value = null
             }
         },
+        get isMultiGroup() {
+            return $wire.groupKeys.length > 1
+        },
+        get isLastGroup() {
+            return $wire.currentGroupIndex >= $wire.groupKeys.length - 1
+        },
+        get isFirstGroup() {
+            return $wire.currentGroupIndex <= 0
+        },
     }"
 >
     <x-modal
@@ -31,13 +40,32 @@
         x-on:close="$wire.clear()"
         persistent
     >
+        <x-slot:title>{{ __('Email') }}</x-slot>
         <div class="flex flex-col gap-2">
+            <div x-cloak x-show="isMultiGroup" class="flex flex-col gap-2">
+                <x-alert
+                    color="amber"
+                    :text="__('All emails will be sent after the last group')"
+                />
+                <div class="flex items-center gap-2 text-sm">
+                    <x-badge color="indigo">
+                        <x-slot:text>
+                            <span x-text="$wire.currentGroupLabel"></span>
+                        </x-slot>
+                    </x-badge>
+                    <span class="text-gray-500">
+                        <span x-text="$wire.currentGroupRecipientCount"></span> {{ __('recipient(s)') }}
+                    </span>
+                    <span class="text-gray-400">·</span>
+                    <span class="text-gray-500" x-text="'{{ __('Group') }} ' + ($wire.currentGroupIndex + 1) + '/' + $wire.groupKeys.length"></span>
+                </div>
+            </div>
 
             <div class="flex flex-col gap-1.5">
                 <x-label :label="__('To')" />
                 <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                     <template x-for="to in $wire.mailMessage.to || []">
-                        <x-badge flat color="indigo" cl>
+                        <x-badge flat color="indigo">
                             <x-slot:text>
                                 <span x-text="to"></span>
                             </x-slot>
@@ -68,7 +96,7 @@
                 <x-label :label="__('CC')" />
                 <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                     <template x-for="cc in $wire.mailMessage.cc || []">
-                        <x-badge flat color="indigo" cl>
+                        <x-badge flat color="indigo">
                             <x-slot:text>
                                 <span x-text="cc"></span>
                             </x-slot>
@@ -78,7 +106,7 @@
                             >
                                 <button
                                     type="button"
-                                    x-on:click="$wire.mailMessage.cc.splice($wire.mailMessage.cc.indexOf(to), 1)"
+                                    x-on:click="$wire.mailMessage.cc.splice($wire.mailMessage.cc.indexOf(cc), 1)"
                                 >
                                     <x-icon name="x-mark" class="h-4 w-4" />
                                 </button>
@@ -97,7 +125,7 @@
                 <x-label :label="__('BCC')" />
                 <div class="flex gap-1">
                     <template x-for="bcc in $wire.mailMessage.bcc || []">
-                        <x-badge flat color="indigo" cl>
+                        <x-badge flat color="indigo">
                             <x-slot:text>
                                 <span x-text="bcc"></span>
                             </x-slot>
@@ -107,7 +135,7 @@
                             >
                                 <button
                                     type="button"
-                                    x-on:click="$wire.mailMessage.bcc.splice($wire.mailMessage.bcc.indexOf(to), 1)"
+                                    x-on:click="$wire.mailMessage.bcc.splice($wire.mailMessage.bcc.indexOf(bcc), 1)"
                                 >
                                     <x-icon name="x-mark" class="h-4 w-4" />
                                 </button>
@@ -195,6 +223,8 @@
         </div>
         <x-slot:footer>
             <x-button
+                x-cloak
+                x-show="! isMultiGroup"
                 color="secondary"
                 light
                 x-on:click="$modalClose('edit-mail')"
@@ -202,6 +232,34 @@
                 :text="__('Cancel')"
             />
             <x-button
+                x-cloak
+                x-show="isMultiGroup"
+                color="secondary"
+                light
+                wire:click="cancelMultiGroup"
+                class="mr-2"
+                :text="__('Cancel')"
+            />
+            <x-button
+                x-cloak
+                x-show="isMultiGroup && ! isFirstGroup"
+                color="secondary"
+                loading="previousGroup"
+                wire:click="previousGroup"
+                :text="__('Back')"
+            />
+            <x-button
+                x-cloak
+                x-show="isMultiGroup && ! isLastGroup"
+                color="indigo"
+                loading="nextGroup"
+                wire:click="nextGroup"
+                class="ml-auto"
+                :text="__('Continue')"
+            />
+            <x-button
+                x-cloak
+                x-show="! isMultiGroup || isLastGroup"
                 color="indigo"
                 loading="send"
                 wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})"

@@ -10,6 +10,10 @@ function apexCharts($wire) {
         chartType: null,
         livewireOptions: {},
         height: null,
+        widgetOptions: [],
+        async loadWidgetOptions() {
+            this.widgetOptions = await $wire.getWidgetOptions();
+        },
         init() {
             this.$el.setAttribute('apex_chart', '');
 

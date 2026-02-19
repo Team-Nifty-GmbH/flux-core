@@ -18,8 +18,8 @@ class UserTableSeeder extends Seeder
 
         User::factory(10)
             ->create([
-                'password' => $password,
                 'language_id' => fn () => $languages->random()->id,
+                'password' => $password,
             ])
             ->each(function (User $user): void {
                 $user->assignRole('Super Admin');

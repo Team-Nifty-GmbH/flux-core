@@ -86,7 +86,7 @@ test('delete industry', function (): void {
     $response->assertNoContent();
 
     $industry = $this->industries[0]->fresh();
-    expect($industry)->toBeNull();
+    expect($industry->trashed())->toBeTrue();
 });
 
 test('delete industry not found', function (): void {

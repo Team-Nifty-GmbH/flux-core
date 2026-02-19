@@ -32,6 +32,11 @@ class Database extends Component
 
     public ?array $tables = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'System';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return System::class;

@@ -10,7 +10,10 @@ return new class() extends Migration
     {
         Schema::create('tokens', function (Blueprint $table): void {
             $table->id();
+            $table->string('name')->nullable();
+            $table->text('description')->nullable();
             $table->string('url')->nullable();
+            $table->json('abilities')->nullable();
             $table->unsignedInteger('max_uses')->nullable();
             $table->unsignedInteger('uses')->nullable();
             $table->timestamp('expires_at')->nullable();

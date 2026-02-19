@@ -20,6 +20,11 @@ class Session extends Component
 
     public ?string $secure = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'System';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return System::class;

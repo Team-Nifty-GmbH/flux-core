@@ -10,6 +10,11 @@ class UserTargetProgresses extends MyTargetProgresses
 {
     public ?int $userId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Targets';
+    }
+
     public function render(): View|Factory
     {
         return view('flux::livewire.widgets.user-target-progresses');

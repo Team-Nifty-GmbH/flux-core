@@ -36,7 +36,7 @@ class UpdateUserRoles extends FluxAction
             ->whereKey($this->data['user_id'])
             ->first();
         $roles = Role::query()
-            ->whereIntegerInRaw('id', $this->data['roles'])
+            ->whereKey($this->data['roles'])
             ->get();
 
         if ($this->data['sync'] ?? false) {

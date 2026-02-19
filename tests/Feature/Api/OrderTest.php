@@ -114,6 +114,34 @@ test('create order', function (): void {
     expect($dbOrder->payment_reminder_days_3)->toEqual($order['payment_reminder_days_3']);
 });
 
+test('create order fills address_delivery from address_delivery_id', function (): void {
+    $order = [
+        'address_invoice_id' => $this->addresses[0]->id,
+        'address_delivery_id' => $this->addresses[1]->id,
+        'tenant_id' => $this->tenants[0]->id,
+        'language_id' => $this->languages[0]->id,
+        'order_type_id' => $this->orderTypes[0]->id,
+        'payment_type_id' => $this->paymentTypes[0]->id,
+        'price_list_id' => $this->priceLists[0]->id,
+        'order_date' => date('Y-m-d'),
+    ];
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/orders', $order);
+    $response->assertCreated();
+
+    $responseOrder = json_decode($response->getContent())->data;
+    $dbOrder = Order::query()
+        ->whereKey($responseOrder->id)
+        ->first();
+
+    expect($dbOrder->address_delivery)->not->toBeNull()
+        ->and($dbOrder->address_delivery['id'])->toEqual($this->addresses[1]->id)
+        ->and($dbOrder->address_delivery_id)->toEqual($this->addresses[1]->id);
+});
+
 test('create order validation fails', function (): void {
     $order = [
         'language_id' => $this->languages[0]->id,
@@ -401,4 +429,34 @@ test('update order validation fails', function (): void {
 
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
     $response->assertUnprocessable();
+});
+
+test('update order address delivery with id validates correctly', function (): void {
+    // Create a new address with an ID that doesn't match any order ID
+    // This tests the fix for the ExistsWithForeign bug where it used the
+    // nested address ID instead of the root order ID for base table lookup
+    $newAddress = Address::factory()->create([
+        'tenant_id' => $this->tenants[0]->getKey(),
+        'contact_id' => $this->orders[0]->contact_id,
+    ]);
+
+    // Ensure address ID is different from order ID (the bug scenario)
+    expect($newAddress->getKey())->not->toBe($this->orders[0]->getKey());
+
+    $order = [
+        'id' => $this->orders[0]->getKey(),
+        'address_delivery' => [
+            'id' => $newAddress->getKey(),
+            'company' => $newAddress->company,
+            'street' => $newAddress->street,
+            'city' => $newAddress->city,
+            'zip' => $newAddress->zip,
+        ],
+    ];
+
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->put('/api/orders', $order);
+    $response->assertOk();
 });

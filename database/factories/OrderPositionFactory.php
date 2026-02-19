@@ -32,9 +32,9 @@ class OrderPositionFactory extends Factory
             'name' => fake()->jobTitle(),
             'description' => fake()->paragraph(),
 
-            'is_net' => fake()->boolean(90),
-            'is_free_text' => fake()->boolean(15),
             'is_alternative' => fake()->boolean(15),
+            'is_free_text' => fake()->boolean(15),
+            'is_net' => fake()->boolean(90),
         ];
     }
 }

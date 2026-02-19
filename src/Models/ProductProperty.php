@@ -39,7 +39,7 @@ class ProductProperty extends FluxModel
         return $this->belongsToMany(
             Product::class,
             'product_product_property',
-            'product_prop_id',
+            'product_property_id',
             'product_id'
         );
     }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Livewire\Dashboard;
 
+use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
@@ -20,10 +21,13 @@ trait RendersWidgets
 
     public array $availableWidgets = [];
 
+    public array $availableWidgetsTree = [];
+
     public array $params = [
         'timeFrame' => TimeFrameEnum::ThisMonth,
-        'start' => null,
-        'end' => null,
+        'dateRange' => [],
+        'comparisonType' => ComparisonTypeEnum::Auto,
+        'comparisonRange' => [],
     ];
 
     public bool $sync = false;
@@ -48,6 +52,7 @@ trait RendersWidgets
     public function mountRendersWidgets(): void
     {
         $this->availableWidgets = $this->filterWidgets(Widget::all());
+        $this->availableWidgetsTree = $this->availableWidgetsTree();
         $this->widgets();
     }
 
@@ -114,6 +119,7 @@ trait RendersWidgets
 
     public function updatedParams(): void
     {
+        $this->dispatch('dashboard-params-updated', params: $this->params);
         $this->skipRender();
     }
 
@@ -161,6 +167,40 @@ trait RendersWidgets
     public function wireModel(): string
     {
         return 'params';
+    }
+
+    protected function availableWidgetsTree(): array
+    {
+        $toNode = fn (array $widget) => [
+            'id' => 'widget-' . $widget['component_name'],
+            'label' => __($widget['label']),
+            'component_name' => $widget['component_name'],
+        ];
+
+        $widgets = collect($this->availableWidgets);
+
+        $categorized = $widgets
+            ->whereNotNull('category')
+            ->groupBy('category')
+            ->sortKeys()
+            ->map(fn ($children, $category) => [
+                'id' => 'category-' . $category,
+                'label' => __($category),
+                'children' => $children
+                    ->map($toNode)
+                    ->sortBy('label', SORT_STRING | SORT_FLAG_CASE)
+                    ->values()
+                    ->all(),
+            ])
+            ->values();
+
+        $uncategorized = $widgets
+            ->whereNull('category')
+            ->map($toNode)
+            ->sortBy('label', SORT_STRING | SORT_FLAG_CASE)
+            ->values();
+
+        return $categorized->merge($uncategorized)->all();
     }
 
     protected function filterWidgets(array $widgets): array

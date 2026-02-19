@@ -55,7 +55,7 @@ class TestServiceProvider extends ServiceProvider
                             string $eventName,
                             array $params
                         ) use ($title, $type, $description, $expandable, $timeout, $persistent, $id) {
-                            return array_key_exists('component', $params)
+                            return array_key_exists('reference', $params)
                                 && (is_null($type) || data_get($params, 'type') === $type)
                                 && (is_null($title) || data_get($params, 'title') === $title)
                                 && (is_null($description) || data_get($params, 'description') === $description)

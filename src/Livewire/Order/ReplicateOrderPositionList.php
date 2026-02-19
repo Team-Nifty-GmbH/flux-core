@@ -2,17 +2,22 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Traits\CalculatesPositionAvailability;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\ComponentAttributeBag;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class ReplicateOrderPositionList extends OrderPositionList
 {
+    use CalculatesPositionAvailability;
+
     public array $alreadyTakenPositions = [];
 
     public array $enabledCols = [
@@ -30,6 +35,9 @@ class ReplicateOrderPositionList extends OrderPositionList
     public bool $isSelectable = true;
 
     public ?int $orderId;
+
+    #[Locked]
+    public ?string $type = null;
 
     #[Modelable]
     public array $selected = [];
@@ -88,53 +96,25 @@ class ReplicateOrderPositionList extends OrderPositionList
             ->pluck('id')
             ->toArray();
 
-        $signedAmounts = DB::select(
-            'WITH RECURSIVE siblings AS (
-                SELECT id, origin_position_id, signed_amount
-                FROM order_positions
-                WHERE order_id = ' . $this->orderId
-            . ' AND id IN (' . implode(',', $positionIds) . ')'
-            . ' UNION ALL
-                SELECT op.id, op.origin_position_id, op.signed_amount
-                FROM order_positions op
-                INNER JOIN siblings s ON s.id = op.origin_position_id
-                WHERE op.deleted_at IS NULL
-            )
-            SELECT * FROM siblings'
-        );
-
-        $maxAmounts = array_reduce(
-            $signedAmounts,
-            function (?array $carry, object $item) {
-                $parentKey = array_find_key(
-                    $carry ?? [],
-                    fn (array $value) => ! is_null($item->origin_position_id)
-                        && in_array(
-                            $item->origin_position_id,
-                            [
-                                $value['id'],
-                                $value['origin_position_id'],
-                            ]
-                        )
-                );
-
-                if (is_null($parentKey)) {
-                    $carry[] = (array) $item;
-                } else {
-                    $carry[$parentKey] = array_merge(
-                        $carry[$parentKey],
-                        [
-                            'origin_position_id' => $item->id,
-                            'signed_amount' => bcsub(
-                                data_get($carry, $parentKey . '.signed_amount'),
-                                $item->signed_amount
-                            ),
-                        ]
-                    );
-                }
-
-                return $carry;
-            }
+        $multiplier = OrderTypeEnum::tryFrom($this->type)
+            ?->multiplier()
+            ?? 1;
+        $maxAmounts = $this->calculateMaxAmounts(
+            DB::select(
+                'WITH RECURSIVE siblings AS (
+                    SELECT id, origin_position_id, signed_amount
+                    FROM order_positions
+                    WHERE order_id = ' . $this->orderId
+                . ' AND id IN (' . implode(',', $positionIds) . ')'
+                . ' UNION ALL
+                    SELECT op.id, op.origin_position_id, op.signed_amount
+                    FROM order_positions op
+                    INNER JOIN siblings s ON s.id = op.origin_position_id
+                    WHERE op.deleted_at IS NULL
+                )
+                SELECT * FROM siblings'
+            ),
+            $multiplier
         );
 
         foreach ($tree as $key => &$item) {
@@ -143,7 +123,14 @@ class ReplicateOrderPositionList extends OrderPositionList
             }
 
             if (data_get($item, 'is_bundle_position')) {
-                if (is_null(array_find_key($tree, fn (array $value) => $value['id'] === $item['parent_id']))) {
+                if (
+                    is_null(
+                        array_find_key(
+                            $tree,
+                            fn (array $value): bool => data_get($value, 'id') === data_get($item, 'parent_id')
+                        )
+                    )
+                ) {
                     unset($tree[$key]);
                 }
 
@@ -151,11 +138,11 @@ class ReplicateOrderPositionList extends OrderPositionList
             }
 
             $totalAmount = data_get(
-                array_find($maxAmounts, fn (array $value) => $value['id'] === data_get($item, 'id')),
+                array_find($maxAmounts, fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')),
                 'signed_amount'
             );
 
-            if (bccomp($totalAmount, 0) !== 1 || in_array($item['id'], $this->alreadyTakenPositions)) {
+            if (bccomp($totalAmount, 0) !== 1 || in_array(data_get($item, 'id'), $this->alreadyTakenPositions)) {
                 unset($tree[$key]);
 
                 continue;

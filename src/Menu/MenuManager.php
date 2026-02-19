@@ -21,6 +21,8 @@ class MenuManager
 
     protected array $resolved = [];
 
+    protected array $whenCallbacks = [];
+
     protected bool $isResolved = false;
 
     public function all(): array
@@ -35,6 +37,7 @@ class MenuManager
         $this->resolved = [];
         $this->registered = [];
         $this->registeredGroups = [];
+        $this->whenCallbacks = [];
         $this->isResolved = false;
     }
 
@@ -44,6 +47,11 @@ class MenuManager
         $menuItems = $this->sortMultiDimensional(
             $this->resolved,
             function (array $value) use ($guard, $ignorePermissions) {
+                $routeName = data_get($value, 'route_name');
+                if ($routeName && ($when = data_get($this->whenCallbacks, $routeName)) && ! $when()) {
+                    return false;
+                }
+
                 if (($value['guard'] ?? $guard) !== $guard) {
                     return false;
                 }
@@ -93,13 +101,17 @@ class MenuManager
         ?int $order = null,
         ?Closure $closure = null): void
     {
-        data_set($this->registeredGroups, $path, [
-            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
-            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
-            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
-            'children' => data_get($this->registeredGroups, $path . '.children', []),
-            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
-        ]);
+        $existing = $this->registeredGroups[$path] ?? [];
+
+        $this->registeredGroups[$path] = [
+            'label' => $label ?? data_get($existing, 'label'),
+            'icon' => $icon ?? data_get($existing, 'icon'),
+            'order' => $order ?? data_get($existing, 'order'),
+            'children' => data_get($existing, 'children', []),
+            'closure' => $closure
+                ? array_merge(data_get($existing, 'closure') ?? [], [$closure])
+                : data_get($existing, 'closure') ?? [],
+        ];
     }
 
     /**
@@ -111,7 +123,8 @@ class MenuManager
         ?string $label = null,
         ?int $order = null,
         ?array $params = null,
-        ?string $path = null
+        ?string $path = null,
+        ?Closure $when = null,
     ): void {
         $this->registered[] = [
             'route' => $route,
@@ -120,6 +133,7 @@ class MenuManager
             'order' => $order,
             'params' => $params,
             'path' => $path,
+            'when' => $when,
         ];
     }
 
@@ -141,7 +155,7 @@ class MenuManager
                     'label' => $group['label'] ?? Str::afterLast($path, '.'),
                     'icon' => $group['icon'],
                     'order' => $group['order'],
-                    'children' => [],
+                    'children' => data_get($this->resolved, $path . '.children') ?? [],
                 ]
             ));
 
@@ -189,6 +203,10 @@ class MenuManager
             $path ??= str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
                 ? Str::beforeLast($routeName, '.') . '.children.' . Str::afterLast($routeName, '.')
                 : (str_ends_with($routeName, '.') ? rtrim($routeName, '.') : $routeName);
+
+            if ($whenCallback = data_get($item, 'when')) {
+                $this->whenCallbacks[$routeName] = $whenCallback;
+            }
 
             data_set($this->resolved, $path, array_merge(
                 data_get($this->resolved, $path) ?? [],

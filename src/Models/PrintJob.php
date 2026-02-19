@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\HasMediaForeignKey;
+use FluxErp\Enums\PrintJobStatusEnum;
 use FluxErp\Traits\Model\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,6 +21,8 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
     protected function casts(): array
     {
         return [
+            'status' => PrintJobStatusEnum::class,
+            'printed_at' => 'datetime',
             'is_completed' => 'boolean',
         ];
     }

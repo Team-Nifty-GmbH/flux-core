@@ -71,7 +71,14 @@
                         type="date"
                         x-bind:disabled="! $wire.event.is_editable ?? false"
                         x-bind:value="dayjs($wire.event.start).format('YYYY-MM-DD')"
-                        x-on:change="setDateTime('start', $event)"
+                        x-on:change="
+                            setDateTime('start', $event);
+                            let end = dayjs($wire.event.end);
+                            $wire.event.end = dayjs($wire.event.start)
+                                .set('hour', end.hour())
+                                .set('minute', end.minute())
+                                .format()
+                        "
                     />
                 </div>
                 <div x-cloak x-show="! $wire.event.is_all_day">
@@ -442,131 +449,16 @@
                 />
             </div>
             @show
-            @section('event-edit.invites')
-            <div x-cloak x-show="$wire.event.is_invited">
-                <x-select.styled
-                    wire:model="event.status"
-                    :label="__('My status')"
-                    required
-                >
-                    <calendar-option value="accepted">
-                        <div>
-                            <x-button.circle
-                                disabled
-                                color="emerald"
-                                xs
-                                icon="check-circle"
-                            />
-                            {{ __('Accepted') }}
-                        </div>
-                    </calendar-option>
-                    <calendar-option :label="__('Declined')" value="declined">
-                        <div>
-                            <x-button.circle
-                                disabled
-                                color="red"
-                                xs
-                                icon="x-mark"
-                            />
-                            {{ __('Declined') }}
-                        </div>
-                    </calendar-option>
-                    <calendar-option :label="__('Maybe')" value="maybe">
-                        <div>
-                            <x-button.circle
-                                disabled
-                                color="amber"
-                                xs
-                                label="?"
-                            />
-                            {{ __('Maybe') }}
-                        </div>
-                    </calendar-option>
-                </x-select.styled>
-            </div>
-            <div>
-                <div
-                    class="grid grid-cols-1 gap-1.5"
-                    x-show="$wire.event.is_editable ?? false"
-                    x-on:click.outside="search = false"
-                >
-                    <x-label for="invite" :text="__('Invites')" />
-                    <template x-for="invited in $wire.event.invited">
-                        <div class="flex gap-1.5">
-                            <x-button.circle
-                                color="red"
-                                xs
-                                icon="trash"
-                                x-bind:disabled="! $wire.event.is_editable ?? false"
-                                x-on:click="$wire.event.invited.splice($wire.event.invited.indexOf(invited), 1)"
-                            />
-                            <x-button.circle
-                                x-show="invited.pivot?.status === 'accepted'"
-                                disabled
-                                color="emerald"
-                                xs
-                                icon="check-circle"
-                            />
-                            <x-button.circle
-                                x-show="invited.pivot?.status === 'declined'"
-                                disabled
-                                color="red"
-                                xs
-                                icon="x-mark"
-                            />
-                            <x-button.circle
-                                x-show="invited.pivot?.status === 'maybe'"
-                                disabled
-                                color="amber"
-                                xs
-                                label="?"
-                            />
-                            <x-button.circle
-                                x-show="invited.pivot?.status !== 'accepted' && invited.pivot?.status !== 'declined' && invited.pivot?.status !== 'maybe'"
-                                disabled
-                                color="gray"
-                                xs
-                                label="?"
-                            />
-                            <x-badge
-                                md
-                                x-text="invited.label ?? invited.name"
-                            />
-                        </div>
-                    </template>
-                    <div class="w-full" id="invitee-search">
-                        <x-select.styled
-                            id="invite"
-                            :placeholder="__('Add invite')"
-                            x-on:select="$wire.event.invited.push($event.detail.select); clear(); $tallstackuiSelect('invitee-search').mergeRequestParams({
-                                where: [['id', '!=', $event.detail.select.value]],
-                            })"
-                            select="label:label|value:id"
-                            :request="[
-                                'url' => route('search', \FluxErp\Models\User::class),
-                                'method' => 'POST',
-                                'params' => [
-                                    'with' => 'media',
-                                    'where' => [
-                                        [
-                                            'id',
-                                            '!=',
-                                            auth()->id(),
-                                        ],
-                                    ],
-                                ],
-                            ]"
-                        />
-                    </div>
-                </div>
-            </div>
-            @show
             @show
         </div>
         <x-slot:footer>
             @section('event-edit.footer')
             <div class="flex w-full justify-between gap-2">
-                <div class="flex justify-start gap-2">
+                <div
+                    class="flex justify-start gap-2"
+                    x-show="$wire.event.is_editable"
+                    x-cloak
+                >
                     <x-button
                         :text="__('Delete')"
                         color="red"
@@ -584,17 +476,18 @@
                     />
                 </div>
                 <div class="flex w-full justify-end gap-2">
-                    @canAction(\FluxErp\Actions\CalendarEvent\CancelCalendarEvent::class)
-                        <x-button
-                            :text="__('Cancel')"
-                            color="secondary"
-                            light
-                            flat
-                            x-on:click="$modalClose('edit-event-modal')"
-                        />
-                    @endcanAction
+                    <x-button
+                        :text="__('Close')"
+                        color="secondary"
+                        light
+                        flat
+                        x-on:click="$modalClose('edit-event-modal')"
+                    />
 
-                    <div x-show="!$wire.event.is_cancelled" x-cloak>
+                    <div
+                        x-show="$wire.event.is_editable && !$wire.event.is_cancelled"
+                        x-cloak
+                    >
                         <x-button
                             :text="__('Save')"
                             primary
@@ -602,7 +495,10 @@
                         />
                     </div>
                     @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)
-                        <div x-show="$wire.event.is_cancelled" x-cloak>
+                        <div
+                            x-show="$wire.event.is_editable && $wire.event.is_cancelled"
+                            x-cloak
+                        >
                             <x-button
                                 :text="__('Reactivate')"
                                 primary

@@ -142,7 +142,7 @@ class Mail extends CommunicationList
     public function getNewMessages(): void
     {
         $mailAccounts = resolve_static(MailAccount::class, 'query')
-            ->whereIntegerInRaw('id', array_column($this->mailAccounts, 'id'))
+            ->whereKey(array_column($this->mailAccounts, 'id'))
             ->get();
 
         foreach ($mailAccounts as $mailAccount) {

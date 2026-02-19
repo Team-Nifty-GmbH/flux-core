@@ -25,7 +25,27 @@ export default function (
         init() {
             // init map
             this.map = L.map('map');
-            this.markers = L.markerClusterGroup();
+            this.markers = L.markerClusterGroup({
+                iconCreateFunction: function (cluster) {
+                    let count = 0;
+                    cluster.getAllChildMarkers().forEach((marker) => {
+                        count += marker.options.itemCount || 1;
+                    });
+
+                    let size = 'small';
+                    if (count >= 100) {
+                        size = 'large';
+                    } else if (count >= 10) {
+                        size = 'medium';
+                    }
+
+                    return L.divIcon({
+                        html: '<div><span>' + count + '</span></div>',
+                        className: 'marker-cluster marker-cluster-' + size,
+                        iconSize: L.point(40, 40),
+                    });
+                },
+            });
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution:
@@ -88,7 +108,9 @@ export default function (
                 }
 
                 let icon = null;
-                let options = {};
+                let options = {
+                    itemCount: address.count || 1,
+                };
                 if (address.hasOwnProperty('icon')) {
                     icon = L.divIcon({
                         className: 'custom-icon',

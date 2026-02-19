@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Login extends Component
 {
@@ -35,7 +36,7 @@ class Login extends Component
         }
 
         if (! config('flux.install_done')) {
-            $this->redirect(route('flux.install'));
+            throw HttpException::fromStatusCode(423);
         }
     }
 

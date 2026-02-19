@@ -8,19 +8,19 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
-use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\CreatesDocuments;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use Throwable;
 
 class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
@@ -28,15 +28,26 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public ?string $cacheKey = 'order.order-list';
 
+    public ?int $mapLimit = 100;
+
     public OrderForm $order;
 
     public ?int $orderType = null;
+
+    public bool $showMap = false;
 
     protected ?string $includeBefore = 'flux::livewire.order.order-list';
 
     protected function getTableActions(): array
     {
         return [
+            DataTableButton::make()
+                ->text(__('Show on Map'))
+                ->color('indigo')
+                ->icon('globe-alt')
+                ->wireClick(<<<'JS'
+                    $toggle('showMap', true)
+                JS),
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('New order'))
@@ -81,13 +92,11 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     }
 
     #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->createDocumentFromItems($this->getSelectedModels());
         $this->loadData();
         $this->reset('selected');
-
-        return $response;
     }
 
     #[Renderless]
@@ -124,6 +133,66 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return null;
     }
 
+    #[Renderless]
+    public function getOrdersWithoutCoordinatesCount(): int
+    {
+        return $this->buildSearch()
+            ->where(function (Builder $query): void {
+                $query->where(function (Builder $query): void {
+                    $query->whereDoesntHave('addressDelivery')
+                        ->orWhereHas('addressDelivery', function (Builder $query): void {
+                            $query->whereNull('latitude')
+                                ->orWhereNull('longitude');
+                        });
+                })
+                    ->where(function (Builder $query): void {
+                        $query->whereNull('address_delivery->latitude')
+                            ->orWhereNull('address_delivery->longitude');
+                    });
+            })
+            ->count();
+    }
+
+    #[Renderless]
+    public function loadData(): void
+    {
+        parent::loadData();
+
+        if ($this->showMap) {
+            $this->updatedShowMap();
+        }
+    }
+
+    #[Renderless]
+    public function loadMap(): array
+    {
+        return $this->buildSearch()
+            ->where(function (Builder $query): void {
+                $query->whereHas('addressDelivery', function (Builder $query): void {
+                    $query->whereNotNull('latitude')
+                        ->whereNotNull('longitude');
+                })
+                    ->orWhere(function (Builder $query): void {
+                        $query->whereNotNull('address_delivery->latitude')
+                            ->whereNotNull('address_delivery->longitude');
+                    });
+            })
+            ->when($this->mapLimit, fn (Builder $query): Builder => $query->limit($this->mapLimit))
+            ->with([
+                'addressDelivery:id,company,firstname,lastname,latitude,longitude,zip,city,street',
+                'contact.mainAddress',
+            ])
+            ->get()
+            ->toMap()
+            ->toArray();
+    }
+
+    #[Renderless]
+    public function updatedShowMap(): void
+    {
+        $this->dispatch('load-map');
+    }
+
     protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
     {
         return new SerializableClosure(
@@ -143,27 +212,48 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     protected function getPrintLayouts(): array
     {
         return resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw('id', $this->selected)
+            ->whereKey($this->getSelectedValues())
             ->with('orderType')
             ->get(['id', 'order_type_id'])
             ->printLayouts();
     }
 
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->language_id;
+    }
+
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        // add invoice address email if an invoice is being sent
-        $address = in_array('invoice', $documents) && $item->contact->invoiceAddress
-            ? $item->contact->invoiceAddress
-            : $item->contact->mainAddress;
+        $printViews = $item->getPrintViews();
 
-        $to = $address->mail_addresses;
+        $invoiceDocs = array_filter(
+            $documents,
+            function (string $doc) use ($printViews) {
+                try {
+                    return resolve_static(data_get($printViews, $doc), 'isInvoice');
+                } catch (Throwable) {
+                    return false;
+                }
+            }
+        );
 
-        // add primary email address if more than just the invoice is added
-        if (array_diff($documents, ['invoice'])) {
-            $to[] = $item->contact->mainAddress->email_primary;
+        $address = $invoiceDocs
+            ? $item->resolveMailableInvoiceAddress()
+            : $item->contact?->mainAddress;
+
+        $to = $address?->mail_addresses ?? [];
+
+        if (array_diff($documents, $invoiceDocs)) {
+            $to[] = $item->contact?->mainAddress?->email_primary;
         }
 
         return array_values(array_unique(array_filter($to)));
+    }
+
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
     }
 
     protected function getViewData(): array

@@ -35,6 +35,11 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
         ];
     }
 
+    public function getRoute(): ?string
+    {
+        return $this->model?->model?->detailRoute();
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         return parent::toMail($notifiable)

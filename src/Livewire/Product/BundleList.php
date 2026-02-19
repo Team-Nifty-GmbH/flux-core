@@ -8,7 +8,7 @@ use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
 use FluxErp\Livewire\DataTables\ProductBundleProductList;
 use FluxErp\Livewire\Forms\ProductBundleProductForm;
 use FluxErp\Livewire\Forms\ProductForm;
-use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Product;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
@@ -62,7 +62,7 @@ class BundleList extends ProductBundleProductList
                 ->color('indigo')
                 ->text(__('Edit'))
                 ->icon('pencil')
-                ->wireClick('edit(record.id)')
+                ->wireClick('edit(record.pivot_id)')
                 ->when(
                     fn () => resolve_static(UpdateProductBundleProduct::class, 'canPerformAction', [false])
                 ),
@@ -72,7 +72,7 @@ class BundleList extends ProductBundleProductList
                 ->icon('trash')
                 ->attributes([
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
-                    'wire:click' => 'delete(record.id)',
+                    'wire:click' => 'delete(record.pivot_id)',
                 ])
                 ->when(
                     fn () => resolve_static(DeleteProductBundleProduct::class, 'canPerformAction', [false])
@@ -83,7 +83,7 @@ class BundleList extends ProductBundleProductList
     public function delete(int $id): void
     {
         $this->productBundleProductForm->reset();
-        $this->productBundleProductForm->id = $id;
+        $this->productBundleProductForm->pivot_id = $id;
 
         try {
             $this->productBundleProductForm->delete();
@@ -108,7 +108,7 @@ class BundleList extends ProductBundleProductList
         }
     }
 
-    public function edit(ProductBundleProduct $productBundleProduct): void
+    public function edit(BundleProductProduct $productBundleProduct): void
     {
         $this->productBundleProductForm->reset();
         $this->productBundleProductForm->fill($productBundleProduct);

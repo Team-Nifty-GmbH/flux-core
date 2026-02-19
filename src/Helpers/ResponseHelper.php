@@ -107,12 +107,13 @@ class ResponseHelper
         );
     }
 
-    public static function createResponseFromBase(int $statusCode,
+    public static function createResponseFromBase(
+        int $statusCode,
         mixed $data = [],
         ?string $statusMessage = null,
         ?array $additions = null,
-        bool $bulk = false): JsonResponse
-    {
+        bool $bulk = false
+    ): JsonResponse {
         $headers = ['Content-Language' => app()->getLocale()];
 
         if (! $bulk) {

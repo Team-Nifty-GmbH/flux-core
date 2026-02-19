@@ -1,3 +1,13 @@
+<x-flux::map.fullscreen-container>
+    <x-slot:controls>
+        @if ($this->getOrdersWithoutCoordinatesCount() > 0)
+            <x-badge
+                color="amber"
+                :text="__(':count orders without coordinates', ['count' => $this->getOrdersWithoutCoordinatesCount()])"
+            />
+        @endif
+    </x-slot>
+</x-flux::map.fullscreen-container>
 <div
     x-data="{
         updateContactId(id) {

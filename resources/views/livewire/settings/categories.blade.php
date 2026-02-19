@@ -15,7 +15,7 @@
     @section('modals')
     <x-modal
         id="edit-category-modal"
-        x-on:open="setCategorySearch(); $focusOn('category-name');"
+        x-on:open="if (!$wire.category.id) $tallstackuiSelect('category-parent-id').clear(); setCategorySearch(); $focusOn('category-name');"
         :title="__('Category')"
     >
         <div class="flex flex-col gap-1.5">

@@ -12,28 +12,28 @@ return new class() extends Migration
             $table->id();
             $table->uuid();
 
-            $table->foreignId('client_id')
-                ->constrained()
-                ->cascadeOnDelete();
             $table->foreignId('country_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('countries')
                 ->nullOnDelete();
             $table->foreignId('employee_department_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('employee_departments')
                 ->nullOnDelete();
             $table->foreignId('location_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('locations')
                 ->nullOnDelete();
             $table->foreignId('supervisor_id')
                 ->nullable()
                 ->constrained('employees')
                 ->nullOnDelete();
+            $table->foreignId('tenant_id')
+                ->constrained('tenants')
+                ->cascadeOnDelete();
             $table->foreignId('user_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('users')
                 ->nullOnDelete();
             $table->foreignId('vacation_carryover_rule_id')
                 ->nullable()

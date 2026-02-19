@@ -27,6 +27,8 @@
                     wire:model="locationForm.country_id"
                     :label="__('Country')"
                     :placeholder="__('Select')"
+                    x-on:select="$wire.locationForm.country_region_id = null"
+                    x-on:remove="$wire.locationForm.country_region_id = null"
                     select="label:name|value:id"
                     unfiltered
                     :request="[
@@ -49,9 +51,6 @@
                         'method' => 'POST',
                         'params' => [
                             'searchFields' => ['name'],
-                            'where' => [
-                                ['country_id', '=', $locationForm->country_id]
-                            ]
                         ]
                     ]"
                 />

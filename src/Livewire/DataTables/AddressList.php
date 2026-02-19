@@ -8,7 +8,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Models\Address;
-use FluxErp\Models\Media;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +16,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -24,7 +23,26 @@ class AddressList extends BaseDataTable
 {
     use AllowRecordMerging, CreatesDocuments;
 
-    public ContactForm $contact;
+    #[DataTableForm(
+        only: [
+            'country_id',
+            'language_id',
+            'tenant_id',
+            'company',
+            'title',
+            'salutation',
+            'firstname',
+            'lastname',
+            'zip',
+            'city',
+            'street',
+            'email_primary',
+            'phone',
+            'phone_mobile',
+            'record_origin_id',
+        ],
+    )]
+    public ContactForm $createContactForm;
 
     public array $enabledCols = [
         'avatar',
@@ -48,6 +66,8 @@ class AddressList extends BaseDataTable
 
     public bool $assignToAgent = true;
 
+    public ?int $mapLimit = 100;
+
     public bool $showMap = false;
 
     protected ?string $includeBefore = 'flux::livewire.contact.address-list';
@@ -61,13 +81,15 @@ class AddressList extends BaseDataTable
                 ->text(__('Show on Map'))
                 ->color('indigo')
                 ->icon('globe-alt')
-                ->wireClick('$toggle(\'showMap\', true)'),
+                ->wireClick(<<<'JS'
+                    $toggle('showMap', true)
+                JS),
             DataTableButton::make()
                 ->text(__('Create'))
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$modalOpen(\'create-contact-modal\')',
+                    'x-on:click' => '$modalOpen(\'contact-form-modal\')',
                 ])
                 ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
         ];
@@ -94,13 +116,11 @@ class AddressList extends BaseDataTable
     }
 
     #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->createDocumentFromItems($this->getSelectedModels());
         $this->loadData();
         $this->reset('selected');
-
-        return $response;
     }
 
     #[Renderless]
@@ -148,6 +168,7 @@ class AddressList extends BaseDataTable
                 'html_body' => null,
                 'communicatable_type' => $this->getCommunicatableType($model),
                 'communicatable_id' => $this->getCommunicatableId($model),
+                'language_id' => $this->getPreferredLanguageId($model),
             ];
         }
 
@@ -174,7 +195,7 @@ class AddressList extends BaseDataTable
     public function loadMap(): array
     {
         return $this->buildSearch()
-            ->limit(100)
+            ->when($this->mapLimit, fn (Builder $query): Builder => $query->limit($this->mapLimit))
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->where('is_main_address', true)
@@ -192,7 +213,7 @@ class AddressList extends BaseDataTable
             ])
             ->with([
                 'contact:id',
-                'contact.media' => fn ($query) => $query->where('collection_name', 'avatar'),
+                'contact.media' => fn (Builder $query): Builder => $query->where('collection_name', 'avatar'),
             ])
             ->get()
             ->toMap()
@@ -210,14 +231,14 @@ class AddressList extends BaseDataTable
     #[Renderless]
     public function resetForm(): void
     {
-        $this->contact->reset();
+        $this->createContactForm->reset();
     }
 
     #[Renderless]
     public function save(): bool
     {
         try {
-            $this->contact->save();
+            $this->createContactForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -228,7 +249,7 @@ class AddressList extends BaseDataTable
             ->success(__(':model saved', ['model' => __('Contact')]))
             ->send();
 
-        $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
+        $this->redirectRoute('contacts.id?', ['id' => $this->createContactForm->id], navigate: true);
 
         return true;
     }
@@ -252,7 +273,7 @@ class AddressList extends BaseDataTable
 
     protected function getPrintLayouts(): array
     {
-        return app(Address::class)->getPrintViews();
+        return app(Address::class)->resolvePrintViews();
     }
 
     protected function getReturnKeys(): array
@@ -270,6 +291,11 @@ class AddressList extends BaseDataTable
         return Arr::wrap(
             $item->email_primary ?? $item->contactOptions->where('type', 'email')->first()?->value ?? []
         );
+    }
+
+    protected function getPreferredLanguageId(OffersPrinting $item): int
+    {
+        return $item->language_id;
     }
 
     protected function itemToArray($item): array

@@ -2,14 +2,14 @@
 
 namespace FluxErp\Rulesets\Product\ProductBundleProduct;
 
-use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Product;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateProductBundleProductRuleset extends FluxRuleset
 {
-    protected static ?string $model = ProductBundleProduct::class;
+    protected static ?string $model = BundleProductProduct::class;
 
     public function rules(): array
     {

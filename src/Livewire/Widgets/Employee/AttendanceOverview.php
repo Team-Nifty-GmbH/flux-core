@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets\Employee;
 
+use Carbon\Carbon;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
@@ -27,6 +28,11 @@ class AttendanceOverview extends CircleChart
 
     public bool $showTotals = true;
 
+    public static function getCategory(): ?string
+    {
+        return 'Employees';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -51,7 +57,6 @@ class AttendanceOverview extends CircleChart
     public function calculateByTimeFrame(): void
     {
         $this->calculateChart();
-        $this->updateData();
     }
 
     public function calculateChart(): void
@@ -90,11 +95,11 @@ class AttendanceOverview extends CircleChart
         $absenceByType = [];
         foreach ($absenceRequests as $absenceRequest) {
             $absenceTypeId = $absenceRequest->absence_type_id;
-            $startDate = max($absenceRequest->start_date, $this->getStart());
-            $endDate = min($absenceRequest->end_date, $this->getEnd());
+            $startDate = Carbon::parse(max($absenceRequest->start_date, $this->getStart()));
+            $endDate = Carbon::parse(min($absenceRequest->end_date, $this->getEnd()));
             $daysAffected = 0;
 
-            while ($startDate <= $endDate) {
+            while ($startDate->lte($endDate)) {
                 $daysAffected = bcadd($daysAffected, $absenceRequest->calculateWorkDaysAffected($startDate));
 
                 $startDate->addDay();
