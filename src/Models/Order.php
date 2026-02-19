@@ -65,6 +65,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
@@ -807,7 +809,23 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function getDescription(): ?string
     {
-        return null;
+        $currencyIso = $this->currency?->iso
+            ?? resolve_static(Currency::class, 'default')?->iso
+            ?? '';
+
+        return Str::of(
+            ($this->invoice_number ?? $this->order_number)
+            . ' - '
+            . $this->commission
+            . ' - '
+            . Number::currency($this->total_gross_price, $currencyIso, app()->getLocale())
+            . ' ('
+            . Number::currency($this->total_net_price, $currencyIso, app()->getLocale())
+            . ' ' . __('net')
+            . ')'
+        )
+            ->deduplicate(' - ')
+            ->toString();
     }
 
     public function getEmailTemplateModelType(): ?string
@@ -817,7 +835,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function getLabel(): ?string
     {
-        return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
+        return $this->orderType?->name
+            . ' - '
+            . ($this->invoice_number ?? $this->order_number)
+            . ' - '
+            . data_get($this->address_invoice, 'name');
     }
 
     public function getPrintViews(): array
