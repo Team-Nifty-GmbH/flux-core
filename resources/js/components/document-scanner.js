@@ -306,6 +306,7 @@ export default ($wire) => ({
                     ) {
                         corners = detected;
                     }
+                    contour.delete();
                 }
 
                 mat.delete();

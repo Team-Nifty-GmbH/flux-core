@@ -96,7 +96,9 @@ class SerialNumber extends Component
         $response->load('product');
         $this->serialNumber = $response->toArray();
 
-        $this->toast()->success(__(':model saved', ['model' => __('Serial Number')]))->send();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Serial Number')]))
+            ->send();
         $this->edit = false;
     }
 

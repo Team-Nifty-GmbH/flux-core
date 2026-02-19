@@ -129,7 +129,9 @@ class Tenants extends TenantList
             }
         }
 
-        $this->toast()->success(__(':model saved', ['model' => __('Tenant')]))->send();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Tenant')]))
+            ->send();
 
         $this->loadData();
 

@@ -66,7 +66,9 @@ class OrderList extends BaseDataTable
             }
         }
 
-        $this->toast()->success(__('Deleted :count orders', ['count' => $deleted]))->send();
+        $this->toast()
+            ->success(__('Deleted :count orders', ['count' => $deleted]))
+            ->send();
 
         if ($deleted > 0) {
             $this->loadData();

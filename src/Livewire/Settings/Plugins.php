@@ -74,7 +74,9 @@ class Plugins extends Component
         try {
             $updates = app('composer')->outdated();
         } catch (ProcessFailedException $e) {
-            $this->toast()->error(__('Failed to check for updates.'))->send();
+            $this->toast()
+                ->error(__('Failed to check for updates.'))
+                ->send();
             $this->addError('checkForUpdates', $e->getMessage());
 
             return;
@@ -131,7 +133,9 @@ class Plugins extends Component
         }
 
         $this->offerRefresh = true;
-        $this->toast()->success(__('Package :package installed successfully.', ['package' => $package]))->send();
+        $this->toast()
+            ->success(__('Package :package installed successfully.', ['package' => $package]))
+            ->send();
         $this->getInstalled();
 
         return true;
@@ -243,7 +247,8 @@ class Plugins extends Component
         $this->toast()
             ->success(
                 __('Package :package uninstalled successfully.', ['package' => implode(',', $packages)])
-            );
+            )
+            ->send();
 
         if ($this->offerRefresh) {
             $this->getInstalled();
@@ -263,7 +268,9 @@ class Plugins extends Component
             return;
         }
 
-        $this->toast()->success(__('Packages updated successfully'))->send();
+        $this->toast()
+            ->success(__('Packages updated successfully'))
+            ->send();
 
         $this->checkForUpdates();
     }
@@ -305,7 +312,9 @@ class Plugins extends Component
             return;
         }
 
-        $this->toast()->success(__('Packages updated successfully'))->send();
+        $this->toast()
+            ->success(__('Packages updated successfully'))
+            ->send();
 
         $this->checkForUpdates();
     }

@@ -298,7 +298,9 @@ abstract class Communication extends CommunicationList
             return false;
         }
 
-        $this->toast()->success(__('Email sent successfully!'))->send();
+        $this->toast()
+            ->success(__('Email sent successfully!'))
+            ->send();
 
         $this->loadData();
 

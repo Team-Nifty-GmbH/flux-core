@@ -3,7 +3,7 @@
 namespace FluxErp\Jobs;
 
 use Barryvdh\DomPDF\Facade\Pdf;
-use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
+use FluxErp\Actions\FluxAction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,7 +14,13 @@ class ProcessScannedDocumentJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    public function __construct(protected readonly string $imagePath) {}
+    /**
+     * @param  class-string<FluxAction>  $action
+     */
+    public function __construct(
+        protected readonly string $imagePath,
+        protected readonly string $action
+    ) {}
 
     public function handle(): void
     {
@@ -32,7 +38,7 @@ class ProcessScannedDocumentJob implements ShouldQueue
                 ->setPaper('a4')
                 ->save($tempPath);
 
-            resolve_static(CreatePurchaseInvoice::class, 'make', [['media' => $tempPath]])
+            resolve_static($this->action, 'make', [['media' => $tempPath]])
                 ->validate()
                 ->execute();
         } finally {

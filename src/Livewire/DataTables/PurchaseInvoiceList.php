@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Jobs\ProcessScannedDocumentJob;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
@@ -18,11 +17,10 @@ use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
+use FluxErp\Traits\Livewire\WithDocumentScanning;
 use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
@@ -33,7 +31,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PurchaseInvoiceList extends BaseDataTable
 {
-    use WithFilePond, WithFileUploads;
+    use WithDocumentScanning, WithFilePond, WithFileUploads;
 
     public array $enabledCols = [
         'url',
@@ -111,7 +109,9 @@ class PurchaseInvoiceList extends BaseDataTable
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
-            $this->toast()->error(__('The file does not exist anymore.'))->send();
+            $this->toast()
+                ->error(__('The file does not exist anymore.'))
+                ->send();
 
             return false;
         }
@@ -275,47 +275,6 @@ class PurchaseInvoiceList extends BaseDataTable
     }
 
     #[Renderless]
-    public function submitScan(string $imageData): bool
-    {
-        if (! preg_match(
-            '#^data:image/(jpeg|png|gif|webp);base64,#',
-            $imageData
-        )) {
-            return false;
-        }
-
-        $base64Part = substr($imageData, strpos($imageData, ',') + 1);
-        $decoded = base64_decode($base64Part, true);
-
-        if ($decoded === false || ! getimagesizefromstring($decoded)) {
-            return false;
-        }
-
-        $storagePath = 'scans/' . Str::uuid() . '.img';
-        Storage::put($storagePath, $decoded);
-
-        dispatch(app(ProcessScannedDocumentJob::class, ['imagePath' => $storagePath]));
-
-        return true;
-    }
-
-    #[Renderless]
-    public function notifyScanResults(int $successCount, int $errorCount): void
-    {
-        if ($successCount > 0) {
-            $this->toast()
-                ->success(__(':count document(s) queued for processing.', ['count' => $successCount]))
-                ->send();
-        }
-
-        if ($errorCount > 0) {
-            $this->toast()
-                ->error(__(':count document(s) could not be uploaded.', ['count' => $errorCount]))
-                ->send();
-        }
-    }
-
-    #[Renderless]
     public function save(): bool
     {
         $this->purchaseInvoiceForm->media = $this->mediaForm->uploadedFile[0] ?? null;
@@ -330,6 +289,11 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         return true;
+    }
+
+    protected function getScannedDocumentAction(): string
+    {
+        return CreatePurchaseInvoice::class;
     }
 
     protected function getBuilder(Builder $builder): Builder

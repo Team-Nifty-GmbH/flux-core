@@ -148,7 +148,9 @@ class UserEdit extends Component
             return;
         }
 
-        $this->toast()->success(__(':model saved', ['model' => __('User')]))->send();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('User')]))
+            ->send();
 
         try {
             UpdateUserPermissions::make([
