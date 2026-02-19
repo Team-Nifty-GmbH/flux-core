@@ -5,7 +5,6 @@ namespace FluxErp\Database\Factories;
 use FluxErp\Models\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use NumberFormatter;
 
 class LanguageFactory extends Factory
 {
@@ -14,16 +13,12 @@ class LanguageFactory extends Factory
     public function definition(): array
     {
         $i = 0;
-        do {
-            $languageCode = fake()->unique()->languageCode();
+        while (Language::query()
+            ->where('language_code', $languageCode = fake()->unique()->languageCode())
+            ->exists()
+            || in_array($languageCode, ['bh']) && $i < 100) {
             $i++;
-        } while (
-            $i < 100
-            && (
-                Language::query()->where('language_code', $languageCode)->exists()
-                || @(new NumberFormatter($languageCode, NumberFormatter::DECIMAL))->getErrorCode() !== 0
-            )
-        );
+        }
 
         if ($i === 100) {
             $languageCode .= '_' . Str::uuid();
