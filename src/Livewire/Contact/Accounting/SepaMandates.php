@@ -49,7 +49,17 @@ class SepaMandates extends SepaMandateList
 
     protected function getRowActions(): array
     {
+        $layout = array_key_first($this->getPrintLayouts());
+        $type = morph_alias($this->getModel());
+
         return [
+            DataTableButton::make()
+                ->text(__('Preview'))
+                ->icon('magnifying-glass')
+                ->color('indigo')
+                ->wireClick(<<<JS
+                    openPreview('{$layout}','{$type}',record.id)
+            JS),
             DataTableButton::make()
                 ->text(__('Edit'))
                 ->icon('pencil')
@@ -163,11 +173,19 @@ class SepaMandates extends SepaMandateList
         return $item->contact->invoiceAddress?->language_id ?? $item->contact->mainAddress?->language_id;
     }
 
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
+    }
+
     protected function getPrintLayouts(): array
     {
         return resolve_static(SepaMandate::class, 'query')
-            ->whereKey($this->sepaMandate->id)
-            ->first(['id'])
+            ->when(
+                $this->sepaMandate->id,
+                fn (Builder $query) => $query->whereKey($this->sepaMandate->id)
+            )
+            ->firstOrNew()
             ->resolvePrintViews();
     }
 
