@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Tenant\CreateTenant;
 use FluxErp\Actions\Tenant\UpdateTenant;
-use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TenantList;
 use FluxErp\Livewire\Forms\MediaUploadForm;
@@ -12,7 +11,6 @@ use FluxErp\Livewire\Forms\TenantForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Country;
 use FluxErp\Models\Scopes\UserTenantScope;
-use FluxErp\Models\SepaMandate;
 use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;

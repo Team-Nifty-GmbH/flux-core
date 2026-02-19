@@ -157,6 +157,17 @@ class SepaMandates extends SepaMandateList
         return true;
     }
 
+    public function preview(SepaMandate $sepaMandate): void
+    {
+        $this->sepaMandate->reset();
+        $this->sepaMandate->fill($sepaMandate);
+
+        $this->openPreview(
+            array_key_first($this->getPrintLayouts()),
+            morph_alias($sepaMandate::class),
+            $this->sepaMandate->id);
+    }
+
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('contact_id', $this->contact->id);
@@ -203,16 +214,4 @@ class SepaMandates extends SepaMandateList
                 ->get(['id', 'iban', 'bank_name']),
         ]);
     }
-
-    public function preview(SepaMandate $sepaMandate):void
-    {
-        $this->sepaMandate->reset();
-        $this->sepaMandate->fill($sepaMandate);
-
-        $this->openPreview(
-            array_key_first($this->getPrintLayouts()),
-            morph_alias($sepaMandate::class),
-            $this->sepaMandate->id);
-    }
-
 }
