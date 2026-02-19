@@ -128,7 +128,7 @@ class CreateChildOrder extends Component
             ? __(':model created', ['model' => __('Retoure')])
             : __(':model created', ['model' => __('Split Order')]);
 
-        $this->notification()
+        $this->toast()
             ->success($successMessage)
             ->send();
 

@@ -70,7 +70,7 @@ class PaymentReminder extends OrderList
 
         $skippedCount = (clone $baseQuery)->count() - $ordersWithEmail->count();
         if ($skippedCount > 0) {
-            $this->notification()->warning(
+            $this->toast()->warning(
                 __(':count order(s) skipped due to missing email address.', ['count' => $skippedCount])
             );
         }

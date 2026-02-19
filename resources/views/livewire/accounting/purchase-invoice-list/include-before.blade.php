@@ -589,66 +589,367 @@
 
     <x-modal
         id="bulk-pdf-upload-modal"
-        lg
+        size="xl"
         scrollable
-        :title="__('Bulk PDF Upload')"
+        persistent
+        :title="__('Upload')"
     >
-        <div class="space-y-4">
-            <div class="text-sm text-gray-600">
-                {{ __('Select multiple PDF files to upload as purchase invoices. Each PDF will create a separate purchase invoice.') }}
-            </div>
+        <div
+            x-data="documentScanner($wire)"
+            x-on:keydown.escape.window="
+                if (isEditing) {
+                    closeEditor()
+                    $event.stopPropagation()
+                }
+            "
+        >
+            <input
+                x-ref="cameraInput"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="hidden"
+                x-on:change="handleFileSelect($event)"
+            />
+            <input
+                x-ref="fileInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                x-on:change="handleFileSelect($event)"
+            />
 
-            <div
-                wire:ignore
-                x-data="{
-                    ...filePond(
-                        $wire,
-                        $refs.upload,
-                        '{{ Auth::user()?->language?->language_code }}',
-                        {
-                            title: '{{ __('File will be replaced') }}',
-                            description: '{{ __('Do you want to proceed?') }}',
-                            labelAccept: '{{ __('Accept') }}',
-                            labelReject: '{{ __('Undo') }}',
-                        },
-                        {
-                            uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
-                        },
-                    ),
-                }"
-            >
-                <div x-ref="upload">
-                    @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                        <div class="flex flex-col items-end">
-                            <div class="mb-4 w-full">
-                                <input
-                                    x-init="loadFilePond(() => 0)"
-                                    id="filepond-drop"
-                                    type="file"
-                                    multiple
-                                    accept="application/pdf"
-                                />
-                            </div>
+            <div class="space-y-6">
+                <div>
+                    <h3
+                        class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                        {{ __('PDF Upload') }}
+                    </h3>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('Select multiple PDF files to upload as purchase invoices. Each PDF will create a separate purchase invoice.') }}
+                    </div>
+
+                    <div
+                        wire:ignore
+                        x-data="{
+                            ...filePond(
+                                $wire,
+                                $refs.upload,
+                                '{{ Auth::user()?->language?->language_code }}',
+                                {
+                                    title: '{{ __('File will be replaced') }}',
+                                    description: '{{ __('Do you want to proceed?') }}',
+                                    labelAccept: '{{ __('Accept') }}',
+                                    labelReject: '{{ __('Undo') }}',
+                                },
+                                {
+                                    uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+                                },
+                            ),
+                        }"
+                    >
+                        <div x-ref="upload">
+                            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
+                                <div class="flex flex-col items-end">
+                                    <div class="mb-4 w-full">
+                                        <input
+                                            x-init="loadFilePond(() => 0)"
+                                            id="filepond-drop"
+                                            type="file"
+                                            multiple
+                                            accept="application/pdf"
+                                        />
+                                    </div>
+                                    <x-button
+                                        :text="__('Upload PDFs')"
+                                        x-cloak
+                                        x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
+                                        x-bind:disabled="isLoadingFiles.length > 0"
+                                        loading="processBulkUpload"
+                                        wire:click="processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); } })"
+                                    />
+                                </div>
+                            @endcanAction
+                        </div>
+                    </div>
+                </div>
+
+                @canAction(\FluxErp\Actions\Media\UploadMedia::class)
+                    <div
+                        x-cloak
+                        x-show="'ontouchstart' in window || isNativeApp"
+                        class="border-t border-gray-200 pt-4 dark:border-gray-700"
+                    >
+                        <h3
+                            class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                            {{ __('Scan Documents') }}
+                        </h3>
+
+                        <div class="flex justify-center gap-4">
                             <x-button
-                                :text="__('Upload PDFs')"
-                                x-cloak
-                                x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
-                                x-bind:disabled="isLoadingFiles.length > 0"
-                                loading="processBulkUpload"
-                                wire:click="processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); $modalClose('bulk-pdf-upload-modal'); } })"
+                                :text="__('Camera')"
+                                icon="camera"
+                                color="primary"
+                                x-on:click="captureFromCamera()"
+                            />
+                            <x-button
+                                :text="__('Gallery')"
+                                icon="photo"
+                                color="secondary"
+                                x-on:click="pickFromGallery()"
                             />
                         </div>
-                    @endcanAction
-                </div>
+
+                        <template x-if="hasDocuments">
+                            <div class="mt-4">
+                                <h4
+                                    class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                                >
+                                    {{ __('Scanned Documents') }}
+                                    (
+                                    <span
+                                        x-text="scannedDocuments.length"
+                                    ></span>
+                                    )
+                                </h4>
+                                <div
+                                    class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+                                >
+                                    <template
+                                        x-for="doc in scannedDocuments"
+                                        x-bind:key="doc.id"
+                                    >
+                                        <div
+                                            class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                                        >
+                                            <img
+                                                x-bind:src="doc.thumbnail"
+                                                alt=""
+                                                class="aspect-[3/4] w-full object-cover"
+                                            />
+                                            <div
+                                                class="flex items-center justify-center border-t border-gray-200 bg-gray-50 p-1.5 dark:border-gray-700 dark:bg-gray-800"
+                                            >
+                                                <x-button
+                                                    icon="trash"
+                                                    color="red"
+                                                    flat
+                                                    sm
+                                                    x-on:click="removeDocument(doc.id)"
+                                                />
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <div class="mt-4">
+                                    <div
+                                        x-cloak
+                                        x-show="isUploading"
+                                        class="mb-3"
+                                    >
+                                        <div
+                                            class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"
+                                        >
+                                            <span>
+                                                {{ __('Uploading documents...') }}
+                                            </span>
+                                            <span>
+                                                <span
+                                                    x-text="uploadProgress"
+                                                ></span>
+                                                /
+                                                <span
+                                                    x-text="uploadTotal"
+                                                ></span>
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="mt-1 h-[2px] w-full bg-gray-200 dark:bg-gray-700"
+                                        >
+                                            <div
+                                                class="h-[2px] bg-blue-500"
+                                                style="transition: width 1s"
+                                                x-bind:style="
+                                                    'width: ' +
+                                                        (uploadTotal > 0 ? Math.round((uploadProgress / uploadTotal) * 100) : 0) +
+                                                        '%'
+                                                "
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <x-button
+                                            :text="__('Upload Documents')"
+                                            color="primary"
+                                            icon="cloud-arrow-up"
+                                            x-bind:disabled="isUploading"
+                                            x-on:click="uploadAll()"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                @endcanAction
             </div>
+
+            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
+                <template x-teleport="body">
+                    <div
+                        x-cloak
+                        x-show="isEditing"
+                        class="fixed inset-0 z-[99] flex flex-col overflow-y-auto bg-white dark:bg-gray-900"
+                    >
+                        <div
+                            class="flex shrink-0 items-center justify-between border-b border-gray-200 p-3 dark:border-gray-700"
+                        >
+                            <h3
+                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                {{ __('Scan') }}
+                            </h3>
+                            <x-button
+                                icon="x-mark"
+                                color="secondary"
+                                flat
+                                sm
+                                x-on:click="closeEditor()"
+                            />
+                        </div>
+
+                        <template x-if="isProcessing">
+                            <div
+                                class="flex flex-1 items-center justify-center"
+                            >
+                                <div
+                                    class="text-center text-gray-700 dark:text-gray-300"
+                                >
+                                    <x-icon
+                                        name="arrow-path"
+                                        class="mx-auto mb-4 h-8 w-8 animate-spin"
+                                    />
+                                    <p>{{ __('Detecting document...') }}</p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="! isProcessing && cornerPoints">
+                            <div class="flex min-h-0 flex-1 flex-col">
+                                <div
+                                    x-cloak
+                                    x-show="detectionFailed"
+                                    class="shrink-0 bg-amber-50 p-3 text-center text-sm text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                >
+                                    {{ __('Document edges could not be detected. Adjust the corners manually.') }}
+                                </div>
+
+                                <div
+                                    class="flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-gray-900"
+                                >
+                                    <div
+                                        class="relative"
+                                        x-ref="imageContainer"
+                                    >
+                                        <img
+                                            x-ref="originalImage"
+                                            x-bind:src="originalImage"
+                                            class="max-h-full max-w-full"
+                                            x-on:load="drawCorners()"
+                                        />
+                                        <canvas
+                                            x-ref="cornerCanvas"
+                                            class="absolute left-0 top-0"
+                                            style="touch-action: none"
+                                            x-on:mousedown="startDrag($event)"
+                                            x-on:mousemove="moveDrag($event)"
+                                            x-on:mouseup="stopDrag()"
+                                            x-on:mouseleave="stopDrag()"
+                                            x-on:touchstart="startDrag($event)"
+                                            x-on:touchmove="moveDrag($event)"
+                                            x-on:touchend="stopDrag()"
+                                        ></canvas>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="flex shrink-0 flex-col gap-3 bg-white p-4 dark:bg-gray-800"
+                                >
+                                    <p
+                                        class="text-center text-xs text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __('Drag the corners to adjust the document area.') }}
+                                    </p>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label
+                                                class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
+                                            >
+                                                {{ __('Brightness') }}:
+                                                <span
+                                                    x-text="brightness + '%'"
+                                                ></span>
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="50"
+                                                max="200"
+                                                x-model="brightness"
+                                                x-on:input="updateFilters()"
+                                                class="w-full"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
+                                            >
+                                                {{ __('Contrast') }}:
+                                                <span
+                                                    x-text="contrast + '%'"
+                                                ></span>
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="50"
+                                                max="200"
+                                                x-model="contrast"
+                                                x-on:input="updateFilters()"
+                                                class="w-full"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end gap-2">
+                                        <x-button
+                                            :text="__('Cancel')"
+                                            color="secondary"
+                                            flat
+                                            x-on:click="closeEditor()"
+                                        />
+                                        <x-button
+                                            :text="__('Done')"
+                                            color="primary"
+                                            icon="check"
+                                            x-on:click="applyAndAddToQueue()"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            @endcanAction
         </div>
 
         <x-slot:footer>
             <x-button
                 color="secondary"
                 light
-                :text="__('Cancel')"
-                x-on:click="$modalClose('bulk-pdf-upload-modal');"
+                :text="__('Close')"
+                x-on:click="$modalClose('bulk-pdf-upload-modal')"
             />
         </x-slot>
     </x-modal>

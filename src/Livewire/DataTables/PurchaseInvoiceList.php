@@ -17,6 +17,7 @@ use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
+use FluxErp\Traits\Livewire\WithDocumentScanning;
 use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,7 +31,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PurchaseInvoiceList extends BaseDataTable
 {
-    use WithFilePond, WithFileUploads;
+    use WithDocumentScanning, WithFilePond, WithFileUploads;
 
     public array $enabledCols = [
         'url',
@@ -82,12 +83,6 @@ class PurchaseInvoiceList extends BaseDataTable
                 ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])
                     && resolve_static(CreatePurchaseInvoice::class, 'canPerformAction', [false])
                 )
-                ->wireClick('edit'),
-            DataTableButton::make()
-                ->text(__('Bulk PDF Upload'))
-                ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])
-                    && resolve_static(CreatePurchaseInvoice::class, 'canPerformAction', [false])
-                )
                 ->xOnClick(<<<'JS'
                     $modalOpen('bulk-pdf-upload-modal')
                 JS),
@@ -114,7 +109,9 @@ class PurchaseInvoiceList extends BaseDataTable
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'))->send();
+            $this->toast()
+                ->error(__('The file does not exist anymore.'))
+                ->send();
 
             return false;
         }
@@ -224,7 +221,7 @@ class PurchaseInvoiceList extends BaseDataTable
     public function processBulkUpload(array $tempFileNames): bool
     {
         if (! $tempFileNames) {
-            $this->notification()
+            $this->toast()
                 ->error(__('Please select at least one PDF file.'))
                 ->send();
 
@@ -236,7 +233,7 @@ class PurchaseInvoiceList extends BaseDataTable
         });
 
         if (! $filesToProcess) {
-            $this->notification()
+            $this->toast()
                 ->error(__('No valid files found for upload.'))->send();
 
             return false;
@@ -263,13 +260,13 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         if ($successCount > 0) {
-            $this->notification()
+            $this->toast()
                 ->success(__(':count PDF(s) successfully uploaded.', ['count' => $successCount]))
                 ->send();
         }
 
         if ($errorCount > 0) {
-            $this->notification()
+            $this->toast()
                 ->error(__(':count PDF(s) could not be uploaded.', ['count' => $errorCount]))
                 ->send();
         }
@@ -292,6 +289,11 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         return true;
+    }
+
+    protected function getScannedDocumentAction(): string
+    {
+        return CreatePurchaseInvoice::class;
     }
 
     protected function getBuilder(Builder $builder): Builder

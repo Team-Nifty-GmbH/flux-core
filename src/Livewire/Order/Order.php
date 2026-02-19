@@ -739,7 +739,9 @@ class Order extends Component
         }
 
         $action->execute();
-        $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Order')]))
+            ->send();
 
         return true;
     }
@@ -943,7 +945,9 @@ class Order extends Component
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Order')]))
+            ->send();
     }
 
     public function updatedScheduleParametersOrderTypeId(): void
