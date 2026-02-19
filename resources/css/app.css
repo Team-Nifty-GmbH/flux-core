@@ -12,7 +12,7 @@
 @import './components/apex-charts.css' layer(base);
 @import './components/full-calendar.css' layer(base);
 
-@import '@phosphor-icons/web/src/regular/style.css' layer(base);
+@import '../../node_modules/@phosphor-icons/web/src/regular/style.css' layer(base);
 
 @import 'filepond/dist/filepond.css' layer(base);
 @import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
