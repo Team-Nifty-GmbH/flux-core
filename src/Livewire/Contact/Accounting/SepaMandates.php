@@ -51,12 +51,17 @@ class SepaMandates extends SepaMandateList
 
     protected function getRowActions(): array
     {
+        $layout = array_key_first($this->getPrintLayouts());
+        $type = morph_alias($this->getModel());
+
         return [
             DataTableButton::make()
                 ->text(__('Preview'))
                 ->icon('magnifying-glass')
                 ->color('indigo')
-                ->wireClick('preview(record.id)'),
+                ->wireClick(<<<JS
+                    openPreview('{$layout}','{$type}',record.id)
+            JS),
             DataTableButton::make()
                 ->text(__('Edit'))
                 ->icon('pencil')
@@ -157,17 +162,6 @@ class SepaMandates extends SepaMandateList
         return true;
     }
 
-    public function preview(SepaMandate $sepaMandate): void
-    {
-        $this->sepaMandate->reset();
-        $this->sepaMandate->fill($sepaMandate);
-
-        $this->openPreview(
-            array_key_first($this->getPrintLayouts()),
-            morph_alias($sepaMandate::class),
-            $this->sepaMandate->id);
-    }
-
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('contact_id', $this->contact->id);
@@ -191,8 +185,11 @@ class SepaMandates extends SepaMandateList
     protected function getPrintLayouts(): array
     {
         return resolve_static(SepaMandate::class, 'query')
-            ->whereKey($this->sepaMandate->id)
-            ->first(['id'])
+            ->when(
+                $this->sepaMandate->id,
+                fn (Builder $query) => $query->whereKey($this->sepaMandate->id)
+            )
+            ->firstOrNew()
             ->resolvePrintViews();
     }
 
