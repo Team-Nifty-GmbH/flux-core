@@ -1,5 +1,4 @@
-<div
-    class="flex flex-col gap-2">
+<div class="flex flex-col gap-2">
     <x-input
         :label="__('Creditor Identifier')"
         wire:model="tenant.creditor_identifier"
