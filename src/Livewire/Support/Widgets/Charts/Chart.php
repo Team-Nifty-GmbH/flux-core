@@ -120,7 +120,7 @@ abstract class Chart extends Component
         $this->options = $this->getOptions();
         $this->js(
             <<<'JS'
-                Alpine.$data($el).updateData();
+                Alpine.$data($el)?.updateData();
             JS
         );
     }
