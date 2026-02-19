@@ -53,6 +53,11 @@ class SepaMandates extends SepaMandateList
     {
         return [
             DataTableButton::make()
+                ->text(__('Preview'))
+                ->icon('magnifying-glass')
+                ->color('indigo')
+                ->wireClick('preview(record.id)'),
+            DataTableButton::make()
                 ->text(__('Edit'))
                 ->icon('pencil')
                 ->color('indigo')
@@ -167,6 +172,11 @@ class SepaMandates extends SepaMandateList
         return $item->contact->invoiceAddress?->language_id ?? $item->contact->mainAddress?->language_id;
     }
 
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
+    }
+
     protected function getPrintLayouts(): array
     {
         return resolve_static(SepaMandate::class, 'query')
@@ -193,4 +203,16 @@ class SepaMandates extends SepaMandateList
                 ->get(['id', 'iban', 'bank_name']),
         ]);
     }
+
+    public function preview(SepaMandate $sepaMandate):void
+    {
+        $this->sepaMandate->reset();
+        $this->sepaMandate->fill($sepaMandate);
+
+        $this->openPreview(
+            array_key_first($this->getPrintLayouts()),
+            morph_alias($sepaMandate::class),
+            $this->sepaMandate->id);
+    }
+
 }

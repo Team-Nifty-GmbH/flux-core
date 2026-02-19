@@ -11,27 +11,22 @@ use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\TenantForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Country;
-use FluxErp\Models\Media;
 use FluxErp\Models\Scopes\UserTenantScope;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-
-// TODO: implement createDocuments trait
 class Tenants extends TenantList
 {
-    use Actions, SupportsLocalization, WithFileUploads, WithTabs, CreatesDocuments;
+    use Actions, SupportsLocalization, WithFileUploads, WithTabs;
 
     public TenantForm $tenant;
 
@@ -167,38 +162,6 @@ class Tenants extends TenantList
         $this->forceRender();
     }
 
-    #[Renderless]
-    public function previewRoute(int $tenantId): ?string
-    {
-        $sepa = resolve_static(SepaMandate::class, 'query')
-             ->where('tenant_id', $tenantId)
-             ->first();
-
-         if(!$sepa) {
-
-             return null;
-         }
-
-        $type =  is_a($sepa::class, OffersPrinting::class, true) ? $sepa->resolvePrintViews() : null;
-
-        if(!$type) {
-            // TODO: translation
-            $this->notification()->error(__('No print views found for this model'))->send();
-
-            return '';
-        }
-
-
-        $previewData = [
-            'model_type' => morph_alias($sepa->getMorphClass()),
-            'model_id' => $sepa->id,
-            'view' => array_key_first($type),
-            'preview' => true,
-        ];
-
-        return route('print.render', $previewData);
-    }
-
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->withoutGlobalScope(UserTenantScope::class);
@@ -221,23 +184,5 @@ class Tenants extends TenantList
                     ->toArray(),
             ]
         );
-    }
-
-    public function createDocuments(): null|MediaStream|Media
-    {
-        // TODO: Implement createDocuments() method.
-    }
-
-    protected function getPrintLayouts(): array
-    {
-        return resolve_static(SepaMandate::class, 'query')
-            ->where('tenant_id', $this->tenant->id)
-            ->first(['id'])
-            ->resolvePrintViews();
-    }
-
-    protected function getTo(OffersPrinting $item, array $documents): array
-    {
-        // TODO: Implement getTo() method.
     }
 }
