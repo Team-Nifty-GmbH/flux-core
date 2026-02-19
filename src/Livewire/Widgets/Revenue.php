@@ -39,6 +39,7 @@ class Revenue extends ValueBox implements HasWidgetOptions
                 ->whereNotNull('invoice_number')
                 ->revenue()
         )
+            ->setRange($this->timeFrame)
             ->setDateColumn('invoice_date')
             ->setStartingDate($this->getStart())
             ->setEndingDate($this->getEnd())
