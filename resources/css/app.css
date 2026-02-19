@@ -2,20 +2,20 @@
 @import '@fontsource/inter/latin-400.css' layer(base);
 @import '@fontsource/inter/latin-600.css' layer(base);
 @import '@fontsource/inter/latin-900.css' layer(base);
-@import '/node_modules/leaflet/dist/leaflet.css' layer(base);
-@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.css' layer(base);
-@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css'
+@import 'leaflet/dist/leaflet.css' layer(base);
+@import 'leaflet.markercluster/dist/MarkerCluster.css' layer(base);
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
   layer(base);
 
-@import '/node_modules/gridstack/dist/gridstack.min.css' layer(base);
+@import 'gridstack/dist/gridstack.min.css' layer(base);
 @import './components/grid-stack.css' layer(base);
 @import './components/apex-charts.css' layer(base);
 @import './components/full-calendar.css' layer(base);
 
-@import '/node_modules/@phosphor-icons/web/src/regular/style.css' layer(base);
+@import '@phosphor-icons/web/src/regular/style.css' layer(base);
 
-@import '/node_modules/filepond/dist/filepond.css' layer(base);
-@import '/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
+@import 'filepond/dist/filepond.css' layer(base);
+@import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
   layer(base);
 
 @import 'tailwindcss';
