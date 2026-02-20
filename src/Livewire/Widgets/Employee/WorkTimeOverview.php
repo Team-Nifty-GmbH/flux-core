@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets\Employee;
 
+use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Employee;
@@ -147,19 +148,19 @@ class WorkTimeOverview extends LineChart
             [
                 'name' => __('Actual Work Time'),
                 'data' => $actualHours,
-                'color' => '#3b82f6',
+                'color' => ChartColorEnum::Blue,
                 'zIndex' => 2,
             ],
             [
                 'name' => __('Target'),
                 'data' => $effectiveTargetHours,
-                'color' => '#10b981',
+                'color' => ChartColorEnum::Emerald,
                 'zIndex' => 1,
             ],
             [
                 'name' => __('Overtime'),
                 'data' => $overtimeHours,
-                'color' => '#ef4444',
+                'color' => ChartColorEnum::Red,
                 'zIndex' => 0,
             ],
         ];
