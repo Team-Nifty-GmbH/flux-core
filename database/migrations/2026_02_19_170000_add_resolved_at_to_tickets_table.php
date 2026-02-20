@@ -13,7 +13,7 @@ return new class() extends Migration
         Schema::table('tickets', function (Blueprint $table): void {
             $table->timestamp('resolved_at')
                 ->nullable()
-                ->after('auto_close_warning_sent_at');
+                ->after('total_cost');
         });
 
         $endStates = resolve_static(TicketState::class, 'all')
