@@ -199,11 +199,11 @@
                         @show
                     </x-slot>
                     <x-slot:suffix>
-                        <div class="size-6">
+                        <div class="size-6 shrink-0">
                             <svg
                                 x-cloak
                                 x-show="node.isLoading"
-                                class="mr-2 inline size-6 animate-spin fill-blue-600 p-1.5 text-gray-200 dark:text-gray-600"
+                                class="size-6 animate-spin fill-blue-600 p-1.5 text-gray-200 dark:text-gray-600"
                                 viewBox="0 0 100 101"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"

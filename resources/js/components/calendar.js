@@ -474,12 +474,7 @@ const calendar = () => {
                                 : `(${cw} ${startWeek}\u2013${endWeek})`;
 
                         titleEl.textContent =
-                            titleEl.textContent.replace(
-                                new RegExp(`\\s*\\(${cw}.*?\\)`),
-                                '',
-                            ) +
-                            ' ' +
-                            cwText;
+                            info.view.title + ' ' + cwText;
                     }
 
                     this.dispatchCalendarEvents('datesSet', info);
