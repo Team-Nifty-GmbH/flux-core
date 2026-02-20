@@ -1,8 +1,12 @@
 @use('Illuminate\Support\Str')
 
 <div class="flex max-h-full flex-col !px-0 !py-0">
-    <div class="flex items-center justify-between border-b border-gray-200 px-4 py-2">
-        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+    <div
+        class="flex items-center justify-between border-b border-gray-200 px-4 py-2"
+    >
+        <h2
+            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+        >
             {{ $this->getLabel() }}
         </h2>
         @if ($count > 0)
@@ -28,6 +32,7 @@
                                 $diff = $ticket->created_at->diffInDays(now(), false);
                                 $badgeColor = $diff > 3 ? 'red' : ($diff > 2 ? 'amber' : 'emerald');
                             @endphp
+
                             <x-badge
                                 :color="$badgeColor"
                                 :text="__('Created At') . ' ' . $ticket->created_at->locale(app()->getLocale())->isoFormat('L')"

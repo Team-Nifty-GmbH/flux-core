@@ -6,7 +6,7 @@
     <div class="flex flex-1 items-center justify-around gap-6">
         @if ($firstResponseHours !== null || $resolutionHours !== null)
             <div class="flex flex-col items-center gap-1">
-                <span class="text-3xl font-bold {{ $firstResponseColor }}">
+                <span class="{{ $firstResponseColor }} text-3xl font-bold">
                     {{ $firstResponseFormatted }}
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">
@@ -14,7 +14,7 @@
                 </span>
             </div>
             <div class="flex flex-col items-center gap-1">
-                <span class="text-3xl font-bold {{ $resolutionColor }}">
+                <span class="{{ $resolutionColor }} text-3xl font-bold">
                     {{ $resolutionFormatted }}
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">
