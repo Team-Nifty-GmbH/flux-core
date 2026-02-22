@@ -33,7 +33,7 @@
                         </div>
                         <div class="w-full">
                             <x-input
-                                class="flex-grow"
+                                class="grow"
                                 x-model="notificationChannel.channel_value[index]"
                             ></x-input>
                         </div>

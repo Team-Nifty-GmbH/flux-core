@@ -100,7 +100,7 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
 
     let promptAppend = directive.modifiers.includes('prompt')
         ? '<div>\n' +
-          '    <div class="relative mt-1 rounded-md shadow-sm">\n' +
+          '    <div class="relative mt-1 rounded-md shadow-xs">\n' +
           '    <div class="focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-dark-600 dark:text-dark-300 text-gray-600 ring-gray-300 dark:bg-dark-800 bg-white">\n' +
           '        <input id="prompt-value" class="dark:placeholder-dark-400 w-full rounded-md border-0 bg-transparent py-1.5 ring-0 placeholder:text-gray-400 focus:outline-hidden focus:ring-transparent sm:text-sm sm:leading-6">\n' +
           '    </div>\n' +

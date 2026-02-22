@@ -4,9 +4,9 @@
             <div class="relative">
                 <x-button
                     wire:loading.attr="disabled"
-                    class="!dark:text-secondary-400 border-b-2 border-b-transparent !text-secondary-600 focus:!ring-0 focus:!ring-offset-0"
+                    class="!dark:text-secondary-400 border-b-2 border-b-transparent text-secondary-600! focus:ring-0! focus:ring-offset-0!"
                     flat
-                    x-bind:class="{'!border-b-primary-600 !rounded-b-none': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
+                    x-bind:class="{'border-b-primary-600! rounded-b-none!': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
                     x-on:click="$wire.set('group', group)"
                 >
                     <x-slot:text>
@@ -89,14 +89,14 @@
                 x-show="!editGrid"
                 x-on:click="editGridMode(true)"
                 icon="pencil"
-                class="flex-shrink-0"
+                class="shrink-0"
             />
             <div x-cloak x-show="editGrid" class="flex gap-2">
                 <x-button
                     color="secondary"
                     light
                     x-on:click="$modalOpen('widget-list')"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                     :text="__('Add')"
                 />
                 <x-button
@@ -104,14 +104,14 @@
                     loading
                     x-on:click="save"
                     :text="__('Save')"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                 />
                 <x-button
                     color="red"
                     loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
                     wire:click="resetWidgets().then(onPostReset.bind($data))"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                     :text="__('Cancel')"
                 />
             </div>

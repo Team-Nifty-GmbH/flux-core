@@ -20,7 +20,73 @@
 
 @import 'tailwindcss';
 
-@config '../../tailwind.config.mjs';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@source '../../../../resources/**/*.blade.php';
+@source '../../../../resources/**/*.js';
+@source '../../../../app/Livewire/**/*.php';
+@source '../../../../app/Components/**/*.php';
+@source '../../../../vendor/tallstackui/tallstackui/src/**/*.php';
+@source '../../../../vendor/team-nifty-gmbh/tall-datatables/resources/**/*.blade.php';
+@source '../../../../vendor/team-nifty-gmbh/tall-datatables/src/**/*.php';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    --text-3xs: 0.5rem;
+    --text-3xs--line-height: 1;
+    --text-2xs: 0.65rem;
+    --text-2xs--line-height: 1;
+
+    --color-flux-primary-50:  #D7E3EC;
+    --color-flux-primary-100: #CCDEEB;
+    --color-flux-primary-200: #B6D6ED;
+    --color-flux-primary-300: #9ECDF0;
+    --color-flux-primary-400: #8AC4F1;
+    --color-flux-primary-500: #74BBF3;
+    --color-flux-primary-600: #5EB3F4;
+    --color-flux-primary-700: #2FA1F7;
+    --color-flux-primary-800: #0690FA;
+
+    --color-flux-secondary-50:  #D7DBE2;
+    --color-flux-secondary-100: #B5B9C5;
+    --color-flux-secondary-200: #9EA2B4;
+    --color-flux-secondary-300: #5B5D7A;
+    --color-flux-secondary-400: #444667;
+    --color-flux-secondary-500: #2D2F55;
+    --color-flux-secondary-600: #171842;
+    --color-flux-secondary-700: #00012F;
+    --color-flux-secondary-800: #00011B;
+
+    --color-primary-50:  #eef2ff;
+    --color-primary-100: #e0e7ff;
+    --color-primary-200: #c7d2fe;
+    --color-primary-300: #a5b4fc;
+    --color-primary-400: #818cf8;
+    --color-primary-500: #6366f1;
+    --color-primary-600: #4f46e5;
+    --color-primary-700: #4338ca;
+    --color-primary-800: #3730a3;
+    --color-primary-900: #312e81;
+    --color-primary-950: #1e1b4b;
+
+    --color-secondary-50:  #f8fafc;
+    --color-secondary-100: #f1f5f9;
+    --color-secondary-200: #e2e8f0;
+    --color-secondary-300: #cbd5e1;
+    --color-secondary-400: #94a3b8;
+    --color-secondary-500: #64748b;
+    --color-secondary-600: #475569;
+    --color-secondary-700: #334155;
+    --color-secondary-800: #1e293b;
+    --color-secondary-900: #0f172a;
+    --color-secondary-950: #020617;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,

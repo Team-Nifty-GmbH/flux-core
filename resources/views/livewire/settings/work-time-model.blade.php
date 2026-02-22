@@ -204,7 +204,7 @@
                                                     type="time"
                                                     x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].start_time"
                                                     x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'start_time', $event.target.value)"
-                                                    class="!py-1"
+                                                    class="py-1!"
                                                 />
                                             </td>
                                             <td
@@ -214,7 +214,7 @@
                                                     type="time"
                                                     x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].end_time"
                                                     x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'end_time', $event.target.value)"
-                                                    class="!py-1"
+                                                    class="py-1!"
                                                 />
                                             </td>
                                             <td
@@ -226,7 +226,7 @@
                                                     min="0"
                                                     max="480"
                                                     step="15"
-                                                    class="!py-1"
+                                                    class="py-1!"
                                                 />
                                             </td>
                                             <td

@@ -126,7 +126,7 @@
 
                         <div class="grow sm:hidden"></div>
 
-                        <div class="flex flex-shrink-0 gap-2">
+                        <div class="flex shrink-0 gap-2">
                             @auth('web')
                                 <div
                                     x-persist="layout.header.search-bar-mobile"
