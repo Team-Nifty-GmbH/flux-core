@@ -104,7 +104,8 @@ export default function ($wire) {
             ) {
                 return new Function(
                     'w',
-                    $wire.__instance.originalEffects.js.plotOptionsTotalFormatter,
+                    $wire.__instance.originalEffects.js
+                        .plotOptionsTotalFormatter,
                 );
             }
 
