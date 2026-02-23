@@ -65,6 +65,7 @@ beforeEach(function (): void {
         'order_id' => $this->order->id,
         'tenant_id' => $dbTenant->id,
         'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     CommissionRate::factory()->create([
@@ -103,6 +104,8 @@ test('commission credit note relationship', function (): void {
     $creditNotePosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->id,
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $commission = Commission::factory()->create([

@@ -269,6 +269,8 @@ test('delete selected order positions', function (): void {
     $positions = OrderPosition::factory()->count(2)->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $selectedIds = $positions->pluck('id')->toArray();
@@ -439,6 +441,8 @@ test('move position with parent', function (): void {
     $parentPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $orderPosition = $this->order->orderPositions->first();
@@ -483,6 +487,8 @@ test('recalculate order positions', function (): void {
         'tenant_id' => $this->dbTenant->getKey(),
         'price_list_id' => $this->priceList->id,
         'warehouse_id' => $warehouse->id,
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
