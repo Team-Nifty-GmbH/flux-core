@@ -170,7 +170,10 @@
         </x-slot>
     </x-modal>
 
-    <x-modal id="create-collective-order-modal" :title="__('Collective Order')">
+    <x-modal
+        id="create-collective-order-modal"
+        :title="__('Collective Order')"
+    >
         <div class="flex flex-col gap-4">
             <x-select.styled
                 :label="__('Collective Order Type')"
