@@ -812,16 +812,19 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ?? resolve_static(Currency::class, 'default')?->iso
             ?? '';
 
-        $parts = array_filter([
-            $this->invoice_number ?? $this->order_number,
-            $this->commission,
-            sprintf(
-                '%s (%s %s)',
-                Number::currency($this->total_gross_price, $currencyIso, app()->getLocale()),
-                Number::currency($this->total_net_price, $currencyIso, app()->getLocale()),
-                __('net'),
-            ),
-        ], static fn ($part) => ! is_null($part) && $part !== '');
+        $parts = array_filter(
+            [
+                $this->invoice_number ?? $this->order_number,
+                $this->commission,
+                sprintf(
+                    '%s (%s %s)',
+                    Number::currency($this->total_gross_price, $currencyIso, app()->getLocale()),
+                    Number::currency($this->total_net_price, $currencyIso, app()->getLocale()),
+                    __('net'),
+                ),
+            ],
+            fn (?string $part) => ! blank($part)
+        );
 
         return implode(' - ', $parts);
     }
