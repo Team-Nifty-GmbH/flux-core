@@ -32,12 +32,12 @@ trait Printable
 
     public function resolvePrintViews(): array
     {
+        $user = Auth::user();
+
         $printViews = array_merge(
             array_filter(
                 $this->getPrintViews(),
-                function (string|int $key) {
-                    $user = Auth::user();
-
+                function (string|int $key) use ($user) {
                     if ($user?->hasRole('Super Admin')) {
                         return true;
                     }
