@@ -633,11 +633,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         $totalNet = $this->orderPositions()
             ->where('is_alternative', false)
-            ->where('is_free_text', false)
+            ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->sum('total_net_price');
         $totalBaseNet = $this->orderPositions()
             ->where('is_alternative', false)
-            ->where('is_free_text', false)
+            ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->sum('total_base_net_price');
 
         $this->total_net_price = bcround(
@@ -667,7 +667,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
-            ->where('is_free_text', false)
+            ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->whereNotNull('vat_rate_percentage')
             ->reorder()
             ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
