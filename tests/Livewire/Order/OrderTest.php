@@ -914,6 +914,7 @@ test('vat calculation with combined discounts', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -926,6 +927,7 @@ test('vat calculation with combined discounts', function (): void {
                 'vat_rate_percentage' => 0.07,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
@@ -1147,6 +1149,7 @@ test('vat calculation with percentage header discount', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -1159,6 +1162,7 @@ test('vat calculation with percentage header discount', function (): void {
                 'vat_rate_percentage' => 0.07,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
@@ -1279,6 +1283,7 @@ test('order discount with mixed vat rates and position discounts', function (): 
                 'vat_price' => 453.15,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -1296,6 +1301,7 @@ test('order discount with mixed vat rates and position discounts', function (): 
                 'vat_price' => 11.20,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -1313,6 +1319,7 @@ test('order discount with mixed vat rates and position discounts', function (): 
                 'vat_price' => 0,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
