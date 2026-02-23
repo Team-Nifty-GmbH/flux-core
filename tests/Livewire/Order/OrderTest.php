@@ -73,6 +73,7 @@ beforeEach(function (): void {
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_free_text' => false,
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->for($currency)
@@ -864,6 +865,7 @@ test('vat calculation prevents negative amounts', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
@@ -993,6 +995,7 @@ test('vat calculation with flat header discount', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -1005,6 +1008,7 @@ test('vat calculation with flat header discount', function (): void {
                 'vat_rate_percentage' => 0.07,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
@@ -1061,6 +1065,7 @@ test('vat calculation with floating point precision', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -1073,6 +1078,7 @@ test('vat calculation with floating point precision', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -1085,6 +1091,7 @@ test('vat calculation with floating point precision', function (): void {
                 'vat_rate_percentage' => 0.07,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
@@ -1219,6 +1226,7 @@ test('vat calculation with position discounts', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->has(OrderPosition::factory()
@@ -1231,6 +1239,7 @@ test('vat calculation with position discounts', function (): void {
                 'vat_rate_percentage' => 0.07,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
@@ -1377,6 +1386,7 @@ test('vat calculation with repeating decimals', function (): void {
                 'vat_rate_percentage' => 0.19,
                 'tenant_id' => $this->dbTenant->getKey(),
                 'is_alternative' => false,
+                'is_free_text' => false,
             ])
         )
         ->create([
