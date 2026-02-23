@@ -244,7 +244,7 @@
                                     <div class="flex gap-4">
                                         <x-avatar
                                             borderless
-                                            image
+                                            :image="route('icons', ['name' => 'user'])"
                                             class="ring-4 ring-offset-2"
                                             x-bind:class="parseFloat(transaction.balance) === 0 ? 'ring-emerald-500' : (transaction.order_transactions_count > 0 ? 'ring-amber-500' : 'ring-red-500')"
                                             x-bind:src="transaction?.avatar_url ?? '{{ route('icons', ['name' => 'user']) }}'"
