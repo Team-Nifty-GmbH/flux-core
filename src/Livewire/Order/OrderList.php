@@ -5,6 +5,8 @@ namespace FluxErp\Livewire\Order;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Forms\CollectiveOrderForm;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
@@ -16,6 +18,8 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
@@ -33,6 +37,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     public ?int $mapLimit = 100;
 
     public OrderForm $order;
+
+    public CollectiveOrderForm $collectiveOrder;
 
     public ?int $orderType = null;
 
@@ -76,6 +82,31 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                     'wire:click' => 'delete',
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
+            DataTableButton::make()
+                ->text(__('Create Collective Order'))
+                ->color('indigo')
+                ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])
+                    && (
+                        ! $this->orderType || resolve_static(OrderType::class, 'query')
+                            ->whereKey($this->orderType)
+                            ->where('order_type_enum', OrderTypeEnum::Order->value)
+                            ->exists()
+                    )
+                    && resolve_static(OrderType::class, 'query')
+                        ->where(
+                            fn (Builder $query) => $query
+                                ->where('order_type_enum', OrderTypeEnum::CollectiveOrder->value)
+                                ->orWhere('order_type_enum', OrderTypeEnum::SplitOrder->value),
+                        )
+                        ->where('is_active', true)
+                        ->distinct('order_type_enum')
+                        ->count() === 2
+                )
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => '$wire.selected.length > 1',
+                ])
+                ->wireClick('openCreateCollectiveOrderModal'),
         ];
     }
 
@@ -122,6 +153,42 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->address_delivery_id = $contact->delivery_address_id ?? $this->order->address_delivery_id;
     }
 
+    #[Renderless]
+    public function openCreateCollectiveOrderModal(): void
+    {
+        $selected = $this->getSelectedModelsQuery()
+            ->whereNull('invoice_number')
+            ->whereDoesntHave('children')
+            ->whereRelation('orderPositions', 'total_net_price', '>', 0)
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query
+                    ->where('order_type_enum', OrderTypeEnum::Order->value)
+                    ->where('is_active', true)
+            )
+            ->get(['id', 'address_invoice_id', 'order_type_id'])
+            ->mapToGroups(fn (Model $item) => [$item->address_invoice_id => $item])
+            ->map(fn (Collection|Model $item, int $key) => ['address_invoice_id' => $key, 'orders' => $item->toArray()])
+            ->values()
+            ->toArray();
+
+        // If no suitable orders are found return toast message about it.
+        if (! $selected) {
+            $this->toast()
+                ->error(__('No suitable orders found.'))
+                ->send();
+
+            return;
+        }
+
+        $this->collectiveOrder->reset();
+        $this->collectiveOrder->orders = $selected;
+
+        $this->js(<<<'JS'
+             $modalOpen('create-collective-order-modal');
+        JS);
+    }
+
     public function save(): ?false
     {
         try {
@@ -135,6 +202,24 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->redirect(route('orders.id', $this->order->id), true);
 
         return null;
+    }
+
+    #[Renderless]
+    public function createCollectiveOrders(): void
+    {
+        try {
+            $this->collectiveOrder->create();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
+
+        $this->js(<<<'JS'
+             $modalClose('create-collective-order-modal');
+        JS);
     }
 
     #[Renderless]

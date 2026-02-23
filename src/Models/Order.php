@@ -54,6 +54,7 @@ use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -66,6 +67,7 @@ use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Traits\Conditionable;
+use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -525,7 +527,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
                         $discount->update([
                             'discount_percentage' => diff_percentage($previous, $new),
-                            'discount_flat' => bcsub($previous, $new, 9),
+                            'discount_flat' => bcround(
+                                bcsub($previous, $new, 9),
+                                2,
+                                RoundingMode::HalfTowardsZero
+                            ),
                         ]);
 
                         return $new;
@@ -544,9 +550,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function calculateMargin(): static
     {
         $this->margin = Rounding::round(
-            $this->orderPositions()
-                ->where('is_alternative', false)
-                ->sum('margin')
+            discount(
+                $this->orderPositions()
+                    ->where('is_alternative', false)
+                    ->sum('margin'),
+                $this->discountPercentage
+            )
         );
 
         $variableCosts = 0;
@@ -676,6 +685,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             fn (OrderPosition $item) => [($item->vat_rate_id ?? $item->vat_rate_percentage) => $item->total_net_price]
         );
 
+        $multiplier = $this->orderType->order_type_enum->multiplier();
         foreach ($this->discounts()->ordered()->get() as $discount) {
             if ($discount->is_percentage) {
                 $positionsByVatRate->transform(function (OrderPosition $item) use ($discount): OrderPosition {
@@ -689,17 +699,19 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     0
                 );
 
-                if (bccomp($total, '0', 9) > 0) {
+                if (bccomp($multiplier, -1) === 0) {
+                    $remainingTotal = min(0, bcsub($total, $discount->discount, 9));
+                } else {
                     $remainingTotal = max(0, bcsub($total, $discount->discount, 9));
-
-                    $positionsByVatRate->transform(
-                        function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
-                            $proportion = bcdiv($item->total_net_price, $total, 9);
-                            $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
-
-                            return $item;
-                        });
                 }
+
+                $positionsByVatRate->transform(
+                    function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
+                        $proportion = bcdiv($item->total_net_price, $total, 9);
+                        $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
+
+                        return $item;
+                    });
             }
         }
 
@@ -1274,6 +1286,16 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'is_public' => false,
             'is_repeatable' => false,
         ];
+    }
+
+    protected function discountPercentage(): Attribute
+    {
+        return Attribute::get(
+            fn (mixed $value, array $attributes) => diff_percentage(
+                data_get($attributes, 'total_base_discounted_net_price') ?? '0',
+                data_get($attributes, 'total_net_price') ?? '0'
+            )
+        );
     }
 
     protected function makeAllSearchableUsing(Builder $query): Builder
