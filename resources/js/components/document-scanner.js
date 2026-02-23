@@ -285,6 +285,7 @@ export default ($wire) => ({
             await this.loadOpenCv();
             openCvLoaded = true;
         } catch (error) {
+            // OpenCV is optional — scanner falls back to manual corner selection
             console.error('OpenCV load failed:', error);
         }
 

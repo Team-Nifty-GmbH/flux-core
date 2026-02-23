@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ProcessScannedDocumentJob implements ShouldQueue
 {
@@ -41,6 +42,8 @@ class ProcessScannedDocumentJob implements ShouldQueue
             resolve_static($this->action, 'make', [['media' => $tempPath]])
                 ->validate()
                 ->execute();
+        } catch (Throwable $e) {
+            report($e);
         } finally {
             Storage::delete($this->imagePath);
 
