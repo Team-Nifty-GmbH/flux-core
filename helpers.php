@@ -465,19 +465,6 @@ if (! function_exists('bcabs')) {
     }
 }
 
-if (! function_exists('bcround')) {
-    function bcround(string $number, int $precision = 0): string
-    {
-        if (str_contains($number, '.')) {
-            return $number[0] !== '-' ?
-                bcadd($number, '0.' . str_repeat('0', $precision) . '5', $precision) :
-                bcsub($number, '0.' . str_repeat('0', $precision) . '5', $precision);
-        }
-
-        return $number;
-    }
-}
-
 if (! function_exists('bcceil')) {
     function bcceil(string $number): string
     {

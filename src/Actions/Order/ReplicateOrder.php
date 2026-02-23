@@ -96,7 +96,13 @@ class ReplicateOrder extends FluxAction
             ->validate()
             ->execute();
 
-        $this->replicateDiscounts(morph_alias(Order::class), $originalOrder->getKey(), $order->getKey());
+        $multiplier = $order->orderType->order_type_enum->multiplier();
+        $this->replicateDiscounts(
+            modelType: morph_alias(Order::class),
+            fromModelId: $originalOrder->getKey(),
+            toModelId: $order->getKey(),
+            multiplier: $multiplier
+        );
 
         if (! $getOrderPositionsFromOrigin) {
             $replicateOrderPositions = collect($this->data['order_positions']);
@@ -204,9 +210,9 @@ class ReplicateOrder extends FluxAction
             $newOrderPositions->push($newPosition);
 
             $this->replicateDiscounts(
-                morph_alias(OrderPosition::class),
-                $originalPositionId,
-                $newPosition->getKey()
+                modelType: morph_alias(OrderPosition::class),
+                fromModelId: $originalPositionId,
+                toModelId: $newPosition->getKey(),
             );
         }
 
@@ -260,18 +266,25 @@ class ReplicateOrder extends FluxAction
         }
     }
 
-    private function replicateDiscounts(string $modelType, int|string $fromModelId, int|string $toModelId): void
-    {
+    protected function replicateDiscounts(
+        string $modelType,
+        int|string $fromModelId,
+        int|string $toModelId,
+        int $multiplier = 1
+    ): void {
         resolve_static(Discount::class, 'query')
             ->where('model_type', $modelType)
             ->where('model_id', $fromModelId)
             ->get()
-            ->each(function (Discount $discount) use ($modelType, $toModelId): void {
+            ->each(function (Discount $discount) use ($modelType, $toModelId, $multiplier): void {
                 CreateDiscount::make([
                     'model_type' => $modelType,
                     'model_id' => $toModelId,
                     'name' => $discount->name,
-                    'discount' => $discount->getRawOriginal('discount'),
+                    'discount' => bcmul(
+                        $discount->getRawOriginal('discount'),
+                        ! $discount->is_percentage && $multiplier === -1 ? -1 : 1
+                    ),
                     'is_percentage' => $discount->is_percentage,
                 ])
                     ->validate()
