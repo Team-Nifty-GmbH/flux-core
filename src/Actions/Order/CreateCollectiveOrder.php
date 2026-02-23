@@ -26,8 +26,8 @@ class CreateCollectiveOrder extends DispatchableFluxAction
         $collectiveOrderOrderTypeId = $this->getData('order_type_id');
         $splitOrderOrderTypeId = $this->getData('split_order_order_type_id');
 
-        $success = 0;
-        $failed = 0;
+        $success = [];
+        $failed = [];
 
         foreach ($this->getData('orders') as $order) {
             try {
@@ -135,8 +135,18 @@ class CreateCollectiveOrder extends DispatchableFluxAction
                 }
             } catch (Throwable $e) {
                 report($e);
-                $failed++;
+                $failed[] = [
+                    'address_invoice_id' => data_get($order, 'address_invoice_id'),
+                    'error' => $e->getMessage(),
+                ];
+
+                continue;
             }
+
+            $success[] = [
+                'address_invoice_id' => data_get($order, 'address_invoice_id'),
+                'collective_order_id' => $collectiveOrder->getKey(),
+            ];
         }
 
         return [
