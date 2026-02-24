@@ -220,12 +220,20 @@ class CreateDocumentsJob implements ShouldQueue
             throw new RuntimeException('Failed to create ZIP archive: ' . $tmpZip);
         }
 
+        $usedNames = [];
+
         foreach ($previewFiles as $file) {
-            $zip->addFromString($file['file_name'], $file['output']);
+            $zip->addFromString(
+                $this->deduplicateFileName($file['file_name'], $usedNames),
+                $file['output']
+            );
         }
 
         foreach ($downloadFiles as $media) {
-            $zip->addFile($media->getPath(), $media->file_name);
+            $zip->addFile(
+                $media->getPath(),
+                $this->deduplicateFileName($media->file_name, $usedNames)
+            );
         }
 
         $zip->close();
@@ -234,5 +242,19 @@ class CreateDocumentsJob implements ShouldQueue
         unlink($tmpZip);
 
         return $zipPath;
+    }
+
+    protected function deduplicateFileName(string $fileName, array &$usedNames): string
+    {
+        $usedNames[$fileName] = ($usedNames[$fileName] ?? 0) + 1;
+
+        if ($usedNames[$fileName] === 1) {
+            return $fileName;
+        }
+
+        $baseName = pathinfo($fileName, PATHINFO_FILENAME);
+        $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+
+        return $baseName . ' (' . ($usedNames[$fileName] - 1) . ')' . ($ext ? '.' . $ext : '');
     }
 }
