@@ -630,6 +630,10 @@ if (! function_exists('morph_to')) {
 
         /** @var Illuminate\Database\Eloquent\Model $model */
         $model = morphed_model($type);
+        if (is_null($model)) {
+            return null;
+        }
+
         $query = $model::query()->whereKey($id);
 
         return $returnBuilder ? $query : $query->first();
