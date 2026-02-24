@@ -40,7 +40,7 @@
             <livewire:dynamic-component
                 wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}"
                 :is="$this->{$attributes->wire('model')->value()}"
-                wire:key="{{ uniqid() }}"
+                wire:key="tab-{{ $attributes->wire('model')->value() }}-{{ $this->{$attributes->wire('model')->value()} }}"
             />
         @else
             <x-dynamic-component

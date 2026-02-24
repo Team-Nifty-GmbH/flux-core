@@ -6,7 +6,7 @@
         <x-modal
             size="5xl"
             id="task-form-modal"
-            x-on:close="$wire.set('taskTab', 'task.general')"
+            x-on:close="$wire.taskTab = 'task.general'"
         >
             <x-flux::tabs
                 wire:model.live="taskTab"
