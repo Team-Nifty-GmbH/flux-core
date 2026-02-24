@@ -32,7 +32,7 @@
     @if ($serialNumberId = data_get($this->serialNumber, 'id'))
         <x-card :header="__('Files')">
             <livewire:product.serial-number.media
-                wire:key="{{ uniqid() }}"
+                wire:key="serial-number-media-{{ $serialNumberId }}"
                 :model-id="$serialNumberId"
             />
         </x-card>
