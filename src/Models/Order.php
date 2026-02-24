@@ -1090,6 +1090,13 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
         if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
             $children = $this->children()
+                ->whereHas('orderType', fn (Builder $query) => $query->whereNotIn(
+                    'order_type_enum',
+                    [
+                        OrderTypeEnum::Refund->value,
+                        OrderTypeEnum::Retoure->value,
+                    ]
+                ))
                 ->pluck('invoice_number')
                 ->toArray();
 
@@ -1105,6 +1112,14 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             }
         } elseif ($this->orderType) {
             unset($printViews['final-invoice']);
+        }
+
+        if ($this->orderType?->order_type_enum === OrderTypeEnum::SplitOrder
+            && $this->parent()
+                ->whereRelation('orderType', 'order_type_enum', OrderTypeEnum::CollectiveOrder->value)
+                ->exists()
+        ) {
+            unset($printViews['invoice'], $printViews['final-invoice']);
         }
 
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
