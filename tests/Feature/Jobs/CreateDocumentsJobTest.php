@@ -6,11 +6,11 @@ use Illuminate\Support\Facades\Storage;
 test('deduplicates preview filenames in zip', function (): void {
     Storage::fake();
 
-    $job = new CreateDocumentsJob(
-        items: [],
-        selectedPrintLayouts: ['preview' => ['invoice']],
-        userMorph: 'user:' . $this->user->getKey(),
-    );
+    $job = app(CreateDocumentsJob::class, [
+        'items' => [],
+        'selectedPrintLayouts' => ['preview' => ['invoice']],
+        'userMorph' => 'user:' . $this->user->getKey(),
+    ]);
 
     $previewOutputs = [];
     for ($i = 1; $i <= 3; $i++) {
@@ -45,11 +45,11 @@ test('deduplicates preview filenames in zip', function (): void {
 test('keeps unique filenames unchanged in zip', function (): void {
     Storage::fake();
 
-    $job = new CreateDocumentsJob(
-        items: [],
-        selectedPrintLayouts: ['preview' => ['invoice']],
-        userMorph: 'user:' . $this->user->getKey(),
-    );
+    $job = app(CreateDocumentsJob::class, [
+        'items' => [],
+        'selectedPrintLayouts' => ['preview' => ['invoice']],
+        'userMorph' => 'user:' . $this->user->getKey(),
+    ]);
 
     $previewOutputs = [
         ['output' => 'PDF A', 'file_name' => 'Rechnung RE-001.pdf'],

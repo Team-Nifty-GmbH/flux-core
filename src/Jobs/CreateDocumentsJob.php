@@ -255,6 +255,6 @@ class CreateDocumentsJob implements ShouldQueue
         $baseName = pathinfo($fileName, PATHINFO_FILENAME);
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
 
-        return $baseName . ' (' . ($usedNames[$fileName] - 1) . ').' . $ext;
+        return $baseName . ' (' . ($usedNames[$fileName] - 1) . ')' . ($ext ? '.' . $ext : '');
     }
 }
