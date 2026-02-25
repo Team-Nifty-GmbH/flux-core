@@ -49,7 +49,7 @@ class FcmChannel
             try {
                 $fcmMessage = CloudMessage::new()
                     ->withNotification($fcmNotification)
-                    ->toToken($deviceToken->token);
+                    ->withToken($deviceToken->token);
 
                 if ($data) {
                     $fcmMessage = $fcmMessage->withData($data);
