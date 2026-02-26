@@ -1,6 +1,6 @@
 <?php
 
-use FluxErp\Livewire\Widgets\TicketsPerAgent;
+use FluxErp\Livewire\Widgets\TicketsPerUser;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\States\Ticket\Done;
@@ -9,7 +9,7 @@ use FluxErp\States\Ticket\WaitingForSupport;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
-    Livewire::test(TicketsPerAgent::class)
+    Livewire::test(TicketsPerUser::class)
         ->assertOk();
 });
 
@@ -44,7 +44,7 @@ test('shows open tickets per agent by state', function (): void {
     ]);
     $doneTicket->users()->attach($this->user);
 
-    $component = Livewire::test(TicketsPerAgent::class);
+    $component = Livewire::test(TicketsPerUser::class);
 
     $component->assertOk();
 

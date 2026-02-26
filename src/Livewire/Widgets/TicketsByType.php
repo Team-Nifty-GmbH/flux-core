@@ -52,15 +52,13 @@ class TicketsByType extends CircleChart implements HasWidgetOptions
             ->get();
 
         $this->labels = $data
-            ->map(fn (Ticket $row) => $row->ticketType?->name ?? __('No Type'))
+            ->map(fn (Ticket $ticket) => $ticket->ticketType?->name ?? __('No Type'))
             ->toArray();
-        $this->series = $data->pluck('total')
-            ->map(fn (mixed $value) => (int) $value)
-            ->toArray();
+        $this->series = $data->pluck('total')->toArray();
         $this->optionData = $data
-            ->map(fn (Ticket $row) => [
-                'label' => $row->ticketType?->name ?? __('No Type'),
-                'ticket_type_id' => $row->ticket_type_id,
+            ->map(fn (Ticket $ticket) => [
+                'label' => $ticket->ticketType?->name ?? __('No Type'),
+                'ticket_type_id' => $ticket->ticket_type_id,
             ])
             ->toArray();
     }

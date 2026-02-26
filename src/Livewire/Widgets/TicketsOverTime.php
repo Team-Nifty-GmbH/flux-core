@@ -53,7 +53,8 @@ class TicketsOverTime extends BarChart implements HasWidgetOptions
 
     public function calculateChart(): void
     {
-        $ticketTypes = resolve_static(TicketType::class, 'query')->get(['id', 'name']);
+        $ticketTypes = resolve_static(TicketType::class, 'query')
+            ->get(['id', 'name']);
 
         $this->series = [];
         $this->optionData = [];
@@ -77,7 +78,8 @@ class TicketsOverTime extends BarChart implements HasWidgetOptions
                     ChartColorEnum::class,
                     'forIndex',
                     ['index' => $colorIndex]
-                )->value,
+                )
+                    ->value,
                 'data' => $result->getData(),
                 'growthRate' => $result->getGrowthRate(),
             ];
@@ -92,7 +94,8 @@ class TicketsOverTime extends BarChart implements HasWidgetOptions
         }
 
         $noTypeResult = Bar::make(
-            resolve_static(Ticket::class, 'query')->whereNull('ticket_type_id')
+            resolve_static(Ticket::class, 'query')
+                ->whereNull('ticket_type_id')
         )
             ->setDateColumn('created_at')
             ->setRange($this->timeFrame)
@@ -107,7 +110,8 @@ class TicketsOverTime extends BarChart implements HasWidgetOptions
                     ChartColorEnum::class,
                     'forIndex',
                     ['index' => $colorIndex]
-                )->value,
+                )
+                    ->value,
                 'data' => $noTypeResult->getData(),
                 'growthRate' => $noTypeResult->getGrowthRate(),
             ];

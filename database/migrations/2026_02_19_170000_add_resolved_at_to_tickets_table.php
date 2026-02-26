@@ -11,9 +11,12 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('tickets', function (Blueprint $table): void {
-            $table->timestamp('resolved_at')
+            $table->unsignedBigInteger('resolved_by')
                 ->nullable()
                 ->after('total_cost');
+            $table->timestamp('resolved_at')
+                ->nullable()
+                ->after('resolved_by');
         });
 
         $endStates = resolve_static(TicketState::class, 'all')
@@ -24,13 +27,16 @@ return new class() extends Migration
         DB::table('tickets')
             ->whereIn('state', $endStates)
             ->whereNull('resolved_at')
-            ->update(['resolved_at' => DB::raw('updated_at')]);
+            ->update([
+                'resolved_at' => DB::raw('updated_at'),
+                'resolved_by' => DB::raw('updated_by'),
+            ]);
     }
 
     public function down(): void
     {
         Schema::table('tickets', function (Blueprint $table): void {
-            $table->dropColumn('resolved_at');
+            $table->dropColumn(['resolved_by', 'resolved_at']);
         });
     }
 };

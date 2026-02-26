@@ -55,10 +55,17 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     {
         static::saving(function (Ticket $ticket): void {
             if ($ticket->isDirty('state')) {
-                if ($ticket->state::$isEndState) {
+                $ticketStateClass = resolve_static(TicketState::class, 'class');
+
+                if (
+                    $ticket->state instanceof $ticketStateClass
+                    && $ticket->state::$isEndState
+                ) {
                     $ticket->resolved_at ??= now();
+                    $ticket->resolved_by ??= auth()->id();
                 } else {
                     $ticket->resolved_at = null;
+                    $ticket->resolved_by = null;
                 }
             }
         });
@@ -67,9 +74,9 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     protected function casts(): array
     {
         return [
-            'resolved_at' => 'datetime',
             'state' => TicketState::class,
             'total_cost' => Money::class,
+            'resolved_at' => 'datetime',
         ];
     }
 

@@ -17,7 +17,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class TicketsPerAgent extends BarChart implements HasWidgetOptions
+class TicketsPerUser extends BarChart implements HasWidgetOptions
 {
     use Widgetable;
 
@@ -68,38 +68,38 @@ class TicketsPerAgent extends BarChart implements HasWidgetOptions
         $openStates = $allStates
             ->reject(fn (string $state) => $state::$isEndState);
 
-        $agents = resolve_static(User::class, 'query')
+        $users = resolve_static(User::class, 'query')
             ->whereHas('tickets', fn (Builder $query) => $query->whereNotIn('state', $endStates))
             ->withCount(['tickets' => fn (Builder $query) => $query->whereNotIn('state', $endStates)])
             ->orderByDesc('tickets_count')
             ->limit(15)
             ->get();
 
-        if ($agents->isEmpty()) {
+        if ($users->isEmpty()) {
             $this->labels = [];
             $this->series = [];
 
             return;
         }
 
-        $this->labels = $agents
-            ->map(fn (User $user) => $user->name)
+        $this->labels = $users
+            ->map(fn (User $user) => $user->getLabel())
             ->toArray();
-        $this->optionData = $agents
+        $this->optionData = $users
             ->map(fn (User $user) => [
-                'label' => $user->name,
+                'label' => $user->getLabel(),
                 'id' => $user->getKey(),
             ])
             ->toArray();
 
-        $agentKeys = $agents
+        $userKeys = $users
             ->map(fn (User $user) => $user->getKey())
             ->toArray();
 
         $breakdown = resolve_static(Ticket::class, 'query')
             ->join('ticket_user', 'tickets.id', '=', 'ticket_user.ticket_id')
             ->whereNotIn('tickets.state', $endStates)
-            ->whereIntegerInRaw('ticket_user.user_id', $agentKeys)
+            ->whereIntegerInRaw('ticket_user.user_id', $userKeys)
             ->groupBy('ticket_user.user_id', 'tickets.state')
             ->selectRaw('ticket_user.user_id, tickets.state, COUNT(*) as total')
             ->get()
@@ -108,17 +108,18 @@ class TicketsPerAgent extends BarChart implements HasWidgetOptions
         $this->series = [];
 
         foreach ($openStates as $stateName => $stateClass) {
-            $data = $agents->map(function (User $user) use ($breakdown, $stateName) {
+            $data = $users->map(function (User $user) use ($breakdown, $stateName) {
                 $userBreakdown = $breakdown->get($user->getKey(), collect());
 
                 return (int) ($userBreakdown->firstWhere('state', $stateName)?->total ?? 0);
-            })->toArray();
+            })
+                ->toArray();
 
             if (array_sum($data) > 0) {
                 $color = resolve_static(
                     ChartColorEnum::class,
                     'fromColor',
-                    ['colorName' => (new $stateClass(''))->color()]
+                    ['colorName' => app($stateClass, ['model' => null])->color()]
                 );
 
                 $this->series[] = [

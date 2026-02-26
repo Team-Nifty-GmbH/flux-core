@@ -47,11 +47,7 @@ class ChartColorEnum extends FluxEnum
 
     public static function fromColor(string $colorName): string
     {
-        $constName = ucfirst($colorName);
-
-        return defined(static::class . '::' . $constName)
-            ? constant(static::class . '::' . $constName)
-            : static::forKey($colorName)->value;
+        return (static::cases()[ucfirst($colorName)] ?? static::forKey($colorName))->value;
     }
 
     public static function forIndex(int $index): object

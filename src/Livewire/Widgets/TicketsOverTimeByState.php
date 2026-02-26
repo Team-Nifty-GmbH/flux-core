@@ -74,7 +74,7 @@ class TicketsOverTimeByState extends BarChart implements HasWidgetOptions
             $color = resolve_static(
                 ChartColorEnum::class,
                 'fromColor',
-                ['colorName' => (new $stateClass(''))->color()]
+                ['colorName' => app($stateClass, ['model' => null])->color()]
             );
 
             $this->series[] = [

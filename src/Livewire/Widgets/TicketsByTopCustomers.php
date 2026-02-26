@@ -7,6 +7,7 @@ use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\Support\Widgets\Charts\Chart;
+use FluxErp\Models\Address;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
@@ -19,7 +20,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class TicketsByCustomer extends Chart implements HasWidgetOptions
+class TicketsByTopCustomers extends Chart implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget, Widgetable;
 
@@ -60,6 +61,7 @@ class TicketsByCustomer extends Chart implements HasWidgetOptions
         ];
 
         $topCustomers = resolve_static(Ticket::class, 'query')
+            ->where('authenticatable_type', morph_alias(Address::class))
             ->whereBetween('created_at', $dateRange)
             ->groupBy('authenticatable_type', 'authenticatable_id')
             ->selectRaw('authenticatable_type, authenticatable_id, COUNT(*) as total')
@@ -91,7 +93,7 @@ class TicketsByCustomer extends Chart implements HasWidgetOptions
             });
 
         $customerKeys = $topCustomers
-            ->map(fn (Ticket $row) => $row->authenticatable_type . ':' . $row->authenticatable_id)
+            ->map(fn (Ticket $ticket) => $ticket->authenticatable_type . ':' . $ticket->authenticatable_id)
             ->toArray();
 
         $this->labels = array_map(
@@ -100,16 +102,17 @@ class TicketsByCustomer extends Chart implements HasWidgetOptions
         );
 
         $this->optionData = $topCustomers
-            ->map(fn (Ticket $row) => [
+            ->map(fn (Ticket $ticket) => [
                 'label' => $names->get(
-                    $row->authenticatable_type . ':' . $row->authenticatable_id
+                    $ticket->authenticatable_type . ':' . $ticket->authenticatable_id
                 ) ?? __('Unknown'),
-                'authenticatable_type' => $row->authenticatable_type,
-                'authenticatable_id' => $row->authenticatable_id,
+                'authenticatable_type' => $ticket->authenticatable_type,
+                'authenticatable_id' => $ticket->authenticatable_id,
             ])
             ->toArray();
 
         $ticketsByCustomer = resolve_static(Ticket::class, 'query')
+            ->where('authenticatable_type', morph_alias(Address::class))
             ->whereBetween('created_at', $dateRange)
             ->where(function (Builder $query) use ($topCustomers): void {
                 foreach ($topCustomers as $customer) {
@@ -123,9 +126,10 @@ class TicketsByCustomer extends Chart implements HasWidgetOptions
             ->groupBy('authenticatable_type', 'authenticatable_id', 'ticket_type_id')
             ->selectRaw('authenticatable_type, authenticatable_id, ticket_type_id, COUNT(*) as total')
             ->get()
-            ->groupBy(fn (Ticket $row) => $row->authenticatable_type . ':' . $row->authenticatable_id);
+            ->groupBy(fn (Ticket $ticket) => $ticket->authenticatable_type . ':' . $ticket->authenticatable_id);
 
-        $ticketTypes = resolve_static(TicketType::class, 'query')->get(['id', 'name']);
+        $ticketTypes = resolve_static(TicketType::class, 'query')
+            ->get(['id', 'name']);
         $colorIndex = 0;
         $this->series = [];
 

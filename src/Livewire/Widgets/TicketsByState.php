@@ -55,34 +55,34 @@ class TicketsByState extends CircleChart implements HasWidgetOptions
             ->get();
 
         $this->labels = $data
-            ->map(fn (Ticket $row) => __(Str::headline((string) $row->state)))
+            ->map(fn (Ticket $ticket) => __(Str::headline((string) $ticket->state)))
             ->toArray();
-        $this->series = $data->pluck('total')
-            ->map(fn (mixed $value) => (int) $value)
-            ->toArray();
+        $this->series = $data->pluck('total')->toArray();
         $this->optionData = $data
-            ->map(fn (Ticket $row) => [
-                'label' => __(Str::headline((string) $row->state)),
-                'state' => (string) $row->state,
+            ->map(fn (Ticket $ticket) => [
+                'label' => __(Str::headline((string) $ticket->state)),
+                'state' => (string) $ticket->state,
             ])
             ->toArray();
-        $this->colors = $data->map(function (Ticket $row) use ($allStates) {
-            $stateClass = $allStates->get((string) $row->state);
+        $this->colors = $data->map(function (Ticket $ticket) use ($allStates) {
+            $stateClass = $allStates->get((string) $ticket->state);
 
             if ($stateClass) {
                 return resolve_static(
                     ChartColorEnum::class,
                     'fromColor',
-                    ['colorName' => (new $stateClass(''))->color()]
+                    ['colorName' => app($stateClass, ['model' => null])->color()]
                 );
             }
 
             return resolve_static(
                 ChartColorEnum::class,
                 'forKey',
-                ['key' => (string) $row->state]
-            )->value;
-        })->toArray();
+                ['key' => (string) $ticket->state]
+            )
+                ->value;
+        })
+            ->toArray();
     }
 
     #[Renderless]
