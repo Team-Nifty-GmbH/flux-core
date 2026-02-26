@@ -49,6 +49,7 @@ class OrderInvoiceAddedSubscriber
             ->where('is_free_text', false)
             ->where('is_bundle_position', false)
             ->whereDoesntHave('commission')
+            ->with(['product' => fn (Builder $query) => $query->withTrashed()])
             ->get();
 
         foreach ($orderPositions as $orderPosition) {
@@ -66,7 +67,7 @@ class OrderInvoiceAddedSubscriber
                     case $commissionRateId = $contactCommissionRates
                     ->whereIn(
                         'category_id',
-                        $orderPosition->product->categories()->pluck('id')->toArray()
+                        $orderPosition->product?->categories()->pluck('id')->toArray() ?? []
                     )
                     ->first()
                     ?->id:
@@ -77,7 +78,7 @@ class OrderInvoiceAddedSubscriber
                     case $commissionRateId = $defaultCommissionRates
                     ->whereIn(
                         'category_id',
-                        $orderPosition->product->categories()->pluck('id')->toArray()
+                        $orderPosition->product?->categories()->pluck('id')->toArray() ?? []
                     )
                     ->first()
                     ?->id:
