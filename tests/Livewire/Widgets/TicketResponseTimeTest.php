@@ -27,7 +27,7 @@ test('calculates first response time', function (): void {
     Comment::factory()->create([
         'model_type' => morph_alias(Ticket::class),
         'model_id' => $ticket->getKey(),
-        'created_by' => $agent->name,
+        'created_by' => $agent->getMorphClass() . ':' . $agent->getKey(),
         'created_at' => now()->subHours(3),
     ]);
 
