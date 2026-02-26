@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
@@ -19,9 +20,9 @@ class TicketResponseTime extends Component
 {
     use IsTimeFrameAwareWidget, Widgetable;
 
-    public ?float $firstResponseHours = null;
+    public float|string|null $firstResponseHours = null;
 
-    public ?float $resolutionHours = null;
+    public float|string|null $resolutionHours = null;
 
     public string $firstResponseFormatted = '-';
 
@@ -71,6 +72,7 @@ class TicketResponseTime extends Component
     protected function calculateFirstResponseTime(): void
     {
         $ticketMorph = morph_alias(Ticket::class);
+        $userMorph = morph_alias(User::class);
 
         $tickets = resolve_static(Ticket::class, 'query')
             ->whereBetween('created_at', [
@@ -93,6 +95,7 @@ class TicketResponseTime extends Component
                 ->where('comments.model_type', $ticketMorph)
             )
             ->whereIntegerInRaw('tickets.id', $tickets->modelKeys())
+            ->where('comments.created_by', 'LIKE', $userMorph . ':%')
             ->where(fn (Builder $subQuery) => $subQuery
                 ->whereColumn('comments.created_by', '!=', 'tickets.created_by')
                 ->orWhereNull('tickets.created_by')
@@ -108,7 +111,11 @@ class TicketResponseTime extends Component
             $firstResponseAt = $firstResponseDates->get($ticket->getKey());
 
             if ($firstResponseAt) {
-                $totalHours += $ticket->created_at->diffInMinutes(Carbon::parse($firstResponseAt)) / 60;
+                $totalHours = bcadd(
+                    $totalHours,
+                    bcdiv($ticket->created_at->diffInMinutes(Carbon::parse($firstResponseAt)), 60, 10),
+                    10
+                );
                 $count++;
             }
         }
@@ -121,7 +128,7 @@ class TicketResponseTime extends Component
             return;
         }
 
-        $this->firstResponseHours = round($totalHours / $count, 1);
+        $this->firstResponseHours = bcround(bcdiv($totalHours, $count, 10), 1);
         $this->firstResponseFormatted = $this->formatHours($this->firstResponseHours);
         $this->firstResponseColor = $this->colorForHours($this->firstResponseHours);
     }
@@ -148,34 +155,38 @@ class TicketResponseTime extends Component
         $totalHours = 0;
 
         foreach ($tickets as $ticket) {
-            $totalHours += $ticket->created_at->diffInMinutes($ticket->resolved_at) / 60;
+            $totalHours = bcadd(
+                $totalHours,
+                bcdiv($ticket->created_at->diffInMinutes($ticket->resolved_at), 60, 10),
+                10
+            );
         }
 
-        $this->resolutionHours = round($totalHours / $tickets->count(), 1);
+        $this->resolutionHours = bcround(bcdiv($totalHours, $tickets->count(), 10), 1);
         $this->resolutionFormatted = $this->formatHours($this->resolutionHours);
         $this->resolutionColor = $this->colorForHours($this->resolutionHours, 48);
     }
 
-    protected function formatHours(float $hours): string
+    protected function formatHours(float|string $hours): string
     {
-        if ($hours < 1) {
-            return round($hours * 60) . 'm';
+        if (bccomp($hours, 1, 10) < 0) {
+            return bcround(bcmul($hours, 60, 10), 0) . 'm';
         }
 
-        if ($hours < 24) {
-            return round($hours, 1) . 'h';
+        if (bccomp($hours, 24, 10) < 0) {
+            return bcround($hours, 1) . 'h';
         }
 
-        return round($hours / 24, 1) . 'd';
+        return bcround(bcdiv($hours, 24, 10), 1) . 'd';
     }
 
-    protected function colorForHours(float $hours, float $redThreshold = 24): string
+    protected function colorForHours(float|string $hours, float|string $redThreshold = 24): string
     {
-        if ($hours <= $redThreshold / 3) {
+        if (bccomp($hours, bcdiv($redThreshold, 3, 10), 10) <= 0) {
             return 'text-emerald-600 dark:text-emerald-400';
         }
 
-        if ($hours <= $redThreshold * 2 / 3) {
+        if (bccomp($hours, bcdiv(bcmul($redThreshold, 2, 10), 3, 10), 10) <= 0) {
             return 'text-amber-600 dark:text-amber-400';
         }
 

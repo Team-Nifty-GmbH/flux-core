@@ -134,11 +134,14 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
         $this->series = [];
 
         foreach ($ticketTypes as $ticketType) {
-            $data = array_map(function (string $key) use ($ticketsByCustomer, $ticketType): int {
-                return (int) ($ticketsByCustomer->get($key, collect())
-                    ->firstWhere('ticket_type_id', $ticketType->getKey())
-                    ?->total ?? 0);
-            }, $customerKeys);
+            $data = array_map(
+                function (string $key) use ($ticketsByCustomer, $ticketType): int {
+                    return (int) ($ticketsByCustomer->get($key, collect())
+                        ->firstWhere('ticket_type_id', $ticketType->getKey())
+                        ?->total ?? 0);
+                },
+                $customerKeys
+            );
 
             if (array_sum($data) > 0) {
                 $this->series[] = [
@@ -147,7 +150,8 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
                         ChartColorEnum::class,
                         'forIndex',
                         ['index' => $colorIndex]
-                    )->value,
+                    )
+                        ->value,
                     'data' => $data,
                 ];
             }
@@ -155,11 +159,14 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
             $colorIndex++;
         }
 
-        $noTypeData = array_map(function (string $key) use ($ticketsByCustomer): int {
-            return (int) ($ticketsByCustomer->get($key, collect())
-                ->firstWhere('ticket_type_id', null)
-                ?->total ?? 0);
-        }, $customerKeys);
+        $noTypeData = array_map(
+            function (string $key) use ($ticketsByCustomer): int {
+                return (int) ($ticketsByCustomer->get($key, collect())
+                    ->firstWhere('ticket_type_id', null)
+                    ?->total ?? 0);
+            },
+            $customerKeys
+        );
 
         if (array_sum($noTypeData) > 0) {
             $this->series[] = [
@@ -168,7 +175,8 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
                     ChartColorEnum::class,
                     'forIndex',
                     ['index' => $colorIndex]
-                )->value,
+                )
+                    ->value,
                 'data' => $noTypeData,
             ];
         }

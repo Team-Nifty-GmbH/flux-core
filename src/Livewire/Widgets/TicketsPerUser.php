@@ -72,7 +72,6 @@ class TicketsPerUser extends BarChart implements HasWidgetOptions
             ->whereHas('tickets', fn (Builder $query) => $query->whereNotIn('state', $endStates))
             ->withCount(['tickets' => fn (Builder $query) => $query->whereNotIn('state', $endStates)])
             ->orderByDesc('tickets_count')
-            ->limit(15)
             ->get();
 
         if ($users->isEmpty()) {
