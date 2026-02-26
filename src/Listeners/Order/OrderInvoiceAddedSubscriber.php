@@ -5,6 +5,7 @@ namespace FluxErp\Listeners\Order;
 use FluxErp\Actions\Commission\CreateCommission;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
 
@@ -49,7 +50,7 @@ class OrderInvoiceAddedSubscriber
             ->where('is_free_text', false)
             ->where('is_bundle_position', false)
             ->whereDoesntHave('commission')
-            ->with(['product' => fn (Builder $query) => $query->withTrashed()])
+            ->with(['product' => fn (BelongsTo $query) => $query->withTrashed()])
             ->get();
 
         foreach ($orderPositions as $orderPosition) {
