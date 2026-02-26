@@ -72,7 +72,10 @@ class OrderView extends PrintableView
                     'scopes' => [
                         'sorted' => function (Builder $query): void {
                             $query->ordered()
-                                ->with(['tags', 'product.unit:id,name,abbreviation'])
+                                ->with([
+                                    'tags',
+                                    'product' => fn (Builder $query) => $query->withTrashed()->with('unit:id,name,abbreviation'),
+                                ])
                                 ->when(
                                     ! $this->showAlternatives,
                                     fn (Builder $query) => $query->whereNot('is_alternative', true)
