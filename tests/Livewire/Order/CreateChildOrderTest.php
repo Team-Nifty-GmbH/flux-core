@@ -87,6 +87,8 @@ beforeEach(function (): void {
         'total_net_price' => 1000,
         'total_gross_price' => 1190,
         'is_net' => false,
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 });
 

@@ -17,6 +17,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Throwable;
 
 class WorkTime extends Component
 {
@@ -183,7 +184,17 @@ class WorkTime extends Component
     public function start(?array $data = null): void
     {
         if ($trackableType = data_get($data, 'trackable_type')) {
-            $data['trackable_type'] = morph_alias(morphed_model($trackableType) ?? $trackableType);
+            $model = morph_to($trackableType, data_get($data, 'trackable_id'));
+
+            if ($model) {
+                $data['trackable_type'] = $model->getMorphClass();
+                try {
+                    $data['contact_id'] ??= $model->getContactId();
+                } catch (Throwable) {
+                }
+            } else {
+                $data['trackable_type'] = morph_alias(morphed_model($trackableType) ?? $trackableType);
+            }
         }
 
         $this->workTime->fill($data ?? []);

@@ -50,7 +50,7 @@
         "playwright": "^1.55.0",
         "postcss": "^8.4.32",
         "postcss-import": "^16.1.0",
-        "prettier": "3.6.2",
+        "prettier": "3.8.1",
         "prettier-plugin-blade": "^2.1.21",
         "prettier-plugin-tailwindcss": "^0.6.11",
         "pusher-js": "^8.4.0-rc2",
@@ -59,5 +59,8 @@
         "tailwindcss": "^3.4.0",
         "uuid": "^13.0.0",
         "vite": "^7.0.3"
+    },
+    "dependencies": {
+        "@techstark/opencv-js": "^4.12.0-release.1"
     }
 }

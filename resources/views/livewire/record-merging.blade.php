@@ -192,6 +192,7 @@
                 x-on:click="$modalClose('merge-records-modal')"
             />
             <x-button
+                loading="merge"
                 :text="__('Merge')"
                 color="indigo"
                 wire:click="merge().then((success) => {if(success) $modalClose('merge-records-modal');})"

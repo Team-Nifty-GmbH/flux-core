@@ -18,6 +18,7 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Livewire;
 use function Livewire\invade;
@@ -148,6 +149,45 @@ test('add order position successfully', function (): void {
     expect($newPosition->total_gross_price)->toBeNumeric();
 });
 
+test('new order position gets slug position at end of list', function (): void {
+    OrderPosition::factory()->count(3)->create([
+        'order_id' => $this->order->id,
+        'vat_rate_id' => $this->vatRate->id,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $highestSortNumber = $this->order->orderPositions()
+        ->whereNull('parent_id')
+        ->max('sort_number');
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('orderPosition.name', 'New Position At End')
+        ->set('orderPosition.amount', 1)
+        ->set('orderPosition.unit_price', 50)
+        ->set('orderPosition.vat_rate_id', $this->vatRate->id)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertReturned(true);
+
+    $newPosition = $this->order->orderPositions()->latest('id')->first();
+
+    expect($newPosition->sort_number)->toBeGreaterThan($highestSortNumber);
+
+    $rawSlugPosition = DB::table('order_positions')
+        ->where('id', $newPosition->getKey())
+        ->value('slug_position');
+    expect($rawSlugPosition)->not->toBeNull();
+
+    $highestSlugPosition = DB::table('order_positions')
+        ->where('order_id', $this->order->getKey())
+        ->whereNull('parent_id')
+        ->whereNull('deleted_at')
+        ->max('slug_position');
+    expect($rawSlugPosition)->toEqual($highestSlugPosition);
+});
+
 test('add order position with product', function (): void {
     $orderPositionCount = $this->order->orderPositions()->count();
 
@@ -269,6 +309,8 @@ test('delete selected order positions', function (): void {
     $positions = OrderPosition::factory()->count(2)->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $selectedIds = $positions->pluck('id')->toArray();
@@ -439,6 +481,8 @@ test('move position with parent', function (): void {
     $parentPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $orderPosition = $this->order->orderPositions->first();
@@ -483,6 +527,8 @@ test('recalculate order positions', function (): void {
         'tenant_id' => $this->dbTenant->getKey(),
         'price_list_id' => $this->priceList->id,
         'warehouse_id' => $warehouse->id,
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])

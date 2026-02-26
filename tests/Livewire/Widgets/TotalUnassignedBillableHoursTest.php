@@ -61,6 +61,8 @@ beforeEach(function (): void {
     $orderPosition = OrderPosition::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->id,
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $this->workTime = WorkTime::factory()

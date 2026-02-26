@@ -148,6 +148,10 @@ class MergeRecords extends FluxAction
                         );
                     break;
                 case $relation instanceof BelongsToMany:
+                    if ($relation->getParentKeyName() !== $mainRecord->getKeyName()) {
+                        break;
+                    }
+
                     // If the relation has pivot columns, we assume that duplicate entries are allowed
                     $pivotColumns = $relation->getPivotColumns();
                     $columns = array_merge(
