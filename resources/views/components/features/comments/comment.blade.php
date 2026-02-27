@@ -109,7 +109,6 @@
                             el.remove()
                         })
                         $el.parentNode.insertAdjacentHTML('beforeend', $refs.textarea.innerHTML)
-                        $wire.commentId = comment.id
                     "
                 >
                     {{ __('Answer') }}

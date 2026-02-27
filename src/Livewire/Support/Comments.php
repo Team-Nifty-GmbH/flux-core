@@ -79,20 +79,6 @@ abstract class Comments extends Component
         return true;
     }
 
-    /**
-     * @return string[]
-     */
-    public function getListeners(): array
-    {
-        $channel = app($this->modelType)->broadcastChannel() . $this->modelId;
-
-        return [
-            'echo-private:' . $channel . ',.CommentCreated' => 'loadComments',
-            'echo-private:' . $channel . ',.CommentUpdated' => 'loadComments',
-            'echo-private:' . $channel . ',.CommentDeleted' => 'loadComments',
-        ];
-    }
-
     #[Renderless]
     public function loadComments(): array
     {

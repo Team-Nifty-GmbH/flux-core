@@ -1,11 +1,21 @@
 <div class="relative">
     <section>
         <div
+            wire:ignore
             x-data="{
                 ...comments(),
                 user: @js(auth()->user()),
                 avatarUrl: @js(auth()->user()?->getAvatarUrl()),
             }"
+            x-init="
+                init();
+                if (window.Echo && @js($this->modelId)) {
+                    window.Echo.private(@js(morph_alias($this->modelType) . '.' . $this->modelId))
+                        .listen('.CommentCreated', () => loadComments())
+                        .listen('.CommentUpdated', () => loadComments())
+                        .listen('.CommentDeleted', () => loadComments());
+                }
+            "
         >
             <div>
                 <template x-ref="textarea">
