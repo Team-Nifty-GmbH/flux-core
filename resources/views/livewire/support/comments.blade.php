@@ -6,16 +6,19 @@
                 ...comments(),
                 user: @js(auth()->user()),
                 avatarUrl: @js(auth()->user()?->getAvatarUrl()),
+                echoChannel: null,
             }"
             x-init="
                 init();
                 if (window.Echo && @js($this->modelId)) {
-                    window.Echo.private(@js(morph_alias($this->modelType) . '.' . $this->modelId))
+                    echoChannel = @js(morph_alias($this->modelType) . '.' . $this->modelId);
+                    window.Echo.private(echoChannel)
                         .listen('.CommentCreated', () => loadComments())
                         .listen('.CommentUpdated', () => loadComments())
                         .listen('.CommentDeleted', () => loadComments());
                 }
             "
+            x-on:remove="echoChannel && window.Echo?.leave(echoChannel)"
         >
             <div>
                 <template x-ref="textarea">
