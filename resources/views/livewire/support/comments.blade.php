@@ -9,13 +9,13 @@
                 echoChannel: null,
             }"
             x-init="
-                init();
+                init()
                 if (window.Echo && @js($this->modelId)) {
-                    echoChannel = @js(morph_alias($this->modelType) . '.' . $this->modelId);
+                    echoChannel = @js(morph_alias($this->modelType) . '.' . $this->modelId)
                     window.Echo.private(echoChannel)
                         .listen('.CommentCreated', () => loadComments())
                         .listen('.CommentUpdated', () => loadComments())
-                        .listen('.CommentDeleted', () => loadComments());
+                        .listen('.CommentDeleted', () => loadComments())
                 }
             "
             x-on:remove="echoChannel && window.Echo?.leave(echoChannel)"
