@@ -55,7 +55,10 @@ class SignaturePublicLink extends Component
 
     public function render(): string
     {
-        config(['livewire.layout' => 'flux::layouts.printing']);
+        config([
+            'livewire.layout' => 'flux::layouts.printing',
+            'livewire.component_layout' => 'flux::layouts.printing',
+        ]);
         // This ensures livewire recognizes the content and wraps the view around it
         // override the x-layouts.print with an empty div
         PrintableView::setLayout(null);
