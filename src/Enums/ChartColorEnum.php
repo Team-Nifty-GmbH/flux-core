@@ -45,6 +45,11 @@ class ChartColorEnum extends FluxEnum
 
     final public const string Yellow = '#eab308';
 
+    public static function fromColor(string $colorName): string
+    {
+        return (static::cases()[ucfirst($colorName)] ?? static::forKey($colorName))->value;
+    }
+
     public static function forIndex(int $index): object
     {
         return array_values(static::cases())[$index % count(static::cases())];
