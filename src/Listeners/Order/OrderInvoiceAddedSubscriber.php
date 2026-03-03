@@ -21,7 +21,7 @@ class OrderInvoiceAddedSubscriber
         $viewClass = data_get($event->media->model->getPrintViews(), $event->media->collection_name);
 
         try {
-            if (! is_string($viewClass) || ! $viewClass::isInvoice()) {
+            if (! is_string($viewClass) || ! resolve_static($viewClass, 'isInvoice')) {
                 return;
             }
         } catch (Throwable) {
