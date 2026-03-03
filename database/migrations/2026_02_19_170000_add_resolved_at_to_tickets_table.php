@@ -11,12 +11,12 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('tickets', function (Blueprint $table): void {
-            $table->unsignedBigInteger('resolved_by')
-                ->nullable()
-                ->after('total_cost');
             $table->timestamp('resolved_at')
                 ->nullable()
-                ->after('resolved_by');
+                ->after('total_cost');
+            $table->string('resolved_by')
+                ->nullable()
+                ->after('resolved_at');
         });
 
         $endStates = resolve_static(TicketState::class, 'all')

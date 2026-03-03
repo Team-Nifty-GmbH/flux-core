@@ -62,7 +62,9 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
                     && $ticket->state::$isEndState
                 ) {
                     $ticket->resolved_at ??= now();
-                    $ticket->resolved_by ??= auth()->id();
+                    $ticket->resolved_by ??= auth()->user()
+                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
+                        : null;
                 } else {
                     $ticket->resolved_at = null;
                     $ticket->resolved_by = null;

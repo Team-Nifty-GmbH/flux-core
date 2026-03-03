@@ -169,11 +169,11 @@ class TicketResponseTime extends Component
 
     protected function formatHours(float|string $hours): string
     {
-        if (bccomp($hours, 1, 10) < 0) {
+        if (bccomp($hours, 1, 10) === -1) {
             return bcround(bcmul($hours, 60, 10), 0) . 'm';
         }
 
-        if (bccomp($hours, 24, 10) < 0) {
+        if (bccomp($hours, 24, 10) === -1) {
             return bcround($hours, 1) . 'h';
         }
 
@@ -182,11 +182,11 @@ class TicketResponseTime extends Component
 
     protected function colorForHours(float|string $hours, float|string $redThreshold = 24): string
     {
-        if (bccomp($hours, bcdiv($redThreshold, 3, 10), 10) <= 0) {
+        if (bccomp($hours, bcdiv($redThreshold, 3, 10), 10) !== 1) {
             return 'text-emerald-600 dark:text-emerald-400';
         }
 
-        if (bccomp($hours, bcdiv(bcmul($redThreshold, 2, 10), 3, 10), 10) <= 0) {
+        if (bccomp($hours, bcdiv(bcmul($redThreshold, 2, 10), 3, 10), 10) !== 1) {
             return 'text-amber-600 dark:text-amber-400';
         }
 
