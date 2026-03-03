@@ -14,14 +14,14 @@ class OrderInvoiceAddedSubscriber
 {
     public function handle(MediaHasBeenAddedEvent $event): void
     {
+        if ($event->media->model_type !== morph_alias(Order::class)) {
+            return;
+        }
+
         $viewClass = data_get($event->media->model->getPrintViews(), $event->media->collection_name);
 
         try {
-            if (
-                $event->media->model_type !== morph_alias(Order::class)
-                || ! is_string($viewClass)
-                || ! $viewClass::isInvoice()
-            ) {
+            if (! is_string($viewClass) || ! $viewClass::isInvoice()) {
                 return;
             }
         } catch (Throwable) {
