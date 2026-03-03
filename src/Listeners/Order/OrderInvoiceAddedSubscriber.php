@@ -8,14 +8,23 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
+use Throwable;
 
 class OrderInvoiceAddedSubscriber
 {
     public function handle(MediaHasBeenAddedEvent $event): void
     {
-        if ($event->media->collection_name !== 'invoice'
-            || $event->media->model_type !== morph_alias(Order::class)
-        ) {
+        $viewClass = data_get($event->media->model->getPrintViews(), $event->media->collection_name);
+
+        try {
+            if (
+                $event->media->model_type !== morph_alias(Order::class)
+                || ! is_string($viewClass)
+                || ! $viewClass::isInvoice()
+            ) {
+                return;
+            }
+        } catch (Throwable) {
             return;
         }
 
