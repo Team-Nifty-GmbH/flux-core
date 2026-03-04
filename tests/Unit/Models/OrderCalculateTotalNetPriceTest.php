@@ -11,11 +11,11 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 
 test('excludes free text positions from total net price calculation', function (): void {
-    $contact = Contact::factory()
-        ->has(Address::factory()->create())
-        ->create();
+    $contact = Contact::factory()->create();
 
-    $address = $contact->addresses()->first();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->id,
+    ]);
 
     $orderType = OrderType::factory()->create([
         'order_type_enum' => OrderTypeEnum::Order,

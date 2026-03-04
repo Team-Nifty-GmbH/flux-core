@@ -31,7 +31,7 @@ class GenericMail extends Mailable
     ) {
         if ($this->mailMessageForm instanceof CommunicationForm) {
             try {
-                $this->tenant ??= $this->mailMessageForm->communicatable()?->getTenantId();
+                $this->tenant ??= $this->mailMessageForm->communicatable()?->getTenant();
             } catch (BadMethodCallException) {
             }
         }

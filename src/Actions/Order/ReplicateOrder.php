@@ -257,7 +257,7 @@ class ReplicateOrder extends FluxAction
             $values = Arr::wrap($values);
             foreach ($values as $index => $value) {
                 if (resolve_static($class, 'query')
-                    ->whereKey($this->getData($value))
+                    ->whereKey($value)
                     ->whereHasTenant($tenantId)
                     ->doesntExist()
                 ) {

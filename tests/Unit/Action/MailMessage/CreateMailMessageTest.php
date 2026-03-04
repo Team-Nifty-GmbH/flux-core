@@ -6,20 +6,16 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\PaymentType;
-use FluxErp\Models\PriceList;
 use FluxErp\Models\Ticket;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    $this->address = Contact::factory()
-        ->has(Address::factory()->create())
-        ->for(PriceList::factory())
-        ->for(PaymentType::factory()->hasAttached($this->dbTenant))
-        ->create()
-        ->addresses()
-        ->first();
+    $contact = Contact::factory()->create();
+
+    $this->address = Address::factory()->create([
+        'contact_id' => $contact->id,
+    ]);
 
     $this->mailAccount = MailAccount::factory()
         ->has(MailFolder::factory()->state(['can_create_ticket' => true]))

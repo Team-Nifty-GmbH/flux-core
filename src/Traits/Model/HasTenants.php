@@ -7,24 +7,27 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 trait HasTenants
 {
     abstract public function tenants(): BelongsToMany;
 
+    public function getTenant(): ?Model
+    {
+        return $this->tenants()
+            ->orderBy('is_default', 'DESC')
+            ->first()
+            ?? resolve_static(Tenant::class, 'default');
+    }
+
     public function getTenantId(): int|string|null
     {
-        $tenants = $this->tenants()->pluck('is_default', 'id')->toArray()
-            ?: resolve_static(Tenant::class, 'query')
-                ->pluck('is_default', 'id')
-                ->toArray();
-
-        return array_key_first(
-            Arr::where($tenants, fn (bool $value, int|string $key) => $value)
-        )
-            ?? array_key_first($tenants);
+        return $this->tenants()
+            ->orderBy('is_default', 'DESC')
+            ->value('id')
+            ?? resolve_static(Tenant::class, 'default')
+                ?->getKey();
     }
 
     public function getTenants(array $columns = ['*']): Collection

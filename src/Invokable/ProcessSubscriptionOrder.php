@@ -69,7 +69,9 @@ class ProcessSubscriptionOrder implements Repeatable
         }
 
         try {
-            $newOrder = ReplicateOrder::make($order)->validate()->execute();
+            $newOrder = ReplicateOrder::make($order)
+                ->validate()
+                ->execute();
 
             if (($autoPrint || $autoSend) && $printLayouts && count($printLayouts) > 0) {
                 $this->processPrintAndSend($newOrder, $printLayouts, $autoSend ? $emailTemplateId : null);
