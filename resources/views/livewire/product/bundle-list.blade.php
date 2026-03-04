@@ -76,7 +76,7 @@
                 color="indigo"
                 loading="save"
                 :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
             />
         </x-slot>
     </x-modal>

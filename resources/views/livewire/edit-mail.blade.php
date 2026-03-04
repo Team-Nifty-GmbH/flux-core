@@ -262,7 +262,7 @@
                 x-show="! isMultiGroup || isLastGroup"
                 color="indigo"
                 loading="send"
-                wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})"
+                x-on:click="$wire.send().then((success) => {if(success) $modalClose('edit-mail');})"
                 class="ml-auto"
                 :text="__('Send')"
             />

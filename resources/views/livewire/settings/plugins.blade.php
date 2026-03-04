@@ -44,7 +44,7 @@
                     color="indigo"
                     :text="__('Update')"
                     loading="update"
-                    wire:click="updatePackages($wire.update.package); $modalClose('update-plugin-modal');"
+                    x-on:click="$wire.updatePackages($wire.update.package).then(() => $modalClose('update-plugin-modal'))"
                 />
             </x-slot>
         </x-modal>

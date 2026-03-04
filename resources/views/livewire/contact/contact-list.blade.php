@@ -36,7 +36,7 @@
                     loading="assignToAgent"
                     x-bind:disabled="! $wire.agentId"
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.contact.assign-agent') }}"
-                    wire:click="assignToAgent().then((success) => {if(success) $modalClose('assign-agent-modal');})"
+                    x-on:click="$wire.assignToAgent().then((success) => {if(success) $modalClose('assign-agent-modal');})"
                 />
             </x-slot>
         </x-modal>

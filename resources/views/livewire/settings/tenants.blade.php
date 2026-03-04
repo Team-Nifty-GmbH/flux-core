@@ -26,7 +26,7 @@
                             light
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Tenant')]) }}"
                             x-bind:class="$wire.tenant.id > 0 || 'invisible'"
-                            wire:click="delete().then((success) => {if(success) close();});"
+                            x-on:click="$wire.delete().then((success) => {if(success) close();});"
                             flat
                             color="red"
                             :text="__('Delete')"
@@ -44,7 +44,7 @@
                         <x-button
                             color="indigo"
                             :text="__('Save')"
-                            wire:click="save().then((success) => {if(success) $modalClose('edit-tenant');});"
+                            x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-tenant');});"
                         />
                     </div>
                 </div>

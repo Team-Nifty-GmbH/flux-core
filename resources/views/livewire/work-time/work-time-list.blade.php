@@ -241,7 +241,7 @@
                 <x-button
                     color="indigo"
                     loading
-                    wire:click="toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); isBillable = true; })"
+                    x-on:click="$wire.toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); isBillable = true; })"
                     :text="__('Apply')"
                 />
             </x-slot>

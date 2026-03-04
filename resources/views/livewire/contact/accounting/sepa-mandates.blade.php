@@ -35,7 +35,7 @@
             :text="__('Cancel')"
         />
         <x-button
-            wire:click="save().then((success) => { if(success) $modalClose('edit-sepa-mandate-modal'); })"
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-sepa-mandate-modal'); })"
             primary
             :text="__('Save')"
         />

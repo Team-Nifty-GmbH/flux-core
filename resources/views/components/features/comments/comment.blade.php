@@ -39,7 +39,11 @@
                         <x-dropdown.items>
                             <span
                                 x-bind:disabled="! comment.is_current_user"
-                                wire:click="delete(comment.id).then((success) => { if(success) removeNode(comment)})"
+                                x-on:click="
+                                    $wire.delete(comment.id).then((success) => {
+                                        if (success) removeNode(comment)
+                                    })
+                                "
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
                             >
                                 {{ __('Delete') }}

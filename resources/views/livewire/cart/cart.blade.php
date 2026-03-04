@@ -109,7 +109,7 @@
                             </div>
                             <x-button
                                 color="indigo"
-                                wire:click="saveToWatchlist().then((success) => {if (success) showWatchlist = false;})"
+                                x-on:click="$wire.saveToWatchlist().then((success) => {if (success) showWatchlist = false;})"
                                 :text="__('Save to watchlist')"
                                 class="w-full"
                             />

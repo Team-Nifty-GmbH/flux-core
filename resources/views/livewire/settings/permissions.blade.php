@@ -23,7 +23,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => { if(success) $modalClose('edit-role-users-modal'); })"
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-role-users-modal'); })"
         />
     </x-slot>
 </x-modal>
@@ -65,7 +65,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => { if(success) $modalClose('edit-role-permissions-modal'); })"
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-role-permissions-modal'); })"
         />
     </x-slot>
 </x-modal>

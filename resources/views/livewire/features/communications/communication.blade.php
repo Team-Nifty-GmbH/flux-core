@@ -350,7 +350,7 @@
             />
             <x-button
                 color="indigo"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-communication'); })"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-communication'); })"
                 primary
                 loading="save"
                 :text="__('Save')"
@@ -361,7 +361,7 @@
             >
                 <x-button
                     color="indigo"
-                    wire:click="send().then((success) => { if(success) $modalClose('edit-communication'); })"
+                    x-on:click="$wire.send().then((success) => { if(success) $modalClose('edit-communication'); })"
                     primary
                     loading="send"
                     :text="__('Send')"
@@ -401,7 +401,7 @@
                 color="indigo"
                 :text="__('Continue')"
                 loading="createDocuments"
-                wire:click="createDocuments().then(() => { $modalClose('create-preview'); });"
+                x-on:click="$wire.createDocuments().then(() => { $modalClose('create-preview'); });"
             />
         </x-slot>
     </x-modal>

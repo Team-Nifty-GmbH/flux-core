@@ -93,7 +93,7 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('{{ $commissionRate->modalName() }}')})"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $commissionRate->modalName() }}')})"
             />
         </x-slot>
     </x-modal>

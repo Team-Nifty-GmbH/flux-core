@@ -61,7 +61,7 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="createLeads().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
+                x-on:click="$wire.createLeads().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
             />
         </x-slot>
     </x-modal>
