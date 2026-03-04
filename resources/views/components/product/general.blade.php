@@ -316,7 +316,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Save')"
-                    wire:click="addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
+                    x-on:click="$wire.addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
                 />
             </x-slot>
         </x-modal>

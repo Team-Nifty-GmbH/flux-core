@@ -72,7 +72,7 @@
             <x-button
                 :text="__('Save')"
                 color="primary"
-                wire:click="save().then((success) => { if(success) $modalClose('{{ $locationForm->modalName() }}') })"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $locationForm->modalName() }}') })"
             />
         </x-slot>
     </x-modal>

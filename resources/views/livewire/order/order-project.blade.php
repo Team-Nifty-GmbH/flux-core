@@ -51,7 +51,7 @@
             loading="createTasks"
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => {if(success) $modalClose('create-tasks');})"
+            x-on:click="$wire.save().then((success) => {if(success) $modalClose('create-tasks');})"
         />
     </div>
 </div>

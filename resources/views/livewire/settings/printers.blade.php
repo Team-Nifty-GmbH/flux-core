@@ -18,7 +18,7 @@
         <x-button
             color="primary"
             :text="__('Save')"
-            wire:click="save().then((success) => { if(success) $modalClose('edit-printer-modal')})"
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-printer-modal')})"
         />
     </x-slot>
 </x-modal>
@@ -46,7 +46,7 @@
         <x-button
             color="red"
             :text="__('Delete')"
-            wire:click="deleteSpooler().then((success) => { if(success) $modalClose('delete-spooler-modal')})"
+            x-on:click="$wire.deleteSpooler().then((success) => { if(success) $modalClose('delete-spooler-modal')})"
             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Spooler')]) }}"
         />
     </x-slot>

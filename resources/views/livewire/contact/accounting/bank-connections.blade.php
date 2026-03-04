@@ -27,7 +27,7 @@
             />
             <x-button
                 color="primary"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
                 primary
                 :text="__('Save')"
             />

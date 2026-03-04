@@ -47,7 +47,7 @@
             <x-button
                 color="primary"
                 :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('{{ $vacationCarryoverRuleForm->modalName() }}') })"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $vacationCarryoverRuleForm->modalName() }}') })"
             />
         </x-slot>
     </x-modal>

@@ -217,7 +217,7 @@
             color="indigo"
             :text="__('Continue')"
             loading="createDocuments"
-            wire:click="createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });"
+            x-on:click="$wire.createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });"
         />
     </x-slot>
 </x-modal>

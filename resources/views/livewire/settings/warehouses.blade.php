@@ -19,7 +19,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => { if(success) $modalClose('edit-warehouse-modal')})"
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-warehouse-modal')})"
         />
     </x-slot>
 </x-modal>

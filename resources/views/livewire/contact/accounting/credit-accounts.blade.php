@@ -19,7 +19,7 @@
             />
             <x-button
                 color="primary"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
                 primary
                 :text="__('Save')"
             />
@@ -71,7 +71,7 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="saveTransaction().then((success) => {if(success) $modalClose('transaction-details-modal');})"
+                x-on:click="$wire.saveTransaction().then((success) => {if(success) $modalClose('transaction-details-modal');})"
             />
         </x-slot>
     </x-modal>
