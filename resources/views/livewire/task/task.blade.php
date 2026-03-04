@@ -1,7 +1,4 @@
-<div
-    id="task-details"
-    x-data="{ edit: false }"
->
+<div id="task-details" x-data="{ edit: false }">
     <x-modal
         id="replicate-task-modal"
         :title="__('Replicate Task')"

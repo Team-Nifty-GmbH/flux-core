@@ -19,7 +19,8 @@
                 @if ($attributes->wire("model")->value())
                     $wire,
                     '{{ $attributes->wire("model")->value() }}',
-                    @js($attributes->wire("model")->hasModifier("live")),
+                    @js($attributes->wire("model")->hasModifier("live"))
+                    ,
                     {{
                         $attributes->wire("model")->hasModifier("debounce")
                             ? Str::before(

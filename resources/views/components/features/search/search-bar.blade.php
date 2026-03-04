@@ -1,7 +1,13 @@
-<div x-data="{
-    get show() { return $wire.show },
-    set show(value) { $wire.show = value },
-}">
+<div
+    x-data="{
+        get show() {
+            return $wire.show
+        },
+        set show(value) {
+            $wire.show = value
+        },
+    }"
+>
     {{ $prepend ?? '' }}
     <div
         x-on:click.outside="show = false"

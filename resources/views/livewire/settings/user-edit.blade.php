@@ -140,10 +140,7 @@
         @show
     </form>
     @show
-    <div
-        class="border-b border-gray-200"
-        x-data="{ active: 'roles' }"
-    >
+    <div class="border-b border-gray-200" x-data="{ active: 'roles' }">
         <nav class="-mb-px mt-2 flex space-x-8 pb-5" aria-label="Tabs">
             <div
                 x-on:click="active = 'roles'"

@@ -1,6 +1,4 @@
-<div
-    x-data="{ edit: false }"
->
+<div x-data="{ edit: false }">
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
