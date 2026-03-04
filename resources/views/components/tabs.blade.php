@@ -4,7 +4,8 @@
 <div
     class="mt-2"
     x-data="{
-        tab: $wire.$entangle('{{ $attributes->wire('model')->value() }}', true),
+        get tab() { return $wire.{{ $attributes->wire('model')->value() }} },
+        set tab(value) { $wire.{{ $attributes->wire('model')->value() }} = value },
         tabButtonClicked(tabButton) {
             this.tabSelected = this.tab = tabButton.dataset.tabName
         },

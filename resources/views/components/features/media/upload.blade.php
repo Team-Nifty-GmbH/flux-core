@@ -8,7 +8,6 @@
             isDropping: false,
             isUploading: false,
             progress: 0,
-            filesArray: $wire.$entangle('filesArray', true),
             handleFileSelect(event) {
                 if (event.target.files.length) {
                     this.uploadFiles(event.target.files, event)
@@ -106,7 +105,7 @@
             />
         </div>
         <div class="space-y-3">
-            <template x-for="(file, index) in filesArray">
+            <template x-for="(file, index) in $wire.filesArray">
                 <div class="flex items-center justify-between text-sm">
                     <div class="flex w-0 flex-1 items-center">
                         <x-icon name="paper-clip" class="h-4 w-4" />
