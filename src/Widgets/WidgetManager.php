@@ -105,7 +105,9 @@ class WidgetManager
      */
     public function register(string $name, string $widget): void
     {
-        $componentClass = app('livewire.factory')->resolveComponentClass($widget);
+        $componentClass = class_exists($widget) && is_subclass_of($widget, Component::class)
+            ? $widget
+            : app('livewire.factory')->resolveComponentClass($widget);
 
         if (! class_exists($componentClass)) {
             throw new Exception("The provided widget class '{$componentClass}' does not exist.");
