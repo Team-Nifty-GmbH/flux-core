@@ -16,12 +16,10 @@ test('renders successfully', function (): void {
 
 test('shows top customers by ticket count with type breakdown', function (): void {
     $contact1 = Contact::factory()
-        ->state(['tenant_id' => $this->dbTenant->getKey()])
-        ->has(Address::factory()->state(['tenant_id' => $this->dbTenant->getKey()]))
+        ->has(Address::factory()->create())
         ->create();
     $contact2 = Contact::factory()
-        ->state(['tenant_id' => $this->dbTenant->getKey()])
-        ->has(Address::factory()->state(['tenant_id' => $this->dbTenant->getKey()]))
+        ->has(Address::factory()->create())
         ->create();
 
     $address1 = $contact1->addresses()->first();
@@ -59,8 +57,7 @@ test('shows top customers by ticket count with type breakdown', function (): voi
 
 test('respects time frame', function (): void {
     $contact = Contact::factory()
-        ->state(['tenant_id' => $this->dbTenant->getKey()])
-        ->has(Address::factory()->state(['tenant_id' => $this->dbTenant->getKey()]))
+        ->has(Address::factory()->create())
         ->create();
 
     $address = $contact->addresses()->first();
