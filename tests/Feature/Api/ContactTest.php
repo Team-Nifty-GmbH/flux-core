@@ -18,6 +18,9 @@ beforeEach(function (): void {
         'is_active' => true,
         'is_sales' => true,
     ]);
+    $this->paymentTypes[0]->is_default = true;
+    $this->paymentTypes[0]->save();
+
     $this->dbTenants[0]->paymentTypes()->attach([$this->paymentTypes[0]->id, $this->paymentTypes[1]->id]);
     $this->dbTenants[1]->paymentTypes()->attach($this->paymentTypes[2]->id);
 
