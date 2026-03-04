@@ -56,7 +56,7 @@
                 <div
                     class="flex items-start space-x-3 border-b border-gray-200 pb-3 last:border-0 dark:border-gray-700"
                 >
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <template x-if="activity.event === 'approved'">
                             <x-icon
                                 name="check-circle"

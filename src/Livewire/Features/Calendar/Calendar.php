@@ -393,6 +393,7 @@ class Calendar extends Component
         $this->storeViewSettings($view);
     }
 
+    #[Renderless]
     #[On('calendar-date-click')]
     public function timeslotClick(bool $allDay, string $dateStr, array $view): void
     {
