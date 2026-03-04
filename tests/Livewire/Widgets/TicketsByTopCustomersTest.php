@@ -15,15 +15,15 @@ test('renders successfully', function (): void {
 });
 
 test('shows top customers by ticket count with type breakdown', function (): void {
-    $contact1 = Contact::factory()
-        ->has(Address::factory()->create())
-        ->create();
-    $contact2 = Contact::factory()
-        ->has(Address::factory()->create())
-        ->create();
+    $contact1 = Contact::factory()->create();
+    $contact2 = Contact::factory()->create();
 
-    $address1 = $contact1->addresses()->first();
-    $address2 = $contact2->addresses()->first();
+    $address1 = Address::factory()->create([
+        'contact_id' => $contact1->id,
+    ]);
+    $address2 = Address::factory()->create([
+        'contact_id' => $contact2->id,
+    ]);
     $ticketType = TicketType::factory()->create();
 
     Ticket::factory()->count(3)->create([
@@ -56,11 +56,10 @@ test('shows top customers by ticket count with type breakdown', function (): voi
 });
 
 test('respects time frame', function (): void {
-    $contact = Contact::factory()
-        ->has(Address::factory()->create())
-        ->create();
-
-    $address = $contact->addresses()->first();
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->id,
+    ]);
 
     Ticket::factory()->create([
         'authenticatable_type' => $address->getMorphClass(),
