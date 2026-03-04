@@ -5,9 +5,9 @@
             $wire.loadData()
         },
         activeActivity: null,
-        page: $wire.entangle('page', true),
-        total: $wire.entangle('total', true),
-        perPage: $wire.entangle('perPage', true),
+        page: $wire.$entangle('page', true),
+        total: $wire.$entangle('total', true),
+        perPage: $wire.$entangle('perPage', true),
         showProperties(id) {
             this.activeActivity = this.activeActivity === id ? null : id
         },

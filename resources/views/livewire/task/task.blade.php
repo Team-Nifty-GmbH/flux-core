@@ -1,7 +1,7 @@
 <div
     id="task-details"
     x-data="{
-        task: $wire.entangle('task'),
+        task: $wire.$entangle('task'),
         edit: false,
     }"
 >

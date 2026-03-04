@@ -1,7 +1,7 @@
 <div
     class="flex items-center justify-center gap-x-2"
     x-data="{
-        dark: $wire.entangle('dark', true),
+        dark: $wire.$entangle('dark', true),
         browserDarkMode() {
             return window.matchMedia('(prefers-color-scheme: dark)').matches
         },
