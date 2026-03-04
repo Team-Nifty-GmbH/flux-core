@@ -6,12 +6,9 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
 
 beforeEach(function (): void {
-    $dbContact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $dbContact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $dbContact->tenant_id,
         'language_id' => $this->user->language_id,
         'contact_id' => $dbContact->id,
         'is_main_address' => true,

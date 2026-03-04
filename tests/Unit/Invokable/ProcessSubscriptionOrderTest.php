@@ -33,32 +33,33 @@ beforeEach(function (): void {
     ]);
 
     $this->paymentType = PaymentType::factory()
-        ->hasAttached($this->tenant, relationship: 'tenants')
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
         ->create([
             'is_default' => true,
         ]);
 
-    $this->contact = Contact::factory()->create([
-        'tenant_id' => $this->tenant->getKey(),
-    ]);
+    $this->contact = Contact::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create();
 
     $this->address = Address::factory()->create([
-        'tenant_id' => $this->tenant->getKey(),
         'contact_id' => $this->contact->getKey(),
         'is_main_address' => true,
     ]);
 
-    $this->subscriptionOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->tenant->getKey(),
-        'order_type_enum' => OrderTypeEnum::Subscription,
-        'is_active' => true,
-    ]);
+    $this->subscriptionOrderType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Subscription,
+            'is_active' => true,
+        ]);
 
-    $this->targetOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->tenant->getKey(),
-        'order_type_enum' => OrderTypeEnum::Order,
-        'is_active' => true,
-    ]);
+    $this->targetOrderType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ]);
 
     $this->subscriptionOrder = Order::factory()->create([
         'tenant_id' => $this->tenant->getKey(),
@@ -94,7 +95,6 @@ test('process subscription order sets created_from_id but not parent_id', functi
 
 test('process subscription order returns false for non-subscription order type', function (): void {
     $regularOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->tenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
@@ -123,9 +123,9 @@ test('process subscription order returns false for non-subscription order type',
 test('process subscription order throws exception on validation error', function (): void {
     // Create a contact in a different tenant to cause ExistsWithForeign validation to fail
     $otherTenant = Tenant::factory()->create();
-    $otherContact = Contact::factory()->create([
-        'tenant_id' => $otherTenant->getKey(),
-    ]);
+    $otherContact = Contact::factory()
+        ->hasAttached($otherTenant, relationship: 'tenants')
+        ->create();
 
     // Update order to use contact from different tenant (bypassing FK by using raw query)
     Illuminate\Support\Facades\DB::table('orders')

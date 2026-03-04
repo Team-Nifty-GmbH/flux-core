@@ -18,17 +18,13 @@ test('renders successfully', function (): void {
 });
 
 test('calculates margin from order and related orders', function (): void {
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
     $orderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 

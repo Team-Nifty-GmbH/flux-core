@@ -12,13 +12,12 @@ use FluxErp\Models\PriceList;
 
 test('excludes free text positions from total net price calculation', function (): void {
     $contact = Contact::factory()
-        ->has(Address::factory()->state(['tenant_id' => $this->dbTenant->getKey()]))
-        ->create(['tenant_id' => $this->dbTenant->getKey()]);
+        ->has(Address::factory()->create())
+        ->create();
 
     $address = $contact->addresses()->first();
 
     $orderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 

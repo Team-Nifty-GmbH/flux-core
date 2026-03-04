@@ -8,10 +8,11 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $this->orderTypes = OrderType::factory()->count(2)->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'order_type_enum' => OrderTypeEnum::Order,
-    ]);
+    $this->orderTypes = OrderType::factory()
+        ->count(2)
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+        ]);
 
     $this->permissions = [
         'show' => Permission::findOrCreate('api.order-types.{id}.get'),
@@ -24,7 +25,6 @@ beforeEach(function (): void {
 
 test('create order type', function (): void {
     $orderType = [
-        'tenant_id' => $this->orderTypes[0]->tenant_id,
         'name' => 'Order Type Name',
         'order_type_enum' => OrderTypeEnum::Retoure->value,
     ];
@@ -41,7 +41,6 @@ test('create order type', function (): void {
         ->first();
 
     expect($dbOrderType)->not->toBeEmpty();
-    expect($dbOrderType->tenant_id)->toEqual($orderType['tenant_id']);
     expect($dbOrderType->name)->toEqual($orderType['name']);
     expect($dbOrderType->description)->toBeNull();
     expect($dbOrderType->order_type_enum->value)->toEqual($orderType['order_type_enum']);
@@ -53,12 +52,12 @@ test('create order type', function (): void {
 
 test('create order type maximum', function (): void {
     $orderType = [
-        'tenant_id' => $this->orderTypes[0]->tenant_id,
         'name' => 'Order Type Name',
         'description' => 'New description text for further information',
         'order_type_enum' => OrderTypeEnum::Retoure->value,
         'is_active' => true,
         'is_hidden' => true,
+        'tenants' => [$this->dbTenant->getKey()],
     ];
 
     $this->user->givePermissionTo($this->permissions['create']);
@@ -73,7 +72,6 @@ test('create order type maximum', function (): void {
         ->first();
 
     expect($dbOrderType)->not->toBeEmpty();
-    expect($dbOrderType->tenant_id)->toEqual($orderType['tenant_id']);
     expect($dbOrderType->name)->toEqual($orderType['name']);
     expect($dbOrderType->description)->toEqual($orderType['description']);
     expect($dbOrderType->order_type_enum->value)->toEqual($orderType['order_type_enum']);
@@ -81,12 +79,12 @@ test('create order type maximum', function (): void {
     expect($dbOrderType->is_hidden)->toEqual($orderType['is_hidden']);
     expect($this->user->is($dbOrderType->getCreatedBy()))->toBeTrue();
     expect($this->user->is($dbOrderType->getUpdatedBy()))->toBeTrue();
+    expect($dbOrderType->getTenants(['id'])->pluck('id')->toArray())->toEqual($orderType['tenants']);
 });
 
 test('create order type validation fails', function (): void {
     $orderType = [
-        'tenant_id' => 'tenant_id',
-        'name' => 'Order Type Name',
+        'name' => null,
         'order_type_enum' => Str::random(),
     ];
 
@@ -130,7 +128,6 @@ test('get order type', function (): void {
     // Check if controller returns the test order type.
     expect($jsonOrderType)->not->toBeEmpty();
     expect($jsonOrderType->id)->toEqual($this->orderTypes[0]->id);
-    expect($jsonOrderType->tenant_id)->toEqual($this->orderTypes[0]->tenant_id);
     expect($jsonOrderType->name)->toEqual($this->orderTypes[0]->name);
     expect($jsonOrderType->description)->toEqual($this->orderTypes[0]->description);
     expect($jsonOrderType->is_active)->toEqual($this->orderTypes[0]->is_active);
@@ -164,7 +161,6 @@ test('get order types', function (): void {
     foreach ($this->orderTypes as $orderType) {
         $jsonOrderTypes->contains(function ($jsonOrderType) use ($orderType) {
             return $jsonOrderType->id === $orderType->id &&
-                $jsonOrderType->tenant_id === $orderType->tenant_id &&
                 $jsonOrderType->name === $orderType->name &&
                 $jsonOrderType->description === $orderType->description &&
                 $jsonOrderType->is_active === $orderType->is_active &&
@@ -235,8 +231,7 @@ test('update order type maximum', function (): void {
 test('update order type validation fails', function (): void {
     $orderType = [
         'id' => $this->orderTypes[0]->id,
-        'tenant_id' => 'tenant_id',
-        'name' => 'Order Type Name',
+        'name' => null,
     ];
 
     $this->user->givePermissionTo($this->permissions['update']);

@@ -21,12 +21,10 @@ beforeEach(function (): void {
     ]);
 
     $this->contact = Contact::factory()
-        ->state(['tenant_id' => $this->dbTenant->getKey()])
         ->create();
 
     $this->address = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => 'test@example.com',
         ])
@@ -42,7 +40,7 @@ beforeEach(function (): void {
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ])
-        ->for(factory: $this->dbTenant, relationship: 'tenant')
+        ->for(factory: $this->dbTenant, relationship: 'tenants')
         ->create();
 });
 
@@ -184,12 +182,11 @@ test('does not send payment reminders for not yet due orders', function (): void
 
 test('does not send payment reminders for purchase orders', function (): void {
     $purchaseOrderType = OrderType::factory()
-        ->state([
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+        ->create([
             'order_type_enum' => OrderTypeEnum::Purchase,
             'is_active' => true,
-        ])
-        ->for(factory: $this->dbTenant, relationship: 'tenant')
-        ->create();
+        ]);
 
     $purchaseOrder = Order::factory()
         ->for(Currency::factory(), 'currency')
@@ -243,7 +240,6 @@ test('does not send payment reminders for orders at maximum reminder level', fun
 test('falls back to contact invoice address when order address has no email', function (): void {
     $addressWithoutEmail = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => null,
             'is_main_address' => false,
@@ -255,7 +251,6 @@ test('falls back to contact invoice address when order address has no email', fu
 
     $contactInvoiceAddress = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => 'invoice@example.com',
             'is_main_address' => false,
@@ -301,7 +296,6 @@ test('falls back to contact invoice address when order address has no email', fu
 test('falls back to contact main address when no invoice addresses have email', function (): void {
     $addressWithoutEmail = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => null,
             'is_main_address' => false,
@@ -343,7 +337,6 @@ test('falls back to contact main address when no invoice addresses have email', 
 test('does not send payment reminders when no address has email', function (): void {
     $addressWithoutEmail = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => null,
             'is_main_address' => false,
@@ -405,7 +398,6 @@ test('resolveMailableInvoiceAddress prefers order invoice address', function ():
 test('resolveMailableInvoiceAddress falls back to contact invoice address', function (): void {
     $addressWithoutEmail = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => null,
             'is_main_address' => false,
@@ -417,7 +409,6 @@ test('resolveMailableInvoiceAddress falls back to contact invoice address', func
 
     $contactInvoiceAddress = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => 'invoice@example.com',
             'is_main_address' => false,
@@ -452,7 +443,6 @@ test('resolveMailableInvoiceAddress falls back to contact invoice address', func
 test('resolveMailableInvoiceAddress falls back to contact main address', function (): void {
     $addressWithoutEmail = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->id,
             'email_primary' => null,
             'is_main_address' => false,

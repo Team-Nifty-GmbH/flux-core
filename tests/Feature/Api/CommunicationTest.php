@@ -11,12 +11,11 @@ use Laravel\Sanctum\Sanctum;
 beforeEach(function (): void {
     $dbTenant = Tenant::factory()->create();
 
-    $this->contact = Contact::factory()->create([
-        'tenant_id' => $dbTenant->id,
-    ]);
+    $this->contact = Contact::factory()
+        ->has($dbTenant, 'tenants')
+        ->create();
 
     Address::factory()->create([
-        'tenant_id' => $dbTenant->id,
         'contact_id' => $this->contact->id,
     ]);
 
