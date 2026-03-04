@@ -35,8 +35,7 @@ test('mark selected as paid', function (): void {
                 ->state([
                     'order_type_enum' => OrderTypeEnum::Order,
                     'is_active' => true,
-                ])
-                ->for(factory: $this->dbTenant, relationship: 'tenants'),
+                ]),
             'orderType'
         )
         ->state([

@@ -103,7 +103,7 @@ test('address update events', function (): void {
         ->assertOk()
         ->assertSet('order.address_invoice_id', $newAddress->id)
         ->assertSet('order.contact_id', $newAddress->contact_id)
-        ->assertSet('order.tenant_id', $newAddress->tenant_id);
+        ->assertSet('order.tenant_id', $newAddress->getTenantId());
 });
 
 test('create and manage discount', function (): void {
@@ -241,7 +241,7 @@ test('fetch contact data', function (): void {
         ->set('order.contact_id', $newContact->id)
         ->call('fetchContactData')
         ->assertOk()
-        ->assertSet('order.tenant_id', $newContact->tenant_id)
+        ->assertSet('order.tenant_id', $newContact->getTenantId())
         ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
         ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
 });

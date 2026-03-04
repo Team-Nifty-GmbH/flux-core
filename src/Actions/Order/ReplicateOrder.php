@@ -13,6 +13,7 @@ use FluxErp\Models\Discount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\Order\ReplicateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -244,6 +245,7 @@ class ReplicateOrder extends FluxAction
             'address_invoice_id' => Address::class,
             'address_delivery_id' => Address::class,
             'order_type_id' => OrderType::class,
+            'payment_type_id' => PaymentType::class,
             'addresses.*.address_id' => Address::class,
             'addresses.*.address_type_id' => AddressType::class,
         ];

@@ -7,6 +7,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Lead;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
@@ -101,12 +102,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'tenant_id',
-                    'table' => 'payment_type_tenant',
-                    'column' => 'payment_type_id',
-                    'baseTable' => 'orders',
-                ]),
+                app(ModelExists::class, ['model' => PaymentType::class]),
             ],
             'responsible_user_id' => [
                 'integer',

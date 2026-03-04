@@ -9,6 +9,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Lead;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
@@ -123,11 +124,7 @@ class CreateOrderRuleset extends FluxRuleset
             'payment_type_id' => [
                 'integer',
                 'nullable',
-                app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'tenant_id',
-                    'table' => 'payment_type_tenant',
-                    'column' => 'payment_type_id',
-                ]),
+                app(ModelExists::class, ['model' => PaymentType::class]),
             ],
             'responsible_user_id' => [
                 'integer',

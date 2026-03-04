@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
+use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\Order\UpdateLockedOrderRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -66,8 +67,24 @@ class UpdateLockedOrder extends FluxAction
         parent::validateData();
 
         $errors = [];
+        $tenantId = null;
+        if ($paymentTypeId = $this->getData('payment_type_id')) {
+            $tenantId ??= resolve_static(Order::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->value('tenant_id');
+            if (resolve_static(PaymentType::class, 'query')
+                ->whereKey($paymentTypeId)
+                ->whereHasTenant($tenantId)
+                ->doesntExist()
+            ) {
+                $errors += [
+                    'payment_type_id' => ['Payment Type not found on given tenant.'],
+                ];
+            }
+        }
+
         if ($addresses = $this->getData('addresses')) {
-            $tenantId = resolve_static(Order::class, 'query')
+            $tenantId ??= resolve_static(Order::class, 'query')
                 ->whereKey($this->getData('id'))
                 ->value('tenant_id');
             foreach ($addresses as $key => $address) {

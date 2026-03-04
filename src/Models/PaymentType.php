@@ -8,20 +8,17 @@ use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasTenants;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Collection;
 
 class PaymentType extends FluxModel
 {
-    use Filterable, HasAttributeTranslations, HasDefault, HasPackageFactory, HasTenantAssignment, HasUserModification,
-        HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasDefault, HasPackageFactory, HasTenantAssignment, HasTenants,
+        HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected function casts(): array
     {
@@ -47,11 +44,5 @@ class PaymentType extends FluxModel
         return [
             'description',
         ];
-    }
-
-    #[Scope]
-    protected function whereHasTenant(Builder $query, Model|array|int|string|Collection|null $tenant): void
-    {
-        $query->whereHas('tenants', fn (Builder $query) => $query->whereKey($tenant));
     }
 }
