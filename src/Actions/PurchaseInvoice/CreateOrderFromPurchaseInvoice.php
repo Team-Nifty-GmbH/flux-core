@@ -137,6 +137,13 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 'is_net',
             ]);
 
+        if (! $this->purchaseInvoice?->getFirstMedia('purchase_invoice')) {
+            throw ValidationException::withMessages([
+                'purchase_invoice' => ['The purchase invoice has no attached document.'],
+            ])
+                ->errorBag('createOrderFromPurchaseInvoice');
+        }
+
         if (
             bccomp(
                 $this->getData('total_gross_price'),
