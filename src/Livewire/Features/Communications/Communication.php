@@ -365,7 +365,7 @@ abstract class Communication extends CommunicationList
                 fn (Builder $query) => $query->whereKey($this->communication->id)
             )
             ->first(['id'])
-            ->resolvePrintViews();
+            ->resolvePrintViews() ?? [];
     }
 
     protected function getReturnKeys(): array
