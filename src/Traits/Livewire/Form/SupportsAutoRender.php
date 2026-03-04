@@ -342,7 +342,7 @@ trait SupportsAutoRender
                 . ':text="__(' . "'Delete'" . ')" '
                 . 'wire:flux-confirm.type.error="{{ __(\'wire:confirm.delete\', [\'model\' => \''
                 . class_basename($this) . '\']) }}" '
-                . 'wire:click="' . $deleteMethod . '().then((success) => { if(success) $modalClose(\''
+                . 'x-on:click="$wire.' . $deleteMethod . '().then((success) => { if(success) $modalClose(\''
                 . $modalName . '\')})"/>';
         }
 
@@ -358,7 +358,7 @@ trait SupportsAutoRender
             . '<div>' . $deleteButton . '</div>'
             . '<div class="flex gap-2">'
             . '<x-button color="secondary" light flat :text="__(' . "'Cancel'" . ')" x-on:click="' . $cancelAction . '"/>'
-            . '<x-button color="indigo" :text="__(' . "'Save'" . ')" wire:click="' . $saveAction . '"/>'
+            . '<x-button color="indigo" :text="__(' . "'Save'" . ')" x-on:click="$wire.' . $saveAction . '"/>'
             . '</div>'
             . '</div>'
             . '</x-slot:footer>'

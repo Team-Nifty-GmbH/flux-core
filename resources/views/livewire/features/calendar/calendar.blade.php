@@ -106,7 +106,7 @@
                             color="red"
                             :text="__('Delete')"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar')]) }}"
-                            wire:click="deleteCalendar().then((deletedId) => {if(deletedId !== false) deleteCalendar(deletedId);})"
+                            x-on:click="$wire.deleteCalendar().then((deletedId) => {if(deletedId !== false) deleteCalendar(deletedId);})"
                         />
                     </div>
                     <div class="flex gap-2">

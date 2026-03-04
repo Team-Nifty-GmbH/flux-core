@@ -26,7 +26,7 @@
                         <x-button
                             color="indigo"
                             :text="__('Save')"
-                            wire:click="save().then((success) => {
+                            x-on:click="$wire.save().then((success) => {
                                 if (success) $modalClose('task-form-modal');
                             })"
                         />

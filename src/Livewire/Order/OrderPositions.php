@@ -361,7 +361,7 @@ class OrderPositions extends OrderPositionList
         if ($orderPosition->exists) {
             $this->orderPosition->fill($orderPosition);
         } else {
-            $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')->getKey();
+            $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')?->getKey();
         }
 
         $this->js(<<<'JS'

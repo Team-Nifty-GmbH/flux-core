@@ -7,6 +7,21 @@ use Laravel\Sanctum\Sanctum;
 
 class Guard extends \Laravel\Sanctum\Guard
 {
+    protected function hasValidProvider($tokenable): bool
+    {
+        if (is_null($this->provider)) {
+            return true;
+        }
+
+        $providerModel = config("auth.providers.$this->provider.model");
+
+        return is_a(
+            morphed_model($tokenable->getMorphClass()) ?? $providerModel,
+            $providerModel,
+            true,
+        );
+    }
+
     /**
      * Determine if the provided access token is valid.
      *

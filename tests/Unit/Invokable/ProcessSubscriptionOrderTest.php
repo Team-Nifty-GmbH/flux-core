@@ -302,6 +302,64 @@ test('process subscription order sets correct performance period for quarterly s
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfQuarter()->format('Y-m-d'));
 });
 
+test('process subscription order handles cron with non-midnight time correctly', function (): void {
+    // Cron runs at 06:00 - system_delivery_date is cast as date (midnight).
+    // Without endOfDay(), getNextRunDate(midnight) returns the same day at 06:00
+    // instead of the next period.
+    $orderDate = Carbon\Carbon::create(2026, 2, 15);
+
+    $this->subscriptionOrder->update([
+        'order_date' => $orderDate,
+        'system_delivery_date' => $orderDate,
+        'system_delivery_date_end' => null,
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'yearlyOn',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [2, 15, '06:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 6 15 2 *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->first();
+
+    // Period should be 02/15/2026 - 02/14/2027 (full year), not 02/15 - 02/14 same year
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe('2026-02-15')
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2027-02-14');
+});
+
 test('process subscription order calculates next period from existing child order', function (): void {
     $orderDate = now()->startOfYear();
 

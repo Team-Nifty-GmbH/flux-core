@@ -268,7 +268,7 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('{{ $emailTemplateForm->modalName() }}')})"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $emailTemplateForm->modalName() }}')})"
             />
         </x-slot>
     </x-modal>

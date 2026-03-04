@@ -5,16 +5,26 @@ namespace FluxErp\Listeners\Order;
 use FluxErp\Actions\Commission\CreateCommission;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
+use Throwable;
 
 class OrderInvoiceAddedSubscriber
 {
     public function handle(MediaHasBeenAddedEvent $event): void
     {
-        if ($event->media->collection_name !== 'invoice'
-            || $event->media->model_type !== morph_alias(Order::class)
-        ) {
+        if ($event->media->model_type !== morph_alias(Order::class)) {
+            return;
+        }
+
+        $viewClass = data_get($event->media->model->getPrintViews(), $event->media->collection_name);
+
+        try {
+            if (! is_string($viewClass) || ! resolve_static($viewClass, 'isInvoice')) {
+                return;
+            }
+        } catch (Throwable) {
             return;
         }
 
@@ -49,6 +59,7 @@ class OrderInvoiceAddedSubscriber
             ->where('is_free_text', false)
             ->where('is_bundle_position', false)
             ->whereDoesntHave('commission')
+            ->with(['product' => fn (BelongsTo $query) => $query->withTrashed()])
             ->get();
 
         foreach ($orderPositions as $orderPosition) {
@@ -66,7 +77,7 @@ class OrderInvoiceAddedSubscriber
                     case $commissionRateId = $contactCommissionRates
                     ->whereIn(
                         'category_id',
-                        $orderPosition->product->categories()->pluck('id')->toArray()
+                        $orderPosition->product?->categories()->pluck('id')->toArray() ?? []
                     )
                     ->first()
                     ?->id:
@@ -77,7 +88,7 @@ class OrderInvoiceAddedSubscriber
                     case $commissionRateId = $defaultCommissionRates
                     ->whereIn(
                         'category_id',
-                        $orderPosition->product->categories()->pluck('id')->toArray()
+                        $orderPosition->product?->categories()->pluck('id')->toArray() ?? []
                     )
                     ->first()
                     ?->id:

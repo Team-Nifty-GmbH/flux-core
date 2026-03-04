@@ -49,9 +49,11 @@ class ProcessSubscriptionOrder implements Repeatable
             ->select(['id', 'system_delivery_date_end'])
             ->orderBy('system_delivery_date_end', 'DESC')
             ->first();
-        $order->order_type_id = $orderType->id;
-        $order->system_delivery_date = $latestChild?->system_delivery_date_end?->addDay() ??
-            $order->system_delivery_date ?? $order->order_date;
+        $order->order_type_id = $orderType->getKey();
+
+        $order->system_delivery_date = $latestChild?->system_delivery_date_end?->addDay()
+            ?? $order->system_delivery_date
+            ?? $order->order_date;
 
         $schedule = $order->schedules()
             ->where('class', static::class)
@@ -61,7 +63,7 @@ class ProcessSubscriptionOrder implements Repeatable
         if ($schedule?->cron_expression) {
             $cronExpression = new CronExpression($schedule->cron_expression);
             $nextRunDate = $cronExpression->getNextRunDate(
-                $order->system_delivery_date->toDateTime()
+                $order->system_delivery_date->copy()->endOfDay()->toDateTime()
             );
             $order->system_delivery_date_end = Carbon::instance($nextRunDate)->subDay();
         } else {

@@ -546,7 +546,7 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Delete')"
                             loading="delete"
-                            wire:click="delete().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                            x-on:click="$wire.delete().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
                         />
                     @endcanAction
@@ -567,7 +567,7 @@
                         x-show="! $wire.purchaseInvoiceForm.order_id"
                         :text="__('Save')"
                         loading="save"
-                        wire:click="save().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                        x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
                     />
                     @canAction(\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
                         <x-button
@@ -576,7 +576,7 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Finish')"
                             loading="finish"
-                            wire:click="finish().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                            x-on:click="$wire.finish().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
                         />
                     @endcanAction
 
@@ -667,7 +667,7 @@
                                         x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
                                         x-bind:disabled="isLoadingFiles.length > 0"
                                         loading="processBulkUpload"
-                                        wire:click="processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); } })"
+                                        x-on:click="$wire.processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); } })"
                                     />
                                 </div>
                             @endcanAction

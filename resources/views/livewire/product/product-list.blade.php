@@ -161,7 +161,7 @@
                     color="indigo"
                     :text="__('Save')"
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.product-prices-update') }}"
-                    wire:click="updatePrices().then((success) => {if(success) $modalClose('update-prices-modal');});"
+                    x-on:click="$wire.updatePrices().then((success) => {if(success) $modalClose('update-prices-modal');});"
                 />
             </x-slot>
         </x-modal>

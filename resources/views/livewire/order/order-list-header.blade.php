@@ -43,7 +43,7 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="discountSelectedPositions().then(() => {$modalClose('edit-position-discount');})"
+                x-on:click="$wire.discountSelectedPositions().then(() => {$modalClose('edit-position-discount');})"
             />
         </x-slot>
     </x-modal>
@@ -412,7 +412,7 @@
                         flat
                         color="red"
                         :text="__('Delete')"
-                        wire:click="deleteOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        x-on:click="$wire.deleteOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
                     />
                 </div>
@@ -426,9 +426,9 @@
                     />
                     <x-button
                         color="indigo"
-                        wire:click="addOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        x-on:click="$wire.addOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        x-cloak
                         x-show="!$wire.order.is_locked"
-                        x-on:click=""
                         :text="__('Save')"
                     />
                 </div>

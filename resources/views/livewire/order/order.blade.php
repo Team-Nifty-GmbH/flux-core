@@ -247,7 +247,7 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
+                x-on:click="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
             />
         </x-slot>
     </x-modal>
