@@ -147,7 +147,7 @@
     </x-modal>
     <x-modal id="create-orders-modal">
         <div class="flex flex-col gap-1.5">
-            @if(count($tenants) > 1)
+            @if (count($tenants) > 1)
                 <x-select.styled
                     :label="__('Tenant')"
                     wire:model="createOrdersFromWorkTimes.tenant_id"
@@ -155,6 +155,7 @@
                     :options="$tenants"
                 />
             @endif
+
             <x-select.styled
                 :label="__('Order Type')"
                 wire:model="createOrdersFromWorkTimes.order_type_id"

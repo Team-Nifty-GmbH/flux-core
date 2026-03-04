@@ -6,7 +6,7 @@
             :label="__('Address Type Code')"
             required
         />
-        @if(count($tenants) > 1)
+        @if (count($tenants) > 1)
             <div>
                 <x-select.styled
                     :label="__('Tenants')"
@@ -18,6 +18,7 @@
                 />
             </div>
         @endif
+
         <div class="mt-2">
             <x-toggle
                 :label="__('Is Unique')"
