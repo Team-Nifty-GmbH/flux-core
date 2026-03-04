@@ -59,10 +59,8 @@ abstract class Communication extends CommunicationList
 
     protected function getRowActions(): array
     {
-
         $layout = array_key_first($this->getPrintLayouts());
         $type = morph_alias($this->getModel());
-
 
         return [
             DataTableButton::make()
@@ -114,11 +112,6 @@ abstract class Communication extends CommunicationList
             ->unique(fn (array $item) => data_get($item, 'communicatable_type') . '-' . data_get($item, 'communicatable_id'))
             ->values()
             ->toArray();
-    }
-
-    protected function supportsDocumentPreview(): bool
-    {
-        return true;
     }
 
     #[Renderless]
@@ -339,6 +332,11 @@ abstract class Communication extends CommunicationList
         $this->communication->to = [
             implode("\n", $address->postal_address),
         ];
+    }
+
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
     }
 
     protected function getBuilder(Builder $builder): Builder
