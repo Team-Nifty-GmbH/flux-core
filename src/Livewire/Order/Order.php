@@ -120,7 +120,7 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->whereRelation('tenants', 'id', $this->order->tenant_id)
+                    ->whereHasTenant($this->order->tenant_id)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'languages' => resolve_static(Language::class, 'query')
