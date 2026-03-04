@@ -13,7 +13,6 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Order\CreateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -157,24 +156,6 @@ class CreateOrder extends FluxAction
             ?? resolve_static(Language::class, 'default')?->getKey();
 
         $this->data['order_date'] ??= now();
-
-        $this->rules = array_merge(
-            $this->rules,
-            [
-                'order_type_id' => [
-                    'required',
-                    'integer',
-                    app(ModelExists::class, ['model' => OrderType::class])
-                        ->where('tenant_id', $this->data['tenant_id']),
-                ],
-                'payment_type_id' => [
-                    'required',
-                    'integer',
-                    app(ModelExists::class, ['model' => PaymentType::class])
-                        ->whereRelation('tenants', 'id', $this->data['tenant_id']),
-                ],
-            ]
-        );
     }
 
     protected function validateData(): void
@@ -187,6 +168,7 @@ class CreateOrder extends FluxAction
             'address_invoice_id' => Address::class,
             'address_delivery_id' => Address::class,
             'order_type_id' => OrderType::class,
+            'payment_type_id' => PaymentType::class,
             'address_delivery.id' => Address::class,
             'addresses.*.address_id' => Address::class,
             'addresses.*.address_type_id' => AddressType::class,
