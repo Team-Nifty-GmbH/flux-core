@@ -334,7 +334,7 @@ test('update contact multi status tenant payment type not exists', function (): 
         ],
         [
             'id' => $this->contacts[1]->id,
-            'tenant_id' => $this->contacts[2]->tenant_id,
+            'tenants' => [$this->dbTenants[1]->getKey()],
         ],
         [
             'id' => $this->contacts[2]->id,

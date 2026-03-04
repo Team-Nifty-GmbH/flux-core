@@ -9,7 +9,6 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Pivots\ContactTenant;
 use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Contact\UpdateContactRuleset;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
