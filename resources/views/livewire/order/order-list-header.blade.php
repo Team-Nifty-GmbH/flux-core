@@ -427,8 +427,8 @@
                     <x-button
                         color="indigo"
                         x-on:click="$wire.addOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        x-cloak
                         x-show="!$wire.order.is_locked"
-                        x-on:click=""
                         :text="__('Save')"
                     />
                 </div>
