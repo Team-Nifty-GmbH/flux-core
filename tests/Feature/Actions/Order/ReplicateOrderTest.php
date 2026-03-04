@@ -192,13 +192,11 @@ test('preserves implicit discounts when position has zero total but no discount_
     $product = Product::factory()->create();
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);

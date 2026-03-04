@@ -118,28 +118,35 @@ class UpdateContact extends FluxAction
             }
         }
 
-        $tenants = $this->getData('tenants') ?? resolve_static(ContactTenant::class, 'query')
-            ->where('contact_id', $this->getData('id'))
-            ->pluck('tenant_id')
-            ->toArray();
-        $tenantPaymentTypeExists = resolve_static(PaymentType::class, 'query')
-            ->whereKey($this->getData('payment_type_id'))
-            ->whereHas('tenants', fn (Builder $query) => $query
-                ->whereKey($tenants ?: resolve_static(Tenant::class, 'query')->pluck('id')->toArray())
-            )
-            ->exists();
+        $paymentTypeId = array_key_exists('payment_type_id', $this->data)
+            ? $this->getData('payment_type_id')
+            : resolve_static(Contact::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->value('payment_type_id');
+        if ($paymentTypeId || $this->getData('tenants')) {
+            $tenants = $this->getData('tenants') ?? resolve_static(ContactTenant::class, 'query')
+                ->where('contact_id', $this->getData('id'))
+                ->pluck('tenant_id')
+                ->toArray();
 
-        if (! $tenantPaymentTypeExists) {
-            $errors += [
-                'payment_type_id' => [
-                    __(
-                        'Payment type with id: \':paymentTypeId\' doesnt match with the associated tenants',
-                        [
-                            'paymentTypeId' => $this->getData('payment_type_id'),
-                        ]
-                    ),
-                ],
-            ];
+            if (resolve_static(PaymentType::class, 'query')
+                ->whereKey($paymentTypeId)
+                ->whereHasTenant(
+                    $tenants ?: resolve_static(Tenant::class, 'query')->pluck('id')->toArray()
+                )
+                ->doesntExist()
+            ) {
+                $errors += [
+                    'payment_type_id' => [
+                        __(
+                            'Payment type with id: \':paymentTypeId\' doesnt match with the associated tenants',
+                            [
+                                'paymentTypeId' => $this->getData('payment_type_id'),
+                            ]
+                        ),
+                    ],
+                ];
+            }
         }
 
         if ($errors) {

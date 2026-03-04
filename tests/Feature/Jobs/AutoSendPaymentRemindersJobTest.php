@@ -36,12 +36,10 @@ beforeEach(function (): void {
     ]);
 
     $this->orderType = OrderType::factory()
-        ->state([
+        ->create([
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
-        ])
-        ->for(factory: $this->dbTenant, relationship: 'tenants')
-        ->create();
+        ]);
 });
 
 test('sends payment reminders for overdue orders', function (): void {

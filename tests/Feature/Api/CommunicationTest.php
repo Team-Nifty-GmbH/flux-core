@@ -12,7 +12,7 @@ beforeEach(function (): void {
     $dbTenant = Tenant::factory()->create();
 
     $this->contact = Contact::factory()
-        ->has($dbTenant, 'tenants')
+        ->hasAttached(factory: $dbTenant, relationship: 'tenants')
         ->create();
 
     Address::factory()->create([

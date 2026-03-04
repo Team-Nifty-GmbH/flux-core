@@ -1745,6 +1745,7 @@
     "Payment type": "Zahlart",
     "Payment Type Id": "Zahlungsart-ID",
     "Payment Type not found on given tenant.": "Zahlart nicht gefunden beim gegebenen Mandanten.",
+    "Payment Type not found on given tenants.": "Zahlart nicht gefunden bei den gegebenen Mandanten.",
     "Payment type with id: \\':paymentTypeId\\' doesnt match with the associated tenants": "Zahlungsart mit id: \\':paymentTypeId\\' passt nicht zu den zugewiesenen Mandanten",
     "Payment Types": "Zahlarten",
     "payment-reminder": "Zahlungserinnerung",

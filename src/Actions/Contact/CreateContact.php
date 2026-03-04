@@ -11,6 +11,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class CreateContact extends FluxAction
 {
@@ -90,5 +91,23 @@ class CreateContact extends FluxAction
         $this->data['price_list_id'] ??= resolve_static(PriceList::class, 'default')?->getKey();
         $this->data['payment_type_id'] ??= resolve_static(PaymentType::class, 'default')?->getKey();
         $this->data['currency_id'] ??= resolve_static(Currency::class, 'default')?->getKey();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (($paymentTypeId = $this->getData('payment_type_id')) && $tenants = $this->getData('tenants')) {
+            if (resolve_static(PaymentType::class, 'query')
+                ->whereKey($paymentTypeId)
+                ->whereHasTenant($tenants)
+                ->doesntExist()
+            ) {
+                throw ValidationException::withMessages([
+                    'payment_type_id' => ['Payment Type not found on given tenants.'],
+                ])
+                    ->errorBag('createContact');
+            }
+        }
     }
 }

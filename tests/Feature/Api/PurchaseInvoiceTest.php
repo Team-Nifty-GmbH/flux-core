@@ -37,7 +37,7 @@ beforeEach(function (): void {
         ]);
 
     $this->contacts = Contact::factory()->count(2)
-        ->has(Address::factory()->create())
+        ->has(Address::factory())
         ->for(PriceList::factory()->state(['is_default' => true]))
         ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
