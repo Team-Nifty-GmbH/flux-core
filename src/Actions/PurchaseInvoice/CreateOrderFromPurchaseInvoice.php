@@ -111,6 +111,8 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
     {
         parent::validateData();
 
+        $errors = [];
+
         if (
             ! data_get($this->data, 'iban')
             && resolve_static(PaymentType::class, 'query')
@@ -120,10 +122,11 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->where('contact_id', $this->data['contact_id'])
                 ->doesntExist()
         ) {
-            throw ValidationException::withMessages([
-                'iban' => ['iban' => __('validation.required', ['attribute' => 'IBAN'])],
-            ])
-                ->errorBag('createOrderFromPurchaseInvoice');
+            $errors['iban'] = ['iban' => __('validation.required', ['attribute' => 'IBAN'])];
+        }
+
+        if (! $this->purchaseInvoice?->getFirstMedia('purchase_invoice')) {
+            $errors['purchase_invoice'] = ['The purchase invoice has no attached document.'];
         }
 
         /** @var PurchaseInvoice $purchaseInvoice */
@@ -137,13 +140,6 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 'is_net',
             ]);
 
-        if (! $this->purchaseInvoice?->getFirstMedia('purchase_invoice')) {
-            throw ValidationException::withMessages([
-                'purchase_invoice' => ['The purchase invoice has no attached document.'],
-            ])
-                ->errorBag('createOrderFromPurchaseInvoice');
-        }
-
         if (
             bccomp(
                 $this->getData('total_gross_price'),
@@ -151,17 +147,19 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 2
             ) !== 0
         ) {
-            throw ValidationException::withMessages([
-                'total_gross_price' => [
-                    __(
-                        'The total gross :total-gross must match the sum of all position total prices :pos-total.',
-                        [
-                            'total-gross' => $this->getData('total_gross_price'),
-                            'pos-total' => $totalPositionGross,
-                        ]
-                    ),
-                ],
-            ])
+            $errors['total_gross_price'] = [
+                __(
+                    'The total gross :total-gross must match the sum of all position total prices :pos-total.',
+                    [
+                        'total-gross' => $this->getData('total_gross_price'),
+                        'pos-total' => $totalPositionGross,
+                    ]
+                ),
+            ];
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
                 ->errorBag('createOrderFromPurchaseInvoice');
         }
     }
