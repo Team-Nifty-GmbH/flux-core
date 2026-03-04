@@ -3,10 +3,13 @@
 namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Address;
+use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Order\UpdateLockedOrderRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class UpdateLockedOrder extends FluxAction
 {
@@ -56,5 +59,43 @@ class UpdateLockedOrder extends FluxAction
         }
 
         return $order->withoutRelations()->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $errors = [];
+        if ($addresses = $this->getData('addresses')) {
+            $tenantId = resolve_static(Order::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->value('tenant_id');
+            foreach ($addresses as $key => $address) {
+                if (resolve_static(Address::class, 'query')
+                    ->whereKey($address['address_id'])
+                    ->whereHasTenant($tenantId)
+                    ->doesntExist()
+                ) {
+                    $errors += [
+                        'addresses.' . $key . '.address_id' => ['Address not found on given tenant.'],
+                    ];
+                }
+
+                if (resolve_static(AddressType::class, 'query')
+                    ->whereKey($address['address_type_id'])
+                    ->whereHasTenant($tenantId)
+                    ->doesntExist()
+                ) {
+                    $errors += [
+                        'addresses.' . $key . '.address_type_id' => ['Address Type not found on given tenant.'],
+                    ];
+                }
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('updateLockedOrder');
+        }
     }
 }

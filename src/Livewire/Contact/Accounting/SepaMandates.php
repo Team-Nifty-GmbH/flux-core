@@ -12,6 +12,7 @@ use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\SepaMandateForm;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -130,7 +131,13 @@ class SepaMandates extends SepaMandateList
 
     public function save(): bool
     {
-        $this->sepaMandate->tenant_id = $this->contact->tenant_id;
+        $this->sepaMandate->tenant_id = $this->contact->tenants
+            ? resolve_static(Tenant::class, 'query')
+                ->whereKey($this->contact->tenants)
+                ->orderByRaw('is_default DESC, FIELD(id, ' . implode(',', $this->contact->tenants) . ')')
+                ->value('id')
+            : resolve_static(Tenant::class, 'default')
+                ?->getKey();
         $this->sepaMandate->contact_id = $this->contact->id;
 
         try {

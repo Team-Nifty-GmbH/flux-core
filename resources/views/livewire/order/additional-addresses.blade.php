@@ -17,12 +17,15 @@
                                   'name',
                                 ],
                                 'with' => 'contact.media',
-                                'where' => [
-                                    [
-                                        'tenant_id',
-                                        '=',
-                                        $tenantId
-                                    ],
+                                'whereRelation' => [
+                                    'tenants',
+                                    'tenant_id',
+                                    '=',
+                                    $tenantId,
+                                ],
+                                'doesntHave' => [
+                                    'tenants',
+                                    'or',
                                 ],
                             ],
                         ]"

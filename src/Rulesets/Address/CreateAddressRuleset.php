@@ -3,10 +3,9 @@
 namespace FluxErp\Rulesets\Address;
 
 use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Country;
 use FluxErp\Models\Language;
-use FluxErp\Models\Tenant;
-use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
@@ -39,7 +38,7 @@ class CreateAddressRuleset extends FluxRuleset
             'contact_id' => [
                 'required',
                 'integer',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'tenant_id', 'table' => 'contacts']),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'country_id' => [
                 'integer',
@@ -50,11 +49,6 @@ class CreateAddressRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Language::class]),
-            ],
-            'tenant_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'advertising_state' => [
                 'string',

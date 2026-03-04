@@ -3,9 +3,9 @@
 namespace FluxErp\Rulesets\Address;
 
 use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Country;
 use FluxErp\Models\Language;
-use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
@@ -37,11 +37,7 @@ class UpdateAddressRuleset extends FluxRuleset
             ],
             'contact_id' => [
                 'integer',
-                app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'tenant_id',
-                    'table' => 'contacts',
-                    'baseTable' => 'addresses',
-                ]),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'country_id' => [
                 'integer',

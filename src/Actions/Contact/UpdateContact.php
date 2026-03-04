@@ -6,7 +6,10 @@ use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Pivots\ContactTenant;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Contact\UpdateContactRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -28,6 +31,7 @@ class UpdateContact extends FluxAction
         $discountGroups = Arr::pull($this->data, 'discount_groups');
         $discounts = Arr::pull($this->data, 'discounts');
         $industries = Arr::pull($this->data, 'industries');
+        $tenants = Arr::pull($this->data, 'tenants');
 
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
@@ -35,6 +39,10 @@ class UpdateContact extends FluxAction
 
         $contact->fill($this->data);
         $contact->save();
+
+        if (! is_null($tenants)) {
+            $contact->tenants()->sync($tenants);
+        }
 
         if (! is_null($discounts)) {
             $syncType = match ($this->getData('discounts_pivot_sync_type')) {
@@ -83,7 +91,6 @@ class UpdateContact extends FluxAction
             ->first();
 
         $this->data['payment_type_id'] ??= $contact?->payment_type_id;
-        $this->data['tenant_id'] ??= $contact?->tenant_id;
     }
 
     protected function validateData(): void
@@ -93,32 +100,42 @@ class UpdateContact extends FluxAction
         $errors = [];
 
         if ($customerNumber = $this->getData('customer_number')) {
-            $customerNumberExists = resolve_static(Contact::class, 'query')
-                ->where('id', '!=', $this->getData('id'))
-                ->where('tenant_id', '=', $this->getData('tenant_id'))
-                ->where('customer_number', $customerNumber)
-                ->exists();
+            $currentCustomerNumber = resolve_static(Contact::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->value('customer_number');
 
-            if ($customerNumberExists) {
-                $errors += [
-                    'customer_number' => ['Customer number already exists'],
-                ];
+            if ($customerNumber !== $currentCustomerNumber) {
+                $customerNumberExists = resolve_static(Contact::class, 'query')
+                    ->whereKeyNot($this->getData('id'))
+                    ->where('customer_number', $customerNumber)
+                    ->exists();
+
+                if ($customerNumberExists) {
+                    $errors += [
+                        'customer_number' => ['Customer number already exists'],
+                    ];
+                }
             }
         }
 
+        $tenants = $this->getData('tenants') ?? resolve_static(ContactTenant::class, 'query')
+            ->where('contact_id', $this->getData('id'))
+            ->pluck('tenant_id')
+            ->toArray();
         $tenantPaymentTypeExists = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->getData('payment_type_id'))
-            ->whereRelation('tenants', 'id', $this->getData('tenant_id'))
+            ->whereHas('tenants', fn (Builder $query) => $query
+                ->whereKey($tenants ?: resolve_static(Tenant::class, 'query')->pluck('id')->toArray())
+            )
             ->exists();
 
         if (! $tenantPaymentTypeExists) {
             $errors += [
                 'payment_type_id' => [
                     __(
-                        'Payment type with id: \':paymentTypeId\' doesnt match tenant id: \':tenantId\'',
+                        'Payment type with id: \':paymentTypeId\' doesnt match with the associated tenants',
                         [
                             'paymentTypeId' => $this->getData('payment_type_id'),
-                            'tenantId' => $this->getData('tenant_id'),
                         ]
                     ),
                 ],

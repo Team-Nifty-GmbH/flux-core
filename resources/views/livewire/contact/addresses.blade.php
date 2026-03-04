@@ -100,6 +100,27 @@
                 x-bind:class="! $wire.$parent.edit && 'pointer-events-none'"
             >
                 <x-select.styled
+                    x-bind:disabled="! $wire.$parent.edit"
+                    wire:model.number="contact.tenants"
+                    :label="__('Tenants')"
+                    multiple
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Tenant::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
+                            ],
+                        ],
+                    ]"
+                />
+                <x-select.styled
                     multiple
                     x-bind:disabled="! $wire.$parent.edit"
                     wire:model.number="contact.categories"

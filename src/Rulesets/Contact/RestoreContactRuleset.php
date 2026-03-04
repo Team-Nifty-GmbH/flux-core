@@ -8,7 +8,6 @@ use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\RecordOrigin;
-use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelDoesntExist;
@@ -33,12 +32,6 @@ class RestoreContactRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
-            ],
-            'tenant_id' => [
-                'sometimes',
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
             ],
             'agent_id' => [
                 'integer',

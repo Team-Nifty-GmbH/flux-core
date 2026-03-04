@@ -6,6 +6,9 @@ use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Address;
+use FluxErp\Models\AddressType;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
@@ -13,6 +16,8 @@ use FluxErp\Models\OrderType;
 use FluxErp\Rulesets\Order\ReplicateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ReplicateOrder extends FluxAction
@@ -230,6 +235,52 @@ class ReplicateOrder extends FluxAction
     {
         parent::validateData();
 
+        $errors = [];
+        $tenantId = resolve_static(Order::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->value('tenant_id');
+        $hasTenants = [
+            'contact_id' => Contact::class,
+            'address_invoice_id' => Address::class,
+            'address_delivery_id' => Address::class,
+            'order_type_id' => OrderType::class,
+            'addresses.*.address_id' => Address::class,
+            'addresses.*.address_type_id' => AddressType::class,
+        ];
+
+        foreach ($hasTenants as $key => $class) {
+            $values = $this->getData($key);
+            if (! $values) {
+                continue;
+            }
+
+            $values = Arr::wrap($values);
+            foreach ($values as $index => $value) {
+                if (resolve_static($class, 'query')
+                    ->whereKey($this->getData($value))
+                    ->whereHasTenant($tenantId)
+                    ->doesntExist()
+                ) {
+                    $errors += [
+                        str_replace('*', $index, $key) => [
+                            Str::headline(morph_alias($class)) . ' not found on given tenant.',
+                        ],
+                    ];
+                }
+            }
+        }
+
+        if ($parentId = $this->getData('parent_id')) {
+            if (resolve_static(Order::class, 'query')
+                ->whereKey($parentId)
+                ->value('tenant_id') !== $tenantId
+            ) {
+                $errors += [
+                    'parent_id' => ['Parent order not found on given tenant.'],
+                ];
+            }
+        }
+
         $orderPositions = data_get($this->data, 'order_positions', []);
         $ids = array_column($orderPositions ?? [], 'id');
 
@@ -239,17 +290,15 @@ class ReplicateOrder extends FluxAction
                 ->whereNotNull('parent_id')
                 ->exists()
         ) {
-            throw ValidationException::withMessages([
+            $errors += [
                 'set_new_as_parent' => ['The given order already has a parent.'],
-            ])
-                ->errorBag('replicateOrder');
+            ];
         }
 
         if (count($ids) !== count(array_unique($ids))) {
-            throw ValidationException::withMessages([
+            $errors += [
                 'order_positions' => ['No duplicate order position ids allowed.'],
-            ])
-                ->errorBag('replicateOrder');
+            ];
         }
 
         if ($orderPositions) {
@@ -258,11 +307,15 @@ class ReplicateOrder extends FluxAction
                 ->where('order_id', '!=', $this->data['id'])
                 ->exists()
             ) {
-                throw ValidationException::withMessages([
+                $errors += [
                     'order_positions' => ['Only order positions from given order allowed.'],
-                ])
-                    ->errorBag('replicateOrder');
+                ];
             }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('replicateOrder');
         }
     }
 
