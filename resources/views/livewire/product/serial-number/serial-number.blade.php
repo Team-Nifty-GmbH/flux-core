@@ -1,7 +1,4 @@
-<div
-    class="dark:text-white"
-    x-data="{}"
->
+<div class="dark:text-white" x-data="{}">
     <!-- Page header -->
     <div
         class="mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8"

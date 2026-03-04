@@ -4,7 +4,12 @@
     set model(value) { $wire.{{ $attributes->wire("model")->value }} = value },
     get availableStates() { return $wire.{{ $attributes->get("available") }} },
     @if ($attributes->wire("formatter")->value)
-        get formatter() { return $wire.{{ $attributes->wire("formatter")->value }} },
+        get
+        formatter()
+        {
+        return
+        $wire.{{ $attributes->wire("formatter")->value }}
+        },
     @else
         formatter: {{ $attributes->get("formatters") }}
     @endif
