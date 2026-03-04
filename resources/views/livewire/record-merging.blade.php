@@ -63,7 +63,7 @@
                                 x-if="$wire.mainRecord[column.name] === true"
                             >
                                 <span
-                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-none dark:bg-emerald-700"
+                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-hidden dark:bg-emerald-700"
                                 >
                                     <svg
                                         class="h-3 w-3 shrink-0"
@@ -85,7 +85,7 @@
                                 x-if="$wire.mainRecord[column.name] === false"
                             >
                                 <span
-                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-none dark:bg-red-700"
+                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-hidden dark:bg-red-700"
                                 >
                                     <svg
                                         class="h-3 w-3 shrink-0"
@@ -129,7 +129,7 @@
                                         x-if="record[column.name] === true"
                                     >
                                         <span
-                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-none dark:bg-emerald-700"
+                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-hidden dark:bg-emerald-700"
                                         >
                                             <svg
                                                 class="h-3 w-3 shrink-0"
@@ -151,7 +151,7 @@
                                         x-if="record[column.name] === false"
                                     >
                                         <span
-                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-none dark:bg-red-700"
+                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-hidden dark:bg-red-700"
                                         >
                                             <svg
                                                 class="h-3 w-3 shrink-0"

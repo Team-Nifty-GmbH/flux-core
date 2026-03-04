@@ -10,7 +10,7 @@
     class="position-item mb-2 text-sm"
 >
     <div
-        class="rounded-md border bg-white p-3 shadow-sm"
+        class="rounded-md border bg-white p-3 shadow-xs"
         @if (! $this->order->is_locked)
             x-bind:class="{
                 'cursor-move':
@@ -26,7 +26,7 @@
                     <button
                         x-on:click="toggleExpand({{ data_get($position, "id") }})"
                         type="button"
-                        class="text-gray-500 hover:text-gray-700 focus:outline-none"
+                        class="text-gray-500 hover:text-gray-700 focus:outline-hidden"
                     >
                         <x-icon
                             name="chevron-right"

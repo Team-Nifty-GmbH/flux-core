@@ -35,7 +35,7 @@
     }
 }"
 >
-    <div class="mx-auto max-w-screen-2xl px-4 pb-6 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-(--breakpoint-2xl) px-4 pb-6 sm:px-6 lg:px-8">
         <div
             class="mx-auto pb-6 md:flex md:items-center md:justify-between md:space-x-5"
         >

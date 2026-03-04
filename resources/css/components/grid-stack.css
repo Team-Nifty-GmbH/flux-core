@@ -3,7 +3,7 @@
 }
 
 .grid-stack-item-content {
-    @apply col-span-full m-0 flex place-content-center rounded-lg bg-white shadow-md dark:bg-slate-800 dark:text-gray-50;
+    @apply col-span-full m-0 flex rounded-lg bg-white shadow-md dark:bg-slate-800 dark:text-gray-50;
 }
 
 .grid-stack > .grid-stack-item > .grid-stack-item-content {
@@ -15,11 +15,11 @@
 }
 
 ::-webkit-scrollbar-track {
-    @apply rounded bg-gray-200 dark:bg-gray-700;
+    @apply rounded-xs bg-gray-200 dark:bg-gray-700;
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply rounded bg-gray-400;
+    @apply rounded-xs bg-gray-400;
 }
 
 ::-webkit-scrollbar-thumb:hover {

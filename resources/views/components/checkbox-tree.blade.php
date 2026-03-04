@@ -140,7 +140,7 @@
                     >
                         @if ($sortable)
                             <li
-                                x-bind:class="node[childrenAttribute]?.length ? 'h-0' : 'min-h-[1rem]'"
+                                x-bind:class="node[childrenAttribute]?.length ? 'h-0' : 'min-h-4'"
                             ></li>
                         @endif
 

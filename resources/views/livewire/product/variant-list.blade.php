@@ -15,7 +15,7 @@
                     productOptionGroup = $event.detail.record ?? $event.detail
                 "
             >
-                <div class="flex-grow">
+                <div class="grow">
                     <livewire:product.product-option-group-list />
                 </div>
                 <div

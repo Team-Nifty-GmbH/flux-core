@@ -54,7 +54,7 @@
             x-show="proxy && proxy.isEditable"
             x-ref="controlPanel-{{ $id }}"
             id="controlPanel"
-            class="{{ $tooltipDropdown ? "" : "border border-b-0" }} flex w-full flex-wrap items-stretch rounded-t-md border-secondary-300 placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
+            class="{{ $tooltipDropdown ? "" : "border border-b-0" }} flex w-full flex-wrap items-stretch rounded-t-md border-secondary-300 placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-hidden focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
         ></div>
         <div class="relative list-disc" x-ref="editor-{{ $id }}">
             {{-- Tooltip buttons (rendered via buttonInstance->render() when tooltipDropdown is true) --}}
@@ -82,7 +82,7 @@
     {{-- templates to be add on demand --}}
     <template
         x-ref="popWindow-{{ $id }}"
-        class="flex w-full flex-wrap items-stretch divide-x rounded-t-md placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
+        class="flex w-full flex-wrap items-stretch divide-x rounded-t-md placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-hidden focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
     ></template>
     <template x-ref="commands-{{ $id }}">
         @foreach ($buttonInstances as $buttonInstance)
