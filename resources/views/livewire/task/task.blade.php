@@ -1,9 +1,6 @@
 <div
     id="task-details"
-    x-data="{
-        task: $wire.$entangle('task'),
-        edit: false,
-    }"
+    x-data="{ edit: false }"
 >
     <x-modal
         id="replicate-task-modal"
@@ -238,7 +235,7 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
                         <div class="pl-2">
-                            <span x-text="task.name"></span>
+                            <span x-text="$wire.task.name"></span>
                         </div>
                     </div>
                 </h1>

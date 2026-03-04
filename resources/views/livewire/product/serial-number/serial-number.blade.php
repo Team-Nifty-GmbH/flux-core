@@ -1,8 +1,6 @@
 <div
     class="dark:text-white"
-    x-data="{
-        productImage: $wire.$entangle('productImage'),
-    }"
+    x-data="{}"
 >
     <!-- Page header -->
     <div
