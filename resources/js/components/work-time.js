@@ -1,10 +1,10 @@
 export default function ($wire, route) {
     return {
-        currentWorkTime: $wire.entangle('workTime'),
+        currentWorkTime: $wire.$entangle('workTime'),
         time: 0,
         open: false,
-        activeWorkTimes: $wire.entangle('activeWorkTimes'),
-        trackable_type: $wire.entangle('workTime.trackable_type'),
+        activeWorkTimes: $wire.$entangle('activeWorkTimes'),
+        trackable_type: $wire.$entangle('workTime.trackable_type'),
         runningTimers: {},
         destroy() {
             const keys = Object.keys(this.runningTimers);

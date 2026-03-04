@@ -9,7 +9,7 @@
         <div class="space-y-8 divide-y divide-gray-200">
             <div
                 x-data="{
-                    ticket: $wire.entangle('ticket'),
+                    ticket: $wire.$entangle('ticket'),
                     save() {
                         this.$wire.save().then((result) => {
                             if (result === true) {

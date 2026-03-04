@@ -106,7 +106,7 @@
                                 this.selection.path = path ? path[path.length - 1] : null
                             }
                         },
-                        filesArray: $wire.entangle('filesArray', true),
+                        filesArray: $wire.$entangle('filesArray', true),
                         async uploadSuccess(multipleFileUpload) {
                             // on single file replace, replace selection - otherwise, add
                             const lastUploads = await $wire.get('latestUploads')

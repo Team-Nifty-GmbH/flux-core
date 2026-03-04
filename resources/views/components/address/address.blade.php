@@ -421,7 +421,7 @@
     <div
         class="flex flex-col gap-1.5"
         x-data="{
-            edit: $wire.entangle('edit'),
+            edit: $wire.$entangle('edit'),
             hrefFromContactOption(type, value) {
                 switch (type) {
                     case 'phone':

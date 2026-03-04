@@ -1,7 +1,7 @@
 <div
     x-data="{
         edit: false,
-        priceLists: $wire.entangle('priceLists'),
+        priceLists: $wire.$entangle('priceLists'),
     }"
 >
     <div

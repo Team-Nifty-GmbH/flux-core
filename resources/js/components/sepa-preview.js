@@ -1,7 +1,7 @@
 export default function sepaPreview($wire, $refs) {
     return {
         route: null,
-        tenant: $wire.entangle('tenant'),
+        tenant: $wire.$entangle('tenant'),
         async onInit(initTenantId) {
             console.log(
                 'Initializing SEPA Preview with tenant ID:',

@@ -1,7 +1,7 @@
 <div
     x-data="{
-        order: $wire.entangle('order', true),
-        orderPositions: $wire.entangle('orderPositions', true),
+        order: $wire.$entangle('order', true),
+        orderPositions: $wire.$entangle('orderPositions', true),
         formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
