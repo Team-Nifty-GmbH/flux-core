@@ -65,10 +65,6 @@ class UpdateCalendarEvent extends FluxAction
             $createdEvent = CreateCalendarEvent::make($this->data)
                 ->validate()
                 ->execute();
-        } else {
-            SyncCalendarEventInvites::make($this->data)
-                ->validate()
-                ->execute();
         }
 
         return [

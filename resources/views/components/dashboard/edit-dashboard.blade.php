@@ -4,9 +4,9 @@
             <div class="relative">
                 <x-button
                     wire:loading.attr="disabled"
-                    class="!dark:text-secondary-400 border-b-2 border-b-transparent !text-secondary-600 focus:!ring-0 focus:!ring-offset-0"
+                    class="!dark:text-secondary-400 border-b-2 border-b-transparent text-secondary-600! focus:ring-0! focus:ring-offset-0!"
                     flat
-                    x-bind:class="{'!border-b-primary-600 !rounded-b-none': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
+                    x-bind:class="{'border-b-primary-600! rounded-b-none!': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
                     x-on:click="$wire.set('group', group)"
                 >
                     <x-slot:text>
@@ -43,26 +43,38 @@
         <div
             x-cloak
             x-show="!editGrid"
-            class="flex flex-col items-center gap-2 text-sm md:min-w-96 md:flex-row"
+            class="flex flex-col items-center gap-2 text-sm md:flex-row"
         >
-            <div class="w-full grow">
+            <div class="w-full md:min-w-48">
                 <x-select.styled
                     class="p-2"
                     wire:model.live="params.timeFrame"
+                    :label="__('Time Frame')"
                     required
                     :options="resolve_static(\FluxErp\Enums\TimeFrameEnum::class, 'valuesLocalized')"
                 />
             </div>
             <div
-                class="flex min-w-96 flex-col items-center gap-2 md:flex-row"
+                class="w-full md:min-w-64"
                 x-cloak
                 x-show="$wire.params.timeFrame === 'Custom'"
             >
-                <x-date wire:model.live="params.start" :without-time="true" />
-                <div>
-                    <span class="px-2">{{ __('Till') }}</span>
-                </div>
-                <x-date wire:model.live="params.end" :without-time="true" />
+                <x-date range wire:model.live="params.dateRange" :label="__('Date Range')" />
+            </div>
+            <div class="w-full md:min-w-52">
+                <x-select.styled
+                    class="p-2"
+                    wire:model.live="params.comparisonType"
+                    :label="__('Comparison')"
+                    :options="resolve_static(\FluxErp\Enums\ComparisonTypeEnum::class, 'valuesLocalized')"
+                />
+            </div>
+            <div
+                class="w-full md:min-w-64"
+                x-cloak
+                x-show="$wire.params.comparisonType === 'Custom'"
+            >
+                <x-date range wire:model.live="params.comparisonRange" :label="__('Comparison Range')" />
             </div>
         </div>
     @endif
@@ -77,14 +89,14 @@
                 x-show="!editGrid"
                 x-on:click="editGridMode(true)"
                 icon="pencil"
-                class="flex-shrink-0"
+                class="shrink-0"
             />
             <div x-cloak x-show="editGrid" class="flex gap-2">
                 <x-button
                     color="secondary"
                     light
                     x-on:click="$modalOpen('widget-list')"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                     :text="__('Add')"
                 />
                 <x-button
@@ -92,14 +104,14 @@
                     loading
                     x-on:click="save"
                     :text="__('Save')"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                 />
                 <x-button
                     color="red"
                     loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
                     wire:click="resetWidgets().then(onPostReset.bind($data))"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                     :text="__('Cancel')"
                 />
             </div>

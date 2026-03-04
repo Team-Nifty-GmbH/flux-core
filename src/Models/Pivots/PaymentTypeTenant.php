@@ -9,12 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentTypeTenant extends FluxPivot
 {
-    public $incrementing = true;
-
-    public $timestamps = false;
-
-    protected $primaryKey = 'pivot_id';
-
     protected $table = 'payment_type_tenant';
 
     public function paymentType(): BelongsTo

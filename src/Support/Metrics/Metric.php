@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Metrics;
 
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Support\Calculation\Rounding;
@@ -21,6 +22,10 @@ abstract class Metric
     protected ?CarbonImmutable $endingDate = null;
 
     protected GrowthRateTypeEnum $growthRateType = GrowthRateTypeEnum::Percentage;
+
+    protected ?CarbonImmutable $previousEndingDate = null;
+
+    protected ?CarbonImmutable $previousStartingDate = null;
 
     protected Builder $query;
 
@@ -81,6 +86,13 @@ abstract class Metric
 
     public function previousRange(): ?array
     {
+        if ($this->previousStartingDate && $this->previousEndingDate) {
+            return [
+                $this->previousStartingDate,
+                $this->previousEndingDate,
+            ];
+        }
+
         $range = $this->getRange();
 
         if ($this->startingDate && $this->endingDate && $range === TimeFrameEnum::Custom) {
@@ -105,6 +117,24 @@ abstract class Metric
     public function setEndingDate(string|CarbonImmutable|null $endingDate): static
     {
         $this->endingDate = is_string($endingDate) ? CarbonImmutable::parse($endingDate) : $endingDate;
+
+        return $this;
+    }
+
+    public function setPreviousEndingDate(CarbonInterface|string|null $previousEndingDate): static
+    {
+        $this->previousEndingDate = $previousEndingDate
+            ? CarbonImmutable::parse($previousEndingDate)
+            : null;
+
+        return $this;
+    }
+
+    public function setPreviousStartingDate(CarbonInterface|string|null $previousStartingDate): static
+    {
+        $this->previousStartingDate = $previousStartingDate
+            ? CarbonImmutable::parse($previousStartingDate)
+            : null;
 
         return $this;
     }

@@ -6,8 +6,8 @@ use Exception;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 trait HasSerialNumberRange
 {
@@ -26,12 +26,11 @@ trait HasSerialNumberRange
                 ->where('model_type', morph_alias(static::class))
                 ->where('tenant_id', $tenantId);
 
-            $store = false;
-            if (ModelInfo::forModel($this)->attribute($type)) {
-                $query->whereNull('model_id');
+            $store = ! Schema::hasColumn($this->getTable(), $type);
+            if ($store) {
+                $query->where('model_id', $this->getKey());
             } else {
-                $store = true;
-                $query->where('model_id', $this->id);
+                $query->whereNull('model_id');
             }
 
             $serialNumberRange = $query->firstOrNew();
@@ -42,6 +41,9 @@ trait HasSerialNumberRange
                         'tenant_id' => $tenantId,
                         'type' => $type,
                         'model_type' => morph_alias(static::class),
+                        'model_id' => $store
+                            ? $this->getKey()
+                            : null,
                         'stores_serial_numbers' => $store,
                     ])->save();
                 } catch (Exception) {

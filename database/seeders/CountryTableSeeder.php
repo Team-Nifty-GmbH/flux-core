@@ -17,8 +17,8 @@ class CountryTableSeeder extends Seeder
         if ($languages and $currencies) {
             for ($i = 0; $i < 5; $i++) {
                 Country::factory()->create([
-                    'language_id' => $languages->random()->id,
                     'currency_id' => $currencies->random()->id,
+                    'language_id' => $languages->random()->id,
                 ]);
             }
         }

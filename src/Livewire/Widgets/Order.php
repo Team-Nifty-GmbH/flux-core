@@ -16,6 +16,11 @@ class Order extends Component
 
     public array $orderPositions = [];
 
+    public static function getCategory(): ?string
+    {
+        return 'Orders';
+    }
+
     public function mount(int $modelId): void
     {
         $order = resolve_static(OrderModel::class, 'query')

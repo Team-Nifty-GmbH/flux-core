@@ -14,6 +14,8 @@ class PrinterForm extends FluxForm
 
     public ?string $alias = null;
 
+    public bool $is_visible = false;
+
     protected function getActions(): array
     {
         return [

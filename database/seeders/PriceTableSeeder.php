@@ -13,8 +13,8 @@ class PriceTableSeeder extends Seeder
     {
         for ($i = 0; $i < 30; $i++) {
             Price::factory()->create([
-                'product_id' => Product::all(['id'])->random()->id,
                 'price_list_id' => PriceList::all(['id'])->random()->id,
+                'product_id' => Product::all(['id'])->random()->id,
             ]);
         }
     }

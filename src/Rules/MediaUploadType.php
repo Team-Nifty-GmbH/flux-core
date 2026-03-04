@@ -21,7 +21,7 @@ class MediaUploadType implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $method = 'addMediaFrom' . ucfirst(strtolower($value));
+        $method = 'addMediaFrom' . ucfirst(strtolower($value ?? ''));
 
         $model = $this->data['model_type'] ?? null;
 
@@ -41,7 +41,7 @@ class MediaUploadType implements DataAwareRule, ValidationRule
             return;
         }
 
-        $valid = match (strtolower($value)) {
+        $valid = match (strtolower($value ?? '')) {
             'base64' => (bool) base64_decode($this->data['media']),
             'url' => Str::isUrl($this->data['media']),
             'string' => is_string($this->data['media']),

@@ -11,17 +11,20 @@ return new class() extends Migration
         Schema::create('carts', function (Blueprint $table): void {
             $table->id();
             $table->uuid();
+            $table->foreignId('payment_type_id')->nullable()->constrained('payment_types')->nullOnDelete();
+            $table->foreignId('price_list_id')->constrained('price_lists')->cascadeOnDelete();
             $table->nullableMorphs('authenticatable');
-            $table->foreignId('payment_type_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('price_list_id')->constrained()->cascadeOnDelete();
             $table->string('session_id')->index();
             $table->string('name')->nullable();
             $table->decimal('total', 40, 10)->nullable();
-            $table->boolean('is_portal_public')->default(false);
             $table->boolean('is_public')->default(false);
             $table->boolean('is_watchlist')->default(false);
-            $table->timestamps();
-            $table->softDeletes();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
         });
     }
 

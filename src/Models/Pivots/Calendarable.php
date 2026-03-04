@@ -6,5 +6,11 @@ use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
 class Calendarable extends MorphPivot
 {
-    protected $table = 'calendarables';
+    public $timestamps = false;
+
+    protected $table = 'calendarable';
+
+    protected $primaryKey = 'pivot_id';
+
+    protected $guarded = ['pivot_id'];
 }

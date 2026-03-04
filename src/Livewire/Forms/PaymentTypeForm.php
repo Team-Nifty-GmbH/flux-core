@@ -22,6 +22,8 @@ class PaymentTypeForm extends FluxForm
 
     public bool $is_active = true;
 
+    public bool $is_cash = false;
+
     public bool $is_default = false;
 
     public bool $is_direct_debit = false;

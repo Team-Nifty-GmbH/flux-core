@@ -51,7 +51,7 @@ class UpdatePurchaseInvoice extends FluxAction
 
         if (! is_null($tags)) {
             $purchaseInvoice->syncTags(
-                resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get()
+                resolve_static(Tag::class, 'query')->whereKey($tags)->get()
             );
         }
 

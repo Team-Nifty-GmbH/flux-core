@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::create('address_serial_number', function (Blueprint $table): void {
-            $table->id();
+            $table->id('pivot_id');
             $table->foreignId('address_id')->constrained('addresses')->cascadeOnDelete();
             $table->foreignId('serial_number_id')->constrained('serial_numbers')->cascadeOnDelete();
             $table->unsignedInteger('quantity')->default(1);

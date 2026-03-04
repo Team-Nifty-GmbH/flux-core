@@ -25,32 +25,6 @@ const calendar = () => {
 
             return dateTime.toLocaleString(locale, config);
         },
-        inviteStatus(calendarEvent, status) {
-            calendarEvent.status = status;
-            if (this.calendarItem.resourceEditable === false) {
-                this.calendarClick(
-                    this.calendars.find((c) => c.resourceEditable === true),
-                );
-            }
-
-            const existingEvent = this.calendar.getEventById(
-                calendarEvent.calendar_event.id,
-            );
-
-            if (
-                (status === 'accepted' || status === 'maybe') &&
-                !existingEvent
-            ) {
-                this.calendar.addEvent(
-                    calendarEvent.calendar_event,
-                    this.calendar.getEventSourceById(this.calendarId),
-                );
-            } else if (status === 'declined' && existingEvent) {
-                existingEvent.remove();
-            }
-
-            this.$wire.inviteStatus(calendarEvent.id, status, this.calendarId);
-        },
         calendarClick(calendar) {
             this.calendarId = calendar.id;
             this.calendarItem = calendar;
@@ -252,7 +226,6 @@ const calendar = () => {
         config: {},
         calendarId: null,
         calendars: [],
-        invites: [],
         calendarEvent: {},
         dispatchCalendarEvents(eventName, params) {
             const eventNameKebap = eventName
@@ -324,15 +297,15 @@ const calendar = () => {
             this.calendar.getEventSourceById(calendar.id)?.remove();
         },
         init() {
-            this.$wire.getCalendars().then((calendars) => {
-                this.calendars = calendars;
-            });
-            this.$wire.getConfig().then((config) => {
-                this.config = config;
+            Promise.all([
+                this.$wire.getCalendars().then((calendars) => {
+                    this.calendars = calendars;
+                }),
+                this.$wire.getConfig().then((config) => {
+                    this.config = config;
+                }),
+            ]).then(() => {
                 this.initCalendar();
-            });
-            this.$wire.getInvites().then((invites) => {
-                this.invites = invites;
             });
         },
         flattenCalendars(calendars, parentPath = '') {
@@ -480,6 +453,37 @@ const calendar = () => {
                 eventsSet: (eventsSetInfo) => {
                     this.dispatchCalendarEvents('eventsSet', eventsSetInfo);
                 },
+                datesSet: (info) => {
+                    const titleEl =
+                        calendarEl.querySelector('.fc-toolbar-title');
+                    if (titleEl) {
+                        const start = dayjs(info.view.currentStart);
+                        const currentEnd = dayjs(info.view.currentEnd);
+                        const end =
+                            currentEnd.diff(start, 'day') > 1
+                                ? currentEnd.subtract(1, 'day')
+                                : start;
+
+                        const startWeek = start.isoWeek();
+                        const endWeek = end.isoWeek();
+
+                        const cw = this.config.calendarWeekAbbreviation || 'CW';
+                        const cwText =
+                            startWeek === endWeek
+                                ? `(${cw} ${startWeek})`
+                                : `(${cw} ${startWeek}\u2013${endWeek})`;
+
+                        titleEl.textContent =
+                            titleEl.textContent.replace(
+                                new RegExp(`\\s*\\(${cw}.*?\\)`),
+                                '',
+                            ) +
+                            ' ' +
+                            cwText;
+                    }
+
+                    this.dispatchCalendarEvents('datesSet', info);
+                },
                 eventContent(info) {
                     let eventContent = document.createElement('div');
                     eventContent.className =
@@ -494,7 +498,7 @@ const calendar = () => {
                     if (!info.event.allDay) {
                         let calendarBadge = document.createElement('div');
                         calendarBadge.className =
-                            'size-3 rounded-full flex-shrink-0';
+                            'size-3 rounded-full shrink-0';
                         calendarBadge.style.backgroundColor =
                             info.backgroundColor;
                         leftContent.appendChild(calendarBadge);
@@ -516,12 +520,12 @@ const calendar = () => {
                     // Right side container for time and status badges
                     let rightContent = document.createElement('div');
                     rightContent.className =
-                        'flex items-center gap-1 flex-shrink-0';
+                        'flex items-center gap-1 shrink-0';
 
                     // Add status badges if they exist
                     if (info.event.extendedProps.appendTitle) {
                         let statusBadges = document.createElement('div');
-                        statusBadges.className = 'flex-shrink-0 mr-1';
+                        statusBadges.className = 'shrink-0 mr-1';
 
                         const appendTitle =
                             info.event.extendedProps.appendTitle;
@@ -546,7 +550,7 @@ const calendar = () => {
                     if (!info.event.allDay && info.timeText) {
                         let timeNode = document.createElement('div');
                         timeNode.className =
-                            'flex-shrink-0 whitespace-nowrap text-xs';
+                            'shrink-0 whitespace-nowrap text-xs';
 
                         if (info.event.extendedProps.is_cancelled) {
                             timeNode.classList.add('line-through');
@@ -562,7 +566,8 @@ const calendar = () => {
                 },
             };
 
-            const { activeCalendars, ...filteredConfig } = this.config;
+            const { activeCalendars, showCalendars, ...filteredConfig } =
+                this.config;
 
             this.calendar = new Calendar(calendarEl, {
                 ...defaultConfig,

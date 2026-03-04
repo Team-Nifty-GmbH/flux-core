@@ -6,7 +6,6 @@ use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
 use FluxErp\Http\Controllers\SearchController;
-use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
@@ -38,7 +37,6 @@ use FluxErp\Livewire\HumanResources\Dashboard as HrDashboard;
 use FluxErp\Livewire\HumanResources\EmployeeDays;
 use FluxErp\Livewire\HumanResources\Employees;
 use FluxErp\Livewire\HumanResources\WorkTimes;
-use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
@@ -65,6 +63,7 @@ use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\CoreSettings;
 use FluxErp\Livewire\Settings\Countries;
+use FluxErp\Livewire\Settings\CountryRegions;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\EmailTemplates;
@@ -72,7 +71,6 @@ use FluxErp\Livewire\Settings\EmployeeDepartments;
 use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Holidays;
 use FluxErp\Livewire\Settings\Industries;
-use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\LeadLossReasons;
 use FluxErp\Livewire\Settings\LeadStates;
@@ -98,10 +96,12 @@ use FluxErp\Livewire\Settings\ReminderSettings;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\SubscriptionSettings;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\Targets;
 use FluxErp\Livewire\Settings\Tenants;
+use FluxErp\Livewire\Settings\TicketSettings;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Tokens;
 use FluxErp\Livewire\Settings\Units;
@@ -136,9 +136,6 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 Route::middleware('web')
     ->domain(config('flux.flux_url'))
     ->group(function (): void {
-        Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)
-            ->name('flux.install');
-
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
@@ -281,6 +278,7 @@ Route::middleware('web')
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/core-settings', CoreSettings::class)->name('core-settings');
                         Route::get('/countries', Countries::class)->name('countries');
+                        Route::get('/country-regions', CountryRegions::class)->name('country-regions');
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
                         Route::get('/email-templates', EmailTemplates::class)->name('email-templates');
@@ -311,13 +309,14 @@ Route::middleware('web')
                         Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
                         Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/targets', Targets::class)->name('targets');
                         Route::get('/tenants', Tenants::class)->name('tenants');
+                        Route::get('/ticket-settings', TicketSettings::class)->name('ticket-settings');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/tokens', Tokens::class)->name('tokens');
-                        Route::get('/translations', LanguageLines::class)->name('translations');
                         Route::get('/units', Units::class)->name('units');
                         Route::get('/users', Users::class)->name('users');
                         Route::get('/users/{user}', UserEdit::class)->name('users.edit');

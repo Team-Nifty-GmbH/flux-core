@@ -55,7 +55,7 @@ class UpdateTask extends FluxAction
 
         if (! is_null($tags)) {
             $task->syncTags(resolve_static(Tag::class, 'query')
-                ->whereIntegerInRaw('id', $tags)
+                ->whereKey($tags)
                 ->get()
             );
         }

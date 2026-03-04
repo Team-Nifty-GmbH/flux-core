@@ -10,6 +10,7 @@
             wire:model="vatRate.footer_text"
             scope="vatRate"
             :label="__('Footer Text')"
+            :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\VatRate::class)"
         />
         <div class="mt-2">
             <x-toggle

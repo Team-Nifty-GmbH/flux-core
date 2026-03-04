@@ -85,7 +85,7 @@ class QueueMonitor extends FluxModel
 
     public function addresses(): MorphToMany
     {
-        return $this->morphedByMany(Address::class, 'queue_monitorable', 'queue_monitorables');
+        return $this->morphedByMany(Address::class, 'queue_monitorable', 'queue_monitorable');
     }
 
     public function broadcastWith(): array
@@ -278,6 +278,6 @@ class QueueMonitor extends FluxModel
 
     public function users(): MorphToMany
     {
-        return $this->morphedByMany(User::class, 'queue_monitorable', 'queue_monitorables');
+        return $this->morphedByMany(User::class, 'queue_monitorable', 'queue_monitorable');
     }
 }

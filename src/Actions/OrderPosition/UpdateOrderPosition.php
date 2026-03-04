@@ -69,7 +69,23 @@ class UpdateOrderPosition extends FluxAction
                 $orderPosition->unit_gram_weight : $product->unit_gram_weight;
         }
 
-        PriceCalculation::make($orderPosition, $this->data)->calculate();
+        $priceRelevantFields = [
+            'amount',
+            'unit_price',
+            'discount_percentage',
+            'discounts',
+            'vat_rate_id',
+            'product_id',
+            'price_list_id',
+            'is_net',
+        ];
+
+        if ($orderPosition->isDirty($priceRelevantFields)
+            || array_intersect_key($this->data, array_flip($priceRelevantFields))
+        ) {
+            PriceCalculation::make($orderPosition, $this->data)->calculate();
+        }
+
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 

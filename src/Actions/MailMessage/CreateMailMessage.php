@@ -41,7 +41,7 @@ class CreateMailMessage extends FluxAction
         if ($tags) {
             $mailMessage->attachTags(
                 resolve_static(Tag::class, 'query')
-                    ->whereIntegerInRaw('id', $tags)
+                    ->whereKey($tags)
                     ->get(),
                 morph_alias(Communication::class)
             );
@@ -54,7 +54,9 @@ class CreateMailMessage extends FluxAction
             $attachment['model_id'] = $mailMessage->id;
             $attachment['model_type'] = app(Communication::class)->getMorphClass();
             $attachment['collection_name'] = 'attachments';
-            $attachment['media_type'] = 'string';
+            $attachment['media_type'] ??= is_file(data_get($attachment, 'media', ''))
+                ? null
+                : 'string';
 
             UploadMedia::make($attachment)
                 ->validate()
@@ -62,7 +64,7 @@ class CreateMailMessage extends FluxAction
         }
         config(['media-library.max_file_size' => $maxFileSize]);
 
-        if ($mailMessage->mailAccount->is_auto_assign) {
+        if ($mailMessage->mailAccount->has_auto_assign) {
             $connectedMailAddresses = resolve_static(MailAccount::class, 'query')
                 ->pluck('email')
                 ->toArray();

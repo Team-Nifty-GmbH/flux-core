@@ -13,6 +13,11 @@ class OvertimeBalanceBox extends ValueBox
     #[Locked]
     public ?int $employeeId = null;
 
+    public static function getCategory(): ?string
+    {
+        return 'Employees';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -35,7 +40,7 @@ class OvertimeBalanceBox extends ValueBox
             ->whereKey($this->employeeId)
             ->first();
 
-        $this->sum = Number::format($employee->getCurrentOvertimeBalance(), 0) . 'h';
+        $this->sum = Number::format($employee->getCurrentOvertimeBalance(), 2) . 'h';
         $this->previousSum = null;
         $this->growthRate = null;
 

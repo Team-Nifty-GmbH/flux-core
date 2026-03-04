@@ -12,11 +12,13 @@ use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\DeleteOrderTransaction;
+use FluxErp\Actions\Schedule\UpdateSchedule;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\SubscriptionCancellationTypeEnum;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Forms\DiscountForm;
@@ -29,7 +31,6 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Discount;
 use FluxErp\Models\Language;
-use FluxErp\Models\Media;
 use FluxErp\Models\Order as OrderModel;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
@@ -49,7 +50,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -161,14 +161,14 @@ class Order extends Component
         );
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
         $hadInvoiceNumber = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
             ->whereNotNull('invoice_number')
             ->exists();
 
-        $createDocuments = $this->createDocumentFromItems(
+        $this->createDocumentFromItems(
             resolve_static(OrderModel::class, 'query')
                 ->whereKey($this->order->id)
                 ->first()
@@ -202,8 +202,6 @@ class Order extends Component
                 ->cancel(__('Cancel'))
                 ->send();
         }
-
-        return $createDocuments;
     }
 
     #[Renderless]
@@ -248,6 +246,39 @@ class Order extends Component
         $this->js(<<<'JS'
             $modalOpen('edit-discount');
         JS);
+    }
+
+    #[Renderless]
+    public function refreshAddress(string $type): void
+    {
+        if (! in_array($type, ['invoice', 'delivery'])) {
+            return;
+        }
+
+        $addressKey = 'address_' . $type;
+
+        $address = resolve_static(Address::class, 'query')
+            ->with('country:id,name')
+            ->whereKey($this->order->{$addressKey . '_id'})
+            ->first();
+
+        if ($address) {
+            $addressArray = $address->toArray();
+
+            try {
+                $updatedOrder = UpdateOrder::make([
+                    'id' => $this->order->id,
+                    $addressKey => $addressArray,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+
+                $this->order->{$addressKey} = $updatedOrder->{$addressKey};
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
     }
 
     #[Renderless]
@@ -755,10 +786,15 @@ class Order extends Component
         $this->schedule->name = ProcessSubscriptionOrder::name();
         $this->schedule->parameters = [
             'orderId' => $this->order->id,
-            'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
-            'printLayouts' => $this->schedule->parameters['printLayouts'] ?? null,
-            'autoPrintAndSend' => $this->schedule->parameters['autoPrintAndSend'] ?? false,
-            'emailTemplateId' => $this->schedule->parameters['emailTemplateId'] ?? null,
+            'orderTypeId' => data_get($this->schedule->parameters, 'orderTypeId'),
+            'printLayouts' => data_get($this->schedule->parameters, 'printLayouts'),
+            'autoPrint' => data_get($this->schedule->parameters, 'autoPrint', false),
+            'autoSend' => data_get($this->schedule->parameters, 'autoSend', false),
+            'emailTemplateId' => data_get($this->schedule->parameters, 'emailTemplateId'),
+            'cancellationNoticeValue' => data_get($this->schedule->parameters, 'cancellationNoticeValue'),
+            'cancellationNoticeUnit' => data_get($this->schedule->parameters, 'cancellationNoticeUnit'),
+            'minimumDurationValue' => data_get($this->schedule->parameters, 'minimumDurationValue'),
+            'minimumDurationUnit' => data_get($this->schedule->parameters, 'minimumDurationUnit'),
         ];
 
         try {
@@ -768,6 +804,64 @@ class Order extends Component
 
             return false;
         }
+
+        return true;
+    }
+
+    public function cancelSubscription(
+        string $type,
+        bool $generateDocument = false,
+        bool $sendEmail = false
+    ): bool {
+        if (! $type = SubscriptionCancellationTypeEnum::tryFrom($type)) {
+            return false;
+        }
+
+        $order = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->first();
+        $schedule = $order?->schedules()->first();
+
+        if (! $schedule) {
+            return false;
+        }
+
+        try {
+            $data = ['id' => $schedule->getKey()];
+
+            if ($type === SubscriptionCancellationTypeEnum::Immediate) {
+                $data['ends_at'] = now();
+                $data['is_active'] = false;
+            } else {
+                $data['ends_at'] = $order->calculateSubscriptionEndDate();
+            }
+
+            $schedule = UpdateSchedule::make($data)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            if ($generateDocument) {
+                $this->selectedPrintLayouts = [
+                    'print' => [],
+                    'email' => $sendEmail ? ['cancellation-confirmation'] : [],
+                    'download' => [],
+                    'force' => ['cancellation-confirmation'],
+                ];
+
+                $this->createDocumentFromItems($order);
+            }
+        } catch (ValidationException|UnauthorizedException|Throwable $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->schedule->fill($schedule->toArray());
+
+        $this->toast()
+            ->success(__('Subscription cancelled successfully'))
+            ->send();
 
         return true;
     }
@@ -824,11 +918,13 @@ class Order extends Component
             ->first()
             ->toArray();
 
-        $this->order->payment_type_id = $this->order->address_invoice['contact']['payment_type_id'] ?? null;
-        $this->order->price_list_id = $this->order->address_invoice['contact']['price_list_id'] ?? null;
-        $this->order->language_id = $this->order->address_invoice['language_id'];
-        $this->order->contact_id = $this->order->address_invoice['contact_id'];
-        $this->order->tenant_id = $this->order->address_invoice['tenant_id'];
+        $this->order->payment_type_id = data_get($this->order->address_invoice, 'contact.payment_type_id');
+        $this->order->price_list_id = data_get($this->order->address_invoice, 'contact.price_list_id');
+        $this->order->language_id = data_get($this->order->address_invoice, 'language_id')
+            ?? $this->order->language_id
+            ?? resolve_static(Language::class, 'default')?->getKey();
+        $this->order->contact_id = data_get($this->order->address_invoice, 'contact_id');
+        $this->order->tenant_id = data_get($this->order->address_invoice, 'tenant_id');
     }
 
     public function updatedOrderIsConfirmed(): void
@@ -953,6 +1049,11 @@ class Order extends Component
         return $item->orderType?->email_template_id;
     }
 
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->language_id;
+    }
+
     protected function getPrintLayouts(): array
     {
         return resolve_static(OrderModel::class, 'query')
@@ -969,16 +1070,27 @@ class Order extends Component
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        // add invoice address email if an invoice is being sent
-        $address = in_array('invoice', $documents) && $item->contact->invoiceAddress
-            ? $item->contact->invoiceAddress
-            : $item->contact->mainAddress;
+        $printViews = $item->getPrintViews();
 
-        $to = $address->mail_addresses;
+        $invoiceDocs = array_filter(
+            $documents,
+            function (string $doc) use ($printViews) {
+                try {
+                    return resolve_static(data_get($printViews, $doc), 'isInvoice');
+                } catch (Throwable) {
+                    return false;
+                }
+            }
+        );
 
-        // add primary email address if more than just the invoice is added
-        if (array_diff($documents, ['invoice'])) {
-            $to[] = $item->contact->mainAddress->email_primary;
+        $address = $invoiceDocs
+            ? $item->resolveMailableInvoiceAddress()
+            : $item->contact?->mainAddress;
+
+        $to = $address?->mail_addresses ?? [];
+
+        if (array_diff($documents, $invoiceDocs)) {
+            $to[] = $item->contact?->mainAddress?->email_primary;
         }
 
         return array_values(array_unique(array_filter($to)));

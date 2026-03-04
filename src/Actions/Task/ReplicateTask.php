@@ -49,7 +49,7 @@ class ReplicateTask extends FluxAction
 
         $tags = ! is_null($tags) ? $tags : $originTask->tags()->pluck('id')->toArray();
         if ($tags) {
-            $task->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $task->attachTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
         }
 
         return $task->refresh();

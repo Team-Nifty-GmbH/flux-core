@@ -123,11 +123,11 @@
                     :label="__('Validate Certificate')"
                 />
                 <x-checkbox
-                    wire:model.boolean="mailAccount.is_o_auth"
+                    wire:model.boolean="mailAccount.has_o_auth"
                     :label="__('oAuth')"
                 />
                 <x-toggle
-                    wire:model.boolean="mailAccount.is_auto_assign"
+                    wire:model.boolean="mailAccount.has_auto_assign"
                     :label="__('Auto assign mails')"
                 />
             </div>

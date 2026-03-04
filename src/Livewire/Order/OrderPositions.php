@@ -13,6 +13,7 @@ use FluxErp\Livewire\Forms\OrderPositionForm;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,6 +31,8 @@ class OrderPositions extends OrderPositionList
     public ?string $cacheKey = 'order.order-positions';
 
     public ?string $discount = null;
+
+    public bool $discountIsPercentage = true;
 
     public array $enabledCols = [
         'slug_position',
@@ -125,6 +128,17 @@ class OrderPositions extends OrderPositionList
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
                 ]),
             DataTableButton::make()
+                ->text(__('Reset name and description'))
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->attributes([
+                    'wire:flux-confirm.type.warning' => __(
+                        'Reset name and description|Are you sure you want to reset name and description from the linked products?|Cancel|Confirm'
+                    ),
+                    'wire:click' => 'resetNameAndDescription(); showSelectedActions = false;',
+                ]),
+            DataTableButton::make()
                 ->text(__('Discount selected positions'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
@@ -197,6 +211,10 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function changedProductId(Product $product): void
     {
+        if ($this->order->language_id) {
+            $product->localize($this->order->language_id);
+        }
+
         $priceList = $this->orderPosition->price_list_id
             ? resolve_static(PriceList::class, 'query')
                 ->whereKey($this->orderPosition->price_list_id)
@@ -210,6 +228,7 @@ class OrderPositions extends OrderPositionList
                     'is_net',
                 ])
             : $this->order->getPriceList();
+        $this->orderPosition->vat_rate_id = $this->order->vat_rate_id;
         $this->orderPosition->fillFromProduct($product);
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
@@ -300,12 +319,26 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function discountSelectedPositions(): void
     {
-        $discount = bcdiv($this->discount, 100);
-        foreach ($this->getSelectedModelsQuery()->get(['id']) as $orderPositions) {
+        $positions = $this->getSelectedModelsQuery()->get(['id', 'total_base_net_price']);
+
+        foreach ($positions as $position) {
+            if ($this->discountIsPercentage) {
+                $discountPercentage = bcdiv($this->discount, 100);
+            } else {
+                // Flat: Calculate percentage per position
+                $discountPercentage = bccomp($position->total_base_net_price ?? 0, 0) === 1
+                    ? bcdiv($this->discount, $position->total_base_net_price)
+                    : '0';
+                // Max 100%
+                if (bccomp($discountPercentage, 1) === 1) {
+                    $discountPercentage = '1';
+                }
+            }
+
             try {
                 UpdateOrderPosition::make([
-                    'id' => $orderPositions->id,
-                    'discount_percentage' => $discount,
+                    'id' => $position->id,
+                    'discount_percentage' => $discountPercentage,
                 ])
                     ->checkPermission()
                     ->validate()
@@ -318,6 +351,7 @@ class OrderPositions extends OrderPositionList
         $this->loadData();
         $this->recalculateOrderTotals();
         $this->discount = null;
+        $this->discountIsPercentage = true;
     }
 
     #[Renderless]
@@ -371,14 +405,14 @@ class OrderPositions extends OrderPositionList
 
     public function getSortableOrderPositions(): array
     {
-        resolve_static(OrderPosition::class, 'addGlobalScope', [
-            'scope' => 'sorted',
-            'implementation' => function (Builder $query): void {
-                $query->ordered();
-            },
-        ]);
-
-        return resolve_static(OrderPosition::class, 'familyTree')
+        return resolve_static(OrderPosition::class, 'withTemporaryGlobalScopes', [
+            'scopes' => [
+                'sorted' => function (Builder $query): void {
+                    $query->ordered();
+                },
+                resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
+            ],
+        ])
             ->where('order_id', $this->order->id)
             ->whereNull('parent_id')
             ->get()
@@ -399,7 +433,6 @@ class OrderPositions extends OrderPositionList
 
     public function movePosition(OrderPosition $position, int $newPosition, ?int $parentId = null): void
     {
-        $newPosition = $newPosition + 1;
         if ($position->parent_id === $parentId && $position->sort_number === $newPosition) {
             return;
         }
@@ -422,7 +455,16 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function quickAdd(): bool
     {
-        $this->orderPosition->fillFromProduct();
+        $product = null;
+        if ($this->orderPosition->product_id && $this->order->language_id) {
+            $product = resolve_static(Product::class, 'query')
+                ->whereKey($this->orderPosition->product_id)
+                ->first()
+                ?->localize($this->order->language_id);
+        }
+
+        $this->orderPosition->vat_rate_id = $this->order->vat_rate_id;
+        $this->orderPosition->fillFromProduct($product);
 
         return $this->addOrderPosition();
     }
@@ -431,7 +473,7 @@ class OrderPositions extends OrderPositionList
     public function recalculateOrderPositions(): void
     {
         $products = resolve_static(Product::class, 'query')
-            ->whereIntegerInRaw('id', $this->getSelectedModelsQuery()->pluck('product_id'))
+            ->whereKey($this->getSelectedModelsQuery()->pluck('product_id'))
             ->get(['id', 'vat_rate_id'])
             ->keyBy('id');
 
@@ -459,6 +501,34 @@ class OrderPositions extends OrderPositionList
         $this->recalculateOrderTotals();
 
         $this->orderPosition->reset();
+    }
+
+    #[Renderless]
+    public function resetNameAndDescription(): void
+    {
+        $selectedPositions = $this->getSelectedModelsQuery()
+            ->whereHas('product')
+            ->where('is_bundle_position', false)
+            ->get(['id', 'product_id']);
+
+        $allPositionIds = $selectedPositions->pluck('id')->toArray();
+
+        foreach ($selectedPositions as $position) {
+            $allPositionIds = array_merge($allPositionIds, $position->descendantKeys());
+        }
+
+        $positions = resolve_static(OrderPosition::class, 'query')
+            ->whereKey($allPositionIds)
+            ->whereHas('product')
+            ->with('product:id,name,description')
+            ->get(['id', 'product_id']);
+
+        foreach ($positions as $position) {
+            $this->updatePositionNameAndDescription($position);
+        }
+
+        $this->loadData();
+        $this->reset('selected');
     }
 
     #[Renderless]
@@ -516,6 +586,28 @@ class OrderPositions extends OrderPositionList
         $this->orderPositionsView = $view;
 
         $this->cacheState();
+    }
+
+    protected function updatePositionNameAndDescription(OrderPosition $position): void
+    {
+        $product = $position->product;
+
+        if ($this->order->language_id) {
+            $product->localize($this->order->language_id);
+        }
+
+        try {
+            UpdateOrderPosition::make([
+                'id' => $position->getKey(),
+                'name' => $product->name,
+                'description' => $product->description,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     protected function compileStoredLayout(): array

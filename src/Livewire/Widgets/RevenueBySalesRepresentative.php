@@ -25,6 +25,11 @@ class RevenueBySalesRepresentative extends CircleChart implements HasWidgetOptio
 
     public bool $showTotals = false;
 
+    public static function getCategory(): ?string
+    {
+        return 'Revenue';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

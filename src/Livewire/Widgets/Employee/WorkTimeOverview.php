@@ -33,6 +33,11 @@ class WorkTimeOverview extends LineChart
         'curve' => 'smooth',
     ];
 
+    public static function getCategory(): ?string
+    {
+        return 'Employees';
+    }
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;

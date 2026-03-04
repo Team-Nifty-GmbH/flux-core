@@ -63,7 +63,8 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
                 static::resolveRelationUsing(
                     $relationName,
                     function (Category $category) use ($modelInfo) {
-                        return $category->morphedByMany($modelInfo->class, 'categorizable');
+                        return $category->morphedByMany($modelInfo->class, 'categorizable', 'categorizable')
+                            ->using(Pivots\Categorizable::class);
                     }
                 );
             });
@@ -119,7 +120,8 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
     public function model(): MorphToMany
     {
         return $this->model_type
-            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable')
+            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable', 'categorizable')
+                ->using(Pivots\Categorizable::class)
             : new MorphToMany(
                 static::query(),
                 $this,

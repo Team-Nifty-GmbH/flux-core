@@ -103,35 +103,53 @@ abstract class Comments extends Component
         /** @var Model $record */
         $record = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
-            ->firstOrFail();
+            ->first();
+
+        if (! $record) {
+            return [];
+        }
 
         resolve_static(Comment::class, 'addGlobalScopes', [
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
-                FamilyTreeScope::class,
+                resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
             ],
         ]);
 
-        $comments = $record
-            ->comments()
-            ->whereNull('parent_id')
-            ->when(
-                ! Auth::user() instanceof User,
-                function ($query): void {
-                    $query->where('is_internal', false);
-                }
-            )
-            ->paginate(page: $this->commentPage);
+        try {
+            $comments = $record
+                ->comments()
+                ->whereNull('parent_id')
+                ->when(
+                    ! Auth::user() instanceof User,
+                    function ($query): void {
+                        $query->where('is_internal', false);
+                    }
+                )
+                ->paginate(page: $this->commentPage);
 
-        $data = $comments->getCollection()->map(function ($comment) {
-            $comment->is_current_user = $comment->getRawOriginal('created_by')
-                === auth()->user()?->getMorphClass() . ':' . auth()->id();
+            $data = $comments->getCollection()->map(function ($comment) {
+                $comment->is_current_user = $comment->getRawOriginal('created_by')
+                    === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
-            return $comment;
-        });
+                return $comment;
+            });
 
-        return $comments->setCollection($data)->toArray();
+            return $comments->setCollection($data)->toArray();
+        } finally {
+            resolve_static(
+                Comment::class,
+                'removeGlobalScopes',
+                [
+                    'scopes' => [
+                        'media',
+                        'ordered',
+                        resolve_static(FamilyTreeScope::class, 'class'),
+                    ],
+                ]
+            );
+        }
     }
 
     #[Renderless]
@@ -149,14 +167,12 @@ abstract class Comments extends Component
             return [];
         }
 
-        resolve_static(Comment::class, 'addGlobalScopes', [
+        return resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
             ],
-        ]);
-
-        return resolve_static(Comment::class, 'query')
+        ])
             ->where('model_type', morph_alias($this->modelType))
             ->where('model_id', $this->modelId)
             ->when(

@@ -40,7 +40,7 @@ class Printable
         } elseif (str_starts_with($name, 'render')) {
             $viewName = strtolower(str_replace('render', '', $name));
 
-            return $this->renderView($this->getViewClass($viewName));
+            return $this->renderView($this->getViewClass($viewName), ...$arguments);
         }
 
         throw new InvalidArgumentException('Method ' . $name . ' doesnt exist');
@@ -84,15 +84,15 @@ class Printable
         return $this;
     }
 
-    public function printView(string $view, ...$arguments): PrintableView
+    public function printView(string $view, mixed ...$arguments): PrintableView
     {
         /** @var PrintableView $view */
-        return $view::make($this->dataSet)->preview($this->preview)->print(...$arguments);
+        return $view::make($this->dataSet, ...$arguments)->preview($this->preview)->print();
     }
 
-    public function renderView(string $view): View|Factory
+    public function renderView(string $view, mixed ...$arguments): View|Factory
     {
         /** @var PrintableView $view */
-        return $view::make($this->dataSet)->renderAndHydrate();
+        return $view::make($this->dataSet, ...$arguments)->renderAndHydrate();
     }
 }

@@ -7,17 +7,16 @@ use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\DataTables\OrderList;
-use FluxErp\Models\Media;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder as PaymentReminderModel;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Traits\Livewire\CreatesDocuments;
-use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
-use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -53,23 +52,34 @@ class PaymentReminder extends OrderList
         ];
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    public function createDocuments(): void
     {
-        $orders = $this->getSelectedModels();
-
         try {
             resolve_static(CreatePaymentReminder::class, 'canPerformAction', [true]);
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return null;
+            return;
+        }
+
+        $baseQuery = $this->getSelectedModelsQuery();
+
+        $ordersWithEmail = (clone $baseQuery)
+            ->whereHasMailableInvoiceAddress()
+            ->get();
+
+        $skippedCount = (clone $baseQuery)->count() - $ordersWithEmail->count();
+        if ($skippedCount > 0) {
+            $this->notification()->warning(
+                __(':count order(s) skipped due to missing email address.', ['count' => $skippedCount])
+            );
         }
 
         $documents = collect();
-        foreach ($orders as $order) {
+        foreach ($ordersWithEmail as $order) {
             try {
                 $paymentReminder = CreatePaymentReminder::make([
-                    'order_id' => $order->id,
+                    'order_id' => $order->getKey(),
                 ])
                     ->validate()
                     ->execute();
@@ -80,12 +90,10 @@ class PaymentReminder extends OrderList
             }
         }
 
-        $response = $this->createDocumentFromItems($documents, true);
+        $this->createDocumentFromItems($documents);
 
         $this->loadData();
         $this->reset('selected');
-
-        return $response;
     }
 
     public function markAsPaid(): void
@@ -171,15 +179,37 @@ class PaymentReminder extends OrderList
         ];
     }
 
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
+    {
+        return $item->getPaymentReminderText()?->email_template_id;
+    }
+
+    protected function getMailGroupKey(OffersPrinting $item): string
+    {
+        return $this->getPreferredLanguageId($item) . '-' . $item->reminder_level;
+    }
+
+    protected function getMailGroupLabel(OffersPrinting $item): ?string
+    {
+        $languageName = resolve_static(Language::class, 'query')
+            ->whereKey($this->getPreferredLanguageId($item))
+            ->value('name');
+
+        return $languageName . ' - ' . __('Reminder Level') . ' ' . $item->reminder_level;
+    }
+
+    protected function getPreferredLanguageId(OffersPrinting $item): ?int
+    {
+        return $item->order->language_id;
+    }
+
     protected function getPrintLayouts(): array
     {
-        return [
-            'payment-reminder' => PaymentReminderView::class,
-        ];
+        return app(PaymentReminderModel::class)->resolvePrintViews();
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        return [$item->order->contact->invoiceAddress->email_primary ?? $item->order->contact->mainAddress->email_primary];
+        return array_filter(Arr::wrap($item->order->resolveMailableInvoiceAddress()?->email_primary));
     }
 }

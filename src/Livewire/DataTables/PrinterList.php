@@ -13,6 +13,7 @@ class PrinterList extends BaseDataTable
         'location',
         'make_and_model',
         'is_active',
+        'is_visible',
     ];
 
     protected string $model = Printer::class;

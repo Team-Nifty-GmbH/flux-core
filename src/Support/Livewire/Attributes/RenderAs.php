@@ -42,6 +42,8 @@ class RenderAs extends LivewireAttribute
 
     public function __construct(
         public string $type,
-        public ?array $options = null
+        public ?array $options = null,
+        public ?string $label = null,
+        public ?string $group = null,
     ) {}
 }

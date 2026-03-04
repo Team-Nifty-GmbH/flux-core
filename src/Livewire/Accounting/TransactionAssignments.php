@@ -94,19 +94,45 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function calcExchangeRate(): void
+    {
+        $this->orderTransactionForm->calcExchangeRate();
+    }
+
+    #[Renderless]
+    public function calcOrderCurrencyAmount(): void
+    {
+        $this->orderTransactionForm->calcOrderCurrencyAmount();
+    }
+
+    #[Renderless]
     public function assignOrders(array $orders): void
     {
+        $transactionCurrencyId = $this->transactionForm->currency_id;
+
         resolve_static(Order::class, 'query')
             ->whereKey($orders)
-            ->get(['id', 'balance'])
-            ->each(function (Order $order): void {
+            ->get(['id', 'currency_id', 'balance'])
+            ->each(function (Order $order) use ($transactionCurrencyId): void {
+                $data = [
+                    'transaction_id' => $this->transactionForm->id,
+                    'order_id' => $order->getKey(),
+                ];
+
+                if ($order->currency_id !== $transactionCurrencyId) {
+                    $data['order_currency_amount'] = $order->balance;
+                    $data['amount'] = $this->transactionForm->amount;
+                    $data['exchange_rate'] = bccomp($this->transactionForm->amount ?? 0, 0, 9) !== 0
+                        ? bcdiv($order->balance, $this->transactionForm->amount, 9)
+                        : null;
+                    $data['is_accepted'] = false;
+                } else {
+                    $data['amount'] = $order->balance;
+                    $data['is_accepted'] = true;
+                }
+
                 try {
-                    CreateOrderTransaction::make([
-                        'transaction_id' => $this->transactionForm->id,
-                        'order_id' => $order->getKey(),
-                        'amount' => $order->balance,
-                        'is_accepted' => true,
-                    ])
+                    CreateOrderTransaction::make($data)
                         ->validate()
                         ->execute();
                 } catch (ValidationException|UnauthorizedException $e) {
@@ -209,16 +235,19 @@ class TransactionAssignments extends Component
                 'orders' => function (BelongsToMany $query): void {
                     $query->select([
                         'id',
+                        'currency_id',
                         'contact_id',
                         'address_invoice_id',
                         'invoice_number',
                         'invoice_date',
                         'total_gross_price',
                     ])
-                        ->withPivot('pivot_id', 'is_accepted', 'amount');
+                        ->withPivot(['pivot_id', 'amount', 'exchange_rate', 'order_currency_amount', 'is_accepted']);
                 },
                 'orders.addressInvoice:id,name',
+                'orders.currency:id,iso,symbol',
                 'bankConnection:id,name,bank_name,iban',
+                'currency:id,iso,symbol',
                 'orders.contact:id',
             ])
             ->paginate($this->perPage)

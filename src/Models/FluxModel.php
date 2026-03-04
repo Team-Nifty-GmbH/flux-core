@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Model\BroadcastsEvents;
 use FluxErp\Traits\Model\HasModelPermission;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class FluxModel extends Model
@@ -16,4 +17,24 @@ abstract class FluxModel extends Model
         'created_at',
         'updated_at',
     ];
+
+    public static function removeGlobalScopes(array $scopes): void
+    {
+        foreach ($scopes as $scope) {
+            if (isset(static::$globalScopes[static::class][$scope])) {
+                unset(static::$globalScopes[static::class][$scope]);
+            }
+        }
+    }
+
+    public static function withTemporaryGlobalScopes(array $scopes): Builder
+    {
+        static::addGlobalScopes($scopes);
+
+        $scopeKeys = array_keys($scopes);
+
+        return static::query()->afterQuery(function () use ($scopeKeys): void {
+            static::removeGlobalScopes($scopeKeys);
+        });
+    }
 }

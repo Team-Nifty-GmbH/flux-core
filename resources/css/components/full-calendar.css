@@ -23,11 +23,11 @@
 }
 
 .fc-button {
-    @apply !capitalize;
+    @apply capitalize!;
 }
 
 .fc-scrollgrid {
-    @apply !border-b-0 !border-l-0 !border-r-0 !border-gray-200;
+    @apply border-b-0! border-l-0! border-r-0! border-gray-200!;
 }
 
 .fc-col-header-cell .fc-scrollgrid-sync-inner {
@@ -61,5 +61,5 @@
 }
 
 .fc-toolbar-title {
-    @apply !text-lg !font-semibold;
+    @apply text-lg! font-semibold!;
 }

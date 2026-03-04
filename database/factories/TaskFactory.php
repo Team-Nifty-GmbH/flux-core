@@ -4,6 +4,7 @@ namespace FluxErp\Database\Factories;
 
 use DateTime;
 use FluxErp\Models\Task;
+use FluxErp\States\Task\TaskState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -34,6 +35,7 @@ class TaskFactory extends Factory
             'priority' => rand(0, 5),
             'time_budget' => rand(0, 1000) . ':' . rand(0, 59),
             'budget' => fake()->randomFloat(),
+            'state' => fake()->randomElement(TaskState::getStateMapping()->keys()->toArray()),
         ];
     }
 }

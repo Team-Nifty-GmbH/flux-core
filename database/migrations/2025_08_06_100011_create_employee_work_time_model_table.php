@@ -12,10 +12,10 @@ return new class() extends Migration
             $table->id('pivot_id');
 
             $table->foreignId('employee_id')
-                ->constrained()
+                ->constrained('employees')
                 ->cascadeOnDelete();
             $table->foreignId('work_time_model_id')
-                ->constrained()
+                ->constrained('work_time_models')
                 ->cascadeOnDelete();
 
             $table->date('valid_from');

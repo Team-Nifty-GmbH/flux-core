@@ -14,11 +14,11 @@ class Communicatable extends MorphPivot
 
     public $timestamps = false;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $table = 'communicatable';
+
+    protected $primaryKey = 'pivot_id';
+
+    protected $guarded = ['pivot_id'];
 
     public function communicatable(): MorphTo
     {

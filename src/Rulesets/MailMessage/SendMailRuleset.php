@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\MailMessage;
 
 use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\Language;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
@@ -37,6 +38,11 @@ class SendMailRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => EmailTemplate::class]),
             ],
+            'language_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Language::class]),
+            ],
             'to' => 'required|array',
             'to.*' => 'email|distinct',
             'cc' => 'nullable|array',
@@ -44,7 +50,7 @@ class SendMailRuleset extends FluxRuleset
             'bcc' => 'nullable|array',
             'bcc.*' => 'email|distinct',
             'subject' => 'nullable|string|max:255',
-            'text_body' => 'nullable|string',
+            'text_body' => 'exclude_if:text_body,null|nullable|string',
             'html_body' => 'nullable|string',
             'attachments' => 'nullable|array',
             'blade_parameters' => 'nullable',

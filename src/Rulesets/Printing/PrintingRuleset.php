@@ -27,6 +27,7 @@ class PrintingRuleset extends FluxRuleset
             'view' => 'required|string',
             'html' => 'exclude_if:preview,true|boolean',
             'preview' => 'boolean',
+            'params' => 'array',
         ];
     }
 }

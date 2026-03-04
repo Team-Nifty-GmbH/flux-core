@@ -11,13 +11,7 @@ class OrderTransaction extends FluxPivot
 {
     use HasPackageFactory;
 
-    public $incrementing = true;
-
-    protected $guarded = [
-        'pivot_id',
-    ];
-
-    protected $primaryKey = 'pivot_id';
+    public $timestamps = true;
 
     protected $table = 'order_transaction';
 

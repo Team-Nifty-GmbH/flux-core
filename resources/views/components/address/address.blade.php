@@ -274,7 +274,7 @@
                                 color="indigo"
                                 flat
                                 squared
-                                x-on:click.prevent="window.open('//' + $wire.address.url)"
+                                x-on:click.prevent="window.open(/^https?:\/\//.test($wire.address.url) ? $wire.address.url : 'https://' + $wire.address.url)"
                             />
                         </div>
                     </x-slot>
@@ -445,11 +445,7 @@
                         x-bind:readonly="!edit"
                         x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
                         x-model="contactOption.type"
-                        :options="[
-                            ['label' => __('Email'), 'value' => 'email'],
-                            ['label' => __('Phone'), 'value' => 'phone'],
-                            ['label' => __('Website'), 'value' => 'website'],
-                        ]"
+                        :options="resolve_static(\FluxErp\Enums\ContactOptionTypeEnum::class, 'valuesLocalized')"
                         required
                     />
                 </div>

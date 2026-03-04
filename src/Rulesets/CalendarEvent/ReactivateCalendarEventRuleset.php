@@ -31,8 +31,6 @@ class ReactivateCalendarEventRuleset extends FluxRuleset
             'repeat' => 'exclude',
             'repeat_end' => 'exclude',
             'recurrences' => 'exclude',
-            'invited_addresses' => 'exclude',
-            'invited' => 'exclude',
         ];
     }
 }

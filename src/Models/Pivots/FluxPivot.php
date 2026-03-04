@@ -9,4 +9,12 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 abstract class FluxPivot extends Pivot
 {
     use BroadcastsEvents, ResolvesRelationsThroughContainer;
+
+    public $incrementing = true;
+
+    public $timestamps = false;
+
+    protected $primaryKey = 'pivot_id';
+
+    protected $guarded = ['pivot_id'];
 }

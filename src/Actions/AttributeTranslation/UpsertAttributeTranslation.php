@@ -31,6 +31,7 @@ class UpsertAttributeTranslation extends FluxAction
                     ->where('model_id', $this->getData('model_id'))
                     ->where('attribute', $this->getData('attribute'))
             )
+            ->latest('id')
             ->firstOrNew();
         $attributeTranslation->fill($this->getData());
         $attributeTranslation->save();

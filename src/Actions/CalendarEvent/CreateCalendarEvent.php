@@ -37,10 +37,6 @@ class CreateCalendarEvent extends FluxAction
         $calendarEvent = app(CalendarEvent::class, ['attributes' => $this->data]);
         $calendarEvent->save();
 
-        SyncCalendarEventInvites::make(array_merge($this->data, ['id' => $calendarEvent->id]))
-            ->validate()
-            ->execute();
-
         return $calendarEvent->fresh();
     }
 

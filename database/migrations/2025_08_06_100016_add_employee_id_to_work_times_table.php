@@ -11,8 +11,8 @@ return new class() extends Migration
         Schema::table('work_times', function (Blueprint $table): void {
             $table->foreignId('employee_id')
                 ->nullable()
-                ->after('user_id')
-                ->constrained()
+                ->after('contact_id')
+                ->constrained('employees')
                 ->nullOnDelete();
         });
     }

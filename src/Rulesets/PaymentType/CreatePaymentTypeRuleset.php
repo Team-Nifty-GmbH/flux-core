@@ -37,6 +37,7 @@ class CreatePaymentTypeRuleset extends FluxRuleset
             'payment_reminder_text' => 'string|nullable',
             'payment_reminder_email_text' => 'string|nullable',
             'is_active' => 'boolean',
+            'is_cash' => 'boolean',
             'is_direct_debit' => 'boolean',
             'is_default' => 'boolean',
             'is_purchase' => 'boolean',

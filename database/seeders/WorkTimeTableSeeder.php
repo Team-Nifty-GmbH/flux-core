@@ -28,14 +28,14 @@ class WorkTimeTableSeeder extends Seeder
                     $startedAt = fake()->dateTimeBetween($dailyWorkTime->started_at, $dailyWorkTime->ended_at);
 
                     return [
-                        'user_id' => $user->id,
                         'contact_id' => fn () => fake()->boolean(70)
                             ? $contacts->random()->id
                             : null,
+                        'parent_id' => $dailyWorkTime->id,
+                        'user_id' => $user->id,
+                        'work_time_type_id' => $workTimeTypes->random()->id,
                         'started_at' => $startedAt,
                         'ended_at' => fake()->dateTimeBetween($startedAt, $dailyWorkTime->ended_at),
-                        'parent_id' => $dailyWorkTime->id,
-                        'work_time_type_id' => $workTimeTypes->random()->id,
                         'is_daily_work_time' => false,
                     ];
                 });

@@ -12,10 +12,10 @@ return new class() extends Migration
             $table->id('pivot_id');
 
             $table->foreignId('holiday_id')
-                ->constrained()
+                ->constrained('holidays')
                 ->cascadeOnDelete();
             $table->foreignId('location_id')
-                ->constrained()
+                ->constrained('locations')
                 ->cascadeOnDelete();
 
             $table->unique(['holiday_id', 'location_id']);

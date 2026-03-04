@@ -12,6 +12,8 @@ enum OrderTypeEnum: string
 
     case Order = 'order';
 
+    case Pos = 'pos';
+
     case Purchase = 'purchase';
 
     case PurchaseRefund = 'purchase-refund';

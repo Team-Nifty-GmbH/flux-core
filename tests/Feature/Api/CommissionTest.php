@@ -64,6 +64,7 @@ beforeEach(function (): void {
     $this->orderPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'tenant_id' => $dbTenant->id,
+        'is_free_text' => false,
     ]);
 
     CommissionRate::factory()->create([
@@ -167,6 +168,64 @@ test('create commission', function (): void {
     expect($dbCommission->total_net_price)->toEqual($commission['total_net_price']);
     expect($this->user->is($dbCommission->getCreatedBy()))->toBeTrue();
     expect($this->user->is($dbCommission->getUpdatedBy()))->toBeTrue();
+});
+
+test('create commission applies order discount to total net price', function (): void {
+    // OrderPosition has total_net_price of 1000 (after position discounts)
+    $this->orderPosition->update(['total_net_price' => 1000]);
+
+    // Set order-level discount (Kopfrabatt) of 10%
+    // total_base_discounted_net_price = price AFTER position discounts, BEFORE order discount
+    // total_net_price = final price AFTER all discounts
+    $this->order->update([
+        'total_base_discounted_net_price' => 1000,
+        'total_net_price' => 900, // 1000 - 10% = 900
+    ]);
+
+    $commissionRate = CommissionRate::factory()->create([
+        'user_id' => $this->agent->id,
+        'commission_rate' => 0.05, // 5%
+    ]);
+
+    $result = FluxErp\Actions\Commission\CreateCommission::make([
+        'user_id' => $this->agent->id,
+        'order_position_id' => $this->orderPosition->id,
+        'commission_rate_id' => $commissionRate->id,
+    ])
+        ->validate()
+        ->execute();
+
+    // Commission should be calculated on discounted price: 1000 * (1 - 0.10) * 0.05 = 900 * 0.05 = 45
+    expect(bccomp($result->total_net_price, '900', 2))->toBe(0);
+    expect(bccomp($result->commission, '45', 2))->toBe(0);
+});
+
+test('create commission without order discount uses full total net price', function (): void {
+    // OrderPosition has total_net_price of 1000
+    $this->orderPosition->update(['total_net_price' => 1000]);
+
+    // No order-level discount - both values are the same
+    $this->order->update([
+        'total_base_discounted_net_price' => 1000,
+        'total_net_price' => 1000, // No discount applied
+    ]);
+
+    $commissionRate = CommissionRate::factory()->create([
+        'user_id' => $this->agent->id,
+        'commission_rate' => 0.05, // 5%
+    ]);
+
+    $result = FluxErp\Actions\Commission\CreateCommission::make([
+        'user_id' => $this->agent->id,
+        'order_position_id' => $this->orderPosition->id,
+        'commission_rate_id' => $commissionRate->id,
+    ])
+        ->validate()
+        ->execute();
+
+    // Commission should be calculated on full price: 1000 * 0.05 = 50
+    expect(bccomp($result->total_net_price, '1000', 2))->toBe(0);
+    expect(bccomp($result->commission, '50', 2))->toBe(0);
 });
 
 test('create commission validation fails', function (): void {
@@ -302,4 +361,58 @@ test('update commission maximum', function (): void {
     expect($dbCommission)->not->toBeEmpty();
     expect($dbCommission->commission)->toEqual($commission['commission']);
     expect($this->user->is($dbCommission->getUpdatedBy()))->toBeTrue();
+});
+
+test('create commission credit notes with nested id array structure', function (): void {
+    // Create a default PaymentType and attach to tenant
+    $paymentType = PaymentType::factory()->create(['is_default' => true]);
+    $paymentType->tenants()->attach($this->order->tenant_id);
+
+    // Create a contact with address for the agent
+    $agentContact = Contact::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'payment_type_id' => $paymentType->id,
+    ]);
+    $agentAddress = Address::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'contact_id' => $agentContact->id,
+        'is_main_address' => true,
+    ]);
+    $agentContact->update(['invoice_address_id' => $agentAddress->id]);
+    $this->agent->update(['contact_id' => $agentContact->id]);
+
+    // Create a refund order type
+    OrderType::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'order_type_enum' => OrderTypeEnum::Refund,
+    ]);
+
+    // Ensure order has invoice data (required for Commission::getLabel())
+    $this->order->update([
+        'invoice_date' => now(),
+        'invoice_number' => 'INV-TEST-001',
+    ]);
+
+    // Ensure commissions have order_id set (required for withWhereHas('order', ...) in the action)
+    foreach ($this->commissions as $commission) {
+        $commission->update(['order_id' => $this->order->id]);
+    }
+
+    // Get commission IDs in the format that CommissionList produces: [['id' => 1], ['id' => 2]]
+    $commissionIds = $this->commissions->map(fn ($commission) => ['id' => $commission->id])->toArray();
+
+    $result = FluxErp\Actions\Commission\CreateCommissionCreditNotes::make([
+        'commissions' => $commissionIds,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($result)->toBeInstanceOf(FluxErp\Support\Collection\OrderCollection::class);
+    expect($result)->toHaveCount(1);
+
+    // Verify commissions are linked to credit note order positions
+    foreach ($this->commissions as $commission) {
+        $commission->refresh();
+        expect($commission->credit_note_order_position_id)->not->toBeNull();
+    }
 });

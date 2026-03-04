@@ -49,9 +49,17 @@ class ExistsWithForeign implements DataAwareRule, ValidationRule
 
         if (! ($data[$this->foreignAttribute] ?? false) && ($data['id'] ?? false)) {
             // If the foreignAttribute is not present in $data we have to gather it from the database
+            // Use root data's 'id' for baseTable lookup, not the nested data's 'id'
+            $baseId = data_get($this->data, 'id');
+            if (! $baseId) {
+                $fail('validation.exists')->translate();
+
+                return;
+            }
+
             $record = DB::table($this->baseTable)
                 ->select($this->foreignAttribute)
-                ->where('id', $data['id'])
+                ->where('id', $baseId)
                 ->first();
             if (! $record) {
                 $fail('validation.exists')->translate();

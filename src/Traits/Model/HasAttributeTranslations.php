@@ -51,10 +51,14 @@ trait HasAttributeTranslations
             foreach ($model->translatableAttributes() as $translatableAttribute) {
                 $value = $model->getAttribute($translatableAttribute);
 
+                if (is_null($value)) {
+                    continue;
+                }
+
                 $model->translations[] = [
                     'language_id' => $languageId,
                     'attribute' => $translatableAttribute,
-                    'value' => $value,
+                    'value' => (string) $value,
                 ];
 
                 if ($model->exists) {
@@ -86,6 +90,7 @@ trait HasAttributeTranslations
                     if ($attributeTranslationId = $model->attributeTranslations()
                         ->where('language_id', data_get($translation, 'language_id'))
                         ->where('attribute', data_get($translation, 'attribute'))
+                        ->latest('id')
                         ->value('id')
                     ) {
                         DeleteAttributeTranslation::make([

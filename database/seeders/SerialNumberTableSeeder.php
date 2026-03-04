@@ -2,9 +2,6 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\OrderPosition;
-use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use Illuminate\Database\Seeder;
 
@@ -12,22 +9,6 @@ class SerialNumberTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $models = [
-            Address::class,
-        ];
-
-        foreach ($models as $model) {
-            $records = $model::all(['id']);
-
-            foreach ($records as $record) {
-                for ($i = 0; $i < rand(0, 10); $i++) {
-                    SerialNumber::factory()->create([
-                        'address_id' => $record->id,
-                        'product_id' => rand(0, 1) ? Product::query()->inRandomOrder()->first()->id : null,
-                        'order_position_id' => rand(0, 1) ? OrderPosition::query()->inRandomOrder()->first()->id : null,
-                    ]);
-                }
-            }
-        }
+        SerialNumber::factory()->count(10)->create();
     }
 }

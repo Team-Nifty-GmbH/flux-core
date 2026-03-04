@@ -5,7 +5,10 @@ namespace FluxErp\Providers;
 use FluxErp\Facades\Editor;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentType;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Models\Ticket;
+use FluxErp\Models\VatRate;
 use FluxErp\Support\Editor\EditorManager;
 use FluxErp\View\Components\EditorButtons\AlignCenter;
 use FluxErp\View\Components\EditorButtons\AlignLeft;
@@ -67,9 +70,9 @@ class EditorServiceProvider extends ServiceProvider
 
         Editor::mergeVariables(
             [
-                'Salutation' => '$paymentReminder->order->addressInvoice->salutation()',
-                'Total Gross Price' => 'format_money($paymentReminder->order->total_gross_price, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
-                'Balance' => 'format_money($paymentReminder->order->balance, $paymentReminder->order->currency, $paymentReminder->order->addressInvoice->language)',
+                'Salutation' => '$paymentReminder->order->resolveMailableInvoiceAddress()?->salutation()',
+                'Total Gross Price' => 'format_money($paymentReminder->order->total_gross_price, $paymentReminder->order->currency, $paymentReminder->order->resolveMailableInvoiceAddress()?->language)',
+                'Balance' => 'format_money($paymentReminder->order->balance, $paymentReminder->order->currency, $paymentReminder->order->resolveMailableInvoiceAddress()?->language)',
                 'Payment Reminder Dates' => '$paymentReminder->order?->paymentReminders()->pluck(\'created_at\')->map(fn ($date) => $date->isoFormat(\'L\'))->join(\', \')',
                 'Last Payment Reminder Date' => '$paymentReminder->order?->paymentReminders()->latest()->whereNot(\'id\', $paymentReminder->id)->first()?->created_at?->isoFormat(\'L\')',
                 'Order Number' => '$paymentReminder->order?->order_number',
@@ -83,16 +86,69 @@ class EditorServiceProvider extends ServiceProvider
 
         Editor::mergeVariables(
             [
-                'Salutation' => '$order->addressInvoice->salutation()',
-                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->addressInvoice->language)',
-                'Balance' => 'format_money($order->balance, $order->currency, $order->addressInvoice->language)',
+                'Salutation' => '$order->resolveMailableInvoiceAddress()?->salutation()',
+                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
+                'Balance' => 'format_money($order->balance, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
                 'Order Number' => '$order->order_number',
                 'Order Date' => '$order->order_date?->isoFormat(\'L\')',
                 'Invoice Number' => '$order->invoice_number',
                 'Invoice Date' => '$order->invoice_date?->isoFormat(\'L\')',
                 'Tenant Name' => '$order->tenant?->name',
+                'Agent Name' => '$order->agent?->name',
+                'Responsible User Name' => '$order->responsibleUser?->name',
+                'Contact Vat Id' => '$order->contact->vat_id',
             ],
             Order::class
+        );
+
+        Editor::mergeVariables(
+            [
+                'Salutation' => '$order->resolveMailableInvoiceAddress()?->salutation()',
+                'Total Gross Price' => 'format_money($order->total_gross_price, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
+                'Balance' => 'format_money($order->balance, $order->currency, $order->resolveMailableInvoiceAddress()?->language)',
+                'Order Number' => '$order->order_number',
+                'Order Date' => '$order->order_date?->isoFormat(\'L\')',
+                'Invoice Number' => '$order->invoice_number',
+                'Invoice Date' => '$order->invoice_date?->isoFormat(\'L\')',
+                'Tenant Name' => '$order->tenant?->name',
+                'Agent Name' => '$order->agent?->name',
+                'Responsible User Name' => '$order->responsibleUser?->name',
+                'Contact Vat Id' => '$order->contact->vat_id',
+            ],
+            VatRate::class
+        );
+
+        Editor::mergeVariables(
+            [
+                'Subscription Start Date' => '$order->order_date?->isoFormat(\'L\')',
+                'Subscription End Date' => '$order->calculateSubscriptionEndDate()->isoFormat(\'L\')',
+                'Subscription Cycle' => '__(\Illuminate\Support\Str::headline(data_get($order->schedules()->first()?->cron, \'methods.basic\') ?? \'\'))',
+            ],
+            Order::class,
+            'subscription'
+        );
+
+        Editor::mergeVariables(
+            [
+                'Salutation' => '$model->addressInvoice->salutation()',
+                'Total Gross Price' => 'format_money($model->total_gross_price, $model->currency, $model->addressInvoice->language)',
+                'Balance' => 'format_money($model->balance, $model->currency, $model->addressInvoice->language)',
+                'Order Number' => '$model->order_number',
+                'Order Date' => '$model->order_date?->isoFormat(\'L\')',
+                'Invoice Number' => '$model->invoice_number',
+                'Invoice Date' => '$model->invoice_date?->isoFormat(\'L\')',
+                'Tenant Name' => '$model->tenant?->name',
+                'Tenant Creditor Identifier' => '$model->tenant?->creditor_identifier',
+                'Customer IBAN' => 'Str::iban($model->contactBankConnection?->iban)',
+                'Customer Account Holder' => '$model->contactBankConnection?->account_holder',
+                'Customer Bank Name' => '$model->contactBankConnection?->bank_name',
+                'Customer BIC' => '$model->contactBankConnection?->bic',
+                'Payment Target Days' => '$model->payment_target',
+                'Payment Discount Target' => '$model->payment_discount_target',
+                'Payment Discount Percent' => 'Number::percentage(bcmul($model->payment_discount_percent ?? 0, 100), precision: 2, locale: $model->addressInvoice->language)',
+                'Balance Due Discount' => 'format_money($model->balance_due_discount, $model->currency, $model->addressInvoice->language)',
+            ],
+            PaymentType::class
         );
 
         Editor::mergeVariables(
@@ -108,6 +164,19 @@ class EditorServiceProvider extends ServiceProvider
                 'Tenant Creditor Identifier' => '$sepaMandate->tenant->creditor_identifier',
             ],
             SepaMandate::class
+        );
+
+        Editor::mergeVariables(
+            [
+                'Ticket Number' => '$ticket->ticket_number',
+                'Ticket Title' => '$ticket->title',
+                'Ticket Description' => '$ticket->description',
+                'Ticket Type' => '$ticket->ticketType?->name',
+                'Customer Name' => '$ticket->authenticatable?->getLabel()',
+                'Customer Email' => '$ticket->authenticatable?->email ?? $ticket->authenticatable?->email_primary',
+                'Created At' => '$ticket->created_at?->isoFormat(\'L LT\')',
+            ],
+            Ticket::class
         );
     }
 

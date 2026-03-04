@@ -56,19 +56,16 @@ class OrderTableSeeder extends Seeder
 
                 $order = Order::factory()
                     ->create([
-                        'address_invoice_id' => $contact->addresses->random()->id,
                         'address_delivery_id' => $contact->addresses->random()->id,
+                        'address_invoice_id' => $contact->addresses->random()->id,
                         'agent_id' => faker()->boolean(40) ? $users->random()->id : null,
-                        'parent_id' => rand(0, 1) ? null : $parentId,
-                        'tenant_id' => $tenant->id,
                         'currency_id' => $currency->id,
                         'language_id' => $languages->random()->id,
                         'order_type_id' => $orderType->id,
-                        'price_list_id' => $priceLists->random()->id,
-                        'delivery_type_id' => rand(0, 10),
-                        'logistics_id' => rand(0, 10),
+                        'parent_id' => rand(0, 1) ? null : $parentId,
                         'payment_type_id' => $paymentType->id,
-                        'tax_exemption_id' => rand(0, 10),
+                        'price_list_id' => $priceLists->random()->id,
+                        'tenant_id' => $tenant->id,
                         'delivery_state' => $orderModel->getStatesFor('delivery_state')->random(),
                         'payment_state' => $orderModel->getStatesFor('payment_state')->random(),
                     ]);
@@ -80,8 +77,8 @@ class OrderTableSeeder extends Seeder
                     ]);
 
                     OrderTransaction::factory()->create([
-                        'transaction_id' => $transaction->id,
                         'order_id' => $order->id,
+                        'transaction_id' => $transaction->id,
                         'amount' => faker()->boolean(80)
                             ? $order->total_gross_price ?? 0
                             : ($order->total_gross_price ?? 0) - rand(1, $order->total_gross_price ?? 0),
