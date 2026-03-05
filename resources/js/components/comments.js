@@ -8,6 +8,13 @@ export default function comments() {
             this.loadComments();
 
             this.$wire.$watch('modelId', () => this.loadComments());
+
+            if (window.Echo && this.echoChannel) {
+                window.Echo.private(this.echoChannel)
+                    .listen('.CommentCreated', () => this.loadComments())
+                    .listen('.CommentUpdated', () => this.loadComments())
+                    .listen('.CommentDeleted', () => this.loadComments());
+            }
         },
 
         loadComments() {

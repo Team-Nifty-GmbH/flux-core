@@ -5,7 +5,7 @@
     class="mt-2"
     x-data="{
         get tab() { return $wire.{{ $attributes->wire('model')->value() }} },
-        set tab(value) { $wire.{{ $attributes->wire('model')->value() }} = value },
+        set tab(value) { $wire.$set('{{ $attributes->wire('model')->value() }}', value) },
         tabButtonClicked(tabButton) {
             this.tabSelected = this.tab = tabButton.dataset.tabName
         },
