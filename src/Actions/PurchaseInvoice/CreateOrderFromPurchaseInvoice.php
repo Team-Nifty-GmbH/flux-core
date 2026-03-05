@@ -122,11 +122,11 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->where('contact_id', $this->data['contact_id'])
                 ->doesntExist()
         ) {
-            $errors['iban'] = ['iban' => __('validation.required', ['attribute' => 'IBAN'])];
+            $errors += ['iban' => ['iban' => __('validation.required', ['attribute' => 'IBAN'])]];
         }
 
         if (! $this->purchaseInvoice?->getFirstMedia('purchase_invoice')) {
-            $errors['purchase_invoice'] = ['The purchase invoice has no attached document.'];
+            $errors += ['purchase_invoice' => ['The purchase invoice has no attached document.']];
         }
 
         /** @var PurchaseInvoice $purchaseInvoice */
@@ -147,7 +147,7 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 2
             ) !== 0
         ) {
-            $errors['total_gross_price'] = [
+            $errors += ['total_gross_price' => [
                 __(
                     'The total gross :total-gross must match the sum of all position total prices :pos-total.',
                     [
@@ -155,7 +155,7 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                         'pos-total' => $totalPositionGross,
                     ]
                 ),
-            ];
+            ]];
         }
 
         if ($errors) {
