@@ -59,6 +59,9 @@ abstract class Communication extends CommunicationList
 
     protected function getRowActions(): array
     {
+        $layout = array_key_first($this->getPrintLayouts());
+        $type = morph_alias($this->getModel());
+
         return [
             DataTableButton::make()
                 ->text(__('Edit'))
@@ -68,6 +71,13 @@ abstract class Communication extends CommunicationList
                 ->when(resolve_static(UpdateCommunication::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->text(__('Preview'))
+                ->icon('magnifying-glass')
+                ->color('indigo')
+                ->wireClick(<<<JS
+                    openPreview('{$layout}','{$type}',record.id)
+            JS),
+            DataTableButton::make()
+                ->text(__('Create Documents'))
                 ->icon('document-text')
                 ->color('indigo')
                 ->wireClick('createPreview(record.id)'),
@@ -324,6 +334,11 @@ abstract class Communication extends CommunicationList
         ];
     }
 
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
+    }
+
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder
@@ -345,9 +360,12 @@ abstract class Communication extends CommunicationList
     protected function getPrintLayouts(): array
     {
         return resolve_static(CommunicationModel::class, 'query')
-            ->whereKey($this->communication->id)
+            ->when(
+                $this->communication->id,
+                fn (Builder $query) => $query->whereKey($this->communication->id)
+            )
             ->first(['id'])
-            ->resolvePrintViews();
+            ?->resolvePrintViews() ?? [];
     }
 
     protected function getReturnKeys(): array
