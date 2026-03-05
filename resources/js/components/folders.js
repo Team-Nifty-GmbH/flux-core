@@ -21,7 +21,6 @@ export default function folders(
         search: null,
         searchAttributes: searchAttributes,
         property: property,
-        getTreePromise: getTreePromise,
         multiSelect: multiSelect,
         nameAttribute: nameAttribute,
         childrenAttribute: childrenAttribute,

@@ -26,7 +26,10 @@ export default function (
             },
             proxy: null,
             editable: true,
-            content: propertyName && $wire ? $wire.$get(propertyName) : null,
+            content:
+                propertyName && $wire
+                    ? Alpine.raw($wire.$get(propertyName))
+                    : null,
             floatingElement: null,
             isFloatingVisible: false,
             isClickListenerSet: false,

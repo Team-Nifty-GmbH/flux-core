@@ -64,6 +64,8 @@ class AddressList extends BaseDataTable
 
     public LeadForm $leadForm;
 
+    public ?int $agentId = null;
+
     public bool $assignToAgent = true;
 
     public ?int $mapLimit = 100;

@@ -17,19 +17,19 @@
             href="#"
             icon="link"
             x-cloak
-            x-show="task.modelUrl"
-            x-bind:href="task.modelUrl"
+            x-show="$wire.task.modelUrl"
+            x-bind:href="$wire.task.modelUrl"
             wire:navigate
         >
             <x-slot:text>
-                <span x-text="task.modelLabel"></span>
+                <span x-text="$wire.task.modelLabel"></span>
             </x-slot>
         </x-link>
         @show
         @section('task-content.selects')
         @section('task-content.selects.project')
         <div
-            x-show="task.id"
+            x-show="$wire.task.id"
             x-bind:class="!edit && 'pointer-events-none'"
         >
             <x-select.styled
@@ -49,7 +49,7 @@
                         href="#"
                         class="pointer-events-auto"
                         wire:navigate
-                        x-bind:href="task.project_id ? '{{ route('projects.id', ':id') }}'.replace(':id', task.project_id) : '#'"
+                        x-bind:href="$wire.task.project_id ? '{{ route('projects.id', ':id') }}'.replace(':id', $wire.task.project_id) : '#'"
                     />
                 </x-slot>
             </x-select.styled>
@@ -98,7 +98,7 @@
                 <div
                     class="flex flex-col gap-2"
                     x-cloak
-                    x-show="task.start_date"
+                    x-show="$wire.task.start_date"
                     x-bind:class="!edit && 'pointer-events-none'"
                 >
                     <x-toggle
@@ -137,7 +137,7 @@
                 <div
                     class="flex flex-col gap-2"
                     x-cloak
-                    x-show="task.due_date"
+                    x-show="$wire.task.due_date"
                     x-bind:class="!edit && 'pointer-events-none'"
                 >
                     <x-toggle
