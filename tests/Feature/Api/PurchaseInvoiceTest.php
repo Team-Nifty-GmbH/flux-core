@@ -495,3 +495,61 @@ test('validates unique invoice number on update', function (): void {
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['invoice_number']);
 });
+
+test('moves media back to purchase invoice when order is deleted', function (): void {
+    ContactBankConnection::factory()->create([
+        'contact_id' => $this->purchaseInvoices[0]->contact_id,
+    ]);
+
+    $this->purchaseInvoices[0]->update([
+        'invoice_date' => Carbon::now()->toDateString(),
+        'payment_target_date' => Carbon::now()->addDays(30)->toDateString(),
+    ]);
+
+    $this->user->givePermissionTo($this->permissions['finish']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', [
+        'id' => $this->purchaseInvoices[0]->getKey(),
+    ]);
+
+    $response->assertCreated();
+
+    $order = Order::query()->whereKey(json_decode($response->getContent())->data->id)->first();
+    $purchaseInvoice = $this->purchaseInvoices[0]->fresh();
+
+    expect($purchaseInvoice->order_id)->toEqual($order->getKey());
+    expect($order->getFirstMedia('invoice'))->not->toBeNull();
+
+    $order->delete();
+
+    $purchaseInvoice->refresh();
+
+    expect($purchaseInvoice)
+        ->order_id->toBeNull()
+        ->media_id->not->toBeNull();
+
+    expect($purchaseInvoice->getFirstMedia('purchase_invoice'))->not->toBeNull();
+});
+
+test('validates finish fails when purchase invoice has no media', function (): void {
+    ContactBankConnection::factory()->create([
+        'contact_id' => $this->purchaseInvoices[0]->contact_id,
+    ]);
+
+    $this->purchaseInvoices[0]->update([
+        'invoice_date' => Carbon::now()->toDateString(),
+    ]);
+
+    $this->purchaseInvoices[0]->clearMediaCollection('purchase_invoice');
+
+    $this->user->givePermissionTo($this->permissions['finish']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', [
+        'id' => $this->purchaseInvoices[0]->getKey(),
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['purchase_invoice']);
+});
