@@ -15,7 +15,6 @@ class SearchBar extends Component
 
     public ?int $widgetId = null;
 
-    public string $widgetModel = '';
 
     protected $listeners = ['renderSearchBarWidget'];
 
