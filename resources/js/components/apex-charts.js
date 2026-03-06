@@ -44,6 +44,10 @@ export default function ($wire) {
                 }
                 this.chart.updateOptions(this.options);
             });
+
+            $wire.$watch('options', () => {
+                this.updateData();
+            });
         },
         get dataLabelsFormatter() {
             if (

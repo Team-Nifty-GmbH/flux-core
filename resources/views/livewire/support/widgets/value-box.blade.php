@@ -14,7 +14,7 @@
                         @foreach ($this->options() ?? [] as $option)
                             <x-dropdown.items
                                 :text="data_get($option, 'label')"
-                                wire:click="$wire.call('{{ data_get($option, 'method') }}', @js(data_get($option, 'params')))"
+                                x-on:click="$wire.{{ data_get($option, 'method') }}('{{ data_get($option, 'params') }}')"
                             />
                         @endforeach
                     </x-dropdown>

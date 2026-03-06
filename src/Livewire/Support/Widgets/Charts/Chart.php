@@ -118,11 +118,6 @@ abstract class Chart extends Component
     public function updateData(): void
     {
         $this->options = $this->getOptions();
-        $this->js(
-            <<<'JS'
-                Alpine.$data($el)?.updateData();
-            JS
-        );
     }
 
     protected function getOptions(): array

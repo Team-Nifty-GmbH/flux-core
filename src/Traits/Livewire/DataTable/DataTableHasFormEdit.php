@@ -168,7 +168,7 @@ trait DataTableHasFormEdit
             ->color('indigo')
             ->when($this->{$this->formAttributeName()}->canAction('update'))
             ->attributes([
-                'wire:click' => 'edit(record.' . ($this->modelKeyName ?? 'id') . ')',
+                'x-on:click' => '$wire.edit(record.' . ($this->modelKeyName ?? 'id') . ')',
             ]);
     }
 
@@ -209,7 +209,7 @@ trait DataTableHasFormEdit
             ->color('indigo')
             ->when($this->{$this->formAttributeName()}->canAction('create'))
             ->attributes([
-                'wire:click' => 'edit()',
+                'x-on:click' => '$wire.edit()',
             ]);
     }
 
