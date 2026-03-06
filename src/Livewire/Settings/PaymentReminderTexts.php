@@ -31,7 +31,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
                 ->color('indigo')
                 ->when(resolve_static(CreatePaymentReminderText::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'edit',
+                    'wire:click' => 'edit()',
                 ]),
         ];
     }

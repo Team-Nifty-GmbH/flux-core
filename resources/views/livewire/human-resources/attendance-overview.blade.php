@@ -55,7 +55,7 @@
 
                 <div class="flex items-center gap-2">
                     <x-button
-                        wire:click="previousMonth"
+                        wire:click="previousMonth()"
                         icon="chevron-left"
                         color="secondary"
                         flat
@@ -70,7 +70,7 @@
                     </div>
 
                     <x-button
-                        wire:click="nextMonth"
+                        wire:click="nextMonth()"
                         icon="chevron-right"
                         color="secondary"
                         flat

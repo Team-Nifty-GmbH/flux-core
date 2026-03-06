@@ -186,7 +186,7 @@
                             <x-button
                                 color="primary"
                                 icon="plus"
-                                wire:click="addCategoryDiscount"
+                                wire:click="addCategoryDiscount()"
                             />
                         </div>
                     </div>

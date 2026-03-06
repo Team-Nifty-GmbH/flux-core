@@ -45,7 +45,7 @@ class PriceLists extends PriceListList
                 ->color('indigo')
                 ->when(resolve_static(CreatePriceList::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'edit',
+                    'wire:click' => 'edit()',
                 ]),
         ];
     }

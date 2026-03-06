@@ -87,7 +87,7 @@
                                 color="indigo"
                                 loading="installUploaded"
                                 :text="__('Upload package')"
-                                wire:click="installUploaded"
+                                wire:click="installUploaded()"
                                 wire:flux-confirm.type.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"
                             />
                         </div>

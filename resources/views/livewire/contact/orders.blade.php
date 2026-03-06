@@ -138,7 +138,7 @@
                 loading
                 color="indigo"
                 :text="__('Save')"
-                wire:click="save"
+                wire:click="save()"
             />
         </x-slot>
     </x-modal>

@@ -325,7 +325,7 @@
             x-show="edit"
             x-cloak
             :text="__('Edit')"
-            wire:click="showProductPropertiesModal"
+            wire:click="showProductPropertiesModal()"
         />
         <div class="grid grid-cols-3 gap-x-4">
             <template

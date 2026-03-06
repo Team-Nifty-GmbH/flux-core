@@ -63,7 +63,7 @@
                                 class="mr-2"
                                 color="indigo"
                                 icon="plus"
-                                wire:click="addCustomProperty"
+                                wire:click="addCustomProperty()"
                             />
                             <template
                                 x-for="(customProperty, index) in $wire.calendar.custom_properties ?? []"
