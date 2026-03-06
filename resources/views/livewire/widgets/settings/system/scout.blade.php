@@ -16,7 +16,7 @@
     </div>
     <div class="flex flex-col gap-2">
         <x-button
-            wire:click="deleteAllIndexes"
+            wire:click="deleteAllIndexes()"
             wire:flux-confirm.type.warning="{{ __('wire:confirm.delete-all-indexes.scout') }}"
             color="red"
             loading="deleteAllIndexes"
@@ -25,7 +25,7 @@
             class="w-full"
         />
         <x-button
-            wire:click="flush"
+            wire:click="flush()"
             wire:flux-confirm.type.warning="{{ __('wire:confirm.flush.scout') }}"
             loading="flush"
             color="red"
@@ -34,19 +34,19 @@
             class="w-full"
         />
         <x-button
-            wire:click="import"
+            wire:click="import()"
             loading="import"
             :text="__('Import Models')"
             class="w-full"
         />
         <x-button
-            wire:click="index"
+            wire:click="index()"
             loading="index"
             :text="__('Create Indexes')"
             class="w-full"
         />
         <x-button
-            wire:click="syncIndexSettings"
+            wire:click="syncIndexSettings()"
             loading="syncIndexSettings"
             :text="__('Sync Index Settings')"
             class="w-full"

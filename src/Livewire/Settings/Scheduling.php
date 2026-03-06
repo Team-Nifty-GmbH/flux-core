@@ -54,7 +54,7 @@ class Scheduling extends ScheduleList
                 ->color('indigo')
                 ->when(resolve_static(CreateSchedule::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'edit',
+                    'wire:click' => 'edit()',
                 ]),
         ];
     }

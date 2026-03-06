@@ -66,7 +66,7 @@
             />
         @endcanAction
 
-        <x-button color="indigo" :text="__('Save')" wire:click="save" />
+        <x-button color="indigo" :text="__('Save')" wire:click="save()" />
         @show
     </div>
     <div class="w-full pt-6 lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
@@ -173,7 +173,7 @@
                             color="secondary"
                             loading="assignToMe"
                             :text="__('Assign to me')"
-                            wire:click="assignToMe"
+                            wire:click="assignToMe()"
                         />
                         <div>
                             <div class="mb-1 flex items-center justify-between">

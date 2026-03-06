@@ -62,7 +62,7 @@
     </div>
     <div class="flex flex-col gap-2">
         <x-button
-            wire:click="clearQueue"
+            wire:click="clearQueue()"
             wire:flux-confirm.type.warning="{{ __('wire:confirm.clear.queue') }}"
             color="red"
             loading="clearQueue"
@@ -71,7 +71,7 @@
             class="w-full"
         />
         <x-button
-            wire:click="restartQueue"
+            wire:click="restartQueue()"
             loading="restartQueue"
             icon="arrow-path"
             :text="__('Restart Queue')"
