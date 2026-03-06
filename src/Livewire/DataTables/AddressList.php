@@ -27,7 +27,6 @@ class AddressList extends BaseDataTable
         only: [
             'country_id',
             'language_id',
-            'tenant_id',
             'company',
             'title',
             'salutation',
@@ -40,6 +39,7 @@ class AddressList extends BaseDataTable
             'phone',
             'phone_mobile',
             'record_origin_id',
+            'tenants',
         ],
     )]
     public ContactForm $createContactForm;
@@ -87,7 +87,7 @@ class AddressList extends BaseDataTable
                     $toggle('showMap', true)
                 JS),
             DataTableButton::make()
-                ->text(__('Create'))
+                ->text(__('New'))
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([

@@ -46,10 +46,11 @@ beforeEach(function (): void {
         'vat_rate_id' => $vatRate->id,
     ]);
 
-    OrderType::factory()->create([
-        'tenant_id' => $dbTenant->id,
-        'order_type_enum' => 'order',
-    ]);
+    OrderType::factory()
+        ->hasAttached(factory: $dbTenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => 'order',
+        ]);
 
     $this->user->tenants()->attach($dbTenant->id);
 

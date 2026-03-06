@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\OrderPositions;
@@ -27,13 +28,11 @@ beforeEach(function (): void {
     Warehouse::factory()->create(['is_default' => true]);
 
     $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'has_delivery_lock' => false,
         'credit_line' => null,
+        'has_delivery_lock' => false,
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -41,7 +40,6 @@ beforeEach(function (): void {
     $this->vatRate = VatRate::factory()->create();
 
     $this->orderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'print_layouts' => ['invoice'],
     ]);
@@ -499,7 +497,6 @@ test('move position with parent', function (): void {
 
 test('quick add order position', function (): void {
     $orderPositionCount = $this->order->orderPositions()->count();
-    $productPrice = $this->product->prices()->first();
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('orderPosition.product_id', $this->product->id)
@@ -619,7 +616,7 @@ test('switch view to table', function (): void {
 });
 
 test('add order position uses product translation based on order language', function (): void {
-    $defaultLanguage = Language::factory()->create(['is_default' => true]);
+    Language::factory()->create(['is_default' => true]);
     $orderLanguage = Language::factory()->create(['is_default' => false]);
 
     $germanName = 'Deutsches Produkt';
@@ -639,21 +636,25 @@ test('add order position uses product translation based on order language', func
         'price_list_id' => $this->priceList->getKey(),
     ]);
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'name',
         'value' => $englishName,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'description',
         'value' => $englishDescription,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
     $this->order->update(['language_id' => $orderLanguage->getKey()]);
     $this->orderForm->fill($this->order->fresh());
@@ -678,7 +679,7 @@ test('add order position uses product translation based on order language', func
 });
 
 test('quick add order position uses product translation based on order language', function (): void {
-    $defaultLanguage = Language::factory()->create(['is_default' => true]);
+    Language::factory()->create(['is_default' => true]);
     $orderLanguage = Language::factory()->create(['is_default' => false]);
 
     $germanName = 'Deutsches Produkt';
@@ -698,21 +699,25 @@ test('quick add order position uses product translation based on order language'
         'price_list_id' => $this->priceList->getKey(),
     ]);
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'name',
         'value' => $englishName,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'description',
         'value' => $englishDescription,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
     $this->order->update(['language_id' => $orderLanguage->getKey()]);
     $this->orderForm->fill($this->order->fresh());

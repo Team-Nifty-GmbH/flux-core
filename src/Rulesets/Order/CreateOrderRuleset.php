@@ -3,10 +3,13 @@
 namespace FluxErp\Rulesets\Order;
 
 use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Lead;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
@@ -73,7 +76,7 @@ class CreateOrderRuleset extends FluxRuleset
                 'required_without:address_invoice_id',
                 'integer',
                 'nullable',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'tenant_id', 'table' => 'contacts']),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'contact_bank_connection_id' => [
                 'integer',
@@ -96,7 +99,7 @@ class CreateOrderRuleset extends FluxRuleset
             'address_delivery_id' => [
                 'integer',
                 'nullable',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'tenant_id', 'table' => 'addresses']),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'language_id' => [
                 'integer',
@@ -106,7 +109,7 @@ class CreateOrderRuleset extends FluxRuleset
             'order_type_id' => [
                 'required',
                 'integer',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'tenant_id', 'table' => 'order_types']),
+                app(ModelExists::class, ['model' => OrderType::class]),
             ],
             'price_list_id' => [
                 'integer',
@@ -121,11 +124,7 @@ class CreateOrderRuleset extends FluxRuleset
             'payment_type_id' => [
                 'integer',
                 'nullable',
-                app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'tenant_id',
-                    'table' => 'payment_type_tenant',
-                    'column' => 'payment_type_id',
-                ]),
+                app(ModelExists::class, ['model' => PaymentType::class]),
             ],
             'responsible_user_id' => [
                 'integer',
@@ -155,11 +154,7 @@ class CreateOrderRuleset extends FluxRuleset
             'address_delivery.id' => [
                 'nullable',
                 'integer',
-                app(ExistsWithForeign::class, [
-                    'foreignAttribute' => 'tenant_id',
-                    'table' => 'addresses',
-                    'baseTable' => 'orders',
-                ]),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
 
             'delivery_state' => [

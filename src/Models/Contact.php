@@ -8,6 +8,7 @@ use FluxErp\Contracts\Targetable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Models\Pivots\ContactTenant;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\Categorizable;
@@ -20,6 +21,7 @@ use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasRecordOrigin;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasTenants;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
@@ -41,7 +43,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 {
     use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasDefaultTargetableColumns,
         HasFrontendAttributes, HasPackageFactory, HasRecordOrigin, HasSerialNumberRange, HasTenantAssignment,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable;
+        HasTenants, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable;
 
     public static string $iconName = 'users';
 
@@ -260,9 +262,9 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->hasMany(SepaMandate::class);
     }
 
-    public function tenant(): BelongsTo
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsToMany(Tenant::class, 'contact_tenant')->using(ContactTenant::class);
     }
 
     public function toSearchableArray(): array

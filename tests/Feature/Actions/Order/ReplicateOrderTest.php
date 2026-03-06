@@ -14,15 +14,13 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
+use FluxErp\Models\Warehouse;
 
-it('copies position discounts when creating retoure', function (): void {
+test('copies position discounts when creating retoure', function (): void {
     // Arrange: Create an order with a position that has a discount
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -35,13 +33,11 @@ it('copies position discounts when creating retoure', function (): void {
     $product = Product::factory()->create();
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -94,14 +90,11 @@ it('copies position discounts when creating retoure', function (): void {
         ->and($retourePosition->discounts->first()->is_percentage)->toBeTrue();
 });
 
-it('copies order-level discounts when creating retoure', function (): void {
+test('copies order-level discounts when creating retoure', function (): void {
     // Arrange: Create an order with an order-level discount
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -114,13 +107,11 @@ it('copies order-level discounts when creating retoure', function (): void {
     $product = Product::factory()->create();
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -181,16 +172,13 @@ it('copies order-level discounts when creating retoure', function (): void {
         ->and($retoureDiscounts->first()->is_percentage)->toBeTrue();
 });
 
-it('preserves implicit discounts when position has zero total but no discount_percentage', function (): void {
+test('preserves implicit discounts when position has zero total but no discount_percentage', function (): void {
     // Arrange: Create an order with a position that has 100% discount applied directly
     // This simulates positions where the discount was set via total_net_price = 0
     // without setting discount_percentage (legacy data scenario)
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -199,18 +187,16 @@ it('preserves implicit discounts when position has zero total but no discount_pe
     $priceList = PriceList::default();
     $paymentType = PaymentType::default();
     $currency = Currency::default();
-    $warehouse = FluxErp\Models\Warehouse::factory()->create();
+    $warehouse = Warehouse::factory()->create();
 
     $product = Product::factory()->create();
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -228,7 +214,7 @@ it('preserves implicit discounts when position has zero total but no discount_pe
     ]);
 
     // Create position with 100% implicit discount (total = 0 but no discount_percentage)
-    $orderPosition = OrderPosition::factory()->create([
+    OrderPosition::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
@@ -268,14 +254,11 @@ it('preserves implicit discounts when position has zero total but no discount_pe
         ->and((float) $retourePosition->discount_percentage)->toBe(1.0);
 });
 
-it('retoure total equals negative of original total', function (): void {
+test('retoure total equals negative of original total', function (): void {
     // A4: Simplified - just verify total sums to zero
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -285,7 +268,7 @@ it('retoure total equals negative of original total', function (): void {
     $priceList = PriceList::default();
     $paymentType = PaymentType::default();
     $currency = Currency::default();
-    $warehouse = FluxErp\Models\Warehouse::factory()->create();
+    $warehouse = Warehouse::factory()->create();
     // Ensure product uses the same vat_rate
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
@@ -297,13 +280,11 @@ it('retoure total equals negative of original total', function (): void {
     ]);
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -363,14 +344,11 @@ it('retoure total equals negative of original total', function (): void {
         ->and(bcadd($order->total_gross_price, $retoure->total_gross_price, 2))->toBe('0.00');
 });
 
-it('handles vat rate mix correctly when creating retoure', function (): void {
+test('handles vat rate mix correctly when creating retoure', function (): void {
     // A5: Retoure von Order mit MwSt-Mix (7%/19%)
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -380,7 +358,7 @@ it('handles vat rate mix correctly when creating retoure', function (): void {
     $priceList = PriceList::default();
     $paymentType = PaymentType::default();
     $currency = Currency::default();
-    $warehouse = FluxErp\Models\Warehouse::factory()->create();
+    $warehouse = Warehouse::factory()->create();
     // Create products with matching vat_rate_id and explicit prices
     $product19 = Product::factory()->create(['vat_rate_id' => $vatRate19->getKey()]);
     $product7 = Product::factory()->create(['vat_rate_id' => $vatRate7->getKey()]);
@@ -398,13 +376,11 @@ it('handles vat rate mix correctly when creating retoure', function (): void {
     ]);
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -494,14 +470,11 @@ it('handles vat rate mix correctly when creating retoure', function (): void {
     expect($retourePositions)->toHaveCount(2);
 });
 
-it('preserves discounts when creating split order', function (): void {
+test('preserves discounts when creating split order', function (): void {
     // B3: Teilauftrag mit Rabatten
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -510,7 +483,7 @@ it('preserves discounts when creating split order', function (): void {
     $priceList = PriceList::default();
     $paymentType = PaymentType::default();
     $currency = Currency::default();
-    $warehouse = FluxErp\Models\Warehouse::factory()->create();
+    $warehouse = Warehouse::factory()->create();
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
@@ -520,13 +493,11 @@ it('preserves discounts when creating split order', function (): void {
     ]);
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $splitOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::SplitOrder,
         'is_active' => true,
     ]);
@@ -591,14 +562,11 @@ it('preserves discounts when creating split order', function (): void {
         ->and(bccomp($splitPosition->total_net_price, '400', 2))->toBe(0); // 500 * 0.8 = 400
 });
 
-it('calculates order with 100 percent position discount correctly', function (): void {
+test('calculates order with 100 percent position discount correctly', function (): void {
     // C1: Order mit 100% Positions-Rabatt
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -611,7 +579,6 @@ it('calculates order with 100 percent position discount correctly', function ():
     $product = Product::factory()->create();
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
@@ -656,14 +623,11 @@ it('calculates order with 100 percent position discount correctly', function ():
         ->and((float) $order->total_gross_price)->toBe(0.0);
 });
 
-it('returned split order makes amount available again for original', function (): void {
+test('returned split order makes amount available again for original', function (): void {
     // Scenario: Original (10) → Split Order (5) → Retoure of Split (5) = 10 available again
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -672,7 +636,7 @@ it('returned split order makes amount available again for original', function ()
     $priceList = PriceList::default();
     $paymentType = PaymentType::default();
     $currency = Currency::default();
-    $warehouse = FluxErp\Models\Warehouse::factory()->create();
+    $warehouse = Warehouse::factory()->create();
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
@@ -682,19 +646,16 @@ it('returned split order makes amount available again for original', function ()
     ]);
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $splitOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::SplitOrder,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -831,14 +792,11 @@ it('returned split order makes amount available again for original', function ()
     expect(bccomp($available, '10', 0))->toBe(0);
 });
 
-it('partially returned split order reduces available amount proportionally', function (): void {
+test('partially returned split order reduces available amount proportionally', function (): void {
     // Scenario: Original (10) → Split Order (5) → Partial Retoure (3) = 8 available
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -847,7 +805,7 @@ it('partially returned split order reduces available amount proportionally', fun
     $priceList = PriceList::default();
     $paymentType = PaymentType::default();
     $currency = Currency::default();
-    $warehouse = FluxErp\Models\Warehouse::factory()->create();
+    $warehouse = Warehouse::factory()->create();
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
@@ -857,19 +815,16 @@ it('partially returned split order reduces available amount proportionally', fun
     ]);
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $splitOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::SplitOrder,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -1001,14 +956,11 @@ it('partially returned split order reduces available amount proportionally', fun
     expect(bccomp($available, '8', 0))->toBe(0);
 });
 
-it('direct retoure still reduces available amount to zero', function (): void {
+test('direct retoure still reduces available amount to zero', function (): void {
     // Scenario: Original (10) → Direct Retoure (10) = 0 available
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -1017,7 +969,7 @@ it('direct retoure still reduces available amount to zero', function (): void {
     $priceList = PriceList::default();
     $paymentType = PaymentType::default();
     $currency = Currency::default();
-    $warehouse = FluxErp\Models\Warehouse::factory()->create();
+    $warehouse = Warehouse::factory()->create();
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
@@ -1027,13 +979,11 @@ it('direct retoure still reduces available amount to zero', function (): void {
     ]);
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $retoureOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
@@ -1147,14 +1097,11 @@ it('direct retoure still reduces available amount to zero', function (): void {
     expect(bccomp($available, '0', 0))->toBe(0);
 });
 
-it('calculates order lock recalculation correctly', function (): void {
+test('calculates order lock recalculation correctly', function (): void {
     // C3: Order Lock → Recalculation
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,
     ]);
@@ -1167,7 +1114,6 @@ it('calculates order lock recalculation correctly', function (): void {
     $product = Product::factory()->create();
 
     $orderOrderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);

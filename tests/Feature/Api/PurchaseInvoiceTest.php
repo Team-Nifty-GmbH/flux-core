@@ -37,10 +37,10 @@ beforeEach(function (): void {
         ]);
 
     $this->contacts = Contact::factory()->count(2)
-        ->has(Address::factory()->set('tenant_id', $this->dbTenant->getKey()))
+        ->has(Address::factory())
         ->for(PriceList::factory()->state(['is_default' => true]))
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
         ->create([
-            'tenant_id' => $this->dbTenant->getKey(),
             'payment_type_id' => $this->paymentTypes->random()->id,
             'payment_target_days' => 0,
             'discount_days' => 0,
@@ -51,10 +51,12 @@ beforeEach(function (): void {
 
     $language = Language::factory()->create();
 
-    $this->orderTypes = OrderType::factory()->count(2)->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'order_type_enum' => OrderTypeEnum::Purchase,
-    ]);
+    $this->orderTypes = OrderType::factory()
+        ->count(2)
+        ->hasAttached(factory: $this->dbTenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Purchase,
+        ]);
 
     $vatRates = VatRate::factory()->count(3)->create();
     $this->purchaseInvoices = PurchaseInvoice::factory()

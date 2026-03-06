@@ -145,14 +145,11 @@ test('delete country country not found', function (): void {
 });
 
 test('delete country country referenced by address', function (): void {
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
     Address::factory()->create([
-        'tenant_id' => $contact->tenant_id,
-        'language_id' => $this->language->id,
-        'country_id' => $this->countries[1]->id,
         'contact_id' => $contact->id,
+        'country_id' => $this->countries[1]->id,
+        'language_id' => $this->language->id,
     ]);
 
     $this->user->givePermissionTo($this->permissions['delete']);

@@ -41,7 +41,6 @@ class ContactList extends BaseDataTable
         only: [
             'country_id',
             'language_id',
-            'tenant_id',
             'company',
             'title',
             'salutation',
@@ -54,6 +53,7 @@ class ContactList extends BaseDataTable
             'phone',
             'phone_mobile',
             'record_origin_id',
+            'tenants',
         ],
     )]
     public ContactForm $createContactForm;
