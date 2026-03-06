@@ -14,13 +14,13 @@
                 <x-button
                     :text="__('Delete')"
                     color="red"
-                    wire:click="delete"
+                    wire:click="delete()"
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Work Time Model')]) }}"
                 />
                 <x-button
                     :text="__('Save')"
                     color="primary"
-                    wire:click="save"
+                    wire:click="save()"
                     wire:loading.attr="disabled"
                 />
             </div>

@@ -107,7 +107,7 @@
                 color="indigo"
                 :text="__('Generate Configuration')"
                 icon="cog"
-                wire:click="generateBridgeConfig"
+                wire:click="generateBridgeConfig()"
             />
         </div>
 

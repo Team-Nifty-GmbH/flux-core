@@ -126,13 +126,13 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    wire:click="cancel"
+                    wire:click="cancel()"
                 />
                 <x-button
                     color="primary"
                     loading="createPaymentRun"
                     :text="__('Create Payment Run')"
-                    wire:click="createPaymentRun"
+                    wire:click="createPaymentRun()"
                     wire:flux-confirm="{{ __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes') }}"
                 />
             </div>
