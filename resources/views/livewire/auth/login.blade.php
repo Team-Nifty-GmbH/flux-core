@@ -32,14 +32,19 @@
                 @show
 
                 @section('totp-challenge')
-                <div
-                    x-show="$wire.showTotpChallenge"
-                    x-cloak
-                >
-                    <form class="flex flex-col gap-6" wire:submit="verifyTotpCode()">
+                <div x-show="$wire.showTotpChallenge" x-cloak>
+                    <form
+                        class="flex flex-col gap-6"
+                        wire:submit="verifyTotpCode()"
+                    >
                         <div class="text-center">
-                            <x-icon name="shield-check" class="mx-auto size-12 text-indigo-600" />
-                            <h3 class="mt-2 text-lg font-semibold text-gray-900">
+                            <x-icon
+                                name="shield-check"
+                                class="mx-auto size-12 text-indigo-600"
+                            />
+                            <h3
+                                class="mt-2 text-lg font-semibold text-gray-900"
+                            >
                                 {{ __('Two-Factor Authentication') }}
                             </h3>
                             <p class="mt-1 text-sm text-gray-600">
@@ -60,6 +65,7 @@
                         @error('totpCode')
                             <p class="text-sm text-red-600">{{ $message }}</p>
                         @enderror
+
                         <x-button
                             loading
                             color="indigo"
@@ -141,9 +147,13 @@
                         <div class="mt-6">
                             <div class="relative">
                                 <div class="absolute inset-0 flex items-center">
-                                    <div class="w-full border-t border-gray-300"></div>
+                                    <div
+                                        class="w-full border-t border-gray-300"
+                                    ></div>
                                 </div>
-                                <div class="relative flex justify-center text-sm">
+                                <div
+                                    class="relative flex justify-center text-sm"
+                                >
                                     <span class="bg-white px-2 text-gray-500">
                                         {{ __('Or') }}
                                     </span>
@@ -154,6 +164,7 @@
                             </div>
                         </div>
                     @endif
+
                     @show
                 </div>
                 @show
