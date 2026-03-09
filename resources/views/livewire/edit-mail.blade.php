@@ -187,8 +187,8 @@
                                 </x-slot>
                                 <x-slot:text>
                                     <div
-                                        wire:click.prevent="downloadAttachment(file.id)"
-                                        class="cursor-pointer"
+                                        x-on:click.prevent="file.id && $wire.downloadAttachment(file.id)"
+                                        x-bind:class="file.id ? 'cursor-pointer' : ''"
                                     >
                                         <span x-text="file.name"></span>
                                     </div>
