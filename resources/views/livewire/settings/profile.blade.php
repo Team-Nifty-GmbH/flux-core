@@ -71,6 +71,12 @@
     </form>
     @show
 
+    @section('profile.security')
+    <div class="space-y-6 pt-8">
+        <livewire:settings.two-factor-setup />
+    </div>
+    @show
+
     @section('profile.web-push')
     <div class="space-y-6 pt-8">
         <x-card>
