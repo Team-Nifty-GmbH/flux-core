@@ -62,11 +62,7 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
         ];
 
         $allStates = TicketState::all();
-
-        $endStates = $allStates
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = $this->getEndStates($allStates);
 
         $topCustomers = resolve_static(Ticket::class, 'query')
             ->where('authenticatable_type', morph_alias(Address::class))
@@ -232,9 +228,9 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
         $this->redirectRoute('tickets', navigate: true);
     }
 
-    protected function getEndStates(): array
+    protected function getEndStates(?Collection $allStates = null): array
     {
-        return TicketState::all()
+        return ($allStates ?? TicketState::all())
             ->filter(fn (string $state) => $state::$isEndState)
             ->keys()
             ->toArray();
