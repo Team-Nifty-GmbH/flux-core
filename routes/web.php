@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')
     ->group(function (): void {
+        if (Route::hasMacro('passkeys')) {
+            Route::passkeys();
+        }
+
         Route::get('/login-mobile', [MobileController::class, 'loginMobile'])->name('mobile.login');
 
         Route::middleware('signed')->group(function (): void {

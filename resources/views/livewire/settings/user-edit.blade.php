@@ -87,6 +87,29 @@
                 />
             @show
             <hr />
+            @section('user-edit.two-factor')
+                <div class="space-y-4">
+                    <h3
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                        {{ __('Two-Factor Authentication') }}
+                    </h3>
+                    <x-toggle
+                        :label="__('Force Two-Factor Authentication')"
+                        wire:model="userForm.force_two_factor"
+                    />
+                    @if ($userForm->id)
+                        <x-button
+                            :text="__('Reset Two-Factor Authentication')"
+                            color="red"
+                            size="sm"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Two-Factor Authentication')]) }}"
+                            wire:click="resetTwoFactor()"
+                        />
+                    @endif
+                </div>
+            @show
+            <hr />
             @section('user-edit.bank-connection')
                 <x-input
                     wire:model="userForm.account_holder"

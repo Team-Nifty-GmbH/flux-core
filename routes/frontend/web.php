@@ -150,7 +150,7 @@ Route::middleware('web')
         Route::post('/logout', Logout::class)
             ->name('logout');
 
-        Route::middleware(['auth:web', 'permission'])->group(function (): void {
+        Route::middleware(['auth:web', '2fa.setup', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
 
             Route::get('/private-storage/{path}', function (string $path) {
