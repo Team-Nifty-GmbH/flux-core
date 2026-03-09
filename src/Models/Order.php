@@ -384,7 +384,19 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         });
 
         static::deleted(function (Order $order): void {
-            $order->purchaseInvoice()->update(['order_id' => null]);
+            $purchaseInvoice = $order->purchaseInvoice;
+
+            if ($purchaseInvoice) {
+                $movedMedia = $order->getFirstMedia('invoice')?->move($purchaseInvoice, 'purchase_invoice');
+
+                $update = ['order_id' => null];
+
+                if ($movedMedia) {
+                    $update['media_id'] = $movedMedia->getKey();
+                }
+
+                $purchaseInvoice->update($update);
+            }
         });
     }
 
