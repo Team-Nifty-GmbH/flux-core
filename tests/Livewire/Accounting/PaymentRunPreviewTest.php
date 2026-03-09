@@ -17,15 +17,12 @@ use FluxErp\Models\SepaMandate;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $this->contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->id,
-    ]);
+    $this->contact = Contact::factory()->create();
 
     $this->address = Address::factory()->create([
         'contact_id' => $this->contact->id,
-        'tenant_id' => $this->dbTenant->id,
-        'is_main_address' => true,
         'name' => 'Test Customer',
+        'is_main_address' => true,
     ]);
 
     $this->paymentType = PaymentType::factory()->create([
@@ -38,10 +35,9 @@ beforeEach(function (): void {
     $this->currency = Currency::factory()->create();
 
     $this->orderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->id,
-        'is_active' => true,
         'order_type_enum' => collect(OrderTypeEnum::cases())
             ->first(fn ($case) => $case->multiplier() < 0),
+        'is_active' => true,
     ]);
 
     $this->orders = Order::factory()->count(2)->create([

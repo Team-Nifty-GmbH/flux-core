@@ -16,13 +16,10 @@ use FluxErp\View\Printing\Order\CancellationConfirmation;
 use Illuminate\Contracts\Support\Htmlable;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
         'company' => 'Test Company GmbH',
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
     ]);
 
@@ -42,7 +39,6 @@ beforeEach(function (): void {
     $orderType = OrderType::factory()
         ->create([
             'print_layouts' => ['cancellation-confirmation'],
-            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Subscription,
         ]);
 

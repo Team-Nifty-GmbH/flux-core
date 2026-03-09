@@ -6,14 +6,16 @@ use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
-use FluxErp\Models\Contact;
 use FluxErp\Models\Country;
+use FluxErp\Models\Pivots\ContactTenant;
 use FluxErp\Models\Tag;
+use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Address\CreateAddressRuleset;
 use FluxErp\Settings\CoreSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CreateAddress extends FluxAction
 {
@@ -107,9 +109,6 @@ class CreateAddress extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['country_id'] ??= resolve_static(Country::class, 'default')?->getKey();
-        $this->data['tenant_id'] ??= resolve_static(Contact::class, 'query')
-            ->whereKey($this->getData('contact_id'))
-            ->value('tenant_id');
         $this->data['email_primary'] = is_string($this->getData('email_primary'))
             ? Str::between($this->getData('email_primary'), '<', '>')
             : null;
@@ -117,5 +116,44 @@ class CreateAddress extends FluxAction
             ? Str::between($this->getData('email'), '<', '>')
             : null;
         $this->data['has_formal_salutation'] ??= app(CoreSettings::class)->formal_salutation;
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $errors = [];
+        if ($addressTypes = $this->getData('address_types')) {
+            $contactTenants = resolve_static(ContactTenant::class, 'query')
+                ->where('contact_id', $this->getData('contact_id'))
+                ->pluck('tenant_id')
+                ->toArray()
+                ?: resolve_static(Tenant::class, 'query')
+                    ->pluck('id')
+                    ->toArray();
+
+            foreach ($addressTypes as $key => $addressType) {
+                if (
+                    ! array_intersect(
+                        resolve_static(AddressType::class, 'query')
+                            ->whereKey($addressType)
+                            ->first(['id'])
+                            ->getTenants(['id'])
+                            ->pluck('id')
+                            ->toArray(),
+                        $contactTenants
+                    )
+                ) {
+                    $errors += [
+                        'address_types.' . $key => ['Address type does not have intersecting tenants'],
+                    ];
+                }
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('createAddress');
+        }
     }
 }

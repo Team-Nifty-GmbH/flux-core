@@ -15,13 +15,10 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
         'company' => Str::uuid()->toString(),
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
     ]);
 
@@ -36,7 +33,6 @@ beforeEach(function (): void {
     $orderType = OrderType::factory()
         ->create([
             'print_layouts' => ['offer', 'invoice'],
-            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 

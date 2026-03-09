@@ -5,8 +5,10 @@ namespace FluxErp\Actions\Order;
 use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
 use FluxErp\Rulesets\Order\CreateCollectiveOrderRuleset;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class CreateCollectiveOrder extends DispatchableFluxAction
@@ -34,6 +36,9 @@ class CreateCollectiveOrder extends DispatchableFluxAction
                 $collectiveOrder = CreateOrder::make([
                     'address_invoice_id' => data_get($order, 'address_invoice_id'),
                     'order_type_id' => $collectiveOrderOrderTypeId,
+                    'tenant_id' => resolve_static(Order::class, 'query')
+                        ->whereKey(data_get($order, 'orders.*.id'))
+                        ->value('tenant_id'),
                 ])
                     ->validate()
                     ->execute();
@@ -153,5 +158,42 @@ class CreateCollectiveOrder extends DispatchableFluxAction
             'success' => $success,
             'failed' => $failed,
         ];
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        // Get tenant ids from all selected orders
+        $tenantIds = resolve_static(Order::class, 'query')
+            ->whereKey($this->getData('orders.*.orders.*.id'))
+            ->pluck('tenant_id')
+            ->toArray();
+
+        // Check if given order types are assigned to ALL selected tenant ids
+        $errors = [];
+        $orderTypes = [
+            'order_type_id',
+            'split_order_order_type_id',
+        ];
+        foreach ($orderTypes as $orderType) {
+            $orderTypeTenantIds = resolve_static(OrderType::class, 'query')
+                ->whereKey($this->getData($orderType))
+                ->first(['id'])
+                ?->getTenants(['id'])
+                ->pluck('id')
+                ->toArray();
+
+            if (array_diff($tenantIds, $orderTypeTenantIds)) {
+                $errors += [
+                    $orderType => ['Given order type is not available for all selected orders'],
+                ];
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('createCollectiveOrder');
+        }
     }
 }

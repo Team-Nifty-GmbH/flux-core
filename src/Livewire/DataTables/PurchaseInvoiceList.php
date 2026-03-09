@@ -146,7 +146,7 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
         $this->purchaseInvoiceForm->currency_id = $contact->currency_id
             ?? resolve_static(Currency::class, 'default')?->getKey();
-        $this->purchaseInvoiceForm->tenant_id = $contact->tenant_id;
+        $this->purchaseInvoiceForm->tenant_id = $contact->getTenantId();
 
         $this->purchaseInvoiceForm->lay_out_user_id = null;
         $this->purchaseInvoiceForm->account_holder = $bankConnection?->account_holder;

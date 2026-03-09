@@ -47,8 +47,8 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
                         ->whereKey($tenantId)
                         ->value('commission_credit_note_order_type_id')
                         ?? resolve_static(OrderType::class, 'query')
-                            ->where('tenant_id', $tenantId)
                             ->where('order_type_enum', OrderTypeEnum::Refund)
+                            ->whereHasTenant($tenantId)
                             ->value('id'),
                     'tenant_id' => $tenantId,
                     'contact_id' => data_get($agentData, 'contact_id'),
@@ -148,8 +148,8 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
                 ->get(['id', 'name']) as $tenant
         ) {
             if (! resolve_static(OrderType::class, 'query')
-                ->where('tenant_id', $tenant->id)
                 ->where('order_type_enum', OrderTypeEnum::Refund)
+                ->whereHasTenant($tenant)
                 ->value('id')
             ) {
                 $errors += [
