@@ -1216,3 +1216,66 @@ it('calculates order lock recalculation correctly', function (): void {
     expect(bccomp($order->total_net_price, '200', 2))->toBe(0)
         ->and(bccomp($order->total_gross_price, '238', 2))->toBe(0);
 });
+
+it('does not set parent_id when creating refund', function (): void {
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+
+    $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $priceList = PriceList::default();
+    $paymentType = PaymentType::default();
+    $currency = Currency::default();
+
+    $orderOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+
+    $refundOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Refund,
+        'is_active' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'contact_id' => $contact->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'payment_type_id' => $paymentType->getKey(),
+        'currency_id' => $currency->getKey(),
+        'is_locked' => true,
+    ]);
+
+    OrderPosition::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'order_id' => $order->getKey(),
+        'vat_rate_id' => VatRate::default()->getKey(),
+        'is_free_text' => true,
+        'amount' => 1,
+        'unit_net_price' => 100,
+        'unit_gross_price' => 119,
+    ]);
+
+    // Simulate what the Livewire component does: passing parent_id explicitly
+    $refund = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'order_type_id' => $refundOrderType->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'parent_id' => $order->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($refund->parent_id)->toBeNull()
+        ->and($refund->created_from_id)->toBe($order->getKey());
+});
