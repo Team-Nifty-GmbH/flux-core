@@ -108,6 +108,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom([
             __DIR__ . '/../database/migrations',
             __DIR__ . '/../database/settings',
+            \Laragear\TwoFactor\TwoFactorServiceProvider::MIGRATIONS,
         ]);
 
         $this->loadTranslationsFrom(__DIR__ . '/../lang');
