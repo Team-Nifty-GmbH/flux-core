@@ -8,6 +8,7 @@ use FluxErp\States\Ticket\Escalated;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
 class EscalatedTickets extends Component
@@ -15,6 +16,8 @@ class EscalatedTickets extends Component
     use Widgetable;
 
     public int $count = 0;
+
+    public int $limit = 25;
 
     public static function getCategory(): ?string
     {
@@ -33,18 +36,32 @@ class EscalatedTickets extends Component
 
     public function render(): View|Factory
     {
-        $tickets = resolve_static(Ticket::class, 'query')
+        $this->count = resolve_static(Ticket::class, 'query')
             ->where('state', Escalated::$name)
-            ->with('authenticatable:id,name')
-            ->orderBy('created_at')
-            ->get();
+            ->count();
 
-        $this->count = $tickets->count();
+        $tickets = $this->getTickets();
 
         return view(
             'flux::livewire.widgets.escalated-tickets',
-            ['tickets' => $tickets]
+            [
+                'tickets' => $tickets,
+                'hasMore' => $this->count > $this->limit,
+            ]
         );
+    }
+
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketUpdated' => '$refresh',
+            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketCreated' => '$refresh',
+        ];
+    }
+
+    public function loadMore(): void
+    {
+        $this->limit += 25;
     }
 
     public function placeholder(): View|Factory
@@ -52,13 +69,21 @@ class EscalatedTickets extends Component
         return view('flux::livewire.placeholders.horizontal-bar');
     }
 
-    protected function getListeners(): array
+    protected function getTickets(): Collection
     {
-        return [
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel')
-                . ',.TicketUpdated' => '$refresh',
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel')
-                . ',.TicketCreated' => '$refresh',
-        ];
+        return resolve_static(Ticket::class, 'query')
+            ->where('state', Escalated::$name)
+            ->with('authenticatable:id,name')
+            ->orderBy('created_at')
+            ->limit($this->limit)
+            ->get([
+                'id',
+                'title',
+                'description',
+                'state',
+                'created_at',
+                'authenticatable_type',
+                'authenticatable_id',
+            ]);
     }
 }
