@@ -71,7 +71,7 @@ class ContactList extends BaseDataTable
                     ->text(__('Assign to agent'))
                     ->when(fn () => resolve_static(UpdateContact::class, 'canPerformAction', [false]))
                     ->xOnClick(<<<'JS'
-                        $modalOpen('assign-agent-modal');
+                        $tsui.open.modal('assign-agent-modal');
                     JS),
             ]
         );

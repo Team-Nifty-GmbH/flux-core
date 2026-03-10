@@ -86,7 +86,7 @@ class Accounting extends OrderTransactionList
         $this->transactionForm->order_id = $this->order->id;
 
         $this->js(<<<'JS'
-            $modalOpen('transaction-details-modal');
+            $tsui.open.modal('transaction-details-modal');
         JS);
 
         if (! $transaction) {

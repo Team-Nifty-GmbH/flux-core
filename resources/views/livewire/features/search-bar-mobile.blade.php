@@ -2,7 +2,7 @@
     <x-button.circle
         color="indigo"
         icon="magnifying-glass"
-        x-on:click="$modalOpen('search-bar-mobile-modal')"
+        x-on:click="$tsui.open.modal('search-bar-mobile-modal')"
     />
 
     <x-modal

@@ -86,7 +86,7 @@ class SerialNumberRanges extends SerialNumberRangeList
         $this->serialNumberRange->fill($serialNumberRange);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-serial-number-range-modal');
+            $tsui.open.modal('edit-serial-number-range-modal');
         JS);
     }
 

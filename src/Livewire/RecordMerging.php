@@ -186,7 +186,7 @@ class RecordMerging extends Component
 
         $this->js(
             <<<'JS'
-                $modalOpen('merge-records-modal');
+                $tsui.open.modal('merge-records-modal');
             JS
         );
     }

@@ -227,7 +227,7 @@
                 x-show="! isMultiGroup"
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-mail')"
+                x-on:click="$tsui.close.modal('edit-mail')"
                 class="mr-2"
                 :text="__('Cancel')"
             />
@@ -262,7 +262,7 @@
                 x-show="! isMultiGroup || isLastGroup"
                 color="indigo"
                 loading="send"
-                wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})"
+                wire:click="send().then((success) => {if(success) $tsui.close.modal('edit-mail');})"
                 class="ml-auto"
                 :text="__('Send')"
             />

@@ -137,7 +137,7 @@ class EditMail extends Component
 
         $this->js(<<<'JS'
             $tallstackuiSelect('email-template').setOptions($wire.emailTemplates);
-            $modalOpen('edit-mail');
+            $tsui.open.modal('edit-mail');
         JS);
     }
 

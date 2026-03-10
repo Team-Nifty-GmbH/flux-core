@@ -465,14 +465,14 @@
                         flat
                         x-show="$wire.event.id"
                         x-cloak
-                        x-on:click="dialogType = 'delete'; $modalOpen('confirm-dialog')"
+                        x-on:click="dialogType = 'delete'; $tsui.open.modal('confirm-dialog')"
                     />
                     <x-button
                         :text="__('Cancel Event')"
                         color="red"
                         x-show="$wire.event.id && !$wire.event.is_cancelled && !$wire.event.calendar_type"
                         x-cloak
-                        x-on:click="dialogType = 'cancel'; $modalOpen('confirm-dialog')"
+                        x-on:click="dialogType = 'cancel'; $tsui.open.modal('confirm-dialog')"
                     />
                 </div>
                 <div class="flex w-full justify-end gap-2">
@@ -481,7 +481,7 @@
                         color="secondary"
                         light
                         flat
-                        x-on:click="$modalClose('edit-event-modal')"
+                        x-on:click="$tsui.close.modal('edit-event-modal')"
                     />
 
                     <div
@@ -491,7 +491,7 @@
                         <x-button
                             :text="__('Save')"
                             primary
-                            x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
+                            x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $tsui.open.modal('confirm-dialog') : $wire.save()"
                         />
                     </div>
                     @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)

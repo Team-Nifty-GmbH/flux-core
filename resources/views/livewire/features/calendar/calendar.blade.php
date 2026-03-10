@@ -115,12 +115,12 @@
                             light
                             flat
                             :text="__('Cancel')"
-                            x-on:click="$modalClose('calendar-modal');"
+                            x-on:click="$tsui.close.modal('calendar-modal');"
                         />
                         <x-button
                             color="indigo"
                             :text="__('Save')"
-                            x-on:click="saveCalendar().then((success) => {if(success) $modalClose('calendar-modal');})"
+                            x-on:click="saveCalendar().then((success) => {if(success) $tsui.close.modal('calendar-modal');})"
                         />
                     </div>
                 </div>

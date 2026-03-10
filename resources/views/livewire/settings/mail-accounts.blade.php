@@ -66,7 +66,7 @@
             color="secondary"
             light
             :text="__('Close')"
-            x-on:click="$modalClose('edit-mail-folders')"
+            x-on:click="$tsui.close.modal('edit-mail-folders')"
         />
     </x-slot>
 </x-modal>
@@ -205,12 +205,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-mail-account')"
+            x-on:click="$tsui.close.modal('edit-mail-account')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => {if(success) {$modalClose('edit-mail-account');}})"
+            x-on:click="$wire.save().then((success) => {if(success) {$tsui.close.modal('edit-mail-account');}})"
         />
     </x-slot>
 </x-modal>

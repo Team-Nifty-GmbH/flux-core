@@ -44,7 +44,7 @@
                 :text="__('Delete')"
                 flat
                 color="red"
-                wire:click="deleteTransaction().then((success) => {if(success) $modalClose('transaction-detail-modal');})"
+                wire:click="deleteTransaction().then((success) => {if(success) $tsui.close.modal('transaction-detail-modal');})"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
             />
             <div class="flex w-full justify-end gap-x-2">
@@ -52,12 +52,12 @@
                     color="secondary"
                     light
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-details-modal')"
+                    x-on:click="$tsui.close.modal('transaction-details-modal')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Save')"
-                    wire:click="saveTransaction().then((success) => {if(success) $modalClose('transaction-details-modal');})"
+                    wire:click="saveTransaction().then((success) => {if(success) $tsui.close.modal('transaction-details-modal');})"
                 />
             </div>
         </div>

@@ -187,5 +187,5 @@ window.$openDetailModal = (url, hideNavigation = true) => {
     }
 
     document.getElementById('detail-modal-iframe').src = urlObj.href;
-    $modalOpen('detail-modal');
+    $tsui.open.modal('detail-modal');
 };

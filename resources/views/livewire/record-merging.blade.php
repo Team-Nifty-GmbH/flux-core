@@ -189,12 +189,12 @@
                 :text="__('Cancel')"
                 color="secondary"
                 light
-                x-on:click="$modalClose('merge-records-modal')"
+                x-on:click="$tsui.close.modal('merge-records-modal')"
             />
             <x-button
                 :text="__('Merge')"
                 color="indigo"
-                wire:click="merge().then((success) => {if(success) $modalClose('merge-records-modal');})"
+                wire:click="merge().then((success) => {if(success) $tsui.close.modal('merge-records-modal');})"
                 wire:flux-confirm.type.warning="{{ __('Merge Records|Are you sure? This cannot be made undone!|Cancel|Confirm') }}"
             />
         </x-slot>

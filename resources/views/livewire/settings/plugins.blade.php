@@ -38,13 +38,13 @@
                     light
                     flat
                     :text="__('Close')"
-                    x-on:click="$modalClose('update-plugin-modal')"
+                    x-on:click="$tsui.close.modal('update-plugin-modal')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Update')"
                     loading="update"
-                    wire:click="updatePackages($wire.update.package); $modalClose('update-plugin-modal');"
+                    wire:click="updatePackages($wire.update.package); $tsui.close.modal('update-plugin-modal');"
                 />
             </x-slot>
         </x-modal>
@@ -61,7 +61,7 @@
                 light
                 flat
                 :text="__('Close')"
-                x-on:click="$modalClose('more-plugin-modal')"
+                x-on:click="$tsui.close.modal('more-plugin-modal')"
             />
         </x-slot>
     </x-modal>
@@ -177,7 +177,7 @@
                     light
                     flat
                     :text="__('Close')"
-                    x-on:click="$modalClose('install-plugin-modal')"
+                    x-on:click="$tsui.close.modal('install-plugin-modal')"
                 />
             </x-slot>
         </x-modal>
@@ -219,7 +219,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Install')"
-                    x-on:click="$modalOpen('install')"
+                    x-on:click="$tsui.open.modal('install')"
                 />
             @endif
 

@@ -47,7 +47,7 @@ class SerialNumberList extends BaseSerialNumberList
         ];
 
         $this->js(<<<'JS'
-            $modalOpen('create-serial-number-modal');
+            $tsui.open.modal('create-serial-number-modal');
         JS);
     }
 

@@ -21,7 +21,7 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('preview-{{ strtolower($this->getId()) }}')"
+                    x-on:click="$tsui.close.modal('preview-{{ strtolower($this->getId()) }}')"
                 />
                 <x-button
                     loading
@@ -211,13 +211,13 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('create-documents-{{ strtolower($this->getId()) }}')"
+            x-on:click="$tsui.close.modal('create-documents-{{ strtolower($this->getId()) }}')"
         />
         <x-button
             color="indigo"
             :text="__('Continue')"
             loading="createDocuments"
-            wire:click="createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });"
+            wire:click="createDocuments().then(() => { $tsui.close.modal('create-documents-{{ strtolower($this->getId()) }}'); });"
         />
     </x-slot>
 </x-modal>

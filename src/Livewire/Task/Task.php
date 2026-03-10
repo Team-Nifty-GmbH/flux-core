@@ -179,7 +179,7 @@ class Task extends Component
         $this->replica = $this->task;
 
         $this->js(<<<'JS'
-            $modalOpen('replicate-task-modal');
+            $tsui.open.modal('replicate-task-modal');
         JS);
     }
 

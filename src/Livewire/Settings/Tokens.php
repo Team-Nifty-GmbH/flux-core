@@ -51,7 +51,7 @@ class Tokens extends TokenList
     {
         if ($result = $this->parentSave()) {
             $this->js(<<<'JS'
-                $modalOpen('copy-token-modal')
+                $tsui.open.modal('copy-token-modal')
             JS);
         }
 

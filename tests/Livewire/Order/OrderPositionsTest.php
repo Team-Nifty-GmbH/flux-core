@@ -309,7 +309,7 @@ test('edit new order position', function (): void {
         ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('orderPosition.vat_rate_id', $defaultVatRate->id)
-        ->assertExecutesJs("\$modalOpen('edit-order-position');");
+        ->assertExecutesJs("\$tsui.open.modal('edit-order-position');");
 });
 
 test('edit order position', function (): void {
@@ -321,7 +321,7 @@ test('edit order position', function (): void {
         ->assertHasNoErrors()
         ->assertSet('orderPosition.id', $orderPosition->id)
         ->assertSet('orderPosition.name', $orderPosition->name)
-        ->assertExecutesJs("\$modalOpen('edit-order-position');");
+        ->assertExecutesJs("\$tsui.open.modal('edit-order-position');");
 });
 
 test('get builder filters by order', function (): void {

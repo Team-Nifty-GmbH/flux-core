@@ -29,7 +29,7 @@ class ActivityLogs extends ActivityLogList
         $this->activity['causer'] = $activity->causer?->name;
 
         $this->js(<<<'JS'
-            $modalOpen('activity-log-detail');
+            $tsui.open.modal('activity-log-detail');
         JS);
     }
 }

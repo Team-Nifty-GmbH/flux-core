@@ -84,7 +84,7 @@ class ProductOptionGroups extends ProductOptionGroupList
         $this->productOptionGroupForm->fill($productOptionGroup);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-product-option-group-modal');
+            $tsui.open.modal('edit-product-option-group-modal');
         JS);
     }
 

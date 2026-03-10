@@ -62,7 +62,7 @@ trait SupportsAutoRender
 
         $this->getComponent()
             ->js(<<<JS
-                \$modalOpen('$modalName');
+                \$tsui.open.modal('$modalName');
             JS);
     }
 
@@ -342,12 +342,12 @@ trait SupportsAutoRender
                 . ':text="__(' . "'Delete'" . ')" '
                 . 'wire:flux-confirm.type.error="{{ __(\'wire:confirm.delete\', [\'model\' => \''
                 . class_basename($this) . '\']) }}" '
-                . 'wire:click="' . $deleteMethod . '().then((success) => { if(success) $modalClose(\''
+                . 'wire:click="' . $deleteMethod . '().then((success) => { if(success) $tsui.close.modal(\''
                 . $modalName . '\')})"/>';
         }
 
-        $saveAction = $saveMethod . '().then((success) => { if(success) $modalClose(\'' . $modalName . '\')})';
-        $cancelAction = '$modalClose(\'' . $modalName . '\')';
+        $saveAction = $saveMethod . '().then((success) => { if(success) $tsui.close.modal(\'' . $modalName . '\')})';
+        $cancelAction = '$tsui.close.modal(\'' . $modalName . '\')';
 
         return '<div x-on:keydown.enter.prevent="$wire.' . $saveAction . '"'
             . ' x-on:keydown.escape.prevent="' . $cancelAction . '">'

@@ -191,7 +191,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('replicate-order')"
+                x-on:click="$tsui.close.modal('replicate-order')"
             />
             <x-button
                 loading="saveReplicate"
@@ -205,7 +205,7 @@
         id="edit-discount"
         x-on:open="$focusOn('discount-name')"
         x-trap="show"
-        x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
+        x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $tsui.close.modal('edit-discount');})"
     >
         <div class="flex flex-col gap-1.5">
             <x-input
@@ -242,12 +242,12 @@
                 color="secondary"
                 light
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-discount')"
+                x-on:click="$tsui.close.modal('edit-discount')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
+                wire:click="saveDiscount().then((success) => {if(success) $tsui.close.modal('edit-discount');})"
             />
         </x-slot>
     </x-modal>

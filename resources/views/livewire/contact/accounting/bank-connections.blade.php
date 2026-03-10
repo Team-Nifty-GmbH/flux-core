@@ -22,12 +22,12 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-contact-bank-connection')"
+                x-on:click="$tsui.close.modal('edit-contact-bank-connection')"
                 :text="__('Cancel')"
             />
             <x-button
                 color="primary"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
+                wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-contact-bank-connection'); })"
                 primary
                 :text="__('Save')"
             />

@@ -80,7 +80,7 @@ class Industries extends IndustryList
         $this->industryForm->fill($industry);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-industry-modal');
+            $tsui.open.modal('edit-industry-modal');
         JS);
     }
 

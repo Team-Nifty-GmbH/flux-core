@@ -56,12 +56,12 @@
                 color="secondary"
                 light
                 :text="__('Cancel')"
-                x-on:click="$modalClose('{{ $leadForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $leadForm->modalName() }}')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="createLeads().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
+                wire:click="createLeads().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
             />
         </x-slot>
     </x-modal>

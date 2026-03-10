@@ -50,12 +50,12 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-payment-reminder-text-modal')"
+                x-on:click="$tsui.close.modal('edit-payment-reminder-text-modal')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="save().then((success) => { if (success) $modalClose('edit-payment-reminder-text-modal'); })"
+                wire:click="save().then((success) => { if (success) $tsui.close.modal('edit-payment-reminder-text-modal'); })"
             />
         </x-slot>
     </div>

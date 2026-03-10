@@ -108,7 +108,7 @@ class TestServiceProvider extends ServiceProvider
 
                     $this->assertStatus(200)
                         ->call('edit')
-                        ->assertExecutesJs('$modalOpen(\'' . $modalName . '\')');
+                        ->assertExecutesJs('$tsui.open.modal(\'' . $modalName . '\')');
 
                     foreach ($formValues as $propertyName => $propertyValue) {
                         $this->set($formPropertyName . '.' . $propertyName, $propertyValue);

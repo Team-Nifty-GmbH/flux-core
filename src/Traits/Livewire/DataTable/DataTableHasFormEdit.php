@@ -84,7 +84,7 @@ trait DataTableHasFormEdit
 
         $modalName = $this->modalName();
         $this->js(<<<JS
-            \$modalOpen('$modalName');
+            \$tsui.open.modal('$modalName');
         JS);
     }
 

@@ -131,7 +131,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-work-time-modal')"
+                x-on:click="$tsui.close.modal('edit-work-time-modal')"
             />
             <x-button
                 color="indigo"
@@ -139,7 +139,7 @@
                 x-on:click="
                     $wire.workTime.local_started_at = dayjs($wire.workTime.started_at).format();
                     $wire.workTime.local_ended_at = dayjs($wire.workTime.ended_at).format();
-                    $wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })
+                    $wire.save().then((success) => { if (success) $tsui.close.modal('edit-work-time-modal'); })
                 "
                 :text="__('Save')"
             />
@@ -215,12 +215,12 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('create-orders-modal')"
+                x-on:click="$tsui.close.modal('create-orders-modal')"
             />
             <x-button
                 color="indigo"
                 loading
-                x-on:click="$wire.createOrders().then(() => { $modalClose('create-orders-modal'); })"
+                x-on:click="$wire.createOrders().then(() => { $tsui.close.modal('create-orders-modal'); })"
                 :text="__('Create Orders')"
             />
         </x-slot>
@@ -236,12 +236,12 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('toggle-is-billable-modal'); isBillable = true;"
+                    x-on:click="$tsui.close.modal('toggle-is-billable-modal'); isBillable = true;"
                 />
                 <x-button
                     color="indigo"
                     loading
-                    wire:click="toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); isBillable = true; })"
+                    wire:click="toggleIsBillable(isBillable).then(() => { $tsui.close.modal('toggle-is-billable-modal'); isBillable = true; })"
                     :text="__('Apply')"
                 />
             </x-slot>

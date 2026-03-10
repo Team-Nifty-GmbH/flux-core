@@ -5,7 +5,7 @@
     x-on:data-table-row-clicked="
         $wire.loadLog($event.detail.record.id).then((result) => {
             log = result
-            $modalOpen('show-log-modal')
+            $tsui.open.modal('show-log-modal')
         })
     "
 >
@@ -57,7 +57,7 @@
                 color="secondary"
                 light
                 :text="__('Close')"
-                x-on:click="$modalClose('show-log-modal')"
+                x-on:click="$tsui.close.modal('show-log-modal')"
                 class="mr-2"
             />
         </x-slot>

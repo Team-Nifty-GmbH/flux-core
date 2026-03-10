@@ -89,7 +89,7 @@ class PurchaseInvoiceList extends BaseDataTable
                     && resolve_static(CreatePurchaseInvoice::class, 'canPerformAction', [false])
                 )
                 ->xOnClick(<<<'JS'
-                    $modalOpen('bulk-pdf-upload-modal')
+                    $tsui.open.modal('bulk-pdf-upload-modal')
                 JS),
         ];
     }
@@ -137,7 +137,7 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $modalOpen('edit-purchase-invoice-modal');
+            $tsui.open.modal('edit-purchase-invoice-modal');
         JS);
     }
 

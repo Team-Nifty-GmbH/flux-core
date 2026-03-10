@@ -199,12 +199,12 @@
                 color="secondary"
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-price-list-modal')"
+                x-on:click="$tsui.close.modal('edit-price-list-modal')"
             />
             <x-button
                 color="primary"
                 :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-price-list-modal')})"
+                wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-price-list-modal')})"
             />
         </x-slot>
     </x-modal>

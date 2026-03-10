@@ -2,7 +2,7 @@
     <x-modal
         id="edit-project"
         x-on:open="$focusOn('project-name')"
-        x-on:create-project.window="$wire.resetForm(); $modalClose('edit-project');"
+        x-on:create-project.window="$wire.resetForm(); $tsui.close.modal('edit-project');"
     >
         <div
             x-data="{ edit: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')) }"
@@ -15,14 +15,14 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-project')"
+                x-on:click="$tsui.close.modal('edit-project')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
                 x-on:click="$wire.save().then((project) => {
                     if (project) {
-                        $modalClose('edit-project');
+                        $tsui.close.modal('edit-project');
                         let baseRoute = '{{ route('projects.id', ['id' => ':id']) }}';
                         Livewire.navigate(baseRoute.replace(':id', $wire.project.id));
                     }

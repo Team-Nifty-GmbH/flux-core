@@ -124,7 +124,7 @@ class Tags extends TagList
         $this->tagForm->fill($tag);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-tag-modal');
+            $tsui.open.modal('edit-tag-modal');
         JS);
     }
 

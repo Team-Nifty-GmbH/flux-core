@@ -19,7 +19,7 @@ trait Actions
     public function modalOpen(string $id): void
     {
         $this->js(<<<JS
-            \$modalOpen('$id');
+            \$tsui.open.modal('$id');
         JS);
     }
 
@@ -27,7 +27,7 @@ trait Actions
     public function modalClose(string $id): void
     {
         $this->js(<<<JS
-            \$modalClose('$id');
+            \$tsui.open.modal('$id');
         JS);
     }
 }

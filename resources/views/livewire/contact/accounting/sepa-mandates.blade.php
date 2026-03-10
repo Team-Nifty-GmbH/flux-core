@@ -31,11 +31,11 @@
         <x-button
             color="secondary"
             light
-            x-on:click="$modalClose('edit-sepa-mandate-modal')"
+            x-on:click="$tsui.close.modal('edit-sepa-mandate-modal')"
             :text="__('Cancel')"
         />
         <x-button
-            wire:click="save().then((success) => { if(success) $modalClose('edit-sepa-mandate-modal'); })"
+            wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-sepa-mandate-modal'); })"
             primary
             :text="__('Save')"
         />

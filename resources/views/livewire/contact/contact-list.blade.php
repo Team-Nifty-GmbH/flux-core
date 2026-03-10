@@ -28,7 +28,7 @@
                     light
                     flat
                     :text="__('Cancel') "
-                    x-on:click="$modalClose('assign-agent-modal')"
+                    x-on:click="$tsui.close.modal('assign-agent-modal')"
                 />
                 <x-button
                     color="indigo"
@@ -36,7 +36,7 @@
                     loading="assignToAgent"
                     x-bind:disabled="! $wire.agentId"
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.contact.assign-agent') }}"
-                    wire:click="assignToAgent().then((success) => {if(success) $modalClose('assign-agent-modal');})"
+                    wire:click="assignToAgent().then((success) => {if(success) $tsui.close.modal('assign-agent-modal');})"
                 />
             </x-slot>
         </x-modal>

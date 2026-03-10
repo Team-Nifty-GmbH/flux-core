@@ -89,14 +89,14 @@
                 :text="__('Cancel')"
                 color="secondary"
                 flat
-                x-on:click="$modalClose('{{ $vacationBlackoutForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $vacationBlackoutForm->modalName() }}')"
             />
             <x-button
                 :text="__('Save')"
                 color="primary"
                 wire:click="save().then((success) => {
                     if (success) {
-                        $modalClose('{{ $vacationBlackoutForm->modalName() }}');
+                        $tsui.close.modal('{{ $vacationBlackoutForm->modalName() }}');
                     }
                 })"
             />

@@ -40,12 +40,12 @@
                         light
                         flat
                         :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-address-assignment')"
+                        x-on:click="$tsui.close.modal('edit-address-assignment')"
                     />
                     <x-button
                         color="indigo"
                         loading="save"
-                        x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-address-assignment');})"
+                        x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('edit-address-assignment');})"
                         :text="__('Save')"
                     />
                 </x-slot>
@@ -81,6 +81,6 @@
     <x-button
         color="indigo"
         :text="__('Add additional address')"
-        x-on:click="$modalOpen('edit-address-assignment')"
+        x-on:click="$tsui.open.modal('edit-address-assignment')"
     />
 </div>

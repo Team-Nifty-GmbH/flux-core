@@ -79,7 +79,7 @@ class Warehouses extends WarehouseList
         $this->warehouse->fill($warehouse);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-warehouse-modal');
+            $tsui.open.modal('edit-warehouse-modal');
         JS);
     }
 

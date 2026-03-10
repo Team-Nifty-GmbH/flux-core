@@ -129,12 +129,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-serial-number-range-modal')"
+            x-on:click="$tsui.close.modal('edit-serial-number-range-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => { if(success) $modalClose('edit-serial-number-range-modal')})"
+            wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-serial-number-range-modal')})"
         />
     </x-slot>
 </x-modal>

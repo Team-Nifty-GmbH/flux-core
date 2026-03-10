@@ -106,7 +106,7 @@ class Scheduling extends ScheduleList
         $this->schedule->fill($schedule);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-schedule-modal');
+            $tsui.open.modal('edit-schedule-modal');
         JS);
     }
 

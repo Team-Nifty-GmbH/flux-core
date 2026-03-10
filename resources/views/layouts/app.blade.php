@@ -63,7 +63,7 @@
                             urlObj.searchParams.delete('no-navigation')
 
                             window.open(urlObj)
-                            $modalClose('detail-modal')
+                            $tsui.close.modal('detail-modal')
                         },
                     }"
                 >
@@ -86,7 +86,7 @@
                                 color="secondary"
                                 light
                                 :text="__('Cancel')"
-                                x-on:click="$modalClose('detail-modal')"
+                                x-on:click="$tsui.close.modal('detail-modal')"
                             />
                             <x-button
                                 color="indigo"

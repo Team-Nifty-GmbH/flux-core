@@ -51,13 +51,13 @@
         <x-button
             color="secondary"
             light
-            x-on:click="$modalClose('edit-media')"
+            x-on:click="$tsui.close.modal('edit-media')"
             :text="__('Cancel')"
         />
         <x-button
             color="secondary"
             light
-            wire:click="save().then((success) => {if(success) $modalClose('edit-media')})"
+            wire:click="save().then((success) => {if(success) $tsui.close.modal('edit-media')})"
             primary
             :text="__('Save')"
         />

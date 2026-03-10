@@ -45,13 +45,13 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('create-tasks')"
+            x-on:click="$tsui.close.modal('create-tasks')"
         />
         <x-button
             loading="createTasks"
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => {if(success) $modalClose('create-tasks');})"
+            wire:click="save().then((success) => {if(success) $tsui.close.modal('create-tasks');})"
         />
     </div>
 </div>

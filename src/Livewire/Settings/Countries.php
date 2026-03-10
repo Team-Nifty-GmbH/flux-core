@@ -80,7 +80,7 @@ class Countries extends CountryList
         $this->country->fill($country);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-country-modal');
+            $tsui.open.modal('edit-country-modal');
         JS);
     }
 

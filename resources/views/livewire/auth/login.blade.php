@@ -25,7 +25,7 @@
                             color="indigo"
                             class="w-full"
                             :text="__('Reset password')"
-                            x-on:click="$modalClose('password-reset')"
+                            x-on:click="$tsui.close.modal('password-reset')"
                         ></x-button>
                     </x-slot>
                 </x-modal>
@@ -55,7 +55,7 @@
                         />
                         <div class="text-sm">
                             <a
-                                x-on:click="$modalOpen('password-reset')"
+                                x-on:click="$tsui.open.modal('password-reset')"
                                 class="cursor-pointer font-medium text-indigo-600 hover:text-indigo-500"
                             >
                                 {{ __('Reset password') }}

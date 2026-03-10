@@ -87,7 +87,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->tenant_id ??= resolve_static(Tenant::class, 'default')?->getKey();
 
         $this->js(<<<'JS'
-             $modalOpen('create-order-modal');
+             $tsui.open.modal('create-order-modal');
         JS);
     }
 

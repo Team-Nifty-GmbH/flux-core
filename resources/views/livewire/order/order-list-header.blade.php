@@ -38,12 +38,12 @@
                 color="secondary"
                 light
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-position-discount')"
+                x-on:click="$tsui.close.modal('edit-position-discount')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                wire:click="discountSelectedPositions().then(() => {$modalClose('edit-position-discount');})"
+                wire:click="discountSelectedPositions().then(() => {$tsui.close.modal('edit-position-discount');})"
             />
         </x-slot>
     </x-modal>
@@ -412,7 +412,7 @@
                         flat
                         color="red"
                         :text="__('Delete')"
-                        wire:click="deleteOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        wire:click="deleteOrderPosition().then((success) => {if(success) $tsui.close.modal('edit-order-position');})"
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
                     />
                 </div>
@@ -422,11 +422,11 @@
                         light
                         flat
                         :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-order-position')"
+                        x-on:click="$tsui.close.modal('edit-order-position')"
                     />
                     <x-button
                         color="indigo"
-                        wire:click="addOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        wire:click="addOrderPosition().then((success) => {if(success) $tsui.close.modal('edit-order-position');})"
                         x-show="!$wire.order.is_locked"
                         x-on:click=""
                         :text="__('Save')"

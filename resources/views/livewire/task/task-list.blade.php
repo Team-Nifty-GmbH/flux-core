@@ -131,14 +131,14 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('new-task-modal')"
+                x-on:click="$tsui.close.modal('new-task-modal')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
                 x-on:click="$wire.save().then((task) => {
                     if (task) {
-                        $modalClose('new-task-modal');
+                        $tsui.close.modal('new-task-modal');
                     }
                 });"
             />

@@ -345,12 +345,12 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-communication')"
+                x-on:click="$tsui.close.modal('edit-communication')"
                 :text="__('Cancel')"
             />
             <x-button
                 color="indigo"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-communication'); })"
+                wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
                 primary
                 loading="save"
                 :text="__('Save')"
@@ -361,7 +361,7 @@
             >
                 <x-button
                     color="indigo"
-                    wire:click="send().then((success) => { if(success) $modalClose('edit-communication'); })"
+                    wire:click="send().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
                     primary
                     loading="send"
                     :text="__('Send')"
@@ -395,13 +395,13 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('create-preview')"
+                x-on:click="$tsui.close.modal('create-preview')"
             />
             <x-button
                 color="indigo"
                 :text="__('Continue')"
                 loading="createDocuments"
-                wire:click="createDocuments().then(() => { $modalClose('create-preview'); });"
+                wire:click="createDocuments().then(() => { $tsui.close.modal('create-preview'); });"
             />
         </x-slot>
     </x-modal>

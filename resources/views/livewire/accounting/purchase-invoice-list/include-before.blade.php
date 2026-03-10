@@ -546,7 +546,7 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Delete')"
                             loading="delete"
-                            wire:click="delete().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                            wire:click="delete().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
                         />
                     @endcanAction
@@ -559,7 +559,7 @@
                         color="secondary"
                         light
                         :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-purchase-invoice-modal')"
+                        x-on:click="$tsui.close.modal('edit-purchase-invoice-modal')"
                     />
                     <x-button
                         color="indigo"
@@ -567,7 +567,7 @@
                         x-show="! $wire.purchaseInvoiceForm.order_id"
                         :text="__('Save')"
                         loading="save"
-                        wire:click="save().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                        wire:click="save().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
                     />
                     @canAction(\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
                         <x-button
@@ -576,7 +576,7 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Finish')"
                             loading="finish"
-                            wire:click="finish().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                            wire:click="finish().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
                         />
                     @endcanAction
 
@@ -635,7 +635,7 @@
                                 x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
                                 x-bind:disabled="isLoadingFiles.length > 0"
                                 loading="processBulkUpload"
-                                wire:click="processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); $modalClose('bulk-pdf-upload-modal'); } })"
+                                wire:click="processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); $tsui.close.modal('bulk-pdf-upload-modal'); } })"
                             />
                         </div>
                     @endcanAction
@@ -648,7 +648,7 @@
                 color="secondary"
                 light
                 :text="__('Cancel')"
-                x-on:click="$modalClose('bulk-pdf-upload-modal');"
+                x-on:click="$tsui.close.modal('bulk-pdf-upload-modal');"
             />
         </x-slot>
     </x-modal>

@@ -156,12 +156,12 @@
             :text="__('Cancel')"
             color="secondary"
             flat
-            x-on:click="$modalClose('{{ $absenceRequestForm->modalName() }}')"
+            x-on:click="$tsui.close.modal('{{ $absenceRequestForm->modalName() }}')"
         />
         <x-button
             :text="__('Save')"
             color="primary"
-            wire:click="save().then((success) => { if(success) $modalClose('{{ $absenceRequestForm->modalName() }}')})"
+            wire:click="save().then((success) => { if(success) $tsui.close.modal('{{ $absenceRequestForm->modalName() }}')})"
         />
     </x-slot>
 </x-modal>

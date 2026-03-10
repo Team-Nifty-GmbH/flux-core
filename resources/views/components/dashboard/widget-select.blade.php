@@ -26,7 +26,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Close')"
-                    x-on:click="$modalClose('widget-list')"
+                    x-on:click="$tsui.close.modal('widget-list')"
                 />
             </div>
         </x-slot>

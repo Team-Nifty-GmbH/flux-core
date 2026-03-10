@@ -124,7 +124,7 @@ class SepaMandates extends SepaMandateList
         $this->sepaMandate->fill($sepaMandate);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-sepa-mandate-modal');
+            $tsui.open.modal('edit-sepa-mandate-modal');
         JS);
     }
 

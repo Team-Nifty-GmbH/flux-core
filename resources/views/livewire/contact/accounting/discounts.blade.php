@@ -98,7 +98,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => {if(success) $modalClose('edit-discount-modal');})"
+            wire:click="save().then((success) => {if(success) $tsui.close.modal('edit-discount-modal');})"
         />
     </x-slot>
 </x-modal>

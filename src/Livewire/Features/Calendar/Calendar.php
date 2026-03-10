@@ -102,7 +102,7 @@ class Calendar extends Component
         $this->calendar->fill($calendar->toCalendarObject());
 
         $this->js(<<<'JS'
-            $modalOpen('calendar-modal');
+            $tsui.open.modal('calendar-modal');
         JS);
     }
 
@@ -167,7 +167,7 @@ class Calendar extends Component
         } else {
             $this->js(
                 <<<'JS'
-                    $modalOpen('edit-event-modal');
+                    $tsui.open.modal('edit-event-modal');
                 JS
             );
         }

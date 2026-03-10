@@ -93,7 +93,7 @@ class MediaList extends BaseDataTable
         $this->mediaForm->fill($media);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-media');
+            $tsui.open.modal('edit-media');
         JS);
     }
 

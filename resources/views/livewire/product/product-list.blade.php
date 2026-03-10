@@ -52,7 +52,7 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('create-product-modal')"
+                    x-on:click="$tsui.close.modal('create-product-modal')"
                 />
                 <x-button
                     loading="save"
@@ -154,14 +154,14 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('update-prices-modal')"
+                    x-on:click="$tsui.close.modal('update-prices-modal')"
                 />
                 <x-button
                     loading="updatePrices"
                     color="indigo"
                     :text="__('Save')"
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.product-prices-update') }}"
-                    wire:click="updatePrices().then((success) => {if(success) $modalClose('update-prices-modal');});"
+                    wire:click="updatePrices().then((success) => {if(success) $tsui.close.modal('update-prices-modal');});"
                 />
             </x-slot>
         </x-modal>
