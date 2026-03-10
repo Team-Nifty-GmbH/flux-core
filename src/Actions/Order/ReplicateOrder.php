@@ -74,9 +74,7 @@ class ReplicateOrder extends FluxAction
             $orderData['is_paid'],
         );
 
-        if ($originalOrder['parent_id'] === $orderData['parent_id']) {
-            unset($orderData['parent_id']);
-        }
+        unset($orderData['parent_id']);
 
         if (
             $originalOrder['contact_id'] === $orderData['contact_id']
