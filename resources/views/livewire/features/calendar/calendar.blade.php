@@ -160,8 +160,8 @@
                         storeSettings()
                     }
                 "
-                x-on:folder-tree-select="(event) => ($wire.calendarObject = event.detail)"
-                x-on:folder-tree-unselect="() => ($wire.calendarObject = null)"
+                x-on:folder-tree-select="(event) => $wire.$set('calendarObject', event.detail)"
+                x-on:folder-tree-unselect="() => $wire.$set('calendarObject', null)"
                 class="w-full pt-2"
             >
                 <x-flux::checkbox-tree
