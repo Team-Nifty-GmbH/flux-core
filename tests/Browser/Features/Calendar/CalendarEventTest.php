@@ -5,52 +5,79 @@ use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Pivots\Calendarable;
 use Illuminate\Support\Carbon;
 
-test('calendar page loads without js errors', function (): void {
-    $calendar = Calendar::factory()->create([
+function createCalendarWithOwner(array $attributes = []): Calendar
+{
+    $calendar = Calendar::factory()->create(array_merge([
         'has_repeatable_events' => false,
         'is_public' => false,
         'is_group' => false,
-    ]);
+    ], $attributes));
 
     Calendarable::create([
         'calendar_id' => $calendar->getKey(),
-        'calendarable_type' => $this->user->getMorphClass(),
-        'calendarable_id' => $this->user->getKey(),
+        'calendarable_type' => test()->user->getMorphClass(),
+        'calendarable_id' => test()->user->getKey(),
         'permission' => 'owner',
     ]);
 
+    return $calendar;
+}
+
+function visitCalendar(): mixed
+{
     $page = visit(route('calendars'))
         ->assertRoute('calendars')
         ->assertNoSmoke();
 
-    // Wait for calendar to initialize
-    $page->script('() => new Promise(r => setTimeout(r, 3000))');
+    // Wait for FullCalendar to render
+    $page->script(<<<'JS'
+        () => new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Calendar did not initialize')), 10000);
+            const check = () => {
+                if (document.querySelector('[calendar-root] .fc')) {
+                    clearTimeout(timeout);
+                    resolve();
+                } else {
+                    setTimeout(check, 200);
+                }
+            };
+            check();
+        })
+    JS);
 
-    $page->assertNoJavascriptErrors();
+    return $page;
+}
+
+function waitForElement(mixed $page, string $selector, int $timeout = 5000): void
+{
+    $page->script(<<<JS
+        () => new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Element not found: {$selector}')), {$timeout});
+            const check = () => {
+                const el = document.querySelector('{$selector}');
+                if (el && el.offsetParent !== null) {
+                    clearTimeout(timeout);
+                    resolve();
+                } else {
+                    setTimeout(check, 200);
+                }
+            };
+            check();
+        })
+    JS);
+}
+
+test('calendar page loads without js errors', function (): void {
+    createCalendarWithOwner();
+
+    visitCalendar()->assertNoJavascriptErrors();
 });
 
 test('saving a new calendar event works without js errors', function (): void {
-    $calendar = Calendar::factory()->create([
-        'has_repeatable_events' => false,
-        'is_public' => false,
-        'is_group' => false,
-    ]);
+    createCalendarWithOwner();
 
-    Calendarable::create([
-        'calendar_id' => $calendar->getKey(),
-        'calendarable_type' => $this->user->getMorphClass(),
-        'calendarable_id' => $this->user->getKey(),
-        'permission' => 'owner',
-    ]);
+    $page = visitCalendar();
 
-    $page = visit(route('calendars'))
-        ->assertRoute('calendars')
-        ->assertNoSmoke();
-
-    // Wait for calendar to initialize
-    $page->script('() => new Promise(r => setTimeout(r, 3000))');
-
-    // Trigger a date click via Livewire dispatch
     $start = Carbon::tomorrow()->setTime(14, 0);
     $page->script(<<<JS
         () => {
@@ -68,40 +95,24 @@ test('saving a new calendar event works without js errors', function (): void {
         }
     JS);
 
-    // Wait for modal to open
-    $page->script('() => new Promise(r => setTimeout(r, 3000))');
+    waitForElement($page, '[x-ref="autofocus"]');
 
-    // Fill in the title via JS (the input might be inside a Livewire component)
     $page->script(<<<'JS'
         () => {
-            const input = document.querySelector('[x-ref="autofocus"]')
-                || document.querySelector('input[wire\\:model="event.title"]')
-                || document.querySelector('input[wire\\:model\\.live="event.title"]');
+            const input = document.querySelector('[x-ref="autofocus"]');
             if (!input) throw new Error('Title input not found');
             input.value = 'Browser Test Event';
             input.dispatchEvent(new Event('input', { bubbles: true }));
         }
     JS);
 
-    // Wait for Livewire to process
     $page->script('() => new Promise(r => setTimeout(r, 1000))');
 
     $page->assertNoJavascriptErrors();
 });
 
-test('editing a calendar event with $wire.$set works', function (): void {
-    $calendar = Calendar::factory()->create([
-        'has_repeatable_events' => true,
-        'is_public' => false,
-        'is_group' => false,
-    ]);
-
-    Calendarable::create([
-        'calendar_id' => $calendar->getKey(),
-        'calendarable_type' => $this->user->getMorphClass(),
-        'calendarable_id' => $this->user->getKey(),
-        'permission' => 'owner',
-    ]);
+test('editing a calendar event opens modal and syncs via $wire.$set', function (): void {
+    $calendar = createCalendarWithOwner(['has_repeatable_events' => true]);
 
     $start = Carbon::tomorrow()->setTime(10, 0);
     $event = CalendarEvent::factory()->create([
@@ -112,14 +123,8 @@ test('editing a calendar event with $wire.$set works', function (): void {
         'is_all_day' => false,
     ]);
 
-    $page = visit(route('calendars'))
-        ->assertRoute('calendars')
-        ->assertNoSmoke();
+    $page = visitCalendar();
 
-    // Wait for calendar to initialize
-    $page->script('() => new Promise(r => setTimeout(r, 3000))');
-
-    // Trigger event click with proper FullCalendar-like structure
     $eventId = $event->getKey();
     $calendarId = $calendar->getKey();
     $startIso = $event->start->toIso8601String();
@@ -147,19 +152,34 @@ test('editing a calendar event with $wire.$set works', function (): void {
         }
     JS);
 
-    // Wait for modal to open
-    $page->script('() => new Promise(r => setTimeout(r, 3000))');
+    // Wait for modal to actually be visible (not just in DOM)
+    waitForElement($page, '#edit-event-modal');
 
-    // Verify no JS errors from the event edit form rendering
     $page->assertNoJavascriptErrors();
 
-    // Verify the event edit modal is visible
-    $modalVisible = $page->script(<<<'JS'
-        () => {
-            const modal = document.querySelector('[id="edit-event-modal"]');
-            return modal ? 'visible' : 'not-found';
-        }
+    // Verify event data was synced via $wire.$set by reading Livewire component state
+    $title = $page->script(<<<'JS'
+        () => new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => resolve('timeout'), 10000);
+            const check = () => {
+                const modal = document.querySelector('#edit-event-modal');
+                if (!modal) { setTimeout(check, 200); return; }
+                const wireEl = modal.querySelector('[wire\\:id]');
+                if (!wireEl || !wireEl.__livewire) { setTimeout(check, 200); return; }
+                const lw = wireEl.__livewire;
+                const title = lw.$wire?.event?.title
+                    || lw.$wire?.$get?.('event.title')
+                    || null;
+                if (title) {
+                    clearTimeout(timeout);
+                    resolve(title);
+                } else {
+                    setTimeout(check, 200);
+                }
+            };
+            check();
+        })
     JS);
 
-    expect($modalVisible)->toContain('visible');
+    expect($title)->toContain('LW4 Test Event');
 });
