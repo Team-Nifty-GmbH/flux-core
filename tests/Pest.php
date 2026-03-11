@@ -77,7 +77,8 @@ pest()
     ->beforeAll(function (): void {
         // Sail/Docker sets PLAYWRIGHT_BROWSERS_PATH=0 which means "local to project" for
         // npm install, but Playwright's run-server interprets 0 as an invalid path prefix.
-        // Override in all PHP env sources so Symfony Process passes the correct path.
+        // This override works when running tests on the host (outside Docker).
+        // Inside Docker, pass the env var via shell: PLAYWRIGHT_BROWSERS_PATH=... vendor/bin/testbench
         $browsersPath = dirname(__DIR__) . '/node_modules/playwright-core/.local-browsers';
         if (is_dir($browsersPath)) {
             putenv('PLAYWRIGHT_BROWSERS_PATH=' . $browsersPath);

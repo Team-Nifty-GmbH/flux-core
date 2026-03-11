@@ -74,10 +74,13 @@
                         x-on:change="
                             setDateTime('start', $event);
                             let end = dayjs($wire.event.end);
-                            $wire.$set('event.end', dayjs($wire.event.start)
-                                .set('hour', end.hour())
-                                .set('minute', end.minute())
-                                .format())
+                            $wire.$set(
+                                'event.end',
+                                dayjs($wire.event.start)
+                                    .set('hour', end.hour())
+                                    .set('minute', end.minute())
+                                    .format()
+                            )
                         "
                     />
                 </div>
