@@ -93,7 +93,7 @@
                     light
                     loading="loadMore"
                     :text="__('Load more')"
-                    wire:click="loadMore"
+                    wire:click="loadMore()"
                 />
             </div>
         @endif

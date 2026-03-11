@@ -52,7 +52,7 @@ abstract class Communication extends CommunicationList
                 ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
-                ->wireClick('edit')
+                ->wireClick('edit()')
                 ->when(resolve_static(CreateCommunication::class, 'canPerformAction', [false])),
         ];
     }
