@@ -1,4 +1,4 @@
-<div x-data="{ edit: true }">
+<div x-data="{ isEditing: true }">
     <div id="new-task-modal">
         <x-modal
             size="5xl"

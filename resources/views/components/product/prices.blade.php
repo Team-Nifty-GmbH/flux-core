@@ -66,7 +66,7 @@
                     <div x-show="priceList.parent">
                         <x-toggle
                             x-model.boolean="priceList.is_editable"
-                            x-bind:disabled="! edit"
+                            x-bind:disabled="! isEditing"
                             label="{{ __('Override calculated price') }}"
                         />
                     </div>
@@ -77,7 +77,7 @@
                 class="net-price"
                 type="number"
                 x-on:input="recalculate(priceList, true);"
-                x-bind:readonly="!edit || !priceList.is_editable"
+                x-bind:readonly="!isEditing || !priceList.is_editable"
                 label="{{ __('Price net') }}"
                 x-model="priceList.price_net"
             />
@@ -86,7 +86,7 @@
                 class="gross-price"
                 type="number"
                 x-on:input="recalculate(priceList, false);"
-                x-bind:readonly="!edit || !priceList.is_editable"
+                x-bind:readonly="!isEditing || !priceList.is_editable"
                 label="{{ __('Price gross') }}"
                 x-model="priceList.price_gross"
             />

@@ -1,5 +1,5 @@
 <div x-data="{
-    edit: false,
+    isEditing: false,
 }">
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
@@ -79,9 +79,9 @@
             <x-button
                 color="indigo"
                 x-cloak
-                x-show="!edit"
+                x-show="!isEditing"
                 class="w-full"
-                x-on:click="edit = true"
+                x-on:click="isEditing = true"
                 :text="__('Edit')"
             />
             <x-button
@@ -89,10 +89,10 @@
                 color="indigo"
                 loading="save"
                 x-cloak
-                x-show="edit"
+                x-show="isEditing"
                 class="w-full"
                 x-on:click="$wire.save().then((success) => {
-                    edit = false;
+                    isEditing = false;
                 });"
                 :text="__('Save')"
             />
@@ -103,9 +103,9 @@
                 :text="__('Cancel')"
                 x-cloak
                 loading="save"
-                x-show="edit"
+                x-show="isEditing"
                 class="w-full"
-                x-on:click="edit = false; $wire.resetForm();"
+                x-on:click="isEditing = false; $wire.resetForm();"
             />
         </div>
     </div>
