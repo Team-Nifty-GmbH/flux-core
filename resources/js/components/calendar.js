@@ -63,6 +63,8 @@ const calendar = () => {
                 this.getFolderTree().updateNode(calendarObj);
             }
 
+            this.$wire.$set('calendarObject', calendarObj);
+
             return true;
         },
         deleteCalendar() {
