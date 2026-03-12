@@ -47,6 +47,8 @@ class OrderPositionForm extends FluxForm
 
     public ?bool $is_alternative = false;
 
+    public bool $is_bundle_parent = false;
+
     public bool $is_bundle_position = false;
 
     public bool $is_free_text = false;

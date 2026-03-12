@@ -89,7 +89,19 @@ class UpdateOrderPosition extends FluxAction
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 
-        if ($product?->bundlePositions?->isNotEmpty()) {
+        if ($orderPosition->wasChanged('amount')) {
+            resolve_static(OrderPosition::class, 'query')
+                ->where('parent_id', $orderPosition->getKey())
+                ->whereNotNull('amount_bundle')
+                ->each(function (OrderPosition $child) use ($orderPosition): void {
+                    UpdateOrderPosition::make([
+                        'id' => $child->getKey(),
+                        'amount' => bcmul($child->amount_bundle, $orderPosition->amount),
+                    ])->validate()->execute();
+                });
+        }
+
+        if ($product?->bundleProducts?->isNotEmpty()) {
             $product = $orderPosition->product()->with('bundleProducts')->first();
             $sortNumber = $orderPosition->sort_number;
             $product->bundleProducts

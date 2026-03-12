@@ -123,7 +123,10 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
 
             'amount' => [
-                'exclude_if:is_free_text,true',
+                app(Numeric::class),
+                'nullable',
+            ],
+            'amount_bundle' => [
                 app(Numeric::class),
                 'nullable',
             ],
