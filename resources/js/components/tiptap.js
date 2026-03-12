@@ -259,6 +259,12 @@ export default function (
                         this.content = content;
                         this.editor()?.commands.setContent(content, false);
                     });
+                } else {
+                    this.$watch('content', (content) => {
+                        if (!this.proxy) return;
+                        if (content === this.editor()?.getHTML()) return;
+                        this.editor()?.commands.setContent(content, false);
+                    });
                 }
             },
         };
