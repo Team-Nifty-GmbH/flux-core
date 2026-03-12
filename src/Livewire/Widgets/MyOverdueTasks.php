@@ -7,11 +7,14 @@ use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
 class MyOverdueTasks extends Component
 {
     use Widgetable;
+
+    public int $limit = 25;
 
     public static function getCategory(): ?string
     {
@@ -35,28 +38,56 @@ class MyOverdueTasks extends Component
 
     public function render(): View|Factory
     {
-        $endStates = TaskState::all()
-            ->filter(fn ($state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $tasks = $this->getTasks();
 
         return view(
             'flux::livewire.widgets.my-tasks',
             [
-                'tasks' => auth()
-                    ->user()
-                    ->tasks()
-                    ->with('project:id,name')
-                    ->whereNotIn('state', $endStates)
-                    ->where('due_date', '<', now())
-                    ->orderBy('due_date', 'ASC')
-                    ->get(),
+                'tasks' => $tasks->take($this->limit),
+                'hasMore' => $tasks->count() > $this->limit,
             ]
         );
+    }
+
+    public function loadMore(): void
+    {
+        $this->limit += 25;
     }
 
     public function placeholder(): View|Factory
     {
         return view('flux::livewire.placeholders.horizontal-bar');
+    }
+
+    protected function getTasks(): Collection
+    {
+        return auth()
+            ->user()
+            ->tasks()
+            ->with(['project:id,name', 'model'])
+            ->whereNotIn('state', $this->getEndStates())
+            ->where('due_date', '<', now())
+            ->orderBy('due_date', 'ASC')
+            ->limit($this->limit + 1)
+            ->get([
+                'id',
+                'name',
+                'description',
+                'state',
+                'due_date',
+                'due_datetime',
+                'priority',
+                'project_id',
+                'model_type',
+                'model_id',
+            ]);
+    }
+
+    protected function getEndStates(): array
+    {
+        return TaskState::all()
+            ->filter(fn (string $state): bool => $state::$isEndState)
+            ->keys()
+            ->toArray();
     }
 }
