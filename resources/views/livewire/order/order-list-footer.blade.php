@@ -3,7 +3,7 @@
     wire:ignore
     x-show="! $wire.order.is_locked"
     x-cloak
-    class="sticky bottom-6 pt-6"
+    class="sticky bottom-6 z-10 pt-6"
 >
     <x-card>
         <form
