@@ -80,6 +80,10 @@ abstract class PrintableView extends Component
             return null;
         }
 
+        if (is_null($this->pdf)) {
+            return null;
+        }
+
         $resource = fopen('php://temp', 'rb+');
         fwrite($resource, $this->pdf->output());
         rewind($resource);
