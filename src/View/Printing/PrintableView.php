@@ -28,7 +28,7 @@ abstract class PrintableView extends Component
 
     private static ?string $layout = 'flux::layouts.printing';
 
-    public PDF $pdf;
+    public ?PDF $pdf = null;
 
     public bool $preview = false;
 
@@ -80,9 +80,11 @@ abstract class PrintableView extends Component
             return null;
         }
 
-        $resource = fopen('php://memory', 'rb+');
+        $resource = fopen('php://temp', 'rb+');
         fwrite($resource, $this->pdf->output());
         rewind($resource);
+
+        $this->pdf = null;
 
         $data = [
             'model_type' => $model->getMorphClass(),
