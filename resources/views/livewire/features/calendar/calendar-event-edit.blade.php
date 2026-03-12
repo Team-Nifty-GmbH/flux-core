@@ -3,17 +3,17 @@
         dialogType: null,
     }"
     x-on:sync-calendar-event.window="
-        Object.keys($event.detail).forEach(key => {
-            $wire.event[key] = $event.detail[key];
-        });
+        Object.keys($event.detail).forEach((key) => {
+            $wire.event[key] = $event.detail[key]
+        })
 
-        document.querySelectorAll('#edit-event-modal [wire\\:id]').forEach(el => {
+        document.querySelectorAll('#edit-event-modal [wire\\:id]').forEach((el) => {
             if (el.__livewire?.$wire?.event !== undefined) {
-                Object.keys($event.detail).forEach(key => {
-                    el.__livewire.$wire.event[key] = $event.detail[key];
-                });
+                Object.keys($event.detail).forEach((key) => {
+                    el.__livewire.$wire.event[key] = $event.detail[key]
+                })
             }
-        });
+        })
     "
 >
     @teleport('body')
