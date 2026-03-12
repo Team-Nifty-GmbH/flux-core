@@ -6,6 +6,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Product;
+use Illuminate\Support\Str;
 
 test('product select dropdown in footer is not obscured on mobile', function (): void {
     OrderType::query()->delete();
@@ -35,29 +36,41 @@ test('product select dropdown in footer is not obscured on mobile', function ():
             'is_invoice_address' => true,
         ]);
 
+    $productName = 'Unique Test Product ' . uniqid();
+
     Product::factory()->create([
-        'name' => 'Unique Test Product ' . uniqid(),
+        'name' => $productName,
         'product_number' => 'TEST-ZINDEX-001',
         'is_active' => true,
     ]);
 
-    $order = Order::factory()->create([
-        'order_type_id' => $orderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'contact_id' => $address->contact_id,
-    ]);
+    // Create order via UI to ensure all required fields are set
+    $page = visit(route('orders.orders'))
+        ->assertRoute('orders.orders')
+        ->assertNoSmoke()
+        ->click('New order')
+        ->click($this->tsSelect('order.order_type_id'))
+        ->click($this->tsSelectOption($orderType->name))
+        ->click($this->tsSelect('order.contact_id'))
+        ->click($this->tsSelectOption($address->name))
+        ->click('Save')
+        ->assertSee('Order positions');
 
-    $page = visit(route('orders.id', ['id' => $order->getKey()]))->on()->mobile();
+    $order = Order::query()
+        ->whereKey(Str::afterLast($page->url(), '/'))
+        ->first();
 
-    $page->assertNoSmoke();
+    // Resize to mobile viewport
+    $page->resize(390, 844);
 
-    // Wait for Livewire/Alpine to initialize
-    $page->script('() => new Promise(r => setTimeout(r, 2000))');
+    // Wait for layout reflow
+    $page->script('() => new Promise(r => setTimeout(r, 1500))');
 
-    // Scroll to the sticky footer and open the product select
+    // Scroll to the sticky footer
     $page->script(<<<'JS'
         () => {
-            const footer = document.querySelector('.sticky.bottom-6');
+            const footer = document.querySelector('[data-testid="order-footer"]')
+                || document.querySelector('.sticky.bottom-6');
             if (footer) footer.scrollIntoView({ block: 'center' });
         }
     JS);
@@ -71,9 +84,9 @@ test('product select dropdown in footer is not obscured on mobile', function ():
     // Type in search to trigger results
     $page->script(<<<'JS'
         () => {
-            const input = document.querySelector('[x-ref="search"]') ||
-                          document.querySelector('input[placeholder*="search" i]') ||
-                          document.querySelector('input[type="search"]');
+            const input = document.querySelector('[x-ref="search"]')
+                || document.querySelector('input[placeholder*="search" i]')
+                || document.querySelector('input[type="search"]');
             if (input) {
                 input.value = 'Test';
                 input.dispatchEvent(new Event('input', { bubbles: true }));
