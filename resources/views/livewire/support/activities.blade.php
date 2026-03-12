@@ -103,10 +103,11 @@
         </template>
         <template x-if="$wire.perPage < $wire.total">
             <x-button
-                x-on:click="$wire.loadMore()"
+                wire:click="loadMore()"
                 color="indigo"
                 class="w-full"
                 :text="__('Show more')"
+                loading
             />
         </template>
     </ul>
