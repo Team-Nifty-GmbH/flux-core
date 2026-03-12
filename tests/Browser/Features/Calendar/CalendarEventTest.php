@@ -263,7 +263,7 @@ test('clicking a new date resets the event form', function (): void {
         }
     JS);
 
-    expect($title)->toBe('', "Event title was not reset — still contains data from previous event");
+    expect($title)->toBe('', 'Event title was not reset — still contains data from previous event');
 
     $page->assertNoJavascriptErrors();
 });
