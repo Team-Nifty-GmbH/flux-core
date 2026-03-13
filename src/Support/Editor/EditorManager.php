@@ -44,26 +44,6 @@ class EditorManager
         static::$variables = [];
     }
 
-    protected static function wrapValue(string|array $value, ?string $key = null, ?string $morphAlias = null, ?string $path = null): array
-    {
-        if (is_array($value) && array_key_exists('id', $value)) {
-            return $value;
-        }
-
-        $expression = is_string($value) ? $value : ($value['expression'] ?? null);
-
-        $id = $key !== null && $morphAlias !== null
-            ? implode('.', array_filter([$morphAlias, $path, Str::snake($key)]))
-            : null;
-
-        return ['id' => $id, 'expression' => $expression];
-    }
-
-    protected static function isVariableEntry(mixed $value): bool
-    {
-        return is_array($value) && ! is_null($value['id'] ?? null);
-    }
-
     /**
      * @return array<class-string<EditorButton>>
      */
@@ -253,6 +233,26 @@ class EditorManager
             implode('.', array_filter([static::getMorphAlias($modelClass), $path])),
             static::wrapValue($value)
         );
+    }
+
+    protected static function wrapValue(string|array $value, ?string $key = null, ?string $morphAlias = null, ?string $path = null): array
+    {
+        if (is_array($value) && array_key_exists('id', $value)) {
+            return $value;
+        }
+
+        $expression = is_string($value) ? $value : ($value['expression'] ?? null);
+
+        $id = $key !== null && $morphAlias !== null
+            ? implode('.', array_filter([$morphAlias, $path, Str::snake($key)]))
+            : null;
+
+        return ['id' => $id, 'expression' => $expression];
+    }
+
+    protected static function isVariableEntry(mixed $value): bool
+    {
+        return is_array($value) && ! is_null($value['id'] ?? null);
     }
 
     protected static function findExpressionById(string $id, mixed $entries): ?string

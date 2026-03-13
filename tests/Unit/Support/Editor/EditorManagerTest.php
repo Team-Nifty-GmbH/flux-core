@@ -10,17 +10,17 @@ test('mergeVariables wraps string values with auto-generated id', function (): v
     EditorManager::mergeVariables([
         'Invoice Number' => '$order->invoice_number',
         'Order Date' => '$order->order_date',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
     $all = EditorManager::allVariables();
-    $orderVars = $all[morph_alias(\FluxErp\Models\Order::class)];
+    $orderVars = $all[morph_alias(FluxErp\Models\Order::class)];
 
     expect($orderVars['Invoice Number'])->toBe([
-        'id' => morph_alias(\FluxErp\Models\Order::class) . '.invoice_number',
+        'id' => morph_alias(FluxErp\Models\Order::class) . '.invoice_number',
         'expression' => '$order->invoice_number',
     ]);
     expect($orderVars['Order Date'])->toBe([
-        'id' => morph_alias(\FluxErp\Models\Order::class) . '.order_date',
+        'id' => morph_alias(FluxErp\Models\Order::class) . '.order_date',
         'expression' => '$order->order_date',
     ]);
 });
@@ -28,10 +28,10 @@ test('mergeVariables wraps string values with auto-generated id', function (): v
 test('mergeVariables wraps values with path segment in id', function (): void {
     EditorManager::mergeVariables([
         'Start Date' => '$order->order_date',
-    ], \FluxErp\Models\Order::class, 'subscription');
+    ], FluxErp\Models\Order::class, 'subscription');
 
     $all = EditorManager::allVariables();
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
     $subVars = $all[$morphAlias]['subscription'];
 
     expect($subVars['Start Date'])->toBe([
@@ -43,10 +43,10 @@ test('mergeVariables wraps values with path segment in id', function (): void {
 test('mergeVariables passes through array values with explicit id', function (): void {
     EditorManager::mergeVariables([
         'Renamed Label' => ['expression' => '$order->invoice_number', 'id' => 'order.invoice_number'],
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
     $all = EditorManager::allVariables();
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($all[$morphAlias]['Renamed Label'])->toBe([
         'expression' => '$order->invoice_number',
@@ -70,10 +70,10 @@ test('mergeVariables global variables get __global__ prefix', function (): void 
 test('registerVariables wraps string values with auto-generated id', function (): void {
     EditorManager::registerVariables([
         'Custom Var' => '$model->custom',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
     $all = EditorManager::allVariables();
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($all[$morphAlias]['Custom Var'])->toBe([
         'id' => $morphAlias . '.custom_var',
@@ -82,10 +82,10 @@ test('registerVariables wraps string values with auto-generated id', function ()
 });
 
 test('registerVariable wraps a single variable', function (): void {
-    EditorManager::registerVariable('My Var', '$model->foo', \FluxErp\Models\Order::class);
+    EditorManager::registerVariable('My Var', '$model->foo', FluxErp\Models\Order::class);
 
     $all = EditorManager::allVariables();
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($all[$morphAlias]['My Var'])->toBe([
         'id' => $morphAlias . '.my_var',
@@ -94,10 +94,10 @@ test('registerVariable wraps a single variable', function (): void {
 });
 
 test('addVariable wraps raw string as null-id entry', function (): void {
-    EditorManager::addVariable('$order->foo', \FluxErp\Models\Order::class);
+    EditorManager::addVariable('$order->foo', FluxErp\Models\Order::class);
 
     $all = EditorManager::allVariables();
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($all[$morphAlias][0])->toBe([
         'id' => null,
@@ -107,19 +107,19 @@ test('addVariable wraps raw string as null-id entry', function (): void {
 
 test('addVariable passes through structured array', function (): void {
     $entry = ['id' => 'custom.id', 'expression' => '$order->foo'];
-    EditorManager::addVariable($entry, \FluxErp\Models\Order::class);
+    EditorManager::addVariable($entry, FluxErp\Models\Order::class);
 
     $all = EditorManager::allVariables();
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($all[$morphAlias][0])->toBe($entry);
 });
 
 test('setVariable wraps raw string as null-id entry', function (): void {
-    EditorManager::setVariable('$order->foo', \FluxErp\Models\Order::class);
+    EditorManager::setVariable('$order->foo', FluxErp\Models\Order::class);
 
     $all = EditorManager::allVariables();
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($all[$morphAlias])->toBe([
         'id' => null,
@@ -130,14 +130,14 @@ test('setVariable wraps raw string as null-id entry', function (): void {
 test('getVariables returns structured entries and excludes nested paths', function (): void {
     EditorManager::mergeVariables([
         'Invoice Number' => '$order->invoice_number',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
     EditorManager::mergeVariables([
         'Start Date' => '$order->order_date',
-    ], \FluxErp\Models\Order::class, 'subscription');
+    ], FluxErp\Models\Order::class, 'subscription');
 
-    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class, withGlobals: false);
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $vars = EditorManager::getVariables(FluxErp\Models\Order::class, withGlobals: false);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($vars)->toHaveKey('Invoice Number');
     expect($vars['Invoice Number'])->toBe([
@@ -151,13 +151,13 @@ test('getVariables returns structured entries and excludes nested paths', functi
 test('getVariables includes parent and path variables when path specified', function (): void {
     EditorManager::mergeVariables([
         'Invoice Number' => '$order->invoice_number',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
     EditorManager::mergeVariables([
         'Start Date' => '$order->order_date',
-    ], \FluxErp\Models\Order::class, 'subscription');
+    ], FluxErp\Models\Order::class, 'subscription');
 
-    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class, 'subscription', withGlobals: false);
+    $vars = EditorManager::getVariables(FluxErp\Models\Order::class, 'subscription', withGlobals: false);
 
     expect($vars)->toHaveKey('Invoice Number');
     expect($vars)->toHaveKey('Start Date');
@@ -170,21 +170,21 @@ test('getVariables includes globals when requested', function (): void {
 
     EditorManager::mergeVariables([
         'Invoice Number' => '$order->invoice_number',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
-    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class);
+    $vars = EditorManager::getVariables(FluxErp\Models\Order::class);
 
     expect($vars)->toHaveKey('Invoice Number');
     expect($vars)->toHaveKey('Current User Name');
 });
 
 test('getVariables excludes null-id entries from addVariable', function (): void {
-    EditorManager::addVariable('$order->foo', \FluxErp\Models\Order::class);
+    EditorManager::addVariable('$order->foo', FluxErp\Models\Order::class);
     EditorManager::mergeVariables([
         'Invoice Number' => '$order->invoice_number',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
-    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class, withGlobals: false);
+    $vars = EditorManager::getVariables(FluxErp\Models\Order::class, withGlobals: false);
 
     expect($vars)->toHaveKey('Invoice Number');
     expect($vars)->not->toHaveKey(0); // numeric key from addVariable should be excluded
@@ -193,10 +193,10 @@ test('getVariables excludes null-id entries from addVariable', function (): void
 test('getTranslatedVariables returns id as value', function (): void {
     EditorManager::mergeVariables([
         'Invoice Number' => '$order->invoice_number',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
-    $translated = EditorManager::getTranslatedVariables(\FluxErp\Models\Order::class, withGlobals: false);
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $translated = EditorManager::getTranslatedVariables(FluxErp\Models\Order::class, withGlobals: false);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
 
     expect($translated['Invoice Number'])->toBe([
         'label' => __('Invoice Number'),
@@ -207,9 +207,9 @@ test('getTranslatedVariables returns id as value', function (): void {
 test('resolveById returns expression for known id', function (): void {
     EditorManager::mergeVariables([
         'Invoice Number' => '$order->invoice_number',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
     $result = EditorManager::resolveById($morphAlias . '.invoice_number');
 
     expect($result)->toBe('$order->invoice_number');
@@ -218,9 +218,9 @@ test('resolveById returns expression for known id', function (): void {
 test('resolveById returns expression for path-scoped variable', function (): void {
     EditorManager::mergeVariables([
         'Start Date' => '$order->order_date',
-    ], \FluxErp\Models\Order::class, 'subscription');
+    ], FluxErp\Models\Order::class, 'subscription');
 
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
     $result = EditorManager::resolveById($morphAlias . '.subscription.start_date');
 
     expect($result)->toBe('$order->order_date');
@@ -243,13 +243,13 @@ test('resolveById returns null for unknown id', function (): void {
 test('resolveById resolves explicit id override', function (): void {
     EditorManager::mergeVariables([
         'Renamed Label' => ['expression' => '$order->invoice_number', 'id' => 'custom.stable.id'],
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
     expect(EditorManager::resolveById('custom.stable.id'))->toBe('$order->invoice_number');
 });
 
 test('resolveById skips null-id entries', function (): void {
-    EditorManager::addVariable('$order->foo', \FluxErp\Models\Order::class);
+    EditorManager::addVariable('$order->foo', FluxErp\Models\Order::class);
 
     expect(EditorManager::resolveById(null))->toBeNull();
 });

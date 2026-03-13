@@ -9,10 +9,10 @@ beforeEach(function (): void {
 test('render_editor_blade resolves new-format id to expression', function (): void {
     EditorManager::mergeVariables([
         'Name' => '$order->name',
-    ], \FluxErp\Models\Order::class);
+    ], FluxErp\Models\Order::class);
 
-    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
-    $order = new \stdClass();
+    $morphAlias = morph_alias(FluxErp\Models\Order::class);
+    $order = new stdClass();
     $order->name = 'Test-Value-123';
 
     $html = '<p>Nr: <span data-type="blade-variable" data-value="' . $morphAlias . '.name" data-label="Name">Name</span></p>';
@@ -23,7 +23,7 @@ test('render_editor_blade resolves new-format id to expression', function (): vo
 });
 
 test('render_editor_blade falls back to raw expression for old-format data', function (): void {
-    $order = new \stdClass();
+    $order = new stdClass();
     $order->name = 'Old-Format-456';
 
     $html = '<p>Nr: <span data-type="blade-variable" data-value="$order->name" data-label="Name">Name</span></p>';
