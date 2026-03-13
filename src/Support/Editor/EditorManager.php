@@ -50,15 +50,13 @@ class EditorManager
             return $value;
         }
 
-        if (is_string($value)) {
-            $value = ['expression' => $value];
-        }
+        $expression = is_string($value) ? $value : ($value['expression'] ?? null);
 
-        $value['id'] = $key !== null && $morphAlias !== null
+        $id = $key !== null && $morphAlias !== null
             ? implode('.', array_filter([$morphAlias, $path, Str::snake($key)]))
             : null;
 
-        return $value;
+        return ['id' => $id, 'expression' => $expression];
     }
 
     protected static function isVariableEntry(mixed $value): bool
@@ -153,11 +151,16 @@ class EditorManager
             data_set(static::$variables, $morphAlias, []);
         }
 
+        $wrapped = [];
+        foreach ($values as $key => $value) {
+            $wrapped[$key] = static::wrapValue($value, $key, $morphAlias, $path);
+        }
+
         $variablePath = implode('.', array_filter([$morphAlias, $path]));
         data_set(
             static::$variables,
             $variablePath,
-            array_merge(Arr::wrap(data_get(static::$variables, $variablePath) ?? []), $values)
+            array_merge(Arr::wrap(data_get(static::$variables, $variablePath) ?? []), $wrapped)
         );
     }
 
