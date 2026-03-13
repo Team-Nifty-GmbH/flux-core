@@ -129,3 +129,29 @@ test('anzahlung creation correctly reduces by existing anzahlungen', function ()
     $orderPosition = array_find($result, fn (array $v) => $v['id'] === 1);
     expect(bccomp($orderPosition['signed_amount'], '5'))->toBe(0);
 });
+
+// Retoure on parent (Anzahlung): AZ=5, existing partial Retoure=-3 → 2 remaining
+test('retoure on anzahlung with existing partial retoure shows correct remainder', function (): void {
+    $positions = [
+        position(2, null, '5'),    // AZ position (root in this context): 5 units
+        position(4, 2, '-3'),      // Existing partial Retoure on AZ: 3 returned (signed=-3)
+    ];
+
+    $result = calculator()->calculate($positions, -1); // Retoure multiplier = -1
+
+    $azPosition = array_find($result, fn (array $v) => $v['id'] === 2);
+    expect(bccomp($azPosition['signed_amount'], '2'))->toBe(0);
+});
+
+// Retoure on parent (Anzahlung): fully retoured AZ has zero available
+test('retoure on fully retoured anzahlung has zero available', function (): void {
+    $positions = [
+        position(2, null, '5'),    // AZ position: 5 units
+        position(4, 2, '-5'),      // Full Retoure on AZ (signed=-5)
+    ];
+
+    $result = calculator()->calculate($positions, -1);
+
+    $azPosition = array_find($result, fn (array $v) => $v['id'] === 2);
+    expect(bccomp($azPosition['signed_amount'], '0'))->toBe(0);
+});
