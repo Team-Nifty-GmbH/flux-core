@@ -535,11 +535,7 @@ test('move position shifts sort numbers to avoid collision', function (): void {
 test('move position preserves is_alternative flag', function (): void {
     $orderPosition = $this->order->orderPositions->first();
 
-    DB::table('order_positions')
-        ->where('id', $orderPosition->getKey())
-        ->update(['is_alternative' => true]);
-
-    $orderPosition->refresh();
+    $orderPosition->update(['is_alternative' => true]);
     expect($orderPosition->is_alternative)->toBeTrue();
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
