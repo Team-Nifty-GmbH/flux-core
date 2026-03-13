@@ -498,8 +498,8 @@ test('move position with parent', function (): void {
 });
 
 test('move position shifts sort numbers to avoid collision', function (): void {
-    $positions = OrderPosition::factory()->count(2)->create([
-        'order_id' => $this->order->id,
+    OrderPosition::factory()->count(2)->create([
+        'order_id' => $this->order->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'is_free_text' => false,
         'is_alternative' => false,
