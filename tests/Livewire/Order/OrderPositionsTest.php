@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\OrderPositions;
@@ -347,7 +348,7 @@ test('discount percentage preserved when updating amount', function (): void {
     $orderPosition = $this->order->orderPositions->first();
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
-        ->set('selected', [$orderPosition->id])
+        ->set('selected', [$orderPosition->getKey()])
         ->set('discount', 10)
         ->call('discountSelectedPositions')
         ->assertOk()
@@ -356,10 +357,12 @@ test('discount percentage preserved when updating amount', function (): void {
     $orderPosition->refresh();
     expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
 
-    FluxErp\Actions\OrderPosition\UpdateOrderPosition::make([
+    UpdateOrderPosition::make([
         'id' => $orderPosition->getKey(),
         'amount' => 2,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
     $orderPosition->refresh();
     expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
