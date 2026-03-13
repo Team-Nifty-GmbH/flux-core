@@ -4,6 +4,7 @@ namespace FluxErp\Support\Editor;
 
 use FluxErp\Contracts\EditorButton;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class EditorManager
@@ -41,6 +42,28 @@ class EditorManager
     public static function clearVariables(): void
     {
         static::$variables = [];
+    }
+
+    protected static function wrapValue(string|array $value, ?string $key = null, ?string $morphAlias = null, ?string $path = null): array
+    {
+        if (is_array($value) && array_key_exists('id', $value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $value = ['expression' => $value];
+        }
+
+        $value['id'] = $key !== null && $morphAlias !== null
+            ? implode('.', array_filter([$morphAlias, $path, Str::snake($key)]))
+            : null;
+
+        return $value;
+    }
+
+    protected static function isVariableEntry(mixed $value): bool
+    {
+        return is_array($value) && ! is_null($value['id'] ?? null);
     }
 
     /**
