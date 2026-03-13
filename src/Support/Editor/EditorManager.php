@@ -199,10 +199,15 @@ class EditorManager
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
+        $wrapped = [];
+        foreach ($variables as $key => $value) {
+            $wrapped[$key] = static::wrapValue($value, $key, $morphAlias);
+        }
+
         data_set(
             static::$variables,
             $morphAlias,
-            array_merge(data_get(static::$variables, $morphAlias) ?? [], $variables)
+            array_merge(data_get(static::$variables, $morphAlias) ?? [], $wrapped)
         );
     }
 

@@ -66,3 +66,29 @@ test('mergeVariables global variables get __global__ prefix', function (): void 
         'expression' => 'auth()->user()?->name',
     ]);
 });
+
+test('registerVariables wraps string values with auto-generated id', function (): void {
+    EditorManager::registerVariables([
+        'Custom Var' => '$model->custom',
+    ], \FluxErp\Models\Order::class);
+
+    $all = EditorManager::allVariables();
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+
+    expect($all[$morphAlias]['Custom Var'])->toBe([
+        'id' => $morphAlias . '.custom_var',
+        'expression' => '$model->custom',
+    ]);
+});
+
+test('registerVariable wraps a single variable', function (): void {
+    EditorManager::registerVariable('My Var', '$model->foo', \FluxErp\Models\Order::class);
+
+    $all = EditorManager::allVariables();
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+
+    expect($all[$morphAlias]['My Var'])->toBe([
+        'id' => $morphAlias . '.my_var',
+        'expression' => '$model->foo',
+    ]);
+});
