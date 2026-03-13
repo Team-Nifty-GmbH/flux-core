@@ -497,6 +497,60 @@ test('move position with parent', function (): void {
     expect($updatedPosition->sort_number)->toEqual(1);
 });
 
+test('move position shifts sort numbers to avoid collision', function (): void {
+    $positions = OrderPosition::factory()->count(2)->create([
+        'order_id' => $this->order->id,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $allPositions = $this->order->orderPositions()
+        ->whereNull('parent_id')
+        ->orderBy('sort_number')
+        ->get();
+
+    expect($allPositions)->toHaveCount(3);
+
+    $posA = $allPositions[0];
+    $posB = $allPositions[1];
+    $posC = $allPositions[2];
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('movePosition', $posC, 1)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $posA->refresh();
+    $posB->refresh();
+    $posC->refresh();
+
+    expect($posC->sort_number)->toEqual(1);
+
+    $sortNumbers = [$posA->sort_number, $posB->sort_number, $posC->sort_number];
+    sort($sortNumbers);
+    expect($sortNumbers)->toEqual([1, 2, 3]);
+});
+
+test('move position preserves is_alternative flag', function (): void {
+    $orderPosition = $this->order->orderPositions->first();
+
+    DB::table('order_positions')
+        ->where('id', $orderPosition->getKey())
+        ->update(['is_alternative' => true]);
+
+    $orderPosition->refresh();
+    expect($orderPosition->is_alternative)->toBeTrue();
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('movePosition', $orderPosition, 2)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $orderPosition->refresh();
+    expect($orderPosition->is_alternative)->toBeTrue();
+});
+
 test('quick add order position', function (): void {
     $orderPositionCount = $this->order->orderPositions()->count();
     $productPrice = $this->product->prices()->first();
