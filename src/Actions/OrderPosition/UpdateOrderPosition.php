@@ -9,6 +9,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +27,27 @@ class UpdateOrderPosition extends FluxAction
     protected function getRulesets(): string|array
     {
         return UpdateOrderPositionRuleset::class;
+    }
+
+    public function setRulesFromRulesets(): static
+    {
+        parent::setRulesFromRulesets();
+
+        if (
+            $this->getData('id')
+            && $this->getData('is_free_text')
+            && ! is_null($this->getData('amount'))
+            && resolve_static(OrderPosition::class, 'query')
+                ->where('parent_id', $this->getData('id'))
+                ->whereNotNull('amount_bundle')
+                ->exists()
+        ) {
+            $this->mergeRules([
+                'amount' => ['sometimes', app(Numeric::class), 'nullable'],
+            ]);
+        }
+
+        return $this;
     }
 
     public function performAction(): Model
@@ -90,15 +112,19 @@ class UpdateOrderPosition extends FluxAction
         $orderPosition->save();
 
         if ($orderPosition->wasChanged('amount')) {
-            resolve_static(OrderPosition::class, 'query')
+            $children = resolve_static(OrderPosition::class, 'query')
                 ->where('parent_id', $orderPosition->getKey())
                 ->whereNotNull('amount_bundle')
-                ->each(function (OrderPosition $child) use ($orderPosition): void {
-                    UpdateOrderPosition::make([
-                        'id' => $child->getKey(),
-                        'amount' => bcmul($child->amount_bundle, $orderPosition->amount),
-                    ])->validate()->execute();
-                });
+                ->get();
+
+            foreach ($children as $child) {
+                UpdateOrderPosition::make([
+                    'id' => $child->getKey(),
+                    'amount' => bcmul($child->amount_bundle, $orderPosition->amount),
+                ])
+                    ->validate()
+                    ->execute();
+            }
         }
 
         if ($product?->bundleProducts?->isNotEmpty()) {
@@ -110,7 +136,7 @@ class UpdateOrderPosition extends FluxAction
 
                     return [
                         'order_id' => $orderPosition->order_id,
-                        'parent_id' => $orderPosition->id,
+                        'parent_id' => $orderPosition->getKey(),
                         'product_id' => $bundleProduct->id,
                         'tenant_id' => $orderPosition->tenant_id,
                         'vat_rate_id' => $bundleProduct->vat_rate_id,

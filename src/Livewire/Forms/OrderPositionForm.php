@@ -184,7 +184,7 @@ class OrderPositionForm extends FluxForm
             }
         }
 
-        unset($data['discount_flat'], $data['discount_is_percentage']);
+        unset($data['discount_flat'], $data['discount_is_percentage'], $data['is_bundle_parent']);
 
         return $data;
     }

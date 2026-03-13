@@ -814,6 +814,6 @@ test('updating amount on bundle group parent propagates to children', function (
     $child1->refresh();
     $child2->refresh();
 
-    expect((float) $child1->amount)->toEqual(6);  // 2 * 3
-    expect((float) $child2->amount)->toEqual(15); // 5 * 3
+    expect((float) $child1->amount)->toEqual(6);
+    expect((float) $child2->amount)->toEqual(15);
 });
