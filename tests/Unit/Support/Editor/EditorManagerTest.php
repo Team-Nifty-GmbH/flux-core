@@ -126,3 +126,80 @@ test('setVariable wraps raw string as null-id entry', function (): void {
         'expression' => '$order->foo',
     ]);
 });
+
+test('getVariables returns structured entries and excludes nested paths', function (): void {
+    EditorManager::mergeVariables([
+        'Invoice Number' => '$order->invoice_number',
+    ], \FluxErp\Models\Order::class);
+
+    EditorManager::mergeVariables([
+        'Start Date' => '$order->order_date',
+    ], \FluxErp\Models\Order::class, 'subscription');
+
+    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class, withGlobals: false);
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+
+    expect($vars)->toHaveKey('Invoice Number');
+    expect($vars['Invoice Number'])->toBe([
+        'id' => $morphAlias . '.invoice_number',
+        'expression' => '$order->invoice_number',
+    ]);
+    // subscription sub-path should be filtered out (it's a nested array, not a variable entry)
+    expect($vars)->not->toHaveKey('subscription');
+});
+
+test('getVariables includes parent and path variables when path specified', function (): void {
+    EditorManager::mergeVariables([
+        'Invoice Number' => '$order->invoice_number',
+    ], \FluxErp\Models\Order::class);
+
+    EditorManager::mergeVariables([
+        'Start Date' => '$order->order_date',
+    ], \FluxErp\Models\Order::class, 'subscription');
+
+    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class, 'subscription', withGlobals: false);
+
+    expect($vars)->toHaveKey('Invoice Number');
+    expect($vars)->toHaveKey('Start Date');
+});
+
+test('getVariables includes globals when requested', function (): void {
+    EditorManager::mergeVariables([
+        'Current User Name' => 'auth()->user()?->name',
+    ]);
+
+    EditorManager::mergeVariables([
+        'Invoice Number' => '$order->invoice_number',
+    ], \FluxErp\Models\Order::class);
+
+    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class);
+
+    expect($vars)->toHaveKey('Invoice Number');
+    expect($vars)->toHaveKey('Current User Name');
+});
+
+test('getVariables excludes null-id entries from addVariable', function (): void {
+    EditorManager::addVariable('$order->foo', \FluxErp\Models\Order::class);
+    EditorManager::mergeVariables([
+        'Invoice Number' => '$order->invoice_number',
+    ], \FluxErp\Models\Order::class);
+
+    $vars = EditorManager::getVariables(\FluxErp\Models\Order::class, withGlobals: false);
+
+    expect($vars)->toHaveKey('Invoice Number');
+    expect($vars)->not->toHaveKey(0); // numeric key from addVariable should be excluded
+});
+
+test('getTranslatedVariables returns id as value', function (): void {
+    EditorManager::mergeVariables([
+        'Invoice Number' => '$order->invoice_number',
+    ], \FluxErp\Models\Order::class);
+
+    $translated = EditorManager::getTranslatedVariables(\FluxErp\Models\Order::class, withGlobals: false);
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+
+    expect($translated['Invoice Number'])->toBe([
+        'label' => __('Invoice Number'),
+        'value' => $morphAlias . '.invoice_number',
+    ]);
+});

@@ -72,7 +72,7 @@ class EditorManager
         return static::$buttons;
     }
 
-    public static function getVariables(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): string|array
+    public static function getVariables(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): array
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
@@ -84,14 +84,14 @@ class EditorManager
 
         // Filter out nested paths (arrays) to only return flat key-value pairs
         if (is_array($data)) {
-            $data = array_filter($data, fn (mixed $value): bool => is_string($value));
+            $data = array_filter($data, static::isVariableEntry(...));
         }
 
         // When a path is specified, also include parent level variables
         if ($path && $modelClass) {
             $parentData = data_get(static::$variables, $morphAlias) ?? [];
             if (is_array($parentData)) {
-                $parentData = array_filter($parentData, fn (mixed $value): bool => is_string($value));
+                $parentData = array_filter($parentData, static::isVariableEntry(...));
             }
 
             $data = array_merge($parentData, $data);
@@ -108,7 +108,7 @@ class EditorManager
 
         // Filter out nested paths from globals as well
         if (is_array($globals)) {
-            $globals = array_filter($globals, fn (mixed $value): bool => is_string($value));
+            $globals = array_filter($globals, static::isVariableEntry(...));
         }
 
         return array_merge($data, $globals);
@@ -119,12 +119,7 @@ class EditorManager
         ?string $path = null,
         bool $withGlobals = true
     ): array {
-        $variables = static::getVariables($modelClass, $path, $withGlobals);
-        if (is_string($variables)) {
-            $variables = [$variables => $variables];
-        }
-
-        return static::translate($variables);
+        return static::translate(static::getVariables($modelClass, $path, $withGlobals));
     }
 
     /**
@@ -255,10 +250,10 @@ class EditorManager
     {
         return Arr::mapWithKeys(
             $variables,
-            fn (string $value, string $key) => [
+            fn (array $entry, string $key) => [
                 $key => [
                     'label' => __($key),
-                    'value' => $value,
+                    'value' => $entry['id'],
                 ],
             ]
         );
