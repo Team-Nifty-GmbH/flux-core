@@ -92,3 +92,37 @@ test('registerVariable wraps a single variable', function (): void {
         'expression' => '$model->foo',
     ]);
 });
+
+test('addVariable wraps raw string as null-id entry', function (): void {
+    EditorManager::addVariable('$order->foo', \FluxErp\Models\Order::class);
+
+    $all = EditorManager::allVariables();
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+
+    expect($all[$morphAlias][0])->toBe([
+        'id' => null,
+        'expression' => '$order->foo',
+    ]);
+});
+
+test('addVariable passes through structured array', function (): void {
+    $entry = ['id' => 'custom.id', 'expression' => '$order->foo'];
+    EditorManager::addVariable($entry, \FluxErp\Models\Order::class);
+
+    $all = EditorManager::allVariables();
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+
+    expect($all[$morphAlias][0])->toBe($entry);
+});
+
+test('setVariable wraps raw string as null-id entry', function (): void {
+    EditorManager::setVariable('$order->foo', \FluxErp\Models\Order::class);
+
+    $all = EditorManager::allVariables();
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+
+    expect($all[$morphAlias])->toBe([
+        'id' => null,
+        'expression' => '$order->foo',
+    ]);
+});

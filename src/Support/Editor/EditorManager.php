@@ -24,7 +24,7 @@ class EditorManager
         $variablePath = implode('.', array_filter([$morphAlias, $path]));
 
         $current = Arr::wrap(data_get(static::$variables, $variablePath) ?? []);
-        $current[] = $value;
+        $current[] = static::wrapValue($value);
 
         data_set(static::$variables, $variablePath, $current);
     }
@@ -240,7 +240,7 @@ class EditorManager
         data_set(
             static::$variables,
             implode('.', array_filter([static::getMorphAlias($modelClass), $path])),
-            $value
+            static::wrapValue($value)
         );
     }
 
