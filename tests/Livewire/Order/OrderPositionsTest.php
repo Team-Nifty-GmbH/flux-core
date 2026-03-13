@@ -343,6 +343,28 @@ test('discount selected positions', function (): void {
     expect($updatedPosition->discount_percentage)->toEqual(0.10);
 });
 
+test('discount percentage preserved when updating amount', function (): void {
+    $orderPosition = $this->order->orderPositions->first();
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('selected', [$orderPosition->id])
+        ->set('discount', 10)
+        ->call('discountSelectedPositions')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $orderPosition->refresh();
+    expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
+
+    FluxErp\Actions\OrderPosition\UpdateOrderPosition::make([
+        'id' => $orderPosition->getKey(),
+        'amount' => 2,
+    ])->validate()->execute();
+
+    $orderPosition->refresh();
+    expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
+});
+
 test('edit new order position', function (): void {
     $defaultVatRate = VatRate::factory()->create(['is_default' => true]);
 
