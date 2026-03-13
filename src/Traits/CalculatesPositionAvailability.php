@@ -4,7 +4,7 @@ namespace FluxErp\Traits;
 
 trait CalculatesPositionAvailability
 {
-    protected function calculateMaxAmounts(array $positions, int $multiplier): array
+    protected function calculateMaxAmounts(array $positions): array
     {
         return array_reduce(
             $positions,
@@ -26,23 +26,30 @@ trait CalculatesPositionAvailability
                         [$item->id]
                     );
 
-                    // Direct children always reduce availability (use absolute value).
-                    // Indirect children (e.g. Retoure-of-Anzahlung) use signed_amount
-                    // so negative amounts correctly free up the parent's claimed amount.
-                    $amount = $item->origin_position_id === $carry[$parentKey]['id']
-                        ? (bccomp($item->signed_amount, '0') < 0
-                            ? bcmul($item->signed_amount, '-1')
-                            : $item->signed_amount)
-                        : $item->signed_amount;
-
                     $carry[$parentKey]['signed_amount'] = bcsub(
                         $carry[$parentKey]['signed_amount'],
-                        $amount
+                        $this->resolveChildAmount($item, $carry[$parentKey]['id'])
                     );
                 }
 
                 return $carry;
             }
         );
+    }
+
+    /**
+     * Direct children always reduce availability (absolute value).
+     * Indirect children (e.g. Retoure-of-Anzahlung) use signed_amount
+     * so negative amounts correctly free up the parent's claimed amount.
+     */
+    protected function resolveChildAmount(object $item, int $rootId): string
+    {
+        if ($item->origin_position_id !== $rootId) {
+            return $item->signed_amount;
+        }
+
+        return bccomp($item->signed_amount, '0') < 0
+            ? bcmul($item->signed_amount, '-1')
+            : $item->signed_amount;
     }
 }
