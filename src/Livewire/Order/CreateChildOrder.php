@@ -152,9 +152,6 @@ class CreateChildOrder extends Component
             }
         }
 
-        $multiplier = OrderTypeEnum::tryFrom($this->type)
-            ?->multiplier()
-            ?? 1;
         $maxAmounts = $this->calculateMaxAmounts(
             DB::select(
                 'WITH RECURSIVE siblings AS (
@@ -169,8 +166,7 @@ class CreateChildOrder extends Component
                     WHERE op.deleted_at IS NULL
                 )
                 SELECT * FROM siblings'
-            ),
-            $multiplier
+            )
         );
 
         $orderPositions = resolve_static(OrderPosition::class, 'query')
