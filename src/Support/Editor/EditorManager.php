@@ -122,6 +122,22 @@ class EditorManager
         return static::translate(static::getVariables($modelClass, $path, $withGlobals));
     }
 
+    public static function resolveById(?string $id): ?string
+    {
+        if (is_null($id)) {
+            return null;
+        }
+
+        foreach (static::$variables as $entries) {
+            $result = static::findExpressionById($id, $entries);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @param  class-string<EditorButton>  $buttonClass
      */
@@ -237,6 +253,28 @@ class EditorManager
             implode('.', array_filter([static::getMorphAlias($modelClass), $path])),
             static::wrapValue($value)
         );
+    }
+
+    protected static function findExpressionById(string $id, mixed $entries): ?string
+    {
+        if (! is_array($entries)) {
+            return null;
+        }
+
+        // Check if this is a leaf entry with id/expression
+        if (array_key_exists('id', $entries) && $entries['id'] === $id) {
+            return $entries['expression'] ?? null;
+        }
+
+        // Recurse into nested entries
+        foreach ($entries as $entry) {
+            $result = static::findExpressionById($id, $entry);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+
+        return null;
     }
 
     protected static function getMorphAlias(?string $modelClass): string

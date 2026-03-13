@@ -203,3 +203,53 @@ test('getTranslatedVariables returns id as value', function (): void {
         'value' => $morphAlias . '.invoice_number',
     ]);
 });
+
+test('resolveById returns expression for known id', function (): void {
+    EditorManager::mergeVariables([
+        'Invoice Number' => '$order->invoice_number',
+    ], \FluxErp\Models\Order::class);
+
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $result = EditorManager::resolveById($morphAlias . '.invoice_number');
+
+    expect($result)->toBe('$order->invoice_number');
+});
+
+test('resolveById returns expression for path-scoped variable', function (): void {
+    EditorManager::mergeVariables([
+        'Start Date' => '$order->order_date',
+    ], \FluxErp\Models\Order::class, 'subscription');
+
+    $morphAlias = morph_alias(\FluxErp\Models\Order::class);
+    $result = EditorManager::resolveById($morphAlias . '.subscription.start_date');
+
+    expect($result)->toBe('$order->order_date');
+});
+
+test('resolveById returns expression for global variable', function (): void {
+    EditorManager::mergeVariables([
+        'Current User Name' => 'auth()->user()?->name',
+    ]);
+
+    $result = EditorManager::resolveById('__global__.current_user_name');
+
+    expect($result)->toBe('auth()->user()?->name');
+});
+
+test('resolveById returns null for unknown id', function (): void {
+    expect(EditorManager::resolveById('nonexistent.id'))->toBeNull();
+});
+
+test('resolveById resolves explicit id override', function (): void {
+    EditorManager::mergeVariables([
+        'Renamed Label' => ['expression' => '$order->invoice_number', 'id' => 'custom.stable.id'],
+    ], \FluxErp\Models\Order::class);
+
+    expect(EditorManager::resolveById('custom.stable.id'))->toBe('$order->invoice_number');
+});
+
+test('resolveById skips null-id entries', function (): void {
+    EditorManager::addVariable('$order->foo', \FluxErp\Models\Order::class);
+
+    expect(EditorManager::resolveById(null))->toBeNull();
+});
