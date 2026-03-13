@@ -233,8 +233,14 @@ class PriceCalculation
             }
         }
 
-        if (! $discounts && ! is_null(data_get($this->data, 'discount_percentage'))) {
-            $discountedPrice = discount($discountedPrice, $this->data['discount_percentage']);
+        if (! $discounts) {
+            $discountPercentage = array_key_exists('discount_percentage', $this->data)
+                ? $this->data['discount_percentage']
+                : $this->orderPosition->getOriginal('discount_percentage');
+
+            if (! is_null($discountPercentage)) {
+                $discountedPrice = discount($discountedPrice, $discountPercentage);
+            }
         }
 
         return $discountedPrice;
