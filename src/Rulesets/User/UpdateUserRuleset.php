@@ -70,6 +70,7 @@ class UpdateUserRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class),
             ],
+            'force_two_factor' => 'sometimes|boolean',
             'is_active' => 'sometimes|required|boolean',
         ];
     }

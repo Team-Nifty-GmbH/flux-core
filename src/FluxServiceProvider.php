@@ -8,6 +8,7 @@ use FluxErp\Helpers\Composer;
 use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
+use FluxErp\Http\Middleware\EnsureTwoFactorSetup;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
@@ -103,6 +104,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom([
             __DIR__ . '/../database/migrations',
             __DIR__ . '/../database/settings',
+            \Laragear\TwoFactor\TwoFactorServiceProvider::MIGRATIONS,
         ]);
 
         $this->loadTranslationsFrom(__DIR__ . '/../lang');
@@ -236,6 +238,7 @@ class FluxServiceProvider extends ServiceProvider
             config(['permission.display_permission_in_exception' => true]);
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
+            config(['two-factor.recovery.enabled' => false]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
@@ -271,11 +274,12 @@ class FluxServiceProvider extends ServiceProvider
         $kernel->appendMiddlewareToGroup('web', Localization::class);
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
 
+        $this->app['router']->aliasMiddleware('2fa.setup', EnsureTwoFactorSetup::class);
         $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
+        $this->app['router']->aliasMiddleware('localization', Localization::class);
+        $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
-        $this->app['router']->aliasMiddleware('permission', Permissions::class);
-        $this->app['router']->aliasMiddleware('localization', Localization::class);
 
         Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }

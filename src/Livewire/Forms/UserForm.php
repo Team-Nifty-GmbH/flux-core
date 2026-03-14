@@ -70,9 +70,11 @@ class UserForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public bool $is_active = false;
+    public bool $force_two_factor = false;
 
     public bool $has_dark_mode = false;
+
+    public bool $is_active = false;
 
     public ?string $job_title = null;
 

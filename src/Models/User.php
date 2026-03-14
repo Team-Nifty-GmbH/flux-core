@@ -35,17 +35,22 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Laragear\TwoFactor\Contracts\TwoFactorAuthenticatable;
+use Laragear\TwoFactor\TwoFactorAuthentication;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
+use Spatie\LaravelPasskeys\Models\Concerns\InteractsWithPasskeys;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
-class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
+class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, HasPasskeys, InteractsWithDataTables, TwoFactorAuthenticatable
 {
     use Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles, HasUserModification, HasUuid,
-        HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+        HasWidgets, InteractsWithMedia, InteractsWithPasskeys, MonitorsQueue, Notifiable, SoftDeletes,
+        TwoFactorAuthentication;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -102,6 +107,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     protected function casts(): array
     {
         return [
+            'force_two_factor' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
