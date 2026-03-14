@@ -27,7 +27,6 @@
         x-show="showCart === {{ $cartForm->id ?? 'null' }}"
         x-collapse
     >
-        @section('cart-items')
         @foreach ($cartForm->cart_items ?? [] as $cartFormItem)
             @if (is_null($cartFormItem))
                 @continue
@@ -57,8 +56,6 @@
                 </div>
             </div>
         @endforeach
-
-        @show
     </div>
     @if ($cartForm->isUserOwned())
         <hr />
