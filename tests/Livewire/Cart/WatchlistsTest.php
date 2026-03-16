@@ -17,13 +17,13 @@ test('each watchlist card renders its own products', function (): void {
     $vatRate = VatRate::factory()->create();
 
     $productAlpha = Product::factory()->create([
-        'name' => 'UniqueProductAlpha',
         'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'UniqueProductAlpha',
     ]);
 
     $productBeta = Product::factory()->create([
-        'name' => 'UniqueProductBeta',
         'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'UniqueProductBeta',
     ]);
 
     $priceListId = PriceList::default()->getKey();
