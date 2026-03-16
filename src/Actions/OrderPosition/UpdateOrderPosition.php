@@ -9,7 +9,6 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
-use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use FluxErp\View\Printing\Order\FinalInvoice;
 use Illuminate\Database\Eloquent\Model;
