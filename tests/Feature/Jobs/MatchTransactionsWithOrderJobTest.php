@@ -28,8 +28,8 @@ beforeEach(function (): void {
 
     $this->address = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $this->contact->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
         ])
         ->for($this->contact, 'contact')
         ->create();
