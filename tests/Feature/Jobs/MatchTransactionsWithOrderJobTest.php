@@ -41,7 +41,6 @@ beforeEach(function (): void {
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ])
-        ->for(factory: $this->dbTenant, relationship: 'tenant')
         ->create();
 
     $this->iban = fake()->iban();
