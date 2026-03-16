@@ -1,7 +1,10 @@
 <div class="flex flex-col gap-8" x-data="{ showCart: null }">
-    @section('content')
     @forelse ($carts as $cart)
-        <livewire:cart.watchlist-card :cart="$cart" :key="uniqid()" />
+        <livewire:cart.watchlist-card
+            :cart="$cart"
+            lazy
+            wire:key="watchlist_{{ $cart->id }}"
+        />
     @empty
         <div
             class="flex flex-col justify-center gap-8 text-gray-900 dark:text-gray-50"
@@ -13,5 +16,4 @@
             </div>
         </div>
     @endforelse
-    @show
 </div>
