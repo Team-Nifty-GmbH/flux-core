@@ -659,7 +659,7 @@ if (! function_exists('render_editor_blade')) {
 
                 // Try to resolve as stable ID first
                 $resolved = FluxErp\Facades\Editor::resolveById($value);
-                if ($resolved !== null) {
+                if (! is_null($resolved)) {
                     $value = $resolved;
                 }
 

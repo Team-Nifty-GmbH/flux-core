@@ -108,14 +108,7 @@ class EditorManager
             return null;
         }
 
-        foreach (static::$variables as $entries) {
-            $result = static::findExpressionById($id, $entries);
-            if ($result !== null) {
-                return $result;
-            }
-        }
-
-        return null;
+        return static::findExpressionById($id, static::$variables);
     }
 
     /**
@@ -243,16 +236,19 @@ class EditorManager
 
         $expression = is_string($value) ? $value : ($value['expression'] ?? null);
 
-        $id = $key !== null && $morphAlias !== null
-            ? implode('.', array_filter([$morphAlias, $path, Str::snake($key)]))
+        $id = ! blank($key) && ! is_null($morphAlias)
+            ? implode('.', array_filter([$morphAlias, $path, Str::snake($key)], fn ($value) => ! blank($value)))
             : null;
 
-        return ['id' => $id, 'expression' => $expression];
+        return [
+            'id' => $id,
+            'expression' => $expression,
+        ];
     }
 
     protected static function isVariableEntry(mixed $value): bool
     {
-        return is_array($value) && ! is_null($value['id'] ?? null);
+        return is_array($value) && ! is_null(data_get($value, 'id'));
     }
 
     protected static function findExpressionById(string $id, mixed $entries): ?string
@@ -269,7 +265,7 @@ class EditorManager
         // Recurse into nested entries
         foreach ($entries as $entry) {
             $result = static::findExpressionById($id, $entry);
-            if ($result !== null) {
+            if (! is_null($result)) {
                 return $result;
             }
         }
