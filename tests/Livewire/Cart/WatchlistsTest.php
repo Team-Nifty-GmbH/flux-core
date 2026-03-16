@@ -29,11 +29,11 @@ test('each watchlist card renders its own products', function (): void {
     $priceListId = PriceList::default()->getKey();
 
     $watchlist1 = Cart::factory()->create([
+        'price_list_id' => $priceListId,
         'authenticatable_type' => $this->user->getMorphClass(),
         'authenticatable_id' => $this->user->getKey(),
-        'price_list_id' => $priceListId,
-        'is_watchlist' => true,
         'name' => 'Watchlist Alpha',
+        'is_watchlist' => true,
     ]);
 
     CartItem::factory()->create([
@@ -44,11 +44,11 @@ test('each watchlist card renders its own products', function (): void {
     ]);
 
     $watchlist2 = Cart::factory()->create([
+        'price_list_id' => $priceListId,
         'authenticatable_type' => $this->user->getMorphClass(),
         'authenticatable_id' => $this->user->getKey(),
-        'price_list_id' => $priceListId,
-        'is_watchlist' => true,
         'name' => 'Watchlist Beta',
+        'is_watchlist' => true,
     ]);
 
     CartItem::factory()->create([
