@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\OrderForm;
@@ -342,6 +343,30 @@ test('discount selected positions', function (): void {
 
     $updatedPosition = $orderPosition->refresh();
     expect($updatedPosition->discount_percentage)->toEqual(0.10);
+});
+
+test('discount percentage preserved when updating amount', function (): void {
+    $orderPosition = $this->order->orderPositions->first();
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('selected', [$orderPosition->getKey()])
+        ->set('discount', 10)
+        ->call('discountSelectedPositions')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $orderPosition->refresh();
+    expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
+
+    UpdateOrderPosition::make([
+        'id' => $orderPosition->getKey(),
+        'amount' => 2,
+    ])
+        ->validate()
+        ->execute();
+
+    $orderPosition->refresh();
+    expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
 });
 
 test('edit new order position', function (): void {
@@ -739,8 +764,8 @@ test('updating amount on bundle group parent propagates to children', function (
     // Create a bundle group product with two sub-products
     $bundleProduct = Product::factory()->create([
         'vat_rate_id' => $this->vatRate->getKey(),
-        'is_bundle' => true,
         'bundle_type_enum' => BundleTypeEnum::Group,
+        'is_bundle' => true,
     ]);
     $bundleProduct->tenants()->attach($this->dbTenant->getKey());
 
@@ -750,8 +775,8 @@ test('updating amount on bundle group parent propagates to children', function (
     $subProduct1->tenants()->attach($this->dbTenant->getKey());
 
     Price::factory()->create([
-        'product_id' => $subProduct1->getKey(),
         'price_list_id' => $this->priceList->getKey(),
+        'product_id' => $subProduct1->getKey(),
     ]);
 
     $subProduct2 = Product::factory()->create([
@@ -760,8 +785,8 @@ test('updating amount on bundle group parent propagates to children', function (
     $subProduct2->tenants()->attach($this->dbTenant->getKey());
 
     Price::factory()->create([
-        'product_id' => $subProduct2->getKey(),
         'price_list_id' => $this->priceList->getKey(),
+        'product_id' => $subProduct2->getKey(),
     ]);
 
     // Attach sub-products to bundle with specific counts
