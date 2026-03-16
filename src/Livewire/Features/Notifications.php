@@ -142,7 +142,7 @@ class Notifications extends Component
 
         $this->loaded = $this->loaded + 20;
         $this->js(<<<'JS'
-            $slideOpen('notifications-slide');
+            $tsui.open.slide('notifications-slide');
         JS);
     }
 }

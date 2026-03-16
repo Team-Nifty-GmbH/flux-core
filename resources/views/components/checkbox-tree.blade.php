@@ -40,7 +40,7 @@
         >
             {{ $beforeTree ?? null }}
             @if ($withSearch)
-                <div class="pb-2">
+                <div class="pb-2">F
                     <x-input
                         type="search"
                         x-model.debounce.500ms="search"

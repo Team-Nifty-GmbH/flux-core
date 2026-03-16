@@ -3,7 +3,7 @@
 namespace FluxErp\Traits\Livewire;
 
 use Livewire\Attributes\Renderless;
-use TallStackUi\Foundation\Interactions\Toast;
+use TallStackUi\Interactions\Toast;
 use TallStackUi\Traits\Interactions as BaseActions;
 
 trait Actions
