@@ -20,7 +20,7 @@ class CreateAddressTypeRuleset extends FluxRuleset
                 'string',
                 'nullable',
                 'max:255',
-                Rule::unique('address_types')->where('tenant_id', $data['tenant_id'] ?? null),
+                Rule::unique('address_types', 'address_type_code'),
             ],
             'name' => 'required|string|max:255',
             'is_locked' => 'boolean',

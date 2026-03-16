@@ -10,9 +10,9 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('address_types', function (Blueprint $table): void {
-            $table->dropUnique('address_types_tenant_id_address_type_code_unique');
-
             $table->dropConstrainedForeignId('tenant_id');
+
+            $table->dropUnique('address_types_tenant_id_address_type_code_unique');
         });
     }
 

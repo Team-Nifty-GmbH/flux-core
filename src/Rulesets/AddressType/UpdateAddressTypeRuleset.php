@@ -24,7 +24,6 @@ class UpdateAddressTypeRuleset extends FluxRuleset
                 'string',
                 'max:255',
                 'nullable',
-                app(UniqueInFieldDependence::class, ['model' => AddressType::class, 'dependingField' => 'tenant_id']),
             ],
             'name' => 'sometimes|required|string|max:255',
             'is_locked' => 'boolean',

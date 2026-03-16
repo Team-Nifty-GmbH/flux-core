@@ -7,6 +7,7 @@ use FluxErp\Models\AddressType;
 use FluxErp\Rulesets\AddressType\UpdateAddressTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 
 class UpdateAddressType extends FluxAction
 {
@@ -36,5 +37,20 @@ class UpdateAddressType extends FluxAction
         }
 
         return $addressType->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->getData('id')) {
+            $this->mergeRules([
+                'address_type_code' => [
+                    'string',
+                    'max:255',
+                    'nullable',
+                    Rule::unique('address_types', 'address_type_code')
+                        ->ignore($this->getData('id')),
+                ],
+            ]);
+        }
     }
 }
