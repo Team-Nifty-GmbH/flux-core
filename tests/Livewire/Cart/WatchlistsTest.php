@@ -58,7 +58,8 @@ test('each watchlist card renders its own products', function (): void {
         'name' => 'UniqueProductBeta',
     ]);
 
-    $html = Livewire::actingAs($this->user)
+    $html = Livewire::withoutLazyLoading()
+        ->actingAs($this->user)
         ->test(Watchlists::class)
         ->assertSee('Watchlist Alpha')
         ->assertSee('Watchlist Beta')
