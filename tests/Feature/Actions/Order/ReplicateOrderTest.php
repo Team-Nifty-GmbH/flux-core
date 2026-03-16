@@ -15,15 +15,15 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 
-it('copies position discounts when creating retoure', function (): void {
+test('copies position discounts when creating retoure', function (): void {
     // Arrange: Create an order with a position that has a discount
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -47,24 +47,24 @@ it('copies position discounts when creating retoure', function (): void {
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_locked' => true,
     ]);
 
     $orderPosition = OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
-        'is_free_text' => true,
         'discount_percentage' => 0.1,
+        'is_free_text' => true,
     ]);
 
     // Create a discount for the order position (10% discount)
@@ -78,8 +78,8 @@ it('copies position discounts when creating retoure', function (): void {
     // Act: Create a retoure from the order
     $retoure = ReplicateOrder::make([
         'id' => $order->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
     ])
         ->validate()
         ->execute();
@@ -94,15 +94,15 @@ it('copies position discounts when creating retoure', function (): void {
         ->and($retourePosition->discounts->first()->is_percentage)->toBeTrue();
 });
 
-it('copies order-level discounts when creating retoure', function (): void {
+test('copies order-level discounts when creating retoure', function (): void {
     // Arrange: Create an order with an order-level discount
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -126,28 +126,28 @@ it('copies order-level discounts when creating retoure', function (): void {
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_locked' => true,
     ]);
 
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
-        'is_free_text' => true,
+        'amount' => 1,
+        'total_gross_price' => 119,
+        'total_net_price' => 100,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 100,
-        'total_gross_price' => 119,
-        'amount' => 1,
+        'is_free_text' => true,
     ]);
 
     // Create an order-level discount (like "CULT Händlerrabatt" or "Transport 100%")
@@ -162,8 +162,8 @@ it('copies order-level discounts when creating retoure', function (): void {
     // Act: Create a retoure from the order
     $retoure = ReplicateOrder::make([
         'id' => $order->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
     ])
         ->validate()
         ->execute();
@@ -181,7 +181,7 @@ it('copies order-level discounts when creating retoure', function (): void {
         ->and($retoureDiscounts->first()->is_percentage)->toBeTrue();
 });
 
-it('preserves implicit discounts when position has zero total but no discount_percentage', function (): void {
+test('preserves implicit discounts when position has zero total but no discount_percentage', function (): void {
     // Arrange: Create an order with a position that has 100% discount applied directly
     // This simulates positions where the discount was set via total_net_price = 0
     // without setting discount_percentage (legacy data scenario)
@@ -190,8 +190,8 @@ it('preserves implicit discounts when position has zero total but no discount_pe
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -216,35 +216,35 @@ it('preserves implicit discounts when position has zero total but no discount_pe
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_locked' => true,
     ]);
 
     // Create position with 100% implicit discount (total = 0 but no discount_percentage)
-    $orderPosition = OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+    OrderPosition::factory()->create([
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_net' => true,
         'amount' => 10,
         'signed_amount' => 10,
+        'discount_percentage' => null,
+        'total_base_gross_price' => 595,
+        'total_base_net_price' => 500,
+        'total_gross_price' => 0,
+        'total_net_price' => 0,
         'unit_net_price' => 50,
         'unit_gross_price' => 59.50,
-        'total_net_price' => 0,
-        'total_gross_price' => 0,
-        'total_base_net_price' => 500,
-        'total_base_gross_price' => 595,
-        'discount_percentage' => null,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     $order->calculatePrices()->save();
@@ -252,8 +252,8 @@ it('preserves implicit discounts when position has zero total but no discount_pe
     // Act: Create a retoure from the order
     $retoure = ReplicateOrder::make([
         'id' => $order->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
     ])
         ->validate()
         ->execute();
@@ -268,15 +268,15 @@ it('preserves implicit discounts when position has zero total but no discount_pe
         ->and((float) $retourePosition->discount_percentage)->toBe(1.0);
 });
 
-it('retoure total equals negative of original total', function (): void {
+test('retoure total equals negative of original total', function (): void {
     // A4: Simplified - just verify total sums to zero
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -291,8 +291,8 @@ it('retoure total equals negative of original total', function (): void {
 
     // Create explicit price in the price list to avoid using random prices from DB
     Price::factory()->create([
-        'product_id' => $product->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'product_id' => $product->getKey(),
         'price' => 100,
     ]);
 
@@ -309,39 +309,39 @@ it('retoure total equals negative of original total', function (): void {
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
         'is_locked' => true,
     ]);
 
     // Position with 50% implicit discount (is_free_text=false)
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 2,
         'signed_amount' => 2,
+        'discount_percentage' => null,
+        'total_base_gross_price' => 238,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 119,
+        'total_net_price' => 100,
+        'vat_price' => 19,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 100,
-        'total_gross_price' => 119,
-        'total_base_net_price' => 200,
-        'total_base_gross_price' => 238,
         'vat_rate_percentage' => 0.19,
-        'vat_price' => 19,
-        'discount_percentage' => null,
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     $order->calculatePrices()->save();
@@ -349,8 +349,8 @@ it('retoure total equals negative of original total', function (): void {
     // Act
     $retoure = ReplicateOrder::make([
         'id' => $order->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
     ])
         ->validate()
         ->execute();
@@ -363,15 +363,15 @@ it('retoure total equals negative of original total', function (): void {
         ->and(bcadd($order->total_gross_price, $retoure->total_gross_price, 2))->toBe('0.00');
 });
 
-it('handles vat rate mix correctly when creating retoure', function (): void {
+test('handles vat rate mix correctly when creating retoure', function (): void {
     // A5: Retoure von Order mit MwSt-Mix (7%/19%)
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -387,13 +387,13 @@ it('handles vat rate mix correctly when creating retoure', function (): void {
 
     // Create explicit prices in the price list to avoid using random prices from DB
     Price::factory()->create([
-        'product_id' => $product19->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'product_id' => $product19->getKey(),
         'price' => 100,
     ]);
     Price::factory()->create([
-        'product_id' => $product7->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'product_id' => $product7->getKey(),
         'price' => 100,
     ]);
 
@@ -410,62 +410,62 @@ it('handles vat rate mix correctly when creating retoure', function (): void {
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
         'is_locked' => true,
     ]);
 
     // Position with 19% VAT (is_free_text=false for proper calculation)
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product19->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate19->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 1,
         'signed_amount' => 1,
+        'discount_percentage' => null,
+        'total_base_gross_price' => 119,
+        'total_base_net_price' => 100,
+        'total_gross_price' => 119,
+        'total_net_price' => 100,
+        'vat_price' => 19,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 100,
-        'total_gross_price' => 119,
-        'total_base_net_price' => 100,
-        'total_base_gross_price' => 119,
         'vat_rate_percentage' => 0.19,
-        'vat_price' => 19,
-        'discount_percentage' => null,
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     // Position with 7% VAT
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product7->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate7->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 1,
         'signed_amount' => 1,
+        'discount_percentage' => null,
+        'total_base_gross_price' => 107,
+        'total_base_net_price' => 100,
+        'total_gross_price' => 107,
+        'total_net_price' => 100,
+        'vat_price' => 7,
         'unit_net_price' => 100,
         'unit_gross_price' => 107,
-        'total_net_price' => 100,
-        'total_gross_price' => 107,
-        'total_base_net_price' => 100,
-        'total_base_gross_price' => 107,
         'vat_rate_percentage' => 0.07,
-        'vat_price' => 7,
-        'discount_percentage' => null,
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     $order->calculatePrices()->save();
@@ -473,8 +473,8 @@ it('handles vat rate mix correctly when creating retoure', function (): void {
     // Act
     $retoure = ReplicateOrder::make([
         'id' => $order->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
     ])
         ->validate()
         ->execute();
@@ -494,15 +494,15 @@ it('handles vat rate mix correctly when creating retoure', function (): void {
     expect($retourePositions)->toHaveCount(2);
 });
 
-it('preserves discounts when creating split order', function (): void {
+test('preserves discounts when creating split order', function (): void {
     // B3: Teilauftrag mit Rabatten
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -514,8 +514,8 @@ it('preserves discounts when creating split order', function (): void {
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
-        'product_id' => $product->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'product_id' => $product->getKey(),
         'price' => 100,
     ]);
 
@@ -532,39 +532,39 @@ it('preserves discounts when creating split order', function (): void {
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
         'is_locked' => true,
     ]);
 
     // Position with 20% discount
     $orderPosition = OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 10,
         'signed_amount' => 10,
+        'discount_percentage' => 0.2,
+        'total_base_gross_price' => 1190,
+        'total_base_net_price' => 1000,
+        'total_gross_price' => 952,
+        'total_net_price' => 800,  // 1000 * 0.8 = 800 (20% discount)
+        'vat_price' => 152,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 800,  // 1000 * 0.8 = 800 (20% discount)
-        'total_gross_price' => 952,
-        'total_base_net_price' => 1000,
-        'total_base_gross_price' => 1190,
         'vat_rate_percentage' => 0.19,
-        'vat_price' => 152,
-        'discount_percentage' => 0.2,
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     $order->calculatePrices()->save();
@@ -572,8 +572,8 @@ it('preserves discounts when creating split order', function (): void {
     // Act: Create split order with half the amount
     $splitOrder = ReplicateOrder::make([
         'id' => $order->getKey(),
-        'order_type_id' => $splitOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $splitOrderType->getKey(),
         'order_positions' => [
             ['id' => $orderPosition->getKey(), 'amount' => 5],
         ],
@@ -591,15 +591,15 @@ it('preserves discounts when creating split order', function (): void {
         ->and(bccomp($splitPosition->total_net_price, '400', 2))->toBe(0); // 500 * 0.8 = 400
 });
 
-it('calculates order with 100 percent position discount correctly', function (): void {
+test('calculates order with 100 percent position discount correctly', function (): void {
     // C1: Order mit 100% Positions-Rabatt
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -617,35 +617,35 @@ it('calculates order with 100 percent position discount correctly', function ():
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
         'is_locked' => false,
     ]);
 
     // Position with 100% discount (free item)
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
-        'is_free_text' => true,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 1,
+        'discount_percentage' => 1.0,
+        'total_base_gross_price' => 119,
+        'total_base_net_price' => 100,
+        'total_gross_price' => 0,
+        'total_net_price' => 0,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 0,
-        'total_gross_price' => 0,
-        'total_base_net_price' => 100,
-        'total_base_gross_price' => 119,
-        'discount_percentage' => 1.0,
+        'is_alternative' => false,
+        'is_free_text' => true,
+        'is_net' => true,
     ]);
 
     $order->calculatePrices()->save();
@@ -656,15 +656,15 @@ it('calculates order with 100 percent position discount correctly', function ():
         ->and((float) $order->total_gross_price)->toBe(0.0);
 });
 
-it('returned split order makes amount available again for original', function (): void {
+test('returned split order makes amount available again for original', function (): void {
     // Scenario: Original (10) → Split Order (5) → Retoure of Split (5) = 10 available again
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -676,8 +676,8 @@ it('returned split order makes amount available again for original', function ()
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
-        'product_id' => $product->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'product_id' => $product->getKey(),
         'price' => 100,
     ]);
 
@@ -701,38 +701,38 @@ it('returned split order makes amount available again for original', function ()
 
     // Step 1: Create original order with 10 items
     $originalOrder = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
         'is_locked' => true,
     ]);
 
     $originalPosition = OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $originalOrder->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 10,
         'signed_amount' => 10,
+        'discount_percentage' => 0, // Explicit no discount
+        'total_base_gross_price' => 1190,
+        'total_base_net_price' => 1000,
+        'total_gross_price' => 1190,
+        'total_net_price' => 1000,
+        'vat_price' => 190,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 1000,
-        'total_gross_price' => 1190,
-        'total_base_net_price' => 1000,
-        'total_base_gross_price' => 1190,
         'vat_rate_percentage' => 0.19,
-        'vat_price' => 190,
-        'discount_percentage' => 0, // Explicit no discount
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     $originalOrder->calculatePrices()->save();
@@ -740,8 +740,8 @@ it('returned split order makes amount available again for original', function ()
     // Step 2: Create split order with 5 items
     $splitOrder = ReplicateOrder::make([
         'id' => $originalOrder->getKey(),
-        'order_type_id' => $splitOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $splitOrderType->getKey(),
         'order_positions' => [
             ['id' => $originalPosition->getKey(), 'amount' => 5],
         ],
@@ -760,8 +760,8 @@ it('returned split order makes amount available again for original', function ()
     // Step 3: Create retoure of the split order (return all 5 items)
     $retoure = ReplicateOrder::make([
         'id' => $splitOrder->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
     ])
         ->validate()
         ->execute();
@@ -831,15 +831,15 @@ it('returned split order makes amount available again for original', function ()
     expect(bccomp($available, '10', 0))->toBe(0);
 });
 
-it('partially returned split order reduces available amount proportionally', function (): void {
+test('partially returned split order reduces available amount proportionally', function (): void {
     // Scenario: Original (10) → Split Order (5) → Partial Retoure (3) = 8 available
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -851,8 +851,8 @@ it('partially returned split order reduces available amount proportionally', fun
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
-        'product_id' => $product->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'product_id' => $product->getKey(),
         'price' => 100,
     ]);
 
@@ -876,38 +876,38 @@ it('partially returned split order reduces available amount proportionally', fun
 
     // Step 1: Create original order with 10 items
     $originalOrder = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
         'is_locked' => true,
     ]);
 
     $originalPosition = OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $originalOrder->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 10,
         'signed_amount' => 10,
+        'discount_percentage' => 0, // Explicit no discount
+        'total_base_gross_price' => 1190,
+        'total_base_net_price' => 1000,
+        'total_gross_price' => 1190,
+        'total_net_price' => 1000,
+        'vat_price' => 190,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 1000,
-        'total_gross_price' => 1190,
-        'total_base_net_price' => 1000,
-        'total_base_gross_price' => 1190,
         'vat_rate_percentage' => 0.19,
-        'vat_price' => 190,
-        'discount_percentage' => 0, // Explicit no discount
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     $originalOrder->calculatePrices()->save();
@@ -915,8 +915,8 @@ it('partially returned split order reduces available amount proportionally', fun
     // Step 2: Create split order with 5 items
     $splitOrder = ReplicateOrder::make([
         'id' => $originalOrder->getKey(),
-        'order_type_id' => $splitOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $splitOrderType->getKey(),
         'order_positions' => [
             ['id' => $originalPosition->getKey(), 'amount' => 5],
         ],
@@ -930,8 +930,8 @@ it('partially returned split order reduces available amount proportionally', fun
     // Step 3: Create partial retoure of the split order (return only 3 items)
     $retoure = ReplicateOrder::make([
         'id' => $splitOrder->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
         'order_positions' => [
             ['id' => $splitPosition->getKey(), 'amount' => 3],
         ],
@@ -1001,15 +1001,15 @@ it('partially returned split order reduces available amount proportionally', fun
     expect(bccomp($available, '8', 0))->toBe(0);
 });
 
-it('direct retoure still reduces available amount to zero', function (): void {
+test('direct retoure still reduces available amount to zero', function (): void {
     // Scenario: Original (10) → Direct Retoure (10) = 0 available
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -1021,8 +1021,8 @@ it('direct retoure still reduces available amount to zero', function (): void {
     $product = Product::factory()->create(['vat_rate_id' => $vatRate->getKey()]);
 
     Price::factory()->create([
-        'product_id' => $product->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'product_id' => $product->getKey(),
         'price' => 100,
     ]);
 
@@ -1040,38 +1040,38 @@ it('direct retoure still reduces available amount to zero', function (): void {
 
     // Step 1: Create original order with 10 items
     $originalOrder = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
         'is_locked' => true,
     ]);
 
     $originalPosition = OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $originalOrder->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
         'warehouse_id' => $warehouse->getKey(),
-        'is_free_text' => false,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 10,
         'signed_amount' => 10,
+        'discount_percentage' => 0, // Explicit no discount
+        'total_base_gross_price' => 1190,
+        'total_base_net_price' => 1000,
+        'total_gross_price' => 1190,
+        'total_net_price' => 1000,
+        'vat_price' => 190,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 1000,
-        'total_gross_price' => 1190,
-        'total_base_net_price' => 1000,
-        'total_base_gross_price' => 1190,
         'vat_rate_percentage' => 0.19,
-        'vat_price' => 190,
-        'discount_percentage' => 0, // Explicit no discount
+        'is_alternative' => false,
+        'is_free_text' => false,
+        'is_net' => true,
     ]);
 
     $originalOrder->calculatePrices()->save();
@@ -1079,8 +1079,8 @@ it('direct retoure still reduces available amount to zero', function (): void {
     // Step 2: Create direct retoure of the original order (return all 10 items)
     $retoure = ReplicateOrder::make([
         'id' => $originalOrder->getKey(),
-        'order_type_id' => $retoureOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $retoureOrderType->getKey(),
     ])
         ->validate()
         ->execute();
@@ -1147,15 +1147,15 @@ it('direct retoure still reduces available amount to zero', function (): void {
     expect(bccomp($available, '0', 0))->toBe(0);
 });
 
-it('calculates order lock recalculation correctly', function (): void {
+test('calculates order lock recalculation correctly', function (): void {
     // C3: Order Lock → Recalculation
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -1173,39 +1173,39 @@ it('calculates order lock recalculation correctly', function (): void {
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
-        'shipping_costs_net_price' => 0,
-        'is_locked' => false,
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'total_net_price' => 0,
         'total_gross_price' => 0,
+        'shipping_costs_net_price' => 0,
+        'is_locked' => false,
     ]);
 
     // Position without calculated totals
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
         'product_id' => $product->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => $vatRate->getKey(),
-        'is_free_text' => true,
-        'is_alternative' => false,
-        'is_net' => true,
         'amount' => 2,
+        'discount_percentage' => null,
+        'total_base_gross_price' => 238,
+        'total_base_net_price' => 200,
+        'total_gross_price' => 238,
+        'total_net_price' => 200,
+        'vat_price' => 38,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
-        'total_net_price' => 200,
-        'total_gross_price' => 238,
-        'total_base_net_price' => 200,
-        'total_base_gross_price' => 238,
         'vat_rate_percentage' => 0.19,
-        'vat_price' => 38,
-        'discount_percentage' => null,
+        'is_alternative' => false,
+        'is_free_text' => true,
+        'is_net' => true,
     ]);
 
     // Act: Calculate prices (like what happens on lock)
@@ -1217,14 +1217,14 @@ it('calculates order lock recalculation correctly', function (): void {
         ->and(bccomp($order->total_gross_price, '238', 2))->toBe(0);
 });
 
-it('does not set parent_id when creating refund', function (): void {
+test('does not set parent_id when creating refund', function (): void {
     $contact = Contact::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => true,
     ]);
 
@@ -1245,32 +1245,32 @@ it('does not set parent_id when creating refund', function (): void {
     ]);
 
     $order = Order::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
+        'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
+        'currency_id' => $currency->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'order_type_id' => $orderOrderType->getKey(),
-        'address_invoice_id' => $address->getKey(),
-        'price_list_id' => $priceList->getKey(),
         'payment_type_id' => $paymentType->getKey(),
-        'currency_id' => $currency->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_locked' => true,
     ]);
 
     OrderPosition::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
         'vat_rate_id' => VatRate::default()->getKey(),
-        'is_free_text' => true,
         'amount' => 1,
         'unit_net_price' => 100,
         'unit_gross_price' => 119,
+        'is_free_text' => true,
     ]);
 
     // Simulate what the Livewire component does: passing parent_id explicitly
     $refund = ReplicateOrder::make([
         'id' => $order->getKey(),
-        'order_type_id' => $refundOrderType->getKey(),
         'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $refundOrderType->getKey(),
         'parent_id' => $order->getKey(),
     ])
         ->validate()
