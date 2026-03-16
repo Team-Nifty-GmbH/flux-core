@@ -138,9 +138,9 @@ class CreateAddress extends FluxAction
                         resolve_static(AddressType::class, 'query')
                             ->whereKey($addressType)
                             ->first(['id'])
-                            ->getTenants(['id'])
+                            ?->getTenants(['id'])
                             ->pluck('id')
-                            ->toArray(),
+                            ->toArray() ?? [],
                         $contactTenants
                     )
                 ) {

@@ -182,7 +182,7 @@ class CreateCollectiveOrder extends DispatchableFluxAction
                 ->first(['id'])
                 ?->getTenants(['id'])
                 ->pluck('id')
-                ->toArray();
+                ->toArray() ?? [];
 
             if (array_diff($tenantIds, $orderTypeTenantIds)) {
                 $errors += [
