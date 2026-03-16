@@ -10,6 +10,8 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('address_types', function (Blueprint $table): void {
+            $table->dropUnique('address_types_tenant_id_address_type_code_unique');
+
             $table->dropConstrainedForeignId('tenant_id');
         });
     }
@@ -17,7 +19,7 @@ return new class() extends Migration
     public function down(): void
     {
         Schema::table('address_types', function (Blueprint $table): void {
-            $table->unsignedBigInteger('tenant_id')->nullable()->after('email_template_id');
+            $table->unsignedBigInteger('tenant_id')->nullable()->after('uuid');
         });
 
         // Fill tenant_id from address_type_tenant table
@@ -38,6 +40,7 @@ return new class() extends Migration
             $table->unsignedBigInteger('tenant_id')->nullable(false)->change();
 
             $table->foreign('tenant_id')->references('id')->on('tenants');
+            $table->unique(['tenant_id', 'address_type_code']);
         });
     }
 };

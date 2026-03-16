@@ -26,7 +26,11 @@
                         wire:model="orderType.tenants"
                         multiple
                         select="label:name|value:id"
-                        :request="route('search', \FluxErp\Models\Tenant::class)"
+                        unfiltered
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\Tenant::class),
+                            'method' => 'POST',
+                        ]"
                     />
                     <x-select.styled
                         :label="__('Order Type')"
