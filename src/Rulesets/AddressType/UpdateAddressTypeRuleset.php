@@ -5,7 +5,6 @@ namespace FluxErp\Rulesets\AddressType;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Tenant;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\UniqueInFieldDependence;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateAddressTypeRuleset extends FluxRuleset
