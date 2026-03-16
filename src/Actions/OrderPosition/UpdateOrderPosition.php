@@ -29,27 +29,6 @@ class UpdateOrderPosition extends FluxAction
         return UpdateOrderPositionRuleset::class;
     }
 
-    public function setRulesFromRulesets(): static
-    {
-        parent::setRulesFromRulesets();
-
-        if (
-            $this->getData('id')
-            && $this->getData('is_free_text')
-            && ! is_null($this->getData('amount'))
-            && resolve_static(OrderPosition::class, 'query')
-                ->where('parent_id', $this->getData('id'))
-                ->whereNotNull('amount_bundle')
-                ->exists()
-        ) {
-            $this->mergeRules([
-                'amount' => ['sometimes', app(Numeric::class), 'nullable'],
-            ]);
-        }
-
-        return $this;
-    }
-
     public function performAction(): Model
     {
         $tags = Arr::pull($this->data, 'tags', []);
@@ -114,13 +93,21 @@ class UpdateOrderPosition extends FluxAction
         if ($orderPosition->wasChanged('amount')) {
             $children = resolve_static(OrderPosition::class, 'query')
                 ->where('parent_id', $orderPosition->getKey())
-                ->whereNotNull('amount_bundle')
+                ->whereNotNull('amount')
                 ->get();
 
+            $previousAmount = data_get($orderPosition->getPrevious(), 'amount') ?? 1;
+            $previousAmount = bccomp($previousAmount, 0) === 0 ? 1 : $previousAmount;
+
             foreach ($children as $child) {
+                $amountBundle = $child->amount_bundle ?? bcdiv($child->amount, $previousAmount);
+
                 UpdateOrderPosition::make([
                     'id' => $child->getKey(),
-                    'amount' => bcmul($child->amount_bundle, $orderPosition->amount),
+                    'amount' => bcmul(
+                        $amountBundle,
+                        bccomp($orderPosition->amount, 0) === 0 ? 1 : $orderPosition->amount
+                    ),
                 ])
                     ->validate()
                     ->execute();
