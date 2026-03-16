@@ -41,26 +41,29 @@ const calendar = () => {
                 return false;
             }
 
-            this.$wire.calendarObject.parentId ??= 'my-calendars';
+            let calendarObj = JSON.parse(
+                JSON.stringify(this.$wire.calendarObject),
+            );
+            calendarObj.parentId ??= 'my-calendars';
 
-            if (this.$wire.calendarObject.isNew) {
+            if (calendarObj.isNew) {
                 // Add new calendar
-                if (!this.$wire.calendarObject.is_group) {
+                if (!calendarObj.is_group) {
                     // Add calendar as event source
-                    this.calendar.addEventSource(this.$wire.calendarObject);
+                    this.calendar.addEventSource(calendarObj);
                 } else {
-                    this.$wire.calendarObject.children = [];
+                    calendarObj.children = [];
                 }
 
                 this.getFolderTree().addFolder(
-                    this.getFolderTree().getNodeById(
-                        this.$wire.calendarObject.parentId,
-                    ),
-                    this.$wire.calendarObject,
+                    this.getFolderTree().getNodeById(calendarObj.parentId),
+                    calendarObj,
                 );
             } else {
-                this.getFolderTree().updateNode(this.$wire.calendarObject);
+                this.getFolderTree().updateNode(calendarObj);
             }
+
+            this.$wire.$set('calendarObject', calendarObj);
 
             return true;
         },
@@ -133,9 +136,9 @@ const calendar = () => {
             }
 
             if (type === 'start') {
-                this.$wire.event.start = dateTime.format(); // Use the default ISO 8601 format
+                this.$wire.$set('event.start', dateTime.format());
             } else {
-                this.$wire.event.end = dateTime.format(); // Use the default ISO 8601 format
+                this.$wire.$set('event.end', dateTime.format());
             }
         },
         mapDatesToUtc(event) {

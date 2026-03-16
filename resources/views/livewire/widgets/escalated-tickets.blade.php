@@ -56,5 +56,16 @@
                 {{ __('No escalated tickets') }}
             </div>
         @endforelse
+        @if ($hasMore)
+            <div class="flex justify-center p-2">
+                <x-button
+                    color="secondary"
+                    light
+                    loading="loadMore"
+                    :text="__('Load more')"
+                    wire:click="loadMore()"
+                />
+            </div>
+        @endif
     </div>
 </div>

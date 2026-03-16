@@ -1,7 +1,4 @@
-<div x-data="{
-    task: $wire.$entangle('task', false),
-    edit: true,
-}">
+<div x-data="{ isEditing: true }">
     <div id="new-task-modal">
         <x-modal
             size="5xl"

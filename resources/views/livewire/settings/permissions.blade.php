@@ -44,7 +44,7 @@
             <x-label :label="__('Permissions')" />
             <div x-show="$wire.roleForm.name !== 'Super Admin'" x-cloak>
                 <x-flux::checkbox-tree
-                    wire:model="$entangle('roleForm.permissions')"
+                    wire:model="roleForm.permissions"
                     selectable="true"
                     tree="$wire.permissions"
                     name-attribute="label"

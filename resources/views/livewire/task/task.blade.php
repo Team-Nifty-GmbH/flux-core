@@ -1,10 +1,4 @@
-<div
-    id="task-details"
-    x-data="{
-        task: $wire.entangle('task'),
-        edit: false,
-    }"
->
+<div id="task-details" x-data="{ isEditing: false }">
     <x-modal
         id="replicate-task-modal"
         :title="__('Replicate Task')"
@@ -41,7 +35,7 @@
                 :label="__('Responsible User')"
                 autocomplete="off"
                 wire:model="replica.responsible_user_id"
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 select="label:label|value:id"
                 unfiltered
                 :request="[
@@ -125,7 +119,7 @@
                 min="0"
             />
             <x-flux::editor
-                x-model="edit"
+                x-model="isEditing"
                 wire:model="replica.description"
                 scope="task"
                 :label="__('Description')"
@@ -133,7 +127,7 @@
             <x-select.styled
                 :label="__('Categories')"
                 wire:model="replica.categories"
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 multiple
                 select="label:label|value:id"
                 unfiltered
@@ -156,7 +150,7 @@
                 autocomplete="off"
                 multiple
                 wire:model="replica.users"
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 select="label:label|value:id"
                 unfiltered
                 :request="[
@@ -238,7 +232,7 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
                         <div class="pl-2">
-                            <span x-text="task.name"></span>
+                            <span x-text="$wire.task.name"></span>
                         </div>
                     </div>
                 </h1>
@@ -289,19 +283,19 @@
             @canAction(\FluxErp\Actions\Task\UpdateTask::class)
                 <x-button
                     color="indigo"
-                    x-show="!edit"
+                    x-show="!isEditing"
                     class="w-full"
-                    x-on:click="edit = true"
+                    x-on:click="isEditing = true"
                     :text="__('Edit')"
                 />
                 <x-button
                     x-cloak
                     color="indigo"
                     loading
-                    x-show="edit"
+                    x-show="isEditing"
                     class="w-full"
                     x-on:click="$wire.save().then((success) => {
-                        edit = false;
+                        isEditing = false;
                     });"
                     :text="__('Save')"
                 />
@@ -309,9 +303,9 @@
                     x-cloak
                     color="indigo"
                     loading
-                    x-show="edit"
+                    x-show="isEditing"
                     class="w-full"
-                    x-on:click="edit = false; $wire.resetForm();"
+                    x-on:click="isEditing = false; $wire.resetForm();"
                     :text="__('Cancel')"
                 />
             @endcanAction

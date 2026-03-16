@@ -362,7 +362,7 @@
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
                     color="red"
                     :text="__('Delete')"
-                    wire:click="delete"
+                    wire:click="delete()"
                 />
             @endif
 

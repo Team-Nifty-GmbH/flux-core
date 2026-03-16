@@ -7,18 +7,7 @@
 >
     <div class="space-y-8 divide-y divide-gray-200">
         <div class="space-y-8 divide-y divide-gray-200">
-            <div
-                x-data="{
-                    ticket: $wire.entangle('ticket'),
-                    save() {
-                        this.$wire.save().then((result) => {
-                            if (result === true) {
-                                close()
-                            }
-                        })
-                    },
-                }"
-            >
+            <div>
                 <div class="mt-6 grid grid-cols-1 gap-1.5 sm:grid-cols-6">
                     <div class="sm:col-span-6">
                         <x-input
@@ -67,6 +56,6 @@
             :text="__('Cancel')"
             x-on:click="$modalClose('new-ticket-modal')"
         />
-        <x-button color="indigo" :text="__('Save')" wire:click="save" />
+        <x-button color="indigo" :text="__('Save')" wire:click="save()" />
     </x-slot>
 </x-modal>

@@ -88,7 +88,7 @@
                             x-show="! $wire.purchaseInvoiceForm.order_id"
                             color="emerald"
                             icon="plus"
-                            wire:click="showCreateContactModal"
+                            wire:click="showCreateContactModal()"
                         />
                     @endcanAction
                 </div>

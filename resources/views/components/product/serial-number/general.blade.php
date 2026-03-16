@@ -4,7 +4,7 @@
             <div class="grid grid-cols-3 gap-4">
                 <x-input
                     :label="__('Serial number')"
-                    x-bind:readonly="! edit"
+                    x-bind:readonly="! isEditing"
                     wire:model.blur="serialNumber.serial_number"
                 />
             </div>

@@ -1,4 +1,4 @@
-<div x-data="{ edit: true }">
+<div x-data="{ isEditing: true }">
     @canAction(\FluxErp\Actions\Product\CreateProduct::class)
         <x-modal
             id="create-product-modal"
@@ -26,7 +26,7 @@
                 />
                 <x-select.styled
                     multiple
-                    x-bind:disabled="!edit"
+                    x-bind:disabled="!isEditing"
                     wire:model.number="product.tenants"
                     :label="__('Tenants')"
                     :src="'logo_small_url'"
@@ -58,7 +58,7 @@
                     loading="save"
                     color="indigo"
                     :text="__('Save')"
-                    wire:click="save"
+                    wire:click="save()"
                 />
             </x-slot>
         </x-modal>

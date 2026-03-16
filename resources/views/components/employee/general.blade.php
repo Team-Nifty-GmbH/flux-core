@@ -5,9 +5,9 @@
         <x-button
             color="indigo"
             x-cloak
-            x-show="!edit"
+            x-show="!isEditing"
             class="w-full"
-            x-on:click="edit = true"
+            x-on:click="isEditing = true"
             :text="__('Edit')"
         />
         <x-button
@@ -15,10 +15,10 @@
             color="indigo"
             loading="save"
             x-cloak
-            x-show="edit"
+            x-show="isEditing"
             class="w-full"
             x-on:click="$wire.save().then((success) => {
-                edit = false;
+                isEditing = false;
             });"
             :text="__('Save')"
         />
@@ -29,9 +29,9 @@
             :text="__('Cancel')"
             x-cloak
             loading="save"
-            x-show="edit"
+            x-show="isEditing"
             class="w-full"
-            x-on:click="edit = false; $wire.resetForm();"
+            x-on:click="isEditing = false; $wire.resetForm();"
         />
     </div>
 </div>
@@ -41,43 +41,43 @@
             <x-input
                 :label="__('Firstname')"
                 wire:model="employee.firstname"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Lastname')"
                 wire:model="employee.lastname"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Email')"
                 type="email"
                 wire:model="employee.email"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Employee Number')"
                 wire:model="employee.employee_number"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Phone')"
                 wire:model="employee.phone"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Phone Mobile')"
                 wire:model="employee.mobile_phone"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('IBAN')"
                 wire:model="employee.iban"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Account Holder')"
                 wire:model="employee.account_holder"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
         </div>
     </x-card>
@@ -87,21 +87,21 @@
             <x-date
                 :label="__('Date Of Birth')"
                 wire:model="employee.date_of_birth"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Place Of Birth')"
                 wire:model="employee.place_of_birth"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
         </div>
         <div class="mt-4 grid grid-cols-3 gap-x-4 gap-y-6">
             <x-input
                 :label="__('Nationality')"
                 wire:model="employee.nationality"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
-            <div x-bind:class="!edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
                     wire:model="employee.country_id"
                     :label="__('Country')"
@@ -119,24 +119,24 @@
             <x-input
                 :label="__('Confession')"
                 wire:model="employee.confession"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Street')"
                 wire:model="employee.street"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Zip')"
                 wire:model="employee.zip"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('City')"
                 wire:model="employee.city"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
-            <div x-bind:class="!edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-number
                     min="0"
                     step="0.5"
@@ -152,22 +152,22 @@
             <x-input
                 :label="__('Social Security Number')"
                 wire:model="employee.social_security_number"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Tax Identification Number')"
                 wire:model="employee.tax_identification_number"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Health Insurance')"
                 wire:model="employee.health_insurance"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Health Insurance Member Number')"
                 wire:model="employee.health_insurance_member_number"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
         </div>
     </x-card>
@@ -176,42 +176,42 @@
     <x-card :header="__('Employment Information')">
         <div
             class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2"
-            x-bind:class="!edit && 'pointer-events-none'"
+            x-bind:class="!isEditing && 'pointer-events-none'"
         >
             <x-date
                 :label="__('Employment Date')"
                 wire:model="employee.employment_date"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-date
                 :label="__('Termination Date')"
                 wire:model="employee.termination_date"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-input
                 :label="__('Job Title')"
                 wire:model="employee.job_title"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-date
                 :label="__('Probation Period Until')"
                 wire:model="employee.probation_period_until"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-date
                 :label="__('Fixed Term Contract Until')"
                 wire:model="employee.fixed_term_contract_until"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-date
                 :label="__('Work Permit Until')"
                 wire:model="employee.work_permit_until"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-date
                 :label="__('Residence Permit Until')"
                 wire:model="employee.residence_permit_until"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
             />
             <x-select.styled
                 :label="__('Tenant')"
@@ -260,7 +260,7 @@
 
     <x-card :header="__('Vacation Carryover Rule')">
         <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-            <div x-bind:class="!edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
                     :label="__('Vacation Carryover Rule')"
                     wire:model="employee.vacation_carryover_rule_id"

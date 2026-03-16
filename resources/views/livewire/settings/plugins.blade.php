@@ -3,7 +3,6 @@
     wire:init="checkForUpdates()"
     x-data="{
         showOnlyFluxPlugins: true,
-        entangledInstalled: $wire.$entangle('installed', true),
         get installed() {
             if (! this.showOnlyFluxPlugins) return $wire.installed
 
@@ -88,7 +87,7 @@
                                 color="indigo"
                                 loading="installUploaded"
                                 :text="__('Upload package')"
-                                wire:click="installUploaded"
+                                wire:click="installUploaded()"
                                 wire:flux-confirm.type.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"
                             />
                         </div>
@@ -253,7 +252,7 @@
                             x-bind:class="! (plugin.can_uninstall && ! plugin.offer_install) && 'invisible'"
                         >
                             <x-toggle
-                                x-model="entangledInstalled[key].is_active"
+                                x-model="$wire.installed[key].is_active"
                             />
                         </div>
                     @endif

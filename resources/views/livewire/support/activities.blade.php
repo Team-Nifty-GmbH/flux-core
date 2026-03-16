@@ -5,9 +5,6 @@
             $wire.loadData()
         },
         activeActivity: null,
-        page: $wire.entangle('page', true),
-        total: $wire.entangle('total', true),
-        perPage: $wire.entangle('perPage', true),
         showProperties(id) {
             this.activeActivity = this.activeActivity === id ? null : id
         },
@@ -104,13 +101,14 @@
                 </div>
             </li>
         </template>
-        <template x-if="perPage < total">
+        <template x-if="$wire.perPage < $wire.total">
             <x-button
-                x-on:click="page++"
+                wire:click="loadMore()"
                 color="indigo"
                 class="w-full"
                 :text="__('Show more')"
-            ></x-button>
+                loading
+            />
         </template>
     </ul>
 </div>

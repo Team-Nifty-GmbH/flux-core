@@ -423,7 +423,7 @@
                     <x-button
                         :text="__('Send Test')"
                         color="secondary"
-                        wire:click="sendTestNotification"
+                        wire:click="sendTestNotification()"
                         icon="paper-airplane"
                     />
                 </div>
@@ -500,7 +500,7 @@
                     <x-button
                         :text="__('Send Test')"
                         color="secondary"
-                        wire:click="sendFcmTestNotification"
+                        wire:click="sendFcmTestNotification()"
                         icon="paper-airplane"
                     />
                 </div>
@@ -550,7 +550,7 @@
             :text="__('Cancel')"
             x-on:click="window.history.back()"
         />
-        <x-button color="indigo" :text="__('Save')" wire:click="save" />
+        <x-button color="indigo" :text="__('Save')" wire:click="save()" />
     </div>
     @show
 </div>

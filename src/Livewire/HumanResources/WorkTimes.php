@@ -41,7 +41,7 @@ class WorkTimes extends WorkTimeList
                 ->text(__('New'))
                 ->color('indigo')
                 ->icon('plus')
-                ->wireClick('edit')
+                ->wireClick('edit()')
                 ->when(resolve_static(CreateLockedWorkTime::class, 'canPerformAction', [false])),
         ];
     }

@@ -42,7 +42,7 @@ class ProjectList extends BaseProjectList
                 ->color('indigo')
                 ->text(__('Create'))
                 ->icon('plus')
-                ->wireClick('createProject')
+                ->wireClick('createProject()')
                 ->when(fn () => resolve_static(CreateProject::class, 'canPerformAction', [false])),
         ];
     }

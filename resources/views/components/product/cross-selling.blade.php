@@ -41,12 +41,12 @@
             </x-slot>
             <div class="flex flex-col gap-4">
                 <x-input
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     x-model="productCrossSelling.name"
                     :label="__('Name')"
                 />
                 <x-toggle
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     x-model="productCrossSelling.is_active"
                     :label="__('Active')"
                 />
@@ -56,7 +56,7 @@
                     x-bind:data-index="index"
                     class="flex flex-col gap-4 pb-4"
                     x-cloak
-                    x-show="edit"
+                    x-show="isEditing"
                     x-transition
                 >
                     <x-button
@@ -85,7 +85,7 @@
                             </div>
                             <span x-text="product.name"></span>
                             <div
-                                x-show="productCrossSelling.products.length > 1 && edit"
+                                x-show="productCrossSelling.products.length > 1 && isEditing"
                                 x-transition
                             >
                                 <x-button.circle
@@ -99,7 +99,7 @@
                 </div>
             </x-slot>
             <x-slot:header>
-                <div x-show="edit" x-cloak x-transition>
+                <div x-show="isEditing" x-cloak x-transition>
                     <x-button
                         color="red"
                         x-on:click="$wire.productCrossSellings.splice(index, 1)"
@@ -113,7 +113,7 @@
     <div class="flex w-full justify-center">
         <x-button
             color="indigo"
-            x-on:click="edit = true; $wire.productCrossSellings.push({'name': '{{ __('New Cross Selling') }}', 'is_active': true, 'is_new': true, 'products': []})"
+            x-on:click="isEditing = true; $wire.productCrossSellings.push({'name': '{{ __('New Cross Selling') }}', 'is_active': true, 'is_new': true, 'products': []})"
         >
             {{ __('Add product cross selling') }}
         </x-button>

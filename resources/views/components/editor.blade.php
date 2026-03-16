@@ -17,9 +17,10 @@
         @endif
         x-data="Object.assign({}, setupEditor(
                 @if ($attributes->wire("model")->value())
-                    $wire.$entangle('{{ $attributes->wire("model")->value() }}',
+                    $wire,
+                    '{{ $attributes->wire("model")->value() }}',
                     @js($attributes->wire("model")->hasModifier("live"))
-                    ),
+                    ,
                     {{
                         $attributes->wire("model")->hasModifier("debounce")
                             ? Str::before(

@@ -2,17 +2,17 @@
     <x-card class="space-y-2.5" :header="__('General')">
         @section('general')
         <x-input
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             label="{{ __('Product number') }}"
             wire:model="product.product_number"
         />
         <x-input
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             label="{{ __('Name') }}"
             wire:model="product.name"
         />
         <x-flux::editor
-            x-model="edit"
+            x-model="isEditing"
             wire:model="product.description"
             scope="product"
             :label="__('Description')"
@@ -23,27 +23,27 @@
         @section('attributes')
         @section('bools')
         <x-checkbox
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             label="{{ __('Is active') }}"
             wire:model="product.is_active"
         />
         <x-checkbox
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             label="{{ __('Is highlight') }}"
             wire:model="product.is_highlight"
         />
         <x-checkbox
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             label="{{ __('Is NOS') }}"
             wire:model="product.is_nos"
         />
         <x-checkbox
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             label="{{ __('Export to Webshop') }}"
             wire:model="product.is_active_export_to_web_shop"
         />
         <x-checkbox
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             label="{{ __('Is service') }}"
             wire:model="product.is_service"
         />
@@ -57,22 +57,22 @@
         @show
         <hr />
         <x-input
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             label="{{ __('EAN') }}"
             wire:model="product.ean"
         />
         <x-input
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             label="{{ __('Customs Tariff Number') }}"
             wire:model="product.customs_tariff_number"
         />
         <x-input
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             label="{{ __('Manufacturer product number') }}"
             wire:model="product.manufacturer_product_number"
         />
         <x-select.styled
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             label="{{ __('Unit') }}"
             wire:model.number="product.unit_id"
             select="label:name|value:id"
@@ -80,10 +80,10 @@
         />
         <div
             class="grid grid-cols-1 gap-4 sm:grid-cols-4"
-            x-bind:class="!edit && 'pointer-events-none'"
+            x-bind:class="!isEditing && 'pointer-events-none'"
         >
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model.number="product.dimension_length_mm"
             >
                 <x-slot:label>
@@ -98,7 +98,7 @@
                 </x-slot>
             </x-number>
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model.number="product.dimension_width_mm"
             >
                 <x-slot:label>
@@ -113,7 +113,7 @@
                 </x-slot>
             </x-number>
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model.number="product.dimension_height_mm"
             >
                 <x-slot:label>
@@ -128,7 +128,7 @@
                 </x-slot>
             </x-number>
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model.number="product.weight_gram"
             >
                 <x-slot:label>
@@ -143,7 +143,7 @@
                 </x-slot>
             </x-number>
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model.number="product.selling_unit"
             >
                 <x-slot:label>
@@ -160,7 +160,7 @@
                 </x-slot>
             </x-number>
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model.number="product.basic_unit"
             >
                 <x-slot:label>
@@ -182,7 +182,7 @@
     <x-card class="flex flex-col gap-4" :header="__('Assignment')">
         <x-select.styled
             multiple
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             wire:model.number="product.categories"
             :label="__('Categories')"
             select="label:label|value:id"
@@ -203,7 +203,7 @@
         />
         <x-select.styled
             multiple
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             wire:model.number="product.tenants"
             :label="__('Tenants')"
             select="label:name|value:id"
@@ -216,7 +216,7 @@
         />
         <x-select.styled
             multiple
-            x-bind:disabled="!edit"
+            x-bind:disabled="!isEditing"
             wire:model.number="product.tags"
             select="label:label|value:id"
             unfiltered
@@ -322,10 +322,10 @@
         </x-modal>
         <x-button
             color="indigo"
-            x-show="edit"
+            x-show="isEditing"
             x-cloak
             :text="__('Edit')"
-            wire:click="showProductPropertiesModal"
+            wire:click="showProductPropertiesModal()"
         />
         <div class="grid grid-cols-3 gap-x-4">
             <template
@@ -372,7 +372,7 @@
                                             <x-input
                                                 x-model="displayedProperty.value"
                                                 x-bind:id="'displayed-property-' + displayedProperty.id"
-                                                x-bind:disabled="!edit"
+                                                x-bind:disabled="!isEditing"
                                             />
                                         </div>
                                     </template>
@@ -401,12 +401,12 @@
                 </x-slot>
                 <x-slot:actions>
                     <x-input
-                        x-bind:disabled="! edit"
+                        x-bind:disabled="! isEditing"
                         x-model="supplier.manufacturer_product_number"
                         :label="__('Manufacturer product number')"
                     />
                     <x-number
-                        x-bind:disabled="! edit"
+                        x-bind:disabled="! isEditing"
                         x-model="supplier.purchase_price"
                         :label="__('Purchase Price')"
                         step="0.01"
@@ -415,14 +415,14 @@
                         <x-button
                             color="red"
                             icon="trash"
-                            x-bind:disabled="!edit"
+                            x-bind:disabled="!isEditing"
                             x-on:click="$wire.product.suppliers.splice(index, 1);"
                         />
                     </div>
                 </x-slot>
             </x-flux::list-item>
         </template>
-        <div x-show="edit" x-cloak x-transition>
+        <div x-show="isEditing" x-cloak x-transition>
             <x-select.styled
                 :label="__('Contact')"
                 select="label:label|value:contact_id"

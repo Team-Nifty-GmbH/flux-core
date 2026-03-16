@@ -1,26 +1,25 @@
 <div
     class="flex items-center justify-center gap-x-2"
     x-data="{
-        dark: $wire.entangle('dark', true),
         browserDarkMode() {
             return window.matchMedia('(prefers-color-scheme: dark)').matches
         },
         enable() {
-            this.dark = true
+            $wire.dark = true
             window.localStorage.setItem('dark', true)
             document.documentElement.classList.add('dark')
         },
         disable() {
-            this.dark = false
+            $wire.dark = false
             window.localStorage.setItem('dark', false)
             document.documentElement.classList.remove('dark')
         },
         syncDarkMode() {
-            this.dark ? this.enable() : this.disable()
+            $wire.dark ? this.enable() : this.disable()
         },
         init() {
             this.syncDarkMode()
-            $watch('dark', () => this.syncDarkMode())
+            $wire.$watch('dark', () => this.syncDarkMode())
         },
     }"
 >
@@ -29,7 +28,7 @@
         x-on:click="disable"
         name="sun"
     />
-    <x-toggle x-model="dark" id="dark-mode-toggle.{{ $this->getId() }}" />
+    <x-toggle x-model="$wire.dark" id="dark-mode-toggle.{{ $this->getId() }}" />
     <x-icon
         class="h-5 w-5 cursor-pointer text-gray-700 dark:text-secondary-200"
         x-on:click="enable"

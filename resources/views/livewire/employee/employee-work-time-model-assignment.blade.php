@@ -53,7 +53,7 @@
                 <x-button
                     :text="__('Assign')"
                     color="primary"
-                    wire:click="assignWorkTimeModel"
+                    wire:click="assignWorkTimeModel()"
                 />
             </div>
         </div>

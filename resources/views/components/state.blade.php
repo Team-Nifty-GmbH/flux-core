@@ -1,9 +1,15 @@
 <div
     x-data="{
-    model: $wire.$entangle('{{ $attributes->wire("model")->value }}', {{ $attributes->wire("model")->hasModifier("live") ? "true" : "false" }}),
-    availableStates: $wire.$entangle('{{ $attributes->get("available") }}'),
+    get model() { return $wire.{{ $attributes->wire("model")->value }} },
+    set model(value) { $wire.{{ $attributes->wire("model")->value }} = value },
+    get availableStates() { return $wire.{{ $attributes->get("available") }} },
     @if ($attributes->wire("formatter")->value)
-        formatter: $wire.$entangle('{{ $attributes->wire("formatter")->value }}'),
+        get
+        formatter()
+        {
+        return
+        $wire.{{ $attributes->wire("formatter")->value }}
+        },
     @else
         formatter: {{ $attributes->get("formatters") }}
     @endif

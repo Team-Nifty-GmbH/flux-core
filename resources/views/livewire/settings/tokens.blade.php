@@ -31,7 +31,7 @@
             :rows="3"
         />
         <x-flux::checkbox-tree
-            wire:model="$entangle('tokenForm.permissions')"
+            wire:model="tokenForm.permissions"
             selectable="true"
             tree="$wire.permissions"
             name-attribute="label"

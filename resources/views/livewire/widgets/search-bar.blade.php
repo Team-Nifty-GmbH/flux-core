@@ -11,7 +11,6 @@
             <livewire:is
                 wire:key="search-bar-{{ $widgetComponent }}-{{ $widgetId }}"
                 :component="$widgetComponent"
-                :model="$widgetModel"
                 :model-id="$widgetId"
             />
         </x-card>

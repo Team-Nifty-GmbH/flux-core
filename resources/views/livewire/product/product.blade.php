@@ -1,9 +1,4 @@
-<div
-    x-data="{
-        edit: false,
-        priceLists: $wire.entangle('priceLists'),
-    }"
->
+<div x-data="{ isEditing: false }">
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
@@ -66,27 +61,27 @@
             @canAction(\FluxErp\Actions\Product\UpdateProduct::class)
                 <x-button
                     color="indigo"
-                    x-show="!edit"
+                    x-show="!isEditing"
                     class="w-full"
-                    x-on:click="edit = true"
+                    x-on:click="isEditing = true"
                     :text="__('Edit')"
                 />
                 <x-button
                     x-cloak
                     color="indigo"
-                    x-show="edit"
+                    x-show="isEditing"
                     class="w-full"
                     x-on:click="$wire.save().then((success) => {
-                        edit = false;
+                        isEditing = false;
                     });"
                     :text="__('Save')"
                 />
                 <x-button
                     x-cloak
                     color="indigo"
-                    x-show="edit"
+                    x-show="isEditing"
                     class="w-full"
-                    x-on:click="edit = false; $wire.resetProduct()"
+                    x-on:click="isEditing = false; $wire.resetProduct()"
                     :text="__('Cancel')"
                 />
             @endcanAction
