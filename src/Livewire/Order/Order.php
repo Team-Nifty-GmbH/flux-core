@@ -690,10 +690,6 @@ class Order extends Component
                 ->value('id');
         }
 
-        if ($orderTypeEnum === OrderTypeEnum::Refund->value) {
-            $this->replicateOrder->parent_id = $this->order->id;
-        }
-
         $this->replicateOrder->order_positions = null;
         $this->replicateOrder->set_new_as_parent = false;
         $this->disableReplicateModalInputs = false;

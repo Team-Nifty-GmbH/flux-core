@@ -2,6 +2,7 @@
 
 use FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\OrderPositions;
@@ -762,4 +763,87 @@ test('quick add order position uses product translation based on order language'
     expect($newPosition)->not->toBeNull();
     expect($newPosition->name)->toEqual($englishName);
     expect($newPosition->description)->toEqual($englishDescription);
+});
+
+test('updating amount on bundle group parent propagates to children', function (): void {
+    // Create a bundle group product with two sub-products
+    $bundleProduct = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'bundle_type_enum' => BundleTypeEnum::Group,
+        'is_bundle' => true,
+    ]);
+    $bundleProduct->tenants()->attach($this->dbTenant->getKey());
+
+    $subProduct1 = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+    ]);
+    $subProduct1->tenants()->attach($this->dbTenant->getKey());
+
+    Price::factory()->create([
+        'price_list_id' => $this->priceList->getKey(),
+        'product_id' => $subProduct1->getKey(),
+    ]);
+
+    $subProduct2 = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+    ]);
+    $subProduct2->tenants()->attach($this->dbTenant->getKey());
+
+    Price::factory()->create([
+        'price_list_id' => $this->priceList->getKey(),
+        'product_id' => $subProduct2->getKey(),
+    ]);
+
+    // Attach sub-products to bundle with specific counts
+    $bundleProduct->bundleProducts()->attach([
+        $subProduct1->getKey() => ['count' => 2],
+        $subProduct2->getKey() => ['count' => 5],
+    ]);
+
+    // Add the bundle group product to the order (amount = 1)
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('orderPosition.product_id', $bundleProduct->getKey())
+        ->set('orderPosition.amount', 1)
+        ->call('changedProductId', $bundleProduct)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertReturned(true);
+
+    // Get the parent group position
+    $parentPosition = $this->order->orderPositions()
+        ->where('product_id', $bundleProduct->getKey())
+        ->where('is_free_text', true)
+        ->first();
+
+    expect($parentPosition)->not->toBeNull();
+
+    // Verify children were created with correct amounts
+    $children = $this->order->orderPositions()
+        ->where('parent_id', $parentPosition->getKey())
+        ->get();
+
+    expect($children)->toHaveCount(2);
+
+    $child1 = $children->firstWhere('product_id', $subProduct1->getKey());
+    $child2 = $children->firstWhere('product_id', $subProduct2->getKey());
+
+    expect((float) $child1->amount)->toEqual(2);
+    expect((float) $child1->amount_bundle)->toEqual(2);
+    expect((float) $child2->amount)->toEqual(5);
+    expect((float) $child2->amount_bundle)->toEqual(5);
+
+    // Now update the parent's amount to 3 via the edit modal
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('editOrderPosition', $parentPosition)
+        ->set('orderPosition.amount', 3)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertReturned(true);
+
+    // Verify children amounts were recalculated: amount = amount_bundle * 3
+    $child1->refresh();
+    $child2->refresh();
+
+    expect((float) $child1->amount)->toEqual(6);
+    expect((float) $child2->amount)->toEqual(15);
 });
