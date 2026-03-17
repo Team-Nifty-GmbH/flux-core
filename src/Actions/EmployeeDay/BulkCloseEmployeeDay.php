@@ -29,7 +29,8 @@ class BulkCloseEmployeeDay extends DispatchableFluxAction
             $period = new DatePeriod(
                 Carbon::parse($period[0]),
                 DateInterval::createFromDateString('1 day'),
-                Carbon::parse($period[1])
+                Carbon::parse($period[1]),
+                DatePeriod::INCLUDE_END_DATE
             );
         }
 
