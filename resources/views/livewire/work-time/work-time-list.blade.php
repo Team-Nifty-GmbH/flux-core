@@ -11,11 +11,7 @@
 >
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
-            <div
-                class="mb-2 mt-2"
-                x-cloak
-                x-show="! $wire.workTime.id"
-            >
+            <div class="mb-2 mt-2" x-cloak x-show="! $wire.workTime.id">
                 <x-toggle
                     :label="__('Is Daily Work Time')"
                     wire:model="workTime.is_daily_work_time"
