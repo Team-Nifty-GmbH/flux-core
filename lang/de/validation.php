@@ -682,6 +682,8 @@ return [
         'till' => 'Bis',
         'time_budget' => 'Zeitbudget',
         'time_unit_enum' => 'Zeiteinheit',
+        'timeframe.0' => 'Zeitraum Start',
+        'timeframe.1' => 'Zeitraum Ende',
         'title' => 'Titel',
         'to' => 'An',
         'total_net_price' => 'Gesamtnettopreis',
