@@ -4,6 +4,7 @@ namespace FluxErp\Support\Editor;
 
 use FluxErp\Contracts\EditorButton;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class EditorManager
@@ -23,7 +24,7 @@ class EditorManager
         $variablePath = implode('.', array_filter([$morphAlias, $path]));
 
         $current = Arr::wrap(data_get(static::$variables, $variablePath) ?? []);
-        $current[] = $value;
+        $current[] = static::wrapValue($value);
 
         data_set(static::$variables, $variablePath, $current);
     }
@@ -51,7 +52,7 @@ class EditorManager
         return static::$buttons;
     }
 
-    public static function getVariables(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): string|array
+    public static function getVariables(?string $modelClass = null, ?string $path = null, bool $withGlobals = true): array
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
@@ -63,14 +64,14 @@ class EditorManager
 
         // Filter out nested paths (arrays) to only return flat key-value pairs
         if (is_array($data)) {
-            $data = array_filter($data, fn (mixed $value): bool => is_string($value));
+            $data = array_filter($data, static::isVariableEntry(...));
         }
 
         // When a path is specified, also include parent level variables
         if ($path && $modelClass) {
             $parentData = data_get(static::$variables, $morphAlias) ?? [];
             if (is_array($parentData)) {
-                $parentData = array_filter($parentData, fn (mixed $value): bool => is_string($value));
+                $parentData = array_filter($parentData, static::isVariableEntry(...));
             }
 
             $data = array_merge($parentData, $data);
@@ -87,7 +88,7 @@ class EditorManager
 
         // Filter out nested paths from globals as well
         if (is_array($globals)) {
-            $globals = array_filter($globals, fn (mixed $value): bool => is_string($value));
+            $globals = array_filter($globals, static::isVariableEntry(...));
         }
 
         return array_merge($data, $globals);
@@ -98,12 +99,16 @@ class EditorManager
         ?string $path = null,
         bool $withGlobals = true
     ): array {
-        $variables = static::getVariables($modelClass, $path, $withGlobals);
-        if (is_string($variables)) {
-            $variables = [$variables => $variables];
+        return static::translate(static::getVariables($modelClass, $path, $withGlobals));
+    }
+
+    public static function resolveById(?string $id): ?string
+    {
+        if (is_null($id)) {
+            return null;
         }
 
-        return static::translate($variables);
+        return static::findExpressionById($id, static::$variables);
     }
 
     /**
@@ -130,11 +135,16 @@ class EditorManager
             data_set(static::$variables, $morphAlias, []);
         }
 
+        $wrapped = [];
+        foreach ($values as $key => $value) {
+            $wrapped[$key] = static::wrapValue($value, $key, $morphAlias, $path);
+        }
+
         $variablePath = implode('.', array_filter([$morphAlias, $path]));
         data_set(
             static::$variables,
             $variablePath,
-            array_merge(Arr::wrap(data_get(static::$variables, $variablePath) ?? []), $values)
+            array_merge(Arr::wrap(data_get(static::$variables, $variablePath) ?? []), $wrapped)
         );
     }
 
@@ -173,10 +183,15 @@ class EditorManager
     {
         $morphAlias = static::getMorphAlias($modelClass);
 
+        $wrapped = [];
+        foreach ($variables as $key => $value) {
+            $wrapped[$key] = static::wrapValue($value, $key, $morphAlias);
+        }
+
         data_set(
             static::$variables,
             $morphAlias,
-            array_merge(data_get(static::$variables, $morphAlias) ?? [], $variables)
+            array_merge(data_get(static::$variables, $morphAlias) ?? [], $wrapped)
         );
     }
 
@@ -209,8 +224,53 @@ class EditorManager
         data_set(
             static::$variables,
             implode('.', array_filter([static::getMorphAlias($modelClass), $path])),
-            $value
+            static::wrapValue($value)
         );
+    }
+
+    protected static function wrapValue(string|array $value, ?string $key = null, ?string $morphAlias = null, ?string $path = null): array
+    {
+        if (is_array($value) && array_key_exists('id', $value)) {
+            return $value;
+        }
+
+        $expression = is_string($value) ? $value : ($value['expression'] ?? null);
+
+        $id = ! blank($key) && ! is_null($morphAlias)
+            ? implode('.', array_filter([$morphAlias, $path, Str::snake($key)], fn ($value) => ! blank($value)))
+            : null;
+
+        return [
+            'id' => $id,
+            'expression' => $expression,
+        ];
+    }
+
+    protected static function isVariableEntry(mixed $value): bool
+    {
+        return is_array($value) && ! is_null(data_get($value, 'id'));
+    }
+
+    protected static function findExpressionById(string $id, mixed $entries): ?string
+    {
+        if (! is_array($entries)) {
+            return null;
+        }
+
+        // Check if this is a leaf entry with id/expression
+        if (array_key_exists('id', $entries) && $entries['id'] === $id) {
+            return $entries['expression'] ?? null;
+        }
+
+        // Recurse into nested entries
+        foreach ($entries as $entry) {
+            $result = static::findExpressionById($id, $entry);
+            if (! is_null($result)) {
+                return $result;
+            }
+        }
+
+        return null;
     }
 
     protected static function getMorphAlias(?string $modelClass): string
@@ -224,10 +284,10 @@ class EditorManager
     {
         return Arr::mapWithKeys(
             $variables,
-            fn (string $value, string $key) => [
+            fn (array $entry, string $key) => [
                 $key => [
                     'label' => __($key),
-                    'value' => $value,
+                    'value' => $entry['id'],
                 ],
             ]
         );

@@ -639,6 +639,12 @@ if (! function_exists('render_editor_blade')) {
             function (array $matches) use ($data): string {
                 $value = html_entity_decode($matches[1]);
 
+                // Try to resolve as stable ID first
+                $resolved = FluxErp\Facades\Editor::resolveById($value);
+                if (! is_null($resolved)) {
+                    $value = $resolved;
+                }
+
                 preg_match('/\$(\w+)/', $value, $variableMatches);
                 $variableName = $variableMatches[1] ?? null;
 
