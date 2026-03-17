@@ -107,7 +107,7 @@
         id="close-employee-day-modal"
         :title="__('Bulk Close Employee Day')"
     >
-        <x-date :label="__('Time Frame')" range wire:model="timeframe"/>
+        <x-date :label="__('Time Frame')" range wire:model="timeframe" />
         <x-slot:footer>
             <x-button
                 :text="__('Cancel')"
