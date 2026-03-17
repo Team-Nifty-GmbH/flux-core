@@ -82,6 +82,17 @@
                             wire:model="orderPosition.name"
                         />
                         <div
+                            x-cloak
+                            x-show="$wire.orderPosition.is_bundle_parent"
+                        >
+                            <x-input
+                                type="number"
+                                min="0"
+                                :label="__('Amount')"
+                                wire:model="orderPosition.amount"
+                            />
+                        </div>
+                        <div
                             class="space-y-4"
                             x-cloak
                             x-show="$wire.orderPosition.is_free_text !== true"
