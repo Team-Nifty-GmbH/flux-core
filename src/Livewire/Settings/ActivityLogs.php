@@ -19,11 +19,11 @@ class ActivityLogs extends ActivityLogList
                 ->icon('eye')
                 ->text(__('Show'))
                 ->color('indigo')
-                ->wireClick('show(record.id)'),
+                ->wireClick('edit(record.id)'),
         ];
     }
 
-    public function show(Activity $activity): void
+    public function edit(Activity $activity): void
     {
         $this->activity = $activity->toArray();
         $this->activity['causer'] = $activity->causer?->name;
