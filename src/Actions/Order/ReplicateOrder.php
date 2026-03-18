@@ -119,9 +119,12 @@ class ReplicateOrder extends FluxAction
                         fn (array $item): bool => data_get($item, 'id') === $orderPosition->getKey()
                     );
 
-                    if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
-                        $orderPosition->origin_position_id = $orderPosition->getKey();
-                    }
+                    $orderPosition->origin_position_id = in_array(
+                        $orderTypeEnum,
+                        [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure]
+                    )
+                        ? $orderPosition->getKey()
+                        : null;
 
                     $originalAmount = $orderPosition->amount;
                     $orderPosition->amount = data_get($position, 'amount');
@@ -143,7 +146,14 @@ class ReplicateOrder extends FluxAction
                     $originalOrder->orderPositions?->toArray() ?? []
                 );
             } else {
-                $orderPositions = $originalOrder->orderPositions?->toArray() ?? [];
+                $orderPositions = array_map(
+                    function (array $position): array {
+                        $position['origin_position_id'] = null;
+
+                        return $position;
+                    },
+                    $originalOrder->orderPositions?->toArray() ?? []
+                );
             }
         }
 
