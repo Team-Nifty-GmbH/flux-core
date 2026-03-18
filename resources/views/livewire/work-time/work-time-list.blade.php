@@ -1,13 +1,10 @@
 <div
-    wire:init="$watch(
-        'workTime.trackable_type',
-        () => {
-            $wire.workTime.trackable_id = null
-            let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
-            searchRoute = searchRoute.replace('__model__', $wire.workTime.trackable_type)
-            $tallstackuiSelect('trackable-id-edit').setRequestUrl(searchRoute)
-        }
-    )"
+    x-init="$wire.$watch('workTime.trackable_type', () => {
+        $wire.workTime.trackable_id = null
+        let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
+        searchRoute = searchRoute.replace('__model__', $wire.workTime.trackable_type)
+        $tallstackuiSelect('trackable-id-edit').setRequestUrl(searchRoute)
+    })"
 >
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
