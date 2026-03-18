@@ -22,11 +22,15 @@
                         :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\Order::class)"
                     />
                     <x-select.styled
-                        :label="__('Tenant')"
-                        :placeholder="__('Select a Tenant')"
-                        wire:model="orderType.tenant_id"
+                        :label="__('Tenants')"
+                        wire:model="orderType.tenants"
+                        multiple
                         select="label:name|value:id"
-                        :request="route('search', \FluxErp\Models\Tenant::class)"
+                        unfiltered
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\Tenant::class),
+                            'method' => 'POST',
+                        ]"
                     />
                     <x-select.styled
                         :label="__('Order Type')"

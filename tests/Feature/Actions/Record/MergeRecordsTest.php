@@ -7,20 +7,16 @@ use FluxErp\Models\Contact;
 use Illuminate\Support\Facades\DB;
 
 test('merges addresses when categorizable_id coincides with another model id', function (): void {
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $mainAddress = Address::factory()->create([
         'contact_id' => $contact->getKey(),
-        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'is_main_address' => false,
     ]);
 
     $mergeAddress = Address::factory()->create([
         'contact_id' => $contact->getKey(),
-        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'is_main_address' => false,
     ]);

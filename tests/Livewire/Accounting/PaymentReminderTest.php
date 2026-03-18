@@ -17,11 +17,9 @@ use Livewire\Livewire;
 
 test('mark selected as paid', function (): void {
     $contact = Contact::factory()
-        ->state(['tenant_id' => $this->dbTenant->getKey()])
         ->create();
     $address = Address::factory()
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
             'contact_id' => $contact->id,
         ])
         ->for($contact, 'contact')
@@ -37,8 +35,7 @@ test('mark selected as paid', function (): void {
                 ->state([
                     'order_type_enum' => OrderTypeEnum::Order,
                     'is_active' => true,
-                ])
-                ->for(factory: $this->dbTenant, relationship: 'tenant'),
+                ]),
             'orderType'
         )
         ->state([

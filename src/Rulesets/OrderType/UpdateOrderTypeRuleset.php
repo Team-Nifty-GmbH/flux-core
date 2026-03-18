@@ -25,10 +25,6 @@ class UpdateOrderTypeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => EmailTemplate::class]),
             ],
-            'tenant_id' => [
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
             'document_header' => 'string|nullable',
@@ -42,6 +38,13 @@ class UpdateOrderTypeRuleset extends FluxRuleset
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
             'is_visible_in_sidebar' => 'boolean',
+
+            'tenants' => 'array|nullable',
+            'tenants.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
+            ],
         ];
     }
 }

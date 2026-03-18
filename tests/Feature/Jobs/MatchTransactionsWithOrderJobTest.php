@@ -23,13 +23,11 @@ beforeEach(function (): void {
     ]);
 
     $this->contact = Contact::factory()
-        ->state(['tenant_id' => $this->dbTenant->getKey()])
         ->create();
 
     $this->address = Address::factory()
         ->state([
             'contact_id' => $this->contact->getKey(),
-            'tenant_id' => $this->dbTenant->getKey(),
         ])
         ->for($this->contact, 'contact')
         ->create();
@@ -43,7 +41,6 @@ beforeEach(function (): void {
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ])
-        ->for(factory: $this->dbTenant, relationship: 'tenant')
         ->create();
 
     $this->iban = fake()->iban();
@@ -58,33 +55,33 @@ beforeEach(function (): void {
     SerialNumberRange::factory()
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
-            'type' => 'invoice_number',
             'model_type' => morph_alias(Order::class),
             'model_id' => null,
+            'type' => 'invoice_number',
+            'current_number' => 1700,
             'prefix' => 'TNRRe-',
             'suffix' => null,
             'length' => 4,
-            'current_number' => 1700,
         ])
         ->create();
 });
 
 test('does not match already paid orders by partial invoice number and total gross price', function (): void {
-    $paidOrder = Order::factory()
+    Order::factory()
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
-            'contact_id' => $this->contact->getKey(),
             'address_invoice_id' => $this->address->getKey(),
-            'invoice_number' => 'TNRRe-0042',
-            'invoice_date' => now()->subMonth(),
-            'is_locked' => true,
+            'contact_id' => $this->contact->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'total_gross_price' => 60.69,
             'balance' => 0,
+            'invoice_date' => now()->subMonth(),
+            'invoice_number' => 'TNRRe-0042',
+            'is_locked' => true,
         ])
         ->create();
 
@@ -95,14 +92,14 @@ test('does not match already paid orders by partial invoice number and total gro
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
-            'contact_id' => $this->contact->getKey(),
             'address_invoice_id' => $this->address->getKey(),
-            'invoice_number' => 'TNRRe-1608',
-            'invoice_date' => now()->subDay(),
-            'is_locked' => true,
+            'contact_id' => $this->contact->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'total_gross_price' => 60.69,
             'balance' => 60.69,
+            'invoice_date' => now()->subDay(),
+            'invoice_number' => 'TNRRe-1608',
+            'is_locked' => true,
         ])
         ->create();
 
@@ -110,13 +107,13 @@ test('does not match already paid orders by partial invoice number and total gro
 
     $transaction = Transaction::factory()
         ->state([
+            'value_date' => now(),
+            'booking_date' => now(),
             'amount' => 60.69,
             'balance' => 60.69,
-            'booking_date' => now(),
-            'value_date' => now(),
             'purpose' => 'TNRRe-1608 vom 28.02.2026 EREF: TNRRe-1608',
-            'counterpart_iban' => $this->iban,
             'counterpart_name' => $this->contact->main_address?->name ?? 'Test',
+            'counterpart_iban' => $this->iban,
             'is_ignored' => false,
         ])
         ->create();
@@ -145,14 +142,14 @@ test('extracts invoice numbers using serial number range pattern instead of blin
             ->for(PaymentType::factory(), 'paymentType')
             ->for($this->orderType, 'orderType')
             ->state([
-                'tenant_id' => $this->dbTenant->getKey(),
-                'contact_id' => $this->contact->getKey(),
                 'address_invoice_id' => $this->address->getKey(),
-                'invoice_number' => $invoiceNumber,
-                'invoice_date' => now()->subMonths(3),
-                'is_locked' => true,
+                'contact_id' => $this->contact->getKey(),
+                'tenant_id' => $this->dbTenant->getKey(),
                 'total_gross_price' => 60.69,
                 'balance' => 0,
+                'invoice_date' => now()->subMonths(3),
+                'invoice_number' => $invoiceNumber,
+                'is_locked' => true,
             ])
             ->create();
     }
@@ -165,14 +162,14 @@ test('extracts invoice numbers using serial number range pattern instead of blin
         ->for(PaymentType::factory(), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
-            'tenant_id' => $this->dbTenant->getKey(),
-            'contact_id' => $this->contact->getKey(),
             'address_invoice_id' => $this->address->getKey(),
-            'invoice_number' => 'TNRRe-1608',
-            'invoice_date' => now()->subDay(),
-            'is_locked' => true,
+            'contact_id' => $this->contact->getKey(),
+            'tenant_id' => $this->dbTenant->getKey(),
             'total_gross_price' => 60.69,
             'balance' => 60.69,
+            'invoice_date' => now()->subDay(),
+            'invoice_number' => 'TNRRe-1608',
+            'is_locked' => true,
         ])
         ->create();
 
@@ -180,13 +177,13 @@ test('extracts invoice numbers using serial number range pattern instead of blin
 
     $transaction = Transaction::factory()
         ->state([
+            'value_date' => now(),
+            'booking_date' => now(),
             'amount' => 60.69,
             'balance' => 60.69,
-            'booking_date' => now(),
-            'value_date' => now(),
             'purpose' => 'TNRRe-1608 vom 28.02.2026 TAN1:SecureGo plus EREF: TNRRe-1608 MREF: 34',
-            'counterpart_iban' => $this->iban,
             'counterpart_name' => $this->contact->main_address?->name ?? 'Test',
+            'counterpart_iban' => $this->iban,
             'is_ignored' => false,
         ])
         ->create();

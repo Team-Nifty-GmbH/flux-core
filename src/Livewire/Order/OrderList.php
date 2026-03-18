@@ -138,7 +138,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->with('invoiceAddress:id,language_id')
             ->first();
 
-        $this->order->tenant_id = $contact->tenant_id ?? $this->order->tenant_id;
+        $this->order->tenant_id = $contact->getTenantId() ?? $this->order->tenant_id;
         $this->order->agent_id = $contact->agent_id ?? $this->order->agent_id;
         $this->order->language_id = $contact->invoiceAddress?->language_id;
         $this->order->address_invoice_id = $contact->address_invoice_id;

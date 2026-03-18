@@ -13,12 +13,10 @@ beforeEach(function (): void {
         ]);
 
     $this->contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'payment_type_id' => $paymentType->id,
     ]);
 
     Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
         'is_main_address' => true,
     ]);

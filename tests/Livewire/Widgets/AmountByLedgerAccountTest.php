@@ -29,12 +29,9 @@ beforeEach(function (): void {
         'ledger_account_type_enum' => 'expense',
     ]);
 
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -47,7 +44,6 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
