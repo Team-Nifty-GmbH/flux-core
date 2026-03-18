@@ -135,7 +135,7 @@ class WidgetManager
         }
 
         $this->widgets[$name] = [
-            'component_name' => $widget,
+            'component_name' => $name,
             'dashboard_component' => $componentClass::dashboardComponent(),
             'label' => $componentClass::getLabel(),
             'category' => $componentClass::getCategory(),
