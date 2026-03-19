@@ -1,10 +1,12 @@
 <div
-    x-init="$wire.$watch('workTime.trackable_type', (value) => {
-        if (! value) return;
-        $tallstackuiSelect('trackable-id-edit').setRequestUrl(
-            '{{ route('search', '__model__') }}'.replace('__model__', value)
-        );
-    })"
+    x-init="
+        $wire.$watch('workTime.trackable_type', (value) => {
+            if (! value) return
+            $tallstackuiSelect('trackable-id-edit').setRequestUrl(
+                '{{ route('search', '__model__') }}'.replace('__model__', value),
+            )
+        })
+    "
 >
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
