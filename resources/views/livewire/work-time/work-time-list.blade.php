@@ -1,13 +1,10 @@
 <div
     x-init="
-        $wire.$watch('workTime.trackable_type', () => {
-            $wire.workTime.trackable_id = null
-            let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
-            searchRoute = searchRoute.replace(
-                '__model__',
-                $wire.workTime.trackable_type,
+        $wire.$watch('workTime.trackable_type', (value) => {
+            if (! value) return
+            $tallstackuiSelect('trackable-id-edit').setRequestUrl(
+                '{{ route('search', '__model__') }}'.replace('__model__', value),
             )
-            $tallstackuiSelect('trackable-id-edit').setRequestUrl(searchRoute)
         })
     "
 >
@@ -108,6 +105,7 @@
                 <x-select.styled
                     :label="__('Model')"
                     wire:model="workTime.trackable_type"
+                    x-on:select="$wire.workTime.trackable_id = null"
                     :options="$trackableTypes"
                 />
                 <div
