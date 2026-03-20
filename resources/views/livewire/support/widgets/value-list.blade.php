@@ -1,6 +1,8 @@
 <div class="flex h-full flex-col gap-4 p-4">
     <div>
-        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+        <h2
+            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+        >
             {{ __($this->title()) }}
         </h2>
         <hr class="mt-2" />

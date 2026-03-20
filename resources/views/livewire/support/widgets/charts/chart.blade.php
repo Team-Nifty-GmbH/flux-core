@@ -11,7 +11,9 @@
             @section('title')
             @if ($this->showTitle())
                 <div class="flex w-full">
-                    <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+                    <h2
+                        class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+                    >
                         {{ $this->getLabel() }}
                     </h2>
                 </div>

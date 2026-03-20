@@ -5,7 +5,9 @@
     </div>
     <div class="flex w-full grow flex-col justify-between overflow-hidden">
         <div class="flex w-full justify-between">
-            <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+            <h2
+                class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+            >
                 {{ __($this->title()) }}
             </h2>
             @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
@@ -22,7 +24,9 @@
             @endif
         </div>
         <div>
-            <div class="flex max-w-full grow flex-wrap items-center gap-2 overflow-hidden">
+            <div
+                class="flex max-w-full grow flex-wrap items-center gap-2 overflow-hidden"
+            >
                 <div
                     class="flex-none truncate whitespace-nowrap text-2xl font-bold text-gray-900 dark:text-gray-100"
                     x-text="$wire.sum"

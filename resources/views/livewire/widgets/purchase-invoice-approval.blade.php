@@ -1,19 +1,25 @@
 <div class="flex max-h-full flex-col gap-4 p-4">
     <div>
-        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+        <h2
+            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+        >
             {{ __('Purchase Invoice Approval') }}
         </h2>
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
         @forelse ($invoices as $invoice)
-            <div class="flex items-start gap-3 py-3 {{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }}">
+            <div
+                class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
+            >
                 <div class="flex-none pt-0.5">
                     <x-avatar xs :image="$invoice->contact->getAvatarUrl()" />
                 </div>
-                <div class="flex-1 min-w-0">
+                <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
-                        <span class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <span
+                            class="truncate text-sm font-medium text-gray-900 dark:text-gray-100"
+                        >
                             {{ $invoice->contact->invoiceAddress->name }}
                         </span>
                         <span
@@ -26,10 +32,14 @@
                             "
                         ></span>
                     </div>
-                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div
+                        class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
+                    >
                         <span>{{ $invoice->invoice_number }}</span>
                         <span>&middot;</span>
-                        <span>{{ $invoice->invoice_date->locale(app()->getLocale())->isoFormat('L') }}</span>
+                        <span>
+                            {{ $invoice->invoice_date->locale(app()->getLocale())->isoFormat('L') }}
+                        </span>
                     </div>
                 </div>
                 <div class="flex flex-none items-center">

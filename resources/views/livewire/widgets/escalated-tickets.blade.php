@@ -1,7 +1,9 @@
 <div class="flex max-h-full flex-col gap-4 p-4">
     <div>
         <div class="flex items-center justify-between">
-            <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+            <h2
+                class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+            >
                 {{ $this->getLabel() }}
             </h2>
             @if ($count > 0)
@@ -12,19 +14,29 @@
     </div>
     <div class="flex-1 overflow-auto">
         @forelse ($tickets as $ticket)
-            <div class="flex items-start gap-3 py-3 {{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }}">
-                <div class="flex-1 min-w-0">
+            <div
+                class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
+            >
+                <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
-                        <span class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <span
+                            class="truncate text-sm font-medium text-gray-900 dark:text-gray-100"
+                        >
                             {{ $ticket->title }}
                         </span>
                     </div>
-                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div
+                        class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
+                    >
                         {!! $ticket->state->badge() !!}
-                        <span class="truncate">{{ data_get($ticket, 'authenticatable.name') }}</span>
+                        <span class="truncate">
+                            {{ data_get($ticket, 'authenticatable.name') }}
+                        </span>
                         @if ($ticket->created_at)
                             <span>&middot;</span>
-                            <span>{{ $ticket->created_at->locale(app()->getLocale())->diffForHumans() }}</span>
+                            <span>
+                                {{ $ticket->created_at->locale(app()->getLocale())->diffForHumans() }}
+                            </span>
                         @endif
                     </div>
                 </div>
