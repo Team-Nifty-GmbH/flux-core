@@ -193,19 +193,10 @@
             <div
                 x-cloak
                 x-show="$wire.schedule.due_at && new Date($wire.schedule.due_at) <= new Date()"
-                class="rounded-lg bg-amber-50 p-3 dark:bg-amber-900/20"
             >
-                <div class="flex items-center gap-2">
-                    <x-icon
-                        name="exclamation-triangle"
-                        class="h-5 w-5 text-amber-600 dark:text-amber-400"
-                    />
-                    <p
-                        class="text-sm font-medium text-amber-800 dark:text-amber-200"
-                    >
-                        {{ __('The schedule will be executed immediately on the next run.') }}
-                    </p>
-                </div>
+                <x-alert color="warning">
+                    {{ __('The schedule will be executed immediately on the next run.') }}
+                </x-alert>
             </div>
             <div
                 x-data="{

@@ -812,16 +812,16 @@ class Order extends Component
         $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
     }
 
+    #[Renderless]
     public function updatedScheduleDueAt(): void
     {
-        $this->skipRender();
-        $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
+        $this->previewSchedule();
     }
 
+    #[Renderless]
     public function updatedScheduleEndsAt(): void
     {
-        $this->skipRender();
-        $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
+        $this->previewSchedule();
     }
 
     public function cancelSubscription(
