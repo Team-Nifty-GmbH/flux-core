@@ -143,23 +143,25 @@ class ScheduleForm extends FluxForm
 
     public function getNextExecutionDates(int $count = 5): array
     {
-        $method = $this->cron['methods']['basic'] ?? null;
+        $method = data_get($this->cron, 'methods.basic');
 
         if (! $method) {
             return [];
         }
 
+        $basicParams = data_get($this->cron, 'parameters.basic', []);
+
         $parameters = match ($method) {
             'hourlyAt', 'everyOddHour', 'everyTwoHours',
-            'everyThreeHours', 'everyFourHours', 'everySixHours' => [$this->cron['parameters']['basic'][0] ?: 0],
-            'dailyAt', 'lastDayOfMonth' => [$this->cron['parameters']['basic'][0] ?? '00:00'],
+            'everyThreeHours', 'everyFourHours', 'everySixHours' => [data_get($basicParams, '0') ?: 0],
+            'dailyAt', 'lastDayOfMonth' => [data_get($basicParams, '0') ?? '00:00'],
             'twiceDaily', 'weeklyOn',
             'monthlyOn', 'quarterlyOn' => array_filter(
-                $this->cron['parameters']['basic'],
+                $basicParams,
                 fn ($key) => $key < 2,
                 ARRAY_FILTER_USE_KEY
             ),
-            'twiceDailyAt', 'twiceMonthly', 'yearlyOn' => $this->cron['parameters']['basic'],
+            'twiceDailyAt', 'twiceMonthly', 'yearlyOn' => $basicParams,
             default => [],
         };
 
@@ -171,7 +173,7 @@ class ScheduleForm extends FluxForm
         $schedule = app(Schedule::class);
         $event = $schedule->call(fn () => null);
 
-        if (! is_null($parameters) && $parameters !== []) {
+        if ($parameters !== []) {
             $event = $event->{$method}(...$parameters);
         } else {
             $event = $event->{$method}();
@@ -187,7 +189,6 @@ class ScheduleForm extends FluxForm
             ? max(0, $this->recurrences - ($this->current_recurrence ?? 0))
             : null;
 
-        // Include due_at itself as the first execution date if it's in the future
         if ($dueAt && $dueAt->greaterThan(now())) {
             if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
                 $dates[] = $dueAt->toDateTimeString();
@@ -203,7 +204,7 @@ class ScheduleForm extends FluxForm
             : $count;
 
         if ($maxDates <= 0) {
-            return [];
+            return $dates;
         }
 
         try {
