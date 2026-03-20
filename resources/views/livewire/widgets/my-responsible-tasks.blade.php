@@ -1,28 +1,41 @@
 <div class="flex max-h-full flex-col gap-4 p-4">
     <div>
-        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+        <h2
+            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+        >
             {{ __('My Responsible Tasks') }}
         </h2>
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
         @forelse ($tasks as $task)
-            <div class="flex items-start gap-3 py-3 {{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }}">
-                <div class="flex-1 min-w-0">
+            <div
+                class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
+            >
+                <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
-                        <span class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <span
+                            class="truncate text-sm font-medium text-gray-900 dark:text-gray-100"
+                        >
                             {{ $task->name }}
                         </span>
                     </div>
-                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div
+                        class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
+                    >
                         {!! $task->state->badge() !!}
                         @if ($task->due_date)
-                            <span class="{{ $task->due_date->isPast() ? 'text-red-500' : '' }}">
+                            <span
+                                class="{{ $task->due_date->isPast() ? 'text-red-500' : '' }}"
+                            >
                                 {{ $task->due_date->locale(app()->getLocale())->diffForHumans() }}
                             </span>
                         @endif
+
                         @foreach ($task->users as $user)
-                            <span class="{{ $user->getKey() === auth()->id() ? 'font-medium text-indigo-500' : '' }}">
+                            <span
+                                class="{{ $user->getKey() === auth()->id() ? 'font-medium text-indigo-500' : '' }}"
+                            >
                                 {{ $user->name }}
                             </span>
                         @endforeach
