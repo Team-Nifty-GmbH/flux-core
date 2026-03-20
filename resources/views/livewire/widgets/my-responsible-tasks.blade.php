@@ -1,93 +1,67 @@
-<div class="flex max-h-full flex-col !px-0 !py-0">
-    <div class="border-b border-gray-200 pb-2 pl-2 pt-2">
-        <h2
-            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
-        >
+<div class="flex max-h-full flex-col gap-4 p-4">
+    <div>
+        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
             {{ __('My Responsible Tasks') }}
         </h2>
+        <hr class="mt-2" />
     </div>
-    <div
-        class="flex-1 overflow-auto"
-        x-data="{ formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes')) }"
-    >
+    <div class="flex-1 overflow-auto">
         @forelse ($tasks as $task)
-            <x-flux::list-item :item="$task">
-                <x-slot:avatar>
-                    {!! $task->state->badge() !!}
-                </x-slot>
-                <x-slot:sub-value>
-                    <div class="mt-1 flex flex-col gap-1">
-                        <div>
-                            @if ($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
-                                <x-link
-                                    sm
-                                    icon="link"
-                                    :href="$task->model->getUrl()"
-                                    wire:navigate
-                                >
-                                    {{ __(Str::headline($task->model->getMorphClass())) }}:
-                                    {{ $task->model->getLabel() }}
-                                </x-link>
-                            @endif
-                        </div>
-                        <div class="flex flex-wrap">
-                            @if ($task->due_date)
-                                <x-badge
-                                    :color="$task->due_date->diffInDays(now(), false) > 0
-                                        ? 'red'
-                                        : ($task->due_date->diffInDays(now(), false) === 0 ? 'amber' : 'emerald')
-                                    "
-                                    :text="__('Due At') . ' ' . $task->due_datetime?->locale(app()->getLocale())->isoFormat('L LT') ?? $task->due_date->locale(app()->getLocale())->isoFormat('L')"
-                                />
-                            @endif
-
-                            @foreach ($task->users as $user)
-                                <x-badge
-                                    :color="$user->id === auth()->id() ? 'indigo' : 'gray'"
-                                    :text="$user->name"
-                                />
-                            @endforeach
-                        </div>
+            <div class="flex items-start gap-3 py-3 {{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }}">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {{ $task->name }}
+                        </span>
                     </div>
-                </x-slot>
-                <x-slot:actions>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        {!! $task->state->badge() !!}
+                        @if ($task->due_date)
+                            <span class="{{ $task->due_date->isPast() ? 'text-red-500' : '' }}">
+                                {{ $task->due_date->locale(app()->getLocale())->diffForHumans() }}
+                            </span>
+                        @endif
+                        @foreach ($task->users as $user)
+                            <span class="{{ $user->getKey() === auth()->id() ? 'font-medium text-indigo-500' : '' }}">
+                                {{ $user->name }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="flex flex-none items-center gap-1">
                     <x-button
                         color="secondary"
                         light
                         icon="clock"
+                        :title="__('Track Time')"
                         x-on:click="
                             $dispatch(
                                 'start-time-tracking',
                                 {
                                     trackable_type: '{{ morph_alias(\FluxErp\Models\Task::class) }}',
-                                    trackable_id: {{ $task->id }},
-                                    name: '{{ $task->name }}',
-                                    description: {{ json_encode(strip_tags($task->description)) }}
+                                    trackable_id: {{ $task->getKey() }},
+                                    name: {{ json_encode($task->name) }},
+                                    description: {{ json_encode(strip_tags($task->description ?? '')) }}
                                 }
                             )"
-                    >
-                        <div class="hidden sm:block">
-                            {{ __('Track Time') }}
-                        </div>
-                    </x-button>
+                    />
                     <x-button
                         color="secondary"
                         light
                         icon="eye"
+                        :title="__('View')"
                         wire:navigate
-                        :href="route('tasks.id', $task->id)"
-                    >
-                        <div class="hidden sm:block">{{ __('View') }}</div>
-                    </x-button>
-                </x-slot>
-            </x-flux::list-item>
+                        :href="route('tasks.id', $task->getKey())"
+                    />
+                </div>
+            </div>
         @empty
-            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+            <div class="p-4 text-center text-sm text-gray-400">
                 {{ __('No tasks found') }}
             </div>
         @endforelse
         @if ($hasMore)
-            <div class="flex justify-center p-2">
+            <div class="flex justify-center pt-2">
                 <x-button
                     color="secondary"
                     light
