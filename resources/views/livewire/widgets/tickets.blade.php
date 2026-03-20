@@ -1,74 +1,62 @@
-<div class="flex max-h-full flex-col !px-0 !py-0">
-    <div class="border-b border-gray-200 pb-2 pl-2 pt-2">
-        <h2
-            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
-        >
+<div class="flex max-h-full flex-col gap-4 p-4">
+    <div>
+        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
             {{ __($this->getLabel()) }}
         </h2>
+        <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
         @forelse ($tickets as $ticket)
-            <x-flux::list-item :item="$ticket" value="title">
-                <x-slot:avatar>
-                    {!! $ticket->state->badge() !!}
-                </x-slot>
-                <x-slot:sub-value>
-                    <div>
-                        <div>
-                            {{ data_get($ticket, 'authenticatable.name') }}
-                        </div>
-                        <div>
-                            {{ \Illuminate\Support\Str::limit(strip_tags($ticket?->description, '')) }}
-                        </div>
+            <div class="flex items-start gap-3 py-3 {{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }}">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {{ $ticket->title }}
+                        </span>
+                    </div>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        {!! $ticket->state->badge() !!}
+                        <span class="truncate">{{ data_get($ticket, 'authenticatable.name') }}</span>
                         @if ($ticket->created_at)
-                            <x-badge
-                                :color="($diff = $ticket->created_at->diffInDays(now(), false)) > 3
-                                    ? 'red'
-                                    : ($diff > 2 ? 'amber' : 'emerald')
-                                "
-                                :text="__('Created At') . ' ' . $ticket->created_at->locale(app()->getLocale())->isoFormat('L')"
-                            />
+                            <span>&middot;</span>
+                            <span>{{ $ticket->created_at->locale(app()->getLocale())->diffForHumans() }}</span>
                         @endif
                     </div>
-                </x-slot>
-                <x-slot:actions>
+                </div>
+                <div class="flex flex-none items-center gap-1">
                     <x-button
                         color="secondary"
                         light
                         icon="clock"
+                        :title="__('Track Time')"
                         x-on:click="
                             $dispatch(
                                 'start-time-tracking',
                                 {
                                     trackable_type: '{{ morph_alias(\FluxErp\Models\Ticket::class) }}',
-                                    trackable_id: {{ $ticket->id }},
+                                    trackable_id: {{ $ticket->getKey() }},
                                     name: {{ json_encode($ticket->title) }},
                                     description: {{ json_encode(strip_tags($ticket->description ?? '')) }}
                                 }
                             )"
-                    >
-                        <div class="hidden sm:block">
-                            {{ __('Track Time') }}
-                        </div>
-                    </x-button>
+                    />
                     <x-button
                         color="secondary"
                         light
                         icon="eye"
+                        :title="__('View')"
                         wire:navigate
-                        :href="route('tickets.id', $ticket->id)"
-                    >
-                        <div class="hidden sm:block">{{ __('View') }}</div>
-                    </x-button>
-                </x-slot>
-            </x-flux::list-item>
+                        :href="route('tickets.id', $ticket->getKey())"
+                    />
+                </div>
+            </div>
         @empty
-            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+            <div class="p-4 text-center text-sm text-gray-400">
                 {{ __('No tickets found') }}
             </div>
         @endforelse
         @if ($hasMore)
-            <div class="flex justify-center p-2">
+            <div class="flex justify-center pt-2">
                 <x-button
                     color="secondary"
                     light

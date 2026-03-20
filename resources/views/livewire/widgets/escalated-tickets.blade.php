@@ -1,63 +1,51 @@
-@use('Illuminate\Support\Str')
-
-<div class="flex max-h-full flex-col !px-0 !py-0">
-    <div
-        class="flex items-center justify-between border-b border-gray-200 px-4 py-2"
-    >
-        <h2
-            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
-        >
-            {{ $this->getLabel() }}
-        </h2>
-        @if ($count > 0)
-            <x-badge color="red" :text="(string) $count" />
-        @endif
+<div class="flex max-h-full flex-col gap-4 p-4">
+    <div>
+        <div class="flex items-center justify-between">
+            <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+                {{ $this->getLabel() }}
+            </h2>
+            @if ($count > 0)
+                <x-badge color="red" :text="(string) $count" />
+            @endif
+        </div>
+        <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
         @forelse ($tickets as $ticket)
-            <x-flux::list-item :item="$ticket" value="title">
-                <x-slot:avatar>
-                    {!! $ticket->state->badge() !!}
-                </x-slot>
-                <x-slot:sub-value>
-                    <div>
-                        <div>
-                            {{ data_get($ticket, 'authenticatable.name') }}
-                        </div>
-                        <div>
-                            {{ Str::limit(strip_tags($ticket->description)) }}
-                        </div>
+            <div class="flex items-start gap-3 py-3 {{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }}">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {{ $ticket->title }}
+                        </span>
+                    </div>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        {!! $ticket->state->badge() !!}
+                        <span class="truncate">{{ data_get($ticket, 'authenticatable.name') }}</span>
                         @if ($ticket->created_at)
-                            @php
-                                $diff = $ticket->created_at->diffInDays(now(), false);
-                                $badgeColor = $diff > 3 ? 'red' : ($diff > 2 ? 'amber' : 'emerald');
-                            @endphp
-
-                            <x-badge
-                                :color="$badgeColor"
-                                :text="__('Created At') . ' ' . $ticket->created_at->locale(app()->getLocale())->isoFormat('L')"
-                            />
+                            <span>&middot;</span>
+                            <span>{{ $ticket->created_at->locale(app()->getLocale())->diffForHumans() }}</span>
                         @endif
                     </div>
-                </x-slot>
-                <x-slot:actions>
+                </div>
+                <div class="flex flex-none items-center">
                     <x-button
                         color="secondary"
                         light
                         icon="eye"
+                        :title="__('View')"
                         wire:navigate
                         :href="route('tickets.id', $ticket->getKey())"
-                        :text="__('View')"
                     />
-                </x-slot>
-            </x-flux::list-item>
+                </div>
+            </div>
         @empty
-            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+            <div class="p-4 text-center text-sm text-gray-400">
                 {{ __('No escalated tickets') }}
             </div>
         @endforelse
         @if ($hasMore)
-            <div class="flex justify-center p-2">
+            <div class="flex justify-center pt-2">
                 <x-button
                     color="secondary"
                     light

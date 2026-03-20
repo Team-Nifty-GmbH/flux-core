@@ -1,8 +1,10 @@
 <div class="flex h-full flex-col gap-4 p-4">
-    <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
-        {{ $this->getLabel() }}
-    </h2>
-    <hr />
+    <div>
+        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
+            {{ $this->getLabel() }}
+        </h2>
+        <hr class="mt-2" />
+    </div>
     <div class="flex flex-1 items-center justify-around gap-6">
         @if ($firstResponseHours !== null || $resolutionHours !== null)
             <div class="flex flex-col items-center gap-1">

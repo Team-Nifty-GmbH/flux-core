@@ -1,9 +1,9 @@
-<div class="flex h-full flex-col gap-4 p-6">
+<div class="flex h-full flex-col gap-4 p-4">
     <div>
-        <h2 class="truncate text-lg font-semibold text-gray-400">
+        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">
             {{ __($this->title()) }}
         </h2>
-        <hr />
+        <hr class="mt-2" />
     </div>
     <div class="overflow-auto">
         <table class="w-full">
@@ -109,7 +109,7 @@
                 <template x-if="$wire.items.length === 0">
                     <tr>
                         <td colspan="3" class="p-4 text-center text-gray-400">
-                            <h2 class="text-2xl font-medium">
+                            <h2 class="text-lg font-medium">
                                 {{ __('No data available') }}
                             </h2>
                         </td>
