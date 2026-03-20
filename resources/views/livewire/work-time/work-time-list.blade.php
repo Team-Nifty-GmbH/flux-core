@@ -1,13 +1,4 @@
-<div
-    x-init="
-        $wire.$watch('workTime.trackable_type', (value) => {
-            if (! value) return
-            $tallstackuiSelect('trackable-id-edit').setRequestUrl(
-                '{{ route('search', '__model__') }}'.replace('__model__', value),
-            )
-        })
-    "
->
+<div>
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
             <div class="mb-2 mt-2" x-cloak x-show="! $wire.workTime.id">
@@ -105,7 +96,12 @@
                 <x-select.styled
                     :label="__('Model')"
                     wire:model="workTime.trackable_type"
-                    x-on:select="$wire.workTime.trackable_id = null"
+                    x-on:select="
+                        $wire.workTime.trackable_id = null;
+                        $tallstackuiSelect('trackable-id-edit').setRequestUrl(
+                            '{{ route('search', '__model__') }}'.replace('__model__', $event.detail.select?.value)
+                        );
+                    "
                     :options="$trackableTypes"
                 />
                 <div
