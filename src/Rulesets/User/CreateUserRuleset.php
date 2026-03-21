@@ -67,6 +67,7 @@ class CreateUserRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class),
             ],
+            'force_two_factor' => 'boolean',
             'is_active' => 'sometimes|boolean',
         ];
     }
