@@ -1,6 +1,6 @@
 <x-modal
     id="edit-country-modal"
-    x-on:open="$focusOn('country.name')"
+    x-on:open="$tsui.focus('country.name')"
     :title="__('Country')"
 >
     <div class="flex flex-col gap-1.5">

@@ -167,7 +167,7 @@
     @teleport('body')
         <x-modal
             id="order-transaction-modal"
-            x-on:open="$focusOn('order-transaction-amount')"
+            x-on:open="$tsui.focus('order-transaction-amount')"
         >
             <div class="flex flex-col gap-4">
                 <x-number
@@ -225,7 +225,7 @@
 
     <x-modal
         id="reset-payment-reminder-level-modal"
-        x-on:open="$focusOn('new-payment-reminder-level')"
+        x-on:open="$tsui.focus('new-payment-reminder-level')"
     >
         <x-slot:title>
             {{ __('Set Payment Reminder Level') }}

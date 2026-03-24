@@ -51,7 +51,7 @@
         size="6xl"
         id="edit-order-position"
         x-on:close="$wire.resetOrderPosition()"
-        x-on:open="$focusOn('order-position-name')"
+        x-on:open="$tsui.focus('order-position-name')"
         persistent
     >
         @section('order-position-detail-modal.content')

@@ -331,8 +331,8 @@ trait SupportsAutoRender
         $saveMethod = $this->getSaveMethod();
         $deleteMethod = $this->getDeleteMethod();
         $persistent = $this->isModalPersistent() ? ' persistent' : '';
-        $focusOn = ! is_null($this->firstInputFocusId)
-            ? ' x-on:open="$focusOn(\'' . $this->firstInputFocusId . '\')"'
+        $tsuiFocus = ! is_null($this->firstInputFocusId)
+            ? ' x-on:open="$tsui.focus(\'' . $this->firstInputFocusId . '\')"'
             : '';
 
         $deleteButton = '';
@@ -351,7 +351,7 @@ trait SupportsAutoRender
 
         return '<div x-on:keydown.enter.prevent="$wire.' . $saveAction . '"'
             . ' x-on:keydown.escape.prevent="' . $cancelAction . '">'
-            . '<x-modal id="' . $modalName . '"' . $persistent . $focusOn . '>'
+            . '<x-modal id="' . $modalName . '"' . $persistent . $tsui.focus . '>'
             . $content
             . '<x-slot:footer>'
             . '<div class="flex w-full justify-between">'

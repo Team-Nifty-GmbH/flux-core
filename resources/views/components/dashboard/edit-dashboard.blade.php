@@ -122,7 +122,7 @@
 <x-modal
     id="create-group-modal"
     :title="__('Create New Group')"
-    x-on:open="$focusOn('new-group-name')"
+    x-on:open="$tsui.focus('new-group-name')"
 >
     <x-input
         id="new-group-name"

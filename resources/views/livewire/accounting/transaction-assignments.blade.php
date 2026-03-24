@@ -95,7 +95,7 @@
     @teleport('body')
         <x-modal
             id="order-transaction-modal"
-            x-on:open="$focusOn('order-transaction-amount')"
+            x-on:open="$tsui.focus('order-transaction-amount')"
         >
             <div class="flex flex-col gap-4">
                 <x-number

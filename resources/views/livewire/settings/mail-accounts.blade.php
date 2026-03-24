@@ -74,7 +74,7 @@
     id="edit-mail-account"
     :title="__('Mail Account')"
     persistent
-    x-on:open="$focusOn('mailAccount.name')"
+    x-on:open="$tsui.focus('mailAccount.name')"
 >
     <div class="flex flex-col gap-1.5">
         <x-card>

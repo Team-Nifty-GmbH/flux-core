@@ -37,7 +37,7 @@ class Notifications extends Component
         $this->unread = $this->unread - 1;
 
         $this->js(<<<'JS'
-            $slideClose('notifications-slide');
+            $tsui.close.slide('notifications-slide');
         JS);
 
         if (data_get($accept, 'url')) {
@@ -62,7 +62,7 @@ class Notifications extends Component
         $this->unread = 0;
 
         $this->js(<<<'JS'
-            $slideClose('notifications-slide');
+            $tsui.close.slide('notifications-slide');
         JS);
     }
 
@@ -74,7 +74,7 @@ class Notifications extends Component
         $this->unread = $this->unread - 1;
         if (! $this->unread) {
             $this->js(<<<'JS'
-                $slideClose('notifications-slide');
+                $tsui.close.slide('notifications-slide');
             JS);
         }
     }

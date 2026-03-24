@@ -203,7 +203,7 @@
     </x-modal>
     <x-modal
         id="edit-discount"
-        x-on:open="$focusOn('discount-name')"
+        x-on:open="$tsui.focus('discount-name')"
         x-trap="show"
         x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $tsui.close.modal('edit-discount');})"
     >

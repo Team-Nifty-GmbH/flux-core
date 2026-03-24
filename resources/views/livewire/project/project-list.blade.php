@@ -1,7 +1,7 @@
 <div>
     <x-modal
         id="edit-project"
-        x-on:open="$focusOn('project-name')"
+        x-on:open="$tsui.focus('project-name')"
         x-on:create-project.window="$wire.resetForm(); $tsui.close.modal('edit-project');"
     >
         <div

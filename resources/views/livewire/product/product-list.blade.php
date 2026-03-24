@@ -3,7 +3,7 @@
         <x-modal
             id="create-product-modal"
             :title="__('New Product')"
-            x-on:open="$focusOn('product-name')"
+            x-on:open="$tsui.focus('product-name')"
         >
             <section class="flex flex-col gap-1.5">
                 <x-input

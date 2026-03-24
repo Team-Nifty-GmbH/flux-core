@@ -13,7 +13,7 @@
                         >
                             <div>{{ __('Addresses') }}</div>
                             <x-button
-                                wire:click="new().then(() => $focusOn('address-company'))"
+                                wire:click="new().then(() => $tsui.focus('address-company'))"
                                 color="indigo"
                                 :text="__('New')"
                             />
@@ -219,7 +219,7 @@
                                 <x-button
                                     color="secondary"
                                     light
-                                    wire:click="replicate().then(() => $focusOn('address-company'))"
+                                    wire:click="replicate().then(() => $tsui.focus('address-company'))"
                                     :text="__('Duplicate')"
                                 />
                             </div>

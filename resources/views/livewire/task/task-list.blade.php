@@ -1,5 +1,5 @@
 <div>
-    <x-modal id="new-task-modal" x-on:open="$focusOn('task-name')">
+    <x-modal id="new-task-modal" x-on:open="$tsui.focus('task-name')">
         <div
             class="space-y-8 divide-y divide-gray-200"
             x-data="{

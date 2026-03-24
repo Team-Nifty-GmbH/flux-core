@@ -1,7 +1,7 @@
 <div>
     <x-modal
         :id="$leadForm->modalName()"
-        x-on:open="$focusOn('lead-name')"
+        x-on:open="$tsui.focus('lead-name')"
         persistent
     >
         <div class="flex flex-col gap-4">
