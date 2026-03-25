@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Imagick;
@@ -199,12 +200,12 @@ abstract class PrintableView extends Component
         return $this;
     }
 
-    public function renderAndHydrate(): string
+    public function renderAndHydrate(): HtmlString
     {
         $this->hydrateSharedData();
 
         try {
-            return $this->renderWithLayout()->render();
+            return new HtmlString($this->renderWithLayout()->render());
         } finally {
             $this->flushSharedData();
         }
