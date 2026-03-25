@@ -53,7 +53,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function defineEnvironment($app): void
     {
-        File::ensureDirectoryExists(database_path('settings'));
+        File::makeDirectory(path: database_path('settings'), force: true);
 
         $app['config']->set('database.default', 'mysql');
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
