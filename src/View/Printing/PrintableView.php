@@ -33,7 +33,7 @@ abstract class PrintableView extends Component
 
     public bool $preview = false;
 
-    private array $sharedPrintData = [];
+    protected array $sharedPrintData = [];
 
     private ?Imagick $imagick = null;
 
