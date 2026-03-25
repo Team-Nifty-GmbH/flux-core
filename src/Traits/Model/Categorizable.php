@@ -18,7 +18,7 @@ trait Categorizable
 {
     private static ?array $columnListing = null;
 
-    public array|int|null $pendingCategoryIds = null;
+    protected array|int|null $pendingCategoryIds = null;
 
     public static function bootCategorizable(): void
     {
