@@ -13,9 +13,9 @@ trait HasParentChildRelations
 {
     public static function familyTree(): Builder
     {
-        static::addGlobalScope(resolve_static(FamilyTreeScope::class, 'class'));
-
-        return static::query();
+        return static::withTemporaryGlobalScopes([
+            resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
+        ]);
     }
 
     public function ancestorKeys(): array
