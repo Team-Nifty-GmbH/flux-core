@@ -26,7 +26,7 @@
                                 $task->priority < 8 => 'amber',
                                 default => 'red',
                             }"
-                            :text="'P' . $task->priority"
+                            :text="__('Priority') . ': ' . $task->priority"
                         />
                     </div>
                     <div
