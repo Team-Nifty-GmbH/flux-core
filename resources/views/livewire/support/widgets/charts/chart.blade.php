@@ -41,7 +41,7 @@
                                     type="button"
                                     role="menuitem"
                                     tabindex="0"
-                                    class="focus:outline-hidden flex w-full cursor-pointer items-center whitespace-nowrap px-4 py-2 text-sm text-secondary-600 transition-colors duration-150 hover:bg-gray-100 focus:bg-gray-100 dark:text-dark-300 dark:hover:bg-dark-600 dark:focus:bg-dark-600"
+                                    class="text-secondary-600 dark:text-dark-300 dark:hover:bg-dark-600 dark:focus:bg-dark-600 flex w-full cursor-pointer items-center px-4 py-2 text-sm whitespace-nowrap transition-colors duration-150 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden"
                                     x-on:click="
                                         $wire.call(option.method, option.params ?? [])
                                         $refs.dropdown.dispatchEvent(new CustomEvent('select'))

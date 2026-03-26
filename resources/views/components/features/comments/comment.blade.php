@@ -61,7 +61,7 @@
             <div class="flex flex-wrap gap-1">
                 <template x-for="file in comment.media">
                     <div
-                        class="group inline-flex items-center justify-center gap-0.5 gap-x-2 rounded-lg border px-4 py-2 text-sm text-slate-500 outline-hidden ring-slate-200 transition-all duration-150 ease-in hover:bg-slate-100 hover:shadow-xs focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 dark:border-slate-500 dark:text-slate-400 dark:ring-slate-600 dark:ring-offset-slate-800 dark:hover:bg-slate-700"
+                        class="group inline-flex items-center justify-center gap-0.5 gap-x-2 rounded-lg border px-4 py-2 text-sm text-slate-500 ring-slate-200 outline-hidden transition-all duration-150 ease-in hover:bg-slate-100 hover:shadow-xs focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 dark:border-slate-500 dark:text-slate-400 dark:ring-slate-600 dark:ring-offset-slate-800 dark:hover:bg-slate-700"
                     >
                         <img
                             x-bind:src="

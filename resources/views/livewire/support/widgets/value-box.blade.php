@@ -1,7 +1,7 @@
 <div class="flex h-full w-full gap-4 p-4">
     <x-flux::spinner />
     <div class="flex flex-col justify-center">
-        <x-icon :name="$this->icon()" class="h-10 w-10 text-primary-500" />
+        <x-icon :name="$this->icon()" class="text-primary-500 h-10 w-10" />
     </div>
     <div class="flex w-full grow flex-col justify-between overflow-hidden">
         <div class="flex w-full justify-between">
@@ -28,7 +28,7 @@
                 class="flex max-w-full grow flex-wrap items-center gap-2 overflow-hidden"
             >
                 <div
-                    class="flex-none truncate whitespace-nowrap text-2xl font-bold text-gray-900 dark:text-gray-100"
+                    class="flex-none truncate text-2xl font-bold whitespace-nowrap text-gray-900 dark:text-gray-100"
                     x-text="$wire.sum"
                 ></div>
                 @if ($shouldBePositive)
@@ -84,7 +84,7 @@
                 @endif
             </div>
             <div
-                class="flex-none truncate whitespace-nowrap text-sm text-gray-600 dark:text-gray-400"
+                class="flex-none truncate text-sm whitespace-nowrap text-gray-600 dark:text-gray-400"
                 x-html="$wire.subValue"
             ></div>
         </div>

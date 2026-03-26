@@ -28,7 +28,7 @@
                 <span x-text="$wire.update.version"></span>
             </x-slot>
             <div
-                class="prose max-w-full dark:prose-invert"
+                class="prose dark:prose-invert max-w-full"
                 x-html="$wire.update.readme"
             ></div>
             <x-slot:footer>
@@ -51,7 +51,7 @@
 
     <x-modal id="more-plugin-modal" size="7xl">
         <div
-            class="prose max-w-full dark:prose-invert"
+            class="prose dark:prose-invert max-w-full"
             x-html="$wire.readme"
         ></div>
         <x-slot:footer>

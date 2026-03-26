@@ -20,7 +20,7 @@
             </span>
             <span
                 x-text="$wire.software"
-                class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
             ></span>
         </div>
         <div>
@@ -29,7 +29,7 @@
             </span>
             <span
                 x-text="$wire.os"
-                class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
             ></span>
         </div>
         <div>
@@ -38,7 +38,7 @@
             </span>
             <span
                 x-text="$wire.server_name"
-                class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
             ></span>
         </div>
         <div>
@@ -47,7 +47,7 @@
             </span>
             <span
                 x-text="$wire.document_root"
-                class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
             ></span>
         </div>
     </div>

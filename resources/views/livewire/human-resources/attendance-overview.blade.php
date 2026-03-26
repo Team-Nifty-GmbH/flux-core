@@ -83,17 +83,17 @@
         <div>
             <x-spinner wire:loading />
             <table
-                class="min-w-full divide-y divide-gray-200 dark:divide-dark-500/50"
+                class="dark:divide-dark-500/50 min-w-full divide-y divide-gray-200"
             >
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr>
                         <th
-                            class="min-w-[200px] border-b border-r bg-gray-50 px-4 py-2 text-left font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                            class="min-w-[200px] border-r border-b bg-gray-50 px-4 py-2 text-left font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
                         >
                             {{ __('Employee') }}
                         </th>
                         <th
-                            class="min-w-[80px] border-b border-r bg-blue-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-blue-900 dark:text-gray-300"
+                            class="min-w-[80px] border-r border-b bg-blue-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-blue-900 dark:text-gray-300"
                         >
                             <div>{{ __('Days') }}</div>
                             <div class="text-gray-500 dark:text-gray-400">
@@ -101,7 +101,7 @@
                             </div>
                         </th>
                         <th
-                            class="min-w-[90px] border-b border-r bg-purple-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-purple-900 dark:text-gray-300"
+                            class="min-w-[90px] border-r border-b bg-purple-50 px-2 py-2 text-center text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-purple-900 dark:text-gray-300"
                         >
                             <div>{{ __('Hours') }}</div>
                             <div class="text-gray-500 dark:text-gray-400">
@@ -110,7 +110,7 @@
                         </th>
                         @foreach ($this->calendarDays as $calDay)
                             <th
-                                class="{{ $calDay['isToday'] ? 'border-l-2 border-r-2 border-t-2 border-yellow-400 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900' : ($calDay['isWeekend'] ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800') }} border-b border-r px-1 py-2 text-center text-xs font-medium dark:border-gray-700"
+                                class="{{ $calDay['isToday'] ? 'border-t-2 border-r-2 border-l-2 border-yellow-400 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900' : ($calDay['isWeekend'] ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800') }} border-r border-b px-1 py-2 text-center text-xs font-medium dark:border-gray-700"
                             >
                                 <div
                                     class="{{ $calDay['isToday'] ? 'font-bold' : '' }} text-gray-700 dark:text-gray-300"
