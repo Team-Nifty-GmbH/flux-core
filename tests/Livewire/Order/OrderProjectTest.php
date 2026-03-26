@@ -18,7 +18,9 @@ beforeEach(function (): void {
     $currency = Currency::factory()->create([
         'is_default' => true,
     ]);
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
     $priceList = PriceList::factory()->create([
         'is_default' => true,
     ]);
@@ -30,14 +32,16 @@ beforeEach(function (): void {
         ]);
 
     $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order->value,
     ]);
 
     $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
-        'is_delivery_address' => true,
-        'is_invoice_address' => true,
         'is_main_address' => true,
+        'is_invoice_address' => true,
+        'is_delivery_address' => true,
     ]);
 
     $this->order = Order::factory()->create([

@@ -102,14 +102,11 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Warehouse::class]),
             ],
 
-            'amount' => [
-                app(Numeric::class),
-                'nullable',
-            ],
+            'amount' => 'sometimes|numeric|nullable|exclude_if:is_free_text,true',
             'amount_bundle' => [
                 'exclude_if:is_bundle_position,false',
                 'required_if:is_bundle_position,true',
-                app(Numeric::class),
+                'numeric',
                 'nullable',
             ],
             'discount_percentage' => [

@@ -54,7 +54,6 @@ use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -66,9 +65,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Number;
 use Illuminate\Support\Traits\Conditionable;
-use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -384,19 +381,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         });
 
         static::deleted(function (Order $order): void {
-            $purchaseInvoice = $order->purchaseInvoice;
-
-            if ($purchaseInvoice) {
-                $movedMedia = $order->getFirstMedia('invoice')?->move($purchaseInvoice, 'purchase_invoice');
-
-                $update = ['order_id' => null];
-
-                if ($movedMedia) {
-                    $update['media_id'] = $movedMedia->getKey();
-                }
-
-                $purchaseInvoice->update($update);
-            }
+            $order->purchaseInvoice()->update(['order_id' => null]);
         });
     }
 
@@ -540,11 +525,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
                         $discount->update([
                             'discount_percentage' => diff_percentage($previous, $new),
-                            'discount_flat' => bcround(
-                                bcsub($previous, $new, 9),
-                                2,
-                                RoundingMode::HalfTowardsZero
-                            ),
+                            'discount_flat' => bcsub($previous, $new, 9),
                         ]);
 
                         return $new;
@@ -563,12 +544,9 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function calculateMargin(): static
     {
         $this->margin = Rounding::round(
-            discount(
-                $this->orderPositions()
-                    ->where('is_alternative', false)
-                    ->sum('margin'),
-                $this->discountPercentage
-            )
+            $this->orderPositions()
+                ->where('is_alternative', false)
+                ->sum('margin')
         );
 
         $variableCosts = 0;
@@ -655,11 +633,9 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         $totalNet = $this->orderPositions()
             ->where('is_alternative', false)
-            ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->sum('total_net_price');
         $totalBaseNet = $this->orderPositions()
             ->where('is_alternative', false)
-            ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->sum('total_base_net_price');
 
         $this->total_net_price = bcround(
@@ -689,7 +665,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         $positionsByVatRate = $this->orderPositions()
             ->where('is_alternative', false)
-            ->where(fn ($q) => $q->where('is_free_text', false)->orWhereDoesntHave('children'))
             ->whereNotNull('vat_rate_percentage')
             ->reorder()
             ->groupBy(['vat_rate_percentage', 'vat_rate_id'])
@@ -701,7 +676,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             fn (OrderPosition $item) => [($item->vat_rate_id ?? $item->vat_rate_percentage) => $item->total_net_price]
         );
 
-        $multiplier = $this->orderType->order_type_enum->multiplier();
         foreach ($this->discounts()->ordered()->get() as $discount) {
             if ($discount->is_percentage) {
                 $positionsByVatRate->transform(function (OrderPosition $item) use ($discount): OrderPosition {
@@ -715,19 +689,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     0
                 );
 
-                if (bccomp($multiplier, -1) === 0) {
-                    $remainingTotal = min(0, bcsub($total, $discount->discount, 9));
-                } else {
+                if (bccomp($total, '0', 9) > 0) {
                     $remainingTotal = max(0, bcsub($total, $discount->discount, 9));
+
+                    $positionsByVatRate->transform(
+                        function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
+                            $proportion = bcdiv($item->total_net_price, $total, 9);
+                            $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
+
+                            return $item;
+                        });
                 }
-
-                $positionsByVatRate->transform(
-                    function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
-                        $proportion = bcdiv($item->total_net_price, $total, 9);
-                        $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
-
-                        return $item;
-                    });
             }
         }
 
@@ -835,25 +807,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function getDescription(): ?string
     {
-        $currencyIso = $this->currency?->iso
-            ?? resolve_static(Currency::class, 'default')?->iso
-            ?? '';
-
-        $parts = array_filter(
-            [
-                $this->invoice_number ?? $this->order_number,
-                $this->commission,
-                sprintf(
-                    '%s (%s %s)',
-                    Number::currency($this->total_gross_price, $currencyIso, app()->getLocale()),
-                    Number::currency($this->total_net_price, $currencyIso, app()->getLocale()),
-                    __('net'),
-                ),
-            ],
-            fn (?string $part) => ! blank($part)
-        );
-
-        return implode(' - ', $parts);
+        return null;
     }
 
     public function getEmailTemplateModelType(): ?string
@@ -863,11 +817,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function getLabel(): ?string
     {
-        return $this->orderType?->name
-            . ' - '
-            . ($this->invoice_number ?? $this->order_number)
-            . ' - '
-            . data_get($this->address_invoice, 'name');
+        return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
     }
 
     public function getPrintViews(): array
@@ -1102,13 +1052,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
         if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
             $children = $this->children()
-                ->whereHas('orderType', fn (Builder $query) => $query->whereNotIn(
-                    'order_type_enum',
-                    [
-                        OrderTypeEnum::Refund->value,
-                        OrderTypeEnum::Retoure->value,
-                    ]
-                ))
                 ->pluck('invoice_number')
                 ->toArray();
 
@@ -1124,14 +1067,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             }
         } elseif ($this->orderType) {
             unset($printViews['final-invoice']);
-        }
-
-        if ($this->orderType?->order_type_enum === OrderTypeEnum::SplitOrder
-            && $this->parent()
-                ->whereRelation('orderType', 'order_type_enum', OrderTypeEnum::CollectiveOrder->value)
-                ->exists()
-        ) {
-            unset($printViews['invoice'], $printViews['final-invoice']);
         }
 
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
@@ -1339,16 +1274,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'is_public' => false,
             'is_repeatable' => false,
         ];
-    }
-
-    protected function discountPercentage(): Attribute
-    {
-        return Attribute::get(
-            fn (mixed $value, array $attributes) => diff_percentage(
-                data_get($attributes, 'total_base_discounted_net_price') ?? '0',
-                data_get($attributes, 'total_net_price') ?? '0'
-            )
-        );
     }
 
     protected function makeAllSearchableUsing(Builder $query): Builder

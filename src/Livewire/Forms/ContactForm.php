@@ -29,13 +29,12 @@ class ContactForm extends FluxForm
     #[RenderAs(
         type: RenderAs::SELECT,
         options: [
-            'multiple' => true,
             'select' => 'label:name|value:id',
             ':options' => "resolve_static(\FluxErp\Models\Tenant::class, 'query')->where('is_active', true)->get(['id', 'name'])",
         ],
-        label: 'Tenants',
+        label: 'flux::tenant',
     )]
-    public array $tenants = [];
+    public ?int $tenant_id = null;
 
     public ?float $credit_line = null;
 
@@ -175,12 +174,11 @@ class ContactForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Contact) {
-            $values->loadMissing(['categories:id', 'industries:id', 'tenants:id']);
+            $values->loadMissing(['categories:id', 'industries:id']);
 
             $values = $values->toArray();
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
             $values['industries'] = array_column($values['industries'] ?? [], 'id');
-            $values['tenants'] = array_column($values['tenants'] ?? [], 'id');
         }
 
         parent::fill($values);
@@ -195,6 +193,7 @@ class ContactForm extends FluxForm
     {
         parent::reset(...$properties);
 
+        $this->tenant_id = resolve_static(Tenant::class, 'default')?->getKey();
         $this->language_id = resolve_static(Language::class, 'default')?->getKey();
         $this->country_id = resolve_static(Country::class, 'default')?->getKey();
     }
@@ -259,7 +258,7 @@ class ContactForm extends FluxForm
                 ->where('model_type', morph_alias(Contact::class))
                 ->where('is_active', true)
                 ->exists(),
-            'tenants' => resolve_static(Tenant::class, 'query')->where('is_active', true)->count() > 1,
+            'tenant_id' => resolve_static(Tenant::class, 'query')->where('is_active', true)->count() > 1,
             default => true,
         };
     }

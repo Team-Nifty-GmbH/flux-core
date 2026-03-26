@@ -1,22 +1,20 @@
-<div class="flex h-full w-full gap-4 p-4">
+<div class="flex h-full w-full gap-6 p-6">
     <x-flux::spinner />
     <div class="flex flex-col justify-center">
-        <x-icon :name="$this->icon()" class="text-primary-500 h-10 w-10" />
+        <x-icon :name="$this->icon()" class="h-12 w-12 text-primary-500" />
     </div>
     <div class="flex w-full grow flex-col justify-between overflow-hidden">
         <div class="flex w-full justify-between">
-            <h2
-                class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
-            >
+            <div class="truncate text-lg font-semibold text-gray-400">
                 {{ __($this->title()) }}
-            </h2>
+            </div>
             @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
                 <div class="flex-none">
                     <x-dropdown icon="ellipsis-vertical" static>
                         @foreach ($this->options() ?? [] as $option)
                             <x-dropdown.items
                                 :text="data_get($option, 'label')"
-                                x-on:click="$wire.{{ data_get($option, 'method') }}('{{ data_get($option, 'params') }}')"
+                                wire:click="{{ data_get($option, 'method') }}('{{ data_get($option, 'params') }}')"
                             />
                         @endforeach
                     </x-dropdown>
@@ -25,10 +23,10 @@
         </div>
         <div>
             <div
-                class="flex max-w-full grow flex-wrap items-center gap-2 overflow-hidden"
+                class="flex max-w-full grow flex-wrap items-center gap-4 overflow-hidden"
             >
                 <div
-                    class="flex-none truncate text-2xl font-bold whitespace-nowrap text-gray-900 dark:text-gray-100"
+                    class="flex-none truncate whitespace-nowrap text-2xl font-bold"
                     x-text="$wire.sum"
                 ></div>
                 @if ($shouldBePositive)
@@ -38,6 +36,7 @@
                                 x-cloak
                                 x-show="$wire.growthRate > 0"
                                 color="emerald"
+                                lg
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
@@ -48,6 +47,7 @@
                                 x-cloak
                                 x-show="$wire.growthRate < 0"
                                 color="red"
+                                lg
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
@@ -63,6 +63,7 @@
                                 x-cloak
                                 x-show="$wire.growthRate > 0"
                                 color="red"
+                                lg
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
@@ -73,6 +74,7 @@
                                 x-cloak
                                 x-show="$wire.growthRate < 0"
                                 color="emerald"
+                                lg
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
@@ -84,13 +86,13 @@
                 @endif
             </div>
             <div
-                class="flex-none truncate text-sm whitespace-nowrap text-gray-600 dark:text-gray-400"
+                class="flex-none truncate whitespace-nowrap text-lg font-semibold"
                 x-html="$wire.subValue"
             ></div>
         </div>
-        <div class="min-h-5">
+        <div class="min-h-6">
             <span
-                class="text-sm text-gray-400"
+                class="text-gray-400"
                 x-cloak
                 x-show="$wire.previousSum"
                 x-text="'{{ __('Previous Period') }} ' + $wire.previousSum"

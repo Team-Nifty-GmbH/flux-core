@@ -41,6 +41,11 @@ class CreateContactRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
+            'tenant_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Tenant::class]),
+            ],
             'agent_id' => [
                 'integer',
                 'nullable',
@@ -111,13 +116,6 @@ class CreateContactRuleset extends FluxRuleset
             'footer' => 'string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
-
-            'tenants' => 'array|nullable',
-            'tenants.*' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Tenant::class]),
-            ],
         ];
     }
 }

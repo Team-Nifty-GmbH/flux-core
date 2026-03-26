@@ -134,11 +134,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-<<<<<<< HEAD
             wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-serial-number-range-modal')})"
-=======
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-serial-number-range-modal')})"
->>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

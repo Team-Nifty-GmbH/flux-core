@@ -66,7 +66,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $closeModal('create-serial-number-modal')})"
+            wire:click="save().then((success) => { if(success) $closeModal('create-serial-number-modal')})"
         />
     </x-slot>
 </x-modal>

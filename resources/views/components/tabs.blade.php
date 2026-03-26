@@ -4,8 +4,7 @@
 <div
     class="mt-2"
     x-data="{
-        get tab() { return $wire.{{ $attributes->wire('model')->value() }} },
-        set tab(value) { $wire.$set('{{ $attributes->wire('model')->value() }}', value) },
+        tab: $wire.entangle('{{ $attributes->wire('model')->value() }}', true),
         tabButtonClicked(tabButton) {
             this.tabSelected = this.tab = tabButton.dataset.tabName
         },
@@ -41,7 +40,7 @@
             <livewire:dynamic-component
                 wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}"
                 :is="$this->{$attributes->wire('model')->value()}"
-                wire:key="tab-{{ $attributes->wire('model')->value() }}-{{ $this->{$attributes->wire('model')->value()} }}"
+                wire:key="{{ uniqid() }}"
             />
         @else
             <x-dynamic-component

@@ -41,7 +41,6 @@ class Purchase extends ValueBox implements HasWidgetOptions
                 ->whereNotNull('invoice_number')
                 ->purchase()
         )
-            ->setRange($this->timeFrame)
             ->setDateColumn('invoice_date')
             ->setStartingDate($this->getStart())
             ->setEndingDate($this->getEnd())

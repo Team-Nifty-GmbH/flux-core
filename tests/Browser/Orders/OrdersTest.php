@@ -12,6 +12,7 @@ test('can create new order', function (): void {
 
     $orderType = OrderType::factory()
         ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
             'is_hidden' => false,
@@ -20,8 +21,12 @@ test('can create new order', function (): void {
     $address = Address::factory()
         ->for(
             Contact::factory()
+                ->state([
+                    'tenant_id' => $this->dbTenant->getKey(),
+                ])
         )
         ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
             'company' => 'Test Company ' . uniqid(),
             'firstname' => 'Firstname',
             'lastname' => 'Lastname',

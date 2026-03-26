@@ -10,7 +10,7 @@ class OrderTypeList extends BaseDataTable
     public array $enabledCols = [
         'name',
         'description',
-        'tenants.name',
+        'tenant.name',
         'order_type_enum',
         'print_layouts',
     ];
@@ -19,6 +19,6 @@ class OrderTypeList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->with('tenants:id,name');
+        return $builder->with('tenant:id,name');
     }
 }

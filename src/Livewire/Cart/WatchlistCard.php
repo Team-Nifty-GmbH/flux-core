@@ -32,11 +32,6 @@ class WatchlistCard extends Component
         return view('flux::livewire.cart.watchlist-card');
     }
 
-    public function placeholder(): View
-    {
-        return view('flux::livewire.placeholders.box');
-    }
-
     #[Renderless]
     public function addToCart(): void
     {
@@ -54,9 +49,10 @@ class WatchlistCard extends Component
             ->to('cart.cart');
     }
 
-    #[Renderless]
     public function delete(): void
     {
+        $this->skipRender();
+
         try {
             $this->cartForm->delete();
         } catch (ValidationException $e) {
@@ -72,9 +68,11 @@ class WatchlistCard extends Component
 
     public function removeProduct(int $productId): void
     {
+        $this->skipRender();
+
         try {
             DeleteCartItem::make([
-                'id' => $cartItemId = resolve_static(CartItem::class, 'query')
+                'id' => resolve_static(CartItem::class, 'query')
                     ->where('cart_id', $this->cartForm->id)
                     ->where('product_id', $productId)
                     ->value('id'),
@@ -89,8 +87,12 @@ class WatchlistCard extends Component
 
         $this->cartForm->cart_items = array_filter(
             $this->cartForm->cart_items,
-            fn (array $cartItem) => $cartItem['id'] !== $cartItemId
+            fn (array $cartItem) => $cartItem['id'] !== $productId
         );
+
+        $this->js(<<<'JS'
+            $wire.$parent.$refresh();
+        JS);
     }
 
     #[Renderless]

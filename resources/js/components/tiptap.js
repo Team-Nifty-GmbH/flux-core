@@ -11,9 +11,7 @@ import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 import { Table } from './tiptap-table.js';
 
 export default function (
-    $wire = null,
-    propertyName = null,
-    live = false,
+    content,
     debounceDelay = 0,
     searchModel = ['user', 'role'],
 ) {
@@ -26,10 +24,7 @@ export default function (
             },
             proxy: null,
             editable: true,
-            content:
-                propertyName && $wire
-                    ? Alpine.raw($wire.$get(propertyName))
-                    : null,
+            content: content,
             floatingElement: null,
             isFloatingVisible: false,
             isClickListenerSet: false,
@@ -233,9 +228,6 @@ export default function (
                         clearTimeout(this.timeout);
                         this.timeout = setTimeout(() => {
                             this.content = editor.getHTML();
-                            if (propertyName && $wire) {
-                                $wire.$set(propertyName, this.content, live);
-                            }
                         }, debounceDelay);
                     },
                     onTransaction: ({ editor }) => {
@@ -252,20 +244,11 @@ export default function (
                     this.proxy.setOptions({ editable: editable });
                 });
 
-                if (propertyName && $wire) {
-                    $wire.$watch(propertyName, (content) => {
-                        if (!this.proxy) return;
-                        if (content === this.editor()?.getHTML()) return;
-                        this.content = content;
-                        this.editor()?.commands.setContent(content, false);
-                    });
-                } else {
-                    this.$watch('content', (content) => {
-                        if (!this.proxy) return;
-                        if (content === this.editor()?.getHTML()) return;
-                        this.editor()?.commands.setContent(content, false);
-                    });
-                }
+                this.$watch('content', (content) => {
+                    if (!this.proxy) return;
+                    if (content === this.editor().getHTML()) return;
+                    this.editor().commands.setContent(content, false);
+                });
             },
         };
     };

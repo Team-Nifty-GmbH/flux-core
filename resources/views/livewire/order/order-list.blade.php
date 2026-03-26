@@ -24,7 +24,7 @@
 >
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
-            <div class="divide-secondary-200 space-y-2.5 divide-y">
+            <div class="space-y-2.5 divide-y divide-secondary-200">
                 @if (! $orderType ?? true)
                     <x-select.styled
                         :label="__('Order type')"
@@ -165,63 +165,7 @@
                 loading="save"
                 color="indigo"
                 :text="__('Save')"
-                wire:click="save()"
-            />
-        </x-slot>
-    </x-modal>
-
-    <x-modal
-        id="create-collective-order-modal"
-        :title="__('Collective Order')"
-    >
-        <div class="flex flex-col gap-4">
-            <x-select.styled
-                :label="__('Collective Order Type')"
-                required
-                wire:model="collectiveOrder.order_type_id"
-                select="label:name|value:id"
-                :options="resolve_static(\FluxErp\Models\OrderType::class, 'query')
-                    ->where('order_type_enum', \FluxErp\Enums\OrderTypeEnum::CollectiveOrder->value)
-                    ->where('is_active', true)
-                    ->get(['id', 'name'])
-                    ->toArray()
-                "
-            />
-            <x-select.styled
-                :label="__('Split Order Order Type')"
-                required
-                wire:model="collectiveOrder.split_order_order_type_id"
-                select="label:name|value:id"
-                :options="resolve_static(\FluxErp\Models\OrderType::class, 'query')
-                    ->where('order_type_enum', \FluxErp\Enums\OrderTypeEnum::SplitOrder->value)
-                    ->where('is_active', true)
-                    ->get(['id', 'name'])
-                    ->toArray()
-                "
-            />
-            <x-card class="text-center">
-                <div
-                    class="text-2xl font-bold"
-                    x-text="Object.values($wire.collectiveOrder.orders).length"
-                ></div>
-                <div class="text-sm">
-                    {{ __('Collective Order(s) will be created') }}
-                </div>
-            </x-card>
-        </div>
-        <x-slot:footer>
-            <x-button
-                color="secondary"
-                light
-                flat
-                :text="__('Cancel')"
-                x-on:click="$modalClose('create-collective-order-modal')"
-            />
-            <x-button
-                loading="createCollectiveOrders"
-                color="indigo"
-                :text="__('Create')"
-                wire:click="createCollectiveOrders()"
+                wire:click="save"
             />
         </x-slot>
     </x-modal>

@@ -8,7 +8,7 @@
     </div>
     @if ($count > 1)
         <div
-            class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white shadow"
+            class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white shadow"
         >
             {{ $count }}
         </div>

@@ -120,7 +120,7 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->whereHasTenant($this->order->tenant_id)
+                    ->whereRelation('tenants', 'id', $this->order->tenant_id)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'languages' => resolve_static(Language::class, 'query')
@@ -396,7 +396,7 @@ class Order extends Component
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderFormName}->tenant_id = $contact?->getTenantId()
+        $this->{$orderFormName}->tenant_id = $contact?->tenant_id
             ?? resolve_static(Tenant::class, 'default')->getKey();
         $this->{$orderFormName}->agent_id = $contact?->agent_id ?? $this->{$orderFormName}->agent_id;
         $this->{$orderFormName}->contact_bank_connection_id = $contact?->contactBankConnections()
@@ -441,10 +441,10 @@ class Order extends Component
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
             $this->schedule->parameters['orderTypeId'] = resolve_static(OrderType::class, 'query')
+                ->where('tenant_id', $this->order->tenant_id)
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
-                ->whereHasTenant($this->order->tenant_id)
                 ->value('id');
         }
     }
@@ -466,9 +466,9 @@ class Order extends Component
                             ])
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
-                            ->whereHasTenant($this->order->tenant_id)
                             ->exists();
                 })
                 ->attributes([
@@ -489,9 +489,9 @@ class Order extends Component
                             ])
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::Refund->value)
                             ->where('is_active', true)
-                            ->whereHasTenant($this->order->tenant_id)
                             ->exists();
                 })
                 ->attributes([
@@ -510,10 +510,10 @@ class Order extends Component
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
                             ->exists()
                         && resolve_static(OrderType::class, 'query')
+                            ->where('tenant_id', $this->order->tenant_id)
                             ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
                             ->where('is_active', true)
                             ->where('is_hidden', false)
-                            ->whereHasTenant($this->order->tenant_id)
                             ->exists();
                 })
                 ->attributes([
@@ -684,10 +684,14 @@ class Order extends Component
 
         if ($orderTypeEnum) {
             $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
+                ->where('tenant_id', $this->order->tenant_id)
                 ->where('order_type_enum', $orderTypeEnum)
                 ->where('is_active', true)
-                ->whereHasTenant($this->order->tenant_id)
                 ->value('id');
+        }
+
+        if ($orderTypeEnum === OrderTypeEnum::Refund->value) {
+            $this->replicateOrder->parent_id = $this->order->id;
         }
 
         $this->replicateOrder->order_positions = null;
@@ -735,9 +739,7 @@ class Order extends Component
         }
 
         $action->execute();
-        $this->toast()
-            ->success(__(':model saved', ['model' => __('Order')]))
-            ->send();
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
 
         return true;
     }
@@ -910,11 +912,11 @@ class Order extends Component
 
     public function updatedOrderAddressInvoiceId(): void
     {
-        $address = resolve_static(Address::class, 'query')
+        $this->order->address_invoice = resolve_static(Address::class, 'query')
             ->whereKey($this->order->address_invoice_id)
             ->with('contact')
-            ->first();
-        $this->order->address_invoice = $address->toArray();
+            ->first()
+            ->toArray();
 
         $this->order->payment_type_id = data_get($this->order->address_invoice, 'contact.payment_type_id');
         $this->order->price_list_id = data_get($this->order->address_invoice, 'contact.price_list_id');
@@ -922,7 +924,7 @@ class Order extends Component
             ?? $this->order->language_id
             ?? resolve_static(Language::class, 'default')?->getKey();
         $this->order->contact_id = data_get($this->order->address_invoice, 'contact_id');
-        $this->order->tenant_id = $address->getTenantId();
+        $this->order->tenant_id = data_get($this->order->address_invoice, 'tenant_id');
     }
 
     public function updatedOrderIsConfirmed(): void
@@ -941,9 +943,7 @@ class Order extends Component
             exception_to_notifications($e, $this);
         }
 
-        $this->toast()
-            ->success(__(':model saved', ['model' => __('Order')]))
-            ->send();
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
     }
 
     public function updatedScheduleParametersOrderTypeId(): void

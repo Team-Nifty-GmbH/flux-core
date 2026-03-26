@@ -41,12 +41,12 @@
             </x-slot>
             <div class="flex flex-col gap-4">
                 <x-input
-                    x-bind:readonly="!isEditing"
+                    x-bind:readonly="!edit"
                     x-model="productCrossSelling.name"
                     :label="__('Name')"
                 />
                 <x-toggle
-                    x-bind:readonly="!isEditing"
+                    x-bind:readonly="!edit"
                     x-model="productCrossSelling.is_active"
                     :label="__('Active')"
                 />
@@ -56,7 +56,7 @@
                     x-bind:data-index="index"
                     class="flex flex-col gap-4 pb-4"
                     x-cloak
-                    x-show="isEditing"
+                    x-show="edit"
                     x-transition
                 >
                     <x-button
@@ -74,7 +74,7 @@
                         >
                             <div class="flex items-center gap-1.5">
                                 <div
-                                    class="dark:border-secondary-500 inline-flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 text-sm"
+                                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 text-sm dark:border-secondary-500"
                                 >
                                     <img
                                         class="shrink-0 object-cover object-center"
@@ -85,7 +85,7 @@
                             </div>
                             <span x-text="product.name"></span>
                             <div
-                                x-show="productCrossSelling.products.length > 1 && isEditing"
+                                x-show="productCrossSelling.products.length > 1 && edit"
                                 x-transition
                             >
                                 <x-button.circle
@@ -99,7 +99,7 @@
                 </div>
             </x-slot>
             <x-slot:header>
-                <div x-show="isEditing" x-cloak x-transition>
+                <div x-show="edit" x-cloak x-transition>
                     <x-button
                         color="red"
                         x-on:click="$wire.productCrossSellings.splice(index, 1)"
@@ -113,7 +113,7 @@
     <div class="flex w-full justify-center">
         <x-button
             color="indigo"
-            x-on:click="isEditing = true; $wire.productCrossSellings.push({'name': '{{ __('New Cross Selling') }}', 'is_active': true, 'is_new': true, 'products': []})"
+            x-on:click="edit = true; $wire.productCrossSellings.push({'name': '{{ __('New Cross Selling') }}', 'is_active': true, 'is_new': true, 'products': []})"
         >
             {{ __('Add product cross selling') }}
         </x-button>

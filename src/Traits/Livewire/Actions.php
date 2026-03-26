@@ -10,7 +10,6 @@ trait Actions
 {
     use BaseActions;
 
-    /** @deprecated use tallstacks toast instead */
     public function notification(): Toast
     {
         return $this->toast();

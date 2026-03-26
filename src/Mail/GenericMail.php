@@ -2,7 +2,6 @@
 
 namespace FluxErp\Mail;
 
-use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Media;
@@ -30,10 +29,7 @@ class GenericMail extends Mailable
         public ?Tenant $tenant = null,
     ) {
         if ($this->mailMessageForm instanceof CommunicationForm) {
-            try {
-                $this->tenant ??= $this->mailMessageForm->communicatable()?->getTenant();
-            } catch (BadMethodCallException) {
-            }
+            $this->tenant ??= $this->mailMessageForm->communicatable()?->tenant;
         }
 
         $this->tenant ??= data_get($this->mailMessageForm, 'tenant_id')

@@ -115,8 +115,9 @@ test('create comment sends notification', function (): void {
     $user->save();
 
     $address = Address::factory()
-        ->for(Contact::factory()->create())
+        ->for(Contact::factory()->create(['tenant_id' => $this->dbTenant->getKey()]))
         ->create([
+            'tenant_id' => $this->dbTenant->getKey(),
             'is_main_address' => true,
         ]);
 
@@ -157,8 +158,9 @@ test('create comment sends notification to address', function (): void {
     config(['queue.default' => 'sync']);
 
     $address = Address::factory()
-        ->for(Contact::factory()->create())
+        ->for(Contact::factory()->create(['tenant_id' => $this->dbTenant->id]))
         ->create([
+            'tenant_id' => $this->dbTenant->id,
             'is_active' => true,
             'is_main_address' => true,
         ]);
@@ -256,6 +258,10 @@ test('delete comment', function (): void {
 });
 
 test('delete comment as super admin', function (): void {
+    $user = User::factory()->create([
+        'language_id' => $this->user->language_id,
+    ]);
+
     $this->user->assignRole('Super Admin');
     Sanctum::actingAs($this->user, ['user']);
 

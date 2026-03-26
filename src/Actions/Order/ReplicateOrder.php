@@ -6,19 +6,13 @@ use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
-use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\Order\ReplicateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ReplicateOrder extends FluxAction
@@ -63,7 +57,6 @@ class ReplicateOrder extends FluxAction
             $orderData['uuid'],
             $orderData['agent_id'],
             $orderData['contact_bank_connection_id'],
-            $orderData['parent_id'],
             $orderData['address_invoice'],
             $orderData['address_delivery'],
             $orderData['state'],
@@ -80,6 +73,10 @@ class ReplicateOrder extends FluxAction
             $orderData['is_confirmed'],
             $orderData['is_paid'],
         );
+
+        if ($originalOrder['parent_id'] === $orderData['parent_id']) {
+            unset($orderData['parent_id']);
+        }
 
         if (
             $originalOrder['contact_id'] === $orderData['contact_id']
@@ -99,13 +96,7 @@ class ReplicateOrder extends FluxAction
             ->validate()
             ->execute();
 
-        $multiplier = $order->orderType->order_type_enum->multiplier();
-        $this->replicateDiscounts(
-            modelType: morph_alias(Order::class),
-            fromModelId: $originalOrder->getKey(),
-            toModelId: $order->getKey(),
-            multiplier: $multiplier
-        );
+        $this->replicateDiscounts(morph_alias(Order::class), $originalOrder->getKey(), $order->getKey());
 
         if (! $getOrderPositionsFromOrigin) {
             $replicateOrderPositions = collect($this->data['order_positions']);
@@ -119,12 +110,9 @@ class ReplicateOrder extends FluxAction
                         fn (array $item): bool => data_get($item, 'id') === $orderPosition->getKey()
                     );
 
-                    $orderPosition->origin_position_id = in_array(
-                        $orderTypeEnum,
-                        [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure]
-                    )
-                        ? $orderPosition->getKey()
-                        : null;
+                    if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
+                        $orderPosition->origin_position_id = $orderPosition->getKey();
+                    }
 
                     $originalAmount = $orderPosition->amount;
                     $orderPosition->amount = data_get($position, 'amount');
@@ -146,14 +134,7 @@ class ReplicateOrder extends FluxAction
                     $originalOrder->orderPositions?->toArray() ?? []
                 );
             } else {
-                $orderPositions = array_map(
-                    function (array $position): array {
-                        $position['origin_position_id'] = null;
-
-                        return $position;
-                    },
-                    $originalOrder->orderPositions?->toArray() ?? []
-                );
+                $orderPositions = $originalOrder->orderPositions?->toArray() ?? [];
             }
         }
 
@@ -223,9 +204,9 @@ class ReplicateOrder extends FluxAction
             $newOrderPositions->push($newPosition);
 
             $this->replicateDiscounts(
-                modelType: morph_alias(OrderPosition::class),
-                fromModelId: $originalPositionId,
-                toModelId: $newPosition->getKey(),
+                morph_alias(OrderPosition::class),
+                $originalPositionId,
+                $newPosition->getKey()
             );
         }
 
@@ -243,53 +224,6 @@ class ReplicateOrder extends FluxAction
     {
         parent::validateData();
 
-        $errors = [];
-        $tenantId = resolve_static(Order::class, 'query')
-            ->whereKey($this->getData('id'))
-            ->value('tenant_id');
-        $hasTenants = [
-            'contact_id' => Contact::class,
-            'address_invoice_id' => Address::class,
-            'address_delivery_id' => Address::class,
-            'order_type_id' => OrderType::class,
-            'payment_type_id' => PaymentType::class,
-            'addresses.*.address_id' => Address::class,
-            'addresses.*.address_type_id' => AddressType::class,
-        ];
-
-        foreach ($hasTenants as $key => $class) {
-            $values = $this->getData($key);
-            if (! $values) {
-                continue;
-            }
-
-            $values = Arr::wrap($values);
-            foreach ($values as $index => $value) {
-                if (resolve_static($class, 'query')
-                    ->whereKey($value)
-                    ->whereHasTenant($tenantId)
-                    ->doesntExist()
-                ) {
-                    $errors += [
-                        str_replace('*', $index, $key) => [
-                            Str::headline(morph_alias($class)) . ' not found on given tenant.',
-                        ],
-                    ];
-                }
-            }
-        }
-
-        if ($parentId = $this->getData('parent_id')) {
-            if (resolve_static(Order::class, 'query')
-                ->whereKey($parentId)
-                ->value('tenant_id') !== $tenantId
-            ) {
-                $errors += [
-                    'parent_id' => ['Parent order not found on given tenant.'],
-                ];
-            }
-        }
-
         $orderPositions = data_get($this->data, 'order_positions', []);
         $ids = array_column($orderPositions ?? [], 'id');
 
@@ -299,15 +233,17 @@ class ReplicateOrder extends FluxAction
                 ->whereNotNull('parent_id')
                 ->exists()
         ) {
-            $errors += [
+            throw ValidationException::withMessages([
                 'set_new_as_parent' => ['The given order already has a parent.'],
-            ];
+            ])
+                ->errorBag('replicateOrder');
         }
 
         if (count($ids) !== count(array_unique($ids))) {
-            $errors += [
+            throw ValidationException::withMessages([
                 'order_positions' => ['No duplicate order position ids allowed.'],
-            ];
+            ])
+                ->errorBag('replicateOrder');
         }
 
         if ($orderPositions) {
@@ -316,37 +252,26 @@ class ReplicateOrder extends FluxAction
                 ->where('order_id', '!=', $this->data['id'])
                 ->exists()
             ) {
-                $errors += [
+                throw ValidationException::withMessages([
                     'order_positions' => ['Only order positions from given order allowed.'],
-                ];
+                ])
+                    ->errorBag('replicateOrder');
             }
-        }
-
-        if ($errors) {
-            throw ValidationException::withMessages($errors)
-                ->errorBag('replicateOrder');
         }
     }
 
-    protected function replicateDiscounts(
-        string $modelType,
-        int|string $fromModelId,
-        int|string $toModelId,
-        int $multiplier = 1
-    ): void {
+    private function replicateDiscounts(string $modelType, int|string $fromModelId, int|string $toModelId): void
+    {
         resolve_static(Discount::class, 'query')
             ->where('model_type', $modelType)
             ->where('model_id', $fromModelId)
             ->get()
-            ->each(function (Discount $discount) use ($modelType, $toModelId, $multiplier): void {
+            ->each(function (Discount $discount) use ($modelType, $toModelId): void {
                 CreateDiscount::make([
                     'model_type' => $modelType,
                     'model_id' => $toModelId,
                     'name' => $discount->name,
-                    'discount' => bcmul(
-                        $discount->getRawOriginal('discount'),
-                        ! $discount->is_percentage && $multiplier === -1 ? -1 : 1
-                    ),
+                    'discount' => $discount->getRawOriginal('discount'),
                     'is_percentage' => $discount->is_percentage,
                 ])
                     ->validate()

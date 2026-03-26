@@ -32,7 +32,7 @@
             }"
         >
             <div
-                class="divide-secondary-200 space-y-2.5 divide-y"
+                class="space-y-2.5 divide-y divide-secondary-200"
                 x-bind:class="$wire.disableReplicateModalInputs && 'pointer-events-none'"
             >
                 <x-select.styled
@@ -247,11 +247,7 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-<<<<<<< HEAD
                 wire:click="saveDiscount().then((success) => {if(success) $tsui.close.modal('edit-discount');})"
-=======
-                x-on:click="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
->>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>
@@ -346,7 +342,7 @@
             </div>
         </div>
         <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
@@ -366,7 +362,7 @@
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
                     color="red"
                     :text="__('Delete')"
-                    wire:click="delete()"
+                    wire:click="delete"
                 />
             @endif
 
@@ -1055,7 +1051,7 @@
                                 </div>
                             </template>
                             <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
+                                class="flex justify-between bg-gray-50 p-2.5 dark:bg-secondary-700"
                             >
                                 <div>
                                     {{ __('Total Gross') }}
@@ -1067,7 +1063,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
+                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
                             >
                                 <div>
                                     {{ __('Balance') }}
@@ -1081,7 +1077,7 @@
                             <div
                                 x-cloak
                                 x-show="$wire.order.balance_due_discount"
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
+                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
                             >
                                 <div>
                                     {{ __('Balance Due Discount') }}
@@ -1170,7 +1166,7 @@
                     @show
                     <x-card>
                         <div
-                            class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
+                            class="overflow-hidden text-ellipsis whitespace-nowrap text-sm"
                         >
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>

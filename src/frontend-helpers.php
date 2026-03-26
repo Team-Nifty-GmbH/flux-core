@@ -20,7 +20,7 @@ if (! function_exists('exception_to_notifications')) {
         switch (true) {
             case method_exists($exception, 'errors') && $errors = $exception->errors():
             case method_exists($exception, 'getResponse')
-                && $errors = data_get(
+            && $errors = data_get(
                 json_decode($exception->getResponse()->getContent(), true),
                 'errors',
                 []

@@ -15,9 +15,9 @@ test('switch tabs', function (): void {
     $tenant = Tenant::factory()->create([
         'is_default' => true,
     ]);
-    $this->contact = Contact::factory()
-        ->hasAttached(factory: $tenant, relationship: 'tenants')
-        ->create();
+    $this->contact = Contact::factory()->create([
+        'tenant_id' => $tenant->id,
+    ]);
 
     $form = new ContactForm(Livewire::new(Accounting::class), 'contact');
     $form->fill($this->contact);

@@ -18,9 +18,12 @@ use FluxErp\Models\Warehouse;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -33,16 +36,19 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
 
     $this->retoureOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Retoure,
         'is_active' => true,
     ]);
 
     $this->splitOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::SplitOrder,
         'is_active' => true,
         'is_hidden' => false,
@@ -81,8 +87,6 @@ beforeEach(function (): void {
         'total_net_price' => 1000,
         'total_gross_price' => 1190,
         'is_net' => false,
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 });
 

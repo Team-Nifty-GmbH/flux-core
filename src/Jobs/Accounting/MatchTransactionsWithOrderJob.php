@@ -10,7 +10,6 @@ use FluxErp\Models\Address;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderTransaction;
-use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\Transaction;
 use FluxErp\Settings\AccountingSettings;
 use Illuminate\Bus\Batchable;
@@ -74,8 +73,6 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
 
     public function handle(): void
     {
-        $invoiceNumberPatterns = $this->loadInvoiceNumberPatterns();
-
         resolve_static(Transaction::class, 'query')
             ->when($this->transactionIds, fn (Builder $query) => $query->whereKey($this->transactionIds))
             ->whereNot('balance', 0)
@@ -83,12 +80,12 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             ->whereDoesntHave('orders', fn (Builder $query) => $query->where('is_accepted', false))
             ->latest()
             ->cursor()
-            ->each(function (Transaction $transaction) use ($invoiceNumberPatterns): void {
-                $this->processTransaction($transaction, $invoiceNumberPatterns);
+            ->each(function (Transaction $transaction): void {
+                $this->processTransaction($transaction);
             });
     }
 
-    protected function findMatchingOrders(Transaction $transaction, Collection $invoiceNumberPatterns): Collection
+    protected function findMatchingOrders(Transaction $transaction): Collection
     {
         $contactId = resolve_static(ContactBankConnection::class, 'query')
             ->latest()
@@ -125,7 +122,7 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
         }
 
         if ($transaction->purpose) {
-            $orders = $this->findOrderByPurpose($transaction, $contactId, $bookingDate, $invoiceNumberPatterns);
+            $orders = $this->findOrderByPurpose($transaction, $contactId, $bookingDate);
 
             if ($orders?->isNotEmpty()) {
                 $matches = $matches->merge($orders);
@@ -177,32 +174,8 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
     protected function findOrderByPurpose(
         Transaction $transaction,
         ?int $contactId,
-        string $bookingDate,
-        Collection $invoiceNumberPatterns
+        string $bookingDate
     ): ?Collection {
-        $potentialMatches = collect();
-
-        $invoiceNumbers = $this->extractInvoiceNumbers($transaction->purpose, $invoiceNumberPatterns);
-
-        foreach ($invoiceNumbers as $invoiceNumber) {
-            try {
-                $matches = $this->findPotentialOrderMatches($invoiceNumber, $transaction, $contactId);
-                $potentialMatches = $potentialMatches->merge($matches);
-            } catch (ModelNotFoundException) {
-            }
-        }
-
-        $invoiceFragments = $invoiceNumbers->flatMap(fn (string $invoiceNumber) => array_merge(
-            explode(' ', $invoiceNumber),
-            explode('.', $invoiceNumber),
-            explode('-', $invoiceNumber),
-            explode(',', $invoiceNumber),
-            [$invoiceNumber],
-        ))
-            ->filter()
-            ->map(fn (string $word) => strtolower(trim($word)))
-            ->unique();
-
         $search = collect(array_merge(
             explode(' ', $transaction->purpose),
             explode('.', $transaction->purpose),
@@ -214,12 +187,13 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             ->unique()
             ->values();
 
+        $potentialMatches = collect();
+
         foreach ($search as $word) {
             if (
                 strlen($word) < 5
                 || $word === $transaction->counterpart_iban
                 || $word === $transaction->counterpart_bic
-                || $invoiceFragments->contains(strtolower($word))
             ) {
                 continue;
             }
@@ -236,7 +210,6 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
         }
 
         return $potentialMatches
-            ->unique('id')
             ->sortBy([
                 fn (Order $order) => abs(
                     bcsub(
@@ -249,45 +222,6 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
                     : PHP_INT_MAX,
                 fn (Order $order) => $contactId && $order->contact_id == $contactId ? 0 : 1,
             ])
-            ->values();
-    }
-
-    protected function loadInvoiceNumberPatterns(): Collection
-    {
-        $marker = "\x00WILDCARD\x00";
-        $quotedMarker = preg_quote($marker, '/');
-
-        return resolve_static(SerialNumberRange::class, 'query')
-            ->where('type', 'invoice_number')
-            ->where('model_type', morph_alias(Order::class))
-            ->whereNotNull('prefix')
-            ->get()
-            ->map(function (SerialNumberRange $range) use ($marker, $quotedMarker): string {
-                $prefix = preg_replace('/:[a-z_]+/i', $marker, $range->prefix);
-                $suffix = preg_replace('/:[a-z_]+/i', $marker, $range->suffix ?? '');
-
-                $prefixPattern = str_replace($quotedMarker, '\\S+', preg_quote($prefix, '/'));
-                $suffixPattern = str_replace($quotedMarker, '\\S+', preg_quote($suffix, '/'));
-
-                $digitPattern = $range->length
-                    ? '\\d{' . $range->length . ',}'
-                    : '\\d+';
-
-                return '/' . $prefixPattern . $digitPattern . $suffixPattern . '/i';
-            });
-    }
-
-    protected function extractInvoiceNumbers(string $purpose, Collection $patterns): Collection
-    {
-        return $patterns
-            ->flatMap(function (string $regex) use ($purpose): array {
-                if (preg_match_all($regex, $purpose, $matches)) {
-                    return $matches[0];
-                }
-
-                return [];
-            })
-            ->unique()
             ->values();
     }
 
@@ -324,7 +258,6 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
                     ->orWhere(function (Builder $query) use ($word, $transaction): void {
                         $query->whereNotNull('invoice_number')
                             ->where('invoice_number', 'like', '%' . $word . '%')
-                            ->whereNot('balance', 0)
                             ->whereRaw('ROUND(total_gross_price, 2) = ?', $transaction->amount);
                     });
             })
@@ -332,9 +265,9 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
             ->unique('id');
     }
 
-    protected function processTransaction(Transaction $transaction, Collection $invoiceNumberPatterns): void
+    protected function processTransaction(Transaction $transaction): void
     {
-        $orders = $this->findMatchingOrders($transaction, $invoiceNumberPatterns);
+        $orders = $this->findMatchingOrders($transaction);
 
         $orders->each(function (Order $order) use ($transaction): void {
             if (! resolve_static(OrderTransaction::class, 'query')

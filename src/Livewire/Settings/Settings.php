@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Mechanisms\ComponentRegistry;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Traits\HasRoles;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -96,7 +97,7 @@ class Settings extends Component
                 ->match(Request::create(
                     Str::of(request()->schemeAndHttpHost())->append(parse_url(data_get($setting, 'uri'), PHP_URL_PATH))
                 ));
-            data_set($settings, $key . '.component', app('livewire.finder')->normalizeName($route->getAction('controller')));
+            data_set($settings, $key . '.component', app(ComponentRegistry::class)->getName($route->getAction('controller')));
 
             $permission = route_to_permission($route);
             if (

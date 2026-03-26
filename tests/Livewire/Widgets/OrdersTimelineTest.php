@@ -15,9 +15,12 @@ use FluxErp\Models\PriceList;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
     ]);
 
@@ -30,8 +33,9 @@ beforeEach(function (): void {
         ->create();
 
     $this->orderType = OrderType::factory()->create([
-        'order_type_enum' => OrderTypeEnum::Order,
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_active' => true,
+        'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
     $this->orders = collect();

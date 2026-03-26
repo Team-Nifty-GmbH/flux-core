@@ -115,9 +115,7 @@ class TicketList extends BaseDataTable
             exception_to_notifications($e, $this);
         }
 
-        $this->toast()
-            ->success(__('Ticket created…'))
-            ->send();
+        $this->notification()->success(__('Ticket created…'))->send();
 
         $this->showTicketModal = false;
         $this->loadData();

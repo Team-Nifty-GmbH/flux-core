@@ -87,7 +87,7 @@
                     color="indigo"
                     :text="__('Take All')"
                     loading="takeOrderPositions"
-                    wire:click="takeOrderPositions()"
+                    wire:click="takeOrderPositions"
                     x-bind:disabled="!$wire.percentage || $wire.percentage <= 0"
                 />
             </div>
@@ -115,7 +115,7 @@
                             x-show="$wire.selectedPositions.length > 0"
                             x-cloak
                             loading="takeOrderPositions"
-                            wire:click="takeOrderPositions()"
+                            wire:click="takeOrderPositions"
                         />
                     </div>
                 </div>
@@ -244,7 +244,7 @@
                 <x-button
                     color="indigo"
                     :text="$this->getTitle()"
-                    wire:click="save()"
+                    wire:click="save"
                     loading
                     x-bind:disabled="!$wire.replicateOrder.order_type_id || !$wire.replicateOrder.order_positions.length"
                 />

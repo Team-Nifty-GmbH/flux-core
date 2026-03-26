@@ -33,7 +33,7 @@ class SerialNumberList extends BaseSerialNumberList
                 ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
-                ->wireClick('edit()')
+                ->wireClick('edit')
                 ->when(resolve_static(CreateSerialNumber::class, 'canPerformAction', [false])),
         ];
     }

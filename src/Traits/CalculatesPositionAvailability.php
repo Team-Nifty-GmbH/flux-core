@@ -4,52 +4,40 @@ namespace FluxErp\Traits;
 
 trait CalculatesPositionAvailability
 {
-    protected function calculateMaxAmounts(array $positions): array
+    protected function calculateMaxAmounts(array $positions, int $multiplier): array
     {
         return array_reduce(
             $positions,
-            function (?array $carry, object $item) {
+            function (?array $carry, object $item) use ($multiplier) {
                 $parentKey = array_find_key(
                     $carry ?? [],
                     fn (array $value) => ! is_null($item->origin_position_id)
                         && in_array(
                             $item->origin_position_id,
-                            $value['all_ids'] ?? [$value['id']]
+                            [
+                                $value['id'],
+                                $value['origin_position_id'],
+                            ]
                         )
                 );
 
                 if (is_null($parentKey)) {
                     $carry[] = (array) $item;
                 } else {
-                    $carry[$parentKey]['all_ids'] = array_merge(
-                        $carry[$parentKey]['all_ids'] ?? [$carry[$parentKey]['id']],
-                        [$item->id]
-                    );
-
-                    $carry[$parentKey]['signed_amount'] = bcsub(
-                        $carry[$parentKey]['signed_amount'],
-                        $this->resolveChildAmount($item, $carry[$parentKey]['id'])
+                    $carry[$parentKey] = array_merge(
+                        $carry[$parentKey],
+                        [
+                            'origin_position_id' => $item->id,
+                            'signed_amount' => bcsub(
+                                data_get($carry, $parentKey . '.signed_amount'),
+                                bcmul($item->signed_amount, $multiplier)
+                            ),
+                        ]
                     );
                 }
 
                 return $carry;
             }
         );
-    }
-
-    /**
-     * Direct children always reduce availability (absolute value).
-     * Indirect children (e.g. Retoure-of-Anzahlung) use signed_amount
-     * so negative amounts correctly free up the parent's claimed amount.
-     */
-    protected function resolveChildAmount(object $item, int $rootId): string
-    {
-        if ($item->origin_position_id !== $rootId) {
-            return $item->signed_amount;
-        }
-
-        return bccomp($item->signed_amount, '0') < 0
-            ? bcmul($item->signed_amount, '-1')
-            : $item->signed_amount;
     }
 }

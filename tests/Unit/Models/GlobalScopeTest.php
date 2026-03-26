@@ -18,19 +18,22 @@ beforeEach(function (): void {
 });
 
 it('applies temporary scopes during eager loading and removes them after', function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->getKey(),
     ]);
 
     $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
-    $paymentType = PaymentType::factory()
-        ->hasAttached($this->dbTenant, relationship: 'tenants')
-        ->create();
+    $paymentType = PaymentType::factory()->create();
+    $paymentType->tenants()->attach($this->dbTenant->getKey());
 
     $order = Order::factory()->create([
         'currency_id' => Currency::default()->getKey(),

@@ -29,13 +29,6 @@ abstract class ValueList extends Component
         return view('flux::livewire.support.widgets.value-list');
     }
 
-    public function boot(): void
-    {
-        if ($this->items) {
-            $this->skipRender();
-        }
-    }
-
     public function calculateByTimeFrame(): void
     {
         $this->calculateList();

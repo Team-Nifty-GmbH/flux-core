@@ -1,9 +1,12 @@
-<div x-data="{ isEditing: true }">
+<div x-data="{
+    task: $wire.$entangle('task', false),
+    edit: true,
+}">
     <div id="new-task-modal">
         <x-modal
             size="5xl"
             id="task-form-modal"
-            x-on:close="$wire.taskTab = 'task.general'"
+            x-on:close="$wire.set('taskTab', 'task.general')"
         >
             <x-flux::tabs
                 wire:model.live="taskTab"
@@ -23,13 +26,8 @@
                         <x-button
                             color="indigo"
                             :text="__('Save')"
-<<<<<<< HEAD
                             wire:click="save().then((success) => {
                                 if (success) $tsui.close.modal('task-form-modal');
-=======
-                            x-on:click="$wire.save().then((success) => {
-                                if (success) $modalClose('task-form-modal');
->>>>>>> feature/auto-inject-frontend-assets
                             })"
                         />
                     </div>

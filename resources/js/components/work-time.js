@@ -1,7 +1,10 @@
 export default function ($wire, route) {
     return {
+        currentWorkTime: $wire.entangle('workTime'),
         time: 0,
         open: false,
+        activeWorkTimes: $wire.entangle('activeWorkTimes'),
+        trackable_type: $wire.entangle('workTime.trackable_type'),
         runningTimers: {},
         destroy() {
             const keys = Object.keys(this.runningTimers);
@@ -12,19 +15,19 @@ export default function ($wire, route) {
         // when using init - with lazy load - can trigger init function several times
         // hence rename to arbitrary name - and pass it to the x-init.once
         load() {
-            $wire.activeWorkTimes.forEach((workTime) => {
+            this.activeWorkTimes.forEach((workTime) => {
                 if (workTime.ended_at) {
                     return;
                 }
                 this.startTimer(workTime);
             });
 
-            this.time = $wire.activeWorkTimes.reduce((acc, workTime) => {
+            this.time = this.activeWorkTimes.reduce((acc, workTime) => {
                 return this.calculateTime(workTime) + acc;
             }, 0);
 
-            $wire.$watch('activeWorkTimes', (value) => {
-                $wire.activeWorkTimes.forEach((workTime) => {
+            this.$watch('activeWorkTimes', (value) => {
+                this.activeWorkTimes.forEach((workTime) => {
                     if (workTime.ended_at) {
                         if (this.runningTimers[workTime.id]) {
                             // only covers pause case
@@ -38,8 +41,8 @@ export default function ($wire, route) {
                 });
             });
 
-            $wire.$watch('workTime.trackable_type', () => {
-                this.relatedSelected($wire.workTime.trackable_type);
+            this.$watch('trackable_type', () => {
+                this.relatedSelected(this.trackable_type);
             });
         },
         relatedSelected(type) {
@@ -77,12 +80,9 @@ export default function ($wire, route) {
                     .sort((a, b) => a - b)
                     .pop();
                 if (greatestId === workTime.id) {
-                    this.time = $wire.activeWorkTimes.reduce(
-                        (acc, workTime) => {
-                            return this.calculateTime(workTime) + acc;
-                        },
-                        0,
-                    );
+                    this.time = this.activeWorkTimes.reduce((acc, workTime) => {
+                        return this.calculateTime(workTime) + acc;
+                    }, 0);
                 }
                 document.querySelector(
                     `#active-work-times [data-id='${workTime.id}']`,
@@ -122,7 +122,7 @@ export default function ($wire, route) {
             await $wire.stop(workTime.id);
             // in case all active times are stopped recalculate time
             if (Object.keys(this.runningTimers).length === 0) {
-                this.time = $wire.activeWorkTimes.reduce((acc, workTime) => {
+                this.time = this.activeWorkTimes.reduce((acc, workTime) => {
                     return this.calculateTime(workTime) + acc;
                 }, 0);
             }

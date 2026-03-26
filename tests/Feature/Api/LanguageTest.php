@@ -102,8 +102,11 @@ test('delete language language referenced by address', function (): void {
         'language_id' => $this->languages[1]->id,
         'currency_id' => $currency->id,
     ]);
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
     Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'language_id' => $this->languages[1]->id,
         'country_id' => $country->id,
         'contact_id' => $contact->id,

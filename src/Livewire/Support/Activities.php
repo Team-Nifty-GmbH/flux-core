@@ -8,7 +8,6 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
 use TeamNiftyGmbH\DataTable\Helpers\Icon;
@@ -36,7 +35,6 @@ abstract class Activities extends Component
         return view('flux::livewire.support.activities');
     }
 
-    #[Renderless]
     public function loadData(): void
     {
         if (! $this->modelType || ! $this->modelId) {
@@ -73,10 +71,8 @@ abstract class Activities extends Component
             ->toArray();
     }
 
-    #[Renderless]
-    public function loadMore(): void
+    public function updatedPage(): void
     {
-        $this->page++;
         $this->loadData();
     }
 }

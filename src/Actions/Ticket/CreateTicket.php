@@ -10,6 +10,7 @@ use FluxErp\Models\User;
 use FluxErp\Rulesets\Ticket\CreateTicketRuleset;
 use FluxErp\Traits\Model\Notifiable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class CreateTicket extends FluxAction
 {
@@ -31,13 +32,7 @@ class CreateTicket extends FluxAction
 
         $ticket->getSerialNumber(
             'ticket_number',
-            (
-                auth()->user()
-                && method_exists(auth()->user(), 'getTenantId')
-                    ? auth()->user()->getTenantId()
-                    : null
-            )
-                ?? resolve_static(Tenant::class, 'default')?->getKey()
+            Auth::user()?->tenant_id ?? resolve_static(Tenant::class, 'default')?->getKey()
         );
 
         $ticket->save();

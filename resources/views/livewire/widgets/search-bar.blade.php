@@ -9,8 +9,9 @@
         <x-flux::spinner />
         <x-card card-classes="shadow-none">
             <livewire:is
-                wire:key="search-bar-{{ $widgetComponent }}-{{ $widgetId }}"
+                wire:key="{{ uniqid() }}"
                 :component="$widgetComponent"
+                :model="$widgetModel"
                 :model-id="$widgetId"
             />
         </x-card>

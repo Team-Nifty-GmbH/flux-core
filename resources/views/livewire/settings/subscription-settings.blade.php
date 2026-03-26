@@ -55,6 +55,6 @@
     </div>
 
     <div class="flex justify-end">
-        <x-button wire:click="save()" :text="__('Save')" />
+        <x-button wire:click="save" :text="__('Save')" />
     </div>
 </div>

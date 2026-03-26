@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Context;
 
 class UserTenantScope implements Scope
 {
+    protected static array $tenants = [];
+
     public function apply(Builder $builder, Model $model): void
     {
         // Don't apply scope if no user is authenticated
@@ -21,24 +22,19 @@ class UserTenantScope implements Scope
             return;
         }
 
-        // Cache tenant IDs in request-scoped Context to avoid multiple queries
-        if (! Context::has('user_tenant_ids')) {
-            Context::add('user_tenant_ids', ($user = Auth::user()) instanceof User
-                ? $user->tenants()
-                    ->withoutGlobalScope(UserTenantScope::class)
-                    ->pluck('id')
-                    ->toArray()
-                : []);
-        }
+        // write the tenants to a static property to avoid multiple queries if the scope is used multiple times
+        static::$tenants ??= ($user = Auth::user()) instanceof User ?
+            $user->tenants()
+                ->withoutGlobalScope(UserTenantScope::class)
+                ->pluck('id')
+                ->toArray() : [];
 
-        $tenants = Context::get('user_tenant_ids');
-
-        if (! $tenants) {
+        if (! static::$tenants) {
             return;
         }
 
         if ($model instanceof Tenant) {
-            $builder->whereIntegerInRaw($model->getQualifiedKeyName(), $tenants);
+            $builder->whereIntegerInRaw($model->getQualifiedKeyName(), static::$tenants);
 
             return;
         }
@@ -49,7 +45,7 @@ class UserTenantScope implements Scope
             $builder->where(fn (Builder $query) => $query
                 ->whereIntegerInRaw(
                     $relation->getQualifiedForeignKeyName(),
-                    $tenants
+                    static::$tenants
                 )
                 ->orWhereNull($relation->getQualifiedForeignKeyName())
             );
@@ -68,7 +64,7 @@ class UserTenantScope implements Scope
                 ->where(fn (Builder $query) => $query
                     ->whereIntegerInRaw(
                         'uts.' . $relation->getRelatedPivotKeyName(),
-                        $tenants
+                        static::$tenants
                     )
                     ->orWhereNull('uts.' . $relation->getForeignPivotKeyName())
                 );

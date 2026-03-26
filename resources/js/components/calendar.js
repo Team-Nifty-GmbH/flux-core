@@ -41,29 +41,26 @@ const calendar = () => {
                 return false;
             }
 
-            let calendarObj = JSON.parse(
-                JSON.stringify(this.$wire.calendarObject),
-            );
-            calendarObj.parentId ??= 'my-calendars';
+            this.$wire.calendarObject.parentId ??= 'my-calendars';
 
-            if (calendarObj.isNew) {
+            if (this.$wire.calendarObject.isNew) {
                 // Add new calendar
-                if (!calendarObj.is_group) {
+                if (!this.$wire.calendarObject.is_group) {
                     // Add calendar as event source
-                    this.calendar.addEventSource(calendarObj);
+                    this.calendar.addEventSource(this.$wire.calendarObject);
                 } else {
-                    calendarObj.children = [];
+                    this.$wire.calendarObject.children = [];
                 }
 
                 this.getFolderTree().addFolder(
-                    this.getFolderTree().getNodeById(calendarObj.parentId),
-                    calendarObj,
+                    this.getFolderTree().getNodeById(
+                        this.$wire.calendarObject.parentId,
+                    ),
+                    this.$wire.calendarObject,
                 );
             } else {
-                this.getFolderTree().updateNode(calendarObj);
+                this.getFolderTree().updateNode(this.$wire.calendarObject);
             }
-
-            this.$wire.$set('calendarObject', calendarObj);
 
             return true;
         },
@@ -136,9 +133,9 @@ const calendar = () => {
             }
 
             if (type === 'start') {
-                this.$wire.$set('event.start', dateTime.format());
+                this.$wire.event.start = dateTime.format(); // Use the default ISO 8601 format
             } else {
-                this.$wire.$set('event.end', dateTime.format());
+                this.$wire.event.end = dateTime.format(); // Use the default ISO 8601 format
             }
         },
         mapDatesToUtc(event) {
@@ -522,12 +519,8 @@ const calendar = () => {
 
                     // Right side container for time and status badges
                     let rightContent = document.createElement('div');
-<<<<<<< HEAD
                     rightContent.className =
                         'flex items-center gap-1 shrink-0';
-=======
-                    rightContent.className = 'flex items-center gap-1 shrink-0';
->>>>>>> feature/auto-inject-frontend-assets
 
                     // Add status badges if they exist
                     if (info.event.extendedProps.appendTitle) {

@@ -110,11 +110,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         });
 
         static::saved(function (OrderPosition $orderPosition): void {
-            if (
-                $orderPosition->wasRecentlyCreated
-                || $orderPosition->wasChanged('sort_number')
-                || $orderPosition->wasChanged('parent_id')
-            ) {
+            if ($orderPosition->wasChanged('sort_number') || $orderPosition->wasChanged('parent_id')) {
                 if ($orderPosition->wasChanged('parent_id')) {
                     DB::statement('SET @row_number = 0');
 

@@ -17,15 +17,13 @@ use Laravel\Sanctum\Sanctum;
 beforeEach(function (): void {
     $this->tenants = Tenant::factory()->count(2)->create();
 
-    $contacts = Contact::factory()
-        ->count(2)
-        ->hasAttached(factory: $this->tenants[0], relationship: 'tenants')
-        ->create();
-    $this->addresses = Address::factory()
-        ->count(2)
-        ->create([
-            'contact_id' => $contacts[0]->id,
-        ]);
+    $contacts = Contact::factory()->count(2)->create([
+        'tenant_id' => $this->tenants[0]->id,
+    ]);
+    $this->addresses = Address::factory()->count(2)->create([
+        'tenant_id' => $this->tenants[0]->id,
+        'contact_id' => $contacts[0]->id,
+    ]);
 
     $this->priceLists = PriceList::factory()->count(2)->create();
 
@@ -34,12 +32,10 @@ beforeEach(function (): void {
 
     $this->languages = Language::factory()->count(2)->create();
 
-    $this->orderTypes = OrderType::factory()
-        ->count(2)
-        ->hasAttached(factory: $this->tenants[0], relationship: 'tenants')
-        ->create([
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $this->orderTypes = OrderType::factory()->count(2)->create([
+        'tenant_id' => $this->tenants[0]->id,
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
 
     $this->paymentTypes = PaymentType::factory()
         ->count(2)
@@ -48,11 +44,10 @@ beforeEach(function (): void {
 
     $priceLists = PriceList::factory()->count(2)->create();
 
-    $addresses = Address::factory()
-        ->count(2)
-        ->create([
-            'contact_id' => $contacts->random()->id,
-        ]);
+    $addresses = Address::factory()->count(2)->create([
+        'tenant_id' => $this->tenants[0]->id,
+        'contact_id' => $contacts->random()->id,
+    ]);
 
     $this->orders = Order::factory()->count(3)->create([
         'tenant_id' => $this->tenants[0]->id,
@@ -441,6 +436,7 @@ test('update order address delivery with id validates correctly', function (): v
     // This tests the fix for the ExistsWithForeign bug where it used the
     // nested address ID instead of the root order ID for base table lookup
     $newAddress = Address::factory()->create([
+        'tenant_id' => $this->tenants[0]->getKey(),
         'contact_id' => $this->orders[0]->contact_id,
     ]);
 

@@ -33,33 +33,32 @@ beforeEach(function (): void {
     ]);
 
     $this->paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->hasAttached($this->tenant, relationship: 'tenants')
         ->create([
             'is_default' => true,
         ]);
 
-    $this->contact = Contact::factory()
-        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
-        ->create();
+    $this->contact = Contact::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+    ]);
 
     $this->address = Address::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
         'contact_id' => $this->contact->getKey(),
         'is_main_address' => true,
     ]);
 
-    $this->subscriptionOrderType = OrderType::factory()
-        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
-        ->create([
-            'order_type_enum' => OrderTypeEnum::Subscription,
-            'is_active' => true,
-        ]);
+    $this->subscriptionOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+    ]);
 
-    $this->targetOrderType = OrderType::factory()
-        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
-        ->create([
-            'order_type_enum' => OrderTypeEnum::Order,
-            'is_active' => true,
-        ]);
+    $this->targetOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
 
     $this->subscriptionOrder = Order::factory()->create([
         'tenant_id' => $this->tenant->getKey(),
@@ -95,6 +94,7 @@ test('process subscription order sets created_from_id but not parent_id', functi
 
 test('process subscription order returns false for non-subscription order type', function (): void {
     $regularOrderType = OrderType::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'is_active' => true,
     ]);
@@ -123,9 +123,9 @@ test('process subscription order returns false for non-subscription order type',
 test('process subscription order throws exception on validation error', function (): void {
     // Create a contact in a different tenant to cause ExistsWithForeign validation to fail
     $otherTenant = Tenant::factory()->create();
-    $otherContact = Contact::factory()
-        ->hasAttached($otherTenant, relationship: 'tenants')
-        ->create();
+    $otherContact = Contact::factory()->create([
+        'tenant_id' => $otherTenant->getKey(),
+    ]);
 
     // Update order to use contact from different tenant (bypassing FK by using raw query)
     Illuminate\Support\Facades\DB::table('orders')
@@ -300,64 +300,6 @@ test('process subscription order sets correct performance period for quarterly s
     expect($newOrder)->not->toBeNull()
         ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($orderDate->format('Y-m-d'))
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfQuarter()->format('Y-m-d'));
-});
-
-test('process subscription order handles cron with non-midnight time correctly', function (): void {
-    // Cron runs at 06:00 - system_delivery_date is cast as date (midnight).
-    // Without endOfDay(), getNextRunDate(midnight) returns the same day at 06:00
-    // instead of the next period.
-    $orderDate = Carbon\Carbon::create(2026, 2, 15);
-
-    $this->subscriptionOrder->update([
-        'order_date' => $orderDate,
-        'system_delivery_date' => $orderDate,
-        'system_delivery_date_end' => null,
-    ]);
-
-    $schedule = Schedule::create([
-        'uuid' => Illuminate\Support\Str::uuid(),
-        'name' => 'ProcessSubscriptionOrder',
-        'class' => ProcessSubscriptionOrder::class,
-        'type' => RepeatableTypeEnum::Invokable,
-        'cron' => [
-            'methods' => [
-                'basic' => 'yearlyOn',
-                'dayConstraint' => null,
-                'timeConstraint' => null,
-            ],
-            'parameters' => [
-                'basic' => [2, 15, '06:00'],
-                'dayConstraint' => [],
-                'timeConstraint' => [],
-            ],
-        ],
-        'cron_expression' => '0 6 15 2 *',
-        'is_active' => true,
-        'parameters' => [
-            'orderId' => $this->subscriptionOrder->getKey(),
-            'orderTypeId' => $this->targetOrderType->getKey(),
-        ],
-    ]);
-
-    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
-
-    $processor = new ProcessSubscriptionOrder();
-
-    $result = $processor(
-        orderId: $this->subscriptionOrder->getKey(),
-        orderTypeId: $this->targetOrderType->getKey()
-    );
-
-    expect($result)->toBeTrue();
-
-    $newOrder = Order::query()
-        ->where('created_from_id', $this->subscriptionOrder->getKey())
-        ->first();
-
-    // Period should be 02/15/2026 - 02/14/2027 (full year), not 02/15 - 02/14 same year
-    expect($newOrder)->not->toBeNull()
-        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe('2026-02-15')
-        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2027-02-14');
 });
 
 test('process subscription order calculates next period from existing child order', function (): void {

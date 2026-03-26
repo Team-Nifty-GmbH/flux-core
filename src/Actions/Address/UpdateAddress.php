@@ -175,33 +175,6 @@ class UpdateAddress extends FluxAction
             }
         }
 
-        if ($addressTypes = $this->getData('address_types')) {
-            $contactTenants = resolve_static(Address::class, 'query')
-                ->whereKey($this->getData('id'))
-                ->first(['id'])
-                ->getTenants(['id'])
-                ->pluck('id')
-                ->toArray();
-
-            foreach ($addressTypes as $key => $addressType) {
-                if (
-                    ! array_intersect(
-                        resolve_static(AddressType::class, 'query')
-                            ->whereKey($addressType)
-                            ->first(['id'])
-                            ?->getTenants(['id'])
-                            ->pluck('id')
-                            ->toArray() ?? [],
-                        $contactTenants
-                    )
-                ) {
-                    $errors += [
-                        'address_types.' . $key => ['Address type does not have intersecting tenants'],
-                    ];
-                }
-            }
-        }
-
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('updateAddress');
         }

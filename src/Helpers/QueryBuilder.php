@@ -102,22 +102,22 @@ class QueryBuilder
                 $allowed->pluck('Field')->toArray()
             )
         );
-        $queryBuilder->allowedFields(...array_keys(array_merge($allowedFields, $relatedAllowedFields)));
+        $queryBuilder->allowedFields(array_keys(array_merge($allowedFields, $relatedAllowedFields)));
 
         if (count($includes) > 0) {
-            $queryBuilder->allowedIncludes(...$includes);
+            $queryBuilder->allowedIncludes($includes);
         }
 
         $modelFilters = self::calculateFilters($model);
 
         $filters = array_merge($modelFilters, $relatedAllowedFilters);
         if (count($filters) > 0) {
-            $queryBuilder->allowedFilters(...$filters);
+            $queryBuilder->allowedFilters($filters);
         }
 
         $sorts = array_merge($allowed->pluck('Field')->toArray(), $relatedAllowedSorts);
         if (count($sorts) > 0) {
-            $queryBuilder->allowedSorts(...$sorts);
+            $queryBuilder->allowedSorts($sorts);
         }
 
         return $queryBuilder;

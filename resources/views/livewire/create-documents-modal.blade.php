@@ -46,7 +46,7 @@
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                 @if ($printers ?? false)
                     <div
-                        class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
+                        class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
                     >
                         {{ __('Print') }}
                     </div>
@@ -54,25 +54,25 @@
             @endcanAction
 
             <div
-                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
+                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
                 {{ __('Email') }}
             </div>
             <div
-                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
+                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
                 {{ __('Download') }}
             </div>
             @if ($supportsDocumentPreview)
                 <div
-                    class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
+                    class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
                 >
                     {{ __('Preview') }}
                 </div>
             @endif
 
             <div
-                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
+                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
                 {{ __('Force Create') }}
             </div>
@@ -217,11 +217,7 @@
             color="indigo"
             :text="__('Continue')"
             loading="createDocuments"
-<<<<<<< HEAD
             wire:click="createDocuments().then(() => { $tsui.close.modal('create-documents-{{ strtolower($this->getId()) }}'); });"
-=======
-            x-on:click="$wire.createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });"
->>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

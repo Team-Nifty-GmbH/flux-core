@@ -31,7 +31,7 @@ class Countries extends CountryList
                 ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateCountry::class, 'canPerformAction', [false]))
-                ->wireClick('edit()'),
+                ->wireClick('edit'),
         ];
     }
 

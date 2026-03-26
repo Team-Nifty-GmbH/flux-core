@@ -26,7 +26,6 @@ class MediaLibraryDownloader implements Downloader
         $temporaryFile = tempnam(sys_get_temp_dir(), 'media-library');
 
         file_put_contents($temporaryFile, $stream);
-        fclose($stream);
 
         return $temporaryFile;
     }

@@ -7,6 +7,7 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 

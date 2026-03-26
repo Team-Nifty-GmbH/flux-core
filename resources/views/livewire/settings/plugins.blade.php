@@ -3,6 +3,7 @@
     wire:init="checkForUpdates()"
     x-data="{
         showOnlyFluxPlugins: true,
+        entangledInstalled: $wire.$entangle('installed', true),
         get installed() {
             if (! this.showOnlyFluxPlugins) return $wire.installed
 
@@ -28,7 +29,7 @@
                 <span x-text="$wire.update.version"></span>
             </x-slot>
             <div
-                class="prose dark:prose-invert max-w-full"
+                class="prose max-w-full dark:prose-invert"
                 x-html="$wire.update.readme"
             ></div>
             <x-slot:footer>
@@ -43,11 +44,7 @@
                     color="indigo"
                     :text="__('Update')"
                     loading="update"
-<<<<<<< HEAD
                     wire:click="updatePackages($wire.update.package); $tsui.close.modal('update-plugin-modal');"
-=======
-                    x-on:click="$wire.updatePackages($wire.update.package).then(() => $modalClose('update-plugin-modal'))"
->>>>>>> feature/auto-inject-frontend-assets
                 />
             </x-slot>
         </x-modal>
@@ -55,7 +52,7 @@
 
     <x-modal id="more-plugin-modal" size="7xl">
         <div
-            class="prose dark:prose-invert max-w-full"
+            class="prose max-w-full dark:prose-invert"
             x-html="$wire.readme"
         ></div>
         <x-slot:footer>
@@ -91,7 +88,7 @@
                                 color="indigo"
                                 loading="installUploaded"
                                 :text="__('Upload package')"
-                                wire:click="installUploaded()"
+                                wire:click="installUploaded"
                                 wire:flux-confirm.type.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"
                             />
                         </div>
@@ -256,7 +253,7 @@
                             x-bind:class="! (plugin.can_uninstall && ! plugin.offer_install) && 'invisible'"
                         >
                             <x-toggle
-                                x-model="$wire.installed[key].is_active"
+                                x-model="entangledInstalled[key].is_active"
                             />
                         </div>
                     @endif

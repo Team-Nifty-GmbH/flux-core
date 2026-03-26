@@ -12,7 +12,9 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $dbContact = Contact::factory()->create();
+    $dbContact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $language = Language::query()->where('language_code', config('app.locale'))->first();
     if (! $language) {
@@ -20,9 +22,10 @@ beforeEach(function (): void {
     }
 
     $this->address = Address::factory()->create([
+        'is_main_address' => true,
+        'tenant_id' => $dbContact->tenant_id,
         'contact_id' => $dbContact->id,
         'language_id' => $language->id,
-        'is_main_address' => true,
     ]);
 
     $this->tickets = Ticket::factory()->count(5)->create([

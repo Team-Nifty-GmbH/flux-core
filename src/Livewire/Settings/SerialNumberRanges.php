@@ -34,7 +34,7 @@ class SerialNumberRanges extends SerialNumberRangeList
                 ->color('indigo')
                 ->when(resolve_static(CreateSerialNumberRange::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'edit()',
+                    'wire:click' => 'edit',
                 ]),
         ];
     }

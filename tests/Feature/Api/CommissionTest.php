@@ -26,25 +26,26 @@ beforeEach(function (): void {
     ]);
     $this->agent->tenants()->attach($dbTenant->id);
 
-    $contact = Contact::factory()
-        ->hasAttached(factory: $dbTenant, relationship: 'tenants')
-        ->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $dbTenant->id,
+    ]);
 
     $currency = Currency::factory()->create();
     $priceList = PriceList::factory()->create();
     $paymentType = PaymentType::factory()->create();
     $language = Language::factory()->create();
-    $orderType = OrderType::factory()
-        ->hasAttached(factory: $dbTenant, relationship: 'tenants')
-        ->create([
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $orderType = OrderType::factory()->create([
+        'tenant_id' => $dbTenant->id,
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
 
     $addressInvoice = Address::factory()->create([
+        'tenant_id' => $dbTenant->id,
         'contact_id' => $contact->id,
     ]);
 
     $addressDelivery = Address::factory()->create([
+        'tenant_id' => $dbTenant->id,
         'contact_id' => $contact->id,
     ]);
 
@@ -64,7 +65,6 @@ beforeEach(function (): void {
         'order_id' => $this->order->id,
         'tenant_id' => $dbTenant->id,
         'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 
     CommissionRate::factory()->create([
@@ -103,8 +103,6 @@ test('commission credit note relationship', function (): void {
     $creditNotePosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->id,
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 
     $commission = Commission::factory()->create([
@@ -371,12 +369,12 @@ test('create commission credit notes with nested id array structure', function (
     $paymentType->tenants()->attach($this->order->tenant_id);
 
     // Create a contact with address for the agent
-    $agentContact = Contact::factory()
-        ->hasAttached(factory: $this->order->tenant, relationship: 'tenants')
-        ->create([
-            'payment_type_id' => $paymentType->id,
-        ]);
+    $agentContact = Contact::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'payment_type_id' => $paymentType->id,
+    ]);
     $agentAddress = Address::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
         'contact_id' => $agentContact->id,
         'is_main_address' => true,
     ]);
@@ -384,11 +382,10 @@ test('create commission credit notes with nested id array structure', function (
     $this->agent->update(['contact_id' => $agentContact->id]);
 
     // Create a refund order type
-    OrderType::factory()
-        ->hasAttached(factory: $this->order->tenant, relationship: 'tenants')
-        ->create([
-            'order_type_enum' => OrderTypeEnum::Refund,
-        ]);
+    OrderType::factory()->create([
+        'tenant_id' => $this->order->tenant_id,
+        'order_type_enum' => OrderTypeEnum::Refund,
+    ]);
 
     // Ensure order has invoice data (required for Commission::getLabel())
     $this->order->update([

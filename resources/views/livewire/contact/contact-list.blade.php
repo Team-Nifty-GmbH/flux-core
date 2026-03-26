@@ -36,11 +36,7 @@
                     loading="assignToAgent"
                     x-bind:disabled="! $wire.agentId"
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.contact.assign-agent') }}"
-<<<<<<< HEAD
                     wire:click="assignToAgent().then((success) => {if(success) $tsui.close.modal('assign-agent-modal');})"
-=======
-                    x-on:click="$wire.assignToAgent().then((success) => {if(success) $modalClose('assign-agent-modal');})"
->>>>>>> feature/auto-inject-frontend-assets
                 />
             </x-slot>
         </x-modal>

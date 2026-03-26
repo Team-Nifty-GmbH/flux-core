@@ -2,22 +2,23 @@
 
 namespace FluxErp\Livewire\Forms;
 
-class CreateOrdersFromWorkTimesForm extends FluxForm
+use Livewire\Attributes\Rule;
+use Livewire\Form;
+
+class CreateOrdersFromWorkTimesForm extends Form
 {
+    #[Rule('boolean')]
     public bool $add_non_billable_work_times = true;
 
+    #[Rule('required|integer|exists:order_types,id,deleted_at,NULL')]
     public ?int $order_type_id = null;
 
+    #[Rule('required|integer|exists:products,id,deleted_at,NULL')]
     public ?int $product_id = null;
 
-    public ?int $tenant_id = null;
-
+    #[Rule('in:floor,ceil,round')]
     public string $round = 'ceil';
 
+    #[Rule('required_if:round,ceil|required_if:round,floor|nullable|integer')]
     public ?int $round_to_minute = null;
-
-    protected function getActions(): array
-    {
-        return [];
-    }
 }

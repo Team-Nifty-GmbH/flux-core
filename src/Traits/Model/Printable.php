@@ -32,18 +32,12 @@ trait Printable
 
     public function resolvePrintViews(): array
     {
-        $user = Auth::user();
-
         $printViews = array_merge(
             array_filter(
                 $this->getPrintViews(),
-                function (string|int $key) use ($user) {
-                    if ($user?->hasRole('Super Admin')) {
-                        return true;
-                    }
-
+                function (string|int $key) {
                     try {
-                        return $user
+                        return Auth::user()
                             ?->hasPermissionTo(print_view_to_permission($key, $this->getMorphClass()))
                             ?? true;
                     } catch (PermissionDoesNotExist) {

@@ -1,4 +1,9 @@
-<div x-data="{ isEditing: false }">
+<div
+    x-data="{
+        edit: false,
+        priceLists: $wire.entangle('priceLists'),
+    }"
+>
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
@@ -29,7 +34,7 @@
             </div>
         </div>
         <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             <div>
                 <x-select.styled
@@ -61,27 +66,27 @@
             @canAction(\FluxErp\Actions\Product\UpdateProduct::class)
                 <x-button
                     color="indigo"
-                    x-show="!isEditing"
+                    x-show="!edit"
                     class="w-full"
-                    x-on:click="isEditing = true"
+                    x-on:click="edit = true"
                     :text="__('Edit')"
                 />
                 <x-button
                     x-cloak
                     color="indigo"
-                    x-show="isEditing"
+                    x-show="edit"
                     class="w-full"
                     x-on:click="$wire.save().then((success) => {
-                        isEditing = false;
+                        edit = false;
                     });"
                     :text="__('Save')"
                 />
                 <x-button
                     x-cloak
                     color="indigo"
-                    x-show="isEditing"
+                    x-show="edit"
                     class="w-full"
-                    x-on:click="isEditing = false; $wire.resetProduct()"
+                    x-on:click="edit = false; $wire.resetProduct()"
                     :text="__('Cancel')"
                 />
             @endcanAction

@@ -3,7 +3,6 @@
 namespace FluxErp\View\Printing\Address;
 
 use FluxErp\Models\Address;
-use FluxErp\Models\Tenant;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\View\View;
@@ -31,13 +30,6 @@ class AddressLabel extends PrintableView
 
     public function getModel(): ?Model
     {
-        $this->address?->setRelation(
-            'tenant',
-            resolve_static(Tenant::class, 'query')
-                ->whereKey($this->address->getTenantId())
-                ->first()
-        );
-
         return $this->address;
     }
 

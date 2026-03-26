@@ -135,8 +135,7 @@
                         sm
                         light
                         icon="paper-clip"
-                        x-on:click="file.id && $wire.download(file.id)"
-                        x-bind:class="! file.id && 'pointer-events-none opacity-50'"
+                        x-on:click="$wire.download(file.id)"
                         rounded
                     >
                         <x-slot:text>

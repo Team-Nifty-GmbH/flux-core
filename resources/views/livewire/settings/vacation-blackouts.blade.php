@@ -94,7 +94,7 @@
             <x-button
                 :text="__('Save')"
                 color="primary"
-                x-on:click="$wire.save().then((success) => {
+                wire:click="save().then((success) => {
                     if (success) {
                         $tsui.close.modal('{{ $vacationBlackoutForm->modalName() }}');
                     }

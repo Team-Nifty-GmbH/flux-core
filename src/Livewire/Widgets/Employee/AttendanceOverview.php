@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Widgets\Employee;
 
 use Carbon\Carbon;
 use FluxErp\Enums\AbsenceRequestStateEnum;
-use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\AbsenceRequest;
@@ -109,7 +108,7 @@ class AttendanceOverview extends CircleChart
             if (! data_get($absenceByType, $absenceTypeId)) {
                 $absenceByType[$absenceTypeId] = [
                     'name' => $absenceRequest->absenceType->name,
-                    'color' => $absenceRequest->absenceType->color ?? ChartColorEnum::Slate,
+                    'color' => $absenceRequest->absenceType->color ?? '#6b7280',
                     'days' => 0,
                 ];
             }
@@ -122,7 +121,7 @@ class AttendanceOverview extends CircleChart
 
         $labels = [__('Remaining Vacation Days')];
         $series = [Number::format(bcround($employee->getCurrentVacationDaysBalance(), 2), 2)];
-        $colors = [ChartColorEnum::Blue];
+        $colors = ['#3b82f6'];
 
         $attendanceDays = resolve_static(EmployeeDay::class, 'query')
             ->where('employee_id', $employee->getKey())
@@ -134,7 +133,7 @@ class AttendanceOverview extends CircleChart
         if (bccomp($attendanceDays, 0) > 0) {
             $labels[] = __('Attendance');
             $series[] = Number::format(bcround($attendanceDays, 2), 2);
-            $colors[] = ChartColorEnum::Emerald;
+            $colors[] = '#10b981';
         }
 
         foreach ($absenceByType as $typeData) {
@@ -158,7 +157,7 @@ class AttendanceOverview extends CircleChart
         if (bccomp($unexcusedDays, 0, 2) > 0) {
             $labels[] = __('Unexcused Absence');
             $series[] = Number::format(bcround($unexcusedDays, 2), 2);
-            $colors[] = ChartColorEnum::Red;
+            $colors[] = '#dc2626';
         }
 
         $this->labels = $labels;

@@ -22,15 +22,11 @@
                         :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\Order::class)"
                     />
                     <x-select.styled
-                        :label="__('Tenants')"
-                        wire:model="orderType.tenants"
-                        multiple
+                        :label="__('Tenant')"
+                        :placeholder="__('Select a Tenant')"
+                        wire:model="orderType.tenant_id"
                         select="label:name|value:id"
-                        unfiltered
-                        :request="[
-                            'url' => route('search', \FluxErp\Models\Tenant::class),
-                            'method' => 'POST',
-                        ]"
+                        :request="route('search', \FluxErp\Models\Tenant::class)"
                     />
                     <x-select.styled
                         :label="__('Order Type')"
@@ -113,11 +109,7 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-<<<<<<< HEAD
             wire:click="save().then((success) => {if (success) $tsui.close.modal('{{ $orderType->modalName() }}');})"
-=======
-            x-on:click="$wire.save().then((success) => {if (success) $modalClose('{{ $orderType->modalName() }}');})"
->>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>
