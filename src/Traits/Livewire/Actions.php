@@ -3,7 +3,7 @@
 namespace FluxErp\Traits\Livewire;
 
 use Livewire\Attributes\Renderless;
-use TallStackUi\Foundation\Interactions\Toast;
+use TallStackUi\Interactions\Toast;
 use TallStackUi\Traits\Interactions as BaseActions;
 
 trait Actions
@@ -20,7 +20,7 @@ trait Actions
     public function modalOpen(string $id): void
     {
         $this->js(<<<JS
-            \$modalOpen('$id');
+            \$tsui.open.modal('$id');
         JS);
     }
 
@@ -28,7 +28,7 @@ trait Actions
     public function modalClose(string $id): void
     {
         $this->js(<<<JS
-            \$modalClose('$id');
+            \$tsui.open.modal('$id');
         JS);
     }
 }

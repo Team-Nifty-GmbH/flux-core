@@ -1,3 +1,24 @@
+<<<<<<< HEAD
+<div class="flex max-h-full flex-col px-0! py-0!">
+    <div
+        class="flex justify-between gap-4 border-b border-gray-200 pb-2 pl-2 pt-2"
+    >
+        <h2
+            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+        >
+            {{ $this->getLabel() }}
+        </h2>
+        @section('options')
+        <div class="flex-none">
+            <x-dropdown icon="ellipsis-vertical" static>
+                @foreach ($this->options() ?? [] as $option)
+                    <x-dropdown.items
+                        :text="data_get($option, 'label')"
+                        wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
+                    />
+                @endforeach
+            </x-dropdown>
+=======
 <div class="flex max-h-full flex-col gap-4 p-4">
     <div>
         <div class="flex items-center justify-between">
@@ -18,6 +39,7 @@
                 </x-dropdown>
             </div>
             @show
+>>>>>>> feature/auto-inject-frontend-assets
         </div>
         <hr class="mt-2" />
     </div>

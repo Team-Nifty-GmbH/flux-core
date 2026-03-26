@@ -18,12 +18,16 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-role-users-modal')"
+            x-on:click="$tsui.close.modal('edit-role-users-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
+            wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-role-users-modal'); })"
+=======
             x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-role-users-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>
@@ -60,12 +64,16 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-role-permissions-modal')"
+            x-on:click="$tsui.close.modal('edit-role-permissions-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
+            wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-role-permissions-modal'); })"
+=======
             x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-role-permissions-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

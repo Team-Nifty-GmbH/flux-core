@@ -3,10 +3,17 @@
     x-on:mouseover.away="closeMenu()"
     x-on:mouseover="showMenu()"
     x-bind:class="menuOpen ? 'w-full! md:w-72! overflow-y-auto' : 'overflow-hidden'"
+<<<<<<< HEAD
+    class="fixed inset-y-0 top-0 z-20 w-0 bg-flux-secondary-500 transition-all duration-500 ease-in-out soft-scrollbar md:block md:flex md:w-20 md:flex-col"
+>
+    <!-- Sidebar component, swap this element with another sidebar if you like -->
+    <div class="flex grow flex-col overflow-x-hidden soft-scrollbar">
+=======
     class="bg-flux-secondary-500 soft-scrollbar fixed inset-y-0 top-0 z-20 w-0 transition-all duration-500 ease-in-out md:block md:flex md:w-20 md:flex-col"
 >
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="soft-scrollbar flex grow flex-col overflow-x-hidden">
+>>>>>>> feature/auto-inject-frontend-assets
         <div class="relative flex h-16 shrink-0 justify-center p-2 px-4">
             <x-flux::logo fill="#D7E3EC" />
             <x-button.circle

@@ -53,7 +53,7 @@ class Users extends UserList
 
         $this->userForm->reset();
         $this->js(<<<'JS'
-            $modalOpen('create-user-modal');
+            $tsui.open.modal('create-user-modal');
         JS);
     }
 

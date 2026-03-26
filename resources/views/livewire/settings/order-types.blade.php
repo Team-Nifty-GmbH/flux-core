@@ -108,12 +108,16 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('{{ $orderType->modalName() }}')"
+            x-on:click="$tsui.close.modal('{{ $orderType->modalName() }}')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
+            wire:click="save().then((success) => {if (success) $tsui.close.modal('{{ $orderType->modalName() }}');})"
+=======
             x-on:click="$wire.save().then((success) => {if (success) $modalClose('{{ $orderType->modalName() }}');})"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

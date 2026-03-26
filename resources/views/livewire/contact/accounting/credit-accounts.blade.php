@@ -14,12 +14,16 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-contact-bank-connection')"
+                x-on:click="$tsui.close.modal('edit-contact-bank-connection')"
                 :text="__('Cancel')"
             />
             <x-button
                 color="primary"
+<<<<<<< HEAD
+                wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-contact-bank-connection'); })"
+=======
                 x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                 primary
                 :text="__('Save')"
             />
@@ -66,12 +70,16 @@
                 color="secondary"
                 light
                 :text="__('Cancel')"
-                x-on:click="$modalClose('transaction-details-modal')"
+                x-on:click="$tsui.close.modal('transaction-details-modal')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
+<<<<<<< HEAD
+                wire:click="saveTransaction().then((success) => {if(success) $tsui.close.modal('transaction-details-modal');})"
+=======
                 x-on:click="$wire.saveTransaction().then((success) => {if(success) $modalClose('transaction-details-modal');})"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

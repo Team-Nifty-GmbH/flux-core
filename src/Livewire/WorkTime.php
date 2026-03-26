@@ -102,7 +102,7 @@ class WorkTime extends Component
         $this->workTime->fill($workTime);
 
         $this->js(<<<'JS'
-            $modalOpen('work-time-modal');
+            $tsui.open.modal('work-time-modal');
         JS);
     }
 
@@ -200,7 +200,7 @@ class WorkTime extends Component
         $this->workTime->fill($data ?? []);
 
         $this->js(<<<'JS'
-            $modalOpen('work-time-modal');
+            $tsui.open.modal('work-time-modal');
         JS);
     }
 

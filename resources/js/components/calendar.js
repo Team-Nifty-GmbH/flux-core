@@ -72,7 +72,7 @@ const calendar = () => {
 
             this.getFolderTree().removeNode(this.calendarItem.id);
 
-            $modalClose('calendar-modal');
+            $tsui.close.modal('calendar-modal');
         },
         saveEvent() {
             this.$wire.saveEvent(this.$wire.calendarEvent).then((event) => {
@@ -112,7 +112,7 @@ const calendar = () => {
                     );
                 }
 
-                $modalClose('calendar-event-modal');
+                $tsui.close.modal('calendar-event-modal');
             });
         },
         setDateTime(type, event) {
@@ -223,7 +223,7 @@ const calendar = () => {
                     break;
             }
 
-            $modalClose('calendar-event-modal');
+            $tsui.close.modal('calendar-event-modal');
         },
         calendar: null,
         config: {},
@@ -522,7 +522,12 @@ const calendar = () => {
 
                     // Right side container for time and status badges
                     let rightContent = document.createElement('div');
+<<<<<<< HEAD
+                    rightContent.className =
+                        'flex items-center gap-1 shrink-0';
+=======
                     rightContent.className = 'flex items-center gap-1 shrink-0';
+>>>>>>> feature/auto-inject-frontend-assets
 
                     // Add status badges if they exist
                     if (info.event.extendedProps.appendTitle) {

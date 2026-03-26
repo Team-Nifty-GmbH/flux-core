@@ -345,12 +345,16 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-communication')"
+                x-on:click="$tsui.close.modal('edit-communication')"
                 :text="__('Cancel')"
             />
             <x-button
                 color="indigo"
+<<<<<<< HEAD
+                wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
+=======
                 x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-communication'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                 primary
                 loading="save"
                 :text="__('Save')"
@@ -361,7 +365,11 @@
             >
                 <x-button
                     color="indigo"
+<<<<<<< HEAD
+                    wire:click="send().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
+=======
                     x-on:click="$wire.send().then((success) => { if(success) $modalClose('edit-communication'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                     primary
                     loading="send"
                     :text="__('Send')"
@@ -395,13 +403,17 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('create-preview')"
+                x-on:click="$tsui.close.modal('create-preview')"
             />
             <x-button
                 color="indigo"
                 :text="__('Continue')"
                 loading="createDocuments"
+<<<<<<< HEAD
+                wire:click="createDocuments().then(() => { $tsui.close.modal('create-preview'); });"
+=======
                 x-on:click="$wire.createDocuments().then(() => { $modalClose('create-preview'); });"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

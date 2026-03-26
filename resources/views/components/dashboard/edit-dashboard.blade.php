@@ -30,7 +30,7 @@
             x-show="editGrid"
             x-cloak
             wire:loading.attr="disabled"
-            x-on:click="$modalOpen('create-group-modal')"
+            x-on:click="$tsui.open.modal('create-group-modal')"
             class="h-6 w-6 cursor-pointer bg-green-500 text-white hover:bg-green-600"
             size="sm"
         >
@@ -95,7 +95,11 @@
                 <x-button
                     color="secondary"
                     light
+<<<<<<< HEAD
+                    x-on:click="$tsui.open.modal('widget-list')"
+=======
                     x-on:click="$modalOpen('widget-list')"
+>>>>>>> feature/auto-inject-frontend-assets
                     class="shrink-0"
                     :text="__('Add')"
                 />
@@ -110,7 +114,11 @@
                     color="red"
                     loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
+<<<<<<< HEAD
+                    wire:click="resetWidgets().then(onPostReset.bind($data))"
+=======
                     x-on:click="$wire.resetWidgets().then(onPostReset.bind($data))"
+>>>>>>> feature/auto-inject-frontend-assets
                     class="shrink-0"
                     :text="__('Cancel')"
                 />
@@ -122,7 +130,7 @@
 <x-modal
     id="create-group-modal"
     :title="__('Create New Group')"
-    x-on:open="$focusOn('new-group-name')"
+    x-on:open="$tsui.focus('new-group-name')"
 >
     <x-input
         id="new-group-name"
@@ -133,7 +141,7 @@
     <x-slot:footer>
         <x-button
             color="secondary"
-            x-on:click="$modalClose('create-group-modal')"
+            x-on:click="$tsui.close.modal('create-group-modal')"
             :text="__('Cancel')"
         />
         <x-button
@@ -142,7 +150,7 @@
                     addNewGroup(newGroupName.trim());
                     $wire.set('group', newGroupName.trim());
                     newGroupName = '';
-                    $modalClose('create-group-modal');
+                    $tsui.close.modal('create-group-modal');
                 }
             "
             :text="__('Save')"

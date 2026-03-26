@@ -180,12 +180,16 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-schedule')"
+                x-on:click="$tsui.close.modal('edit-schedule')"
                 :text="__('Cancel')"
             />
             <x-button
                 color="indigo"
+<<<<<<< HEAD
+                wire:click="saveSchedule().then((success) => { if(success) $tsui.close.modal('edit-schedule'); })"
+=======
                 x-on:click="$wire.saveSchedule().then((success) => { if(success) $modalClose('edit-schedule'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                 primary
                 :text="__('Save')"
             />
@@ -199,7 +203,7 @@
         color="indigo"
         class="w-full"
         icon="clock"
-        x-on:click="$modalOpen('edit-schedule')"
+        x-on:click="$tsui.open.modal('edit-schedule')"
         :text="__('Schedule')"
     />
 @endsection

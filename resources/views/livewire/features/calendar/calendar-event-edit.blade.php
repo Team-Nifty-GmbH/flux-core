@@ -114,7 +114,7 @@
                         :text="__('Cancel')"
                         color="secondary"
                         light
-                        x-on:click="$modalClose('confirm-dialog')"
+                        x-on:click="$tsui.close.modal('confirm-dialog')"
                     />
                     <div x-show="dialogType === 'cancel'">
                         <x-button

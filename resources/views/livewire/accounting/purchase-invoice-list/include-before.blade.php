@@ -546,7 +546,11 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Delete')"
                             loading="delete"
+<<<<<<< HEAD
+                            wire:click="delete().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
+=======
                             x-on:click="$wire.delete().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
                         />
                     @endcanAction
@@ -559,7 +563,7 @@
                         color="secondary"
                         light
                         :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-purchase-invoice-modal')"
+                        x-on:click="$tsui.close.modal('edit-purchase-invoice-modal')"
                     />
                     <x-button
                         color="indigo"
@@ -567,7 +571,11 @@
                         x-show="! $wire.purchaseInvoiceForm.order_id"
                         :text="__('Save')"
                         loading="save"
+<<<<<<< HEAD
+                        wire:click="save().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
+=======
                         x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                     />
                     @canAction(\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
                         <x-button
@@ -576,7 +584,11 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Finish')"
                             loading="finish"
+<<<<<<< HEAD
+                            wire:click="finish().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
+=======
                             x-on:click="$wire.finish().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                         />
                     @endcanAction
 
@@ -689,6 +701,14 @@
 
                         <div class="flex justify-center gap-4">
                             <x-button
+<<<<<<< HEAD
+                                :text="__('Upload PDFs')"
+                                x-cloak
+                                x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
+                                x-bind:disabled="isLoadingFiles.length > 0"
+                                loading="processBulkUpload"
+                                wire:click="processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); $tsui.close.modal('bulk-pdf-upload-modal'); } })"
+=======
                                 :text="__('Camera')"
                                 icon="camera"
                                 color="primary"
@@ -699,6 +719,7 @@
                                 icon="photo"
                                 color="secondary"
                                 x-on:click="pickFromGallery()"
+>>>>>>> feature/auto-inject-frontend-assets
                             />
                         </div>
 
@@ -948,8 +969,13 @@
             <x-button
                 color="secondary"
                 light
+<<<<<<< HEAD
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('bulk-pdf-upload-modal');"
+=======
                 :text="__('Close')"
                 x-on:click="$modalClose('bulk-pdf-upload-modal')"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

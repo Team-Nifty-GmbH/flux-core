@@ -311,12 +311,16 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('edit-product-properties-modal')"
+                    x-on:click="$tsui.close.modal('edit-product-properties-modal')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Save')"
+<<<<<<< HEAD
+                    wire:click="addProductProperties().then(() => { $tsui.close.modal('edit-product-properties-modal'); })"
+=======
                     x-on:click="$wire.addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                 />
             </x-slot>
         </x-modal>

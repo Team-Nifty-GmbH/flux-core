@@ -135,7 +135,7 @@
                 x-show="! Object.values($wire.variants).length > 0"
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('generate-variants-modal')"
+                x-on:click="$tsui.close.modal('generate-variants-modal')"
             />
             <x-button
                 color="indigo"
@@ -160,7 +160,11 @@
                 spinner="save()"
                 :text="__('Save')"
                 wire:flux-confirm.type.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
+<<<<<<< HEAD
+                wire:click="save().then(() => { $tsui.close.modal('generate-variants-modal'); })"
+=======
                 x-on:click="$wire.save().then(() => { $modalClose('generate-variants-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

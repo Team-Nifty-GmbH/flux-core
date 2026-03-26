@@ -44,7 +44,11 @@
                 :text="__('Delete')"
                 flat
                 color="red"
+<<<<<<< HEAD
+                wire:click="deleteTransaction().then((success) => {if(success) $tsui.close.modal('transaction-detail-modal');})"
+=======
                 x-on:click="$wire.deleteTransaction().then((success) => {if(success) $modalClose('transaction-detail-modal');})"
+>>>>>>> feature/auto-inject-frontend-assets
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
             />
             <div class="flex w-full justify-end gap-x-2">
@@ -52,12 +56,16 @@
                     color="secondary"
                     light
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-details-modal')"
+                    x-on:click="$tsui.close.modal('transaction-details-modal')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Save')"
+<<<<<<< HEAD
+                    wire:click="saveTransaction().then((success) => {if(success) $tsui.close.modal('transaction-details-modal');})"
+=======
                     x-on:click="$wire.saveTransaction().then((success) => {if(success) $modalClose('transaction-details-modal');})"
+>>>>>>> feature/auto-inject-frontend-assets
                 />
             </div>
         </div>

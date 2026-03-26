@@ -7,7 +7,7 @@
         saveItem() {
             this.dataTable.$wire.saveItem(this.discountGroup).then((success) => {
                 if (success) {
-                    $modalClose('manage-discount-group-modal')
+                    $tsui.close.modal('manage-discount-group-modal')
                 }
             })
         },
@@ -26,7 +26,7 @@
                 }
             }
 
-            $modalOpen('manage-discount-group-modal')
+            $tsui.open.modal('manage-discount-group-modal')
         },
         deleteItem(recordId) {
             $interaction()
@@ -83,7 +83,7 @@
                 color="secondary"
                 light
                 flat
-                x-on:click="$modalClose('manage-discount-group-modal')"
+                x-on:click="$tsui.close.modal('manage-discount-group-modal')"
             >
                 {{ __('Cancel') }}
             </x-button>

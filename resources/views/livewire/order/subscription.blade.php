@@ -384,12 +384,16 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-schedule')"
+                x-on:click="$tsui.close.modal('edit-schedule')"
                 :text="__('Cancel')"
             />
             <x-button
                 color="indigo"
+<<<<<<< HEAD
+                wire:click="saveSchedule().then((success) => { if(success) $tsui.close.modal('edit-schedule'); })"
+=======
                 x-on:click="$wire.saveSchedule().then((success) => { if(success) $modalClose('edit-schedule'); })"
+>>>>>>> feature/auto-inject-frontend-assets
                 primary
                 :text="__('Save')"
             />
@@ -561,13 +565,13 @@
                 <x-button
                     color="secondary"
                     light
-                    x-on:click="$modalClose('cancel-subscription')"
+                    x-on:click="$tsui.close.modal('cancel-subscription')"
                     :text="__('Cancel')"
                 />
                 <x-button
                     color="amber"
                     loading
-                    x-on:click="$wire.cancelSubscription(cancellationType, generateDocument, sendEmail).then((success) => { if(success) $modalClose('cancel-subscription'); })"
+                    x-on:click="$wire.cancelSubscription(cancellationType, generateDocument, sendEmail).then((success) => { if(success) $tsui.close.modal('cancel-subscription'); })"
                     :text="__('Confirm Cancellation')"
                 />
             </div>
@@ -581,14 +585,14 @@
         color="indigo"
         class="w-full"
         icon="clock"
-        x-on:click="$modalOpen('edit-schedule')"
+        x-on:click="$tsui.open.modal('edit-schedule')"
         :text="__('Schedule')"
     />
     <x-button
         color="amber"
         class="w-full"
         icon="x-circle"
-        x-on:click="$modalOpen('cancel-subscription')"
+        x-on:click="$tsui.open.modal('cancel-subscription')"
         :text="__('Cancellation')"
     />
 @endsection

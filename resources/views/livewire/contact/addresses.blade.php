@@ -13,7 +13,11 @@
                         >
                             <div>{{ __('Addresses') }}</div>
                             <x-button
+<<<<<<< HEAD
+                                wire:click="new().then(() => $tsui.focus('address-company'))"
+=======
                                 x-on:click="$wire.new().then(() => $focusOn('address-company'))"
+>>>>>>> feature/auto-inject-frontend-assets
                                 color="indigo"
                                 :text="__('New')"
                             />
@@ -240,7 +244,11 @@
                                 <x-button
                                     color="secondary"
                                     light
+<<<<<<< HEAD
+                                    wire:click="replicate().then(() => $tsui.focus('address-company'))"
+=======
                                     x-on:click="$wire.replicate().then(() => $focusOn('address-company'))"
+>>>>>>> feature/auto-inject-frontend-assets
                                     :text="__('Duplicate')"
                                 />
                             </div>

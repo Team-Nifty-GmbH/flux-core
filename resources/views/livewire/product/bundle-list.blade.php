@@ -70,13 +70,17 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-bundle-product-modal')"
+                x-on:click="$tsui.close.modal('edit-bundle-product-modal')"
             />
             <x-button
                 color="indigo"
                 loading="save"
                 :text="__('Save')"
+<<<<<<< HEAD
+                wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-bundle-product-modal'); })"
+=======
                 x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

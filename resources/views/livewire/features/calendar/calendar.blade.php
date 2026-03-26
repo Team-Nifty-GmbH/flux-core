@@ -115,12 +115,12 @@
                             light
                             flat
                             :text="__('Cancel')"
-                            x-on:click="$modalClose('calendar-modal');"
+                            x-on:click="$tsui.close.modal('calendar-modal');"
                         />
                         <x-button
                             color="indigo"
                             :text="__('Save')"
-                            x-on:click="saveCalendar().then((success) => {if(success) $modalClose('calendar-modal');})"
+                            x-on:click="saveCalendar().then((success) => {if(success) $tsui.close.modal('calendar-modal');})"
                         />
                     </div>
                 </div>
@@ -254,7 +254,11 @@
     <div class="h-full w-full">
         <div
             calendar
+<<<<<<< HEAD
+            class="h-full! border-l dark:border-secondary-600 dark:text-gray-50"
+=======
             class="dark:border-secondary-600 h-full! border-l dark:text-gray-50"
+>>>>>>> feature/auto-inject-frontend-assets
         ></div>
     </div>
 </div>

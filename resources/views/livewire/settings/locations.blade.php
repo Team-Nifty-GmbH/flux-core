@@ -67,12 +67,16 @@
                 :text="__('Cancel')"
                 color="secondary"
                 flat
-                x-on:click="$modalClose('{{ $locationForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $locationForm->modalName() }}')"
             />
             <x-button
                 :text="__('Save')"
                 color="primary"
+<<<<<<< HEAD
+                wire:click="save().then((success) => { if(success) $tsui.close.modal('{{ $locationForm->modalName() }}') })"
+=======
                 x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $locationForm->modalName() }}') })"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

@@ -125,7 +125,13 @@
                 >
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex w-0 flex-1 items-center gap-1.5">
+<<<<<<< HEAD
+                            <div
+                                class="shrink-0 rounded-md object-contain"
+                            >
+=======
                             <div class="shrink-0 rounded-md object-contain">
+>>>>>>> feature/auto-inject-frontend-assets
                                 <img
                                     x-bind:src="file.preview_url ? file.preview_url : '#'"
                                     class="h-16 w-16 rounded-md object-cover"

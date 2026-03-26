@@ -86,7 +86,7 @@ class Categories extends CategoryList
         $this->category->fill($category);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-category-modal');
+            $tsui.open.modal('edit-category-modal');
         JS);
     }
 

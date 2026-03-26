@@ -51,13 +51,17 @@
         <x-button
             color="secondary"
             light
-            x-on:click="$modalClose('edit-media')"
+            x-on:click="$tsui.close.modal('edit-media')"
             :text="__('Cancel')"
         />
         <x-button
             color="secondary"
             light
+<<<<<<< HEAD
+            wire:click="save().then((success) => {if(success) $tsui.close.modal('edit-media')})"
+=======
             x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-media')})"
+>>>>>>> feature/auto-inject-frontend-assets
             primary
             :text="__('Save')"
         />

@@ -15,7 +15,7 @@
     @section('modals')
     <x-modal
         id="edit-category-modal"
-        x-on:open="if (!$wire.category.id) $tallstackuiSelect('category-parent-id').clear(); setCategorySearch(); $focusOn('category-name');"
+        x-on:open="if (!$wire.category.id) $tallstackuiSelect('category-parent-id').clear(); setCategorySearch(); $tsui.focus('category-name');"
         :title="__('Category')"
     >
         <div class="flex flex-col gap-1.5">
@@ -76,12 +76,16 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-category-modal')"
+                x-on:click="$tsui.close.modal('edit-category-modal')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
+<<<<<<< HEAD
+                wire:click="save().then((success) => {if(success) $tsui.close.modal('edit-category-modal');});"
+=======
                 x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-category-modal');});"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

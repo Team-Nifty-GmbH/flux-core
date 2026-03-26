@@ -189,13 +189,17 @@
                 :text="__('Cancel')"
                 color="secondary"
                 light
-                x-on:click="$modalClose('merge-records-modal')"
+                x-on:click="$tsui.close.modal('merge-records-modal')"
             />
             <x-button
                 loading="merge"
                 :text="__('Merge')"
                 color="indigo"
+<<<<<<< HEAD
+                wire:click="merge().then((success) => {if(success) $tsui.close.modal('merge-records-modal');})"
+=======
                 x-on:click="$wire.merge().then((success) => {if(success) $modalClose('merge-records-modal');})"
+>>>>>>> feature/auto-inject-frontend-assets
                 wire:flux-confirm.type.warning="{{ __('Merge Records|Are you sure? This cannot be made undone!|Cancel|Confirm') }}"
             />
         </x-slot>

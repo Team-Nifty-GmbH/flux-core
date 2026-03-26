@@ -27,12 +27,16 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-language-line-modal')"
+            x-on:click="$tsui.close.modal('edit-language-line-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
+            wire:click="save().then((success) => {if(success) $tsui.close.modal('edit-language-line-modal');});"
+=======
             x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-language-line-modal');});"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

@@ -44,8 +44,8 @@ class CalendarEvent extends Component
         }
 
         $this->js(<<<JS
-            \$modalClose('confirm-dialog');
-            \$modalClose('edit-event-modal');
+            \$tsui.close.modal('confirm-dialog');
+            \$tsui.close.modal('edit-event-modal');
             calendar.getEventSourceById('$calendarId')?.refetch();
         JS);
 
@@ -72,8 +72,8 @@ class CalendarEvent extends Component
         }
 
         $this->js(<<<JS
-            \$modalClose('confirm-dialog');
-            \$modalClose('edit-event-modal');
+            \$tsui.close.modal('confirm-dialog');
+            \$tsui.close.modal('edit-event-modal');
             calendar.getEventById('$eventId')?.remove();
         JS);
 
@@ -103,7 +103,7 @@ class CalendarEvent extends Component
         }
 
         $this->js(<<<JS
-            \$modalClose('edit-event-modal');
+            \$tsui.close.modal('edit-event-modal');
             calendar.getEventSourceById('$calendarId')?.refetch();
         JS);
     }
@@ -139,8 +139,8 @@ class CalendarEvent extends Component
         }
 
         $this->js(<<<JS
-            \$modalClose('confirm-dialog');
-            \$modalClose('edit-event-modal');
+            \$tsui.close.modal('confirm-dialog');
+            \$tsui.close.modal('edit-event-modal');
             calendar.getEventSourceById('{$this->event->calendar_id}')?.refetch();
         JS);
 

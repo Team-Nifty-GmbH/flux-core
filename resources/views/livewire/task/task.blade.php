@@ -213,7 +213,7 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('replicate-task-modal')"
+                x-on:click="$tsui.close.modal('replicate-task-modal')"
                 :text="__('Cancel')"
             />
             <x-button

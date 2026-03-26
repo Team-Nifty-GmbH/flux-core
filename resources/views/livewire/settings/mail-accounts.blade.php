@@ -66,7 +66,7 @@
             color="secondary"
             light
             :text="__('Close')"
-            x-on:click="$modalClose('edit-mail-folders')"
+            x-on:click="$tsui.close.modal('edit-mail-folders')"
         />
     </x-slot>
 </x-modal>
@@ -74,7 +74,7 @@
     id="edit-mail-account"
     :title="__('Mail Account')"
     persistent
-    x-on:open="$focusOn('mailAccount.name')"
+    x-on:open="$tsui.focus('mailAccount.name')"
 >
     <div class="flex flex-col gap-1.5">
         <x-card>
@@ -205,12 +205,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-mail-account')"
+            x-on:click="$tsui.close.modal('edit-mail-account')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => {if(success) {$modalClose('edit-mail-account');}})"
+            x-on:click="$wire.save().then((success) => {if(success) {$tsui.close.modal('edit-mail-account');}})"
         />
     </x-slot>
 </x-modal>
