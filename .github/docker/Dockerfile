@@ -28,6 +28,7 @@ RUN git config --global --add safe.directory '*'
 
 # Disable SSL verification for mysql/mysqldump CLI tools
 # (GitHub Actions MySQL service uses self-signed certs)
-RUN printf "[client]\nssl-mode=DISABLED\n[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf \
-    && mkdir -p /etc/mysql/conf.d && cp /etc/my.cnf /etc/mysql/conf.d/disable-ssl.cnf \
-    && mkdir -p /etc/mysql/mariadb.conf.d && printf "[client]\nssl=0\n[mysqldump]\nssl=0\ncolumn-statistics=0\n" > /etc/mysql/mariadb.conf.d/disable-ssl.cnf
+# MariaDB client uses ssl=0, MySQL uses ssl-mode=DISABLED.
+# Use separate config files per tool to avoid incompatible options.
+RUN printf "[client]\nssl=0\n" > /etc/mysql/mariadb.conf.d/99-disable-ssl.cnf \
+    && printf "[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf
