@@ -8,11 +8,15 @@ ENV PLAYWRIGHT_BROWSERS_PATH=0
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
       libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev \
-      default-mysql-client gnupg ca-certificates \
+      gnupg ca-certificates \
     && if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
          curl -sL "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_amd64.deb" -o /tmp/mysql-client.deb \
-         && dpkg -x /tmp/mysql-client.deb /tmp/mysql && cp /tmp/mysql/usr/bin/mysqldump /usr/local/bin/mysqldump \
+         && dpkg -x /tmp/mysql-client.deb /tmp/mysql \
+         && cp /tmp/mysql/usr/bin/mysql /usr/local/bin/mysql \
+         && cp /tmp/mysql/usr/bin/mysqldump /usr/local/bin/mysqldump \
          && rm -rf /tmp/mysql /tmp/mysql-client.deb; \
+       else \
+         apt-get install -y --no-install-recommends default-mysql-client; \
        fi \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif pcntl sockets \
@@ -26,9 +30,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN git config --global --add safe.directory '*'
 
-# Disable SSL verification for mysql/mysqldump CLI tools
-# (GitHub Actions MySQL service uses self-signed certs)
-# MariaDB client uses ssl=0, MySQL uses ssl-mode=DISABLED.
-# Use separate config files per tool to avoid incompatible options.
-RUN printf "[client]\nssl=0\n" > /etc/mysql/mariadb.conf.d/99-disable-ssl.cnf \
-    && printf "[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf
+# Disable SSL for MySQL client tools (CI MySQL service uses self-signed certs)
+RUN printf "[client]\nssl-mode=DISABLED\n[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf
