@@ -106,8 +106,10 @@ jobs:
       - name: Run Feature Tests
         run: composer test-feature
 
-      - name: Install Playwright Browsers
-        run: npx playwright install chromium
+      - name: Build assets and install Playwright
+        run: |
+          npm run build
+          npx playwright install chromium
         env:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
