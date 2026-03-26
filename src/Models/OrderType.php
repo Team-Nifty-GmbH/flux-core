@@ -3,21 +3,24 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Pivots\OrderTypeTenant;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasTenants;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderType extends FluxModel
 {
-    use Filterable, HasAttributeTranslations, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid,
-        LogsActivity, SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasPackageFactory, HasTenantAssignment, HasTenants, HasUserModification,
+        HasUuid, LogsActivity, SoftDeletes;
 
     public static function hasPermission(): bool
     {
@@ -47,9 +50,9 @@ class OrderType extends FluxModel
         return $this->hasMany(Order::class);
     }
 
-    public function tenant(): BelongsTo
+    public function tenants(): BelongsToMany
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsToMany(Tenant::class, 'order_type_tenant')->using(OrderTypeTenant::class);
     }
 
     protected function translatableAttributes(): array

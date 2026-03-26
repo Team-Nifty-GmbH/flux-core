@@ -226,7 +226,7 @@
     </div>
 
     <x-button
-        wire:click="pruneDatabase"
+        wire:click="pruneDatabase()"
         loading="pruneDatabase"
         size="sm"
         icon="trash"

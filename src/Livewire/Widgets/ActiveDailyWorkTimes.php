@@ -20,23 +20,26 @@ class ActiveDailyWorkTimes extends ValueList
 
     public function calculateList(): void
     {
-        $query = resolve_static(WorkTime::class, 'query')
+        $workTimes = resolve_static(WorkTime::class, 'query')
             ->where('is_daily_work_time', true)
             ->where('is_locked', false)
             ->where('is_pause', false)
             ->with('user:id,name')
             ->get();
 
-        $this->items = $query->map(fn (WorkTime $item) => [
+        $usersWithPause = resolve_static(WorkTime::class, 'query')
+            ->where('is_daily_work_time', true)
+            ->where('is_locked', false)
+            ->where('is_pause', true)
+            ->whereIn('user_id', $workTimes->pluck('user_id'))
+            ->pluck('user_id')
+            ->flip();
+
+        $this->items = $workTimes->map(fn (WorkTime $item) => [
             'id' => $item->id,
             'label' => '<div class="flex gap-1.5 items-center">' .
                     (
-                        $item->user
-                            ->workTimes()
-                            ->where('is_daily_work_time', true)
-                            ->where('is_pause', true)
-                            ->where('is_locked', false)
-                            ->exists()
+                        $usersWithPause->has($item->user_id)
                         ? '<span class="relative flex h-3 w-3">
                               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                               <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>

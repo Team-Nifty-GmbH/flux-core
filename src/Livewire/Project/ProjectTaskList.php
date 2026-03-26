@@ -52,9 +52,7 @@ class ProjectTaskList extends BaseTaskList
     #[Renderless]
     public function edit(string|int|null $id = null): void
     {
-        $this->reset('taskTab');
         $this->editForm($id);
-
         $this->task->project_id = $this->projectId;
     }
 

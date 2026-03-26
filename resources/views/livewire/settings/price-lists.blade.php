@@ -122,22 +122,22 @@
                     >
                         <x-flux::table.row>
                             <td
-                                class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-50"
+                                class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-50"
                                 x-text="category.name"
                             ></td>
-                            <td class="whitespace-nowrap px-3 py-4">
+                            <td class="px-3 py-4 whitespace-nowrap">
                                 <x-number
                                     x-model.number="category.discounts[0].discount"
                                     :disabled="! ($priceList->id ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                 />
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-center">
+                            <td class="px-3 py-4 text-center whitespace-nowrap">
                                 <x-toggle
                                     x-model.boolean="category.discounts[0].is_percentage"
                                     :disabled="! ($priceList->id ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                 />
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4">
+                            <td class="px-3 py-4 whitespace-nowrap">
                                 @if ($priceList->id ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
                                     <x-button
                                         icon="trash"
@@ -186,7 +186,7 @@
                             <x-button
                                 color="primary"
                                 icon="plus"
-                                wire:click="addCategoryDiscount"
+                                wire:click="addCategoryDiscount()"
                             />
                         </div>
                     </div>
@@ -204,7 +204,7 @@
             <x-button
                 color="primary"
                 :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-price-list-modal')})"
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-price-list-modal')})"
             />
         </x-slot>
     </x-modal>

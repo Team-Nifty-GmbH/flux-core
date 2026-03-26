@@ -6,8 +6,7 @@ use FluxErp\Printing\Printable;
 use FluxErp\Rulesets\Printing\PrintingRuleset;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\View\Factory;
-use Illuminate\View\View;
+use Illuminate\Support\HtmlString;
 
 class Printing extends FluxAction
 {
@@ -30,7 +29,7 @@ class Printing extends FluxAction
         return PrintingRuleset::class;
     }
 
-    public function performAction(): View|Factory|PrintableView
+    public function performAction(): HtmlString|PrintableView
     {
         $this->model = morphed_model($this->data['model_type'])::query()
             ->whereKey($this->data['model_id'])

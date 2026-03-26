@@ -76,6 +76,12 @@ class TestServiceProvider extends ServiceProvider
                 'cycleTabs',
                 function (string $tabPropertyName = 'tab'): void {
                     $tabs = $this->instance()->getTabs();
+                    $currentTab = $this->instance()->{$tabPropertyName};
+
+                    // Reorder so the current (default) tab comes last. With stable
+                    // wire:keys, assertSeeLivewire only works when the child is
+                    // newly created, which requires an actual tab change.
+                    usort($tabs, fn ($a, $b) => ($a->component === $currentTab) <=> ($b->component === $currentTab));
 
                     foreach ($tabs as $tab) {
                         $this

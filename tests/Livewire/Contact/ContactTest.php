@@ -6,16 +6,13 @@ use FluxErp\Models\Contact as ContactModel;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $this->contact = ContactModel::factory()->create([
-        'tenant_id' => $this->dbTenant->id,
-    ]);
+    $this->contact = ContactModel::factory()->create();
 
     Address::factory()->create([
-        'tenant_id' => $this->dbTenant->id,
         'contact_id' => $this->contact->id,
-        'is_main_address' => true,
-        'is_invoice_address' => true,
         'is_delivery_address' => true,
+        'is_invoice_address' => true,
+        'is_main_address' => true,
     ]);
 });
 

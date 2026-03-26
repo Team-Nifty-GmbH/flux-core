@@ -135,7 +135,8 @@
                         sm
                         light
                         icon="paper-clip"
-                        x-on:click="$wire.download(file.id)"
+                        x-on:click="file.id && $wire.download(file.id)"
+                        x-bind:class="! file.id && 'pointer-events-none opacity-50'"
                         rounded
                     >
                         <x-slot:text>
@@ -150,7 +151,7 @@
             ></div>
         </div>
     </x-modal>
-    <section class="flex max-w-[96rem] flex-col gap-4">
+    <section class="flex max-w-384 flex-col gap-4">
         <x-card
             id="mail-folders"
             x-on:folder-tree-select="$wire.set('folderId', $event.detail.id, true)"

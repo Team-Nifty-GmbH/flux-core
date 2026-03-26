@@ -79,20 +79,6 @@ abstract class Comments extends Component
         return true;
     }
 
-    /**
-     * @return string[]
-     */
-    public function getListeners(): array
-    {
-        $channel = app($this->modelType)->broadcastChannel() . $this->modelId;
-
-        return [
-            'echo-private:' . $channel . ',.CommentCreated' => 'loadComments',
-            'echo-private:' . $channel . ',.CommentUpdated' => 'loadComments',
-            'echo-private:' . $channel . ',.CommentDeleted' => 'loadComments',
-        ];
-    }
-
     #[Renderless]
     public function loadComments(): array
     {
@@ -109,17 +95,16 @@ abstract class Comments extends Component
             return [];
         }
 
-        resolve_static(Comment::class, 'addGlobalScopes', [
-            'scopes' => [
-                'media' => fn (Builder $query) => $query->with('media'),
-                'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
-                resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
-            ],
-        ]);
-
         try {
-            $comments = $record
-                ->comments()
+            $comments = resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
+                'scopes' => [
+                    'media' => fn (Builder $query) => $query->with('media'),
+                    'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
+                    resolve_static(FamilyTreeScope::class, 'class') => app(FamilyTreeScope::class),
+                ],
+            ])
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
                 ->whereNull('parent_id')
                 ->when(
                     ! Auth::user() instanceof User,

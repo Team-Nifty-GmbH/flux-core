@@ -8,8 +8,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\View\Factory;
-use Illuminate\View\View;
+use Illuminate\Support\HtmlString;
 use InvalidArgumentException;
 
 class Printable
@@ -90,7 +89,7 @@ class Printable
         return $view::make($this->dataSet, ...$arguments)->preview($this->preview)->print();
     }
 
-    public function renderView(string $view, mixed ...$arguments): View|Factory
+    public function renderView(string $view, mixed ...$arguments): HtmlString
     {
         /** @var PrintableView $view */
         return $view::make($this->dataSet, ...$arguments)->renderAndHydrate();

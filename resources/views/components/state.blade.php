@@ -1,9 +1,15 @@
 <div
     x-data="{
-    model: $wire.$entangle('{{ $attributes->wire("model")->value }}', {{ $attributes->wire("model")->hasModifier("live") ? "true" : "false" }}),
-    availableStates: $wire.$entangle('{{ $attributes->get("available") }}'),
+    get model() { return $wire.{{ $attributes->wire("model")->value }} },
+    set model(value) { $wire.{{ $attributes->wire("model")->value }} = value },
+    get availableStates() { return $wire.{{ $attributes->get("available") }} },
     @if ($attributes->wire("formatter")->value)
-        formatter: $wire.$entangle('{{ $attributes->wire("formatter")->value }}'),
+        get
+        formatter()
+        {
+        return
+        $wire.{{ $attributes->wire("formatter")->value }}
+        },
     @else
         formatter: {{ $attributes->get("formatters") }}
     @endif
@@ -26,9 +32,9 @@
                 <button
                     x-on:click="show = !show"
                     wire:loading.attr="disabled"
-                    wire:loading.class="!cursor-wait"
+                    wire:loading.class="cursor-wait!"
                     type="button"
-                    class="group inline-flex w-full items-center justify-center gap-x-2 rounded px-4 py-2 text-sm font-semibold outline-none hover:shadow-sm focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 dark:bg-slate-700 dark:ring-slate-600 dark:ring-offset-slate-700 dark:hover:bg-slate-700"
+                    class="group inline-flex w-full items-center justify-center gap-x-2 rounded px-4 py-2 text-sm font-semibold outline-hidden hover:shadow-xs focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 dark:bg-slate-700 dark:ring-slate-600 dark:ring-offset-slate-700 dark:hover:bg-slate-700"
                     x-bind:class="
                         'text-' +
                             formatter[1][model] +

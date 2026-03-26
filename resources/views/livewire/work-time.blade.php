@@ -173,7 +173,7 @@
                 :text="__('Record new working hours')"
                 x-on:click="$modalOpen('work-time-modal')"
             />
-            <template x-for="workTime in activeWorkTimes">
+            <template x-for="workTime in $wire.activeWorkTimes">
                 <div class="flex flex-col gap-1.5 rounded-md p-1.5">
                     <div class="flex w-full justify-between">
                         <div class="flex w-full flex-col">

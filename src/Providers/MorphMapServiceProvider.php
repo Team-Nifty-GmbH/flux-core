@@ -68,6 +68,7 @@ use FluxErp\Models\Pivots\AddressAddressType;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\AddressProduct;
 use FluxErp\Models\Pivots\AddressSerialNumber;
+use FluxErp\Models\Pivots\AddressTypeTenant;
 use FluxErp\Models\Pivots\BankConnectionTenant;
 use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\Calendarable;
@@ -77,6 +78,7 @@ use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Models\Pivots\ContactTenant;
 use FluxErp\Models\Pivots\DiscountDiscountGroup;
 use FluxErp\Models\Pivots\EmployeeDayWorkTime;
 use FluxErp\Models\Pivots\EmployeeDepartmentVacationBlackout;
@@ -92,6 +94,7 @@ use FluxErp\Models\Pivots\OrderPositionStockPosting;
 use FluxErp\Models\Pivots\OrderPositionTask;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
+use FluxErp\Models\Pivots\OrderTypeTenant;
 use FluxErp\Models\Pivots\OrderUser;
 use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Models\Pivots\PrinterUser;
@@ -265,6 +268,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'address_address_type_order' => AddressAddressTypeOrder::class,
             'address_product' => AddressProduct::class,
             'address_serial_number' => AddressSerialNumber::class,
+            'address_type_tenant' => AddressTypeTenant::class,
             'bank_connection_tenant' => BankConnectionTenant::class,
             'bundle_product_product' => BundleProductProduct::class,
             'calendarable' => Calendarable::class,
@@ -274,6 +278,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
             'contact_industry' => ContactIndustry::class,
+            'contact_tenant' => ContactTenant::class,
             'discount_discount_group' => DiscountDiscountGroup::class,
             'employee_day_work_time' => EmployeeDayWorkTime::class,
             'employee_department_vacation_blackout' => EmployeeDepartmentVacationBlackout::class,
@@ -289,6 +294,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'order_position_task' => OrderPositionTask::class,
             'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
+            'order_type_tenant' => OrderTypeTenant::class,
             'order_user' => OrderUser::class,
             'payment_type_tenant' => PaymentTypeTenant::class,
             'printer_user' => PrinterUser::class,

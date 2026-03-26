@@ -63,7 +63,7 @@
                                 class="mr-2"
                                 color="indigo"
                                 icon="plus"
-                                wire:click="addCustomProperty"
+                                wire:click="addCustomProperty()"
                             />
                             <template
                                 x-for="(customProperty, index) in $wire.calendar.custom_properties ?? []"
@@ -106,7 +106,7 @@
                             color="red"
                             :text="__('Delete')"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar')]) }}"
-                            wire:click="deleteCalendar().then((deletedId) => {if(deletedId !== false) deleteCalendar(deletedId);})"
+                            x-on:click="$wire.deleteCalendar().then((deletedId) => {if(deletedId !== false) deleteCalendar(deletedId);})"
                         />
                     </div>
                     <div class="flex gap-2">
@@ -160,8 +160,8 @@
                         storeSettings()
                     }
                 "
-                x-on:folder-tree-select="(event) => ($wire.calendarObject = event.detail)"
-                x-on:folder-tree-unselect="() => ($wire.calendarObject = null)"
+                x-on:folder-tree-select="(event) => $wire.$set('calendarObject', event.detail)"
+                x-on:folder-tree-unselect="() => $wire.$set('calendarObject', null)"
                 class="w-full pt-2"
             >
                 <x-flux::checkbox-tree
@@ -199,11 +199,11 @@
                         @show
                     </x-slot>
                     <x-slot:suffix>
-                        <div class="size-6">
+                        <div class="size-6 shrink-0">
                             <svg
                                 x-cloak
                                 x-show="node.isLoading"
-                                class="mr-2 inline size-6 animate-spin fill-blue-600 p-1.5 text-gray-200 dark:text-gray-600"
+                                class="size-6 animate-spin fill-blue-600 p-1.5 text-gray-200 dark:text-gray-600"
                                 viewBox="0 0 100 101"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -254,7 +254,7 @@
     <div class="h-full w-full">
         <div
             calendar
-            class="!h-full border-l dark:border-secondary-600 dark:text-gray-50"
+            class="dark:border-secondary-600 h-full! border-l dark:text-gray-50"
         ></div>
     </div>
 </div>

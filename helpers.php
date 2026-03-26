@@ -441,20 +441,7 @@ if (! function_exists('faker')) {
 if (! function_exists('livewire_component_exists')) {
     function livewire_component_exists(string $classOrAlias): bool
     {
-        $componentRegistry = app(Livewire\Mechanisms\ComponentRegistry::class);
-        try {
-            $class = $componentRegistry->getClass($classOrAlias);
-        } catch (Livewire\Exceptions\ComponentNotFoundException) {
-            $class = false;
-        }
-
-        try {
-            $alias = $componentRegistry->getName($classOrAlias);
-        } catch (Livewire\Exceptions\ComponentNotFoundException) {
-            $alias = false;
-        }
-
-        return $class || is_string($alias);
+        return app('livewire.factory')->exists($classOrAlias);
     }
 }
 
@@ -462,19 +449,6 @@ if (! function_exists('bcabs')) {
     function bcabs(string $number): string
     {
         return $number[0] === '-' ? substr($number, 1) : $number;
-    }
-}
-
-if (! function_exists('bcround')) {
-    function bcround(string $number, int $precision = 0): string
-    {
-        if (str_contains($number, '.')) {
-            return $number[0] !== '-' ?
-                bcadd($number, '0.' . str_repeat('0', $precision) . '5', $precision) :
-                bcsub($number, '0.' . str_repeat('0', $precision) . '5', $precision);
-        }
-
-        return $number;
     }
 }
 
@@ -643,6 +617,10 @@ if (! function_exists('morph_to')) {
 
         /** @var Illuminate\Database\Eloquent\Model $model */
         $model = morphed_model($type);
+        if (is_null($model)) {
+            return null;
+        }
+
         $query = $model::query()->whereKey($id);
 
         return $returnBuilder ? $query : $query->first();
@@ -660,6 +638,12 @@ if (! function_exists('render_editor_blade')) {
             '/<span[^>]*data-type="blade-variable"[^>]*data-value="([^"]*)"[^>]*>.*?<\/span>/',
             function (array $matches) use ($data): string {
                 $value = html_entity_decode($matches[1]);
+
+                // Try to resolve as stable ID first
+                $resolved = FluxErp\Facades\Editor::resolveById($value);
+                if (! is_null($resolved)) {
+                    $value = $resolved;
+                }
 
                 preg_match('/\$(\w+)/', $value, $variableMatches);
                 $variableName = $variableMatches[1] ?? null;

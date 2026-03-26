@@ -9,6 +9,7 @@ use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Number;
 
 class OrderView extends PrintableView
@@ -72,7 +73,10 @@ class OrderView extends PrintableView
                     'scopes' => [
                         'sorted' => function (Builder $query): void {
                             $query->ordered()
-                                ->with(['tags', 'product.unit:id,name,abbreviation'])
+                                ->with([
+                                    'tags',
+                                    'product' => fn (BelongsTo $query) => $query->withTrashed()->with('unit:id,name,abbreviation'),
+                                ])
                                 ->when(
                                     ! $this->showAlternatives,
                                     fn (Builder $query) => $query->whereNot('is_alternative', true)

@@ -1,5 +1,8 @@
 <?php
 
+use FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation;
+use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\OrderPositions;
@@ -18,6 +21,7 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Livewire;
 use function Livewire\invade;
@@ -26,13 +30,11 @@ beforeEach(function (): void {
     Warehouse::factory()->create(['is_default' => true]);
 
     $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'has_delivery_lock' => false,
         'credit_line' => null,
+        'has_delivery_lock' => false,
     ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -40,7 +42,6 @@ beforeEach(function (): void {
     $this->vatRate = VatRate::factory()->create();
 
     $this->orderType = OrderType::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
         'print_layouts' => ['invoice'],
     ]);
@@ -146,6 +147,45 @@ test('add order position successfully', function (): void {
     expect($newPosition->updated_at)->not->toBeNull();
     expect($newPosition->total_net_price)->toBeNumeric();
     expect($newPosition->total_gross_price)->toBeNumeric();
+});
+
+test('new order position gets slug position at end of list', function (): void {
+    OrderPosition::factory()->count(3)->create([
+        'order_id' => $this->order->id,
+        'vat_rate_id' => $this->vatRate->id,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $highestSortNumber = $this->order->orderPositions()
+        ->whereNull('parent_id')
+        ->max('sort_number');
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('orderPosition.name', 'New Position At End')
+        ->set('orderPosition.amount', 1)
+        ->set('orderPosition.unit_price', 50)
+        ->set('orderPosition.vat_rate_id', $this->vatRate->id)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertReturned(true);
+
+    $newPosition = $this->order->orderPositions()->latest('id')->first();
+
+    expect($newPosition->sort_number)->toBeGreaterThan($highestSortNumber);
+
+    $rawSlugPosition = DB::table('order_positions')
+        ->where('id', $newPosition->getKey())
+        ->value('slug_position');
+    expect($rawSlugPosition)->not->toBeNull();
+
+    $highestSlugPosition = DB::table('order_positions')
+        ->where('order_id', $this->order->getKey())
+        ->whereNull('parent_id')
+        ->whereNull('deleted_at')
+        ->max('slug_position');
+    expect($rawSlugPosition)->toEqual($highestSlugPosition);
 });
 
 test('add order position with product', function (): void {
@@ -269,6 +309,8 @@ test('delete selected order positions', function (): void {
     $positions = OrderPosition::factory()->count(2)->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $selectedIds = $positions->pluck('id')->toArray();
@@ -299,6 +341,30 @@ test('discount selected positions', function (): void {
 
     $updatedPosition = $orderPosition->refresh();
     expect($updatedPosition->discount_percentage)->toEqual(0.10);
+});
+
+test('discount percentage preserved when updating amount', function (): void {
+    $orderPosition = $this->order->orderPositions->first();
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('selected', [$orderPosition->getKey()])
+        ->set('discount', 10)
+        ->call('discountSelectedPositions')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    $orderPosition->refresh();
+    expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
+
+    UpdateOrderPosition::make([
+        'id' => $orderPosition->getKey(),
+        'amount' => 2,
+    ])
+        ->validate()
+        ->execute();
+
+    $orderPosition->refresh();
+    expect(bccomp($orderPosition->discount_percentage, '0.10'))->toBe(0);
 });
 
 test('edit new order position', function (): void {
@@ -439,6 +505,8 @@ test('move position with parent', function (): void {
     $parentPosition = OrderPosition::factory()->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     $orderPosition = $this->order->orderPositions->first();
@@ -455,7 +523,6 @@ test('move position with parent', function (): void {
 
 test('quick add order position', function (): void {
     $orderPositionCount = $this->order->orderPositions()->count();
-    $productPrice = $this->product->prices()->first();
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('orderPosition.product_id', $this->product->id)
@@ -483,6 +550,8 @@ test('recalculate order positions', function (): void {
         'tenant_id' => $this->dbTenant->getKey(),
         'price_list_id' => $this->priceList->id,
         'warehouse_id' => $warehouse->id,
+        'is_free_text' => false,
+        'is_alternative' => false,
     ]);
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
@@ -573,7 +642,7 @@ test('switch view to table', function (): void {
 });
 
 test('add order position uses product translation based on order language', function (): void {
-    $defaultLanguage = Language::factory()->create(['is_default' => true]);
+    Language::factory()->create(['is_default' => true]);
     $orderLanguage = Language::factory()->create(['is_default' => false]);
 
     $germanName = 'Deutsches Produkt';
@@ -593,21 +662,25 @@ test('add order position uses product translation based on order language', func
         'price_list_id' => $this->priceList->getKey(),
     ]);
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'name',
         'value' => $englishName,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'description',
         'value' => $englishDescription,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
     $this->order->update(['language_id' => $orderLanguage->getKey()]);
     $this->orderForm->fill($this->order->fresh());
@@ -632,7 +705,7 @@ test('add order position uses product translation based on order language', func
 });
 
 test('quick add order position uses product translation based on order language', function (): void {
-    $defaultLanguage = Language::factory()->create(['is_default' => true]);
+    Language::factory()->create(['is_default' => true]);
     $orderLanguage = Language::factory()->create(['is_default' => false]);
 
     $germanName = 'Deutsches Produkt';
@@ -652,21 +725,25 @@ test('quick add order position uses product translation based on order language'
         'price_list_id' => $this->priceList->getKey(),
     ]);
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'name',
         'value' => $englishName,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
-    FluxErp\Actions\AttributeTranslation\UpsertAttributeTranslation::make([
+    UpsertAttributeTranslation::make([
         'language_id' => $orderLanguage->getKey(),
         'model_type' => $product->getMorphClass(),
         'model_id' => $product->getKey(),
         'attribute' => 'description',
         'value' => $englishDescription,
-    ])->validate()->execute();
+    ])
+        ->validate()
+        ->execute();
 
     $this->order->update(['language_id' => $orderLanguage->getKey()]);
     $this->orderForm->fill($this->order->fresh());
@@ -686,4 +763,87 @@ test('quick add order position uses product translation based on order language'
     expect($newPosition)->not->toBeNull();
     expect($newPosition->name)->toEqual($englishName);
     expect($newPosition->description)->toEqual($englishDescription);
+});
+
+test('updating amount on bundle group parent propagates to children', function (): void {
+    // Create a bundle group product with two sub-products
+    $bundleProduct = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'bundle_type_enum' => BundleTypeEnum::Group,
+        'is_bundle' => true,
+    ]);
+    $bundleProduct->tenants()->attach($this->dbTenant->getKey());
+
+    $subProduct1 = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+    ]);
+    $subProduct1->tenants()->attach($this->dbTenant->getKey());
+
+    Price::factory()->create([
+        'price_list_id' => $this->priceList->getKey(),
+        'product_id' => $subProduct1->getKey(),
+    ]);
+
+    $subProduct2 = Product::factory()->create([
+        'vat_rate_id' => $this->vatRate->getKey(),
+    ]);
+    $subProduct2->tenants()->attach($this->dbTenant->getKey());
+
+    Price::factory()->create([
+        'price_list_id' => $this->priceList->getKey(),
+        'product_id' => $subProduct2->getKey(),
+    ]);
+
+    // Attach sub-products to bundle with specific counts
+    $bundleProduct->bundleProducts()->attach([
+        $subProduct1->getKey() => ['count' => 2],
+        $subProduct2->getKey() => ['count' => 5],
+    ]);
+
+    // Add the bundle group product to the order (amount = 1)
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->set('orderPosition.product_id', $bundleProduct->getKey())
+        ->set('orderPosition.amount', 1)
+        ->call('changedProductId', $bundleProduct)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertReturned(true);
+
+    // Get the parent group position
+    $parentPosition = $this->order->orderPositions()
+        ->where('product_id', $bundleProduct->getKey())
+        ->where('is_free_text', true)
+        ->first();
+
+    expect($parentPosition)->not->toBeNull();
+
+    // Verify children were created with correct amounts
+    $children = $this->order->orderPositions()
+        ->where('parent_id', $parentPosition->getKey())
+        ->get();
+
+    expect($children)->toHaveCount(2);
+
+    $child1 = $children->firstWhere('product_id', $subProduct1->getKey());
+    $child2 = $children->firstWhere('product_id', $subProduct2->getKey());
+
+    expect((float) $child1->amount)->toEqual(2);
+    expect((float) $child1->amount_bundle)->toEqual(2);
+    expect((float) $child2->amount)->toEqual(5);
+    expect((float) $child2->amount_bundle)->toEqual(5);
+
+    // Now update the parent's amount to 3 via the edit modal
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('editOrderPosition', $parentPosition)
+        ->set('orderPosition.amount', 3)
+        ->call('addOrderPosition')
+        ->assertOk()
+        ->assertReturned(true);
+
+    // Verify children amounts were recalculated: amount = amount_bundle * 3
+    $child1->refresh();
+    $child2->refresh();
+
+    expect((float) $child1->amount)->toEqual(6);
+    expect((float) $child2->amount)->toEqual(15);
 });

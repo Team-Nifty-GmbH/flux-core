@@ -168,7 +168,7 @@ trait DataTableHasFormEdit
             ->color('indigo')
             ->when($this->{$this->formAttributeName()}->canAction('update'))
             ->attributes([
-                'wire:click' => 'edit(record.' . ($this->modelKeyName ?? 'id') . ')',
+                'x-on:click' => '$wire.edit(record.' . ($this->modelKeyName ?? 'id') . ')',
             ]);
     }
 
@@ -192,7 +192,7 @@ trait DataTableHasFormEdit
                 ->color('red')
                 ->when($this->{$this->formAttributeName()}->canAction('delete'))
                 ->attributes([
-                    'wire:click' => 'deleteSelected',
+                    'wire:click' => 'deleteSelected()',
                     'wire:flux-confirm.type.error' => __(
                         'wire:confirm.delete',
                         ['model' => __(Str::headline(morph_alias($this->getModel())))]
@@ -209,7 +209,7 @@ trait DataTableHasFormEdit
             ->color('indigo')
             ->when($this->{$this->formAttributeName()}->canAction('create'))
             ->attributes([
-                'wire:click' => 'edit',
+                'x-on:click' => '$wire.edit()',
             ]);
     }
 

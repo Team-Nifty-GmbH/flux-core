@@ -70,7 +70,7 @@
         <x-button
             :text="__('Save')"
             color="indigo"
-            wire:click="save().then((success) => {if(success) $modalClose('bank-connection-modal');});"
+            x-on:click="$wire.save().then((success) => {if(success) $modalClose('bank-connection-modal');});"
         />
     </x-slot>
 </x-modal>

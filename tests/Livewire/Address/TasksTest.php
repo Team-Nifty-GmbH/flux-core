@@ -6,12 +6,9 @@ use FluxErp\Models\Contact;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
-        'tenant_id' => $this->dbTenant->getKey(),
         'can_login' => false,
         'is_active' => true,
     ]);

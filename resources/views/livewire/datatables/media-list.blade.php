@@ -57,7 +57,7 @@
         <x-button
             color="secondary"
             light
-            wire:click="save().then((success) => {if(success) $modalClose('edit-media')})"
+            x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-media')})"
             primary
             :text="__('Save')"
         />

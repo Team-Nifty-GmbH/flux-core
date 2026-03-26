@@ -196,12 +196,11 @@ function createData(Collection $paymentProps, Tenant $tenant, Currency $currency
 {
     $orders = collect();
 
-    $contact = Contact::factory()->create([
-        'tenant_id' => $tenant->getKey(),
-    ]);
+    $contact = Contact::factory()
+        ->hasAttached(factory: $tenant, relationship: 'tenants')
+        ->create();
 
     $address = Address::factory()->create([
-        'tenant_id' => $tenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -209,10 +208,11 @@ function createData(Collection $paymentProps, Tenant $tenant, Currency $currency
 
     $language = Language::factory()->create();
 
-    $orderType = OrderType::factory()->create([
-        'tenant_id' => $tenant->getKey(),
-        'order_type_enum' => OrderTypeEnum::Order,
-    ]);
+    $orderType = OrderType::factory()
+        ->hasAttached(factory: $tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+        ]);
 
     $paymentType = PaymentType::factory()
         ->hasAttached(factory: $tenant, relationship: 'tenants')

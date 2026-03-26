@@ -30,7 +30,7 @@
                             <x-button
                                 color="red"
                                 :text="__('Delete')"
-                                wire:click="removeOrder(order.id).then((closeModal) => {if(closeModal) close();})"
+                                x-on:click="$wire.removeOrder(order.id).then((closeModal) => {if(closeModal) close();})"
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
                             />
                             <x-button
@@ -103,7 +103,7 @@
                 flat
                 color="red"
                 :text="__('Delete')"
-                wire:click="delete().then((success) => {if(success) $modalClose('execute-payment-run');})"
+                x-on:click="$wire.delete().then((success) => {if(success) $modalClose('execute-payment-run');})"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
             />
             <div class="flex justify-end gap-x-2">
@@ -117,7 +117,7 @@
                     color="indigo"
                     :text="__('Execute Payment Run')"
                     loading="executePaymentRun"
-                    wire:click="executePaymentRun().then((success) => {if(success) $modalClose('execute-payment-run');})"
+                    x-on:click="$wire.executePaymentRun().then((success) => {if(success) $modalClose('execute-payment-run');})"
                 />
             </div>
         </div>

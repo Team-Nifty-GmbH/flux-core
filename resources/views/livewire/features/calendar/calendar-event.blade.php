@@ -12,7 +12,7 @@
                     wire:model="event.calendar_id"
                     :label="__('Calendar')"
                     required
-                    x-on:select="$wire.event.is_repeatable = await $wire.isCalendarEventRepeatable($event.detail.select.id);"
+                    x-on:select="$wire.$set('event.is_repeatable', await $wire.isCalendarEventRepeatable($event.detail.select.id))"
                     select="label:label|value:id"
                     :request="[
                         'url' => route('calendar-search'),
@@ -74,10 +74,13 @@
                         x-on:change="
                             setDateTime('start', $event);
                             let end = dayjs($wire.event.end);
-                            $wire.event.end = dayjs($wire.event.start)
-                                .set('hour', end.hour())
-                                .set('minute', end.minute())
-                                .format()
+                            $wire.$set(
+                                'event.end',
+                                dayjs($wire.event.start)
+                                    .set('hour', end.hour())
+                                    .set('minute', end.minute())
+                                    .format()
+                            )
                         "
                     />
                 </div>
@@ -213,7 +216,7 @@
                     />
                     <x-select.styled
                         wire:model="event.repeat.unit"
-                        x-init="$wire.$watch('event.unit', (value) => {
+                        x-init="$wire.$watch('event.repeat.unit', (value) => {
                             const option = options.find(option => option.value === value);
                             if (option) {
                                 select(option);
@@ -235,16 +238,17 @@
                         class="mt-4 grid grid-cols-7 items-center gap-1.5"
                         x-data="{
                             updateWeekdays(weekday) {
-                                if ($wire.event.repeat.weekdays.indexOf(weekday) !== -1) {
-                                    $wire.event.repeat.weekdays = $wire.event.repeat.weekdays.filter(
-                                        (day) => day !== weekday,
-                                    )
+                                let weekdays = [...($wire.event.repeat.weekdays || [])]
+                                const index = weekdays.indexOf(weekday)
+                                if (index !== -1) {
+                                    weekdays.splice(index, 1)
                                 } else {
-                                    $wire.event.repeat.weekdays.push(weekday)
+                                    weekdays.push(weekday)
                                 }
+                                $wire.$set('event.repeat.weekdays', weekdays)
                             },
                             weekdaySelected(weekday) {
-                                return $wire.event.repeat.weekdays.indexOf(weekday) !== -1
+                                return ($wire.event.repeat.weekdays || []).indexOf(weekday) !== -1
                                     ? 'bg-indigo-500 text-white'
                                     : ''
                             },
@@ -320,7 +324,7 @@
                         x-data="{
                             selectedOption: null,
                             selectOption(option) {
-                                $wire.event.repeat.monthly = option.value
+                                $wire.$set('event.repeat.monthly', option.value)
                                 this.selectedOption = option
                             },
                             options: [
@@ -398,7 +402,7 @@
                         </x-dropdown>
                     </div>
                 </template>
-                <div class="mb-2 mt-4">
+                <div class="mt-4 mb-2">
                     <x-label :label="__('Repeat end')" />
                 </div>
                 <x-radio
@@ -406,7 +410,7 @@
                     name="repeat-radio"
                     :label="__('Never')"
                     :value="null"
-                    x-model="$wire.event.repeat.repeat_radio"
+                    wire:model="event.repeat.repeat_radio"
                     x-bind:disabled="! $wire.event.is_editable ?? false"
                 />
                 <div class="grid grid-cols-2 items-center gap-1.5">
@@ -415,7 +419,7 @@
                         name="repeat-radio"
                         :label="__('Date At')"
                         value="repeat_end"
-                        x-model="$wire.event.repeat.repeat_radio"
+                        wire:model="event.repeat.repeat_radio"
                         x-bind:disabled="! $wire.event.is_editable ?? false"
                     />
                     <x-input
@@ -423,18 +427,18 @@
                         type="date"
                         x-bind:disabled="(! $wire.event.is_editable ?? false) || $wire.event.repeat.repeat_radio !== 'repeat_end'"
                         x-bind:value="dayjs($wire.event.repeat_end).format('YYYY-MM-DD')"
-                        x-on:change="$wire.event.repeat_end = dayjs($event.target.value).format('YYYY-MM-DD')"
+                        x-on:change="$wire.$set('event.repeat_end', dayjs($event.target.value).format('YYYY-MM-DD'))"
                     />
                     <x-radio
                         id="calendar-event-repeat-end-recurrences-radio"
                         name="repeat-radio"
                         :label="__('After amount of events')"
                         value="recurrences"
-                        x-model="$wire.event.repeat.repeat_radio"
+                        wire:model="event.repeat.repeat_radio"
                         x-bind:disabled="! $wire.event.is_editable ?? false"
                     />
                     <x-number
-                        x-model="$wire.event.recurrences"
+                        wire:model="event.recurrences"
                         x-bind:disabled="(! $wire.event.is_editable ?? false) || $wire.event.repeat.repeat_radio !== 'recurrences'"
                     />
                 </div>
@@ -491,7 +495,7 @@
                         <x-button
                             :text="__('Save')"
                             primary
-                            x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
+                            x-on:click="dialogType = 'save'; $wire.$set('event.confirm_option', 'future'); $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
                         />
                     </div>
                     @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)

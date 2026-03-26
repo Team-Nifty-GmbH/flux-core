@@ -130,7 +130,9 @@ class Mail extends CommunicationList
     {
         if (! file_exists($mediaItem->getPath())) {
             if (method_exists($this, 'notification')) {
-                $this->notification()->error(__('File not found!'))->send();
+                $this->toast()
+                    ->error(__('File not found!'))
+                    ->send();
             }
 
             return false;

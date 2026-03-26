@@ -69,7 +69,7 @@
             <div
                 x-intersect.once="onChange()"
                 x-bind:class="isFullscreen ? 'flex-1 min-h-0 flex flex-col' : ''"
-                class="overflow-hidden rounded-lg border border-secondary-200 dark:border-secondary-600"
+                class="border-secondary-200 dark:border-secondary-600 overflow-hidden rounded-lg border"
             >
                 <div
                     id="map"

@@ -46,7 +46,7 @@
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                 @if ($printers ?? false)
                     <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                        class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
                     >
                         {{ __('Print') }}
                     </div>
@@ -54,25 +54,25 @@
             @endcanAction
 
             <div
-                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
             >
                 {{ __('Email') }}
             </div>
             <div
-                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
             >
                 {{ __('Download') }}
             </div>
             @if ($supportsDocumentPreview)
                 <div
-                    class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                    class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
                 >
                     {{ __('Preview') }}
                 </div>
             @endif
 
             <div
-                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
             >
                 {{ __('Force Create') }}
             </div>
@@ -217,7 +217,7 @@
             color="indigo"
             :text="__('Continue')"
             loading="createDocuments"
-            wire:click="createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });"
+            x-on:click="$wire.createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });"
         />
     </x-slot>
 </x-modal>

@@ -41,26 +41,29 @@ const calendar = () => {
                 return false;
             }
 
-            this.$wire.calendarObject.parentId ??= 'my-calendars';
+            let calendarObj = JSON.parse(
+                JSON.stringify(this.$wire.calendarObject),
+            );
+            calendarObj.parentId ??= 'my-calendars';
 
-            if (this.$wire.calendarObject.isNew) {
+            if (calendarObj.isNew) {
                 // Add new calendar
-                if (!this.$wire.calendarObject.is_group) {
+                if (!calendarObj.is_group) {
                     // Add calendar as event source
-                    this.calendar.addEventSource(this.$wire.calendarObject);
+                    this.calendar.addEventSource(calendarObj);
                 } else {
-                    this.$wire.calendarObject.children = [];
+                    calendarObj.children = [];
                 }
 
                 this.getFolderTree().addFolder(
-                    this.getFolderTree().getNodeById(
-                        this.$wire.calendarObject.parentId,
-                    ),
-                    this.$wire.calendarObject,
+                    this.getFolderTree().getNodeById(calendarObj.parentId),
+                    calendarObj,
                 );
             } else {
-                this.getFolderTree().updateNode(this.$wire.calendarObject);
+                this.getFolderTree().updateNode(calendarObj);
             }
+
+            this.$wire.$set('calendarObject', calendarObj);
 
             return true;
         },
@@ -133,9 +136,9 @@ const calendar = () => {
             }
 
             if (type === 'start') {
-                this.$wire.event.start = dateTime.format(); // Use the default ISO 8601 format
+                this.$wire.$set('event.start', dateTime.format());
             } else {
-                this.$wire.event.end = dateTime.format(); // Use the default ISO 8601 format
+                this.$wire.$set('event.end', dateTime.format());
             }
         },
         mapDatesToUtc(event) {
@@ -498,7 +501,7 @@ const calendar = () => {
                     if (!info.event.allDay) {
                         let calendarBadge = document.createElement('div');
                         calendarBadge.className =
-                            'size-3 rounded-full flex-shrink-0';
+                            'size-3 rounded-full shrink-0';
                         calendarBadge.style.backgroundColor =
                             info.backgroundColor;
                         leftContent.appendChild(calendarBadge);
@@ -519,13 +522,12 @@ const calendar = () => {
 
                     // Right side container for time and status badges
                     let rightContent = document.createElement('div');
-                    rightContent.className =
-                        'flex items-center gap-1 flex-shrink-0';
+                    rightContent.className = 'flex items-center gap-1 shrink-0';
 
                     // Add status badges if they exist
                     if (info.event.extendedProps.appendTitle) {
                         let statusBadges = document.createElement('div');
-                        statusBadges.className = 'flex-shrink-0 mr-1';
+                        statusBadges.className = 'shrink-0 mr-1';
 
                         const appendTitle =
                             info.event.extendedProps.appendTitle;
@@ -550,7 +552,7 @@ const calendar = () => {
                     if (!info.event.allDay && info.timeText) {
                         let timeNode = document.createElement('div');
                         timeNode.className =
-                            'flex-shrink-0 whitespace-nowrap text-xs';
+                            'shrink-0 whitespace-nowrap text-xs';
 
                         if (info.event.extendedProps.is_cancelled) {
                             timeNode.classList.add('line-through');

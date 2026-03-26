@@ -11,7 +11,9 @@ import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 import { Table } from './tiptap-table.js';
 
 export default function (
-    content,
+    $wire = null,
+    propertyName = null,
+    live = false,
     debounceDelay = 0,
     searchModel = ['user', 'role'],
 ) {
@@ -24,7 +26,10 @@ export default function (
             },
             proxy: null,
             editable: true,
-            content: content,
+            content:
+                propertyName && $wire
+                    ? Alpine.raw($wire.$get(propertyName))
+                    : null,
             floatingElement: null,
             isFloatingVisible: false,
             isClickListenerSet: false,
@@ -148,7 +153,7 @@ export default function (
                             class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
                                 prose prose-sm dark:prose-invert max-w-full content-editable-placeholder dark:text-gray-50 placeholder-secondary-400 dark:placeholder-secondary-500 \
                                 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
-                                 ${fullHeight ? 'h-full' : 'min-h-[85px]'} w-full border p-3 ${showEditorPadding ? 'p-3' : 'no-margin'} shadow-sm transition duration-100 ease-in-out focus:outline-none sm:text-sm`,
+                                 ${fullHeight ? 'h-full' : 'min-h-[85px]'} w-full border p-3 ${showEditorPadding ? 'p-3' : 'no-margin'} shadow-xs transition duration-100 ease-in-out focus:outline-hidden sm:text-sm`,
                             style: `${defaultFontSize != null ? `font-size: ${defaultFontSize}px;` : ''}`,
                         },
                     },
@@ -228,6 +233,9 @@ export default function (
                         clearTimeout(this.timeout);
                         this.timeout = setTimeout(() => {
                             this.content = editor.getHTML();
+                            if (propertyName && $wire) {
+                                $wire.$set(propertyName, this.content, live);
+                            }
                         }, debounceDelay);
                     },
                     onTransaction: ({ editor }) => {
@@ -244,11 +252,20 @@ export default function (
                     this.proxy.setOptions({ editable: editable });
                 });
 
-                this.$watch('content', (content) => {
-                    if (!this.proxy) return;
-                    if (content === this.editor().getHTML()) return;
-                    this.editor().commands.setContent(content, false);
-                });
+                if (propertyName && $wire) {
+                    $wire.$watch(propertyName, (content) => {
+                        if (!this.proxy) return;
+                        if (content === this.editor()?.getHTML()) return;
+                        this.content = content;
+                        this.editor()?.commands.setContent(content, false);
+                    });
+                } else {
+                    this.$watch('content', (content) => {
+                        if (!this.proxy) return;
+                        if (content === this.editor()?.getHTML()) return;
+                        this.editor()?.commands.setContent(content, false);
+                    });
+                }
             },
         };
     };

@@ -389,7 +389,7 @@
             />
             <x-button
                 color="indigo"
-                wire:click="saveSchedule().then((success) => { if(success) $modalClose('edit-schedule'); })"
+                x-on:click="$wire.saveSchedule().then((success) => { if(success) $modalClose('edit-schedule'); })"
                 primary
                 :text="__('Save')"
             />

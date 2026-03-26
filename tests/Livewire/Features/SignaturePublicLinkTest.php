@@ -21,9 +21,9 @@ beforeEach(function (): void {
     $currency = Currency::factory()->create([
         'is_default' => true,
     ]);
-    $contact = Contact::factory()->create([
-        'tenant_id' => $tenant->id,
-    ]);
+    $contact = Contact::factory()
+        ->hasAttached(factory: $tenant, relationship: 'tenants')
+        ->create();
     $priceList = PriceList::factory()->create([
         'is_default' => true,
     ]);
@@ -34,18 +34,18 @@ beforeEach(function (): void {
             'is_default' => true,
         ]);
 
-    $orderType = OrderType::factory()->create([
-        'tenant_id' => $tenant->id,
-        'order_type_enum' => OrderTypeEnum::Order->value,
-        'print_layouts' => ['invoice'],
-    ]);
+    $orderType = OrderType::factory()
+        ->hasAttached(factory: $tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Order->value,
+            'print_layouts' => ['invoice'],
+        ]);
 
     $address = Address::factory()->create([
-        'tenant_id' => $tenant->id,
         'contact_id' => $contact->id,
-        'is_main_address' => true,
-        'is_invoice_address' => true,
         'is_delivery_address' => true,
+        'is_invoice_address' => true,
+        'is_main_address' => true,
     ]);
 
     $this->order = Order::factory()->create([
