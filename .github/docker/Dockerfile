@@ -8,11 +8,10 @@ ENV PLAYWRIGHT_BROWSERS_PATH=0
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
       libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev \
-      gnupg ca-certificates wget \
-    && wget -q https://dev.mysql.com/get/mysql-apt-config_0.8.33-1_all.deb \
-    && MYSQL_SERVER_VERSION=mysql-8.0 dpkg -i mysql-apt-config_0.8.33-1_all.deb \
-    && rm mysql-apt-config_0.8.33-1_all.deb \
-    && apt-get update && apt-get install -y --no-install-recommends mysql-client \
+      default-mysql-client gnupg ca-certificates \
+    && curl -sL https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_amd64.deb -o /tmp/mysql-client.deb \
+    && dpkg -x /tmp/mysql-client.deb /tmp/mysql && cp /tmp/mysql/usr/bin/mysqldump /usr/local/bin/mysqldump \
+    && rm -rf /tmp/mysql /tmp/mysql-client.deb \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif pcntl sockets \
     && pecl install imagick xdebug && docker-php-ext-enable imagick xdebug \
