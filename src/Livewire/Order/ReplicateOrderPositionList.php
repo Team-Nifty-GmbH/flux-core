@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Order;
 
-use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Traits\CalculatesPositionAvailability;
