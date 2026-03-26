@@ -107,7 +107,7 @@ jobs:
         run: composer test-feature
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install
 
       - name: Run Browser Tests
         run: composer test-browser
