@@ -59,17 +59,6 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - name: Install system dependencies and PHP extensions
-        run: |
-          apt-get update && apt-get install -y --no-install-recommends \
-            git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
-            libzip-dev libonig-dev imagemagick libmagickwand-dev \
-            libicu-dev libexif-dev default-mysql-client
-          docker-php-ext-configure gd --with-freetype --with-jpeg
-          docker-php-ext-install pdo_mysql gd zip bcmath intl exif
-          pecl install imagick xdebug && docker-php-ext-enable imagick xdebug
-          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -77,6 +66,13 @@ jobs:
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, dom, fileinfo, mysql, gd, zip, bcmath, intl, exif, imagick
+          coverage: xdebug
 
       - name: Setup Node
         uses: actions/setup-node@v4
