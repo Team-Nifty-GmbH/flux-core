@@ -59,6 +59,9 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
+      - name: Install libsodium
+        run: apt-get update && apt-get install -y --no-install-recommends libsodium23
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
