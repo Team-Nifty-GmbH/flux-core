@@ -85,24 +85,24 @@
                     <div class="mt-3 text-center sm:mt-5">
                         <div x-show="dialogType === 'cancel'" x-cloak>
                             <h3
-                                class="text-lg font-semibold leading-6 text-gray-700 dark:text-dark-200"
+                                class="dark:text-dark-200 text-lg leading-6 font-semibold text-gray-700"
                                 x-html="'{{ __('Cancel :model', ['model' => __('Calendar Event')]) }}'"
                             ></h3>
                             <div class="mt-2">
                                 <p
-                                    class="text-sm text-gray-500 dark:text-dark-300"
+                                    class="dark:text-dark-300 text-sm text-gray-500"
                                     x-html="'{{ __('Do you really want to cancel this :model?', ['model' => __('Calendar Event')]) }}'"
                                 ></p>
                             </div>
                         </div>
                         <div x-show="dialogType === 'delete'" x-cloak>
                             <h3
-                                class="text-lg font-semibold leading-6 text-gray-700 dark:text-dark-200"
+                                class="dark:text-dark-200 text-lg leading-6 font-semibold text-gray-700"
                                 x-html="'{{ __('Delete :model', ['model' => __('Calendar Event')]) }}'"
                             ></h3>
                             <div class="mt-2">
                                 <p
-                                    class="text-sm text-gray-500 dark:text-dark-300"
+                                    class="dark:text-dark-300 text-sm text-gray-500"
                                     x-html="'{{ __('Do you really want to delete this :model?', ['model' => __('Calendar Event')]) }}'"
                                 ></p>
                             </div>

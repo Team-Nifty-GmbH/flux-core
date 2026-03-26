@@ -1,6 +1,6 @@
 <div class="mx-auto md:flex md:items-center md:justify-end md:space-x-5">
     <div
-        class="flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+        class="flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
     >
         <x-button
             color="indigo"
@@ -35,7 +35,7 @@
         />
     </div>
 </div>
-<div class="space-y-6 pb-16 pt-4">
+<div class="space-y-6 pt-4 pb-16">
     <x-card :header="__('Basic Information')">
         <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <x-input

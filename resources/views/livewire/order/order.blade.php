@@ -32,7 +32,7 @@
             }"
         >
             <div
-                class="space-y-2.5 divide-y divide-secondary-200"
+                class="divide-secondary-200 space-y-2.5 divide-y"
                 x-bind:class="$wire.disableReplicateModalInputs && 'pointer-events-none'"
             >
                 <x-select.styled
@@ -342,7 +342,7 @@
             </div>
         </div>
         <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
@@ -1051,7 +1051,7 @@
                                 </div>
                             </template>
                             <div
-                                class="flex justify-between bg-gray-50 p-2.5 dark:bg-secondary-700"
+                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
                             >
                                 <div>
                                     {{ __('Total Gross') }}
@@ -1063,7 +1063,7 @@
                                 </div>
                             </div>
                             <div
-                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
+                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
                             >
                                 <div>
                                     {{ __('Balance') }}
@@ -1077,7 +1077,7 @@
                             <div
                                 x-cloak
                                 x-show="$wire.order.balance_due_discount"
-                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
+                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
                             >
                                 <div>
                                     {{ __('Balance Due Discount') }}
@@ -1166,7 +1166,7 @@
                     @show
                     <x-card>
                         <div
-                            class="overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+                            class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
                         >
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>

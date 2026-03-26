@@ -254,7 +254,7 @@
     <div class="h-full w-full">
         <div
             calendar
-            class="h-full! border-l dark:border-secondary-600 dark:text-gray-50"
+            class="dark:border-secondary-600 h-full! border-l dark:text-gray-50"
         ></div>
     </div>
 </div>

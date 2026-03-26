@@ -382,7 +382,7 @@
 @section('attributes')
 @if (! $onlyPostal)
     <h3
-        class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
+        class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
     >
         {{ __('Attributes') }}
     </h3>
@@ -412,7 +412,7 @@
         @show
     </div>
     <h3
-        class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
+        class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
     >
         {{ __('Contact options') }}
     </h3>

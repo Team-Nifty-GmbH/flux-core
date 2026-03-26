@@ -141,7 +141,7 @@
     </form>
     @show
     <div class="border-b border-gray-200" x-data="{ active: 'roles' }">
-        <nav class="-mb-px mt-2 flex space-x-8 pb-5" aria-label="Tabs">
+        <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">
             <div
                 x-on:click="active = 'roles'"
                 x-bind:class="
@@ -149,7 +149,7 @@
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500'
                 "
-                class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
+                class="cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap hover:border-gray-200 hover:text-gray-700"
             >
                 {{ __('Roles') }}
             </div>
@@ -160,7 +160,7 @@
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500'
                 "
-                class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
+                class="cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap hover:border-gray-200 hover:text-gray-700"
             >
                 {{ __('Permissions') }}
             </div>
@@ -171,7 +171,7 @@
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500'
                 "
-                class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
+                class="cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap hover:border-gray-200 hover:text-gray-700"
             >
                 {{ __('Tenants') }}
             </div>
@@ -182,7 +182,7 @@
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500'
                 "
-                class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
+                class="cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap hover:border-gray-200 hover:text-gray-700"
                 x-show="$wire.userForm.id"
             >
                 {{ __('Commission Rates') }}

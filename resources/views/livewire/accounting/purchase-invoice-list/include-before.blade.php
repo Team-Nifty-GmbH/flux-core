@@ -176,7 +176,7 @@
                         />
                     </button>
                     <div x-cloak x-show="showPayment" x-collapse>
-                        <div class="grid grid-cols-2 gap-4 pb-2 pt-2">
+                        <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
                             @if (count($currencies ?? []) > 1)
                                 <div
                                     x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
@@ -256,7 +256,7 @@
                         />
                     </button>
                     <div x-cloak x-show="showBank" x-collapse>
-                        <div class="grid grid-cols-2 gap-4 pb-2 pt-2">
+                        <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
                             <div class="col-span-2">
                                 <x-select.styled
                                     :label="__('Lay out user')"
@@ -861,7 +861,7 @@
                                         />
                                         <canvas
                                             x-ref="cornerCanvas"
-                                            class="absolute left-0 top-0"
+                                            class="absolute top-0 left-0"
                                             style="touch-action: none"
                                             x-on:mousedown="startDrag($event)"
                                             x-on:mousemove="moveDrag($event)"

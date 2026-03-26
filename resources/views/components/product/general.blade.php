@@ -255,7 +255,7 @@
         />
     </x-card>
     <x-card
-        class="space-y-2.5 bg-gray-50 dark:bg-secondary-700"
+        class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
         :header="__('Product Properties')"
         x-data="{productPropertyGroup: null}"
     >

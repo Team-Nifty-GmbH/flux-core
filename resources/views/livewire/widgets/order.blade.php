@@ -60,7 +60,7 @@
             x-text="$wire.order.invoice_number"
         ></div>
     </div>
-    <div class="pb-2 pt-8 font-semibold uppercase">{{ __('Accounting') }}</div>
+    <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Accounting') }}</div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Payment state')" />
         <div
@@ -73,7 +73,7 @@
             x-text="formatters.money($wire.order.total_net_price, $wire.order.currency)"
         ></div>
     </div>
-    <div class="pb-2 pt-8 font-semibold uppercase">
+    <div class="pt-8 pb-2 font-semibold uppercase">
         {{ __('Order positions') }}
     </div>
     <div
