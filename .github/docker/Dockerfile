@@ -8,7 +8,10 @@ ENV PLAYWRIGHT_BROWSERS_PATH=0
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
       libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev \
-      default-mysql-client gnupg ca-certificates \
+      gnupg ca-certificates lsb-release \
+    && curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /etc/apt/keyrings/mysql.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ $(lsb_release -sc) mysql-8.0" > /etc/apt/sources.list.d/mysql.list \
+    && apt-get update && apt-get install -y --no-install-recommends mysql-community-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif pcntl sockets \
     && pecl install imagick xdebug && docker-php-ext-enable imagick xdebug \
