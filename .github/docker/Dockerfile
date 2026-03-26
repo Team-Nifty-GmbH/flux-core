@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
       libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev \
       default-mysql-client gnupg ca-certificates \
-    && curl -sL https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_amd64.deb -o /tmp/mysql-client.deb \
+    && ARCH=$(dpkg --print-architecture) \
+    && curl -sL "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_${ARCH}.deb" -o /tmp/mysql-client.deb \
     && dpkg -x /tmp/mysql-client.deb /tmp/mysql && cp /tmp/mysql/usr/bin/mysqldump /usr/local/bin/mysqldump \
     && rm -rf /tmp/mysql /tmp/mysql-client.deb \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
