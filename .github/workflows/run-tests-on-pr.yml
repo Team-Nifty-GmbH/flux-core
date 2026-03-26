@@ -60,7 +60,11 @@ jobs:
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - name: Install system dependencies
-        run: apt-get update && apt-get install -y --no-install-recommends libsodium23 software-properties-common
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends \
+            libsodium23 libzip4 libpng16-16t64 libjpeg8 libfreetype6 \
+            libicu74 libonig5 libmagickwand-6.q16-7t64 libexif12 \
+            software-properties-common
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
