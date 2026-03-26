@@ -69,10 +69,10 @@ class UserTenantScope implements Scope
                         ->whereColumn($pivotTable . '.' . $foreignPivotKey, $parentKey)
                         ->whereIntegerInRaw($pivotTable . '.' . $relatedPivotKey, $tenants);
                 })
-                ->orWhereDoesntExist(function ($sub) use ($pivotTable, $foreignPivotKey, $parentKey): void {
+                ->whereNotExists(function ($sub) use ($pivotTable, $foreignPivotKey, $parentKey): void {
                     $sub->from($pivotTable)
                         ->whereColumn($pivotTable . '.' . $foreignPivotKey, $parentKey);
-                })
+                }, 'or')
             );
         }
     }
