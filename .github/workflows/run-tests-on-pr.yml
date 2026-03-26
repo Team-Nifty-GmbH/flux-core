@@ -108,7 +108,7 @@ jobs:
 
       - name: Build assets and install Playwright
         run: |
-          npm run build
+          ./vendor/bin/testbench flux:install-assets --force
           npx playwright install chromium
         env:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
