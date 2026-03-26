@@ -107,13 +107,14 @@ jobs:
         run: composer test-feature
 
       - name: Install Playwright Browsers
-        run: |
-          node -e "console.log(require('playwright-core/package.json').version)"
-          npx playwright install chromium
-          npx playwright run-server --version
+        run: npx playwright install chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
       - name: Run Browser Tests
         run: composer test-browser
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
       - name: Upload Browser Test Artifacts
         uses: actions/upload-artifact@v4
