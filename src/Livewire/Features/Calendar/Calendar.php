@@ -182,17 +182,11 @@ class Calendar extends Component
                 $modalOpen('edit-event-modal');
             JS);
         } else {
-<<<<<<< HEAD
             $this->js(
                 <<<'JS'
                     $tsui.open.modal('edit-event-modal');
                 JS
             );
-=======
-            $this->js(<<<'JS'
-                $modalOpen('edit-event-modal');
-            JS);
->>>>>>> feature/auto-inject-frontend-assets
         }
     }
 
