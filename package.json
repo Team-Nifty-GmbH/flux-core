@@ -47,7 +47,7 @@
         "lodash": "^4.17.21",
         "lodash.debounce": "^4.0.8",
         "lodash.kebabcase": "^4.1.1",
-        "playwright": "1.54.1",
+        "playwright": "^1.54.0",
         "postcss": "^8.4.32",
         "postcss-import": "^16.1.0",
         "prettier": "3.8.1",
