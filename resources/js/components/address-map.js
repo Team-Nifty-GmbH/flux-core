@@ -80,6 +80,10 @@ export default function (
             }
         },
         addMarkers(addresses = null) {
+            if (!this.markers) {
+                return;
+            }
+
             let address = addresses ?? $wire[propertyName];
             if (propertyName.includes('.') && !addresses) {
                 const props = propertyName.split('.');
@@ -193,7 +197,7 @@ export default function (
             });
         },
         get showMap() {
-            return this.markers.getLayers().length > 0;
+            return this.markers?.getLayers().length > 0 ?? false;
         },
         addUserMarker() {
             navigator.geolocation.getCurrentPosition((position) => {
