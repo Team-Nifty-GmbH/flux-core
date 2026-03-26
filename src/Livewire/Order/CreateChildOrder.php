@@ -74,9 +74,9 @@ class CreateChildOrder extends Component
         $this->replicateOrder->order_positions = [];
 
         $this->availableOrderTypes = resolve_static(OrderType::class, 'query')
-            ->where('tenant_id', $parentOrder->tenant_id)
             ->where('order_type_enum', $this->type)
             ->where('is_active', true)
+            ->whereHasTenant($parentOrder->tenant_id)
             ->when(
                 $this->type === OrderTypeEnum::SplitOrder->value,
                 fn (Builder $query) => $query->where('is_hidden', false)
@@ -128,7 +128,7 @@ class CreateChildOrder extends Component
             ? __(':model created', ['model' => __('Retoure')])
             : __(':model created', ['model' => __('Split Order')]);
 
-        $this->notification()
+        $this->toast()
             ->success($successMessage)
             ->send();
 
@@ -152,9 +152,6 @@ class CreateChildOrder extends Component
             }
         }
 
-        $multiplier = OrderTypeEnum::tryFrom($this->type)
-            ?->multiplier()
-            ?? 1;
         $maxAmounts = $this->calculateMaxAmounts(
             DB::select(
                 'WITH RECURSIVE siblings AS (
@@ -169,8 +166,7 @@ class CreateChildOrder extends Component
                     WHERE op.deleted_at IS NULL
                 )
                 SELECT * FROM siblings'
-            ),
-            $multiplier
+            )
         );
 
         $orderPositions = resolve_static(OrderPosition::class, 'query')

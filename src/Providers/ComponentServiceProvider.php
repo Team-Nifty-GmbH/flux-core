@@ -49,7 +49,11 @@ class ComponentServiceProvider extends ServiceProvider
             $cachePath = $this->app->bootstrapPath('cache/flux-livewire-components.php');
 
             if (file_exists($cachePath)) {
-                return require $cachePath;
+                $cached = require $cachePath;
+
+                if (is_array($cached)) {
+                    return $cached;
+                }
             }
         }
 

@@ -268,7 +268,11 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
+<<<<<<< HEAD
                 wire:click="save().then((success) => { if(success) $tsui.close.modal('{{ $emailTemplateForm->modalName() }}')})"
+=======
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $emailTemplateForm->modalName() }}')})"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

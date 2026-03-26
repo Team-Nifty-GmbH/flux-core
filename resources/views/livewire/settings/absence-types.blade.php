@@ -250,7 +250,11 @@
             <x-button
                 :text="__('Save')"
                 color="primary"
+<<<<<<< HEAD
                 wire:click="save().then((success) => { if(success) $tsui.close.modal('{{ $absenceTypeForm->modalName() }}') })"
+=======
+                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $absenceTypeForm->modalName() }}') })"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

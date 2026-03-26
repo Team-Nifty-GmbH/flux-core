@@ -86,7 +86,11 @@
                         color="indigo"
                         icon="pencil"
                         x-ref="addPosition"
+<<<<<<< HEAD
                         wire:click="editOrderPosition().then(() => $tsui.open.modal('edit-order-position'))"
+=======
+                        x-on:click="$wire.editOrderPosition().then(() => $modalOpen('edit-order-position'))"
+>>>>>>> feature/auto-inject-frontend-assets
                     />
                 </div>
                 @show

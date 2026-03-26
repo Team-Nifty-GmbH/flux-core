@@ -60,7 +60,7 @@
 @show
 <main>
     @section('header')
-    <div class="prose-xs pb-4 pt-10">
+    <div class="prose-xs pt-10 pb-4">
         {{ render_editor_blade($model->header, ['order' => $model]) }}
         @if ($model->orderType?->document_header)
             {{ render_editor_blade($model->orderType->document_header, ['order' => $model]) }}
@@ -149,7 +149,7 @@
                     <td class="text-right">
                         {{ __('Sum net without discount') }}
                     </td>
-                    <td class="w-0 whitespace-nowrap pl-12 text-right">
+                    <td class="w-0 pl-12 text-right whitespace-nowrap">
                         {{ Number::currency($model->total_base_net_price) }}
                     </td>
                 </tr>
@@ -162,7 +162,7 @@
                                 {{ Number::percentage(bcmul($model->total_position_discount_percentage ?? 0, 100), maxPrecision: 2) }}
                             </span>
                         </td>
-                        <td class="w-0 whitespace-nowrap pl-12 text-right">
+                        <td class="w-0 pl-12 text-right whitespace-nowrap">
                             {{ Number::currency(bcmul($model->total_position_discount_flat ?? 0, -1)) }}
                         </td>
                     </tr>
@@ -171,7 +171,7 @@
                             <td class="text-right">
                                 {{ __('Sum net discounted') }}
                             </td>
-                            <td class="w-0 whitespace-nowrap pl-12 text-right">
+                            <td class="w-0 pl-12 text-right whitespace-nowrap">
                                 {{ Number::currency($model->total_base_discounted_net_price ?? 0) }}
                             </td>
                         </tr>
@@ -188,7 +188,7 @@
                                 {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100), maxPrecision: 2) }}
                             </span>
                         </td>
-                        <td class="w-0 whitespace-nowrap pl-12 text-right">
+                        <td class="w-0 pl-12 text-right whitespace-nowrap">
                             {{ Number::currency(bcmul(data_get($discount, 'discount_flat', 0), -1)) }}
                         </td>
                     </tr>
@@ -203,7 +203,7 @@
                 <td class="text-right">
                     {{ __('Sum net') }}
                 </td>
-                <td class="w-0 whitespace-nowrap pl-12 text-right">
+                <td class="w-0 pl-12 text-right whitespace-nowrap">
                     {{ Number::currency($model->total_net_price) }}
                 </td>
             </tr>
@@ -219,7 +219,7 @@
                             ])
                         }}
                     </td>
-                    <td class="w-0 whitespace-nowrap pl-12 text-right">
+                    <td class="w-0 pl-12 text-right whitespace-nowrap">
                         {{ Number::currency($vat['total_vat_price']) }}
                     </td>
                 </tr>
@@ -231,7 +231,7 @@
                 <td class="text-right">
                     {{ __('Total Gross') }}
                 </td>
-                <td class="w-0 whitespace-nowrap pl-12 text-right">
+                <td class="w-0 pl-12 text-right whitespace-nowrap">
                     {{ Number::currency($model->total_gross_price) }}
                 </td>
             </tr>

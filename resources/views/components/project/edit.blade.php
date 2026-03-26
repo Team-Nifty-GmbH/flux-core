@@ -4,13 +4,13 @@
         @section('general')
         <x-input
             :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Project Number')])"
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             wire:model="project.project_number"
             label="{{ __('Project Number') }}"
         />
         <x-input
             id="project-name"
-            x-bind:readonly="!edit"
+            x-bind:readonly="!isEditing"
             wire:model="project.name"
             label="{{ __('Name') }}"
         />
@@ -20,12 +20,12 @@
             class="space-y-2.5 p-0.5"
         >
             <div
-                x-bind:class="! edit && 'pointer-events-none'"
+                x-bind:class="! isEditing && 'pointer-events-none'"
                 x-show="! $wire.project.id"
                 x-cloak
             >
                 <x-select.styled
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     :label="__('Tenant')"
                     wire:model="project.tenant_id"
                     select="label:name|value:id"
@@ -40,23 +40,23 @@
                 @section('dates')
                 <x-date
                     without-time
-                    x-bind:readonly="!edit"
-                    x-bind:class="! edit && 'pointer-events-none'"
+                    x-bind:readonly="!isEditing"
+                    x-bind:class="! isEditing && 'pointer-events-none'"
                     wire:model="project.start_date"
                     :label="__('Start Date')"
                 />
                 <x-date
                     without-time
-                    x-bind:readonly="!edit"
-                    x-bind:class="! edit && 'pointer-events-none'"
+                    x-bind:readonly="!isEditing"
+                    x-bind:class="! isEditing && 'pointer-events-none'"
                     wire:model="project.end_date"
                     :label="__('End Date')"
                 />
                 @show
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="! isEditing && 'pointer-events-none'">
                 <x-flux::state
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     class="w-full"
                     align="bottom"
                     :label="__('Project state')"
@@ -66,14 +66,14 @@
                 />
             </div>
             <x-textarea
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model="project.description"
                 :label="__('Description')"
             />
             @section('connections')
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="! isEditing && 'pointer-events-none'">
                 <x-select.styled
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     :label="__('Responsible User')"
                     autocomplete="off"
                     wire:model="project.responsible_user_id"
@@ -88,9 +88,9 @@
                     ]"
                 />
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="! isEditing && 'pointer-events-none'">
                 <x-select.styled
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     wire:model="project.contact_id"
                     select="label:label|value:contact_id"
                     unfiltered
@@ -126,9 +126,9 @@
                     </x-slot>
                 </x-select.styled>
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="! isEditing && 'pointer-events-none'">
                 <x-select.styled
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     wire:model="project.order_id"
                     select="label:label|value:id"
                     unfiltered
@@ -153,12 +153,12 @@
             @section('budget')
             <x-number
                 :label="__('Budget')"
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 wire:model="project.budget"
                 step="0.01"
             />
             <x-input
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 :label="__('Time Budget')"
                 wire:model.blur="project.time_budget"
                 :corner-hint="__('Hours:Minutes')"

@@ -6,15 +6,19 @@
             :label="__('Address Type Code')"
             required
         />
-        <div x-show="! $wire.addressType.id" x-cloak>
-            <x-select.styled
-                :label="__('Tenant')"
-                autocomplete="off"
-                wire:model="addressType.tenant_id"
-                select="label:name|value:id"
-                :options="$tenants"
-            />
-        </div>
+        @if (count($tenants) > 1)
+            <div>
+                <x-select.styled
+                    :label="__('Tenants')"
+                    autocomplete="off"
+                    wire:model="addressType.tenants"
+                    multiple
+                    select="label:name|value:id"
+                    :options="$tenants"
+                />
+            </div>
+        @endif
+
         <div class="mt-2">
             <x-toggle
                 :label="__('Is Unique')"
@@ -37,7 +41,11 @@
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
             wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-address-type-modal')})"
+=======
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-address-type-modal')})"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

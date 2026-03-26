@@ -15,7 +15,7 @@
                 gs-y="{{ $widget['order_row'] }}"
             >
                 <div
-                    class="grid-stack-item-content h-full w-full animate-pulse bg-gray-100 dark:bg-secondary-600"
+                    class="grid-stack-item-content dark:bg-secondary-600 h-full w-full animate-pulse bg-gray-100"
                 ></div>
             </div>
         @endforeach
@@ -39,7 +39,7 @@
                     class="grid-stack-item-content"
                     x-bind:class="editGrid ? 'border-4 border-primary-500' : ''"
                 >
-                    <div class="absolute right-2 top-2 z-10">
+                    <div class="absolute top-2 right-2 z-10">
                         <x-button.circle
                             x-cloak
                             x-show="editGrid"

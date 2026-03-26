@@ -106,7 +106,6 @@ class Calendar extends Component
         JS);
     }
 
-    #[Renderless]
     #[On('calendar-event-click')]
     #[On('calendar-event-change')]
     public function editEvent(array $event, ?string $trigger = null): void
@@ -115,8 +114,13 @@ class Calendar extends Component
             && data_get($this->calendar, 'is_editable', true);
 
         if ($trigger === 'event-change' && ! $isEditable) {
+            $this->skipRender();
+            CalendarEventEdit::$skipNextRender = true;
+
             return;
         }
+
+        $previousEditComponent = $this->event->edit_component;
 
         $this->event->reset();
         $this->event->fillFromJs(array_merge(
@@ -150,6 +154,9 @@ class Calendar extends Component
         }
 
         if ($trigger === 'event-change') {
+            $this->skipRender();
+            CalendarEventEdit::$skipNextRender = true;
+
             try {
                 $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
                     ?? resolve_static(CalendarEvent::class, 'class');
@@ -164,6 +171,16 @@ class Calendar extends Component
 
                 return;
             }
+        } elseif ($previousEditComponent === $this->event->edit_component) {
+            $this->skipRender();
+            CalendarEventEdit::$skipNextRender = true;
+
+            $this->js(<<<'JS'
+                window.dispatchEvent(new CustomEvent('sync-calendar-event', {
+                    detail: JSON.parse(JSON.stringify($wire.event))
+                }));
+                $modalOpen('edit-event-modal');
+            JS);
         } else {
             $this->js(
                 <<<'JS'

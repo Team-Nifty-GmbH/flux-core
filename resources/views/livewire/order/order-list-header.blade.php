@@ -43,7 +43,11 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
+<<<<<<< HEAD
                 wire:click="discountSelectedPositions().then(() => {$tsui.close.modal('edit-position-discount');})"
+=======
+                x-on:click="$wire.discountSelectedPositions().then(() => {$modalClose('edit-position-discount');})"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>
@@ -81,6 +85,17 @@
                             :label="__('Name')"
                             wire:model="orderPosition.name"
                         />
+                        <div
+                            x-cloak
+                            x-show="$wire.orderPosition.is_bundle_parent"
+                        >
+                            <x-input
+                                type="number"
+                                min="0"
+                                :label="__('Amount')"
+                                wire:model="orderPosition.amount"
+                            />
+                        </div>
                         <div
                             class="space-y-4"
                             x-cloak
@@ -412,7 +427,11 @@
                         flat
                         color="red"
                         :text="__('Delete')"
+<<<<<<< HEAD
                         wire:click="deleteOrderPosition().then((success) => {if(success) $tsui.close.modal('edit-order-position');})"
+=======
+                        x-on:click="$wire.deleteOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+>>>>>>> feature/auto-inject-frontend-assets
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
                     />
                 </div>
@@ -426,9 +445,13 @@
                     />
                     <x-button
                         color="indigo"
+<<<<<<< HEAD
                         wire:click="addOrderPosition().then((success) => {if(success) $tsui.close.modal('edit-order-position');})"
+=======
+                        x-on:click="$wire.addOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        x-cloak
+>>>>>>> feature/auto-inject-frontend-assets
                         x-show="!$wire.order.is_locked"
-                        x-on:click=""
                         :text="__('Save')"
                     />
                 </div>

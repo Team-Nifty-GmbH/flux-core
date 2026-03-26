@@ -360,8 +360,10 @@ class OrderPositions extends OrderPositionList
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         if ($orderPosition->exists) {
             $this->orderPosition->fill($orderPosition);
+            $this->orderPosition->is_bundle_parent = $orderPosition->is_free_text
+                && $orderPosition->children()->whereNotNull('amount')->exists();
         } else {
-            $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')->getKey();
+            $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')?->getKey();
         }
 
         $this->js(<<<'JS'

@@ -54,7 +54,7 @@ class Accounting extends OrderTransactionList
             DataTableButton::make()
                 ->text(__('Add'))
                 ->color('indigo')
-                ->wireClick('editTransaction')
+                ->wireClick('editTransaction()')
                 ->when(fn () => resolve_static(CreateTransaction::class, 'canPerformAction', [false])),
         ];
     }

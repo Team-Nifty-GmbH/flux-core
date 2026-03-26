@@ -20,7 +20,11 @@
             </span>
             <span
                 x-text="$wire.software"
+<<<<<<< HEAD
                 class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+=======
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
+>>>>>>> feature/auto-inject-frontend-assets
             ></span>
         </div>
         <div>
@@ -29,7 +33,11 @@
             </span>
             <span
                 x-text="$wire.os"
+<<<<<<< HEAD
                 class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+=======
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
+>>>>>>> feature/auto-inject-frontend-assets
             ></span>
         </div>
         <div>
@@ -38,7 +46,11 @@
             </span>
             <span
                 x-text="$wire.server_name"
+<<<<<<< HEAD
                 class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+=======
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
+>>>>>>> feature/auto-inject-frontend-assets
             ></span>
         </div>
         <div>
@@ -47,7 +59,11 @@
             </span>
             <span
                 x-text="$wire.document_root"
+<<<<<<< HEAD
                 class="wrap-break-word text-sm font-medium text-gray-900 dark:text-white"
+=======
+                class="text-sm font-medium wrap-break-word text-gray-900 dark:text-white"
+>>>>>>> feature/auto-inject-frontend-assets
             ></span>
         </div>
     </div>

@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Order;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
+use FluxErp\Models\AddressType;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -12,10 +13,10 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Order\CreateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CreateOrder extends FluxAction
@@ -70,8 +71,9 @@ class CreateOrder extends FluxAction
     {
         $this->data['currency_id'] ??= resolve_static(Currency::class, 'default')?->getKey();
 
-        if (! data_get($this->data, 'address_invoice_id', false)
-            && $contactId = data_get($this->data, 'contact_id', false)
+        $contactId = $this->getData('contact_id');
+        if (! $this->getData('address_invoice_id')
+            && $contactId
         ) {
             $contact = resolve_static(Contact::class, 'query')
                 ->whereKey($contactId)
@@ -80,8 +82,8 @@ class CreateOrder extends FluxAction
 
             $addressInvoice = $contact->invoiceAddress ?? $contact->mainAddress ?? $contact->addresses->first();
             $this->data['address_invoice_id'] = $addressInvoice->id;
-        } elseif (! data_get($this->data, 'contact_id', false)
-            && $addressInvoiceId = data_get($this->data, 'address_invoice_id', false)
+        } elseif (! $contactId
+            && $addressInvoiceId = data_get($this->data, 'address_invoice_id')
         ) {
             $addressInvoice = resolve_static(Address::class, 'query')
                 ->whereKey($addressInvoiceId)
@@ -118,7 +120,7 @@ class CreateOrder extends FluxAction
         $this->data['payment_type_id'] = $this->data['payment_type_id']
             ?? $contact->payment_type_id
             ?? resolve_static(PaymentType::class, 'default')?->getKey();
-        $this->data['tenant_id'] ??= $contact->tenant_id;
+        $this->data['tenant_id'] ??= $contact->getTenantId();
 
         $paymentType = resolve_static(PaymentType::class, 'query')
             ->whereKey(data_get($this->data, 'payment_type_id'))
@@ -154,51 +156,85 @@ class CreateOrder extends FluxAction
             ?? resolve_static(Language::class, 'default')?->getKey();
 
         $this->data['order_date'] ??= now();
-
-        $this->rules = array_merge(
-            $this->rules,
-            [
-                'order_type_id' => [
-                    'required',
-                    'integer',
-                    (new ModelExists(OrderType::class))->where('tenant_id', $this->data['tenant_id']),
-                ],
-                'payment_type_id' => [
-                    'required',
-                    'integer',
-                    (new ModelExists(PaymentType::class))
-                        ->whereRelation('tenants', 'id', $this->data['tenant_id']),
-                ],
-            ]
-        );
     }
 
     protected function validateData(): void
     {
         parent::validateData();
 
+        $errors = [];
+        $hasTenants = [
+            'contact_id' => Contact::class,
+            'address_invoice_id' => Address::class,
+            'address_delivery_id' => Address::class,
+            'order_type_id' => OrderType::class,
+            'payment_type_id' => PaymentType::class,
+            'address_delivery.id' => Address::class,
+            'addresses.*.address_id' => Address::class,
+            'addresses.*.address_type_id' => AddressType::class,
+        ];
+        $tenantId = $this->getData('tenant_id');
+        foreach ($hasTenants as $key => $class) {
+            $values = $this->getData($key);
+            if (! $values) {
+                continue;
+            }
+
+            $values = Arr::wrap($values);
+            foreach ($values as $index => $value) {
+                if (resolve_static($class, 'query')
+                    ->whereKey($value)
+                    ->whereHasTenant($tenantId)
+                    ->doesntExist()
+                ) {
+                    $errors += [
+                        str_replace('*', $index, $key) => [
+                            Str::headline(morph_alias($class)) . ' not found on given tenant.',
+                        ],
+                    ];
+                }
+            }
+        }
+
+        if ($parentId = $this->getData('parent_id')) {
+            if (resolve_static(Order::class, 'query')
+                ->whereKey($parentId)
+                ->value('tenant_id') !== $tenantId
+            ) {
+                $errors += [
+                    'parent_id' => ['Parent order not found on given tenant.'],
+                ];
+            }
+        }
+
         if ($this->data['invoice_number'] ?? false) {
+            $contactId = $this->getData('contact_id');
             $isPurchase = resolve_static(OrderType::class, 'query')
                 ->whereKey($this->data['order_type_id'])
                 ->whereIn('order_type_enum', [OrderTypeEnum::Purchase->value, OrderTypeEnum::PurchaseRefund->value])
                 ->exists();
 
-            if ($isPurchase && ! ($this->data['contact_id'] ?? false)) {
-                throw ValidationException::withMessages([
+            if ($isPurchase && ! $contactId) {
+                $errors += [
                     'contact_id' => [__('validation.required', ['attribute' => 'contact_id'])],
-                ])->errorBag('createOrder');
+                ];
             }
 
             if (resolve_static(Order::class, 'query')
                 ->where('tenant_id', $this->data['tenant_id'])
                 ->where('invoice_number', $this->data['invoice_number'])
-                ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $this->data['contact_id']))
+                ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $contactId))
                 ->exists()
             ) {
-                throw ValidationException::withMessages([
+                $errors += [
                     'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
-                ])->errorBag('createOrder');
+                ];
             }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)
+                ->errorBag('createOrder');
         }
     }
 }

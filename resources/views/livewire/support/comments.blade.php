@@ -1,11 +1,14 @@
 <div class="relative">
     <section>
         <div
+            wire:ignore
             x-data="{
                 ...comments(),
                 user: @js(auth()->user()),
                 avatarUrl: @js(auth()->user()?->getAvatarUrl()),
+                echoChannel: @js($this->modelId ? morph_alias($this->modelType) . '.' . $this->modelId : null),
             }"
+            x-on:remove="echoChannel && window.Echo?.leave(echoChannel)"
         >
             <div>
                 <template x-ref="textarea">
@@ -33,7 +36,7 @@
                         </template>
                     </div>
                     <div
-                        class="overflow-auto soft-scrollbar dark:divide-secondary-700"
+                        class="soft-scrollbar dark:divide-secondary-700 overflow-auto"
                     >
                         <h3 class="pb-4">{{ __('All comments') }}</h3>
                         <div class="tree-container w-full gap-4">

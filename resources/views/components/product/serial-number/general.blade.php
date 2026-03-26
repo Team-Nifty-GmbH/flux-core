@@ -4,7 +4,7 @@
             <div class="grid grid-cols-3 gap-4">
                 <x-input
                     :label="__('Serial number')"
-                    x-bind:readonly="! edit"
+                    x-bind:readonly="! isEditing"
                     wire:model.blur="serialNumber.serial_number"
                 />
             </div>
@@ -32,7 +32,7 @@
     @if ($serialNumberId = data_get($this->serialNumber, 'id'))
         <x-card :header="__('Files')">
             <livewire:product.serial-number.media
-                wire:key="{{ uniqid() }}"
+                wire:key="serial-number-media-{{ $serialNumberId }}"
                 :model-id="$serialNumberId"
             />
         </x-card>

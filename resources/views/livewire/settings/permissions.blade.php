@@ -23,7 +23,11 @@
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
             wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-role-users-modal'); })"
+=======
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-role-users-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>
@@ -44,7 +48,7 @@
             <x-label :label="__('Permissions')" />
             <div x-show="$wire.roleForm.name !== 'Super Admin'" x-cloak>
                 <x-flux::checkbox-tree
-                    wire:model="$entangle('roleForm.permissions')"
+                    wire:model="roleForm.permissions"
                     selectable="true"
                     tree="$wire.permissions"
                     name-attribute="label"
@@ -65,7 +69,11 @@
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
             wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-role-permissions-modal'); })"
+=======
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-role-permissions-modal'); })"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

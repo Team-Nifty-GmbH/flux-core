@@ -1,14 +1,14 @@
 <nav class="h-full max-h-80 overflow-y-auto" aria-label="Directory">
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>A</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -37,7 +37,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -66,7 +66,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -95,7 +95,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -126,14 +126,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>B</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -162,7 +162,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -191,7 +191,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -222,14 +222,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>C</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -258,7 +258,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -289,14 +289,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>E</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -325,7 +325,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -354,7 +354,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -383,7 +383,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -414,14 +414,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>G</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -450,7 +450,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -481,14 +481,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>M</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -517,7 +517,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -546,7 +546,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -577,14 +577,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>S</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -613,7 +613,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -644,14 +644,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>T</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -680,7 +680,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -709,7 +709,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -740,14 +740,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>W</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -776,7 +776,7 @@
 
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img
@@ -807,14 +807,14 @@
 
     <div class="relative">
         <div
-            class="sticky top-0 z-10 border-b border-t border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
+            class="sticky top-0 z-10 border-t border-b border-gray-200 bg-gray-50 px-6 py-1 text-sm font-medium text-gray-500"
         >
             <h3>Y</h3>
         </div>
         <ul role="list" class="relative z-0 divide-y divide-gray-200">
             <li class="bg-white">
                 <div
-                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50"
+                    class="relative flex items-center space-x-3 px-6 py-5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-inset hover:bg-gray-50"
                 >
                     <div class="shrink-0">
                         <img

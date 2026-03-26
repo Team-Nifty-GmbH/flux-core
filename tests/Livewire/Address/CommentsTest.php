@@ -6,12 +6,9 @@ use FluxErp\Models\Contact;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contact = Contact::factory()->create();
 
     $this->address = Address::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 });

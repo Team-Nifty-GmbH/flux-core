@@ -44,11 +44,11 @@ class PaymentReminder extends OrderList
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('Create Payment Reminder'))
-                ->wireClick('openCreateDocumentsModal'),
+                ->wireClick('openCreateDocumentsModal()'),
             DataTableButton::make()
                 ->text(__('Mark as paid'))
                 ->when(fn () => resolve_static(UpdateOrder::class, 'canPerformAction', [false]))
-                ->wireClick('markAsPaid'),
+                ->wireClick('markAsPaid()'),
         ];
     }
 
@@ -70,7 +70,7 @@ class PaymentReminder extends OrderList
 
         $skippedCount = (clone $baseQuery)->count() - $ordersWithEmail->count();
         if ($skippedCount > 0) {
-            $this->notification()->warning(
+            $this->toast()->warning(
                 __(':count order(s) skipped due to missing email address.', ['count' => $skippedCount])
             );
         }

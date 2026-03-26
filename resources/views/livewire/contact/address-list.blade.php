@@ -61,7 +61,11 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
+<<<<<<< HEAD
                 wire:click="createLeads().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
+=======
+                x-on:click="$wire.createLeads().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
+>>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

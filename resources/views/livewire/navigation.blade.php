@@ -81,7 +81,7 @@
                                 @if ($navigation["children"] ?? false)
                                     <span
                                         aria-hidden="true"
-                                        class="ml-auto pl-2 pr-2"
+                                        class="ml-auto pr-2 pl-2"
                                     >
                                         <x-icon
                                             name="chevron-left"
@@ -133,7 +133,7 @@
                             <span class="truncate text-sm text-white">
                                 {{ __("Frequently visited") }}
                             </span>
-                            <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                            <span aria-hidden="true" class="ml-auto pr-2 pl-2">
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
@@ -191,7 +191,7 @@
                             <span class="truncate text-sm text-white">
                                 {{ __("Favorites") }}
                             </span>
-                            <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                            <span aria-hidden="true" class="ml-auto pr-2 pl-2">
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"

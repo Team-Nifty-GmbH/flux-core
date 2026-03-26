@@ -27,7 +27,11 @@
 }
 
 .fc-scrollgrid {
+<<<<<<< HEAD
     @apply border-b-0! border-l-0! border-r-0! border-gray-200!;
+=======
+    @apply border-r-0! border-b-0! border-l-0! border-gray-200!;
+>>>>>>> feature/auto-inject-frontend-assets
 }
 
 .fc-col-header-cell .fc-scrollgrid-sync-inner {

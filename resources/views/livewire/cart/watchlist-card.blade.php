@@ -27,7 +27,6 @@
         x-show="showCart === {{ $cartForm->id ?? 'null' }}"
         x-collapse
     >
-        @section('cart-items')
         @foreach ($cartForm->cart_items ?? [] as $cartFormItem)
             @if (is_null($cartFormItem))
                 @continue
@@ -43,22 +42,20 @@
                         color="red"
                         icon="x-mark"
                         wire:click="removeProduct({{ $cartFormItem['product_id'] }})"
-                        class="absolute right-2 top-2 z-10 h-4 w-4"
+                        class="absolute top-2 right-2 z-10 h-4 w-4"
                     />
                 @endif
 
-                <div class="rounded-lg border p-4 dark:border-secondary-700">
+                <div class="dark:border-secondary-700 rounded-lg border p-4">
                     <div class="font-semibold">
                         {{ $cartFormItem['name'] ?? ($cartFormItem['product']['name'] ?? __('Product')) }}
                     </div>
-                    <div class="text-sm text-secondary-500">
+                    <div class="text-secondary-500 text-sm">
                         {{ __('Amount') }}: {{ $cartFormItem['amount'] ?? 1 }}
                     </div>
                 </div>
             </div>
         @endforeach
-
-        @show
     </div>
     @if ($cartForm->isUserOwned())
         <hr />

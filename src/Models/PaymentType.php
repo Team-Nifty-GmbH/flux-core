@@ -8,6 +8,7 @@ use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
+use FluxErp\Traits\Model\HasTenants;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PaymentType extends FluxModel
 {
-    use Filterable, HasAttributeTranslations, HasDefault, HasPackageFactory, HasTenantAssignment, HasUserModification,
-        HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasDefault, HasPackageFactory, HasTenantAssignment, HasTenants,
+        HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected function casts(): array
     {

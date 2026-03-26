@@ -95,9 +95,31 @@
             <x-button
                 :text="__('Save')"
                 color="primary"
-                wire:click="save().then((success) => {
+                x-on:click="$wire.save().then((success) => {
                     if (success) {
                         $tsui.close.modal('{{ $employeeForm->modalName() }}');
+                    }
+                })"
+            />
+        </x-slot>
+    </x-modal>
+    <x-modal
+        id="close-employee-day-modal"
+        :title="__('Bulk Close Employee Day')"
+    >
+        <x-date :label="__('Time Frame')" range wire:model="timeframe" />
+        <x-slot:footer>
+            <x-button
+                :text="__('Cancel')"
+                color="secondary"
+                x-on:click="$modalClose('close-employee-day-modal')"
+            />
+            <x-button
+                :text="__('Save')"
+                color="primary"
+                x-on:click="$wire.closeEmployeeDay().then((success) => {
+                    if (success) {
+                        $modalClose('close-employee-day-modal');
                     }
                 })"
             />

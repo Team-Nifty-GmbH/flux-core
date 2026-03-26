@@ -22,7 +22,6 @@ class LockedWorkTimeForm extends FluxForm
 
     public ?bool $is_billable = null;
 
-    #[Locked]
     public bool $is_daily_work_time = false;
 
     #[Locked]

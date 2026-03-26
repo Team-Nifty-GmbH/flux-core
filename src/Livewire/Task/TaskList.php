@@ -43,7 +43,7 @@ class TaskList extends BaseTaskList
                 ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateTask::class, 'canPerformAction', [false]))
-                ->wireClick('show'),
+                ->wireClick('edit()'),
         ];
     }
 
@@ -64,7 +64,7 @@ class TaskList extends BaseTaskList
     }
 
     #[Renderless]
-    public function show(): void
+    public function edit(): void
     {
         $this->task->reset();
 
