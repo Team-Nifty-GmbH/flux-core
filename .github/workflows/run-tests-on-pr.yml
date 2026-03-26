@@ -107,7 +107,10 @@ jobs:
         run: composer test-feature
 
       - name: Install Playwright Browsers
-        run: npm install playwright@latest && npx playwright install
+        run: |
+          npm install playwright@latest
+          npx playwright install chromium
+          npx playwright install-deps chromium 2>/dev/null || true
 
       - name: Run Browser Tests
         run: composer test-browser
