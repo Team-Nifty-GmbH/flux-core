@@ -25,3 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get -y autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN git config --global --add safe.directory '*'
+
+# Disable SSL verification for mysql/mysqldump CLI tools
+# (GitHub Actions MySQL service uses self-signed certs)
+RUN printf "[client]\nssl-mode=DISABLED\n[mysqldump]\nssl-mode=DISABLED\ncolumn-statistics=0\n" > /etc/my.cnf
