@@ -351,7 +351,7 @@ trait SupportsAutoRender
 
         return '<div x-on:keydown.enter.prevent="$wire.' . $saveAction . '"'
             . ' x-on:keydown.escape.prevent="' . $cancelAction . '">'
-            . '<x-modal id="' . $modalName . '"' . $persistent . $tsui.focus . '>'
+            . '<x-modal id="' . $modalName . '"' . $persistent . $tsuiFocus . '>'
             . $content
             . '<x-slot:footer>'
             . '<div class="flex w-full justify-between">'
