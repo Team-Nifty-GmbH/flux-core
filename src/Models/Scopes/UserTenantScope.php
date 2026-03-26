@@ -58,8 +58,8 @@ class UserTenantScope implements Scope
         if ($model->isRelation('tenants')
             && ($relation = $model->tenants()) instanceof BelongsToMany
         ) {
-            if (! $builder->getQuery()->columns) {
-                $builder->select($model->getTable() . '.*');
+            if (is_null($builder->getQuery()->columns)) {
+                $builder->select($builder->getQuery()->from . '.*');
             }
 
             // uts = UserTenantScope
