@@ -84,7 +84,7 @@ jobs:
         run: npm i
 
       - name: Install Playwright Browsers
-        run: npx playwright install chromium
+        run: npm install playwright@latest && npx playwright install chromium
 
       - name: Pint
         run: ./vendor/bin/pint --test --parallel
