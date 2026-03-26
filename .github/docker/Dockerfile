@@ -9,10 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
       libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev \
       default-mysql-client gnupg ca-certificates \
-    && ARCH=$(dpkg --print-architecture) \
-    && curl -sL "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_${ARCH}.deb" -o /tmp/mysql-client.deb \
-    && dpkg -x /tmp/mysql-client.deb /tmp/mysql && cp /tmp/mysql/usr/bin/mysqldump /usr/local/bin/mysqldump \
-    && rm -rf /tmp/mysql /tmp/mysql-client.deb \
+    && if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
+         curl -sL "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_amd64.deb" -o /tmp/mysql-client.deb \
+         && dpkg -x /tmp/mysql-client.deb /tmp/mysql && cp /tmp/mysql/usr/bin/mysqldump /usr/local/bin/mysqldump \
+         && rm -rf /tmp/mysql /tmp/mysql-client.deb; \
+       fi \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif pcntl sockets \
     && pecl install imagick xdebug && docker-php-ext-enable imagick xdebug \
