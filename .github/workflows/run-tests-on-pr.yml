@@ -78,6 +78,9 @@ jobs:
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
+      - name: Configure Composer GitHub auth
+        run: composer config --global github-oauth.github.com ${{ github.token }}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
