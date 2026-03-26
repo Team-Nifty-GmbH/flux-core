@@ -10,11 +10,12 @@ jobs:
   laravel:
     name: Laravel ${{ matrix.laravel }} (PHP ${{ matrix.php-versions }}) - ${{ matrix.browser }}
     runs-on: [self-hosted, Linux]
+    container:
+      image: php:${{ matrix.php-versions }}
     env:
-      HOME: /github/home
       DB_CONNECTION: mysql
-      DB_HOST: 127.0.0.1
-      DB_PORT: 33306
+      DB_HOST: mysql
+      DB_PORT: 3306
       DB_DATABASE: testing
       DB_USERNAME: root
       DB_PASSWORD: password
@@ -22,6 +23,9 @@ jobs:
       CACHE_DRIVER: redis
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MEILISEARCH_HOST: http://meilisearch:7700
     strategy:
       fail-fast: false
       matrix:
@@ -32,7 +36,6 @@ jobs:
           - laravel: 12.*
             testbench: 10.*
 
-    # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
       mysql:
         image: mysql:8.0
@@ -40,10 +43,7 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: false
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: testing
-        ports:
-          - 33306:3306/tcp
         options: >-
-          --sysctl net.ipv4.ip_unprivileged_port_start=0
           --tmpfs /var/lib/mysql
           --tmpfs /var/log/mysql
           --tmpfs /tmp
@@ -54,53 +54,44 @@ jobs:
 
       redis:
         image: redis
-        ports:
-          - 6379:6379/tcp
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
       meilisearch:
         image: getmeili/meilisearch:latest
-        ports:
-          - 7700/tcp
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
+      - name: Install system dependencies and PHP extensions
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends \
+            git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
+            libzip-dev libonig-dev imagemagick libmagickwand-dev \
+            default-mysql-client
+          docker-php-ext-configure gd --with-freetype --with-jpeg
+          docker-php-ext-install pdo_mysql gd zip
+          pecl install xdebug && docker-php-ext-enable xdebug
+          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, dom, fileinfo, mysql
-          coverage: xdebug
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
-      - name: Cache composer dependencies
-        run: |
-          echo "COMPOSER_CACHE_DIR=$(composer config cache-files-dir)" >> $GITHUB_ENV
-
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
       - name: Change ImageMagick policy to allow pdf->png conversion
         run: |
-          sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
+          sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
 
       - name: Change Laravel Version Dependencies
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
 
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-
-      - name: Install dependencies
+      - name: Install npm dependencies
         run: npm i
 
       - name: Install Playwright Browsers
@@ -123,30 +114,15 @@ jobs:
 
       - name: Run Unit Tests
         run: composer test-unit
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Run Livewire Tests
         run: composer test-livewire
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Run Feature Tests
         run: composer test-feature
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+
       - name: Run Browser Tests
         run: composer test-browser
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Upload Browser Test Artifacts
         uses: actions/upload-artifact@v4
