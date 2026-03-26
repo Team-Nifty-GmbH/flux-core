@@ -123,3 +123,12 @@ jobs:
             tests/Browser/Screenshots/
             vendor/orchestra/testbench-core/laravel/storage/logs/
           retention-days: 7
+
+  cleanup:
+    name: Cleanup Docker resources
+    runs-on: [self-hosted, Linux]
+    needs: laravel
+    if: always()
+    steps:
+      - name: Prune unused Docker images older than 7 days
+        run: docker image prune -af --filter "until=168h"
