@@ -59,14 +59,6 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Fix git ownership
-        run: git config --global --add safe.directory $GITHUB_WORKSPACE
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -74,21 +66,21 @@ jobs:
           extensions: mbstring, dom, fileinfo, mysql, gd, zip, bcmath, intl, exif, imagick
           coverage: xdebug
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
+      - name: Change Laravel Version Dependencies
+        run: composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: Change ImageMagick policy to allow pdf->png conversion
-        run: |
-          sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
-
-      - name: Change Laravel Version Dependencies
-        run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
 
       - name: Install npm dependencies
         run: npm i
@@ -107,7 +99,6 @@ jobs:
 
       - name: Create schema
         run: |
-          cd $GITHUB_WORKSPACE
           ./vendor/bin/testbench migrate --force
           ./vendor/bin/testbench schema:dump
 
