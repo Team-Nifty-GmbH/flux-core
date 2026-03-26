@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
-use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\TimelineChart;
 use FluxErp\Models\Order;
@@ -86,7 +85,7 @@ class OrdersTimeline extends TimelineChart implements HasWidgetOptions
                             $order->system_delivery_date->timestamp * 1000,
                             ($order->system_delivery_date_end ?? $order->system_delivery_date)->timestamp * 1000,
                         ],
-                        'fillColor' => ChartColorEnum::Blue,
+                        'fillColor' => '#3b82f6',
                     ])
                     ->toArray(),
             ],

@@ -24,7 +24,7 @@
                 </x-slot>
                 @foreach ($unsignedViews as $unsignedView)
                     <x-dropdown.items
-                        x-on:click="$wire.setPublicLink('{{ $unsignedView }}').then(() => show = false)"
+                        wire:click="setPublicLink('{{ $unsignedView }}').then(() => show = false)"
                     >
                         {{ __($unsignedView) }}
                     </x-dropdown.items>

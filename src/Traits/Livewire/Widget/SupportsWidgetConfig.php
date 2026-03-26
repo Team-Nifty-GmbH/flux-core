@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
+use Livewire\Mechanisms\ComponentRegistry;
 
 trait SupportsWidgetConfig
 {
@@ -22,7 +23,7 @@ trait SupportsWidgetConfig
             ->widgets()
             ->where(
                 'dashboard_component',
-                app('livewire.factory')->resolveComponentClass($this->dashboardComponent)
+                app(ComponentRegistry::class)->getClass($this->dashboardComponent)
             )
             ->where('component_name', $this->getName())
             ->first();

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 
@@ -365,7 +366,7 @@ class FluxOptimize extends Command
             flux_path('src/Livewire/Widgets') => 'FluxErp\Livewire\Widgets',
         ];
 
-        $finder = app('livewire.finder');
+        $componentRegistry = app(ComponentRegistry::class);
         $allWidgets = [];
 
         foreach ($directories as $directory => $namespace) {
@@ -398,7 +399,7 @@ class FluxOptimize extends Command
                     continue;
                 }
 
-                $componentName = $finder->normalizeName($class);
+                $componentName = $componentRegistry->getName($class);
                 $widgets[$componentName] = $class;
             }
 

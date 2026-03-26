@@ -29,7 +29,7 @@ class Units extends UnitList
                 ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateUnit::class, 'canPerformAction', [false]))
-                ->wireClick('edit()'),
+                ->wireClick('edit'),
         ];
     }
 

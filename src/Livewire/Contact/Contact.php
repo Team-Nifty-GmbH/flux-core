@@ -38,7 +38,7 @@ class Contact extends Component
     public function mount(?int $id = null): void
     {
         $contact = resolve_static(ContactModel::class, 'query')
-            ->with(['mainAddress', 'categories:id', 'tenants:id'])
+            ->with(['mainAddress', 'categories:id'])
             ->whereKey($id)
             ->firstOrFail();
 

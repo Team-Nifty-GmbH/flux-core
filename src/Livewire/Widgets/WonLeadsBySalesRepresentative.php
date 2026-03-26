@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
-use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
@@ -59,6 +58,15 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
     #[Renderless]
     public function calculateChart(): void
     {
+        // Default colors of apexcharts
+        $colors = [
+            '#2E93fA',
+            '#66DA26',
+            '#546E7A',
+            '#E91E63',
+            '#FF9800',
+        ];
+
         $start = $this->getStart();
         $end = $this->getEnd();
 
@@ -77,15 +85,11 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
 
         $i = 0;
         $this->series = $leadCounts
-            ->map(function (Model $user) use (&$i): array {
+            ->map(function (Model $user) use (&$i, $colors): array {
                 return [
                     'id' => $user->getKey(),
                     'name' => $user->getLabel(),
-                    'color' => $user->color ?? resolve_static(
-                        ChartColorEnum::class,
-                        'forIndex',
-                        ['index' => $i++]
-                    )->value,
+                    'color' => $user->color ?? $colors[$i++ % count($colors)],
                     'data' => [$user->total],
                 ];
             })

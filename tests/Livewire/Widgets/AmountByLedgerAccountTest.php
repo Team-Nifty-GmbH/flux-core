@@ -29,9 +29,12 @@ beforeEach(function (): void {
         'ledger_account_type_enum' => 'expense',
     ]);
 
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -44,6 +47,7 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
@@ -70,8 +74,6 @@ beforeEach(function (): void {
         'ledger_account_id' => $this->ledgerAccountRevenue->id,
         'order_id' => $this->orders[0]->id,
         'total_gross_price' => 2000,
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 
     OrderPosition::factory()->count(10)->create([
@@ -79,16 +81,12 @@ beforeEach(function (): void {
         'ledger_account_id' => $this->ledgerAccountExpenses->id,
         'order_id' => $this->orders[1]->id,
         'total_gross_price' => 2000,
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 
     OrderPosition::factory()->count(10)->create([
         'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $this->orders[2]->id,
         'total_gross_price' => 2000,
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 
     OrderPosition::factory()->count(2)->create([
@@ -96,8 +94,6 @@ beforeEach(function (): void {
         'order_id' => $this->orders[3]->id,
         'total_gross_price' => 2000,
         'created_at' => Carbon::yesterday(),
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 });
 
@@ -165,8 +161,6 @@ test('net orders get successfully ignored', function (): void {
         'ledger_account_id' => $this->ledgerAccountExpenses->id,
         'order_id' => $this->orders[4]->id,
         'total_net_price' => 2000,
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 
     Livewire::test(AmountByLedgerAccount::class)

@@ -111,8 +111,6 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
     {
         parent::validateData();
 
-        $errors = [];
-
         if (
             ! data_get($this->data, 'iban')
             && resolve_static(PaymentType::class, 'query')
@@ -122,11 +120,10 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->where('contact_id', $this->data['contact_id'])
                 ->doesntExist()
         ) {
-            $errors += ['iban' => ['iban' => __('validation.required', ['attribute' => 'IBAN'])]];
-        }
-
-        if (! $this->purchaseInvoice?->getFirstMedia('purchase_invoice')) {
-            $errors += ['purchase_invoice' => ['The purchase invoice has no attached document.']];
+            throw ValidationException::withMessages([
+                'iban' => ['iban' => __('validation.required', ['attribute' => 'IBAN'])],
+            ])
+                ->errorBag('createOrderFromPurchaseInvoice');
         }
 
         /** @var PurchaseInvoice $purchaseInvoice */
@@ -147,19 +144,17 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 2
             ) !== 0
         ) {
-            $errors += ['total_gross_price' => [
-                __(
-                    'The total gross :total-gross must match the sum of all position total prices :pos-total.',
-                    [
-                        'total-gross' => $this->getData('total_gross_price'),
-                        'pos-total' => $totalPositionGross,
-                    ]
-                ),
-            ]];
-        }
-
-        if ($errors) {
-            throw ValidationException::withMessages($errors)
+            throw ValidationException::withMessages([
+                'total_gross_price' => [
+                    __(
+                        'The total gross :total-gross must match the sum of all position total prices :pos-total.',
+                        [
+                            'total-gross' => $this->getData('total_gross_price'),
+                            'pos-total' => $totalPositionGross,
+                        ]
+                    ),
+                ],
+            ])
                 ->errorBag('createOrderFromPurchaseInvoice');
         }
     }

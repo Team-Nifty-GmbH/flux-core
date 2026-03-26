@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Validator;
 
 trait Categorizable
 {
-    private static ?array $columnListing = null;
+    public static array|int|null $categoryIds = null;
 
-    protected array|int|null $pendingCategoryIds = null;
+    private static ?array $columnListing = null;
 
     public static function bootCategorizable(): void
     {
@@ -29,9 +29,8 @@ trait Categorizable
 
         static::saved(function (Model $model): void {
             // after saving attach the attributes
-            if (! is_null($model->pendingCategoryIds)) {
-                $model->categories()->sync($model->pendingCategoryIds);
-                $model->pendingCategoryIds = null;
+            if (! is_null(static::$categoryIds)) {
+                $model->categories()->sync(static::$categoryIds);
             }
         });
     }
@@ -59,7 +58,7 @@ trait Categorizable
                 : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
             set: fn ($value) => $this->hasCategoryIdAttribute()
                 ? $value
-                : tap($value, fn ($v) => $this->pendingCategoryIds = $v)
+                : static::$categoryIds = $value
         );
     }
 
@@ -114,7 +113,7 @@ trait Categorizable
             throw new HttpResponseException(response()->json($validator->errors(), 422));
         }
 
-        $this->pendingCategoryIds = $validator->validated();
+        self::$categoryIds = $validator->validated();
     }
 
     /**

@@ -1,5 +1,7 @@
 <div
     x-data="{
+        order: $wire.entangle('order', true),
+        orderPositions: $wire.entangle('orderPositions', true),
         formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
@@ -37,48 +39,48 @@
         <x-label :label="__('Customer')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="$wire.order.address_invoice.name"
+            x-text="order.address_invoice.name"
         ></div>
         <x-label :label="__('Invoice Address')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="$wire.order.address_invoice.description"
+            x-text="order.address_invoice.description"
         ></div>
         <x-label :label="__('Order state')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-html="formatters.state($wire.order.state, formatter.state[1])"
+            x-html="formatters.state(order.state, formatter.state[1])"
         ></div>
         <x-label :label="__('Commission')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="$wire.order.commission"
+            x-text="order.commission"
         ></div>
         <x-label :label="__('Invoice number')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="$wire.order.invoice_number"
+            x-text="order.invoice_number"
         ></div>
     </div>
-    <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Accounting') }}</div>
+    <div class="pb-2 pt-8 font-semibold uppercase">{{ __('Accounting') }}</div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Payment state')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-html="formatters.state($wire.order.payment_state, formatter.payment_state[1])"
+            x-html="formatters.state(order.payment_state, formatter.payment_state[1])"
         ></div>
         <x-label :label="__('Total net')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="formatters.money($wire.order.total_net_price, $wire.order.currency)"
+            x-text="formatters.money(order.total_net_price, order.currency)"
         ></div>
     </div>
-    <div class="pt-8 pb-2 font-semibold uppercase">
+    <div class="pb-2 pt-8 font-semibold uppercase">
         {{ __('Order positions') }}
     </div>
     <div
         class="w-full pb-2"
-        x-show="$wire.orderPositions.length > 0"
+        x-show="orderPositions.length > 0"
         x-collapse
         x-cloak
     >
@@ -94,7 +96,7 @@
                     {{ __('Total Net Price') }}
                 </x-flux::table.head-cell>
             </x-slot>
-            <template x-for="orderPosition in $wire.orderPositions">
+            <template x-for="orderPosition in orderPositions">
                 <x-flux::table.row>
                     <x-flux::table.cell
                         x-html="orderPosition.name"
@@ -114,10 +116,10 @@
     <x-button
         loading
         color="indigo"
-        x-on:click="$wire.orderPositions.length < 1 ? $wire.loadOrderPositions() : $wire.orderPositions = []"
+        x-on:click="orderPositions.length < 1 ? $wire.loadOrderPositions() : orderPositions = []"
     >
         <span
-            x-text="$wire.orderPositions.length < 1 ? '{{ __('Show') }}' : '{{ __('Hide') }}'"
+            x-text="orderPositions.length < 1 ? '{{ __('Show') }}' : '{{ __('Hide') }}'"
         ></span>
     </x-button>
 </div>

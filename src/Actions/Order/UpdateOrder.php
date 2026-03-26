@@ -4,16 +4,12 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\Order\UpdateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class UpdateOrder extends FluxAction
@@ -84,48 +80,15 @@ class UpdateOrder extends FluxAction
     {
         parent::validateData();
 
+        $errors = [];
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
         if ($order->is_locked) {
-            throw ValidationException::withMessages([
+            $errors += [
                 'is_locked' => ['Order is locked'],
-            ])
-                ->errorBag('updateOrder');
-        }
-
-        $errors = [];
-        $hasTenants = [
-            'address_invoice_id' => Address::class,
-            'address_delivery_id' => Address::class,
-            'order_type_id' => OrderType::class,
-            'payment_type_id' => PaymentType::class,
-            'address_delivery.id' => Address::class,
-            'addresses.*.address_id' => Address::class,
-            'addresses.*.address_type_id' => AddressType::class,
-        ];
-        $tenantId = $order->tenant_id;
-        foreach ($hasTenants as $key => $class) {
-            $values = $this->getData($key);
-            if (! $values) {
-                continue;
-            }
-
-            $values = Arr::wrap($values);
-            foreach ($values as $index => $value) {
-                if (resolve_static($class, 'query')
-                    ->whereKey($value)
-                    ->whereHasTenant($tenantId)
-                    ->doesntExist()
-                ) {
-                    $errors += [
-                        str_replace('*', $index, $key) => [
-                            Str::headline(morph_alias($class)) . ' not found on given tenant.',
-                        ],
-                    ];
-                }
-            }
+            ];
         }
 
         $updatedOrderType = false;

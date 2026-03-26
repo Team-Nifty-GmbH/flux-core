@@ -5,26 +5,16 @@ namespace FluxErp\Listeners\Order;
 use FluxErp\Actions\Commission\CreateCommission;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
-use Throwable;
 
 class OrderInvoiceAddedSubscriber
 {
     public function handle(MediaHasBeenAddedEvent $event): void
     {
-        if ($event->media->model_type !== morph_alias(Order::class)) {
-            return;
-        }
-
-        $viewClass = data_get($event->media->model->getPrintViews(), $event->media->collection_name);
-
-        try {
-            if (! is_string($viewClass) || ! resolve_static($viewClass, 'isInvoice')) {
-                return;
-            }
-        } catch (Throwable) {
+        if ($event->media->collection_name !== 'invoice'
+            || $event->media->model_type !== morph_alias(Order::class)
+        ) {
             return;
         }
 
@@ -59,7 +49,6 @@ class OrderInvoiceAddedSubscriber
             ->where('is_free_text', false)
             ->where('is_bundle_position', false)
             ->whereDoesntHave('commission')
-            ->with(['product' => fn (BelongsTo $query) => $query->withTrashed()])
             ->get();
 
         foreach ($orderPositions as $orderPosition) {
@@ -71,33 +60,33 @@ class OrderInvoiceAddedSubscriber
             } elseif ($orderPosition->product_id) {
                 switch (true) {
                     case $commissionRateId = $contactCommissionRates
-                        ->where('product_id', $orderPosition->product_id)
-                        ->first()
-                        ?->id:
+                    ->where('product_id', $orderPosition->product_id)
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $contactCommissionRates
-                        ->whereIn(
+                    ->whereIn(
                         'category_id',
-                        $orderPosition->product?->categories()->pluck('id')->toArray() ?? []
+                        $orderPosition->product->categories()->pluck('id')->toArray()
                     )
-                        ->first()
-                        ?->id:
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $defaultCommissionRates
-                        ->where('product_id', $orderPosition->product_id)
-                        ->first()
-                        ?->id:
+                    ->where('product_id', $orderPosition->product_id)
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $defaultCommissionRates
-                        ->whereIn(
+                    ->whereIn(
                         'category_id',
-                        $orderPosition->product?->categories()->pluck('id')->toArray() ?? []
+                        $orderPosition->product->categories()->pluck('id')->toArray()
                     )
-                        ->first()
-                        ?->id:
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $defaultCommissionRateByContact?->id:
                     case $commissionRateId = $defaultCommissionRates
-                        ->whereNull('category_id')
-                        ->whereNull('product_id')
-                        ->first()
-                        ?->id:
+                    ->whereNull('category_id')
+                    ->whereNull('product_id')
+                    ->first()
+                    ?->id:
                         break;
                     default:
                         $commissionRateId = null;

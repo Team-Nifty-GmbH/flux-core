@@ -7,6 +7,7 @@ use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
+use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 
@@ -23,7 +24,7 @@ class WidgetManager
 
     public function autoDiscoverWidgets(?string $directory = null, ?string $namespace = null): void
     {
-        $finder = app('livewire.finder');
+        $componentRegistry = app(ComponentRegistry::class);
         $namespace = $namespace ?: config('livewire.class_namespace') . '\\Widgets';
         $path = $directory ?: app_path('Livewire/Widgets');
 
@@ -69,7 +70,7 @@ class WidgetManager
             // Check if the class is a valid Livewire component
             if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
                 if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), $namespace)) {
-                    $componentName = $finder->normalizeName($class);
+                    $componentName = $componentRegistry->getName($class);
                 } else {
                     continue;
                 }
@@ -105,9 +106,8 @@ class WidgetManager
      */
     public function register(string $name, string $widget): void
     {
-        $componentClass = class_exists($widget) && is_subclass_of($widget, Component::class)
-            ? $widget
-            : app('livewire.factory')->resolveComponentClass($widget);
+        $componentRegistry = app(ComponentRegistry::class);
+        $componentClass = $componentRegistry->getClass($widget);
 
         if (! class_exists($componentClass)) {
             throw new Exception("The provided widget class '{$componentClass}' does not exist.");
@@ -135,7 +135,7 @@ class WidgetManager
         }
 
         $this->widgets[$name] = [
-            'component_name' => $name,
+            'component_name' => $widget,
             'dashboard_component' => $componentClass::dashboardComponent(),
             'label' => $componentClass::getLabel(),
             'category' => $componentClass::getCategory(),

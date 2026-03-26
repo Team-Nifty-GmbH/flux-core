@@ -17,9 +17,12 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $this->contact = Contact::factory()->create();
+    $this->contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $addresses = Address::factory()->count(2)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $this->contact->id,
     ]);
 
@@ -32,6 +35,7 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 

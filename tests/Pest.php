@@ -74,16 +74,6 @@ pest()
 
 pest()
     ->extend(BrowserTestCase::class)
-    ->beforeAll(function (): void {
-        $browsersPath = dirname(__DIR__) . '/node_modules/playwright-core/.local-browsers';
-        if (is_dir($browsersPath)) {
-            putenv('PLAYWRIGHT_BROWSERS_PATH=' . $browsersPath);
-            $_ENV['PLAYWRIGHT_BROWSERS_PATH'] = $browsersPath;
-            $_SERVER['PLAYWRIGHT_BROWSERS_PATH'] = $browsersPath;
-        }
-
-        BrowserTestCase::installAssets();
-    })
     ->in('Browser');
 
 /*

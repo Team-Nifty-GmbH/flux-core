@@ -67,11 +67,9 @@ class CreateMailExecutedSubscriber
         foreach ($message->getMedia('attachments') as $attachment) {
             try {
                 $purchaseInvoice = CreatePurchaseInvoice::make([
-                    'tenant_id' => $contact?->getTenantId() ?? resolve_static(Tenant::class, 'default')
-                        ->getKey(),
+                    'tenant_id' => $contact?->tenant_id ?? resolve_static(Tenant::class, 'default')->getKey(),
                     'contact_id' => $contact?->id,
-                    'currency_id' => $contact?->currency_id ?? resolve_static(Currency::class, 'default')
-                        ->getKey(),
+                    'currency_id' => $contact?->currency_id ?? resolve_static(Currency::class, 'default')->getKey(),
                     'payment_type_id' => $contact?->purchase_payment_type_id ?? $contact?->payment_type_id,
                     'invoice_date' => $message->date->toDateString(),
                     'media' => [
@@ -108,7 +106,7 @@ class CreateMailExecutedSubscriber
         try {
             /** @var Ticket $ticket */
             $ticket = CreateTicket::make([
-                'tenant_id' => $this->address->getTenantId()
+                'tenant_id' => $this->address->tenant_id
                     ?? resolve_static(Tenant::class, 'default')->getKey(),
                 'authenticatable_type' => morph_alias(Address::class),
                 'authenticatable_id' => $this->address->getKey(),

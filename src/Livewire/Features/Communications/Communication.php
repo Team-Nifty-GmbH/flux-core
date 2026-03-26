@@ -52,16 +52,13 @@ abstract class Communication extends CommunicationList
                 ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
-                ->wireClick('edit()')
+                ->wireClick('edit')
                 ->when(resolve_static(CreateCommunication::class, 'canPerformAction', [false])),
         ];
     }
 
     protected function getRowActions(): array
     {
-        $layout = array_key_first($this->getPrintLayouts());
-        $type = morph_alias($this->getModel());
-
         return [
             DataTableButton::make()
                 ->text(__('Edit'))
@@ -71,13 +68,6 @@ abstract class Communication extends CommunicationList
                 ->when(resolve_static(UpdateCommunication::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->text(__('Preview'))
-                ->icon('magnifying-glass')
-                ->color('indigo')
-                ->wireClick(<<<JS
-                    openPreview('{$layout}','{$type}',record.id)
-            JS),
-            DataTableButton::make()
-                ->text(__('Create Documents'))
                 ->icon('document-text')
                 ->color('indigo')
                 ->wireClick('createPreview(record.id)'),
@@ -308,9 +298,7 @@ abstract class Communication extends CommunicationList
             return false;
         }
 
-        $this->toast()
-            ->success(__('Email sent successfully!'))
-            ->send();
+        $this->notification()->success(__('Email sent successfully!'))->send();
 
         $this->loadData();
 
@@ -334,11 +322,6 @@ abstract class Communication extends CommunicationList
         ];
     }
 
-    protected function supportsDocumentPreview(): bool
-    {
-        return true;
-    }
-
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder
@@ -360,12 +343,9 @@ abstract class Communication extends CommunicationList
     protected function getPrintLayouts(): array
     {
         return resolve_static(CommunicationModel::class, 'query')
-            ->when(
-                $this->communication->id,
-                fn (Builder $query) => $query->whereKey($this->communication->id)
-            )
+            ->whereKey($this->communication->id)
             ->first(['id'])
-            ?->resolvePrintViews() ?? [];
+            ->resolvePrintViews();
     }
 
     protected function getReturnKeys(): array

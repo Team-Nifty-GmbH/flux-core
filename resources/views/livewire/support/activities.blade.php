@@ -5,6 +5,9 @@
             $wire.loadData()
         },
         activeActivity: null,
+        page: $wire.entangle('page', true),
+        total: $wire.entangle('total', true),
+        perPage: $wire.entangle('perPage', true),
         showProperties(id) {
             this.activeActivity = this.activeActivity === id ? null : id
         },
@@ -89,7 +92,7 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="text-right text-sm whitespace-nowrap text-gray-500"
+                                    class="whitespace-nowrap text-right text-sm text-gray-500"
                                 >
                                     <time
                                         x-text="formatters.datetime(activity.created_at)"
@@ -101,14 +104,13 @@
                 </div>
             </li>
         </template>
-        <template x-if="$wire.perPage < $wire.total">
+        <template x-if="perPage < total">
             <x-button
-                wire:click="loadMore()"
+                x-on:click="page++"
                 color="indigo"
                 class="w-full"
                 :text="__('Show more')"
-                loading
-            />
+            ></x-button>
         </template>
     </ul>
 </div>

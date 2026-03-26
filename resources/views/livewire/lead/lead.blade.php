@@ -1,5 +1,5 @@
 <div class="flex min-h-full flex-col" x-data="{
-    isEditing: false,
+    edit: false,
 }">
     <div
         class="mx-auto w-full md:flex md:items-center md:justify-between md:space-x-5"
@@ -33,7 +33,7 @@
             @show
         </div>
         <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             <x-button
                 color="secondary"
@@ -57,19 +57,19 @@
                 :text="__('Edit')"
                 color="indigo"
                 x-cloak
-                x-show="!isEditing"
+                x-show="!edit"
                 class="w-full"
-                x-on:click="isEditing = true"
+                x-on:click="edit = true"
             />
             <x-button
                 :text="__('Save')"
                 color="indigo"
                 loading="save"
                 x-cloak
-                x-show="isEditing"
+                x-show="edit"
                 class="w-full"
                 x-on:click="$wire.save().then((success) => {
-                    isEditing = false;
+                    edit = false;
                 });"
             />
             <x-button
@@ -79,9 +79,9 @@
                 light
                 flat
                 x-cloak
-                x-show="isEditing"
+                x-show="edit"
                 class="w-full"
-                x-on:click="isEditing = false; $wire.resetForm();"
+                x-on:click="edit = false; $wire.resetForm();"
             />
         </div>
     </div>

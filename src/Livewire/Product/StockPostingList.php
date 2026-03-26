@@ -49,7 +49,7 @@ class StockPostingList extends BaseStockPostingList
                 ->text(__('New Stock Posting'))
                 ->icon('plus')
                 ->color('indigo')
-                ->wireClick('create()')
+                ->wireClick('create')
                 ->when(resolve_static(CreateStockPosting::class, 'canPerformAction', [false])),
         ];
     }

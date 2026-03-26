@@ -35,7 +35,7 @@ class CreateSepaMandate extends FluxAction
 
         $tenantContactExists = resolve_static(Contact::class, 'query')
             ->whereKey($this->getData('contact_id'))
-            ->whereHasTenant($this->getData('tenant_id'))
+            ->where('tenant_id', $this->getData('tenant_id'))
             ->exists();
 
         $errors = [];

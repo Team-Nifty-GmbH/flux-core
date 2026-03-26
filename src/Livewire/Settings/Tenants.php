@@ -44,7 +44,7 @@ class Tenants extends TenantList
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([
-                    'wire:click' => 'edit()',
+                    'wire:click' => 'show()',
                 ])
                 ->when(resolve_static(CreateTenant::class, 'canPerformAction', [false])),
         ];
@@ -58,7 +58,7 @@ class Tenants extends TenantList
                 ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
-                    'wire:click' => 'edit(record.id)',
+                    'wire:click' => 'show(record.id)',
                 ])
                 ->when(resolve_static(UpdateTenant::class, 'canPerformAction', [false])),
         ];
@@ -129,9 +129,7 @@ class Tenants extends TenantList
             }
         }
 
-        $this->toast()
-            ->success(__(':model saved', ['model' => __('Tenant')]))
-            ->send();
+        $this->notification()->success(__(':model saved', ['model' => __('Tenant')]))->send();
 
         $this->loadData();
 
@@ -139,7 +137,7 @@ class Tenants extends TenantList
     }
 
     #[Renderless]
-    public function edit(?Tenant $record = null): void
+    public function show(?Tenant $record = null): void
     {
         $this->tenant->reset();
         $record->load('bankConnections:id');

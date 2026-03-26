@@ -37,7 +37,7 @@ class Tags extends TagList
                 ->color('indigo')
                 ->when(resolve_static(CreateTag::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'edit()',
+                    'wire:click' => 'edit',
                 ]),
         ];
     }
@@ -73,7 +73,7 @@ class Tags extends TagList
                 ->color('red')
                 ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'deleteSelected()',
+                    'wire:click' => 'deleteSelected',
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
                 ]),
         ];

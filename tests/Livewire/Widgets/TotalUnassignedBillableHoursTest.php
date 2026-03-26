@@ -18,9 +18,12 @@ use FluxErp\Models\WorkTime;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -33,6 +36,7 @@ beforeEach(function (): void {
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
@@ -57,8 +61,6 @@ beforeEach(function (): void {
     $orderPosition = OrderPosition::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
         'order_id' => $order->id,
-        'is_free_text' => false,
-        'is_alternative' => false,
     ]);
 
     $this->workTime = WorkTime::factory()

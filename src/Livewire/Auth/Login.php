@@ -54,9 +54,7 @@ class Login extends Component
             $login = $this->tryLogin();
         } else {
             $this->sendMagicLink();
-            $this->toast()
-                ->success(__('Login link sent, check your inbox'))
-                ->send();
+            $this->notification()->success(__('Login link sent, check your inbox'))->send();
 
             return true;
         }
@@ -67,9 +65,7 @@ class Login extends Component
             return true;
         } else {
             $this->reset('password');
-            $this->toast()
-                ->error(__('Login failed'))
-                ->send();
+            $this->notification()->error(__('Login failed'))->send();
             $this->js('$focus.focus(document.getElementById(\'password\'));');
         }
 
@@ -82,9 +78,7 @@ class Login extends Component
 
         $this->getPasswordBroker()->sendResetLink(['email' => $this->email]);
 
-        $this->toast()
-            ->success(__('Password reset link sent'))
-            ->send();
+        $this->notification()->success(__('Password reset link sent'))->send();
     }
 
     public function sendMagicLink(): void

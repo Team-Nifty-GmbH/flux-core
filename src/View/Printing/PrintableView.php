@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Imagick;
@@ -32,8 +31,6 @@ abstract class PrintableView extends Component
     public PDF $pdf;
 
     public bool $preview = false;
-
-    protected array $sharedPrintData = [];
 
     private ?Imagick $imagick = null;
 
@@ -119,13 +116,7 @@ abstract class PrintableView extends Component
         $this->hydrateSharedData();
         File::ensureDirectoryExists(storage_path('fonts'));
 
-        try {
-            $html = $this->renderWithLayout()->render();
-        } finally {
-            $this->flushSharedData();
-        }
-
-        $this->pdf = PdfFacade::loadHTML($html)
+        $this->pdf = PdfFacade::loadHTML($this->renderWithLayout())
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
             ->setOption('isRemoteEnabled', true)
@@ -200,15 +191,11 @@ abstract class PrintableView extends Component
         return $this;
     }
 
-    public function renderAndHydrate(): HtmlString
+    public function renderAndHydrate(): \Illuminate\View\View|string
     {
         $this->hydrateSharedData();
 
-        try {
-            return new HtmlString($this->renderWithLayout()->render());
-        } finally {
-            $this->flushSharedData();
-        }
+        return $this->renderWithLayout();
     }
 
     public function savePDF(?string $fileName = null, ?string $disk = null): PDF
@@ -274,27 +261,14 @@ abstract class PrintableView extends Component
                 ?->getPath();
         }
 
-        $this->sharedPrintData = [
-            'signaturePath' => $signaturePath,
-            'tenant' => $tenant,
-            'subject' => $this->getSubject(),
-            'printView' => Str::kebab(class_basename($this)),
-            'printLayout' => static::$layout,
-        ];
-
-        View::share($this->sharedPrintData);
+        View::share('signaturePath', $signaturePath);
+        View::share('tenant', $tenant);
+        View::share('subject', $this->getSubject());
+        View::share('printView', Str::kebab(class_basename($this)));
+        View::share('printLayout', static::$layout);
 
         $this->imagick?->clear();
         $this->imagick?->destroy();
-    }
-
-    protected function flushSharedData(): void
-    {
-        foreach (array_keys($this->sharedPrintData ?? []) as $key) {
-            View::share($key, null);
-        }
-
-        $this->sharedPrintData = [];
     }
 
     protected function renderFooter(): bool

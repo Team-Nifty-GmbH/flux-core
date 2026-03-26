@@ -31,15 +31,15 @@ class OrderTableSeeder extends Seeder
             $contacts = Contact::query()
                 ->with('addresses')
                 ->where('has_delivery_lock', false)
-                ->whereHasTenant($tenant->id)
+                ->where('tenant_id', $tenant->id)
                 ->get(['id']);
 
             $orderTypes = OrderType::query()
-                ->whereHasTenant($tenant->id)
+                ->where('tenant_id', $tenant->id)
                 ->get(['id']);
 
             $paymentTypes = PaymentType::query()
-                ->whereHasTenant($tenant->id)
+                ->whereRelation('tenants', 'id', $tenant->id)
                 ->get(['id']);
 
             $orders = Order::query()

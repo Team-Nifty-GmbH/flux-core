@@ -35,7 +35,7 @@ class DirectDebit extends OrderList
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('Create Payment Run'))
-                ->wireClick('createPaymentRun()')
+                ->wireClick('createPaymentRun')
                 ->when(resolve_static(CreatePaymentRun::class, 'canPerformAction', [false])),
         ];
     }

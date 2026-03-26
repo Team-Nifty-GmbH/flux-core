@@ -3,36 +3,46 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\AddressType;
+use FluxErp\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class AddressTypeTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $invoiceAddressType = AddressType::query()
-            ->where('address_type_code', 'inv')
-            ->first();
+        $tenants = Tenant::all(['id']);
 
-        if (! $invoiceAddressType) {
-            AddressType::factory()->create([
-                'address_type_code' => 'inv',
-                'name' => 'invoice',
+        foreach ($tenants as $tenant) {
+            $invoiceAddressType = AddressType::query()
+                ->where('tenant_id', $tenant->id)
+                ->where('address_type_code', 'inv')
+                ->first();
+
+            if (! $invoiceAddressType) {
+                AddressType::factory()->create([
+                    'tenant_id' => $tenant->id,
+                    'address_type_code' => 'inv',
+                    'name' => 'invoice',
+                ]);
+            }
+
+            $deliveryAddressType = AddressType::query()
+                ->where('tenant_id', $tenant->id)
+                ->where('address_type_code', 'del')
+                ->first();
+
+            if (! $deliveryAddressType) {
+                AddressType::factory()->create([
+                    'tenant_id' => $tenant->id,
+                    'address_type_code' => 'del',
+                    'name' => 'delivery',
+                ]);
+            }
+
+            AddressType::factory()->count(3)->create([
+                'tenant_id' => $tenant->id,
+                'address_type_code' => null,
             ]);
         }
-
-        $deliveryAddressType = AddressType::query()
-            ->where('address_type_code', 'del')
-            ->first();
-
-        if (! $deliveryAddressType) {
-            AddressType::factory()->create([
-                'address_type_code' => 'del',
-                'name' => 'delivery',
-            ]);
-        }
-
-        AddressType::factory()->count(3)->create([
-            'address_type_code' => null,
-        ]);
     }
 }

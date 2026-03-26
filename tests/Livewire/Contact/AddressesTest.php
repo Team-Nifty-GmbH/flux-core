@@ -9,12 +9,15 @@ use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
     $address = Address::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
         'contact_id' => $contact->id,
-        'is_delivery_address' => true,
-        'is_invoice_address' => true,
         'is_main_address' => true,
+        'is_invoice_address' => true,
+        'is_delivery_address' => true,
     ]);
 
     $this->contactForm = new ContactForm(Livewire::new(Addresses::class), 'contact');

@@ -10,10 +10,13 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
+        'tenant_id' => $this->dbTenant->getKey(),
         'is_main_address' => false,
     ]);
 

@@ -187,8 +187,8 @@
                                 </x-slot>
                                 <x-slot:text>
                                     <div
-                                        x-on:click.prevent="file.id && $wire.downloadAttachment(file.id)"
-                                        x-bind:class="file.id ? 'cursor-pointer' : ''"
+                                        wire:click.prevent="downloadAttachment(file.id)"
+                                        class="cursor-pointer"
                                     >
                                         <span x-text="file.name"></span>
                                     </div>
@@ -236,7 +236,7 @@
                 x-show="isMultiGroup"
                 color="secondary"
                 light
-                wire:click="cancelMultiGroup()"
+                wire:click="cancelMultiGroup"
                 class="mr-2"
                 :text="__('Cancel')"
             />
@@ -245,7 +245,7 @@
                 x-show="isMultiGroup && ! isFirstGroup"
                 color="secondary"
                 loading="previousGroup"
-                wire:click="previousGroup()"
+                wire:click="previousGroup"
                 :text="__('Back')"
             />
             <x-button
@@ -253,7 +253,7 @@
                 x-show="isMultiGroup && ! isLastGroup"
                 color="indigo"
                 loading="nextGroup"
-                wire:click="nextGroup()"
+                wire:click="nextGroup"
                 class="ml-auto"
                 :text="__('Continue')"
             />
@@ -262,11 +262,7 @@
                 x-show="! isMultiGroup || isLastGroup"
                 color="indigo"
                 loading="send"
-<<<<<<< HEAD
                 wire:click="send().then((success) => {if(success) $tsui.close.modal('edit-mail');})"
-=======
-                x-on:click="$wire.send().then((success) => {if(success) $modalClose('edit-mail');})"
->>>>>>> feature/auto-inject-frontend-assets
                 class="ml-auto"
                 :text="__('Send')"
             />

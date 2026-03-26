@@ -29,7 +29,7 @@ class ProductOptionGroups extends ProductOptionGroupList
                 ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
-                ->wireClick('edit()')
+                ->wireClick('edit')
                 ->when(
                     fn () => resolve_static(CreateProductOptionGroup::class, 'canPerformAction', [false])
                 ),

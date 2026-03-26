@@ -18,15 +18,13 @@ beforeEach(function (): void {
         ->hasAttached(factory: $dbTenants[0], relationship: 'tenants')
         ->create();
 
-    $this->contacts = Contact::factory()
-        ->count(2)
-        ->hasAttached(factory: $dbTenants[0], relationship: 'tenants')
-        ->create([
-            'payment_type_id' => $paymentType->id,
-        ]);
-    $this->contacts[] = Contact::factory()
-        ->hasAttached(factory: $dbTenants[1], relationship: 'tenants')
-        ->create();
+    $this->contacts = Contact::factory()->count(2)->create([
+        'payment_type_id' => $paymentType->id,
+        'tenant_id' => $dbTenants[0]->id,
+    ]);
+    $this->contacts[] = Contact::factory()->create([
+        'tenant_id' => $dbTenants[1]->id,
+    ]);
 
     $this->contactBankConnections = ContactBankConnection::factory()->count(2)->create([
         'contact_id' => $this->contacts[0]->id,

@@ -28,7 +28,7 @@
         </div>
     </div>
     <x-button
-        wire:click="clearCache()"
+        wire:click="clearCache"
         loading="clearCache"
         icon="trash"
         :text="__('Clear Cache')"

@@ -15,20 +15,24 @@ beforeEach(function (): void {
 
     $contacts = Contact::factory()->count(2)->create([
         'price_list_id' => $priceList->id,
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $this->addresses = collect([
         Address::factory()->create([
-            'contact_id' => $contacts->random()->id,
             'name' => 'Website',
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $contacts->random()->id,
         ]),
         Address::factory()->create([
-            'contact_id' => $contacts->random()->id,
             'name' => 'Social Media',
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $contacts->random()->id,
         ]),
         Address::factory()->create([
-            'contact_id' => $contacts->random()->id,
             'name' => 'Partner Referral',
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $contacts->random()->id,
         ]),
     ]);
 

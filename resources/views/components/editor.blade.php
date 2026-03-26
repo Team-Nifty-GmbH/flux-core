@@ -17,10 +17,9 @@
         @endif
         x-data="Object.assign({}, setupEditor(
                 @if ($attributes->wire("model")->value())
-                    $wire,
-                    '{{ $attributes->wire("model")->value() }}',
+                    $wire.$entangle('{{ $attributes->wire("model")->value() }}',
                     @js($attributes->wire("model")->hasModifier("live"))
-                    ,
+                    ),
                     {{
                         $attributes->wire("model")->hasModifier("debounce")
                             ? Str::before(
@@ -54,11 +53,7 @@
             x-show="proxy && proxy.isEditable"
             x-ref="controlPanel-{{ $id }}"
             id="controlPanel"
-<<<<<<< HEAD
             class="{{ $tooltipDropdown ? "" : "border border-b-0" }} flex w-full flex-wrap items-stretch rounded-t-md border-secondary-300 placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-hidden focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
-=======
-            class="{{ $tooltipDropdown ? "" : "border border-b-0" }} border-secondary-300 placeholder-secondary-400 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 flex w-full flex-wrap items-stretch rounded-t-md transition duration-100 ease-in-out focus:outline-hidden sm:text-sm"
->>>>>>> feature/auto-inject-frontend-assets
         ></div>
         <div class="relative list-disc" x-ref="editor-{{ $id }}">
             {{-- Tooltip buttons (rendered via buttonInstance->render() when tooltipDropdown is true) --}}
@@ -66,7 +61,7 @@
                 <div
                     x-cloak
                     x-show="proxy && proxy.isEditable"
-                    class="absolute top-0 right-0 z-10 flex gap-1 p-2"
+                    class="absolute right-0 top-0 z-10 flex gap-1 p-2"
                 >
                     @foreach ($buttonInstances as $buttonInstance)
                         @if ($buttonInstance instanceof \FluxErp\Contracts\EditorTooltipButton)
@@ -86,11 +81,7 @@
     {{-- templates to be add on demand --}}
     <template
         x-ref="popWindow-{{ $id }}"
-<<<<<<< HEAD
         class="flex w-full flex-wrap items-stretch divide-x rounded-t-md placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-hidden focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
-=======
-        class="placeholder-secondary-400 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 flex w-full flex-wrap items-stretch divide-x rounded-t-md transition duration-100 ease-in-out focus:outline-hidden sm:text-sm"
->>>>>>> feature/auto-inject-frontend-assets
     ></template>
     <template x-ref="commands-{{ $id }}">
         @foreach ($buttonInstances as $buttonInstance)

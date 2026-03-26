@@ -32,7 +32,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
                 ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
-                ->wireClick('edit()')
+                ->wireClick('edit')
                 ->when(
                     fn () => resolve_static(CreateProductPropertyGroup::class, 'canPerformAction', [false])
                 ),

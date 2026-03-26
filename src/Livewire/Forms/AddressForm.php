@@ -18,6 +18,8 @@ class AddressForm extends FluxForm
 
     public ?string $city = null;
 
+    public ?int $tenant_id = null;
+
     public ?string $company = null;
 
     public ?int $contact_id = null;
@@ -73,34 +75,30 @@ class AddressForm extends FluxForm
 
     public ?string $street = null;
 
+    public array $tags = [];
+
     public ?string $title = null;
 
     public ?string $url = null;
 
     public ?string $zip = null;
 
-    public array $tags = [];
-
-    public array $tenants = [];
-
     public function fill($values): void
     {
         if ($values instanceof Address) {
-            $values->loadMissing(['contactOptions', 'tags:id', 'tenants:id']);
+            $values->loadMissing(['contactOptions', 'tags:id']);
 
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
-            $values['tenants'] = array_column($values['tenants'] ?? [], 'id');
         } elseif (data_get($values, 'id')) {
             $address = resolve_static(Address::class, 'query')
                 ->whereKey(data_get($values, 'id'))
-                ->with(['contactOptions', 'tags:id', 'tenants:id'])
-                ->first(['id', 'contact_id']);
+                ->with(['contactOptions', 'tags:id'])
+                ->first(['id']);
 
             if ($address) {
                 $values['contact_options'] ??= $address->contactOptions->toArray();
                 $values['tags'] ??= $address->tags->pluck('id')->toArray();
-                $values['tenants'] ??= $address->tenants->pluck('id')->toArray();
             }
         }
 

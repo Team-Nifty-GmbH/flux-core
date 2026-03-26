@@ -31,7 +31,7 @@ class VatRates extends VatRateList
                 ->color('indigo')
                 ->when(resolve_static(CreateVatRate::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'edit()',
+                    'wire:click' => 'edit',
                 ]),
         ];
     }

@@ -165,7 +165,7 @@ class Task extends Component
             return false;
         }
 
-        $this->toast()
+        $this->notification()
             ->success(__(':model saved', ['model' => __('Task')]))
             ->send();
         $this->skipRender();

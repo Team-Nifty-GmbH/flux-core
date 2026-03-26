@@ -22,37 +22,33 @@ class UnassignedTickets extends MyTickets
         return Dashboard::class;
     }
 
-    public function getListeners(): array
+    protected function getListeners(): array
     {
-        return [
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketUpdated' => '$refresh',
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketCreated' => '$refresh',
-        ];
+        return $this->rememberedEventListeners = array_merge(
+            $this->rememberedEventListeners ?? [],
+            [
+                'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel')
+                    . ',.TicketCreated' => '$refresh',
+            ],
+            parent::getListeners()
+        );
     }
 
     protected function getTickets(): Collection
     {
-        return resolve_static(Ticket::class, 'query')
+        return $this->tickets ?? resolve_static(Ticket::class, 'query')
+            ->latest()
             ->whereDoesntHave('users')
             ->with('authenticatable:id,name')
             ->whereNotIn(
                 'state',
                 TicketState::all()
-                    ->filter(fn (string $state): bool => $state::$isEndState)
+                    ->filter(fn ($state) => $state::$isEndState)
                     ->keys()
                     ->toArray()
             )
             ->orderByRaw("state = 'escalated' DESC")
             ->orderBy('created_at')
-            ->limit($this->limit + 1)
-            ->get([
-                'id',
-                'title',
-                'description',
-                'state',
-                'created_at',
-                'authenticatable_type',
-                'authenticatable_id',
-            ]);
+            ->get();
     }
 }

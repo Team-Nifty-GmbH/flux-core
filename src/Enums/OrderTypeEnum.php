@@ -14,8 +14,6 @@ enum OrderTypeEnum: string
 
     case Pos = 'pos';
 
-    case CollectiveOrder = 'collective-order';
-
     case Purchase = 'purchase';
 
     case PurchaseRefund = 'purchase-refund';

@@ -32,7 +32,7 @@ class PaymentTypes extends PaymentTypeList
                 ->color('indigo')
                 ->when(resolve_static(CreatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'edit()',
+                    'wire:click' => 'edit',
                 ]),
         ];
     }

@@ -15,7 +15,9 @@ class MyTickets extends Component
 {
     use Widgetable;
 
-    public int $limit = 25;
+    public ?array $rememberedEventListeners = null;
+
+    protected ?Collection $tickets = null;
 
     public static function getCategory(): ?string
     {
@@ -39,28 +41,12 @@ class MyTickets extends Component
 
     public function render(): View|Factory
     {
-        $tickets = $this->getTickets();
-
         return view(
             'flux::livewire.widgets.tickets',
             [
-                'tickets' => $tickets->take($this->limit),
-                'hasMore' => $tickets->count() > $this->limit,
+                'tickets' => $this->getTickets(),
             ]
         );
-    }
-
-    public function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketUpdated' => '$refresh',
-            'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel') . ',.TicketCreated' => '$refresh',
-        ];
-    }
-
-    public function loadMore(): void
-    {
-        $this->limit += 25;
     }
 
     public function placeholder(): View|Factory
@@ -68,30 +54,33 @@ class MyTickets extends Component
         return view('flux::livewire.placeholders.horizontal-bar');
     }
 
+    protected function getListeners(): array
+    {
+        return $this->rememberedEventListeners = array_merge(
+            $this->rememberedEventListeners ?? [],
+            $this->getTickets()
+                ->mapWithKeys(fn (Ticket $ticket, int $key) => [
+                    'echo-private:' . $ticket->broadcastChannel() . ',.TicketUpdated' => '$refresh',
+                ])
+                ->toArray() ?? []
+        );
+    }
+
     protected function getTickets(): Collection
     {
-        return auth()
+        return $this->tickets ?? auth()
             ->user()
             ->tickets()
             ->with('authenticatable:id,name')
             ->whereNotIn(
                 'state',
                 TicketState::all()
-                    ->filter(fn (string $state): bool => $state::$isEndState)
+                    ->filter(fn ($state) => $state::$isEndState)
                     ->keys()
                     ->toArray()
             )
             ->orderByRaw("state = 'escalated' DESC")
             ->orderBy('created_at')
-            ->limit($this->limit + 1)
-            ->get([
-                'id',
-                'title',
-                'description',
-                'state',
-                'created_at',
-                'authenticatable_type',
-                'authenticatable_id',
-            ]);
+            ->get();
     }
 }

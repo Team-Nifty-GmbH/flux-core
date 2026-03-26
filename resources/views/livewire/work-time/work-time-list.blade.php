@@ -1,12 +1,16 @@
-<div>
+<div
+    wire:init="$watch(
+        'workTime.trackable_type',
+        () => {
+            $wire.workTime.trackable_id = null
+            let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
+            searchRoute = searchRoute.replace('__model__', $wire.workTime.trackable_type)
+            $tallstackuiSelect('trackable-id-edit').setRequestUrl(searchRoute)
+        }
+    )"
+>
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
-            <div class="mt-2 mb-2" x-cloak x-show="! $wire.workTime.id">
-                <x-toggle
-                    :label="__('Is Daily Work Time')"
-                    wire:model="workTime.is_daily_work_time"
-                />
-            </div>
             <div
                 class="flex flex-col gap-1.5"
                 x-cloak
@@ -19,17 +23,12 @@
                     select="label:name|value:id"
                     :options="$workTimeTypes"
                 />
-                <div class="mt-2 mb-2">
+                <div class="mb-2 mt-2">
                     <x-toggle
                         :label="__('Is Billable')"
                         wire:model="workTime.is_billable"
                     />
                 </div>
-            </div>
-            <div
-                x-cloak
-                x-show="! $wire.workTime.is_daily_work_time || ! $wire.workTime.id"
-            >
                 <x-select.styled
                     :label="__('User')"
                     autocomplete="off"
@@ -96,12 +95,6 @@
                 <x-select.styled
                     :label="__('Model')"
                     wire:model="workTime.trackable_type"
-                    x-on:select="
-                        $wire.workTime.trackable_id = null;
-                        $tallstackuiSelect('trackable-id-edit').setRequestUrl(
-                            '{{ route('search', '__model__') }}'.replace('__model__', $event.detail.select?.value)
-                        );
-                    "
                     :options="$trackableTypes"
                 />
                 <div
@@ -154,20 +147,11 @@
     </x-modal>
     <x-modal id="create-orders-modal">
         <div class="flex flex-col gap-1.5">
-            @if (count($tenants) > 1)
-                <x-select.styled
-                    :label="__('Tenant')"
-                    wire:model="createOrdersFromWorkTimes.tenant_id"
-                    select="label:name|value:id"
-                    :options="$tenants"
-                />
-            @endif
-
             <x-select.styled
                 :label="__('Order Type')"
-                wire:model="createOrdersFromWorkTimes.order_type_id"
-                select="label:name|value:id"
                 :options="$orderTypes"
+                select="label:name|value:id"
+                wire:model="createOrdersFromWorkTimes.order_type_id"
             />
             <x-select.styled
                 :label="__('Product')"
@@ -257,11 +241,7 @@
                 <x-button
                     color="indigo"
                     loading
-<<<<<<< HEAD
                     wire:click="toggleIsBillable(isBillable).then(() => { $tsui.close.modal('toggle-is-billable-modal'); isBillable = true; })"
-=======
-                    x-on:click="$wire.toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); isBillable = true; })"
->>>>>>> feature/auto-inject-frontend-assets
                     :text="__('Apply')"
                 />
             </x-slot>

@@ -54,7 +54,7 @@
                 </div>
             </div>
             <div
-                class="mt-4 mr-10 mb-4 flex h-8 w-full justify-end space-x-5 lg:mr-0"
+                class="mb-4 mr-10 mt-4 flex h-8 w-full justify-end space-x-5 lg:mr-0"
             >
                 <x-button
                     x-cloak

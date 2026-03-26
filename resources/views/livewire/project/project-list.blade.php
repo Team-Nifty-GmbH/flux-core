@@ -5,7 +5,7 @@
         x-on:create-project.window="$wire.resetForm(); $tsui.close.modal('edit-project');"
     >
         <div
-            x-data="{ isEditing: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')) }"
+            x-data="{ edit: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')) }"
         >
             <x-flux::project.edit />
         </div>

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Tests;
 
+use FluxErp\Console\Commands\InstallAssets;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
@@ -37,7 +38,31 @@ abstract class BrowserTestCase extends TestCase
             unlink($manifest);
         }
 
-        $process = Process::fromShellCommandline('npm i && npm run build', __DIR__ . '/..', timeout: 180);
+        $testbenchConfigPath = __DIR__ . '/../vendor/orchestra/testbench-core/laravel/tailwind.config.mjs';
+        if (file_exists($testbenchConfigPath)) {
+            $stubContent = file_get_contents(__DIR__ . '/../stubs/tailwind/tailwind.config.mjs');
+
+            $configContent = str_replace(
+                '{{ relative_path }}',
+                '../../../..',
+                $stubContent
+            );
+
+            $configContent = str_replace(
+                '].concat(dataTablesConfig.content, fluxConfig.content),',
+                ',\n        \'../../../../resources/**/*.blade.php\',\n        \'../../../../resources/**/*.js\',\n        \'../../../../src/**/*.php\',\n    ].concat(dataTablesConfig.content, fluxConfig.content),',
+                $configContent
+            );
+
+            file_put_contents($testbenchConfigPath, $configContent);
+        }
+
+        InstallAssets::copyStubs(
+            force: true,
+            basePath: fn ($path = '') => __DIR__ . '/../' . $path
+        );
+
+        $process = Process::fromShellCommandline('npm i && npm run build', timeout: 180);
         $process->run();
 
         while ($process->isRunning()) {

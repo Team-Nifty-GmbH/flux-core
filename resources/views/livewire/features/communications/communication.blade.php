@@ -350,11 +350,7 @@
             />
             <x-button
                 color="indigo"
-<<<<<<< HEAD
                 wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
-=======
-                x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-communication'); })"
->>>>>>> feature/auto-inject-frontend-assets
                 primary
                 loading="save"
                 :text="__('Save')"
@@ -365,11 +361,7 @@
             >
                 <x-button
                     color="indigo"
-<<<<<<< HEAD
                     wire:click="send().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
-=======
-                    x-on:click="$wire.send().then((success) => { if(success) $modalClose('edit-communication'); })"
->>>>>>> feature/auto-inject-frontend-assets
                     primary
                     loading="send"
                     :text="__('Send')"
@@ -409,11 +401,7 @@
                 color="indigo"
                 :text="__('Continue')"
                 loading="createDocuments"
-<<<<<<< HEAD
                 wire:click="createDocuments().then(() => { $tsui.close.modal('create-preview'); });"
-=======
-                x-on:click="$wire.createDocuments().then(() => { $modalClose('create-preview'); });"
->>>>>>> feature/auto-inject-frontend-assets
             />
         </x-slot>
     </x-modal>

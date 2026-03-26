@@ -44,10 +44,6 @@ function apexCharts($wire) {
                 }
                 this.chart.updateOptions(this.options);
             });
-
-            $wire.$watch('options', () => {
-                this.updateData();
-            });
         },
         get dataLabelsFormatter() {
             if (
@@ -112,8 +108,7 @@ function apexCharts($wire) {
             ) {
                 return new Function(
                     'w',
-                    $wire.__instance.originalEffects.js
-                        .plotOptionsTotalFormatter,
+                    $wire.__instance.originalEffects.js.plotOptionsTotalFormatter,
                 );
             }
 
@@ -302,8 +297,6 @@ function apexCharts($wire) {
             return options;
         },
         get defaultOptions() {
-            const isDark = document.documentElement.classList.contains('dark');
-
             return {
                 noData: {
                     text: undefined,
@@ -312,68 +305,21 @@ function apexCharts($wire) {
                     offsetX: 0,
                     offsetY: 0,
                     style: {
-                        color: isDark ? '#9ca3af' : '#6b7280',
+                        color: undefined,
                         fontSize: '14px',
                         fontFamily: undefined,
                     },
                 },
                 legend: {
-                    position: 'bottom',
-                    horizontalAlign: 'center',
-                    fontSize: '12px',
-                    labels: {
-                        colors: isDark ? '#9ca3af' : '#6b7280',
-                    },
-                    markers: {
-                        size: 4,
-                        shape: 'circle',
-                    },
-                    itemMargin: {
-                        horizontal: 8,
-                        vertical: 4,
-                    },
+                    position: 'top',
+                    horizontalAlign: 'left',
                 },
                 chart: {
                     redrawOnParentResize: true,
                     type: null,
                     height: this.height,
                     fontFamily: 'inherit',
-                    toolbar: {
-                        show: true,
-                        tools: {
-                            download: true,
-                            selection: false,
-                            zoom: false,
-                            zoomin: false,
-                            zoomout: false,
-                            pan: false,
-                            reset: false,
-                        },
-                    },
                     events: this.generateEvents(),
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 2,
-                },
-                grid: {
-                    borderColor: isDark ? '#374151' : '#e5e7eb',
-                    strokeDashArray: 3,
-                },
-                colors: [
-                    colors.sky[400],
-                    colors.emerald[400],
-                    colors.amber[400],
-                    colors.rose[400],
-                    colors.violet[400],
-                    colors.cyan[400],
-                    colors.orange[400],
-                    colors.indigo[400],
-                    colors.teal[400],
-                    colors.pink[400],
-                ],
-                fill: {
-                    opacity: 1,
                 },
                 dataLabels: {
                     formatter:
@@ -384,29 +330,15 @@ function apexCharts($wire) {
                 },
                 xaxis: {
                     labels: {
-                        style: {
-                            colors: isDark ? '#9ca3af' : '#6b7280',
-                            fontSize: '12px',
-                        },
                         formatter:
                             this.xAxisFormatter ??
                             function (val) {
                                 return val;
                             },
                     },
-                    axisBorder: {
-                        show: false,
-                    },
-                    axisTicks: {
-                        show: false,
-                    },
                 },
                 yaxis: {
                     labels: {
-                        style: {
-                            colors: isDark ? '#9ca3af' : '#6b7280',
-                            fontSize: '12px',
-                        },
                         formatter:
                             this.yAxisFormatter ??
                             function (val) {
@@ -415,7 +347,6 @@ function apexCharts($wire) {
                     },
                 },
                 tooltip: {
-                    theme: isDark ? 'dark' : 'light',
                     y: {
                         formatter:
                             this.toolTipFormatter ??
@@ -425,11 +356,6 @@ function apexCharts($wire) {
                     },
                 },
                 plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        borderRadiusApplication: 'end',
-                        columnWidth: '60%',
-                    },
                     pie: {
                         donut: {
                             labels: {

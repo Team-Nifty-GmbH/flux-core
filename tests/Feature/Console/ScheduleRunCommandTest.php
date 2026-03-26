@@ -81,7 +81,7 @@ class ScheduleRunTestDefaultCronInvokable implements Repeatable
     }
 }
 
-test('does not set last_success when a scheduled job fails', function (): void {
+it('does not set last_success when a scheduled job fails', function (): void {
     Queue::fake();
 
     $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
@@ -114,7 +114,7 @@ test('does not set last_success when a scheduled job fails', function (): void {
         ->and($schedule->last_success)->toBeNull();
 });
 
-test('sets last_success when a scheduled job completes successfully', function (): void {
+it('sets last_success when a scheduled job completes successfully', function (): void {
     config()->set('queue.default', 'sync');
 
     $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
@@ -147,7 +147,7 @@ test('sets last_success when a scheduled job completes successfully', function (
         ->and($schedule->last_success)->not->toBeNull();
 });
 
-test('increments current_recurrence when a scheduled job with recurrences completes', function (): void {
+it('increments current_recurrence when a scheduled job with recurrences completes', function (): void {
     config()->set('queue.default', 'sync');
 
     $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
@@ -182,7 +182,7 @@ test('increments current_recurrence when a scheduled job with recurrences comple
         ->and($schedule->current_recurrence)->toBe(4);
 });
 
-test('sets due_at to last day of next month for lastDayOfMonth schedules', function (): void {
+it('sets due_at to last day of next month for lastDayOfMonth schedules', function (): void {
     $this->travelTo(Carbon::create(2025, 1, 31, 0, 0, 0));
 
     $schedule = resolve_static(Schedule::class, 'query')->create([
@@ -214,7 +214,7 @@ test('sets due_at to last day of next month for lastDayOfMonth schedules', funct
     expect($schedule->due_at->format('Y-m-d'))->toBe('2025-02-28');
 });
 
-test('does not double fire overdue schedule when cron matches later the same day', function (): void {
+it('does not double fire overdue schedule when cron matches later the same day', function (): void {
     ScheduleRunTestInvokable::$invocationCount = 0;
 
     // Schedule: yearlyOn Feb 1 at 06:00, but due_at is midnight Feb 1
@@ -263,7 +263,7 @@ test('does not double fire overdue schedule when cron matches later the same day
     expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
 });
 
-test('runs a repeatable with defaultCron without a db entry', function (): void {
+it('runs a repeatable with defaultCron without a db entry', function (): void {
     ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
 
     RepeatableFacade::register(
@@ -278,7 +278,7 @@ test('runs a repeatable with defaultCron without a db entry', function (): void 
     expect(ScheduleRunTestDefaultCronInvokable::$wasInvoked)->toBeTrue();
 });
 
-test('uses db entry over defaultCron when both exist', function (): void {
+it('uses db entry over defaultCron when both exist', function (): void {
     ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
 
     RepeatableFacade::register(
@@ -289,26 +289,25 @@ test('uses db entry over defaultCron when both exist', function (): void {
     $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
 
     // Create a DB entry for the same class with a yearly cron (won't be due now)
-    resolve_static(Schedule::class, 'query')
-        ->create([
-            'name' => 'DB Default Cron Override',
-            'class' => ScheduleRunTestDefaultCronInvokable::class,
-            'type' => RepeatableTypeEnum::Invokable,
-            'cron' => [
-                'methods' => [
-                    'basic' => 'yearly',
-                    'dayConstraint' => null,
-                    'timeConstraint' => null,
-                ],
-                'parameters' => [
-                    'basic' => [],
-                    'dayConstraint' => [],
-                    'timeConstraint' => [null, null],
-                ],
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'DB Default Cron Override',
+        'class' => ScheduleRunTestDefaultCronInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'yearly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
             ],
-            'is_active' => true,
-            'due_at' => now()->addYear(),
-        ]);
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => now()->addYear(),
+    ]);
 
     $this->artisan('schedule:run');
 

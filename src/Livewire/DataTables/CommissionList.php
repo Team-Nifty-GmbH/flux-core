@@ -65,7 +65,7 @@ class CommissionList extends BaseDataTable
                 ->color('indigo')
                 ->text(__('Create credit notes'))
                 ->attributes([
-                    'wire:click' => 'createCreditNotes()',
+                    'wire:click' => 'createCreditNotes',
                     'wire:flux-confirm' => __('wire:confirm.commission-credit-notes'),
                 ]),
         ];

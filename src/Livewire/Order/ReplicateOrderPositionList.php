@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Traits\CalculatesPositionAvailability;
@@ -95,6 +96,9 @@ class ReplicateOrderPositionList extends OrderPositionList
             ->pluck('id')
             ->toArray();
 
+        $multiplier = OrderTypeEnum::tryFrom($this->type)
+            ?->multiplier()
+            ?? 1;
         $maxAmounts = $this->calculateMaxAmounts(
             DB::select(
                 'WITH RECURSIVE siblings AS (
@@ -109,7 +113,8 @@ class ReplicateOrderPositionList extends OrderPositionList
                     WHERE op.deleted_at IS NULL
                 )
                 SELECT * FROM siblings'
-            )
+            ),
+            $multiplier
         );
 
         foreach ($tree as $key => &$item) {

@@ -4,7 +4,6 @@ namespace FluxErp\Actions\WorkTime;
 
 use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\WorkTime\CreateLockedWorkTimeRuleset;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -38,10 +37,7 @@ class CreateLockedWorkTime extends CreateWorkTime
 
     protected function prepareForValidation(): void
     {
-        if (data_get($this->data, 'user_id')
-            && data_get($this->data, 'started_at')
-            && ! data_get($this->data, 'is_daily_work_time')
-        ) {
+        if (data_get($this->data, 'user_id') && data_get($this->data, 'started_at')) {
             // add parent_id in case daily work time exists
             $this->data['parent_id'] = resolve_static(WorkTime::class, 'query')
                 ->where('user_id', $this->data['user_id'])
@@ -59,33 +55,6 @@ class CreateLockedWorkTime extends CreateWorkTime
     {
         parent::validateData();
 
-        if ($this->getData('is_daily_work_time')
-            && resolve_static(WorkTime::class, 'query')
-                ->when(
-                    $this->getData('employee_id'),
-                    fn (Builder $query) => $query->where('employee_id', $this->getData('employee_id'))
-                )
-                ->when(
-                    $this->getData('user_id'),
-                    fn (Builder $query) => $query->where('user_id', $this->getData('user_id'))
-                )
-                ->where(function (Builder $query): void {
-                    $query->where('started_at', '<=', $this->getData('ended_at'))
-                        ->where('ended_at', '>=', $this->getData('started_at'))
-                        ->orWhere(fn (Builder $query) => $query
-                            ->where('started_at', '<=', $this->getData('started_at'))
-                            ->whereNull('ended_at')
-                        );
-                })
-                ->where('is_daily_work_time', true)
-                ->exists()
-        ) {
-            throw ValidationException::withMessages([
-                'started_at' => ['Daily work time already started in given timeframe.'],
-            ])
-                ->errorBag('createLockedWorkTime');
-        }
-
         if ($endedAt = data_get($this->data, 'ended_at')) {
             $totalTimeMs = Carbon::parse($this->data['started_at'])->diffInMilliseconds(Carbon::parse($endedAt), true)
                 - data_get($this->data, 'paused_time_ms', 0);
@@ -93,8 +62,7 @@ class CreateLockedWorkTime extends CreateWorkTime
             if ($totalTimeMs < 0) {
                 throw ValidationException::withMessages([
                     'paused_time_ms' => ['Pause can not be longer than time between started_at and ended_at.'],
-                ])
-                    ->errorBag('createLockedWorkTime');
+                ])->errorBag('createLockedWorkTime');
             }
         }
     }

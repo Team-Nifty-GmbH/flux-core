@@ -382,7 +382,7 @@
 @section('attributes')
 @if (! $onlyPostal)
     <h3
-        class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
+        class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
     >
         {{ __('Attributes') }}
     </h3>
@@ -412,7 +412,7 @@
         @show
     </div>
     <h3
-        class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
+        class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
     >
         {{ __('Contact options') }}
     </h3>
@@ -421,6 +421,7 @@
     <div
         class="flex flex-col gap-1.5"
         x-data="{
+            edit: $wire.entangle('edit'),
             hrefFromContactOption(type, value) {
                 switch (type) {
                     case 'phone':
@@ -441,8 +442,8 @@
             <div class="flex items-center gap-1.5">
                 <div>
                     <x-select.native
-                        x-bind:readonly="!$wire.edit"
-                        x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
+                        x-bind:readonly="!edit"
+                        x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
                         x-model="contactOption.type"
                         :options="resolve_static(\FluxErp\Enums\ContactOptionTypeEnum::class, 'valuesLocalized')"
                         required
@@ -451,16 +452,16 @@
                 <x-input
                     x-model="contactOption.label"
                     :placeholder="__('Label')"
-                    x-bind:disabled="!$wire.edit"
-                    x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
+                    x-bind:disabled="!edit"
+                    x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
                 />
                 <x-input
                     x-cloak
-                    x-show="$wire.edit"
+                    x-show="edit"
                     x-model="contactOption.value"
                     :placeholder="__('Value')"
-                    x-bind:disabled="!$wire.edit"
-                    x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
+                    x-bind:disabled="!edit"
+                    x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
                 />
                 <div
                     class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
@@ -469,26 +470,26 @@
                         x-bind:href="hrefFromContactOption(contactOption.type, contactOption.value)"
                         x-text="contactOption.value"
                         x-cloak
-                        x-show="!$wire.edit"
+                        x-show="!edit"
                     ></a>
                 </div>
-                <div x-transition x-cloak x-show="$wire.edit">
+                <div x-transition x-cloak x-show="edit">
                     <x-button
                         icon="trash"
                         color="red"
                         x-on:click.prevent="$wire.address.contact_options.splice(index, 1)"
-                        x-bind:disabled="!$wire.edit"
+                        x-bind:disabled="!edit"
                     />
                 </div>
             </div>
         </template>
-        <div x-transition x-cloak x-show="$wire.edit">
+        <div x-transition x-cloak x-show="edit">
             <x-button
                 icon="plus"
                 :text="__('Add')"
                 color="indigo"
                 x-on:click.prevent="$wire.address.contact_options.push({type: 'email'})"
-                x-bind:disabled="!$wire.edit"
+                x-bind:disabled="!edit"
             />
         </div>
     </div>

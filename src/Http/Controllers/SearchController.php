@@ -167,10 +167,6 @@ class SearchController extends Controller
             $query->whereDoesntHaveRelation(...$request->get('whereDoesntHaveRelation'));
         }
 
-        if ($request->has('doesntHave')) {
-            $query->doesntHave(...$request->get('doesntHave'));
-        }
-
         $result = $query->latest()->get();
 
         if ($request->has('appends')) {

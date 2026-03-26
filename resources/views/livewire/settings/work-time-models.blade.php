@@ -77,7 +77,7 @@
             <x-button
                 :text="__('Create and Configure Schedule')"
                 color="primary"
-                x-on:click="$wire.save().then((success) => {if(success) $wire.editSchedule($wire.workTimeModelForm.id);})"
+                wire:click="save().then((success) => {if(success) $wire.editSchedule($wire.workTimeModelForm.id);})"
             />
         </x-slot>
     </x-modal>

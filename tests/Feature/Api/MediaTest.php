@@ -473,11 +473,10 @@ test('update media validation fails', function (): void {
 test('upload media collection read only', function (): void {
     $language = Language::factory()->create();
     $tenant = Tenant::factory()->create();
-    $orderType = OrderType::factory()
-        ->hasAttached(factory: $tenant, relationship: 'tenants')
-        ->create([
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $orderType = OrderType::factory()->create([
+        'tenant_id' => $tenant->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
     $priceList = PriceList::factory()->create();
     $currency = Currency::factory()->create();
 
@@ -485,10 +484,11 @@ test('upload media collection read only', function (): void {
         ->hasAttached(factory: $tenant, relationship: 'tenants')
         ->create();
 
-    $contact = Contact::factory()
-        ->hasAttached(factory: $tenant, relationship: 'tenants')
-        ->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $tenant->getKey(),
+    ]);
     $addresses = Address::factory()->count(2)->create([
+        'tenant_id' => $tenant->getKey(),
         'contact_id' => $contact->getKey(),
     ]);
 

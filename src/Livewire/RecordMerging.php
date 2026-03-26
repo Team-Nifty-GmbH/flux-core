@@ -73,7 +73,7 @@ class RecordMerging extends Component
             return false;
         }
 
-        $this->toast()
+        $this->notification()
             ->success(__('Records merged successfully'))
             ->send();
 
@@ -93,7 +93,7 @@ class RecordMerging extends Component
             ->get();
 
         if (count($records) < 2) {
-            $this->toast()
+            $this->notification()
                 ->error(__('At least two records are required for merging'))
                 ->send();
 

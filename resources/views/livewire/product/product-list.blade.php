@@ -1,4 +1,4 @@
-<div x-data="{ isEditing: true }">
+<div x-data="{ edit: true }">
     @canAction(\FluxErp\Actions\Product\CreateProduct::class)
         <x-modal
             id="create-product-modal"
@@ -26,7 +26,7 @@
                 />
                 <x-select.styled
                     multiple
-                    x-bind:disabled="!isEditing"
+                    x-bind:disabled="!edit"
                     wire:model.number="product.tenants"
                     :label="__('Tenants')"
                     :src="'logo_small_url'"
@@ -58,7 +58,7 @@
                     loading="save"
                     color="indigo"
                     :text="__('Save')"
-                    wire:click="save()"
+                    wire:click="save"
                 />
             </x-slot>
         </x-modal>
@@ -161,11 +161,7 @@
                     color="indigo"
                     :text="__('Save')"
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.product-prices-update') }}"
-<<<<<<< HEAD
                     wire:click="updatePrices().then((success) => {if(success) $tsui.close.modal('update-prices-modal');});"
-=======
-                    x-on:click="$wire.updatePrices().then((success) => {if(success) $modalClose('update-prices-modal');});"
->>>>>>> feature/auto-inject-frontend-assets
                 />
             </x-slot>
         </x-modal>

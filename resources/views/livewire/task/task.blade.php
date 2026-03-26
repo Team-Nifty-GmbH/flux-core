@@ -1,4 +1,10 @@
-<div id="task-details" x-data="{ isEditing: false }">
+<div
+    id="task-details"
+    x-data="{
+        task: $wire.entangle('task'),
+        edit: false,
+    }"
+>
     <x-modal
         id="replicate-task-modal"
         :title="__('Replicate Task')"
@@ -35,7 +41,7 @@
                 :label="__('Responsible User')"
                 autocomplete="off"
                 wire:model="replica.responsible_user_id"
-                x-bind:readonly="!isEditing"
+                x-bind:readonly="!edit"
                 select="label:label|value:id"
                 unfiltered
                 :request="[
@@ -119,7 +125,7 @@
                 min="0"
             />
             <x-flux::editor
-                x-model="isEditing"
+                x-model="edit"
                 wire:model="replica.description"
                 scope="task"
                 :label="__('Description')"
@@ -127,7 +133,7 @@
             <x-select.styled
                 :label="__('Categories')"
                 wire:model="replica.categories"
-                x-bind:readonly="!isEditing"
+                x-bind:readonly="!edit"
                 multiple
                 select="label:label|value:id"
                 unfiltered
@@ -150,7 +156,7 @@
                 autocomplete="off"
                 multiple
                 wire:model="replica.users"
-                x-bind:readonly="!isEditing"
+                x-bind:readonly="!edit"
                 select="label:label|value:id"
                 unfiltered
                 :request="[
@@ -232,14 +238,14 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
                         <div class="pl-2">
-                            <span x-text="$wire.task.name"></span>
+                            <span x-text="task.name"></span>
                         </div>
                     </div>
                 </h1>
             </div>
         </div>
         <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
                 <x-button
@@ -283,19 +289,19 @@
             @canAction(\FluxErp\Actions\Task\UpdateTask::class)
                 <x-button
                     color="indigo"
-                    x-show="!isEditing"
+                    x-show="!edit"
                     class="w-full"
-                    x-on:click="isEditing = true"
+                    x-on:click="edit = true"
                     :text="__('Edit')"
                 />
                 <x-button
                     x-cloak
                     color="indigo"
                     loading
-                    x-show="isEditing"
+                    x-show="edit"
                     class="w-full"
                     x-on:click="$wire.save().then((success) => {
-                        isEditing = false;
+                        edit = false;
                     });"
                     :text="__('Save')"
                 />
@@ -303,9 +309,9 @@
                     x-cloak
                     color="indigo"
                     loading
-                    x-show="isEditing"
+                    x-show="edit"
                     class="w-full"
-                    x-on:click="isEditing = false; $wire.resetForm();"
+                    x-on:click="edit = false; $wire.resetForm();"
                     :text="__('Cancel')"
                 />
             @endcanAction

@@ -1,13 +1,4 @@
-<div
-    x-data="{
-        get show() {
-            return $wire.show
-        },
-        set show(value) {
-            $wire.show = value
-        },
-    }"
->
+<div x-data="{ show: @entangle('show').live }">
     {{ $prepend ?? '' }}
     <div
         x-on:click.outside="show = false"

@@ -10,10 +10,13 @@ use Livewire\Livewire;
 test('lead list', function (): void {
     $lead = Lead::factory()->create();
 
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     $leadState = LeadState::factory()->create();

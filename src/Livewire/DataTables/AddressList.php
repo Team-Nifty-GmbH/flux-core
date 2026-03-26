@@ -27,6 +27,7 @@ class AddressList extends BaseDataTable
         only: [
             'country_id',
             'language_id',
+            'tenant_id',
             'company',
             'title',
             'salutation',
@@ -39,7 +40,6 @@ class AddressList extends BaseDataTable
             'phone',
             'phone_mobile',
             'record_origin_id',
-            'tenants',
         ],
     )]
     public ContactForm $createContactForm;
@@ -64,8 +64,6 @@ class AddressList extends BaseDataTable
 
     public LeadForm $leadForm;
 
-    public ?int $agentId = null;
-
     public bool $assignToAgent = true;
 
     public ?int $mapLimit = 100;
@@ -87,7 +85,7 @@ class AddressList extends BaseDataTable
                     $toggle('showMap', true)
                 JS),
             DataTableButton::make()
-                ->text(__('New'))
+                ->text(__('Create'))
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([
@@ -104,15 +102,15 @@ class AddressList extends BaseDataTable
                 ->icon('document-text')
                 ->text(__('Create Documents'))
                 ->color('indigo')
-                ->wireClick('openCreateDocumentsModal()'),
+                ->wireClick('openCreateDocumentsModal'),
             DataTableButton::make()
                 ->text(__('Send Mail'))
                 ->color('indigo')
-                ->wireClick('createMailMessage()'),
+                ->wireClick('createMailMessage'),
             DataTableButton::make()
                 ->text(__('Create Leads'))
                 ->color('indigo')
-                ->wireClick('openLeadsModal()')
+                ->wireClick('openLeadsModal')
                 ->when(fn () => resolve_static(CreateLead::class, 'canPerformAction', [false])),
         ];
     }

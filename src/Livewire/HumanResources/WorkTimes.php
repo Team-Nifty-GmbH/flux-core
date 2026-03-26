@@ -11,7 +11,6 @@ use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Forms\CreateOrdersFromWorkTimesForm;
 use FluxErp\Livewire\Forms\LockedWorkTimeForm;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\Tenant;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Model\Trackable;
@@ -41,7 +40,7 @@ class WorkTimes extends WorkTimeList
                 ->text(__('New'))
                 ->color('indigo')
                 ->icon('plus')
-                ->wireClick('edit()')
+                ->wireClick('edit')
                 ->when(resolve_static(CreateLockedWorkTime::class, 'canPerformAction', [false])),
         ];
     }
@@ -214,9 +213,6 @@ class WorkTimes extends WorkTimeList
                     ->where('is_active', true)
                     ->get(['id', 'name', 'order_type_enum'])
                     ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase())
-                    ->toArray(),
-                'tenants' => resolve_static(Tenant::class, 'query')
-                    ->get(['id', 'name'])
                     ->toArray(),
             ]
         );

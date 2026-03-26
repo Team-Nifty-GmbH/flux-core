@@ -9,9 +9,7 @@ use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Order;
-use FluxErp\Models\OrderType;
 use FluxErp\Models\Product;
-use FluxErp\Models\Tenant;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\WorkTime\CreateOrdersFromWorkTimesRuleset;
@@ -57,7 +55,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     );
             })
             ->with('invoiceAddress.language:id,language_code')
-            ->get(['id', 'invoice_address_id']);
+            ->get(['id', 'tenant_id', 'invoice_address_id']);
 
         foreach ($contacts as $contact) {
             if ($contact->workTimes->isEmpty()) {
@@ -65,9 +63,9 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
             }
 
             $order = CreateOrder::make([
+                'tenant_id' => $contact->tenant_id,
                 'contact_id' => $contact->getKey(),
                 'order_type_id' => $this->getData('order_type_id'),
-                'tenant_id' => $this->getData('tenant_id'),
             ])
                 ->validate()
                 ->execute();
@@ -158,26 +156,5 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
         return resolve_static(Order::class, 'query')
             ->whereKey($createdOrderIds)
             ->get();
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->data['tenant_id'] ??= resolve_static(Tenant::class, 'default')?->getKey();
-    }
-
-    protected function validateData(): void
-    {
-        parent::validateData();
-
-        if (resolve_static(OrderType::class, 'query')
-            ->whereKey($this->getData('order_type_id'))
-            ->whereHasTenant($this->getData('tenant_id'))
-            ->doesntExist()
-        ) {
-            throw ValidationException::withMessages([
-                'order_type_id' => ['Order Type not found on given tenant.'],
-            ])
-                ->errorBag('createOrdersFromWorkTimes');
-        }
     }
 }

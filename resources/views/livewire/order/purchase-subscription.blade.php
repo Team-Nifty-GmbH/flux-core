@@ -185,11 +185,7 @@
             />
             <x-button
                 color="indigo"
-<<<<<<< HEAD
                 wire:click="saveSchedule().then((success) => { if(success) $tsui.close.modal('edit-schedule'); })"
-=======
-                x-on:click="$wire.saveSchedule().then((success) => { if(success) $modalClose('edit-schedule'); })"
->>>>>>> feature/auto-inject-frontend-assets
                 primary
                 :text="__('Save')"
             />

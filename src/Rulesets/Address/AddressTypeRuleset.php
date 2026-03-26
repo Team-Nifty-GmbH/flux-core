@@ -2,8 +2,7 @@
 
 namespace FluxErp\Rulesets\Address;
 
-use FluxErp\Models\AddressType;
-use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rulesets\FluxRuleset;
 
 class AddressTypeRuleset extends FluxRuleset
@@ -16,7 +15,14 @@ class AddressTypeRuleset extends FluxRuleset
                 'required',
                 'integer',
                 'distinct',
-                app(ModelExists::class, ['model' => AddressType::class]),
+                app(
+                    ExistsWithForeign::class,
+                    [
+                        'foreignAttribute' => 'tenant_id',
+                        'table' => 'address_types',
+                        'baseTable' => 'addresses',
+                    ]
+                ),
             ],
         ];
     }
