@@ -6,7 +6,7 @@ import nuxbeAppBridge from './nuxbe-bridge.js';
 // Import all modules into single bundle
 import './components/alpine.js';
 import './components/apex-charts.js';
-import '../../../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';
+import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
 
