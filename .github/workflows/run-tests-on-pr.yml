@@ -59,18 +59,22 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - name: Install libsodium
-        run: apt-get update && apt-get install -y --no-install-recommends libsodium23
+      - name: Install system dependencies for PHP extensions
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends \
+            libsodium23 libgd3 libzip4t64
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: >-
-            mbstring, dom, fileinfo, mysql, gd, zip, bcmath, intl, exif, imagick, sodium,
-            -amqp, -dba, -odbc, -pdo_odbc, -pdo_pgsql, -pdo_sqlsrv, -pgsql,
-            -snmp, -sqlsrv, -tidy, -xsl, -zmq, -memcached
+          extensions: mbstring, dom, fileinfo, mysql, gd, zip, bcmath, intl, exif, imagick, sodium
           coverage: xdebug
+
+      - name: Disable unused PHP extensions
+        run: |
+          rm -f /etc/php/${{ matrix.php-versions }}/cli/conf.d/20-{amqp,dba,odbc,pdo_odbc,pdo_pgsql,pdo_sqlsrv,pgsql,snmp,sqlsrv,tidy,xsl,zmq}.ini
+          rm -f /etc/php/${{ matrix.php-versions }}/cli/conf.d/25-memcached.ini
 
       - name: Checkout
         uses: actions/checkout@v4
