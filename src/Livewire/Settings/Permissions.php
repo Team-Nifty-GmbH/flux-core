@@ -155,10 +155,13 @@ class Permissions extends RoleList
     protected function preparePermissions(array $tree, array $parent = []): array
     {
         foreach ($tree as $key => &$value) {
-            $label = data_get($value, 'label');
+            $label = data_get($value, 'label', '');
+            $label = is_array($label) ? implode(' ', $label) : $label;
 
             if ($parent) {
-                data_set($tree, $key . '.path', data_get($parent, 'path') . ' -> ' . $label);
+                $parentPath = data_get($parent, 'path', '');
+                $parentPath = is_array($parentPath) ? implode(' -> ', $parentPath) : $parentPath;
+                data_set($tree, $key . '.path', $parentPath . ' -> ' . $label);
             } else {
                 data_set($tree, $key . '.path', $label);
             }

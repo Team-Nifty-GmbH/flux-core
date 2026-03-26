@@ -95,7 +95,11 @@
                 <x-button
                     color="secondary"
                     light
+<<<<<<< HEAD
                     x-on:click="$tsui.open.modal('widget-list')"
+=======
+                    x-on:click="$modalOpen('widget-list')"
+>>>>>>> feature/auto-inject-frontend-assets
                     class="shrink-0"
                     :text="__('Add')"
                 />
@@ -110,7 +114,11 @@
                     color="red"
                     loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
+<<<<<<< HEAD
                     wire:click="resetWidgets().then(onPostReset.bind($data))"
+=======
+                    x-on:click="$wire.resetWidgets().then(onPostReset.bind($data))"
+>>>>>>> feature/auto-inject-frontend-assets
                     class="shrink-0"
                     :text="__('Cancel')"
                 />

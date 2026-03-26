@@ -31,7 +31,7 @@
             :rows="3"
         />
         <x-flux::checkbox-tree
-            wire:model="$entangle('tokenForm.permissions')"
+            wire:model="tokenForm.permissions"
             selectable="true"
             tree="$wire.permissions"
             name-attribute="label"
@@ -50,7 +50,11 @@
         <x-button
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
             wire:click="save().then((success) => { if(success) $tsui.close.modal('{{ $this->modalName() }}')})"
+=======
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $this->modalName() }}')})"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

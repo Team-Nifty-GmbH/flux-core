@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $this->contact = Contact::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $this->contact = Contact::factory()->create();
 
     $permission = Permission::findOrCreate('action.media-folder.update', 'web');
     $this->user->givePermissionTo($permission);

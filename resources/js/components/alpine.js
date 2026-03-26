@@ -15,6 +15,7 @@ import navigationSpinner from './navigation-spinner.js';
 import wireNavigation from './wire-navigation.js';
 import comments from './comments.js';
 import familyTree from './family-tree.js';
+import documentScanner from './document-scanner.js';
 import selectComponent from './tallstackui/select.js';
 import toastComponent from './tallstackui/toast.js';
 
@@ -41,6 +42,7 @@ window.dashboard = dashboard;
 window.addressMap = addressMap;
 window.signature = signature;
 window.familyTree = familyTree;
+window.documentScanner = documentScanner;
 window.filePond = filePond;
 window.$tallstackuiSelect = selectComponent;
 window.$tallstackuiToast = toastComponent;

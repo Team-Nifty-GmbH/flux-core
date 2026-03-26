@@ -9,6 +9,8 @@ use Livewire\Component;
 
 class CalendarEventEdit extends Component
 {
+    public static bool $skipNextRender = false;
+
     #[Modelable]
     public CalendarEventForm $event;
 
@@ -22,11 +24,16 @@ class CalendarEventEdit extends Component
     public function boot(): void
     {
         $this->currentEditComponent = data_get($this->event, 'edit_component');
+
+        if (static::$skipNextRender) {
+            static::$skipNextRender = false;
+            $this->skipRender();
+        }
     }
 
     public function updatedEvent(): void
     {
-        if ($this->currentEditComponent === data_get($this->event, 'edit_component')) {
+        if ($this->currentEditComponent !== data_get($this->event, 'edit_component')) {
             return;
         }
 

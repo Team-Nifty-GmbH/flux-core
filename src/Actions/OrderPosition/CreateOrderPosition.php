@@ -236,8 +236,7 @@ class CreateOrderPosition extends FluxAction
                                     WHERE op.deleted_at IS NULL
                                 )
                                 SELECT * FROM siblings'
-                            ),
-                            $multiplier
+                            )
                         ),
                         fn (array $value) => $value['id'] === $originPositionId
                     ),

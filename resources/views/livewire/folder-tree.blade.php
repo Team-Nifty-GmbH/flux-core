@@ -22,7 +22,7 @@
                             color="secondary"
                             light
                             :text="__('Add folder')"
-                            wire:click="saveFolder({name: '{{ __('New folder') }}'}).then((folder) => { if (folder) addFolder(null, folder); })"
+                            x-on:click="$wire.saveFolder({name: '{{ __('New folder') }}'}).then((folder) => { if (folder) addFolder(null, folder); })"
                         />
                     @endcanAction
 
@@ -106,7 +106,6 @@
                                 this.selection.path = path ? path[path.length - 1] : null
                             }
                         },
-                        filesArray: $wire.entangle('filesArray', true),
                         async uploadSuccess(multipleFileUpload) {
                             // on single file replace, replace selection - otherwise, add
                             const lastUploads = await $wire.get('latestUploads')
@@ -150,7 +149,7 @@
                                     color="red"
                                     :text="__('Delete')"
                                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
-                                    wire:click="deleteCollection(selection.id, getNodePath(selectionProxy, 'slug')).then((success) => {if (success) { selected = null; removeNode(selection.id); } })"
+                                    x-on:click="$wire.deleteCollection(selection.id, getNodePath(selectionProxy, 'slug')).then((success) => {if (success) { selected = null; removeNode(selection.id); } })"
                                 />
                             @endcanAction
 
@@ -200,7 +199,7 @@
                                     x-show="!$wire.isReadonly && !readOnly"
                                     color="indigo"
                                     :text="__('Save')"
-                                    wire:click="saveFolder(selection).then((folder) => {
+                                    x-on:click="$wire.saveFolder(selection).then((folder) => {
                                         if (folder) {
                                             this.selectionProxy = JSON.parse(JSON.stringify(folder))
                                             updateNode(this.selectionProxy)
@@ -260,7 +259,7 @@
                                     color="red"
                                     :text="__('Delete')"
                                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
-                                    wire:click="delete(selection.id).then(() => {
+                                    x-on:click="$wire.delete(selection.id).then(() => {
                                         try {
                                                 removeNode(selection.id);
                                                 this.selected = null;

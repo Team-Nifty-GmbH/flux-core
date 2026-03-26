@@ -51,7 +51,11 @@
             loading="createTasks"
             color="indigo"
             :text="__('Save')"
+<<<<<<< HEAD
             wire:click="save().then((success) => {if(success) $tsui.close.modal('create-tasks');})"
+=======
+            x-on:click="$wire.save().then((success) => {if(success) $modalClose('create-tasks');})"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </div>
 </div>

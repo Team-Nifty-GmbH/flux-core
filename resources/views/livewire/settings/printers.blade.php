@@ -18,7 +18,11 @@
         <x-button
             color="primary"
             :text="__('Save')"
+<<<<<<< HEAD
             wire:click="save().then((success) => { if(success) $tsui.close.modal('edit-printer-modal')})"
+=======
+            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-printer-modal')})"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>
@@ -46,7 +50,11 @@
         <x-button
             color="red"
             :text="__('Delete')"
+<<<<<<< HEAD
             wire:click="deleteSpooler().then((success) => { if(success) $tsui.close.modal('delete-spooler-modal')})"
+=======
+            x-on:click="$wire.deleteSpooler().then((success) => { if(success) $modalClose('delete-spooler-modal')})"
+>>>>>>> feature/auto-inject-frontend-assets
             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Spooler')]) }}"
         />
     </x-slot>
@@ -107,7 +115,7 @@
                 color="indigo"
                 :text="__('Generate Configuration')"
                 icon="cog"
-                wire:click="generateBridgeConfig"
+                wire:click="generateBridgeConfig()"
             />
         </div>
 

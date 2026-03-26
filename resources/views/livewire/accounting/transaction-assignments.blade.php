@@ -238,13 +238,13 @@
                             class="flex flex-col rounded border-2 border-slate-200 lg:flex-row"
                         >
                             <div
-                                class="flex w-full flex-col p-4 lg:w-1/2 lg:border-b-0 lg:border-r-2"
+                                class="flex w-full flex-col p-4 lg:w-1/2 lg:border-r-2 lg:border-b-0"
                             >
                                 <div class="flex justify-between gap-4">
                                     <div class="flex gap-4">
                                         <x-avatar
                                             borderless
-                                            image
+                                            :image="route('icons', ['name' => 'user'])"
                                             class="ring-4 ring-offset-2"
                                             x-bind:class="parseFloat(transaction.balance) === 0 ? 'ring-emerald-500' : (transaction.order_transactions_count > 0 ? 'ring-amber-500' : 'ring-red-500')"
                                             x-bind:src="transaction?.avatar_url ?? '{{ route('icons', ['name' => 'user']) }}'"
@@ -327,7 +327,7 @@
                                                 icon="link-slash"
                                                 wire:click="deleteOrderTransaction(order.pivot.pivot_id)"
                                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Assignment')]) }}"
-                                                class="absolute left-0 top-0 opacity-0 transition-opacity duration-200 group-hover/button:opacity-100"
+                                                class="absolute top-0 left-0 opacity-0 transition-opacity duration-200 group-hover/button:opacity-100"
                                             />
                                         </div>
                                         <div

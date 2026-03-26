@@ -38,7 +38,7 @@ class OrderList extends BaseDataTable
                 ->color('red')
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:click' => 'delete',
+                    'wire:click' => 'delete()',
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
@@ -66,7 +66,9 @@ class OrderList extends BaseDataTable
             }
         }
 
-        $this->notification()->success(__('Deleted :count orders', ['count' => $deleted]))->send();
+        $this->toast()
+            ->success(__('Deleted :count orders', ['count' => $deleted]))
+            ->send();
 
         if ($deleted > 0) {
             $this->loadData();

@@ -31,7 +31,7 @@ class Industries extends IndustryList
                 ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateIndustry::class, 'canPerformAction', [false]))
-                ->wireClick('edit'),
+                ->wireClick('edit()'),
         ];
     }
 

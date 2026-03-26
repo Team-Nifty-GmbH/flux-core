@@ -331,8 +331,8 @@ trait SupportsAutoRender
         $saveMethod = $this->getSaveMethod();
         $deleteMethod = $this->getDeleteMethod();
         $persistent = $this->isModalPersistent() ? ' persistent' : '';
-        $tsuiFocus = ! is_null($this->firstInputFocusId)
-            ? ' x-on:open="$tsui.focus(\'' . $this->firstInputFocusId . '\')"'
+        $focusOn = ! is_null($this->firstInputFocusId)
+            ? ' x-on:open="$focusOn(\'' . $this->firstInputFocusId . '\')"'
             : '';
 
         $deleteButton = '';
@@ -342,16 +342,16 @@ trait SupportsAutoRender
                 . ':text="__(' . "'Delete'" . ')" '
                 . 'wire:flux-confirm.type.error="{{ __(\'wire:confirm.delete\', [\'model\' => \''
                 . class_basename($this) . '\']) }}" '
-                . 'wire:click="' . $deleteMethod . '().then((success) => { if(success) $tsui.close.modal(\''
+                . 'wire:click="' . $deleteMethod . '().then((success) => { if(success) $modalClose(\''
                 . $modalName . '\')})"/>';
         }
 
-        $saveAction = $saveMethod . '().then((success) => { if(success) $tsui.close.modal(\'' . $modalName . '\')})';
-        $cancelAction = '$tsui.close.modal(\'' . $modalName . '\')';
+        $saveAction = $saveMethod . '().then((success) => { if(success) $modalClose(\'' . $modalName . '\')})';
+        $cancelAction = '$modalClose(\'' . $modalName . '\')';
 
         return '<div x-on:keydown.enter.prevent="$wire.' . $saveAction . '"'
             . ' x-on:keydown.escape.prevent="' . $cancelAction . '">'
-            . '<x-modal id="' . $modalName . '"' . $persistent . $tsuiFocus . '>'
+            . '<x-modal id="' . $modalName . '"' . $persistent . $focusOn . '>'
             . $content
             . '<x-slot:footer>'
             . '<div class="flex w-full justify-between">'

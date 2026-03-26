@@ -102,7 +102,7 @@ class VariantList extends ProductList
                 ->when(fn () => resolve_static(UpdateProduct::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:flux-confirm.type.info' => __('wire:confirm.recalculate-product-names'),
-                    'wire:click' => 'recalculateNames',
+                    'wire:click' => 'recalculateNames()',
                 ]),
         ];
     }

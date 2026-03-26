@@ -34,29 +34,33 @@ beforeEach(function (): void {
     $dbTenants[0]->paymentTypes()->attach([$paymentTypes[0]->id, $paymentTypes[1]->id]);
     $dbTenants[1]->paymentTypes()->attach($paymentTypes[2]->id);
 
-    $this->contacts = Contact::factory()->count(2)->create([
-        'tenant_id' => $dbTenants[0]->id,
-        'payment_type_id' => $paymentTypes[0]->id,
-    ]);
-    $this->contacts[] = Contact::factory()->create([
-        'tenant_id' => $dbTenants[1]->id,
-        'payment_type_id' => $paymentTypes[1]->id,
-    ]);
+    $this->contacts = Contact::factory()
+        ->count(2)
+        ->hasAttached(factory: $dbTenants[0], relationship: 'tenants')
+        ->create([
+            'payment_type_id' => $paymentTypes[0]->id,
+        ]);
+    $this->contacts[] = Contact::factory()
+        ->hasAttached(factory: $dbTenants[1], relationship: 'tenants')
+        ->create([
+            'payment_type_id' => $paymentTypes[1]->id,
+        ]);
 
-    $this->addresses = Address::factory()->count(3)->create([
-        'tenant_id' => $dbTenants[0]->id,
-        'contact_id' => $this->contacts[0]->id,
-        'language_id' => $this->languages[0]->id,
-        'country_id' => $this->countries[0]->id,
-        'is_main_address' => false,
-    ]);
-    $this->addresses[] = Address::factory()->create([
-        'tenant_id' => $dbTenants[1]->id,
-        'contact_id' => $this->contacts[2]->id,
-        'language_id' => $this->languages[1]->id,
-        'country_id' => $this->countries[2]->id,
-        'is_main_address' => true,
-    ]);
+    $this->addresses = Address::factory()
+        ->count(3)
+        ->create([
+            'contact_id' => $this->contacts[0]->id,
+            'language_id' => $this->languages[0]->id,
+            'country_id' => $this->countries[0]->id,
+            'is_main_address' => false,
+        ]);
+    $this->addresses[] = Address::factory()
+        ->create([
+            'contact_id' => $this->contacts[2]->id,
+            'language_id' => $this->languages[1]->id,
+            'country_id' => $this->countries[2]->id,
+            'is_main_address' => true,
+        ]);
 
     $this->user->tenants()->attach($dbTenants->pluck('id')->toArray());
 
@@ -71,7 +75,6 @@ beforeEach(function (): void {
 
 test('create address', function (): void {
     $address = [
-        'tenant_id' => $this->contacts[2]->tenant_id,
         'contact_id' => $this->contacts[2]->id,
     ];
 
@@ -87,7 +90,6 @@ test('create address', function (): void {
         ->first();
 
     expect($dbAddress)->not->toBeEmpty();
-    expect($dbAddress->tenant_id)->toEqual($address['tenant_id']);
     expect($dbAddress->contact_id)->toEqual($address['contact_id']);
     expect($dbAddress->language_id)->toBeNull();
     expect($dbAddress->country_id)->toEqual($this->countries[2]->id);
@@ -114,7 +116,6 @@ test('create address', function (): void {
 
 test('create address maximum', function (): void {
     $address = [
-        'tenant_id' => $this->contacts[1]->tenant_id,
         'contact_id' => $this->contacts[1]->id,
         'language_id' => $this->languages[0]->id,
         'country_id' => $this->countries[2]->id,
@@ -149,7 +150,6 @@ test('create address maximum', function (): void {
         ->first();
 
     expect($dbAddress)->not->toBeEmpty();
-    expect($dbAddress->tenant_id)->toEqual($address['tenant_id']);
     expect($dbAddress->contact_id)->toEqual($address['contact_id']);
     expect($dbAddress->language_id)->toEqual($address['language_id']);
     expect($dbAddress->country_id)->toEqual($address['country_id']);
@@ -176,7 +176,6 @@ test('create address maximum', function (): void {
 
 test('create address validation fails', function (): void {
     $address = [
-        'tenant_id' => $this->addresses[2]->tenant_id,
         'contact_id' => ++$this->addresses[3]->contact_id,
         'zip' => -123456,
     ];

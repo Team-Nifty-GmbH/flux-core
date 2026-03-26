@@ -30,7 +30,7 @@ class AddressTypes extends AddressTypeList
                 ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateAddressType::class, 'canPerformAction', [false]))
-                ->wireClick('edit'),
+                ->wireClick('edit()'),
         ];
     }
 

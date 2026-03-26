@@ -47,6 +47,8 @@ class OrderPositionForm extends FluxForm
 
     public ?bool $is_alternative = false;
 
+    public bool $is_bundle_parent = false;
+
     public bool $is_bundle_position = false;
 
     public bool $is_free_text = false;
@@ -174,15 +176,15 @@ class OrderPositionForm extends FluxForm
             $basePrice = $this->total_base_net_price
                 ?? bcmul($this->unit_price ?? 0, $this->amount ?? 1);
 
-            if (! is_null($this->discount_flat) && bccomp($basePrice, 0) === 1) {
-                $discountPercentage = bcdiv($this->discount_flat, $basePrice);
+            if (! is_null($this->discount_flat) && bccomp($basePrice, 0)) {
+                $discountPercentage = bcabs(bcdiv($this->discount_flat, $basePrice));
                 $data['discount_percentage'] = bccomp($discountPercentage, 1) === 1 ? 1 : $discountPercentage;
             } else {
                 $data['discount_percentage'] = null;
             }
         }
 
-        unset($data['discount_flat'], $data['discount_is_percentage']);
+        unset($data['discount_flat'], $data['discount_is_percentage'], $data['is_bundle_parent']);
 
         return $data;
     }

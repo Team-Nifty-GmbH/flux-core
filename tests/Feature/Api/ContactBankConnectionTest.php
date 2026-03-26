@@ -10,9 +10,7 @@ use Laravel\Sanctum\Sanctum;
 uses(Illuminate\Foundation\Testing\WithFaker::class);
 
 beforeEach(function (): void {
-    $contacts = Contact::factory()->count(2)->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-    ]);
+    $contacts = Contact::factory()->count(2)->create();
 
     $this->contactBankConnections = ContactBankConnection::factory()->count(2)->create([
         'contact_id' => $contacts[0]->id,

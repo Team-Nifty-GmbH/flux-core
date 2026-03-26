@@ -1,5 +1,5 @@
 <div x-data="{
-    edit: false,
+    isEditing: false,
 }">
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"

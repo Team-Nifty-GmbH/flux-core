@@ -1,56 +1,56 @@
 <div>
-    <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-500/50">
+    <table class="dark:divide-dark-500/50 min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
                 <th
-                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Year') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Carryover') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Expired Carryover') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Earned') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Adjustments') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Available') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Requested') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Used') }}
                 </th>
                 <th
-                    class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+                    class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
                 >
                     {{ __('Remaining') }}
                 </th>
             </tr>
         </thead>
         <tbody
-            class="divide-y divide-gray-200 bg-white dark:divide-dark-500/20 dark:bg-dark-700"
+            class="dark:divide-dark-500/20 dark:bg-dark-700 divide-y divide-gray-200 bg-white"
         >
             @forelse ($yearlyData as $year)
                 <tr
@@ -58,7 +58,7 @@
                         'bg-primary-50 dark:bg-primary-900/20' => $year['is_current'],
                     ])
                 >
-                    <td class="whitespace-nowrap px-4 py-2">
+                    <td class="px-4 py-2 whitespace-nowrap">
                         <span
                             @class([
                                 'font-semibold' => $year['is_current'],
@@ -84,7 +84,7 @@
                             @endif
                         </span>
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         @if ($year['carryover_days'] != '0.0')
                             <span class="font-medium">
                                 {{ $year['carryover_days'] }}
@@ -100,7 +100,7 @@
                             </span>
                         @endif
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         @if ($year['expired_carryover_days'] != '0.0')
                             <span class="font-medium">
                                 {{ $year['expired_carryover_days'] }}
@@ -116,7 +116,7 @@
                             </span>
                         @endif
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         <span class="font-medium">
                             {{ $year['earned_days'] }}
                         </span>
@@ -124,7 +124,7 @@
                             {{ __('days') }}
                         </span>
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         @if ($year['adjustments_days'] != '0.0')
                             <span class="font-medium">
                                 {{ $year['adjustments_days'] }}
@@ -140,7 +140,7 @@
                             </span>
                         @endif
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         <span
                             class="font-semibold text-blue-600 dark:text-blue-400"
                         >
@@ -150,7 +150,7 @@
                             {{ __('days') }}
                         </span>
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         <span class="font-medium">
                             {{ $year['requested_days'] }}
                         </span>
@@ -158,7 +158,7 @@
                             {{ __('days') }}
                         </span>
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         <span class="font-medium">
                             {{ $year['used_days'] }}
                         </span>
@@ -166,7 +166,7 @@
                             {{ __('days') }}
                         </span>
                     </td>
-                    <td class="whitespace-nowrap px-4 py-2 text-right">
+                    <td class="px-4 py-2 text-right whitespace-nowrap">
                         <div
                             @class([
                                 'text-green-600 dark:text-green-400' =>

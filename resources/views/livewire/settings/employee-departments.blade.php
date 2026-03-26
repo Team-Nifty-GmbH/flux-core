@@ -84,7 +84,7 @@
             <x-button
                 :text="__('Save')"
                 color="primary"
-                wire:click="save().then((success) => {
+                x-on:click="$wire.save().then((success) => {
                     if (success) {
                         $tsui.close.modal('{{ $employeeDepartmentForm->modalName() }}');
                     }

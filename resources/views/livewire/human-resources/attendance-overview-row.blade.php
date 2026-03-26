@@ -5,7 +5,7 @@
     class="hover:bg-gray-50 dark:hover:bg-gray-800"
 >
     <td
-        class="border-b border-r bg-white px-4 py-2 pl-8 dark:border-gray-700 dark:bg-gray-900"
+        class="border-r border-b bg-white px-4 py-2 pl-8 dark:border-gray-700 dark:bg-gray-900"
     >
         <x-link href="#" x-on:click.prevent="$wire.showEmployee()">
             {{ data_get($employee, 'name', __('Unknown')) }}
@@ -13,7 +13,7 @@
     </td>
 
     <td
-        class="cursor-pointer border-b border-r bg-blue-50 px-2 py-2 text-center transition-opacity hover:opacity-80 dark:border-gray-700 dark:bg-blue-900"
+        class="cursor-pointer border-r border-b bg-blue-50 px-2 py-2 text-center transition-opacity hover:opacity-80 dark:border-gray-700 dark:bg-blue-900"
         x-on:click="$wire.showWorkTime()"
     >
         <div class="text-sm font-medium">
@@ -26,7 +26,7 @@
     </td>
 
     <td
-        class="cursor-pointer border-b border-r bg-purple-50 px-2 py-2 text-center transition-opacity hover:opacity-80 dark:border-gray-700 dark:bg-purple-900"
+        class="cursor-pointer border-r border-b bg-purple-50 px-2 py-2 text-center transition-opacity hover:opacity-80 dark:border-gray-700 dark:bg-purple-900"
         x-on:click="$wire.showWorkTime()"
     >
         <div class="text-sm font-medium">
@@ -44,7 +44,7 @@
         @endphp
 
         <td
-            class="{{ data_get($calDay, 'isToday') ? 'border-l-2 border-r-2 border-yellow-400 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900' : (data_get($calDay, 'isWeekend') ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-gray-900') }} cursor-pointer border-b border-r px-1 py-1 text-center text-xs transition-opacity hover:opacity-80 dark:border-gray-700"
+            class="{{ data_get($calDay, 'isToday') ? 'border-r-2 border-l-2 border-yellow-400 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900' : (data_get($calDay, 'isWeekend') ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-gray-900') }} cursor-pointer border-r border-b px-1 py-1 text-center text-xs transition-opacity hover:opacity-80 dark:border-gray-700"
         >
             <div class="flex flex-col items-center justify-center gap-1">
                 {{-- Holiday --}}
@@ -77,7 +77,7 @@
                                 title="{{ data_get($dayData, 'holiday_day_part') === 'first_half' ? __('First Half') : __('Second Half') }}"
                             ></div>
                             <span
-                                class="absolute bottom-0 right-0.5 text-[8px] font-bold opacity-80"
+                                class="absolute right-0.5 bottom-0 text-[8px] font-bold opacity-80"
                             >
                                 ½
                             </span>
@@ -91,7 +91,7 @@
                         x-on:click="$wire.showEmployeeDay({{ data_get($dayData, 'id', 'null') }})"
                         x-cloak
                         x-show="! isStatusHidden('present')"
-                        class="{{ data_get($dayData, 'plus_minus_overtime_hours', 0) > 0 ? 'ring-2 ring-green-400 ring-offset-1 dark:ring-green-600' : '' }} {{ data_get($dayData, 'plus_minus_overtime_hours', 0) < 0 ? 'ring-2 ring-red-400 ring-offset-1 dark:ring-red-600' : '' }} flex size-10 items-center justify-center rounded border-green-500 bg-green-500 text-green-50 dark:border-transparent dark:bg-green-700 dark:bg-opacity-80"
+                        class="{{ data_get($dayData, 'plus_minus_overtime_hours', 0) > 0 ? 'ring-2 ring-green-400 ring-offset-1 dark:ring-green-600' : '' }} {{ data_get($dayData, 'plus_minus_overtime_hours', 0) < 0 ? 'ring-2 ring-red-400 ring-offset-1 dark:ring-red-600' : '' }} dark:bg-opacity-80 flex size-10 items-center justify-center rounded border-green-500 bg-green-500 text-green-50 dark:border-transparent dark:bg-green-700"
                         style="
                             background-color: {{ data_get($absenceTypes, 'present.color', 'green') }};
                         "
@@ -147,7 +147,7 @@
                                     title="{{ data_get($absence, 'day_part') === 'first_half' ? __('First Half') : __('Second Half') }}"
                                 ></div>
                                 <span
-                                    class="absolute bottom-0 right-0.5 text-[8px] font-bold opacity-80"
+                                    class="absolute right-0.5 bottom-0 text-[8px] font-bold opacity-80"
                                 >
                                     ½
                                 </span>
@@ -162,7 +162,7 @@
                         x-on:click="{{ data_get($dayData, 'id') ? "\$wire.showEmployeeDay(" . data_get($dayData, 'id') . ')' : '' }}"
                         x-cloak
                         x-show="! isStatusHidden('absent')"
-                        class="flex size-10 items-center justify-center rounded bg-red-500 text-red-50 dark:border-transparent dark:bg-red-700 dark:bg-opacity-80"
+                        class="dark:bg-opacity-80 flex size-10 items-center justify-center rounded bg-red-500 text-red-50 dark:border-transparent dark:bg-red-700"
                         style="
                             background-color: {{ data_get($absenceTypes, 'absent.color', 'red') }};
                         "

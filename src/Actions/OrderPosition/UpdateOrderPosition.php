@@ -89,7 +89,31 @@ class UpdateOrderPosition extends FluxAction
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 
-        if ($product?->bundlePositions?->isNotEmpty()) {
+        if ($orderPosition->wasChanged('amount')) {
+            $children = resolve_static(OrderPosition::class, 'query')
+                ->where('parent_id', $orderPosition->getKey())
+                ->whereNotNull('amount')
+                ->get();
+
+            $previousAmount = data_get($orderPosition->getPrevious(), 'amount') ?? 1;
+            $previousAmount = bccomp($previousAmount, 0) === 0 ? 1 : $previousAmount;
+
+            foreach ($children as $child) {
+                $amountBundle = $child->amount_bundle ?? bcdiv($child->amount, $previousAmount);
+
+                UpdateOrderPosition::make([
+                    'id' => $child->getKey(),
+                    'amount' => bcmul(
+                        $amountBundle,
+                        bccomp($orderPosition->amount, 0) === 0 ? 1 : $orderPosition->amount
+                    ),
+                ])
+                    ->validate()
+                    ->execute();
+            }
+        }
+
+        if ($product?->bundleProducts?->isNotEmpty()) {
             $product = $orderPosition->product()->with('bundleProducts')->first();
             $sortNumber = $orderPosition->sort_number;
             $product->bundleProducts
@@ -98,7 +122,7 @@ class UpdateOrderPosition extends FluxAction
 
                     return [
                         'order_id' => $orderPosition->order_id,
-                        'parent_id' => $orderPosition->id,
+                        'parent_id' => $orderPosition->getKey(),
                         'product_id' => $bundleProduct->id,
                         'tenant_id' => $orderPosition->tenant_id,
                         'vat_rate_id' => $bundleProduct->vat_rate_id,

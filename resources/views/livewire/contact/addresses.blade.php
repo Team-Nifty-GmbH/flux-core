@@ -13,7 +13,11 @@
                         >
                             <div>{{ __('Addresses') }}</div>
                             <x-button
+<<<<<<< HEAD
                                 wire:click="new().then(() => $tsui.focus('address-company'))"
+=======
+                                x-on:click="$wire.new().then(() => $focusOn('address-company'))"
+>>>>>>> feature/auto-inject-frontend-assets
                                 color="indigo"
                                 :text="__('New')"
                             />
@@ -48,14 +52,14 @@
                                 $wire.address.id === addressItem.id &&
                                     'rounded-lg ring-2 ring-inset ring-primary-500 bg-blue-100 dark:bg-secondary-700'
                             "
-                            class="cursor-pointer space-y-2 p-1.5 hover:bg-blue-50 dark:hover:bg-secondary-800"
+                            class="dark:hover:bg-secondary-800 cursor-pointer space-y-2 p-1.5 hover:bg-blue-50"
                         >
                             <div
                                 class="flex w-full justify-between gap-1.5 dark:text-gray-50"
                                 x-bind:class="! addressItem.is_active && 'text-secondary-400 dark:text-gray-200'"
                             >
                                 <div
-                                    class="text-ellipsis whitespace-nowrap text-sm"
+                                    class="text-sm text-ellipsis whitespace-nowrap"
                                 >
                                     @section('left-side-bar.address-list.address')
                                     <p
@@ -99,6 +103,27 @@
                 class="flex flex-col gap-1.5"
                 x-bind:class="! $wire.$parent.edit && 'pointer-events-none'"
             >
+                <x-select.styled
+                    x-bind:disabled="! $wire.$parent.edit"
+                    wire:model.number="contact.tenants"
+                    :label="__('Tenants')"
+                    multiple
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Tenant::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
+                            ],
+                        ],
+                    ]"
+                />
                 <x-select.styled
                     multiple
                     x-bind:disabled="! $wire.$parent.edit"
@@ -219,7 +244,11 @@
                                 <x-button
                                     color="secondary"
                                     light
+<<<<<<< HEAD
                                     wire:click="replicate().then(() => $tsui.focus('address-company'))"
+=======
+                                    x-on:click="$wire.replicate().then(() => $focusOn('address-company'))"
+>>>>>>> feature/auto-inject-frontend-assets
                                     :text="__('Duplicate')"
                                 />
                             </div>

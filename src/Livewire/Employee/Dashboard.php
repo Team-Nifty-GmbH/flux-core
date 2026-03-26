@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Employee;
 
+use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
 use FluxErp\Livewire\Support\Dashboard as BaseDashboard;
@@ -20,6 +21,9 @@ class Dashboard extends BaseDashboard
 
     public array $params = [
         'timeFrame' => TimeFrameEnum::ThisYear,
+        'dateRange' => [],
+        'comparisonType' => ComparisonTypeEnum::Auto,
+        'comparisonRange' => [],
         'start' => null,
         'end' => null,
     ];

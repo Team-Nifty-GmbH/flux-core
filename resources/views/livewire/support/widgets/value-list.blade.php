@@ -1,16 +1,18 @@
-<div class="flex h-full flex-col gap-4 p-6">
+<div class="flex h-full flex-col gap-4 p-4">
     <div>
-        <h2 class="truncate text-lg font-semibold text-gray-400">
+        <h2
+            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+        >
             {{ __($this->title()) }}
         </h2>
-        <hr />
+        <hr class="mt-2" />
     </div>
     <div class="overflow-auto">
         <table class="w-full">
             <tbody>
                 <template x-for="item in $wire.items">
                     <tr>
-                        <td class="flex flex-col pb-2 pr-1.5">
+                        <td class="flex flex-col pr-1.5 pb-2">
                             <div x-html="item.label ?? null"></div>
                             <div
                                 x-html="item.subLabel ?? null"
@@ -18,7 +20,7 @@
                             ></div>
                         </td>
                         <td
-                            class="whitespace-nowrap pb-2 pr-1.5 text-right font-bold"
+                            class="pr-1.5 pb-2 text-right font-bold whitespace-nowrap"
                             x-text="item.value"
                         ></td>
                         <td class="pb-2 text-right">
@@ -109,7 +111,7 @@
                 <template x-if="$wire.items.length === 0">
                     <tr>
                         <td colspan="3" class="p-4 text-center text-gray-400">
-                            <h2 class="text-2xl font-medium">
+                            <h2 class="text-lg font-medium">
                                 {{ __('No data available') }}
                             </h2>
                         </td>

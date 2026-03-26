@@ -233,7 +233,7 @@ trait RendersWidgets
                 }
 
                 return (! $permissionExists || auth()->user()->can('widget.' . $name))
-                    && array_key_exists($name, Widget::all());
+                    && ! is_null(Widget::get($name));
             }
         );
 

@@ -70,7 +70,11 @@
         <x-button
             :text="__('Save')"
             color="indigo"
+<<<<<<< HEAD
             wire:click="save().then((success) => {if(success) $tsui.close.modal('bank-connection-modal');});"
+=======
+            x-on:click="$wire.save().then((success) => {if(success) $modalClose('bank-connection-modal');});"
+>>>>>>> feature/auto-inject-frontend-assets
         />
     </x-slot>
 </x-modal>

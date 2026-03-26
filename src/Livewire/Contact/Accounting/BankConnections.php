@@ -33,7 +33,7 @@ class BankConnections extends BaseContactBankConnectionList
                 ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
-                ->wireClick('edit')
+                ->wireClick('edit()')
                 ->when(resolve_static(CreateContactBankConnection::class, 'canPerformAction', [false])),
         ];
     }
