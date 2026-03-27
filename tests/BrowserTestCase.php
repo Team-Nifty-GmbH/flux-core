@@ -78,7 +78,7 @@ abstract class BrowserTestCase extends TestCase
 
     protected function setUp(): void
     {
-        $settingsPath = base_path('database/settings');
+        $settingsPath = __DIR__ . '/../vendor/orchestra/testbench-core/laravel/database/settings';
         if (! file_exists($settingsPath)) {
             mkdir($settingsPath, 0755, true);
         }
