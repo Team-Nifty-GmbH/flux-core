@@ -7,6 +7,10 @@ on:
     branches: [main, dev]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
 env:
   PHP_VERSION: '8.5'
   LARAVEL_VERSION: '12.*'
