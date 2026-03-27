@@ -56,10 +56,15 @@ window.allLocales = allLocales;
 
 navigationSpinner();
 
-window.addEventListener('alpine:init', () => {
+if (window.Alpine?.version) {
     window.Alpine.plugin(sort);
     window.Alpine.plugin(collapse);
-});
+} else {
+    window.addEventListener('alpine:init', () => {
+        window.Alpine.plugin(sort);
+        window.Alpine.plugin(collapse);
+    });
+}
 
 Alpine.directive('currency', (el, { expression }, { evaluate }) => {
     const data = evaluate(expression);
