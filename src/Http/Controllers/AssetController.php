@@ -76,7 +76,7 @@ class AssetController extends Controller
                 'scope' => '/',
                 'icons' => [
                     [
-                        'src' => '/favicon.svg',
+                        'src' => route('favicon'),
                         'type' => 'image/svg+xml',
                         'sizes' => 'any',
                     ],
