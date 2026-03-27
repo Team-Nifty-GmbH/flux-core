@@ -84,7 +84,7 @@ class PaymentTypes extends PaymentTypeList
         $this->paymentType->fill($paymentType);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-payment-type-modal');
+            $tsui.open.modal('edit-payment-type-modal');
         JS);
     }
 

@@ -32,7 +32,7 @@
                     <div>
                         <x-button
                             :text="__('Set Level')"
-                            x-on:click="$modalOpen('reset-payment-reminder-level-modal')"
+                            x-on:click="$tsui.open.modal('reset-payment-reminder-level-modal')"
                         />
                     </div>
                 @endcanAction
@@ -167,7 +167,7 @@
     @teleport('body')
         <x-modal
             id="order-transaction-modal"
-            x-on:open="$focusOn('order-transaction-amount')"
+            x-on:open="$tsui.focus('order-transaction-amount')"
         >
             <div class="flex flex-col gap-4">
                 <x-number
@@ -211,12 +211,12 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('order-transaction-modal')"
+                    x-on:click="$tsui.close.modal('order-transaction-modal')"
                 />
                 <x-button
                     :text="__('Save')"
                     x-on:click="$wire.save().then((success) => {
-                        if (success) $modalClose('order-transaction-modal');
+                        if (success) $tsui.close.modal('order-transaction-modal');
                     })"
                 />
             </x-slot>
@@ -225,7 +225,7 @@
 
     <x-modal
         id="reset-payment-reminder-level-modal"
-        x-on:open="$focusOn('new-payment-reminder-level')"
+        x-on:open="$tsui.focus('new-payment-reminder-level')"
     >
         <x-slot:title>
             {{ __('Set Payment Reminder Level') }}
@@ -241,11 +241,11 @@
             <x-button
                 color="secondary"
                 :text="__('Cancel')"
-                x-on:click="$modalClose('reset-payment-reminder-level-modal')"
+                x-on:click="$tsui.close.modal('reset-payment-reminder-level-modal')"
             />
             <x-button
                 :text="__('Save')"
-                x-on:click="$wire.resetPaymentReminderLevel().then((success) => {if (success) $modalClose('reset-payment-reminder-level-modal');})"
+                x-on:click="$wire.resetPaymentReminderLevel().then((success) => {if (success) $tsui.close.modal('reset-payment-reminder-level-modal');})"
             />
         </x-slot>
     </x-modal>

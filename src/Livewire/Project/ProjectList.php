@@ -53,7 +53,7 @@ class ProjectList extends BaseProjectList
         $this->project->reset();
 
         $this->js(<<<'JS'
-            $modalOpen('edit-project');
+            $tsui.open.modal('edit-project');
         JS);
     }
 

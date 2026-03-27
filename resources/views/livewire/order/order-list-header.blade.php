@@ -38,12 +38,12 @@
                 color="secondary"
                 light
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-position-discount')"
+                x-on:click="$tsui.close.modal('edit-position-discount')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.discountSelectedPositions().then(() => {$modalClose('edit-position-discount');})"
+                x-on:click="$wire.discountSelectedPositions().then(() => {$tsui.close.modal('edit-position-discount');})"
             />
         </x-slot>
     </x-modal>
@@ -51,7 +51,7 @@
         size="6xl"
         id="edit-order-position"
         x-on:close="$wire.resetOrderPosition()"
-        x-on:open="$focusOn('order-position-name')"
+        x-on:open="$tsui.focus('order-position-name')"
         persistent
     >
         @section('order-position-detail-modal.content')
@@ -423,7 +423,7 @@
                         flat
                         color="red"
                         :text="__('Delete')"
-                        x-on:click="$wire.deleteOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        x-on:click="$wire.deleteOrderPosition().then((success) => {if(success) $tsui.close.modal('edit-order-position');})"
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
                     />
                 </div>
@@ -433,11 +433,11 @@
                         light
                         flat
                         :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-order-position')"
+                        x-on:click="$tsui.close.modal('edit-order-position')"
                     />
                     <x-button
                         color="indigo"
-                        x-on:click="$wire.addOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
+                        x-on:click="$wire.addOrderPosition().then((success) => {if(success) $tsui.close.modal('edit-order-position');})"
                         x-cloak
                         x-show="!$wire.order.is_locked"
                         :text="__('Save')"

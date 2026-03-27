@@ -34,13 +34,13 @@ class Printers extends PrinterList
                 ->text(__('Generate Bridge Config'))
                 ->color('primary')
                 ->icon('cog')
-                ->xOnClick("\$modalOpen('printer-bridge-config-modal')"),
+                ->xOnClick("\$tsui.open.modal('printer-bridge-config-modal')"),
             DataTableButton::make()
                 ->text(__('Delete Spooler'))
                 ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeletePrinter::class, 'canPerformAction', [false]))
-                ->xOnClick("\$modalOpen('delete-spooler-modal')"),
+                ->xOnClick("\$tsui.open.modal('delete-spooler-modal')"),
         ];
     }
 

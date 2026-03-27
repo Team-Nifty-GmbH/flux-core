@@ -199,7 +199,7 @@ test('show product properties modal', function (): void {
         ->call('showProductPropertiesModal')
         ->assertOk()
         ->assertHasNoErrors()
-        ->assertExecutesJs("\$modalOpen('edit-product-properties-modal');");
+        ->assertExecutesJs("\$tsui.open.modal('edit-product-properties-modal');");
 });
 
 test('switch tabs', function (): void {

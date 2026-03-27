@@ -4,7 +4,7 @@ namespace FluxErp\Support\TallstackUI\Interactions;
 
 use FluxErp\Traits\Makeable;
 use Illuminate\Support\Traits\Conditionable;
-use TallStackUi\Foundation\Interactions\Toast as BaseToast;
+use TallStackUi\Interactions\Toast as BaseToast;
 
 class Toast extends BaseToast
 {

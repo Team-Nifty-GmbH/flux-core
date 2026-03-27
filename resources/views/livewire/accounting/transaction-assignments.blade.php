@@ -42,7 +42,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-assign-orders-modal')"
+                    x-on:click="$tsui.close.modal('transaction-assign-orders-modal')"
                 />
                 <x-button
                     :text="__('Assign')"
@@ -86,7 +86,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-comments-modal')"
+                    x-on:click="$tsui.close.modal('transaction-comments-modal')"
                 />
             </x-slot>
         </x-modal>
@@ -95,7 +95,7 @@
     @teleport('body')
         <x-modal
             id="order-transaction-modal"
-            x-on:open="$focusOn('order-transaction-amount')"
+            x-on:open="$tsui.focus('order-transaction-amount')"
         >
             <div class="flex flex-col gap-4">
                 <x-number
@@ -138,7 +138,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('order-transaction-modal')"
+                    x-on:click="$tsui.close.modal('order-transaction-modal')"
                 />
                 <x-button
                     :text="__('Save')"

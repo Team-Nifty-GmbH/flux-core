@@ -53,7 +53,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-notification-settings-modal')"
+                x-on:click="$tsui.close.modal('edit-notification-settings-modal')"
             />
             <x-button color="indigo" :text="__('Save')" wire:click="save()" />
         </x-slot>

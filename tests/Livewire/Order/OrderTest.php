@@ -164,7 +164,7 @@ test('create documents', function (): void {
     $component
         ->assertSet('order.invoice_number', null)
         ->call('openCreateDocumentsModal')
-        ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+        ->assertExecutesJs("\$tsui.open.modal('create-documents-$componentId')")
         ->assertSet('printLayouts', [
             ['layout' => 'invoice', 'label' => 'invoice'],
         ])
@@ -412,7 +412,7 @@ test('order position with credit account', function (): void {
     $component
         ->assertSet('order.invoice_number', null)
         ->call('openCreateDocumentsModal')
-        ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+        ->assertExecutesJs("\$tsui.open.modal('create-documents-$componentId')")
         ->set([
             'selectedPrintLayouts' => [
                 'download' => ['invoice'],
@@ -517,7 +517,7 @@ test('order position with credit account debit', function (): void {
     $component
         ->assertSet('order.invoice_number', null)
         ->call('openCreateDocumentsModal')
-        ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+        ->assertExecutesJs("\$tsui.open.modal('create-documents-$componentId')")
         ->set([
             'selectedPrintLayouts' => [
                 'download' => ['invoice'],
@@ -623,7 +623,7 @@ test('replicate order', function (): void {
         ->call('replicate')
         ->assertOk()
         ->assertHasNoErrors()
-        ->assertExecutesJs("\$modalOpen('replicate-order')")
+        ->assertExecutesJs("\$tsui.open.modal('replicate-order')")
         ->call('saveReplicate')
         ->assertOk()
         ->assertHasNoErrors();

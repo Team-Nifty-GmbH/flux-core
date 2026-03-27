@@ -83,7 +83,7 @@ class VatRates extends VatRateList
         $this->vatRate->fill($vatRate);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-vat-rate-modal');
+            $tsui.open.modal('edit-vat-rate-modal');
         JS);
     }
 

@@ -2,13 +2,13 @@
     <x-button.circle
         color="indigo"
         icon="magnifying-glass"
-        x-on:click="$modalOpen('search-bar-mobile-modal')"
+        x-on:click="$tsui.open.modal('search-bar-mobile-modal')"
     />
 
     <x-modal
         id="search-bar-mobile-modal"
         size="xl"
-        x-on:open="$focusOn('search-mobile-input')"
+        x-on:open="$tsui.focus('search-mobile-input')"
     >
         <div class="flex flex-col gap-4">
             <x-input

@@ -79,7 +79,7 @@ class LedgerAccounts extends LedgerAccountList
         $this->ledgerAccount->fill($ledgerAccount);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-ledger-account-modal');
+            $tsui.open.modal('edit-ledger-account-modal');
         JS);
     }
 

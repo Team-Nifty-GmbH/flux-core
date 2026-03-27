@@ -86,7 +86,7 @@ class TransactionList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $modalOpen('transaction-details-modal');
+            $tsui.open.modal('transaction-details-modal');
         JS);
     }
 

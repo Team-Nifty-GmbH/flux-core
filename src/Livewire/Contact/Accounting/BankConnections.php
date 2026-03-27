@@ -80,7 +80,7 @@ class BankConnections extends BaseContactBankConnectionList
         $this->contactBankConnection->fill($contactBankConnection);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-contact-bank-connection');
+            $tsui.open.modal('edit-contact-bank-connection');
         JS);
     }
 

@@ -13,12 +13,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-printer-modal')"
+            x-on:click="$tsui.close.modal('edit-printer-modal')"
         />
         <x-button
             color="primary"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-printer-modal')})"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-printer-modal')})"
         />
     </x-slot>
 </x-modal>
@@ -41,12 +41,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('delete-spooler-modal')"
+            x-on:click="$tsui.close.modal('delete-spooler-modal')"
         />
         <x-button
             color="red"
             :text="__('Delete')"
-            x-on:click="$wire.deleteSpooler().then((success) => { if(success) $modalClose('delete-spooler-modal')})"
+            x-on:click="$wire.deleteSpooler().then((success) => { if(success) $tsui.close.modal('delete-spooler-modal')})"
             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Spooler')]) }}"
         />
     </x-slot>
@@ -162,7 +162,7 @@
             light
             flat
             :text="__('Close')"
-            x-on:click="$modalClose('printer-bridge-config-modal')"
+            x-on:click="$tsui.close.modal('printer-bridge-config-modal')"
         />
     </x-slot>
 </x-modal>

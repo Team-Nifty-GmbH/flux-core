@@ -12,7 +12,7 @@
         "dompdf/dompdf": "^3.1.0",
         "kreait/firebase-php": "^8.0",
         "laravel-notification-channels/webpush": "^10.2",
-        "laravel/framework": "^12.21.0",
+        "laravel/framework": "^13.0",
         "laravel/reverb": "^1.0.0",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^11.1",
@@ -29,8 +29,8 @@
         "spatie/laravel-settings": "^3.4",
         "spatie/laravel-tags": "^4.3",
         "spatie/pdf-to-image": "^3.0",
-        "tallstackui/tallstackui": "^2.15.1",
-        "team-nifty-gmbh/tall-datatables": "^1.0",
+        "tallstackui/tallstackui": "^3.0.6",
+        "team-nifty-gmbh/tall-datatables": "^2.0",
         "webklex/laravel-imap": "^6.1"
     },
     "require-dev": {

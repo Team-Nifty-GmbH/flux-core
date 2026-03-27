@@ -18,7 +18,7 @@ class ToastNotification extends Toast implements Arrayable
 
     protected ?NotificationAction $accept = null;
 
-    protected array $attributes = [];
+    public $attributes = [];
 
     protected ?string $description = null;
 
