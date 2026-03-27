@@ -112,7 +112,7 @@ class AssetController extends Controller
             abort(404);
         }
 
-        $buildPath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'build';
+        $buildPath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'dist';
         $path = $buildPath . DIRECTORY_SEPARATOR . data_get($entry, 'file');
 
         if (! file_exists($path)) {

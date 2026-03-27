@@ -214,7 +214,7 @@ class FluxServiceProvider extends ServiceProvider
             __DIR__ . '/../lang' => base_path('lang/vendor/team-nifty-gmbh/flux'),
         ], 'flux-translations');
         $this->publishes([
-            __DIR__ . '/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
+            __DIR__ . '/../dist' => public_path('vendor/team-nifty-gmbh/flux'),
         ], 'flux-assets');
         $this->publishes([
             __DIR__ . '/../docker' => base_path('docker'),

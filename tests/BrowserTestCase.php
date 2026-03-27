@@ -31,9 +31,9 @@ abstract class BrowserTestCase extends TestCase
 
     public static function installAssets(): void
     {
-        static::deleteDirectory(__DIR__ . '/../public/build/assets/');
+        static::deleteDirectory(__DIR__ . '/../dist/assets/');
 
-        if (file_exists($manifest = __DIR__ . '/../public/build/manifest.json')) {
+        if (file_exists($manifest = __DIR__ . '/../dist/manifest.json')) {
             unlink($manifest);
         }
 
@@ -44,7 +44,7 @@ abstract class BrowserTestCase extends TestCase
             usleep(1000);
         }
 
-        $jsFiles = glob(__DIR__ . '/../public/build/assets/*.js');
+        $jsFiles = glob(__DIR__ . '/../dist/assets/*.js');
         foreach ($jsFiles as $file) {
             $content = file_get_contents($file);
             if (substr($content, -1) === "\n") {
@@ -82,7 +82,7 @@ abstract class BrowserTestCase extends TestCase
 
         try {
             if (! file_exists(public_path('build'))) {
-                symlink(package_path('public/build'), public_path('build'));
+                symlink(package_path('dist'), public_path('build'));
             }
         } catch (Throwable) {
         }

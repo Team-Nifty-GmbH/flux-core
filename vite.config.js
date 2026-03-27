@@ -4,6 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     base: '/flux/',
+    build: {
+        outDir: 'dist',
+        emptyOutDir: true,
+    },
     plugins: [
         tailwindcss(),
         laravel({

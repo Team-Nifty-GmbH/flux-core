@@ -178,7 +178,7 @@ class FrontendAssets
 
     public function boot(): void
     {
-        static::$buildPath = dirname(__DIR__, 3) . '/public/build';
+        static::$buildPath = dirname(__DIR__, 3) . '/dist';
 
         $this->registerRoutes();
         $this->registerBladeDirectives();

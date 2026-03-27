@@ -8,6 +8,3 @@ testbench.yaml
 /vendor
 node_modules
 reports
-postcss.config.js
-package-lock.json
-public/build
