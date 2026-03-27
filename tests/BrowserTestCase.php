@@ -78,6 +78,11 @@ abstract class BrowserTestCase extends TestCase
 
     protected function setUp(): void
     {
+        $settingsPath = base_path('database/settings');
+        if (! file_exists($settingsPath)) {
+            mkdir($settingsPath, 0755, true);
+        }
+
         parent::setUp();
 
         try {
