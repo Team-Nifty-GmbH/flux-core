@@ -12,6 +12,7 @@ permissions:
   packages: read
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PHP_VERSION: '8.5'
   LARAVEL_VERSION: '12.*'
   TESTBENCH_VERSION: '10.*'
