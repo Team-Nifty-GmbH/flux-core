@@ -28,7 +28,7 @@
     >
         @forelse (collect($this->widgets)->filter(fn (array $widget) => data_get($widget, 'group') === $this->group) as $widget)
             <div
-                class="grid-stack-item relative z-0 rounded-lg"
+                class="grid-stack-item z-0 rounded-lg"
                 gs-id="{{ $widget['id'] }}"
                 gs-w="{{ $widget['width'] }}"
                 gs-h="{{ $widget['height'] }}"
