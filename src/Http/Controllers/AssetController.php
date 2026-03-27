@@ -105,7 +105,7 @@ class AssetController extends Controller
 
     public function pwaServiceWorker(): Response
     {
-        $manifest = FrontendAssets::getManifest();
+        $manifest = resolve_static(FrontendAssets::class, 'getManifest');
         $entry = data_get($manifest, 'resources/js/sw.js');
 
         if (! $entry) {

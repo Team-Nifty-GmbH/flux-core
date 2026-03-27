@@ -75,16 +75,16 @@ class SupportAutoInjectedAssets
                 return;
             }
 
-            $assetsHead = FrontendAssets::styles()->toHtml();
-            $assetsBody = FrontendAssets::scripts()->toHtml();
+            $assetsHead = resolve_static(FrontendAssets::class, 'styles')->toHtml()
+                . resolve_static(FrontendAssets::class, 'scripts')->toHtml();
 
-            if ($assetsHead === '' && $assetsBody === '') {
+            if ($assetsHead === '') {
                 return;
             }
 
             $originalContent = $handled->response->original;
             $handled->response->setContent(
-                static::injectAssets($html, $assetsHead, $assetsBody)
+                static::injectAssets($html, $assetsHead, '')
             );
             $handled->response->original = $originalContent;
         });
