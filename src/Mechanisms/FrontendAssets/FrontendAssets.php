@@ -24,14 +24,14 @@ class FrontendAssets
     public static function fluxStyles(): string
     {
         return <<<'PHP'
-            <?php echo \FluxErp\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
+            <?php echo resolve_static(\FluxErp\Mechanisms\FrontendAssets\FrontendAssets::class, 'styles'); ?>
         PHP;
     }
 
     public static function fluxScripts(): string
     {
         return <<<'PHP'
-            <?php echo \FluxErp\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
+            <?php echo resolve_static(\FluxErp\Mechanisms\FrontendAssets\FrontendAssets::class, 'scripts'); ?>
         PHP;
     }
 
