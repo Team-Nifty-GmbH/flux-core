@@ -7,16 +7,16 @@
     <x-card>
         <div class="flex flex-col gap-4">
             <x-input
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 :label="__('Name')"
                 wire:model="leadForm.name"
             />
             <x-textarea
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 :label="__('Description')"
                 wire:model="leadForm.description"
             />
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
                     :label="__('Commission Agent')"
                     wire:model="leadForm.user_id"
@@ -31,9 +31,9 @@
                     ]"
                 />
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     wire:model="leadForm.address_id"
                     required
                     select="label:label|value:id"
@@ -62,12 +62,12 @@
                     </x-slot>
                 </x-select.styled>
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
                     x-on:select="$wire.isLost = $event.detail.select.is_lost"
                     wire:model="leadForm.lead_state_id"
                     :label="__('Lead State')"
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     select="label:name|value:id"
                     unfiltered
                     :request="[
@@ -82,7 +82,7 @@
                 />
             </div>
             <div
-                x-bind:class="! edit && 'pointer-events-none'"
+                x-bind:class="!isEditing && 'pointer-events-none'"
                 x-cloak
                 x-show="$wire.isLost"
             >
@@ -115,14 +115,14 @@
             </div>
             <div x-cloak x-show="$wire.isLost">
                 <x-textarea
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     wire:model="leadForm.loss_reason"
                     :label="__('Loss Reason')"
                 />
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     wire:model="leadForm.recommended_by_address_id"
                     select="label:label|value:id"
                     unfiltered
@@ -150,7 +150,7 @@
                     </x-slot>
                 </x-select.styled>
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
                     :label="__('Origin')"
                     wire:model="leadForm.record_origin_id"
@@ -180,27 +180,27 @@
                 />
             </div>
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 :label="__('Expected Revenue')"
                 wire:model="leadForm.expected_revenue"
             />
             <x-number
-                x-bind:readonly="!edit"
+                x-bind:readonly="!isEditing"
                 :label="__('Expected Gross Profit')"
                 wire:model="leadForm.expected_gross_profit"
             />
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-rating
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     wire:model.number="leadForm.score"
                     :text="__('Score')"
                     :quantity="5"
                     position="right"
                 />
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-range
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     wire:model.number="leadForm.probability_percentage"
                     :hint="__('Probability to win this lead…')"
                 >
@@ -214,25 +214,25 @@
                 </x-range>
             </div>
             <div
-                x-bind:class="! edit && 'pointer-events-none'"
+                x-bind:class="!isEditing && 'pointer-events-none'"
                 class="flex gap-4"
             >
                 <x-date
                     wire:model="leadForm.start"
                     :label="__('Start Date')"
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                 />
                 <x-date
                     wire:model="leadForm.end"
                     :label="__('End Date')"
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                 />
             </div>
-            <div x-bind:class="!edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
                     :label="__('Categories')"
                     wire:model="leadForm.categories"
-                    x-bind:readonly="!edit"
+                    x-bind:readonly="!isEditing"
                     multiple
                     select="label:label|value:id"
                     unfiltered
@@ -251,10 +251,9 @@
                     ]"
                 />
             </div>
-            <div x-bind:class="!edit && 'pointer-events-none'">
+            <div x-bind:class="!isEditing && 'pointer-events-none'">
                 <x-select.styled
                     multiple
-                    x-bind:disabled="! $wire.edit"
                     wire:model.number="leadForm.tags"
                     select="label:label|value:id"
                     unfiltered

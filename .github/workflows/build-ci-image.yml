@@ -1,0 +1,27 @@
+name: Build CI Image
+
+on:
+  push:
+    branches: [main, dev]
+    paths: ['.github/docker/Dockerfile']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted, Linux]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .github/docker
+          push: true
+          tags: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
