@@ -1,10 +1,10 @@
 name: tests
 
 on:
-  # push:
-  #   branches: [dev]
-  # pull_request:
-  #   branches: [main, dev]
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [main, dev]
   workflow_dispatch:
 
 permissions:
