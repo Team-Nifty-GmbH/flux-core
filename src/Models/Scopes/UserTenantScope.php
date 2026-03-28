@@ -58,24 +58,22 @@ class UserTenantScope implements Scope
         if ($model->isRelation('tenants')
             && ($relation = $model->tenants()) instanceof BelongsToMany
         ) {
-            if (is_null($builder->getQuery()->columns)) {
-                $builder->select($builder->getQuery()->from . '.*');
-            }
+            $pivotTable = $relation->getTable();
+            $foreignPivotKey = $relation->getForeignPivotKeyName();
+            $relatedPivotKey = $relation->getRelatedPivotKeyName();
+            $parentKey = $relation->getQualifiedParentKeyName();
 
-            // uts = UserTenantScope
-            $builder->leftJoin(
-                $relation->getTable() . ' AS uts',
-                'uts.' . $relation->getForeignPivotKeyName(),
-                '=',
-                $relation->getQualifiedParentKeyName()
-            )
-                ->where(fn (Builder $query) => $query
-                    ->whereIntegerInRaw(
-                        'uts.' . $relation->getRelatedPivotKeyName(),
-                        $tenants
-                    )
-                    ->orWhereNull('uts.' . $relation->getForeignPivotKeyName())
-                );
+            $builder->where(fn (Builder $query) => $query
+                ->whereExists(function ($sub) use ($pivotTable, $foreignPivotKey, $relatedPivotKey, $parentKey, $tenants): void {
+                    $sub->from($pivotTable)
+                        ->whereColumn($pivotTable . '.' . $foreignPivotKey, $parentKey)
+                        ->whereIntegerInRaw($pivotTable . '.' . $relatedPivotKey, $tenants);
+                })
+                ->whereNotExists(function ($sub) use ($pivotTable, $foreignPivotKey, $parentKey): void {
+                    $sub->from($pivotTable)
+                        ->whereColumn($pivotTable . '.' . $foreignPivotKey, $parentKey);
+                }, 'or')
+            );
         }
     }
 }

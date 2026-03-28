@@ -27,8 +27,6 @@ trait HasModelPermission
 
     protected static function bootHasModelPermission(): void
     {
-        if (auth()->user() && ! auth()->user()->hasRole('Super Admin')) {
-            static::addGlobalScope(app(ModelPermissionCheckScope::class));
-        }
+        static::addGlobalScope(app(ModelPermissionCheckScope::class));
     }
 }

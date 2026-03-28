@@ -59,10 +59,20 @@ class AssetController extends Controller
             file_put_contents($path, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>');
         }
 
-        return Utils::pretendResponseIsFile(
+        $response = Utils::pretendResponseIsFile(
             $path,
             $mimeType
         );
+
+        if (str_starts_with($path, sys_get_temp_dir())) {
+            app()->terminating(function () use ($path): void {
+                if (file_exists($path)) {
+                    unlink($path);
+                }
+            });
+        }
+
+        return $response;
     }
 
     public function manifest(): JsonResponse
