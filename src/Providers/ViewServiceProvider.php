@@ -50,10 +50,24 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function bootFrontendAssets(): void
     {
-        app(FrontendAssets::class)->boot();
+        $frontendAssets = app(FrontendAssets::class);
+        $frontendAssets->boot();
+
+        $this->registerPackageAssets($frontendAssets);
 
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             app(SupportAutoInjectedAssets::class)->boot();
+        }
+    }
+
+    protected function registerPackageAssets(FrontendAssets $frontendAssets): void
+    {
+        $tallDatatablesDistPath = dirname((new \ReflectionClass(\TeamNiftyGmbH\DataTable\DataTableServiceProvider::class))->getFileName(), 2) . '/dist/build';
+
+        if (is_dir($tallDatatablesDistPath)) {
+            $frontendAssets->registerManifest('tall-datatables', $tallDatatablesDistPath, [
+                'resources/js/tall-datatables.js',
+            ]);
         }
     }
 
