@@ -60,6 +60,15 @@
       "_chunk-C_aKfXeR.js"
     ]
   },
+  "node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js": {
+    "file": "assets/leaflet.markercluster-src-BmwTfPhq.js",
+    "name": "leaflet.markercluster-src",
+    "src": "node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_chunk-C_aKfXeR.js"
+    ]
+  },
   "node_modules/leaflet/dist/images/layers-2x.png": {
     "file": "assets/layers-2x-Bpkbi35X.png",
     "src": "node_modules/leaflet/dist/images/layers-2x.png"
@@ -81,7 +90,7 @@
     "src": "node_modules/leaflet/dist/images/marker-shadow.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-9B2Zazm_.css",
+    "file": "assets/app-Bu--0Nih.css",
     "name": "app",
     "names": [
       "app.css"
@@ -107,7 +116,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CWsv8A5B.js",
+    "file": "assets/app-CBWsxSMo.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -115,6 +124,7 @@
       "_chunk-C_aKfXeR.js"
     ],
     "dynamicImports": [
+      "node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js",
       "node_modules/@techstark/opencv-js/dist/opencv.js"
     ],
     "assets": [
