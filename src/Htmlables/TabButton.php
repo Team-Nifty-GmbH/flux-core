@@ -9,7 +9,7 @@ use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\ComponentAttributeBag;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TallStackUi\View\Components\Button\Button;
+use TallStackUi\Components\Button\Normal\Component as Button;
 use Throwable;
 
 class TabButton implements Htmlable

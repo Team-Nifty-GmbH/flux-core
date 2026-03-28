@@ -103,7 +103,7 @@
                 flat
                 color="red"
                 :text="__('Delete')"
-                x-on:click="$wire.delete().then((success) => {if(success) $modalClose('execute-payment-run');})"
+                x-on:click="$wire.delete().then((success) => {if(success) $tsui.close.modal('execute-payment-run');})"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
             />
             <div class="flex justify-end gap-x-2">
@@ -111,13 +111,13 @@
                     color="secondary"
                     light
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('execute-payment-run')"
+                    x-on:click="$tsui.close.modal('execute-payment-run')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Execute Payment Run')"
                     loading="executePaymentRun"
-                    x-on:click="$wire.executePaymentRun().then((success) => {if(success) $modalClose('execute-payment-run');})"
+                    x-on:click="$wire.executePaymentRun().then((success) => {if(success) $tsui.close.modal('execute-payment-run');})"
                 />
             </div>
         </div>

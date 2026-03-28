@@ -215,7 +215,7 @@ abstract class Communication extends CommunicationList
         }
 
         $this->js(<<<'JS'
-            $modalOpen('edit-communication');
+            $tsui.open.modal('edit-communication');
         JS);
     }
 

@@ -142,7 +142,7 @@ class TransactionAssignments extends Component
 
         $this->refreshTransactions();
         $this->js(<<<'JS'
-            $modalClose('transaction-assign-orders-modal');
+            $tsui.close.modal('transaction-assign-orders-modal');
         JS);
     }
 
@@ -153,7 +153,7 @@ class TransactionAssignments extends Component
         $this->transactionForm->fill($transaction);
 
         $this->js(<<<'JS'
-            $modalOpen('transaction-assign-orders-modal');
+            $tsui.open.modal('transaction-assign-orders-modal');
         JS);
     }
 
@@ -181,7 +181,7 @@ class TransactionAssignments extends Component
         $this->orderTransactionForm->fill($orderTransaction);
 
         $this->js(<<<'JS'
-            $modalOpen('order-transaction-modal');
+            $tsui.open.modal('order-transaction-modal');
         JS);
     }
 
@@ -277,7 +277,7 @@ class TransactionAssignments extends Component
 
         $this->refreshTransactions();
         $this->js(<<<'JS'
-            $modalClose('order-transaction-modal');
+            $tsui.close.modal('order-transaction-modal');
         JS);
     }
 
@@ -296,7 +296,7 @@ class TransactionAssignments extends Component
         $this->transactionForm->fill($transaction);
 
         $this->js(<<<'JS'
-            $modalOpen('transaction-comments-modal');
+            $tsui.open.modal('transaction-comments-modal');
         JS);
     }
 

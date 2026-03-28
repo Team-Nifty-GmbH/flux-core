@@ -244,7 +244,7 @@ class Order extends Component
         $this->discount->fill($discount);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-discount');
+            $tsui.open.modal('edit-discount');
         JS);
     }
 
@@ -695,7 +695,7 @@ class Order extends Component
         $this->disableReplicateModalInputs = false;
 
         $this->js(<<<'JS'
-            $modalOpen('replicate-order');
+            $tsui.open.modal('replicate-order');
         JS);
     }
 
@@ -710,7 +710,7 @@ class Order extends Component
         $this->disableReplicateModalInputs = true;
 
         $this->js(<<<'JS'
-            $modalOpen('replicate-order');
+            $tsui.open.modal('replicate-order');
         JS);
     }
 

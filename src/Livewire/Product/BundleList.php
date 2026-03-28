@@ -46,7 +46,7 @@ class BundleList extends ProductBundleProductList
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => <<<'JS'
-                        $modalOpen('edit-bundle-product-modal')
+                        $tsui.open.modal('edit-bundle-product-modal')
                     JS,
                 ])
                 ->when(
@@ -114,7 +114,7 @@ class BundleList extends ProductBundleProductList
         $this->productBundleProductForm->fill($productBundleProduct);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-bundle-product-modal');
+            $tsui.open.modal('edit-bundle-product-modal');
         JS);
     }
 

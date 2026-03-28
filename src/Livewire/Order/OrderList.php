@@ -118,7 +118,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->tenant_id ??= resolve_static(Tenant::class, 'default')?->getKey();
 
         $this->js(<<<'JS'
-             $modalOpen('create-order-modal');
+             $tsui.open.modal('create-order-modal');
         JS);
     }
 
@@ -181,7 +181,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->collectiveOrder->orders = $selected;
 
         $this->js(<<<'JS'
-             $modalOpen('create-collective-order-modal');
+             $tsui.open.modal('create-collective-order-modal');
         JS);
     }
 
@@ -214,7 +214,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->loadData();
 
         $this->js(<<<'JS'
-             $modalClose('create-collective-order-modal');
+             $tsui.close.modal('create-collective-order-modal');
         JS);
     }
 

@@ -90,14 +90,14 @@
             <x-button
                 :text="__('Cancel')"
                 color="secondary"
-                x-on:click="$modalClose('{{ $employeeForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $employeeForm->modalName() }}')"
             />
             <x-button
                 :text="__('Save')"
                 color="primary"
                 x-on:click="$wire.save().then((success) => {
                     if (success) {
-                        $modalClose('{{ $employeeForm->modalName() }}');
+                        $tsui.close.modal('{{ $employeeForm->modalName() }}');
                     }
                 })"
             />
@@ -112,14 +112,14 @@
             <x-button
                 :text="__('Cancel')"
                 color="secondary"
-                x-on:click="$modalClose('close-employee-day-modal')"
+                x-on:click="$tsui.close.modal('close-employee-day-modal')"
             />
             <x-button
                 :text="__('Save')"
                 color="primary"
                 x-on:click="$wire.closeEmployeeDay().then((success) => {
                     if (success) {
-                        $modalClose('close-employee-day-modal');
+                        $tsui.close.modal('close-employee-day-modal');
                     }
                 })"
             />

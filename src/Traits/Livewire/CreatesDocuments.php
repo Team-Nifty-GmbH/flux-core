@@ -124,7 +124,7 @@ trait CreatesDocuments
 
         $id = strtolower($this->getId());
         $this->js(<<<JS
-            \$modalOpen('create-documents-$id');
+            \$tsui.open.modal('create-documents-$id');
         JS);
     }
 
@@ -150,7 +150,7 @@ trait CreatesDocuments
         $id = strtolower($this->getId());
         $this->js(<<<JS
             document.getElementById('preview-$id').querySelector('iframe').src = '$route';
-            \$modalOpen('preview-$id');
+            \$tsui.open.modal('preview-$id');
         JS);
     }
 

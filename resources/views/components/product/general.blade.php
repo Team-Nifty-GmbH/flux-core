@@ -311,12 +311,12 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('edit-product-properties-modal')"
+                    x-on:click="$tsui.close.modal('edit-product-properties-modal')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Save')"
-                    x-on:click="$wire.addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
+                    x-on:click="$wire.addProductProperties().then(() => { $tsui.close.modal('edit-product-properties-modal'); })"
                 />
             </x-slot>
         </x-modal>

@@ -63,7 +63,7 @@
                             urlObj.searchParams.delete('no-navigation')
 
                             window.open(urlObj)
-                            $modalClose('detail-modal')
+                            $tsui.close.modal('detail-modal')
                         },
                     }"
                 >
@@ -86,7 +86,7 @@
                                 color="secondary"
                                 light
                                 :text="__('Cancel')"
-                                x-on:click="$modalClose('detail-modal')"
+                                x-on:click="$tsui.close.modal('detail-modal')"
                             />
                             <x-button
                                 color="indigo"
@@ -107,14 +107,12 @@
             @if (! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
                 <x-slot:header>
                     <x-layout.header without-mobile-button>
-                        <x-slot:left>
-                            <x-button
-                                flat
-                                class="md:hidden"
-                                icon="bars-4"
-                                x-on:click="$dispatch('menu-force-open')"
-                            />
-                        </x-slot>
+                        <x-button
+                            flat
+                            class="md:hidden"
+                            icon="bars-4"
+                            x-on:click="$dispatch('menu-force-open')"
+                        />
                         @auth('web')
                             <div
                                 x-persist="layout.header.search-bar"

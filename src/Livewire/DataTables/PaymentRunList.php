@@ -66,7 +66,7 @@ class PaymentRunList extends BaseDataTable
         $this->loadPaymentRun($paymentRun);
 
         $this->js(<<<'JS'
-            $modalOpen('execute-payment-run');
+            $tsui.open.modal('execute-payment-run');
         JS);
     }
 

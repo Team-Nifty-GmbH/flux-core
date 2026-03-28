@@ -115,7 +115,7 @@ class OrderPositions extends OrderPositionList
             DataTableButton::make()
                 ->text(__('Create tasks'))
                 ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
-                ->xOnClick('$modalOpen(\'create-tasks\')'),
+                ->xOnClick('$tsui.open.modal(\'create-tasks\')'),
             DataTableButton::make()
                 ->text(__('Recalculate prices'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
@@ -144,7 +144,7 @@ class OrderPositions extends OrderPositionList
                     && ! $this->order->is_locked
                 )
                 ->xOnClick(<<<'JS'
-                    $modalOpen('edit-position-discount');
+                    $tsui.open.modal('edit-position-discount');
                 JS),
             DataTableButton::make()
                 ->text(__('Replicate'))
@@ -367,7 +367,7 @@ class OrderPositions extends OrderPositionList
         }
 
         $this->js(<<<'JS'
-            $modalOpen('edit-order-position');
+            $tsui.open.modal('edit-order-position');
         JS);
     }
 

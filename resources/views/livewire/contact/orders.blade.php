@@ -132,7 +132,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('create-order-modal')"
+                x-on:click="$tsui.close.modal('create-order-modal')"
             />
             <x-button
                 loading

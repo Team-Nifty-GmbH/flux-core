@@ -151,7 +151,7 @@ class PriceLists extends PriceListList
         }
 
         $this->js(<<<'JS'
-            $modalOpen('edit-price-list-modal');
+            $tsui.open.modal('edit-price-list-modal');
         JS);
     }
 

@@ -74,13 +74,13 @@ class WorkTimes extends WorkTimeList
                 ->text(__('Create Orders'))
                 ->color('indigo')
                 ->xOnClick(<<<'JS'
-                    $modalOpen('create-orders-modal');
+                    $tsui.open.modal('create-orders-modal');
                 JS)
                 ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->text(__('Change is billable'))
                 ->xOnClick(<<<'JS'
-                    $modalOpen('toggle-is-billable-modal');
+                    $tsui.open.modal('toggle-is-billable-modal');
                 JS)
                 ->when(fn () => resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
         ];
@@ -139,7 +139,7 @@ class WorkTimes extends WorkTimeList
             $wire.workTime.ended_at = $wire.workTime.ended_at
                 ? dayjs($wire.workTime.ended_at).utc(true).local().format('YYYY-MM-DDTHH:mm')
                 : null;
-            $modalOpen('edit-work-time-modal');
+            $tsui.open.modal('edit-work-time-modal');
         JS);
     }
 

@@ -263,12 +263,12 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('{{ $emailTemplateForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $emailTemplateForm->modalName() }}')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $emailTemplateForm->modalName() }}')})"
+                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $emailTemplateForm->modalName() }}')})"
             />
         </x-slot>
     </x-modal>

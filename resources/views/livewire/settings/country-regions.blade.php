@@ -19,12 +19,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('country-region-form-modal')"
+            x-on:click="$tsui.close.modal('country-region-form-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('country-region-form-modal')})"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('country-region-form-modal')})"
         />
     </x-slot>
 </x-modal>

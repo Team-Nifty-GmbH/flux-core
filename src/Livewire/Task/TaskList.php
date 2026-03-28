@@ -69,7 +69,7 @@ class TaskList extends BaseTaskList
         $this->task->reset();
 
         $this->js(<<<'JS'
-            $modalOpen('new-task-modal');
+            $tsui.open.modal('new-task-modal');
         JS);
     }
 }

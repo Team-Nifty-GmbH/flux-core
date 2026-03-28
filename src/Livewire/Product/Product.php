@@ -467,7 +467,7 @@ class Product extends Component
         );
 
         $this->js(<<<'JS'
-            $modalOpen('edit-product-properties-modal');
+            $tsui.open.modal('edit-product-properties-modal');
         JS);
     }
 
