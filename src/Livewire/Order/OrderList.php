@@ -238,7 +238,6 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->count();
     }
 
-    #[Renderless]
     public function loadData(): void
     {
         parent::loadData();

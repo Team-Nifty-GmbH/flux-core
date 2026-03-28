@@ -183,7 +183,6 @@ class AddressList extends BaseDataTable
     #[Renderless]
     public function evaluate(): void {}
 
-    #[Renderless]
     public function loadData(): void
     {
         parent::loadData();
