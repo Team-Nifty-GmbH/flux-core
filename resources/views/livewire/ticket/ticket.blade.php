@@ -237,7 +237,7 @@
                         <div class="flex gap-0.5">
                             <div class="">{{ __('Created At') }}:</div>
                             <div
-                                x-text="window.formatters.datetime($wire.ticket.created_at)"
+                                x-text="$nuxbe.format.datetime($wire.ticket.created_at)"
                             ></div>
                             <div
                                 x-text="$wire.ticket.created_by || '{{ __('Unknown') }}'"
@@ -246,7 +246,7 @@
                         <div class="flex gap-0.5">
                             <div class="">{{ __('Updated At') }}:</div>
                             <div
-                                x-text="window.formatters.datetime($wire.ticket.updated_at)"
+                                x-text="$nuxbe.format.datetime($wire.ticket.updated_at)"
                             ></div>
                             <div
                                 x-text="$wire.ticket.updated_by || '{{ __('Unknown') }}'"

@@ -116,14 +116,14 @@
                                 class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                             >
                                 <span
-                                    x-text="assignment.valid_from ? window.formatters.date(assignment.valid_from) : '-'"
+                                    x-text="assignment.valid_from ? $nuxbe.format.date(assignment.valid_from) : '-'"
                                 ></span>
                             </td>
                             <td
                                 class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                             >
                                 <span
-                                    x-text="assignment.valid_until ? window.formatters.date(assignment.valid_until) : '-'"
+                                    x-text="assignment.valid_until ? $nuxbe.format.date(assignment.valid_until) : '-'"
                                 ></span>
                             </td>
                             <td
@@ -132,7 +132,7 @@
                                 <span
                                     x-text="
                                         assignment.annual_vacation_days
-                                            ? window.formatters.int(assignment.annual_vacation_days)
+                                            ? $nuxbe.format.int(assignment.annual_vacation_days)
                                             : '-'
                                     "
                                 ></span>

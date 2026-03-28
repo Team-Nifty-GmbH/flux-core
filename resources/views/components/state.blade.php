@@ -58,7 +58,7 @@
             <template x-for="state in availableStates">
                 <x-dropdown.items x-on:click="model = state.name; show = false">
                     <div
-                        x-html="window.formatters.state(state.label, formatter[1][state.name])"
+                        x-html="$nuxbe.format.state(state.label, formatter[1][state.name])"
                     ></div>
                 </x-dropdown.items>
             </template>

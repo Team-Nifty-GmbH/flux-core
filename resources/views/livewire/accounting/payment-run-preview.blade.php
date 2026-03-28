@@ -41,19 +41,19 @@
                         x-text="order.contact_name || order.address_name || '-'"
                     ></x-flux::table.cell>
                     <x-flux::table.cell
-                        x-html="window.formatters.coloredMoney(order.total_gross_price)"
+                        x-html="$nuxbe.format.money(order.total_gross_price, {colored: true})"
                     ></x-flux::table.cell>
                     <x-flux::table.cell>
                         <div>
                             <span
-                                x-html="window.formatters.coloredMoney(order.balance)"
+                                x-html="$nuxbe.format.money(order.balance, {colored: true})"
                             ></span>
                             <div
                                 x-show="order.balance_due_discount"
                                 class="text-xs text-gray-500"
                             >
                                 <span
-                                    x-html="window.formatters.coloredMoney(order.balance_due_discount)"
+                                    x-html="$nuxbe.format.money(order.balance_due_discount, {colored: true})"
                                 ></span>
                                 <span
                                     x-show="order.payment_discount_target_date"
@@ -61,9 +61,9 @@
                                     (
                                     <span
                                         x-text="
-                                            window.formatters.percentage(order.payment_discount_percent) +
+                                            $nuxbe.format.percentage(order.payment_discount_percent) +
                                                 ' {{ __('until') }} ' +
-                                                window.formatters.date(order.payment_discount_target_date)
+                                                $nuxbe.format.date(order.payment_discount_target_date)
                                         "
                                     ></span>
                                     )
@@ -116,7 +116,7 @@
                 </x-flux::table.head-cell>
                 <x-flux::table.head-cell
                     class="font-bold"
-                    x-html="window.formatters.coloredMoney(Math.abs(totalAmount))"
+                    x-html="$nuxbe.format.money(Math.abs(totalAmount), {colored: true})"
                 ></x-flux::table.head-cell>
                 <x-flux::table.head-cell></x-flux::table.head-cell>
             </x-slot>

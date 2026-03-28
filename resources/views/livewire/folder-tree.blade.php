@@ -297,7 +297,7 @@
                                 <x-input
                                     :label="__('Size')"
                                     disabled
-                                    x-bind:value="window.fileSizeHumanReadable(selection?.size)"
+                                    x-bind:value="$nuxbe.format.fileSize(selection?.size)"
                                 />
                                 <x-input
                                     :label="__('File')"

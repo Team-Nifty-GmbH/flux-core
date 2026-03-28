@@ -10,7 +10,7 @@
                 <span
                     x-cloak
                     x-show="$wire.leadStateForm.probability_percentage !== null"
-                    x-text="window.formatters.percentage($wire.leadStateForm.probability_percentage / 100)"
+                    x-text="$nuxbe.format.percentage($wire.leadStateForm.probability_percentage / 100)"
                 ></span>
             </x-slot>
         </x-range>

@@ -35,7 +35,7 @@
                 <div class="text-right">
                     <div
                         class="font-semibold"
-                        x-text="window.formatters.datetime($wire.mailMessage.date)"
+                        x-text="$nuxbe.format.datetime($wire.mailMessage.date)"
                     ></div>
                     <div
                         class="text-sm"
@@ -80,7 +80,7 @@
                 <div class="text-sm">{{ __('To') }}:</div>
                 <template x-for="to in $wire.mailMessage.to">
                     <span
-                        x-html="window.formatters.badge(to.full, 'neutral')"
+                        x-html="$nuxbe.format.badge(to.full, 'neutral')"
                     ></span>
                 </template>
             </div>
@@ -92,7 +92,7 @@
                 <div class="text-sm">{{ __('CC') }}:</div>
                 <template x-for="cc in $wire.mailMessage.cc">
                     <span
-                        x-html="window.formatters.badge(cc.full, 'neutral')"
+                        x-html="$nuxbe.format.badge(cc.full, 'neutral')"
                     ></span>
                 </template>
             </div>
@@ -104,7 +104,7 @@
                 <div class="text-sm">{{ __('BCC') }}:</div>
                 <template x-for="bcc in $wire.mailMessage.bcc">
                     <span
-                        x-html="window.formatters.badge(bcc.full, 'neutral')"
+                        x-html="$nuxbe.format.badge(bcc.full, 'neutral')"
                     ></span>
                 </template>
             </div>

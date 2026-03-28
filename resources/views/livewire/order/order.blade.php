@@ -1087,7 +1087,7 @@
                                     >
                                         ({{ __('until') }}
                                         <span
-                                            x-text="window.formatters.date($wire.order.payment_discount_target_date)"
+                                            x-text="$nuxbe.format.date($wire.order.payment_discount_target_date)"
                                         ></span>
                                         )
                                     </span>
@@ -1171,7 +1171,7 @@
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>
                                 <div
-                                    x-text="window.formatters.datetime($wire.order.created_at)"
+                                    x-text="$nuxbe.format.datetime($wire.order.created_at)"
                                 ></div>
                                 <div
                                     x-text="$wire.order.created_by || '{{ __('Unknown') }}'"
@@ -1180,7 +1180,7 @@
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Updated At') }}:</div>
                                 <div
-                                    x-text="window.formatters.datetime($wire.order.updated_at)"
+                                    x-text="$nuxbe.format.datetime($wire.order.updated_at)"
                                 ></div>
                                 <div
                                     x-text="$wire.order.updated_by || '{{ __('Unknown') }}'"

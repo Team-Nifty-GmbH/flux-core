@@ -196,7 +196,7 @@
                             >
                                 <span>{{ __("Subtotal net") }}:</span>
                                 <span
-                                    x-html="window.formatters.coloredMoney(getSubtotal(), '{{ data_get($parentOrder, 'currency.symbol') }}')"
+                                    x-html="$nuxbe.format.money(getSubtotal(), {colored: true, currency: '{{ data_get($parentOrder, 'currency.iso') }}'})"
                                 ></span>
                             </div>
                             @foreach (data_get($parentOrder, "discounts") ?? [] as $discount)
@@ -225,7 +225,7 @@
                             </span>
                             <span class="text-lg font-bold">
                                 <span
-                                    x-html="window.formatters.coloredMoney(getTotalAmount(), '{{ data_get($parentOrder, 'currency.symbol') }}')"
+                                    x-html="$nuxbe.format.money(getTotalAmount(), {colored: true, currency: '{{ data_get($parentOrder, 'currency.iso') }}'})"
                                 ></span>
                             </span>
                         </div>

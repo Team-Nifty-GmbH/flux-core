@@ -99,10 +99,10 @@
         </div>
         <div class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-50">
             <span
-                x-text="window.formatters.relativeTime(new Date(comment.created_at).getTime())"
+                x-text="$nuxbe.format.relativeTime(new Date(comment.created_at).getTime())"
             ></span>
             <span
-                x-text="'(' + window.formatters.datetime(new Date(comment.created_at)) + ')'"
+                x-text="'(' + $nuxbe.format.datetime(new Date(comment.created_at)) + ')'"
             ></span>
             @canAction(\FluxErp\Actions\Comment\CreateComment::class)
                 <span class="">&middot;</span>

@@ -18,6 +18,7 @@ import familyTree from './family-tree.js';
 import documentScanner from './document-scanner.js';
 import selectComponent from './tallstackui/select.js';
 import toastComponent from './tallstackui/toast.js';
+import nuxbe from '../nuxbe.js';
 
 import { Calendar } from '@fullcalendar/core';
 import allLocales from '@fullcalendar/core/locales-all';
@@ -59,22 +60,14 @@ navigationSpinner();
 if (window.Alpine?.version) {
     window.Alpine.plugin(sort);
     window.Alpine.plugin(collapse);
+    window.Alpine.plugin(nuxbe);
 } else {
     window.addEventListener('alpine:init', () => {
         window.Alpine.plugin(sort);
         window.Alpine.plugin(collapse);
+        window.Alpine.plugin(nuxbe);
     });
 }
-
-Alpine.directive('currency', (el, { expression }, { evaluate }) => {
-    const data = evaluate(expression);
-
-    el.innerText = formatters.money(data.value, data.currency);
-});
-
-Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
-    el.innerText = formatters.percentage(evaluate(expression));
-});
 
 Alpine.directive('template-outlet', templateOutlet);
 Alpine.data('folder_tree', folders);

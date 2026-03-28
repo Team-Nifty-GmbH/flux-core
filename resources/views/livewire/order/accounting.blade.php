@@ -8,7 +8,7 @@
 
             return (
                 '(' +
-                window.formatters.date(
+                $nuxbe.format.date(
                     dayjs($wire.$parent.order.payment_target_date)
                         .add(days, 'day')
                         .toDate(),
@@ -48,7 +48,7 @@
                     <span>{{ __('Payment target') }}</span>
                     <span
                         x-show="$wire.$parent.order.payment_target_date"
-                        x-text="'(' + window.formatters.date($wire.$parent.order.payment_target_date) + ')'"
+                        x-text="'(' + $nuxbe.format.date($wire.$parent.order.payment_target_date) + ')'"
                         class="text-xs"
                     ></span>
                 </div>
@@ -67,7 +67,7 @@
                         x-show="$wire.$parent.order.payment_discount_target_date"
                         x-text="
                             '(' +
-                                window.formatters.date($wire.$parent.order.payment_discount_target_date) +
+                                $nuxbe.format.date($wire.$parent.order.payment_discount_target_date) +
                                 ')'
                         "
                         class="text-xs"

@@ -101,11 +101,11 @@
                     ></x-flux::table.cell>
                     <x-flux::table.cell
                         class="text-right"
-                        x-html="window.formatters.float(orderPosition.amount)"
+                        x-html="$nuxbe.format.float(orderPosition.amount)"
                     ></x-flux::table.cell>
                     <x-flux::table.cell
                         class="text-right"
-                        x-html="window.formatters.coloredMoney(orderPosition.total_net_price)"
+                        x-html="$nuxbe.format.money(orderPosition.total_net_price, {colored: true})"
                     ></x-flux::table.cell>
                 </x-flux::table.row>
             </template>

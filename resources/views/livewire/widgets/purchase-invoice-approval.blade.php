@@ -25,9 +25,9 @@
                         <span
                             class="flex-none text-sm font-bold"
                             x-html="
-                                window.formatters.coloredMoney(
+                                $nuxbe.format.money(
                                     {{ $invoice->total_gross_price }},
-                                    '{{ $invoice->currency->symbol }}',
+                                    {colored: true, currency: '{{ $invoice->currency->iso }}'},
                                 )
                             "
                         ></span>

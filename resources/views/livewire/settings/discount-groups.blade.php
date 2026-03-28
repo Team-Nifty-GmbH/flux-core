@@ -71,7 +71,7 @@
                         </td>
                         <td>
                             <span
-                                x-text="window.formatters.percentage(discount.discount)"
+                                x-text="$nuxbe.format.percentage(discount.discount)"
                             ></span>
                         </td>
                     </x-table.row>
