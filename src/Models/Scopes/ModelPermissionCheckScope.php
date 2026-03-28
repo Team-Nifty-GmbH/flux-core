@@ -11,7 +11,11 @@ class ModelPermissionCheckScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         return;
-        if (! auth()->check() || ! $model::hasPermission()) {
+        if (
+            ! auth()->check()
+            || ! $model::hasPermission()
+            || auth()->user()->hasRole('Super Admin')
+        ) {
             return;
         }
 
@@ -20,7 +24,6 @@ class ModelPermissionCheckScope implements Scope
         if (
             $relevantPermissions->isNotEmpty()
             && ! auth()->user()->hasAnyPermission($relevantPermissions)
-            && ! auth()->user()->hasRole('Super Admin')
         ) {
             $builder->whereRaw('1 = 0');
         }

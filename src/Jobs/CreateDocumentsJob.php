@@ -214,32 +214,37 @@ class CreateDocumentsJob implements ShouldQueue
         $zipPath = $folder . str_replace(['<', '>', ':', '"', '/', '\\', '|', '?', '*'], '_', $zipName);
         $tmpZip = tempnam(sys_get_temp_dir(), 'flux-docs-') . '.zip';
 
-        $zip = new ZipArchive();
+        try {
+            $zip = new ZipArchive();
 
-        if ($zip->open($tmpZip, ZipArchive::CREATE) !== true) {
-            throw new RuntimeException('Failed to create ZIP archive: ' . $tmpZip);
+            if ($zip->open($tmpZip, ZipArchive::CREATE) !== true) {
+                throw new RuntimeException('Failed to create ZIP archive: ' . $tmpZip);
+            }
+
+            $usedNames = [];
+
+            foreach ($previewFiles as $file) {
+                $zip->addFromString(
+                    $this->deduplicateFileName($file['file_name'], $usedNames),
+                    $file['output']
+                );
+            }
+
+            foreach ($downloadFiles as $media) {
+                $zip->addFile(
+                    $media->getPath(),
+                    $this->deduplicateFileName($media->file_name, $usedNames)
+                );
+            }
+
+            $zip->close();
+
+            $disk->put($zipPath, file_get_contents($tmpZip));
+        } finally {
+            if (file_exists($tmpZip)) {
+                unlink($tmpZip);
+            }
         }
-
-        $usedNames = [];
-
-        foreach ($previewFiles as $file) {
-            $zip->addFromString(
-                $this->deduplicateFileName($file['file_name'], $usedNames),
-                $file['output']
-            );
-        }
-
-        foreach ($downloadFiles as $media) {
-            $zip->addFile(
-                $media->getPath(),
-                $this->deduplicateFileName($media->file_name, $usedNames)
-            );
-        }
-
-        $zip->close();
-
-        $disk->put($zipPath, file_get_contents($tmpZip));
-        unlink($tmpZip);
 
         return $zipPath;
     }

@@ -50,19 +50,22 @@ class CreateMailMessage extends FluxAction
         // the maximum file size for mail messages should be managed on the mail server
         $maxFileSize = config('media-library.max_file_size');
         config(['media-library.max_file_size' => 1024 * 1024 * 500]);
-        foreach ($attachments as $attachment) {
-            $attachment['model_id'] = $mailMessage->id;
-            $attachment['model_type'] = app(Communication::class)->getMorphClass();
-            $attachment['collection_name'] = 'attachments';
-            $attachment['media_type'] ??= is_file(data_get($attachment, 'media', ''))
-                ? null
-                : 'string';
+        try {
+            foreach ($attachments as $attachment) {
+                $attachment['model_id'] = $mailMessage->id;
+                $attachment['model_type'] = app(Communication::class)->getMorphClass();
+                $attachment['collection_name'] = 'attachments';
+                $attachment['media_type'] ??= is_file(data_get($attachment, 'media', ''))
+                    ? null
+                    : 'string';
 
-            UploadMedia::make($attachment)
-                ->validate()
-                ->execute();
+                UploadMedia::make($attachment)
+                    ->validate()
+                    ->execute();
+            }
+        } finally {
+            config(['media-library.max_file_size' => $maxFileSize]);
         }
-        config(['media-library.max_file_size' => $maxFileSize]);
 
         if ($mailMessage->mailAccount->has_auto_assign) {
             $connectedMailAddresses = resolve_static(MailAccount::class, 'query')
