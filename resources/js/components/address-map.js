@@ -2,7 +2,6 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import 'leaflet.markercluster';
 
 // remove default icon - take what vite generated
 delete L.Icon.Default.prototype._getIconUrl;
@@ -13,6 +12,13 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
+// leaflet.markercluster expects L as a global variable (window.L), not as
+// an ES module import. Vite/Rollup may evaluate the plugin before leaflet
+// sets window.L, causing L.MarkerClusterGroup to be undefined. Loading the
+// plugin dynamically after ensuring window.L is set avoids this race.
+window.L = L;
+const markerClusterReady = import('leaflet.markercluster');
+
 export default function (
     $wire,
     propertyName,
@@ -22,7 +28,9 @@ export default function (
 ) {
     return {
         zoom: zoom,
-        init() {
+        async init() {
+            await markerClusterReady;
+
             // init map
             this.map = L.map('map');
             this.markers = L.markerClusterGroup({
@@ -72,6 +80,10 @@ export default function (
             }
         },
         addMarkers(addresses = null) {
+            if (!this.markers) {
+                return;
+            }
+
             let address = addresses ?? $wire[propertyName];
             if (propertyName.includes('.') && !addresses) {
                 const props = propertyName.split('.');
@@ -185,7 +197,7 @@ export default function (
             });
         },
         get showMap() {
-            return this.markers.getLayers().length > 0;
+            return this.markers?.getLayers().length > 0 ?? false;
         },
         addUserMarker() {
             navigator.geolocation.getCurrentPosition((position) => {
