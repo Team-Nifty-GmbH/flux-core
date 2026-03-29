@@ -220,7 +220,7 @@
                     x-on:focus=""
                     :label="__('Discount')"
                     wire:model="discount.discount"
-                    x-on:change="$el.value = parseNumber($el.value)"
+                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                 />
             </div>
             <div x-cloak x-show="! $wire.discount.is_percentage">
@@ -229,7 +229,7 @@
                     type="number"
                     :label="__('Discount')"
                     wire:model="discount.discount"
-                    x-on:change="$el.value = parseNumber($el.value)"
+                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                 />
             </div>
             <x-toggle

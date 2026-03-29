@@ -89,7 +89,7 @@
                                 x-cloak
                                 x-show="file.preview_url !== ''"
                                 class="h-full"
-                                x-on:click="$openDetailModal(file.original_url)"
+                                x-on:click="$nuxbe.openDetailModal(file.original_url)"
                                 icon="eye"
                             />
                         </div>

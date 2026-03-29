@@ -342,7 +342,7 @@
                                                         color="secondary"
                                                         sm
                                                         icon="eye"
-                                                        x-on:click="$openDetailModal('{{ route('orders.id', ['id' => '__key__']) }}'.replace('__key__', order.id))"
+                                                        x-on:click="$nuxbe.openDetailModal('{{ route('orders.id', ['id' => '__key__']) }}'.replace('__key__', order.id))"
                                                     />
                                                 </div>
                                                 <div>

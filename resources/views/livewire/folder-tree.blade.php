@@ -323,7 +323,7 @@
                                             <x-button
                                                 x-cloak
                                                 x-show="previewSupported"
-                                                x-on:click="$openDetailModal(selection.original_url)"
+                                                x-on:click="$nuxbe.openDetailModal(selection.original_url)"
                                                 icon="eye"
                                                 class="h-full rounded-l-md"
                                                 color="indigo"
@@ -344,7 +344,7 @@
                             <object
                                 x-on:load="previewSupported = true"
                                 x-on:error="previewSupported = false"
-                                x-on:click="$openDetailModal(selection.original_url)"
+                                x-on:click="$nuxbe.openDetailModal(selection.original_url)"
                                 class="cursor-pointer object-contain"
                                 x-bind:type="selection.mime_type"
                                 x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"

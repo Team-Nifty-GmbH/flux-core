@@ -19,7 +19,7 @@
                     x-on:focus=""
                     :label="__('Discount')"
                     wire:model="discount"
-                    x-on:change="$el.value = parseNumber($el.value)"
+                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                 />
             </div>
             <div x-cloak x-show="! $wire.discountIsPercentage">
@@ -29,7 +29,7 @@
                     x-on:focus=""
                     :label="__('Discount')"
                     wire:model="discount"
-                    x-on:change="$el.value = parseNumber($el.value)"
+                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                 />
             </div>
         </div>
@@ -187,7 +187,7 @@
                                 :prefix="data_get($order->currency, 'symbol')"
                                 type="number"
                                 wire:model="orderPosition.unit_price"
-                                x-on:change="$el.value = parseNumber($el.value)"
+                                x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                             >
                                 <x-slot:label>
                                     <x-label for="orderPosition.unit_price">
@@ -244,7 +244,7 @@
                                     prefix="%"
                                     type="number"
                                     wire:model="orderPosition.discount_percentage"
-                                    x-on:change="$el.value = parseNumber($el.value)"
+                                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                                 />
                             </div>
                             <div
@@ -255,7 +255,7 @@
                                     :prefix="data_get($order->currency, 'symbol')"
                                     type="number"
                                     wire:model="orderPosition.discount_flat"
-                                    x-on:change="$el.value = parseNumber($el.value)"
+                                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                                 />
                             </div>
                         </div>
@@ -319,7 +319,7 @@
                                         type="number"
                                         :label="__('Purchase Price')"
                                         wire:model="orderPosition.purchase_price"
-                                        x-on:change="$el.value = parseNumber($el.value)"
+                                        x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                                     />
                                     @if (resolve_static(\FluxErp\Models\LedgerAccount::class, 'query')->where('ledger_account_type_enum', $order->isPurchase ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue)->exists())
                                         <x-select.styled

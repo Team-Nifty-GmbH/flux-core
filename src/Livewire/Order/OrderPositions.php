@@ -567,7 +567,7 @@ class OrderPositions extends OrderPositionList
     public function showProduct(Product $product): void
     {
         $this->js(<<<JS
-            \$openDetailModal('{$product->getUrl()}');
+            \$nuxbe.openDetailModal('{$product->getUrl()}');
         JS);
     }
 
