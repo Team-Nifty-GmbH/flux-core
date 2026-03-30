@@ -2,11 +2,16 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use Cron\CronExpression;
 use FluxErp\Actions\Schedule\CreateSchedule;
 use FluxErp\Actions\Schedule\DeleteSchedule;
 use FluxErp\Actions\Schedule\UpdateSchedule;
+use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Facades\Repeatable;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
+use Throwable;
 
 class ScheduleForm extends FluxForm
 {
@@ -37,6 +42,9 @@ class ScheduleForm extends FluxForm
     public ?int $id = null;
 
     public bool $is_active = true;
+
+    #[Locked]
+    public array $nextExecutionDates = [];
 
     public ?string $name = null;
 
@@ -72,6 +80,8 @@ class ScheduleForm extends FluxForm
             ! is_null($this->recurrences) => 'recurrences',
             default => 'never'
         };
+
+        $this->nextExecutionDates = $this->getNextExecutionDates();
     }
 
     public function save(): void
@@ -129,6 +139,115 @@ class ScheduleForm extends FluxForm
             ->execute();
 
         $this->fill($response);
+    }
+
+    public function getNextExecutionDates(int $count = 5): array
+    {
+        $method = data_get($this->cron, 'methods.basic');
+
+        if (! $method) {
+            return [];
+        }
+
+        $basicParams = data_get($this->cron, 'parameters.basic', []);
+
+        $parameters = match ($method) {
+            'hourlyAt', 'everyOddHour', 'everyTwoHours',
+            'everyThreeHours', 'everyFourHours', 'everySixHours' => [data_get($basicParams, '0') ?: 0],
+            'dailyAt', 'lastDayOfMonth' => [data_get($basicParams, '0') ?? '00:00'],
+            'twiceDaily', 'weeklyOn',
+            'monthlyOn', 'quarterlyOn' => array_filter(
+                $basicParams,
+                fn ($key) => $key < 2,
+                ARRAY_FILTER_USE_KEY
+            ),
+            'twiceDailyAt', 'twiceMonthly', 'yearlyOn' => $basicParams,
+            default => [],
+        };
+
+        $parameters = array_map(
+            fn ($item) => ! is_null($item) && ! str_contains((string) $item, ':') ? (int) $item : $item,
+            $parameters
+        );
+
+        $schedule = app(Schedule::class);
+        $event = $schedule->call(fn () => null);
+
+        if ($parameters !== []) {
+            $event = $event->{$method}(...$parameters);
+        } else {
+            $event = $event->{$method}();
+        }
+
+        $dates = [];
+        $dueAt = $this->due_at ? Carbon::parse($this->due_at) : null;
+        $from = $dueAt ? $dueAt->copy() : now();
+        $endsAt = $this->end_radio === 'ends_at' && $this->ends_at
+            ? Carbon::parse($this->ends_at)
+            : null;
+        $remainingRecurrences = $this->end_radio === 'recurrences' && $this->recurrences
+            ? max(0, $this->recurrences - ($this->current_recurrence ?? 0))
+            : null;
+
+        if ($dueAt && $dueAt->greaterThan(now())) {
+            if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
+                $dates[] = $dueAt->toDateTimeString();
+            }
+        }
+
+        if ($from->lessThan(now())) {
+            $from = now();
+        }
+
+        $maxDates = $remainingRecurrences !== null
+            ? min($count, $remainingRecurrences)
+            : $count;
+
+        if ($maxDates <= 0) {
+            return $dates;
+        }
+
+        try {
+            if ($method === FrequenciesEnum::LastDayOfMonth->value) {
+                $parts = explode(' ', $event->expression);
+                $current = $from->copy();
+
+                for ($i = 0; $i < $maxDates; $i++) {
+                    $next = $current->copy()->endOfMonth()
+                        ->setTime((int) $parts[1], (int) $parts[0]);
+
+                    if ($next->lessThanOrEqualTo($current)) {
+                        $next = $current->copy()->addMonthNoOverflow()->endOfMonth()
+                            ->setTime((int) $parts[1], (int) $parts[0]);
+                    }
+
+                    if ($endsAt && $next->greaterThan($endsAt)) {
+                        break;
+                    }
+
+                    $dates[] = $next->toDateTimeString();
+                    $current = $next->copy()->addDay();
+                }
+            } else {
+                $cron = new CronExpression($event->expression);
+                $current = $from;
+
+                for ($i = 0; $i < $maxDates; $i++) {
+                    $next = Carbon::instance($cron->getNextRunDate($current));
+
+                    if ($endsAt && $next->greaterThan($endsAt)) {
+                        break;
+                    }
+
+                    $dates[] = $next->toDateTimeString();
+                    $current = $next;
+                }
+            }
+        } catch (Throwable) {
+            return [];
+        }
+
+        return $dates;
     }
 
     protected function getActions(): array
