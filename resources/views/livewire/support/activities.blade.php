@@ -92,7 +92,7 @@
                                     class="text-right text-sm whitespace-nowrap text-gray-500"
                                 >
                                     <time
-                                        x-text="formatters.datetime(activity.created_at)"
+                                        x-text="$nuxbe.format.datetime(activity.created_at)"
                                     ></time>
                                 </div>
                             </div>

@@ -47,7 +47,7 @@
         <x-label :label="__('Order state')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-html="formatters.state($wire.order.state, formatter.state[1])"
+            x-html="$nuxbe.format.state($wire.order.state, formatter.state[1])"
         ></div>
         <x-label :label="__('Commission')" />
         <div
@@ -65,12 +65,12 @@
         <x-label :label="__('Payment state')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-html="formatters.state($wire.order.payment_state, formatter.payment_state[1])"
+            x-html="$nuxbe.format.state($wire.order.payment_state, formatter.payment_state[1])"
         ></div>
         <x-label :label="__('Total net')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="formatters.money($wire.order.total_net_price, $wire.order.currency)"
+            x-text="$nuxbe.format.money($wire.order.total_net_price, $wire.order.currency)"
         ></div>
     </div>
     <div class="pt-8 pb-2 font-semibold uppercase">

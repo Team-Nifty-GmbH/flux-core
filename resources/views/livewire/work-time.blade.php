@@ -187,7 +187,7 @@
                             ></div>
                             <div
                                 class="text-xs text-gray-500 dark:text-gray-400"
-                                x-text="formatters.datetime(workTime.started_at)"
+                                x-text="$nuxbe.format.datetime(workTime.started_at)"
                             ></div>
                             <x-badge color="indigo">
                                 <div

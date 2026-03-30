@@ -23,12 +23,12 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
+                            x-html="$nuxbe.format.money($wire.transactionForm.amount, {colored: true})"
                         ></span>
                     </div>
                     <div
                         class="text-xs"
-                        x-text="formatters.date($wire.transactionForm.booking_date)"
+                        x-text="$nuxbe.format.date($wire.transactionForm.booking_date)"
                     ></div>
                     <div
                         class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
@@ -62,12 +62,12 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
+                            x-html="$nuxbe.format.money($wire.transactionForm.amount, {colored: true})"
                         ></span>
                     </div>
                     <div
                         class="text-xs"
-                        x-text="formatters.date($wire.transactionForm.booking_date)"
+                        x-text="$nuxbe.format.date($wire.transactionForm.booking_date)"
                     ></div>
                     <div
                         class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
@@ -265,13 +265,13 @@
                                     <div class="flex flex-col gap-2">
                                         <div
                                             class="flex w-full justify-end text-lg font-semibold"
-                                            x-html="formatters.coloredMoney(transaction.amount)"
+                                            x-html="$nuxbe.format.money(transaction.amount, {colored: true})"
                                         ></div>
                                         <div
                                             class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
                                         >
                                             <span
-                                                x-text="formatters.date(transaction.booking_date)"
+                                                x-text="$nuxbe.format.date(transaction.booking_date)"
                                             ></span>
                                             <x-dropdown icon="banknotes">
                                                 <div class="p-2">
@@ -358,7 +358,7 @@
                                                 <div>
                                                     <div
                                                         class="flex w-full justify-end font-semibold"
-                                                        x-html="formatters.coloredMoney(order.pivot.amount)"
+                                                        x-html="$nuxbe.format.money(order.pivot.amount, {colored: true})"
                                                     ></div>
                                                     <div
                                                         x-cloak
@@ -377,7 +377,7 @@
                                                         class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
                                                     >
                                                         <span
-                                                            x-html="formatters.date(order.invoice_date)"
+                                                            x-html="$nuxbe.format.date(order.invoice_date)"
                                                         ></span>
                                                     </div>
                                                 </div>
@@ -463,7 +463,7 @@
                                                     {{ __('Open') }}:
                                                 </span>
                                                 <span
-                                                    x-html="formatters.coloredMoney(transaction.balance)"
+                                                    x-html="$nuxbe.format.money(transaction.balance, {colored: true})"
                                                 ></span>
                                             </div>
                                         </div>

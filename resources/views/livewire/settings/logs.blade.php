@@ -11,7 +11,7 @@
 >
     <x-modal id="show-log-modal" :title="__('Log')">
         <div class="flex w-full justify-between px-6 py-3">
-            <span x-text="formatters.datetime(log?.created_at)"></span>
+            <span x-text="$nuxbe.format.datetime(log?.created_at)"></span>
             <span
                 class="text-xl uppercase"
                 x-text="log?.level + ' | ' + log?.level_name"

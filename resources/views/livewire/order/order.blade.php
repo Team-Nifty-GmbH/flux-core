@@ -880,7 +880,7 @@
                                     </div>
                                     <div>
                                         <span
-                                            x-html="formatters.coloredMoney($wire.order.total_base_net_price ?? 0)"
+                                            x-html="$nuxbe.format.money($wire.order.total_base_net_price ?? 0, {colored: true})"
                                         ></span>
                                     </div>
                                 </div>
@@ -894,12 +894,12 @@
                                             {{ __('Position discounts') }}
                                         </span>
                                         <span
-                                            x-html="formatters.percentage($wire.order.total_position_discount_percentage ?? 0)"
+                                            x-html="$nuxbe.format.percentage($wire.order.total_position_discount_percentage ?? 0)"
                                         ></span>
                                     </div>
                                     <div>
                                         <span
-                                            x-html="formatters.coloredMoney(($wire.order.total_position_discount_flat ?? 0) * -1)"
+                                            x-html="$nuxbe.format.money(($wire.order.total_position_discount_flat ?? 0, {colored: true}) * -1)"
                                         ></span>
                                     </div>
                                 </div>
@@ -915,7 +915,7 @@
                                     </div>
                                     <div>
                                         <span
-                                            x-html="formatters.coloredMoney($wire.order.total_base_discounted_net_price ?? 0)"
+                                            x-html="$nuxbe.format.money($wire.order.total_base_discounted_net_price ?? 0, {colored: true})"
                                         ></span>
                                     </div>
                                 </div>
@@ -950,13 +950,13 @@
                                                         x-html="discount.name"
                                                     ></span>
                                                     <span
-                                                        x-html="formatters.percentage(discount.discount_percentage ?? 0)"
+                                                        x-html="$nuxbe.format.percentage(discount.discount_percentage ?? 0)"
                                                     ></span>
                                                 </div>
                                             </div>
                                             <div>
                                                 <span
-                                                    x-html="formatters.coloredMoney((discount.discount_flat ?? 0) * -1)"
+                                                    x-html="$nuxbe.format.money((discount.discount_flat ?? 0, {colored: true}) * -1)"
                                                 ></span>
                                             </div>
                                         </div>
@@ -983,12 +983,12 @@
                                 <div>
                                     <span>{{ __('Total discount') }}</span>
                                     <span
-                                        x-html="formatters.percentage($wire.order.total_discount_percentage ?? 0)"
+                                        x-html="$nuxbe.format.percentage($wire.order.total_discount_percentage ?? 0)"
                                     ></span>
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney(($wire.order.total_discount_flat ?? 0) * -1)"
+                                        x-html="$nuxbe.format.money(($wire.order.total_discount_flat ?? 0, {colored: true}) * -1)"
                                     ></span>
                                 </div>
                             </div>
@@ -1002,7 +1002,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.subtotal_net_price)"
+                                        x-html="$nuxbe.format.money($wire.order.subtotal_net_price, {colored: true})"
                                     ></span>
                                 </div>
                             </div>
@@ -1017,8 +1017,9 @@
                                 <div>
                                     <span
                                         x-html="
-                                            formatters.coloredMoney(
+                                            $nuxbe.format.money(
                                                 $wire.order.total_net_price - $wire.order.subtotal_net_price,
+                                                {colored: true},
                                             )
                                         "
                                     ></span>
@@ -1030,7 +1031,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.total_net_price ?? 0)"
+                                        x-html="$nuxbe.format.money($wire.order.total_net_price ?? 0, {colored: true})"
                                     ></span>
                                 </div>
                             </div>
@@ -1040,12 +1041,12 @@
                                     <div>
                                         <span>{{ __('Plus ') }}</span>
                                         <span
-                                            x-html="formatters.percentage(vat.vat_rate_percentage ?? 0)"
+                                            x-html="$nuxbe.format.percentage(vat.vat_rate_percentage ?? 0)"
                                         ></span>
                                     </div>
                                     <div>
                                         <span
-                                            x-html="formatters.coloredMoney(vat.total_vat_price ?? 0)"
+                                            x-html="$nuxbe.format.money(vat.total_vat_price ?? 0, {colored: true})"
                                         ></span>
                                     </div>
                                 </div>
@@ -1058,7 +1059,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.total_gross_price ?? 0)"
+                                        x-html="$nuxbe.format.money($wire.order.total_gross_price ?? 0, {colored: true})"
                                     ></span>
                                 </div>
                             </div>
@@ -1070,7 +1071,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.balance ?? 0)"
+                                        x-html="$nuxbe.format.money($wire.order.balance ?? 0, {colored: true})"
                                     ></span>
                                 </div>
                             </div>
@@ -1094,7 +1095,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.balance_due_discount ?? 0)"
+                                        x-html="$nuxbe.format.money($wire.order.balance_due_discount ?? 0, {colored: true})"
                                     ></span>
                                 </div>
                             </div>
@@ -1106,7 +1107,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.margin ?? 0)"
+                                        x-html="$nuxbe.format.money($wire.order.margin ?? 0, {colored: true})"
                                     ></span>
                                 </div>
                             </div>
@@ -1116,7 +1117,7 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)"
+                                        x-html="$nuxbe.format.money($wire.order.gross_profit ?? 0, {colored: true})"
                                     ></span>
                                 </div>
                             </div>
