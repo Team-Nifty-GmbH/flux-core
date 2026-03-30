@@ -10,7 +10,7 @@
         },
     }"
 >
-    <x-spinner />
+    <x-loading />
     <ul role="list" class="-mb-1">
         <template
             x-for="(activity, index) in $wire.activities"
