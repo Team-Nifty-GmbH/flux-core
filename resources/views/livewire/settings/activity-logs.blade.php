@@ -9,7 +9,7 @@
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalClose('activity-log-detail')"
+                x-on:click="$tsui.close.modal('activity-log-detail')"
                 :text="__('Close')"
             />
         </x-slot>

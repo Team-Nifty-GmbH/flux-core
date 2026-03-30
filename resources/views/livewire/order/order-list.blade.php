@@ -24,7 +24,7 @@
 >
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
-            <div class="space-y-2.5 divide-y divide-secondary-200">
+            <div class="divide-secondary-200 space-y-2.5 divide-y">
                 @if (! $orderType ?? true)
                     <x-select.styled
                         :label="__('Order type')"
@@ -159,7 +159,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('create-order-modal')"
+                x-on:click="$tsui.close.modal('create-order-modal')"
             />
             <x-button
                 loading="save"
@@ -215,7 +215,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('create-collective-order-modal')"
+                x-on:click="$tsui.close.modal('create-collective-order-modal')"
             />
             <x-button
                 loading="createCollectiveOrders"

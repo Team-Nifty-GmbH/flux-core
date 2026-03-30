@@ -105,7 +105,7 @@ class MailAccounts extends MailAccountList
         $this->mailAccount->fill($mailAccount);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-mail-account');
+            $tsui.open.modal('edit-mail-account');
         JS);
     }
 
@@ -117,7 +117,7 @@ class MailAccounts extends MailAccountList
         $this->loadFolders();
 
         $this->js(<<<'JS'
-            $modalOpen('edit-mail-folders');
+            $tsui.open.modal('edit-mail-folders');
         JS);
     }
 

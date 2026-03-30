@@ -31,7 +31,7 @@ class FailedJobs extends FailedJobList
         $this->failedJob['exception'] = explode("\n", data_get($this->failedJob, 'exception', ''));
 
         $this->js(<<<'JS'
-            $modalOpen('show-failed-job');
+            $tsui.open.modal('show-failed-job');
         JS);
     }
 

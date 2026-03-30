@@ -56,7 +56,7 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="formatters.coloredMoney($wire.address.total_net)"
+                x-html="$nuxbe.format.money($wire.address.total_net, {colored: true})"
             ></span>
         </div>
         <x-label :label="__('Invoices')" />
@@ -70,7 +70,7 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="formatters.coloredMoney($wire.address.balance)"
+                x-html="$nuxbe.format.money($wire.address.balance, {colored: true})"
             ></span>
         </div>
         <x-label :label="__('Revenue this year')" />
@@ -78,7 +78,7 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="formatters.coloredMoney($wire.address.revenue_this_year)"
+                x-html="$nuxbe.format.money($wire.address.revenue_this_year, {colored: true})"
             ></span>
         </div>
         <x-label :label="__('Revenue last year')" />
@@ -86,7 +86,7 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="formatters.coloredMoney($wire.address.revenue_last_year)"
+                x-html="$nuxbe.format.money($wire.address.revenue_last_year, {colored: true})"
             ></span>
         </div>
         <hr class="col-span-2" />
@@ -109,7 +109,7 @@
         </div>
     </div>
     <hr class="col-span-2" />
-    <div class="pb-2 pt-8 font-semibold uppercase">
+    <div class="pt-8 pb-2 font-semibold uppercase">
         {{ __('Contact options') }}
     </div>
     <div class="grid grid-cols-2 gap-2">

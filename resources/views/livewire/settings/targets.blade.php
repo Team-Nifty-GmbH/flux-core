@@ -24,7 +24,7 @@
         }"
         class="flex flex-col gap-4"
     >
-        <x-spinner />
+        <x-loading />
         <x-input wire:model="target.name" :label="__('Title')" required />
         <x-date :label="__('Start')" wire:model="target.start_date" />
         <x-date :label="__('End')" wire:model="target.end_date" />
@@ -105,12 +105,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('{{ $target->modalName() }}')"
+            x-on:click="$tsui.close.modal('{{ $target->modalName() }}')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $target->modalName() }}')})"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $target->modalName() }}')})"
         />
     </x-slot>
 </x-modal>

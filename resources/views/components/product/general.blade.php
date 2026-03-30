@@ -255,7 +255,7 @@
         />
     </x-card>
     <x-card
-        class="space-y-2.5 bg-gray-50 dark:bg-secondary-700"
+        class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
         :header="__('Product Properties')"
         x-data="{productPropertyGroup: null}"
     >
@@ -272,7 +272,7 @@
                     productPropertyGroup = $event.detail.record ?? $event.detail
                 "
             >
-                <div class="flex-grow">
+                <div class="grow">
                     <livewire:product.product-property-group-list />
                 </div>
                 <div
@@ -311,12 +311,12 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('edit-product-properties-modal')"
+                    x-on:click="$tsui.close.modal('edit-product-properties-modal')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Save')"
-                    x-on:click="$wire.addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
+                    x-on:click="$wire.addProductProperties().then(() => { $tsui.close.modal('edit-product-properties-modal'); })"
                 />
             </x-slot>
         </x-modal>

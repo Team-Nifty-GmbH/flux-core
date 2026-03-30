@@ -79,14 +79,14 @@
                 :text="__('Cancel')"
                 color="secondary"
                 flat
-                x-on:click="$modalClose('{{ $employeeDepartmentForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $employeeDepartmentForm->modalName() }}')"
             />
             <x-button
                 :text="__('Save')"
                 color="primary"
                 x-on:click="$wire.save().then((success) => {
                     if (success) {
-                        $modalClose('{{ $employeeDepartmentForm->modalName() }}');
+                        $tsui.close.modal('{{ $employeeDepartmentForm->modalName() }}');
                     }
                 })"
             />

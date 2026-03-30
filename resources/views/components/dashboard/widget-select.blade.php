@@ -10,7 +10,7 @@
                 <div
                     x-cloak
                     x-show="isLoading"
-                    class="h-6 w-6 animate-spin rounded-full border-4 border-primary-200 border-t-primary-500 dark:border-white dark:border-t-gray-400"
+                    class="border-primary-200 border-t-primary-500 h-6 w-6 animate-spin rounded-full border-4 dark:border-white dark:border-t-gray-400"
                 ></div>
             </div>
             <x-flux::checkbox-tree
@@ -26,7 +26,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Close')"
-                    x-on:click="$modalClose('widget-list')"
+                    x-on:click="$tsui.close.modal('widget-list')"
                 />
             </div>
         </x-slot>

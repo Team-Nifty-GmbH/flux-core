@@ -60,7 +60,7 @@ class CreditAccounts extends BankConnections
         $this->transactionForm->value_date = now()->format('Y-m-d');
 
         $this->js(<<<'JS'
-            $modalOpen('transaction-details-modal');
+            $tsui.open.modal('transaction-details-modal');
         JS);
     }
 

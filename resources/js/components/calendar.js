@@ -72,7 +72,7 @@ const calendar = () => {
 
             this.getFolderTree().removeNode(this.calendarItem.id);
 
-            $modalClose('calendar-modal');
+            $tsui.close.modal('calendar-modal');
         },
         saveEvent() {
             this.$wire.saveEvent(this.$wire.calendarEvent).then((event) => {
@@ -112,7 +112,7 @@ const calendar = () => {
                     );
                 }
 
-                $modalClose('calendar-event-modal');
+                $tsui.close.modal('calendar-event-modal');
             });
         },
         setDateTime(type, event) {
@@ -223,7 +223,7 @@ const calendar = () => {
                     break;
             }
 
-            $modalClose('calendar-event-modal');
+            $tsui.close.modal('calendar-event-modal');
         },
         calendar: null,
         config: {},
@@ -476,7 +476,13 @@ const calendar = () => {
                                 ? `(${cw} ${startWeek})`
                                 : `(${cw} ${startWeek}\u2013${endWeek})`;
 
-                        titleEl.textContent = info.view.title + ' ' + cwText;
+                        titleEl.textContent =
+                            titleEl.textContent.replace(
+                                new RegExp(`\\s*\\(${cw}.*?\\)`),
+                                '',
+                            ) +
+                            ' ' +
+                            cwText;
                     }
 
                     this.dispatchCalendarEvents('datesSet', info);
@@ -495,7 +501,7 @@ const calendar = () => {
                     if (!info.event.allDay) {
                         let calendarBadge = document.createElement('div');
                         calendarBadge.className =
-                            'size-3 rounded-full flex-shrink-0';
+                            'size-3 rounded-full shrink-0';
                         calendarBadge.style.backgroundColor =
                             info.backgroundColor;
                         leftContent.appendChild(calendarBadge);
@@ -516,13 +522,12 @@ const calendar = () => {
 
                     // Right side container for time and status badges
                     let rightContent = document.createElement('div');
-                    rightContent.className =
-                        'flex items-center gap-1 flex-shrink-0';
+                    rightContent.className = 'flex items-center gap-1 shrink-0';
 
                     // Add status badges if they exist
                     if (info.event.extendedProps.appendTitle) {
                         let statusBadges = document.createElement('div');
-                        statusBadges.className = 'flex-shrink-0 mr-1';
+                        statusBadges.className = 'shrink-0 mr-1';
 
                         const appendTitle =
                             info.event.extendedProps.appendTitle;
@@ -547,7 +552,7 @@ const calendar = () => {
                     if (!info.event.allDay && info.timeText) {
                         let timeNode = document.createElement('div');
                         timeNode.className =
-                            'flex-shrink-0 whitespace-nowrap text-xs';
+                            'shrink-0 whitespace-nowrap text-xs';
 
                         if (info.event.extendedProps.is_cancelled) {
                             timeNode.classList.add('line-through');

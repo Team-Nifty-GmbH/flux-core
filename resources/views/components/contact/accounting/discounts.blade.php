@@ -82,8 +82,8 @@
                                                 <span
                                                     x-html="
                                                         discount.is_percentage
-                                                            ? window.formatters.percentage(discount.discount)
-                                                            : window.formatters.money(discount.discount)
+                                                            ? $nuxbe.format.percentage(discount.discount)
+                                                            : $nuxbe.format.money(discount.discount)
                                                     "
                                                 />
                                             </td>

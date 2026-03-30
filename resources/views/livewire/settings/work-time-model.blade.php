@@ -133,7 +133,7 @@
                                                 ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                                         "
-                                        class="whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium transition-colors"
+                                        class="border-b-2 px-1 py-2 text-sm font-medium whitespace-nowrap transition-colors"
                                     >
                                         {{ __('Week :number', ['number' => $i + 1]) }}
                                     </button>
@@ -159,27 +159,27 @@
                                 <thead class="bg-gray-50 dark:bg-gray-800">
                                     <tr>
                                         <th
-                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                         >
                                             {{ __('Day') }}
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                         >
                                             {{ __('Start Time') }}
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                         >
                                             {{ __('End Time') }}
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                         >
                                             {{ __('Break (Minutes)') }}
                                         </th>
                                         <th
-                                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
                                         >
                                             {{ __('Work Hours') }}
                                         </th>
@@ -194,31 +194,31 @@
                                     >
                                         <tr>
                                             <td
-                                                class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100"
+                                                class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
                                                 x-text="dayName"
                                             ></td>
                                             <td
-                                                class="whitespace-nowrap px-6 py-4"
+                                                class="px-6 py-4 whitespace-nowrap"
                                             >
                                                 <x-input
                                                     type="time"
                                                     x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].start_time"
                                                     x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'start_time', $event.target.value)"
-                                                    class="!py-1"
+                                                    class="py-1!"
                                                 />
                                             </td>
                                             <td
-                                                class="whitespace-nowrap px-6 py-4"
+                                                class="px-6 py-4 whitespace-nowrap"
                                             >
                                                 <x-input
                                                     type="time"
                                                     x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].end_time"
                                                     x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'end_time', $event.target.value)"
-                                                    class="!py-1"
+                                                    class="py-1!"
                                                 />
                                             </td>
                                             <td
-                                                class="whitespace-nowrap px-6 py-4"
+                                                class="px-6 py-4 whitespace-nowrap"
                                             >
                                                 <x-number
                                                     x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].break_minutes"
@@ -226,11 +226,11 @@
                                                     min="0"
                                                     max="480"
                                                     step="15"
-                                                    class="!py-1"
+                                                    class="py-1!"
                                                 />
                                             </td>
                                             <td
-                                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100"
+                                                class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100"
                                             >
                                                 <span
                                                     class="font-medium"

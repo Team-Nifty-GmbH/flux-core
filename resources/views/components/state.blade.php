@@ -32,9 +32,9 @@
                 <button
                     x-on:click="show = !show"
                     wire:loading.attr="disabled"
-                    wire:loading.class="!cursor-wait"
+                    wire:loading.class="cursor-wait!"
                     type="button"
-                    class="group inline-flex w-full items-center justify-center gap-x-2 rounded px-4 py-2 text-sm font-semibold outline-none hover:shadow-sm focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 dark:bg-slate-700 dark:ring-slate-600 dark:ring-offset-slate-700 dark:hover:bg-slate-700"
+                    class="group inline-flex w-full items-center justify-center gap-x-2 rounded px-4 py-2 text-sm font-semibold outline-hidden hover:shadow-xs focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 dark:bg-slate-700 dark:ring-slate-600 dark:ring-offset-slate-700 dark:hover:bg-slate-700"
                     x-bind:class="
                         'text-' +
                             formatter[1][model] +
@@ -58,7 +58,7 @@
             <template x-for="state in availableStates">
                 <x-dropdown.items x-on:click="model = state.name; show = false">
                     <div
-                        x-html="window.formatters.state(state.label, formatter[1][state.name])"
+                        x-html="$nuxbe.format.state(state.label, formatter[1][state.name])"
                     ></div>
                 </x-dropdown.items>
             </template>

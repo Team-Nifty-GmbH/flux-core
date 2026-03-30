@@ -4,6 +4,8 @@ namespace FluxErp\Providers;
 
 use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
+use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
+use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
@@ -36,6 +38,37 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerViews();
 
         $this->bootBladeDirectives();
+
+        $this->bootFrontendAssets();
+    }
+
+    public function register(): void
+    {
+        $this->app->singleton(FrontendAssets::class);
+        $this->app->singleton(SupportAutoInjectedAssets::class);
+    }
+
+    protected function bootFrontendAssets(): void
+    {
+        $frontendAssets = app(FrontendAssets::class);
+        $frontendAssets->boot();
+
+        $this->registerPackageAssets($frontendAssets);
+
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            app(SupportAutoInjectedAssets::class)->boot();
+        }
+    }
+
+    protected function registerPackageAssets(FrontendAssets $frontendAssets): void
+    {
+        $tallDatatablesDistPath = dirname((new \ReflectionClass(\TeamNiftyGmbH\DataTable\DataTableServiceProvider::class))->getFileName(), 2) . '/dist/build';
+
+        if (is_dir($tallDatatablesDistPath)) {
+            $frontendAssets->registerManifest('tall-datatables', $tallDatatablesDistPath, [
+                'resources/js/tall-datatables.js',
+            ]);
+        }
     }
 
     protected function bootBladeDirectives(): void
@@ -47,75 +80,75 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function customizeTallstackUi(): void
     {
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->avatar()
-            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
+            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200!');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->dropdown()
             ->block('wrapper.second', 'relative inline-block text-left w-full');
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->dropdown('items')
             ->block('item')
             ->replace('whitespace-nowrap', 'whitespace-normal');
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->scope('calendar')
             ->dropdown()
             ->block('wrapper.second', 'relative inline-block text-left w-full')
             ->block('floating.class', 'w-full');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->badge()
             ->block('wrapper.class', 'outline-hidden inline-flex items-center border px-2 py-0.5');
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->button()
             ->block('wrapper.sizes.md', 'text-sm px-4 py-2');
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->form('label')
             ->block('text', 'block text-sm font-medium text-gray-700 dark:text-gray-400');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->card('min-h-full')
             ->block('wrapper.first', 'flex justify-center gap-4 w-full min-h-full');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->card()
             ->block('header.wrapper.border', 'dark:border-b-dark-600 border-b border-gray-100 p-2')
             ->block('header.text.size', 'text-sm font-medium w-full');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->slide('notifications')
             ->block('body', 'soft-scrollbar dark:text-dark-300 grow overflow-y-auto rounded-b-xl text-gray-700');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->toast()
             ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->card('w-auto')
             ->block('wrapper.first', 'flex justify-center gap-4 w-auto');
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->card()
             ->block('wrapper.first', 'flex justify-center gap-4 w-full');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->toast('relative')
             ->block('wrapper.first', 'pointer-events-none inset-0 flex flex-col items-end justify-end gap-y-2 px-4 py-4')
             ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5')
             ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->layout('header')
-            ->block('wrapper', 'dark:bg-dark-700 dark:border-dark-600 sticky top-0 z-10 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8');
+            ->block('wrapper', 'dark:bg-dark-700 dark:border-dark-600 sticky top-0 z-10 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->modal('fullscreen')
             ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex w-full transform flex-col rounded-xl bg-white text-left shadow-xl transition-all min-h-screen')
             ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');
 
-        TallStackUi::personalize()
+        TallStackUi::customize()
             ->modal('headless')
             ->block('body', 'dark:text-dark-300 grow text-gray-700');
     }

@@ -182,7 +182,7 @@ class Plugins extends Component
         $this->settingsComponent = $this->installed[$package]['settings'] ?? null;
 
         $this->js(<<<'JS'
-            $modalOpen('more');
+            $tsui.open.modal('more');
         JS);
     }
 
@@ -207,7 +207,7 @@ class Plugins extends Component
         }
 
         $this->js(<<<'JS'
-            $modalOpen('update');
+            $tsui.open.modal('update');
         JS);
     }
 

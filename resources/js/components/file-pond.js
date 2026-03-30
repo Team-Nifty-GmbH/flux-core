@@ -107,7 +107,7 @@ export default function (
                             this.fileCount() !== undefined &&
                             this.fileCount() > 0
                         ) {
-                            $interaction('dialog')
+                            $tsui.interaction('dialog')
                                 .wireable($wire.id)
                                 .question(
                                     modalTranslations.title,

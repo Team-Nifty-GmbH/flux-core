@@ -24,7 +24,7 @@
             x-sort:group="nested-positions"
         @endif
     >
-        <x-flux::spinner />
+        <x-loading />
         @foreach ($this->getSortableOrderPositions() as $position)
             <x-flux::order.order-position-sort-item
                 :position="$position"

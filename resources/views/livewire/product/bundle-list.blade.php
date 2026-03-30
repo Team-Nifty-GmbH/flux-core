@@ -12,7 +12,7 @@
                 }
 
                 if (value !== oldValue) {
-                    $interaction('dialog')
+                    $tsui.interaction('dialog')
                         .wireable()
                         .error(
                             '{{ __('Warning') }}',
@@ -70,13 +70,13 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-bundle-product-modal')"
+                x-on:click="$tsui.close.modal('edit-bundle-product-modal')"
             />
             <x-button
                 color="indigo"
                 loading="save"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
+                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-bundle-product-modal'); })"
             />
         </x-slot>
     </x-modal>

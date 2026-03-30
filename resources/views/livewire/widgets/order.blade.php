@@ -47,7 +47,7 @@
         <x-label :label="__('Order state')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-html="formatters.state($wire.order.state, formatter.state[1])"
+            x-html="$nuxbe.format.state($wire.order.state, formatter.state[1])"
         ></div>
         <x-label :label="__('Commission')" />
         <div
@@ -60,20 +60,20 @@
             x-text="$wire.order.invoice_number"
         ></div>
     </div>
-    <div class="pb-2 pt-8 font-semibold uppercase">{{ __('Accounting') }}</div>
+    <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Accounting') }}</div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Payment state')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-html="formatters.state($wire.order.payment_state, formatter.payment_state[1])"
+            x-html="$nuxbe.format.state($wire.order.payment_state, formatter.payment_state[1])"
         ></div>
         <x-label :label="__('Total net')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="formatters.money($wire.order.total_net_price, $wire.order.currency)"
+            x-text="$nuxbe.format.money($wire.order.total_net_price, $wire.order.currency)"
         ></div>
     </div>
-    <div class="pb-2 pt-8 font-semibold uppercase">
+    <div class="pt-8 pb-2 font-semibold uppercase">
         {{ __('Order positions') }}
     </div>
     <div
@@ -101,11 +101,11 @@
                     ></x-flux::table.cell>
                     <x-flux::table.cell
                         class="text-right"
-                        x-html="window.formatters.float(orderPosition.amount)"
+                        x-html="$nuxbe.format.float(orderPosition.amount)"
                     ></x-flux::table.cell>
                     <x-flux::table.cell
                         class="text-right"
-                        x-html="window.formatters.coloredMoney(orderPosition.total_net_price)"
+                        x-html="$nuxbe.format.money(orderPosition.total_net_price, {colored: true})"
                     ></x-flux::table.cell>
                 </x-flux::table.row>
             </template>

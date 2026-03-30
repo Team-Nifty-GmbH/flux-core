@@ -377,7 +377,7 @@
                                     </div>
                                 </td>
                                 <td
-                                    x-text="window.formatters.datetime(subscription.created_at)"
+                                    x-text="$nuxbe.format.datetime(subscription.created_at)"
                                 ></td>
                                 <td class="text-right">
                                     <x-button
@@ -479,7 +479,7 @@
                                 </td>
                                 <td x-text="device.platform"></td>
                                 <td
-                                    x-text="window.formatters.datetime(device.created_at)"
+                                    x-text="$nuxbe.format.datetime(device.created_at)"
                                 ></td>
                                 <td class="text-right">
                                     <x-button

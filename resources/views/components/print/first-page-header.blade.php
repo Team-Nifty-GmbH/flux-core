@@ -14,7 +14,7 @@
     @show
     <table class="w-full">
         <tr>
-            <td colspan="2" class="w-full pb-1 pt-6 text-2xs">
+            <td colspan="2" class="text-2xs w-full pt-6 pb-1">
                 @section('tenant-address')
                 <div>
                     {{ $tenant->postal_address_one_line }}

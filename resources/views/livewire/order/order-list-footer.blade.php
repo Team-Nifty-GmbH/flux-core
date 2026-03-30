@@ -86,7 +86,7 @@
                         color="indigo"
                         icon="pencil"
                         x-ref="addPosition"
-                        x-on:click="$wire.editOrderPosition().then(() => $modalOpen('edit-order-position'))"
+                        x-on:click="$wire.editOrderPosition().then(() => $tsui.open.modal('edit-order-position'))"
                     />
                 </div>
                 @show

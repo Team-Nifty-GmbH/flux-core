@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'inject_assets' => env('FLUX_INJECT_ASSETS', true),
+
     'install_done' => env('FLUX_INSTALL_DONE', false),
 
     'license_key' => env('FLUX_LICENSE_KEY'),

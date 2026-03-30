@@ -1,7 +1,7 @@
 <div>
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
-            <div class="mb-2 mt-2" x-cloak x-show="! $wire.workTime.id">
+            <div class="mt-2 mb-2" x-cloak x-show="! $wire.workTime.id">
                 <x-toggle
                     :label="__('Is Daily Work Time')"
                     wire:model="workTime.is_daily_work_time"
@@ -19,7 +19,7 @@
                     select="label:name|value:id"
                     :options="$workTimeTypes"
                 />
-                <div class="mb-2 mt-2">
+                <div class="mt-2 mb-2">
                     <x-toggle
                         :label="__('Is Billable')"
                         wire:model="workTime.is_billable"
@@ -138,7 +138,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-work-time-modal')"
+                x-on:click="$tsui.close.modal('edit-work-time-modal')"
             />
             <x-button
                 color="indigo"
@@ -146,7 +146,7 @@
                 x-on:click="
                     $wire.workTime.local_started_at = dayjs($wire.workTime.started_at).format();
                     $wire.workTime.local_ended_at = dayjs($wire.workTime.ended_at).format();
-                    $wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })
+                    $wire.save().then((success) => { if (success) $tsui.close.modal('edit-work-time-modal'); })
                 "
                 :text="__('Save')"
             />
@@ -231,12 +231,12 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('create-orders-modal')"
+                x-on:click="$tsui.close.modal('create-orders-modal')"
             />
             <x-button
                 color="indigo"
                 loading
-                x-on:click="$wire.createOrders().then(() => { $modalClose('create-orders-modal'); })"
+                x-on:click="$wire.createOrders().then(() => { $tsui.close.modal('create-orders-modal'); })"
                 :text="__('Create Orders')"
             />
         </x-slot>
@@ -252,12 +252,12 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('toggle-is-billable-modal'); isBillable = true;"
+                    x-on:click="$tsui.close.modal('toggle-is-billable-modal'); isBillable = true;"
                 />
                 <x-button
                     color="indigo"
                     loading
-                    x-on:click="$wire.toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); isBillable = true; })"
+                    x-on:click="$wire.toggleIsBillable(isBillable).then(() => { $tsui.close.modal('toggle-is-billable-modal'); isBillable = true; })"
                     :text="__('Apply')"
                 />
             </x-slot>

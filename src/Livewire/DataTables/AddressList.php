@@ -91,7 +91,7 @@ class AddressList extends BaseDataTable
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$modalOpen(\'contact-form-modal\')',
+                    'x-on:click' => '$tsui.open.modal(\'contact-form-modal\')',
                 ])
                 ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
         ];
@@ -183,7 +183,6 @@ class AddressList extends BaseDataTable
     #[Renderless]
     public function evaluate(): void {}
 
-    #[Renderless]
     public function loadData(): void
     {
         parent::loadData();

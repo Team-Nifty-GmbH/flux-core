@@ -28,7 +28,7 @@
     </div>
     @show
     <div
-        class="mt-6 flex flex-col-reverse justify-end space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+        class="mt-6 flex flex-col-reverse justify-end space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
     >
         @section('buttons')
         @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
@@ -195,6 +195,7 @@
                                         xs
                                         outline
                                         icon="eye"
+                                        wire:navigate
                                         x-bind:class="($wire.get('authorTypeContact') !== true || ! $wire.ticket.authenticatable_id) && 'cursor-not-allowed'"
                                         x-bind:href="($wire.get('authorTypeContact') === true && $wire.ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', $wire.ticket.authenticatable.contact_id) + '?address=' + $wire.ticket.authenticatable_id"
                                     ></x-button>
@@ -231,12 +232,12 @@
                 @section('attributes')
                 <x-card>
                     <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+                        class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
                     >
                         <div class="flex gap-0.5">
                             <div class="">{{ __('Created At') }}:</div>
                             <div
-                                x-text="window.formatters.datetime($wire.ticket.created_at)"
+                                x-text="$nuxbe.format.datetime($wire.ticket.created_at)"
                             ></div>
                             <div
                                 x-text="$wire.ticket.created_by || '{{ __('Unknown') }}'"
@@ -245,7 +246,7 @@
                         <div class="flex gap-0.5">
                             <div class="">{{ __('Updated At') }}:</div>
                             <div
-                                x-text="window.formatters.datetime($wire.ticket.updated_at)"
+                                x-text="$nuxbe.format.datetime($wire.ticket.updated_at)"
                             ></div>
                             <div
                                 x-text="$wire.ticket.updated_by || '{{ __('Unknown') }}'"

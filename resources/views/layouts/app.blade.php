@@ -19,7 +19,7 @@
             'dark bg-secondary-800': darkTheme,
             'bg-slate-50': ! darkTheme,
         }"
-        class="h-full text-secondary-600 transition duration-300 dark:text-secondary-50"
+        class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
     >
         @section('wire.navigate.spinner')
         @persist('spinner')
@@ -30,7 +30,7 @@
             >
                 <div
                     id="loading-overlay-spinner"
-                    class="fixed inset-0 flex items-center justify-center bg-secondary-400 bg-opacity-60 opacity-0 transition-opacity duration-200 dark:bg-secondary-700 dark:bg-opacity-60"
+                    class="bg-secondary-400 bg-opacity-60 dark:bg-secondary-700 dark:bg-opacity-60 fixed inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200"
                 >
                     <x-flux::spinner-svg />
                 </div>
@@ -63,7 +63,7 @@
                             urlObj.searchParams.delete('no-navigation')
 
                             window.open(urlObj)
-                            $modalClose('detail-modal')
+                            $tsui.close.modal('detail-modal')
                         },
                     }"
                 >
@@ -86,7 +86,7 @@
                                 color="secondary"
                                 light
                                 :text="__('Cancel')"
-                                x-on:click="$modalClose('detail-modal')"
+                                x-on:click="$tsui.close.modal('detail-modal')"
                             />
                             <x-button
                                 color="indigo"
@@ -107,14 +107,12 @@
             @if (! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
                 <x-slot:header>
                     <x-layout.header without-mobile-button>
-                        <x-slot:left>
-                            <x-button
-                                flat
-                                class="md:hidden"
-                                icon="bars-4"
-                                x-on:click="$dispatch('menu-force-open')"
-                            />
-                        </x-slot>
+                        <x-button
+                            flat
+                            class="md:hidden"
+                            icon="bars-4"
+                            x-on:click="$dispatch('menu-force-open')"
+                        />
                         @auth('web')
                             <div
                                 x-persist="layout.header.search-bar"
@@ -126,7 +124,7 @@
 
                         <div class="grow sm:hidden"></div>
 
-                        <div class="flex flex-shrink-0 gap-2">
+                        <div class="flex shrink-0 gap-2">
                             @auth('web')
                                 <div
                                     x-persist="layout.header.search-bar-mobile"

@@ -22,7 +22,7 @@
                     color="secondary"
                     light
                     :text="__('Close')"
-                    x-on:click="$modalClose('show-failed-job')"
+                    x-on:click="$tsui.close.modal('show-failed-job')"
                 />
             </x-slot>
         </x-card>

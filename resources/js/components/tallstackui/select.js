@@ -10,7 +10,12 @@ class TallstackUISelect {
 
         const mergeDeep = (target, source) => {
             for (const key in source) {
-                if (source.hasOwnProperty(key)) {
+                if (
+                    source.hasOwnProperty(key) &&
+                    key !== '__proto__' &&
+                    key !== 'constructor' &&
+                    key !== 'prototype'
+                ) {
                     if (
                         source[key] &&
                         typeof source[key] === 'object' &&

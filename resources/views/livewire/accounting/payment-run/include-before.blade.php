@@ -19,7 +19,7 @@
                         </x-slot>
                         <x-slot:sub-value>
                             <div
-                                x-html="window.formatters.coloredMoney(order.pivot.amount)"
+                                x-html="$nuxbe.format.money(order.pivot.amount, {colored: true})"
                             ></div>
                             <div x-text="order.address_invoice.name"></div>
                             <div
@@ -46,7 +46,7 @@
             <div class="flex justify-end gap-1.5 pt-4">
                 <div>{{ __('Total') }}</div>
                 <div
-                    x-html="window.formatters.coloredMoney($wire.paymentRunForm.total_amount)"
+                    x-html="$nuxbe.format.money($wire.paymentRunForm.total_amount, {colored: true})"
                 ></div>
             </div>
             <hr class="py-4" />
@@ -103,7 +103,7 @@
                 flat
                 color="red"
                 :text="__('Delete')"
-                x-on:click="$wire.delete().then((success) => {if(success) $modalClose('execute-payment-run');})"
+                x-on:click="$wire.delete().then((success) => {if(success) $tsui.close.modal('execute-payment-run');})"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
             />
             <div class="flex justify-end gap-x-2">
@@ -111,13 +111,13 @@
                     color="secondary"
                     light
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('execute-payment-run')"
+                    x-on:click="$tsui.close.modal('execute-payment-run')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Execute Payment Run')"
                     loading="executePaymentRun"
-                    x-on:click="$wire.executePaymentRun().then((success) => {if(success) $modalClose('execute-payment-run');})"
+                    x-on:click="$wire.executePaymentRun().then((success) => {if(success) $tsui.close.modal('execute-payment-run');})"
                 />
             </div>
         </div>

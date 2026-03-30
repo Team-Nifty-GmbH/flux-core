@@ -13,7 +13,7 @@ test('can add new task', function (): void {
     Livewire::test(ProjectTaskList::class, ['projectId' => $project->id])
         ->assertOk()
         ->call('edit')
-        ->assertExecutesJs("\$modalOpen('task-form-modal');")
+        ->assertExecutesJs("\$tsui.open.modal('task-form-modal');")
         ->assertSet('task.project_id', $project->id)
         ->assertSet('task.responsible_user_id', $this->user->getKey())
         ->assertSet('task.users', [$this->user->getKey()])

@@ -10,7 +10,7 @@
                 <span
                     x-cloak
                     x-show="$wire.leadStateForm.probability_percentage !== null"
-                    x-text="window.formatters.percentage($wire.leadStateForm.probability_percentage / 100)"
+                    x-text="$nuxbe.format.percentage($wire.leadStateForm.probability_percentage / 100)"
                 ></span>
             </x-slot>
         </x-range>
@@ -39,12 +39,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('{{ $leadStateForm->modalName() }}')"
+            x-on:click="$tsui.close.modal('{{ $leadStateForm->modalName() }}')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $leadStateForm->modalName() }}')})"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $leadStateForm->modalName() }}')})"
         />
     </x-slot>
 </x-modal>

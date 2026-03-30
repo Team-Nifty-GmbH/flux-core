@@ -224,7 +224,7 @@ test('clicking a new date resets the event form', function (): void {
 
     // Close the modal
     $page->script(<<<'JS'
-        () => { $modalClose('edit-event-modal'); }
+        () => { $tsui.close.modal('edit-event-modal'); }
     JS);
 
     $page->script('() => new Promise(r => setTimeout(r, 500))');
@@ -342,7 +342,7 @@ test('clicking different events shows correct data without one-behind lag', func
     expect($titleA)->toBe('Event Alpha');
 
     // Close modal
-    $page->script("() => { \$modalClose('edit-event-modal'); }");
+    $page->script("() => { \$tsui.close.modal('edit-event-modal'); }");
     $page->script('() => new Promise(r => setTimeout(r, 500))');
 
     // Click event B

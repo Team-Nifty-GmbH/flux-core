@@ -102,7 +102,7 @@ class Calendar extends Component
         $this->calendar->fill($calendar->toCalendarObject());
 
         $this->js(<<<'JS'
-            $modalOpen('calendar-modal');
+            $tsui.open.modal('calendar-modal');
         JS);
     }
 
@@ -179,11 +179,11 @@ class Calendar extends Component
                 window.dispatchEvent(new CustomEvent('sync-calendar-event', {
                     detail: JSON.parse(JSON.stringify($wire.event))
                 }));
-                $modalOpen('edit-event-modal');
+                $tsui.open.modal('edit-event-modal');
             JS);
         } else {
             $this->js(<<<'JS'
-                $modalOpen('edit-event-modal');
+                $tsui.open.modal('edit-event-modal');
             JS);
         }
     }
@@ -393,6 +393,7 @@ class Calendar extends Component
         $this->storeViewSettings($view);
     }
 
+    #[Renderless]
     #[On('calendar-date-click')]
     public function timeslotClick(bool $allDay, string $dateStr, array $view): void
     {

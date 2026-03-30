@@ -72,7 +72,7 @@ class Mail extends CommunicationList
             ->success(__(':model created', ['model' => __('Lead')]))
             ->send();
         $this->js(<<<'JS'
-            $modalClose('show-mail');
+            $tsui.close.modal('show-mail');
         JS);
     }
 
@@ -97,7 +97,7 @@ class Mail extends CommunicationList
             ->success(__(':model created', ['model' => __('Purchase Invoice')]))
             ->send();
         $this->js(<<<'JS'
-            $modalClose('show-mail');
+            $tsui.close.modal('show-mail');
         JS);
     }
 
@@ -122,7 +122,7 @@ class Mail extends CommunicationList
             ->success(__(':model created', ['model' => __('Ticket')]))
             ->send();
         $this->js(<<<'JS'
-            $modalClose('show-mail');
+            $tsui.close.modal('show-mail');
         JS);
     }
 
@@ -161,7 +161,7 @@ class Mail extends CommunicationList
 
         $this->js(<<<'JS'
             writeHtml();
-            $modalOpen('show-mail');
+            $tsui.open.modal('show-mail');
         JS);
     }
 

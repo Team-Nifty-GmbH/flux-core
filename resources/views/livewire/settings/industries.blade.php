@@ -8,12 +8,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-industry-modal')"
+            x-on:click="$tsui.close.modal('edit-industry-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-industry-modal')})"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-industry-modal')})"
         />
     </x-slot>
 </x-modal>

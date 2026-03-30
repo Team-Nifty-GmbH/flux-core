@@ -5,13 +5,13 @@
     x-on:data-table-row-clicked="
         $wire.loadLog($event.detail.record.id).then((result) => {
             log = result
-            $modalOpen('show-log-modal')
+            $tsui.open.modal('show-log-modal')
         })
     "
 >
     <x-modal id="show-log-modal" :title="__('Log')">
         <div class="flex w-full justify-between px-6 py-3">
-            <span x-text="formatters.datetime(log?.created_at)"></span>
+            <span x-text="$nuxbe.format.datetime(log?.created_at)"></span>
             <span
                 class="text-xl uppercase"
                 x-text="log?.level + ' | ' + log?.level_name"
@@ -19,14 +19,14 @@
         </div>
         <div class="px-6 py-3">
             <div
-                class="text-sm uppercase leading-normal text-gray-600"
+                class="text-sm leading-normal text-gray-600 uppercase"
                 x-text="log.message"
             >
                 {{ __('Message') }}
             </div>
         </div>
         <div class="px-6 py-3">
-            <div class="text-sm uppercase leading-normal text-gray-600">
+            <div class="text-sm leading-normal text-gray-600 uppercase">
                 {{ __('Extra') }}
             </div>
             <div
@@ -35,7 +35,7 @@
             ></div>
         </div>
         <div class="relative overflow-hidden px-6 py-3">
-            <div class="text-sm uppercase leading-normal text-gray-600">
+            <div class="text-sm leading-normal text-gray-600 uppercase">
                 {{ __('Formatted') }}
             </div>
             <div
@@ -44,11 +44,11 @@
             ></div>
         </div>
         <div class="relative overflow-hidden px-6 py-3">
-            <div class="text-sm uppercase leading-normal text-gray-600">
+            <div class="text-sm leading-normal text-gray-600 uppercase">
                 {{ __('Context') }}
             </div>
             <div
-                class="overflow-auto whitespace-pre rounded-md bg-black p-1 font-mono text-white"
+                class="overflow-auto rounded-md bg-black p-1 font-mono whitespace-pre text-white"
                 x-text="JSON.stringify(JSON.parse(log?.context ?? '{}'), null, 4)"
             ></div>
         </div>
@@ -57,7 +57,7 @@
                 color="secondary"
                 light
                 :text="__('Close')"
-                x-on:click="$modalClose('show-log-modal')"
+                x-on:click="$tsui.close.modal('show-log-modal')"
                 class="mr-2"
             />
         </x-slot>

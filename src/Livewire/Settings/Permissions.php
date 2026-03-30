@@ -98,7 +98,7 @@ class Permissions extends RoleList
         $this->permissions = $this->getPermissionTree();
 
         $this->js(<<<JS
-            \$modalOpen('$modal');
+            \$tsui.open.modal('$modal');
         JS);
     }
 

@@ -86,13 +86,13 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('work-time-modal')"
+                x-on:click="$tsui.close.modal('work-time-modal')"
             />
             <x-button
                 color="indigo"
                 :text="__('Start')"
                 loading
-                x-on:click="$wire.save().then((success) => { if (success) $modalClose('work-time-modal'); })"
+                x-on:click="$wire.save().then((success) => { if (success) $tsui.close.modal('work-time-modal'); })"
             >
                 <x-slot:label>
                     <span
@@ -171,7 +171,7 @@
                 x-show="$wire.dailyWorkTime.id"
                 color="emerald"
                 :text="__('Record new working hours')"
-                x-on:click="$modalOpen('work-time-modal')"
+                x-on:click="$tsui.open.modal('work-time-modal')"
             />
             <template x-for="workTime in $wire.activeWorkTimes">
                 <div class="flex flex-col gap-1.5 rounded-md p-1.5">
@@ -187,7 +187,7 @@
                             ></div>
                             <div
                                 class="text-xs text-gray-500 dark:text-gray-400"
-                                x-text="formatters.datetime(workTime.started_at)"
+                                x-text="$nuxbe.format.datetime(workTime.started_at)"
                             ></div>
                             <x-badge color="indigo">
                                 <div

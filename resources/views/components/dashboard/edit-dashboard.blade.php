@@ -4,9 +4,9 @@
             <div class="relative">
                 <x-button
                     wire:loading.attr="disabled"
-                    class="!dark:text-secondary-400 border-b-2 border-b-transparent !text-secondary-600 focus:!ring-0 focus:!ring-offset-0"
+                    class="!dark:text-secondary-400 border-b-2 border-b-transparent text-secondary-600! focus:ring-0! focus:ring-offset-0!"
                     flat
-                    x-bind:class="{'!border-b-primary-600 !rounded-b-none': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
+                    x-bind:class="{'border-b-primary-600! rounded-b-none!': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
                     x-on:click="$wire.set('group', group)"
                 >
                     <x-slot:text>
@@ -30,7 +30,7 @@
             x-show="editGrid"
             x-cloak
             wire:loading.attr="disabled"
-            x-on:click="$modalOpen('create-group-modal')"
+            x-on:click="$tsui.open.modal('create-group-modal')"
             class="h-6 w-6 cursor-pointer bg-green-500 text-white hover:bg-green-600"
             size="sm"
         >
@@ -89,14 +89,14 @@
                 x-show="!editGrid"
                 x-on:click="editGridMode(true)"
                 icon="pencil"
-                class="flex-shrink-0"
+                class="shrink-0"
             />
             <div x-cloak x-show="editGrid" class="flex gap-2">
                 <x-button
                     color="secondary"
                     light
-                    x-on:click="$modalOpen('widget-list')"
-                    class="flex-shrink-0"
+                    x-on:click="$tsui.open.modal('widget-list')"
+                    class="shrink-0"
                     :text="__('Add')"
                 />
                 <x-button
@@ -104,14 +104,14 @@
                     loading
                     x-on:click="save"
                     :text="__('Save')"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                 />
                 <x-button
                     color="red"
                     loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
                     x-on:click="$wire.resetWidgets().then(onPostReset.bind($data))"
-                    class="flex-shrink-0"
+                    class="shrink-0"
                     :text="__('Cancel')"
                 />
             </div>
@@ -122,7 +122,7 @@
 <x-modal
     id="create-group-modal"
     :title="__('Create New Group')"
-    x-on:open="$focusOn('new-group-name')"
+    x-on:open="$tsui.focus('new-group-name')"
 >
     <x-input
         id="new-group-name"
@@ -133,7 +133,7 @@
     <x-slot:footer>
         <x-button
             color="secondary"
-            x-on:click="$modalClose('create-group-modal')"
+            x-on:click="$tsui.close.modal('create-group-modal')"
             :text="__('Cancel')"
         />
         <x-button
@@ -142,7 +142,7 @@
                     addNewGroup(newGroupName.trim());
                     $wire.set('group', newGroupName.trim());
                     newGroupName = '';
-                    $modalClose('create-group-modal');
+                    $tsui.close.modal('create-group-modal');
                 }
             "
             :text="__('Save')"

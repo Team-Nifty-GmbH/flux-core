@@ -42,12 +42,12 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('{{ $vacationCarryoverRuleForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $vacationCarryoverRuleForm->modalName() }}')"
             />
             <x-button
                 color="primary"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $vacationCarryoverRuleForm->modalName() }}') })"
+                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $vacationCarryoverRuleForm->modalName() }}') })"
             />
         </x-slot>
     </x-modal>

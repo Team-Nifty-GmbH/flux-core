@@ -105,7 +105,7 @@
         <x-button
             color="indigo"
             :text="__('View')"
-            x-on:click="$openDetailModal($wire.order.invoice.url)"
+            x-on:click="$nuxbe.openDetailModal($wire.order.invoice.url)"
         />
     </x-card>
     @show

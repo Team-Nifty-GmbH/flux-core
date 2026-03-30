@@ -99,12 +99,12 @@
                 :text="__('Cancel')"
                 color="secondary"
                 flat
-                x-on:click="$modalClose('{{ $holidayForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $holidayForm->modalName() }}')"
             />
             <x-button
                 :text="__('Save')"
                 color="primary"
-                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $holidayForm->modalName() }}') })"
+                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $holidayForm->modalName() }}') })"
             />
         </x-slot>
     </x-modal>

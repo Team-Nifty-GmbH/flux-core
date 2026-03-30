@@ -65,12 +65,12 @@
             color="secondary"
             light
             :text="__('Cancel')"
-            x-on:click="$modalClose('bank-connection-modal')"
+            x-on:click="$tsui.close.modal('bank-connection-modal')"
         />
         <x-button
             :text="__('Save')"
             color="indigo"
-            x-on:click="$wire.save().then((success) => {if(success) $modalClose('bank-connection-modal');});"
+            x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('bank-connection-modal');});"
         />
     </x-slot>
 </x-modal>

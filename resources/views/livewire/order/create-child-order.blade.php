@@ -35,7 +35,7 @@
     }
 }"
 >
-    <div class="mx-auto max-w-screen-2xl px-4 pb-6 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-(--breakpoint-2xl) px-4 pb-6 sm:px-6 lg:px-8">
         <div
             class="mx-auto pb-6 md:flex md:items-center md:justify-between md:space-x-5"
         >
@@ -196,7 +196,7 @@
                             >
                                 <span>{{ __("Subtotal net") }}:</span>
                                 <span
-                                    x-html="window.formatters.coloredMoney(getSubtotal(), '{{ data_get($parentOrder, 'currency.symbol') }}')"
+                                    x-html="$nuxbe.format.money(getSubtotal(), {colored: true, currency: '{{ data_get($parentOrder, 'currency.iso') }}'})"
                                 ></span>
                             </div>
                             @foreach (data_get($parentOrder, "discounts") ?? [] as $discount)
@@ -225,7 +225,7 @@
                             </span>
                             <span class="text-lg font-bold">
                                 <span
-                                    x-html="window.formatters.coloredMoney(getTotalAmount(), '{{ data_get($parentOrder, 'currency.symbol') }}')"
+                                    x-html="$nuxbe.format.money(getTotalAmount(), {colored: true, currency: '{{ data_get($parentOrder, 'currency.iso') }}'})"
                                 ></span>
                             </span>
                         </div>

@@ -6,15 +6,15 @@
         persistent
         x-on:close="$wire.clear()"
     >
-        <div class="pl-4 pr-4">
+        <div class="pr-4 pl-4">
             <x-flux::table>
                 <x-slot:header>
                     <x-flux::table.row>
-                        <th class="border border-l-0 border-t-0 text-center">
+                        <th class="border border-t-0 border-l-0 text-center">
                             <span>{{ __('Column') }}</span>
                         </th>
                         <th
-                            class="border border-r-0 border-t-0 text-center"
+                            class="border border-t-0 border-r-0 text-center"
                             x-show="$wire.mergeRecords.main_record.id"
                             x-cloak
                         >
@@ -28,7 +28,7 @@
                         </th>
                         <template x-for="record in $wire.records">
                             <th
-                                class="border border-r-0 border-t-0 text-center"
+                                class="border border-t-0 border-r-0 text-center"
                                 x-show="record.id !== $wire.mergeRecords.main_record.id"
                                 x-cloak
                             >
@@ -55,7 +55,7 @@
                             <span x-text="column.label"></span>
                         </td>
                         <td
-                            class="border border-b-0 border-r-0 text-center"
+                            class="border border-r-0 border-b-0 text-center"
                             x-show="$wire.mergeRecords.main_record.id"
                             x-cloak
                         >
@@ -63,7 +63,7 @@
                                 x-if="$wire.mainRecord[column.name] === true"
                             >
                                 <span
-                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-none dark:bg-emerald-700"
+                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-hidden dark:bg-emerald-700"
                                 >
                                     <svg
                                         class="h-3 w-3 shrink-0"
@@ -85,7 +85,7 @@
                                 x-if="$wire.mainRecord[column.name] === false"
                             >
                                 <span
-                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-none dark:bg-red-700"
+                                    class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-hidden dark:bg-red-700"
                                 >
                                     <svg
                                         class="h-3 w-3 shrink-0"
@@ -114,7 +114,7 @@
                         </td>
                         <template x-for="record in $wire.records">
                             <td
-                                class="border border-b-0 border-r-0"
+                                class="border border-r-0 border-b-0"
                                 x-show="record.id !== $wire.mergeRecords.main_record.id"
                                 x-cloak
                             >
@@ -129,7 +129,7 @@
                                         x-if="record[column.name] === true"
                                     >
                                         <span
-                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-none dark:bg-emerald-700"
+                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white outline-hidden dark:bg-emerald-700"
                                         >
                                             <svg
                                                 class="h-3 w-3 shrink-0"
@@ -151,7 +151,7 @@
                                         x-if="record[column.name] === false"
                                     >
                                         <span
-                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-none dark:bg-red-700"
+                                            class="group inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white outline-hidden dark:bg-red-700"
                                         >
                                             <svg
                                                 class="h-3 w-3 shrink-0"
@@ -189,13 +189,13 @@
                 :text="__('Cancel')"
                 color="secondary"
                 light
-                x-on:click="$modalClose('merge-records-modal')"
+                x-on:click="$tsui.close.modal('merge-records-modal')"
             />
             <x-button
                 loading="merge"
                 :text="__('Merge')"
                 color="indigo"
-                x-on:click="$wire.merge().then((success) => {if(success) $modalClose('merge-records-modal');})"
+                x-on:click="$wire.merge().then((success) => {if(success) $tsui.close.modal('merge-records-modal');})"
                 wire:flux-confirm.type.warning="{{ __('Merge Records|Are you sure? This cannot be made undone!|Cancel|Confirm') }}"
             />
         </x-slot>
