@@ -29,7 +29,7 @@
             $tsui.open.modal('manage-discount-group-modal')
         },
         deleteItem(recordId) {
-            $interaction()
+            $tsui.interaction('dialog')
                 .wireable()
                 .error(
                     '{{ __('Delete discount group') }}',

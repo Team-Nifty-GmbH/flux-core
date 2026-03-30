@@ -61,7 +61,7 @@
 
                             // on folder change, clear temp files - if confirmation is accepted
                             if (this.tempFilesId.length !== 0) {
-                                $interaction('dialog')
+                                $tsui.interaction('dialog')
                                     .wireable($wire.__instance.id)
                                     .warning(
                                         '{{ __('Selected files not submitted') }}',

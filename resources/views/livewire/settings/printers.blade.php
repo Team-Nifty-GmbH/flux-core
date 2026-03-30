@@ -127,12 +127,12 @@
                         const configText = $wire.configForm.bridge_config ? JSON.stringify($wire.configForm.bridge_config, null, 2) : '';
                         navigator.clipboard.writeText(configText)
                             .then(() => {
-                                $interaction('toast')
+                                $tsui.interaction('toast')
                                     .success('{{ __('Copied!') }}', '{{ __('Configuration copied to clipboard') }}')
                                     .send();
                             })
                             .catch(() => {
-                                $interaction('toast')
+                                $tsui.interaction('toast')
                                     .error('{{ __('Error') }}', '{{ __('Failed to copy to clipboard. Please try again.') }}')
                                     .send();
                             });
