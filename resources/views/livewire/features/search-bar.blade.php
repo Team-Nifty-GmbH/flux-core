@@ -52,7 +52,7 @@
                     {{ __('No results…') }}
                 </div>
             </div>
-            <x-flux::spinner />
+            <x-loading />
             <div
                 class="dark:divide-secondary-600 flex flex-row divide-x divide-gray-100"
             >

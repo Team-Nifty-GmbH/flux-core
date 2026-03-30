@@ -31,7 +31,7 @@
 >
     {{ $prepend ?? '' }}
     @if ($attributes->has('wire:loading'))
-        <x-flux::spinner {{ $attributes->thatStartWith('wire:loading') }} />
+        <x-loading {{ $attributes->thatStartWith('wire:loading') }} />
     @endif
 
     <div class="min-w-0 w-full">

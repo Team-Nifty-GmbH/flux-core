@@ -42,7 +42,7 @@
                     <div x-text="$wire.setting.path"></div>
                 </div>
             </x-slot>
-            <x-flux::spinner />
+            <x-loading />
             @if ($settingComponent)
                 <livewire:is
                     :component="$settingComponent"

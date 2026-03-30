@@ -3,7 +3,7 @@
     class="flex h-full max-h-full w-full flex-col gap-4 p-4 text-sm"
 >
     @if ($withSpinner)
-        <x-flux::spinner />
+        <x-loading />
     @endif
 
     <div class="flex w-full flex-row items-center justify-between gap-2">

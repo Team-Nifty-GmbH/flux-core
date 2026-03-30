@@ -12,7 +12,7 @@
         },
     }"
 >
-    <x-flux::spinner />
+    <x-loading />
     @teleport('body')
         <x-modal id="transaction-assign-orders-modal" size="7xl">
             <x-slot:title>
