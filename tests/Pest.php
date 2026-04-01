@@ -15,12 +15,12 @@ use Pest\Browser\Api\PendingAwaitablePage;
 
 if ($auditLocale = env('TRANSLATION_AUDIT_LOCALE')) {
     require_once __DIR__ . '/Support/TranslationAuditCollector.php';
-    \FluxErp\Tests\Support\TranslationAuditCollector::boot($auditLocale);
+    FluxErp\Tests\Support\TranslationAuditCollector::boot($auditLocale);
 
     pest()->beforeEach(function () use ($auditLocale): void {
         app()->setLocale($auditLocale);
         app('translator')->handleMissingKeysUsing(function (string $key): void {
-            \FluxErp\Tests\Support\TranslationAuditCollector::record($key);
+            FluxErp\Tests\Support\TranslationAuditCollector::record($key);
         });
     });
 }

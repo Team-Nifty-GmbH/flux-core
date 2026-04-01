@@ -14,17 +14,6 @@ class TranslationAuditCollector
 
     private static bool $shutdownRegistered = false;
 
-    public static function boot(string $locale): void
-    {
-        self::$locale = $locale;
-        self::loadIgnoreList($locale);
-
-        if (! self::$shutdownRegistered) {
-            self::$shutdownRegistered = true;
-            register_shutdown_function([self::class, 'writeReport']);
-        }
-    }
-
     public static function record(string $key): void
     {
         if (isset(self::$ignoredKeys[$key])) {
@@ -95,6 +84,17 @@ class TranslationAuditCollector
             } else {
                 self::$ignoredKeys[$line] = true;
             }
+        }
+    }
+
+    public static function boot(string $locale): void
+    {
+        self::$locale = $locale;
+        self::loadIgnoreList($locale);
+
+        if (! self::$shutdownRegistered) {
+            self::$shutdownRegistered = true;
+            register_shutdown_function([self::class, 'writeReport']);
         }
     }
 }

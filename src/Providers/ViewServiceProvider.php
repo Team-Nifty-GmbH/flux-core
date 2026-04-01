@@ -11,6 +11,7 @@ use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use ReflectionClass;
 use TallStackUi\Facades\TallStackUi;
 
 class ViewServiceProvider extends ServiceProvider
@@ -62,7 +63,7 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerPackageAssets(FrontendAssets $frontendAssets): void
     {
-        $tallDatatablesDistPath = dirname((new \ReflectionClass(\TeamNiftyGmbH\DataTable\DataTableServiceProvider::class))->getFileName(), 2) . '/dist/build';
+        $tallDatatablesDistPath = dirname((new ReflectionClass(\TeamNiftyGmbH\DataTable\DataTableServiceProvider::class))->getFileName(), 2) . '/dist/build';
 
         if (is_dir($tallDatatablesDistPath)) {
             $frontendAssets->registerManifest('tall-datatables', $tallDatatablesDistPath, [
