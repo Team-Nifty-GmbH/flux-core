@@ -66,7 +66,7 @@
         </div>
         <x-input
             id="token"
-            wire:model.defer="tokenForm.plain_text_token"
+            wire:model="tokenForm.plain_text_token"
             readonly
             :label="__('Token')"
         />
