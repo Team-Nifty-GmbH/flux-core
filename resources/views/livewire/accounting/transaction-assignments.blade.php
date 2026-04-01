@@ -23,7 +23,7 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="$nuxbe.format.money($wire.transactionForm.amount, {colored: true})"
+                            x-html="$nuxbe.format.money($wire.transactionForm.amount, { colored: true })"
                         ></span>
                     </div>
                     <div
@@ -62,7 +62,7 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="$nuxbe.format.money($wire.transactionForm.amount, {colored: true})"
+                            x-html="$nuxbe.format.money($wire.transactionForm.amount, { colored: true })"
                         ></span>
                     </div>
                     <div
@@ -265,7 +265,7 @@
                                     <div class="flex flex-col gap-2">
                                         <div
                                             class="flex w-full justify-end text-lg font-semibold"
-                                            x-html="$nuxbe.format.money(transaction.amount, {colored: true})"
+                                            x-html="$nuxbe.format.money(transaction.amount, { colored: true })"
                                         ></div>
                                         <div
                                             class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
@@ -358,7 +358,7 @@
                                                 <div>
                                                     <div
                                                         class="flex w-full justify-end font-semibold"
-                                                        x-html="$nuxbe.format.money(order.pivot.amount, {colored: true})"
+                                                        x-html="$nuxbe.format.money(order.pivot.amount, { colored: true })"
                                                     ></div>
                                                     <div
                                                         x-cloak
@@ -463,7 +463,7 @@
                                                     {{ __('Open') }}:
                                                 </span>
                                                 <span
-                                                    x-html="$nuxbe.format.money(transaction.balance, {colored: true})"
+                                                    x-html="$nuxbe.format.money(transaction.balance, { colored: true })"
                                                 ></span>
                                             </div>
                                         </div>

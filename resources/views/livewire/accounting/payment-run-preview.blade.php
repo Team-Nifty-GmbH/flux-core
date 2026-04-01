@@ -46,14 +46,14 @@
                     <x-flux::table.cell>
                         <div>
                             <span
-                                x-html="$nuxbe.format.money(order.balance, {colored: true})"
+                                x-html="$nuxbe.format.money(order.balance, { colored: true })"
                             ></span>
                             <div
                                 x-show="order.balance_due_discount"
                                 class="text-xs text-gray-500"
                             >
                                 <span
-                                    x-html="$nuxbe.format.money(order.balance_due_discount, {colored: true})"
+                                    x-html="$nuxbe.format.money(order.balance_due_discount, { colored: true })"
                                 ></span>
                                 <span
                                     x-show="order.payment_discount_target_date"

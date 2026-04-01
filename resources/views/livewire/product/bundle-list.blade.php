@@ -12,7 +12,8 @@
                 }
 
                 if (value !== oldValue) {
-                    $tsui.interaction('dialog')
+                    $tsui
+                        .interaction('dialog')
                         .wireable()
                         .error(
                             '{{ __('Warning') }}',

@@ -65,11 +65,7 @@
                     <span>{{ __('Payment Discount Target') }}</span>
                     <span
                         x-show="$wire.$parent.order.payment_discount_target_date"
-                        x-text="
-                            '(' +
-                                $nuxbe.format.date($wire.$parent.order.payment_discount_target_date) +
-                                ')'
-                        "
+                        x-text="'(' + $nuxbe.format.date($wire.$parent.order.payment_discount_target_date) + ')'"
                         class="text-xs"
                     ></span>
                 </div>

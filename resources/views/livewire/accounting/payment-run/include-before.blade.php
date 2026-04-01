@@ -19,7 +19,7 @@
                         </x-slot>
                         <x-slot:sub-value>
                             <div
-                                x-html="$nuxbe.format.money(order.pivot.amount, {colored: true})"
+                                x-html="$nuxbe.format.money(order.pivot.amount, { colored: true })"
                             ></div>
                             <div x-text="order.address_invoice.name"></div>
                             <div
@@ -46,7 +46,7 @@
             <div class="flex justify-end gap-1.5 pt-4">
                 <div>{{ __('Total') }}</div>
                 <div
-                    x-html="$nuxbe.format.money($wire.paymentRunForm.total_amount, {colored: true})"
+                    x-html="$nuxbe.format.money($wire.paymentRunForm.total_amount, { colored: true })"
                 ></div>
             </div>
             <hr class="py-4" />

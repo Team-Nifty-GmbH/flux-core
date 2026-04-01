@@ -21,7 +21,8 @@
             uploadError() {
                 this.isUploading = false
                 this.progress = 0
-                $tsui.interaction('dialog')
+                $tsui
+                    .interaction('dialog')
                     .error(
                         '{{ __('File upload failed') }}',
                         '{{ __('Your file upload failed. Please try again.') }}',

@@ -4,7 +4,9 @@
             $wire.getPriceLists().then(() =>
                 $wire.priceLists.forEach((priceList) => {
                     priceList.price_net = $nuxbe.parseNumber(priceList.price_net)
-                    priceList.price_gross = $nuxbe.parseNumber(priceList.price_gross)
+                    priceList.price_gross = $nuxbe.parseNumber(
+                        priceList.price_gross,
+                    )
                 }),
             )
         },

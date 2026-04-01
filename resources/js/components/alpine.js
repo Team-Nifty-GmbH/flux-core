@@ -124,7 +124,8 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
     if (title === '') title = 'Are you sure?';
 
     el.__livewire_confirm = (action) => {
-        $tsui.interaction('dialog')
+        $tsui
+            .interaction('dialog')
             .wireable(component.id)
             [type](title, description)
             .confirm(confirmLabel, () => {
