@@ -1,10 +1,8 @@
 <?php
 
-namespace FluxErp\Tests\Unit\Livewire\DataTable;
-
 use FluxErp\Jobs\ExportDataTableJob;
-use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Notifications\ExportReady;
+use FluxErp\Tests\Unit\Livewire\DataTable\ExportTestDataTable;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -45,8 +43,3 @@ test('can export data', function (): void {
         }
     );
 });
-
-class ExportTestDataTable extends BaseDataTable
-{
-    protected string $model = \FluxErp\Models\Tenant::class;
-}

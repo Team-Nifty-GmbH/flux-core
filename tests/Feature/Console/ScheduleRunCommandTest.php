@@ -1,85 +1,14 @@
 <?php
 
-use Cron\CronExpression;
-use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Facades\Repeatable as RepeatableFacade;
 use FluxErp\Models\Schedule;
-use FluxErp\Traits\Job\TracksSchedule;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use FluxErp\Tests\Feature\Console\ScheduleRunTestDefaultCronInvokable;
+use FluxErp\Tests\Feature\Console\ScheduleRunTestInvokable;
+use FluxErp\Tests\Feature\Console\ScheduleRunTestJob;
+use FluxErp\Tests\Feature\Console\ScheduleRunTestSuccessJob;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
-
-class ScheduleRunTestJob implements ShouldQueue
-{
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TracksSchedule;
-
-    public function handle(): void
-    {
-        throw new RuntimeException('Job failed');
-    }
-}
-
-class ScheduleRunTestSuccessJob implements ShouldQueue
-{
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TracksSchedule;
-
-    public function handle(): void {}
-}
-
-class ScheduleRunTestInvokable
-{
-    public static int $invocationCount = 0;
-
-    public function __invoke(): void
-    {
-        static::$invocationCount++;
-    }
-}
-
-class ScheduleRunTestDefaultCronInvokable implements Repeatable
-{
-    public static bool $wasInvoked = false;
-
-    public function __invoke(): void
-    {
-        static::$wasInvoked = true;
-    }
-
-    public static function defaultCron(): ?CronExpression
-    {
-        return new CronExpression('* * * * *');
-    }
-
-    public static function description(): ?string
-    {
-        return 'Test default cron invokable';
-    }
-
-    public static function isRepeatable(): bool
-    {
-        return true;
-    }
-
-    public static function name(): string
-    {
-        return 'DefaultCronInvokable';
-    }
-
-    public static function parameters(): array
-    {
-        return [];
-    }
-
-    public static function withoutOverlapping(): bool
-    {
-        return false;
-    }
-}
 
 test('does not set last_success when a scheduled job fails', function (): void {
     Queue::fake();
