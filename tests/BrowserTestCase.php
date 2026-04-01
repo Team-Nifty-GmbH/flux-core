@@ -134,10 +134,6 @@ abstract class BrowserTestCase extends TestCase
 
     protected function tsSelectOption(string $option): string
     {
-        $base = '//li[@role="option"][contains(., "' . $option . '")]';
-
-        return ! $this->lastClickedTsSelect
-            ? $base
-            : $this->lastClickedTsSelect . '/../..//ul' . $base;
+        return 'li[role="option"]:has-text("' . $option . '")';
     }
 }

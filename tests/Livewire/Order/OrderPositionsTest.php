@@ -610,7 +610,7 @@ test('show product', function (): void {
         ->call('showProduct', $this->product)
         ->assertOk()
         ->assertHasNoErrors()
-        ->assertExecutesJs("\$openDetailModal('{$this->product->getUrl()}');");
+        ->assertExecutesJs("\$nuxbe.openDetailModal('{$this->product->getUrl()}');");
 });
 
 test('switch view same view returns early', function (): void {
