@@ -42,8 +42,8 @@
         >
             <div class="flex h-full flex-col justify-between">
                 <div
-                    x-on:tallstackui:toast-list.window="addToast($event)"
-                    x-on:tallstackui:toast.window="event.stopPropagation()"
+                    x-on:ts-ui:toast-list.window="addToast($event)"
+                    x-on:ts-ui:toast.window="event.stopPropagation()"
                 >
                     <div class="space-y-3 p-0" id="toasts">
                         <x-toast scope="relative" />

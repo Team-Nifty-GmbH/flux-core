@@ -40,12 +40,7 @@
         @show
         @persist('notifications')
             @if (auth()->check() && auth()->id())
-                <div
-                    id="{{ \Illuminate\Support\Str::uuid() }}"
-                    x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)"
-                >
-                    <x-toast z-index="z-50"></x-toast>
-                </div>
+                <x-toast z-index="z-50" />
             @endif
 
             <x-dialog z-index="z-40" blur="md" align="center" />

@@ -50,7 +50,7 @@ class TestServiceProvider extends ServiceProvider
                     string|int|null $id = null
                 ) {
                     $this->assertDispatched(
-                        'tallstackui:toast',
+                        'ts-ui:toast',
                         function (
                             string $eventName,
                             array $params
