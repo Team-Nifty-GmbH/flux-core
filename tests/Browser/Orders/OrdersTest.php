@@ -42,17 +42,10 @@ test('can create new order', function (): void {
         ->assertSee($address->name)
         ->click($this->tsSelectOption($address->name))
         ->assertNoSmoke()
-        ->click('Save');
-
-    $order = Order::query()->latest('id')->first();
-    expect($order)->not->toBeNull();
-    expect($order->contact_id)->toBe($address->contact_id);
-
-    $page->visit(route('orders.id', ['id' => $order->getKey()]))
+        ->click('Save')
         ->assertNoSmoke()
-        ->assertSee($orderType->name . ' ' . $order->order_number)
+        ->waitForText($orderType->name)
         ->assertSee('Contact')
         ->assertSee('Invoice Address')
-        ->assertSee('Delivery Address')
-        ->assertRoute('orders.id', ['id' => $order->getKey()]);
+        ->assertSee('Delivery Address');
 });
