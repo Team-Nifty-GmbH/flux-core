@@ -49,15 +49,20 @@ test('mark selected as paid', function (): void {
         ->create()
         ->each(fn (Order $order) => $order->update(['balance' => faker()->randomFloat(2, 1, 100)]));
 
-    Livewire::test(PaymentReminder::class)
-        ->call('loadData')
-        ->assertCount('data.data', 3)
-        ->set('selected', [$orders[0]->id, $orders[1]->id])
+    $component = Livewire::test(PaymentReminder::class)
+        ->call('loadData');
+
+    $data = $component->instance()->getDataForTesting();
+    expect($data['data'])->toHaveCount(3);
+
+    $component->set('selected', [$orders[0]->id, $orders[1]->id])
         ->call('markAsPaid')
         ->assertOk()
         ->assertHasNoErrors()
-        ->assertCount('data.data', 1)
         ->assertCount('selected', 0);
+
+    $data = $component->instance()->getDataForTesting();
+    expect($data['data'])->toHaveCount(1);
 
     $this->assertDatabaseHas('orders', ['id' => $orders[0]->id, 'payment_state' => Paid::$name]);
     $this->assertDatabaseHas('orders', ['id' => $orders[1]->id, 'payment_state' => Paid::$name]);

@@ -7,6 +7,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -16,12 +17,14 @@ test('renders successfully', function (): void {
     $paymentType = PaymentType::factory()
         ->hasAttached($this->dbTenant, relationship: 'tenants')
         ->create();
+    $priceList = PriceList::factory()->create();
 
     $order = Order::factory()->create([
         'order_type_id' => $orderType->getKey(),
         'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
         'payment_type_id' => $paymentType->getKey(),
+        'price_list_id' => $priceList->getKey(),
     ]);
 
     Livewire::test(ReplicateOrderPositionList::class, ['orderId' => $order->getKey()])

@@ -232,8 +232,10 @@ test('can show related columns', function (): void {
         ->assertHasNoErrors();
 
     expect($component->get('enabledCols'))->toContain('order.uuid');
-    expect($component->get('data.data.0'))->toHaveKey('order.uuid');
-    expect($component->get('data.data.0')['order.uuid'])->toEqual($this->order->uuid);
+
+    $data = $component->instance()->getDataForTesting();
+    expect($data['data'][0])->toHaveKey('order.uuid');
+    expect($data['data'][0]['order.uuid'])->toEqual($this->order->uuid);
 });
 
 test('changed product id fills position data', function (): void {
@@ -638,7 +640,8 @@ test('switch view to table', function (): void {
         ->assertOk()
         ->assertSet('orderPositionsView', 'table');
 
-    expect($component->get('data'))->not->toBeEmpty();
+    $data = $component->instance()->getDataForTesting();
+    expect($data)->not->toBeEmpty();
 });
 
 test('add order position uses product translation based on order language', function (): void {
