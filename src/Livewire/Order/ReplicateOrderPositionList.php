@@ -95,22 +95,24 @@ class ReplicateOrderPositionList extends OrderPositionList
             ->pluck('id')
             ->toArray();
 
-        $maxAmounts = $this->calculateMaxAmounts(
-            DB::select(
-                'WITH RECURSIVE siblings AS (
-                    SELECT id, origin_position_id, signed_amount
-                    FROM order_positions
-                    WHERE order_id = ' . $this->orderId
-                . ' AND id IN (' . implode(',', $positionIds) . ')'
-                . ' UNION ALL
-                    SELECT op.id, op.origin_position_id, op.signed_amount
-                    FROM order_positions op
-                    INNER JOIN siblings s ON s.id = op.origin_position_id
-                    WHERE op.deleted_at IS NULL
+        $maxAmounts = $positionIds
+            ? $this->calculateMaxAmounts(
+                DB::select(
+                    'WITH RECURSIVE siblings AS (
+                        SELECT id, origin_position_id, signed_amount
+                        FROM order_positions
+                        WHERE order_id = ' . $this->orderId
+                    . ' AND id IN (' . implode(',', $positionIds) . ')'
+                    . ' UNION ALL
+                        SELECT op.id, op.origin_position_id, op.signed_amount
+                        FROM order_positions op
+                        INNER JOIN siblings s ON s.id = op.origin_position_id
+                        WHERE op.deleted_at IS NULL
+                    )
+                    SELECT * FROM siblings'
                 )
-                SELECT * FROM siblings'
             )
-        );
+            : [];
 
         foreach ($tree as $key => &$item) {
             if (data_get($item, 'is_free_text')) {
