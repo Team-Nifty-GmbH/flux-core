@@ -42,6 +42,7 @@ test('can create new order', function (): void {
         ->click($this->tsSelect('order.contact_id'))
         ->assertSee($address->name)
         ->click($this->tsSelectOption($address->name))
+        ->assertNoSmoke()
         ->click('Save')
         ->waitForText('Order positions')
         ->assertNoSmoke();

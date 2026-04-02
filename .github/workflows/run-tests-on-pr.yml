@@ -14,8 +14,8 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PHP_VERSION: '8.5'
-  LARAVEL_VERSION: '12.*'
-  TESTBENCH_VERSION: '10.*'
+  LARAVEL_VERSION: '13.*'
+  TESTBENCH_VERSION: '11.*'
 
 jobs:
   lint:
