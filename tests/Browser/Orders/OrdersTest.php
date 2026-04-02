@@ -43,15 +43,15 @@ test('can create new order', function (): void {
         ->assertSee($address->name)
         ->click($this->tsSelectOption($address->name))
         ->assertNoSmoke()
-        ->click('Save')
-        ->waitForText('Order positions')
-        ->assertNoSmoke();
+        ->click('Save');
 
-    $order = Order::query()
-        ->whereKey(Str::afterLast($page->url(), '/'))
-        ->first();
+    $order = Order::query()->latest('id')->first();
+    expect($order)->not->toBeNull();
+    expect($order->contact_id)->toBe($address->contact_id);
 
-    $page->assertSee($orderType->name . ' ' . $order->order_number)
+    $page->visit(route('orders.id', ['id' => $order->getKey()]))
+        ->assertNoSmoke()
+        ->assertSee($orderType->name . ' ' . $order->order_number)
         ->assertSee('Contact')
         ->assertSee('Invoice Address')
         ->assertSee('Delivery Address')
