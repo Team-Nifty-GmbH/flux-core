@@ -8,6 +8,7 @@ use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User;
 use Laravel\Sanctum\HasApiTokens;
+use ReflectionClass;
 use Spatie\Activitylog\Traits\CausesActivity;
 
 abstract class FluxAuthenticatable extends User
@@ -17,5 +18,16 @@ abstract class FluxAuthenticatable extends User
     public function deviceTokens(): MorphMany
     {
         return $this->morphMany(DeviceToken::class, 'authenticatable');
+    }
+
+    public function resolveCollectionFromAttribute(): ?string
+    {
+        $parent = get_parent_class(static::class);
+
+        if ($parent && (new ReflectionClass($parent))->isAbstract()) {
+            return null;
+        }
+
+        return parent::resolveCollectionFromAttribute();
     }
 }
