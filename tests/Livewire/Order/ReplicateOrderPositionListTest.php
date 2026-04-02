@@ -4,6 +4,7 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Order\ReplicateOrderPositionList;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
@@ -18,6 +19,7 @@ test('renders successfully', function (): void {
         ->hasAttached($this->dbTenant, relationship: 'tenants')
         ->create();
     $priceList = PriceList::factory()->create();
+    $currency = Currency::factory()->create();
 
     $order = Order::factory()->create([
         'order_type_id' => $orderType->getKey(),
@@ -26,6 +28,8 @@ test('renders successfully', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'currency_id' => $currency->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
     ]);
 
     Livewire::test(ReplicateOrderPositionList::class, ['orderId' => $order->getKey()])
