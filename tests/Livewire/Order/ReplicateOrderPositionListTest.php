@@ -25,6 +25,7 @@ test('renders successfully', function (): void {
         'contact_id' => $contact->getKey(),
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
     ]);
 
     Livewire::test(ReplicateOrderPositionList::class, ['orderId' => $order->getKey()])
