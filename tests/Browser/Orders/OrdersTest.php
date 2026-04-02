@@ -3,7 +3,6 @@
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 
 test('can create new order', function (): void {
