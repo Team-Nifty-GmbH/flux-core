@@ -27,7 +27,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -98,7 +98,7 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -177,7 +177,7 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -253,7 +253,7 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -292,7 +292,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
       - name: Upload Browser Test Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: browser-test-artifacts

@@ -25,7 +25,7 @@ jobs:
     outputs:
       locales: ${{ steps.find.outputs.locales }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Find locale JSON files
         id: find
@@ -84,7 +84,7 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -283,7 +283,7 @@ jobs:
           '
 
       - name: Upload audit reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: translation-audit-${{ matrix.locale }}
