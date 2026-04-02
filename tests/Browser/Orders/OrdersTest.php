@@ -43,7 +43,8 @@ test('can create new order', function (): void {
         ->assertSee($address->name)
         ->click($this->tsSelectOption($address->name))
         ->click('Save')
-        ->assertSee('Order positions');
+        ->waitForText('Order positions')
+        ->assertNoSmoke();
 
     $order = Order::query()
         ->whereKey(Str::afterLast($page->url(), '/'))
