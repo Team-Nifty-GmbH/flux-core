@@ -5,7 +5,6 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
-use Illuminate\Support\Str;
 
 test('can create new order', function (): void {
     OrderType::query()->delete();
