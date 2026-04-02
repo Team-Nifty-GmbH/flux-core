@@ -11,7 +11,15 @@ abstract class FluxPivot extends Pivot
 {
     use BroadcastsEvents, ResolvesRelationsThroughContainer;
 
-    public function resolveCollectionFromAttribute()
+    public $incrementing = true;
+
+    public $timestamps = false;
+
+    protected $primaryKey = 'pivot_id';
+
+    protected $guarded = ['pivot_id'];
+
+    public function resolveCollectionFromAttribute(): ?string
     {
         $parent = get_parent_class(static::class);
 
@@ -21,12 +29,4 @@ abstract class FluxPivot extends Pivot
 
         return parent::resolveCollectionFromAttribute();
     }
-
-    public $incrementing = true;
-
-    public $timestamps = false;
-
-    protected $primaryKey = 'pivot_id';
-
-    protected $guarded = ['pivot_id'];
 }

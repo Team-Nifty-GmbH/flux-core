@@ -13,17 +13,6 @@ abstract class FluxModel extends Model
 {
     use BroadcastsEvents, HasModelPermission, ResolvesRelationsThroughContainer;
 
-    public function resolveCollectionFromAttribute()
-    {
-        $parent = get_parent_class(static::class);
-
-        if ($parent && (new ReflectionClass($parent))->isAbstract()) {
-            return null;
-        }
-
-        return parent::resolveCollectionFromAttribute();
-    }
-
     protected $guarded = [
         'id',
         'created_at',
@@ -48,5 +37,16 @@ abstract class FluxModel extends Model
         return static::query()->afterQuery(function () use ($scopeKeys): void {
             static::removeGlobalScopes($scopeKeys);
         });
+    }
+
+    public function resolveCollectionFromAttribute(): ?string
+    {
+        $parent = get_parent_class(static::class);
+
+        if ($parent && (new ReflectionClass($parent))->isAbstract()) {
+            return null;
+        }
+
+        return parent::resolveCollectionFromAttribute();
     }
 }
