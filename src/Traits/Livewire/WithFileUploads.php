@@ -49,10 +49,14 @@ trait WithFileUploads
                 ->whereKey($id)
                 ->first();
 
+            if (! $mediaFolder) {
+                return null;
+            }
+
             $fileName = trim($mediaFolder->name);
             $actionData = [
                 'file_name' => $fileName,
-                'media_folders' => [$mediaFolder?->getKey()],
+                'media_folders' => [$mediaFolder->getKey()],
             ];
         } else {
             $collection = is_array($collection) ? implode('.', $collection) : $collection;
@@ -82,7 +86,7 @@ trait WithFileUploads
             return response()->streamDownload(
                 fn () => $stream->getZipStream(),
                 str($fileName)->finish('.zip'),
-                ['Content-Type' => 'application/octet-stream']
+                ['Content-Type' => 'application/zip']
             );
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
