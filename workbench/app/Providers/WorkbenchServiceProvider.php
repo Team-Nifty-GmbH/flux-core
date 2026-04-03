@@ -7,17 +7,17 @@ use Illuminate\Support\ServiceProvider;
 class WorkbenchServiceProvider extends ServiceProvider
 {
     /**
-     * Register services.
+     * Bootstrap services.
      */
-    public function register(): void
+    public function boot(): void
     {
         //
     }
 
     /**
-     * Bootstrap services.
+     * Register services.
      */
-    public function boot(): void
+    public function register(): void
     {
         //
     }
