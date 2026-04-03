@@ -20,7 +20,7 @@ use FluxErp\Settings\TicketSettings;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Support\CauserResolver;
 use Throwable;
 
 class CreateMailExecutedSubscriber
@@ -182,7 +182,7 @@ class CreateMailExecutedSubscriber
         );
 
         if ($this->address) {
-            Activity::defaultCauser($this->address);
+            app(CauserResolver::class)->setCauser($this->address);
         }
 
         return $this;
