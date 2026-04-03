@@ -136,12 +136,14 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((task) => {
-                    if (task) {
-                        $tsui.close.modal('new-task-modal');
-                    }
-                });"
+                x-on:click="
+                    $wire.save().then((task) => {
+                        if (task) {
+                            $tsui.close.modal('new-task-modal');
+                        }
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

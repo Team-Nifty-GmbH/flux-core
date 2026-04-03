@@ -20,7 +20,10 @@
                     <div x-text="notificationChannel.name"></div>
                 </div>
                 <template
-                    x-for="(channelValue, index) in notificationChannel.channel_value"
+                    x-for="
+                        (channelValue, index) in
+                        notificationChannel.channel_value
+                    "
                 >
                     <div class="flex">
                         <div class="flex items-center pr-1.5 transition-all">
@@ -28,13 +31,22 @@
                                 2xs
                                 color="red"
                                 text="-"
-                                x-on:click.prevent="notificationChannel.channel_value.splice(notificationChannel.channel_value.indexOf(channelValue), 1)"
+                                x-on:click.prevent="
+                                    notificationChannel.channel_value.splice(
+                                        notificationChannel.channel_value.indexOf(
+                                            channelValue,
+                                        ),
+                                        1,
+                                    )
+                                "
                             ></x-button.circle>
                         </div>
                         <div class="w-full">
                             <x-input
                                 class="grow"
-                                x-model="notificationChannel.channel_value[index]"
+                                x-model="
+                                    notificationChannel.channel_value[index]
+                                "
                             ></x-input>
                         </div>
                     </div>
@@ -53,10 +65,12 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('edit-notification-settings-modal')"
+                x-on:click="
+                    $tsui.close.modal('edit-notification-settings-modal')
+                "
             />
             <x-button color="indigo" :text="__('Save')" wire:click="save()" />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
@@ -73,9 +87,7 @@
             <x-slot name="header">
                 <th class="col-span-2">{{ __('Notification') }}</th>
             </x-slot>
-            <template
-                x-for="(notification, key) in $wire.notificationSettings"
-            >
+            <template x-for="(notification, key) in $wire.notificationSettings">
                 <x-flux::table.row>
                     <td>
                         <div x-text="$wire.translate(key)"></div>

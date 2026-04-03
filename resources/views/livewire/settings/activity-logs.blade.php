@@ -12,6 +12,6 @@
                 x-on:click="$tsui.close.modal('activity-log-detail')"
                 :text="__('Close')"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-card>
 </x-modal>

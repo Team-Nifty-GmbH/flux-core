@@ -9,8 +9,11 @@
     <x-card
         wire:ignore
         scope="w-auto"
-        x-on:folder-tree-select="$wire.showSetting($event.detail); showContent = true"
-        x-show="! showContent"
+        x-on:folder-tree-select="
+            $wire.showSetting($event.detail);
+            showContent = true;
+        "
+        x-show="!showContent"
         x-cloak
         class="lg:block!"
     >
@@ -26,7 +29,7 @@
                     }
                 "
             ></div>
-            <x-slot:nodeIcon></x-slot>
+            <x-slot:nodeIcon></x-slot:nodeIcon>
         </x-flux::checkbox-tree>
     </x-card>
     <div x-show="showContent" x-cloak class="flex-1 lg:block!">
@@ -41,9 +44,9 @@
                     />
                     <div x-text="$wire.setting.path"></div>
                 </div>
-            </x-slot>
+            </x-slot:header>
             <x-loading />
-            @if ($settingComponent)
+            @if($settingComponent)
                 <livewire:is
                     :component="$settingComponent"
                     :key="$settingComponent"

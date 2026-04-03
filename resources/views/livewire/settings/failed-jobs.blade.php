@@ -24,7 +24,7 @@
                     :text="__('Close')"
                     x-on:click="$tsui.close.modal('show-failed-job')"
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-card>
     </x-modal>
 </div>

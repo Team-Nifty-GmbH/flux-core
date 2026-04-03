@@ -57,14 +57,10 @@
             <x-table>
                 <x-slot:header>
                     <table.row>
-                        <th class="text-left">
-                            {{ __('Name') }}
-                        </th>
-                        <th class="text-left">
-                            {{ __('Discount') }}
-                        </th>
+                        <th class="text-left">{{ __('Name') }}</th>
+                        <th class="text-left">{{ __('Discount') }}</th>
                     </table.row>
-                </x-slot>
+                </x-slot:header>
                 <template x-for="discount in discountGroup.discounts">
                     <x-table.row>
                         <td>
@@ -72,7 +68,9 @@
                         </td>
                         <td>
                             <span
-                                x-text="$nuxbe.format.percentage(discount.discount)"
+                                x-text="
+                                    $nuxbe.format.percentage(discount.discount)
+                                "
                             ></span>
                         </td>
                     </x-table.row>
@@ -91,7 +89,7 @@
             <x-button color="indigo" class="mr-2" x-on:click="saveItem()">
                 {{ __('Save') }}
             </x-button>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <livewire:data-tables.settings.discount-group-list />
 </div>

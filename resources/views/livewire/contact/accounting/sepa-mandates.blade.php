@@ -12,7 +12,7 @@
             :label="__('Signed Date')"
             :without-time="true"
         />
-        <div x-cloak x-show="! $wire.sepaMandate.id">
+        <div x-cloak x-show="!$wire.sepaMandate.id">
             <x-select.styled
                 wire:model="sepaMandate.sepa_mandate_type_enum"
                 required
@@ -35,9 +35,13 @@
             :text="__('Cancel')"
         />
         <x-button
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-sepa-mandate-modal'); })"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success) $tsui.close.modal('edit-sepa-mandate-modal');
+                })
+            "
             primary
             :text="__('Save')"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

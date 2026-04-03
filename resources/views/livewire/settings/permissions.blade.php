@@ -1,6 +1,6 @@
 <x-modal id="edit-role-users-modal">
     <div class="flex flex-col gap-1.5">
-        @foreach ($users as $user)
+        @foreach($users as $user)
             <div class="flex">
                 <div class="flex-1 font-medium">{{ $user['name'] }}</div>
                 <div class="">
@@ -23,9 +23,13 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-role-users-modal'); })"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success) $tsui.close.modal('edit-role-users-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>
 
 <x-modal id="edit-role-permissions-modal">
@@ -65,7 +69,12 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-role-permissions-modal'); })"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success)
+                        $tsui.close.modal('edit-role-permissions-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

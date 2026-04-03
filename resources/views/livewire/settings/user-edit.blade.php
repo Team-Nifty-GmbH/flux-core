@@ -1,144 +1,157 @@
 <x-card>
     @section('user-edit')
-    <form class="space-y-5">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            @section('user-edit.personal-data')
-            <x-input
-                :label="__('Firstname')"
-                wire:model="userForm.firstname"
-            />
-            <x-input :label="__('Lastname')" wire:model="userForm.lastname" />
-            <x-input :label="__('Email')" wire:model="userForm.email" />
-            <x-input :label="__('Phone')" wire:model="userForm.phone" />
-            <x-input
-                :label="__('User code')"
-                wire:model="userForm.user_code"
-            />
-            <x-color :label="__('Color')" wire:model="userForm.color" />
-            @show
-        </div>
-        <hr />
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            @section('user-edit.employment')
-            <x-date
-                :without-time="true"
-                :label="__('Date Of Birth')"
-                wire:model="userForm.date_of_birth"
-            />
-            <x-input
-                :label="__('Employee Number')"
-                wire:model="userForm.employee_number"
-            />
-            <x-date
-                :without-time="true"
-                :label="__('Employment Date')"
-                wire:model="userForm.employment_date"
-            />
-            <x-date
-                :without-time="true"
-                :label="__('Termination Date')"
-                wire:model="userForm.termination_date"
-            />
-            <x-number
-                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
-                :label="__('Cost Per Hour')"
-                wire:model="userForm.cost_per_hour"
-            />
-            @show
-        </div>
-        <hr />
-        @section('user-edit.selects')
-        <x-select.styled
-            wire:model="userForm.language_id"
-            searchable
-            :label="__('Language')"
-            select="label:name|value:id"
-            :options="$languages"
-        />
-        <x-select.styled
-            wire:model="userForm.timezone"
-            searchable
-            :label="__('Timezone')"
-            :options="timezone_identifiers_list()"
-        />
-        <x-select.styled
-            wire:model="userForm.parent_id"
-            searchable
-            :label="__('Parent')"
-            select="label:name|value:id|description:email"
-            :options="$users"
-        />
-        @show
-        @section('user-edit.attributes')
-        <x-checkbox :label="__('Active')" wire:model="userForm.is_active" />
-        <x-password
-            :label="__('New password')"
-            wire:model="userForm.password"
-        />
-        <x-password
-            :label="__('Repeat password')"
-            wire:model="userForm.password_confirmation"
-        />
-        @show
-        <hr />
-        @section('user-edit.bank-connection')
-        <x-input
-            wire:model="userForm.account_holder"
-            :label="__('Account Holder')"
-        />
-        <x-input wire:model="userForm.iban" :label="__('IBAN')" />
-        <x-input wire:model="userForm.bic" :label="__('BIC')" />
-        <x-input wire:model="userForm.bank_name" :label="__('Bank Name')" />
-        @show
-        @section('user-edit.mail-accounts')
-        <x-select.styled
-            :label="__('Mail Accounts')"
-            wire:model="userForm.mail_accounts"
-            multiple
-            select="label:name|value:id"
-            :options="$mailAccounts"
-        />
-        @show
-        @section('user-edit.default-mail-account')
-        @if ($userForm->mail_accounts)
-            <x-select.styled
-                :label="__('Default Mail Account')"
-                wire:model="userForm.default_mail_account_id"
-                select="label:name|value:id"
-                :options="collect($mailAccounts)->whereIn('id', $userForm->mail_accounts)->values()->toArray()"
-            />
-        @endif
-
-        @show
-        @section('user-edit.printers')
-        <x-select.styled
-            :label="__('Printers')"
-            wire:model="userForm.printers"
-            multiple
-            select="label:name|value:id|description:location"
-            :options="$printers"
-        />
-        @show
-        @section('user-edit.default-printer')
-        @if ($userPrinters)
-            <x-select.styled
-                :label="__('Default Printer')"
-                wire:model="printerUserForm.pivot_id"
-                x-on:select="$tallstackuiSelect('default-printer-size').setOptions($event.detail.select.media_sizes)"
-                select="label:name|value:id|description:location"
-                :options="$userPrinters"
-            />
-            <div id="default-printer-size">
-                <x-select.styled
-                    :label="__('Default Size')"
-                    wire:model="printerUserForm.default_size"
-                    :options="data_get(collect($printers)->firstWhere('id', $printerUserForm->printer_id), 'media_sizes', [''])"
-                />
+        <form class="space-y-5">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                @section('user-edit.personal-data')
+                    <x-input
+                        :label="__('Firstname')"
+                        wire:model="userForm.firstname"
+                    />
+                    <x-input
+                        :label="__('Lastname')"
+                        wire:model="userForm.lastname"
+                    />
+                    <x-input :label="__('Email')" wire:model="userForm.email" />
+                    <x-input :label="__('Phone')" wire:model="userForm.phone" />
+                    <x-input
+                        :label="__('User code')"
+                        wire:model="userForm.user_code"
+                    />
+                    <x-color :label="__('Color')" wire:model="userForm.color" />
+                @show
             </div>
-        @endif
+            <hr />
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                @section('user-edit.employment')
+                    <x-date
+                        :without-time="true"
+                        :label="__('Date Of Birth')"
+                        wire:model="userForm.date_of_birth"
+                    />
+                    <x-input
+                        :label="__('Employee Number')"
+                        wire:model="userForm.employee_number"
+                    />
+                    <x-date
+                        :without-time="true"
+                        :label="__('Employment Date')"
+                        wire:model="userForm.employment_date"
+                    />
+                    <x-date
+                        :without-time="true"
+                        :label="__('Termination Date')"
+                        wire:model="userForm.termination_date"
+                    />
+                    <x-number
+                        :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
+                        :label="__('Cost Per Hour')"
+                        wire:model="userForm.cost_per_hour"
+                    />
+                @show
+            </div>
+            <hr />
+            @section('user-edit.selects')
+                <x-select.styled
+                    wire:model="userForm.language_id"
+                    searchable
+                    :label="__('Language')"
+                    select="label:name|value:id"
+                    :options="$languages"
+                />
+                <x-select.styled
+                    wire:model="userForm.timezone"
+                    searchable
+                    :label="__('Timezone')"
+                    :options="timezone_identifiers_list()"
+                />
+                <x-select.styled
+                    wire:model="userForm.parent_id"
+                    searchable
+                    :label="__('Parent')"
+                    select="label:name|value:id|description:email"
+                    :options="$users"
+                />
+            @show
+            @section('user-edit.attributes')
+                <x-checkbox
+                    :label="__('Active')"
+                    wire:model="userForm.is_active"
+                />
+                <x-password
+                    :label="__('New password')"
+                    wire:model="userForm.password"
+                />
+                <x-password
+                    :label="__('Repeat password')"
+                    wire:model="userForm.password_confirmation"
+                />
+            @show
+            <hr />
+            @section('user-edit.bank-connection')
+                <x-input
+                    wire:model="userForm.account_holder"
+                    :label="__('Account Holder')"
+                />
+                <x-input wire:model="userForm.iban" :label="__('IBAN')" />
+                <x-input wire:model="userForm.bic" :label="__('BIC')" />
+                <x-input
+                    wire:model="userForm.bank_name"
+                    :label="__('Bank Name')"
+                />
+            @show
+            @section('user-edit.mail-accounts')
+                <x-select.styled
+                    :label="__('Mail Accounts')"
+                    wire:model="userForm.mail_accounts"
+                    multiple
+                    select="label:name|value:id"
+                    :options="$mailAccounts"
+                />
+            @show
+            @section('user-edit.default-mail-account')
+                @if($userForm->mail_accounts)
+                    <x-select.styled
+                        :label="__('Default Mail Account')"
+                        wire:model="userForm.default_mail_account_id"
+                        select="label:name|value:id"
+                        :options="collect($mailAccounts)->whereIn('id', $userForm->mail_accounts)->values()->toArray()"
+                    />
+                @endif
 
-        @show
-    </form>
+            @show
+            @section('user-edit.printers')
+                <x-select.styled
+                    :label="__('Printers')"
+                    wire:model="userForm.printers"
+                    multiple
+                    select="label:name|value:id|description:location"
+                    :options="$printers"
+                />
+            @show
+            @section('user-edit.default-printer')
+                @if($userPrinters)
+                    <x-select.styled
+                        :label="__('Default Printer')"
+                        wire:model="printerUserForm.pivot_id"
+                        x-on:select="
+                            $tallstackuiSelect(
+                                'default-printer-size',
+                            ).setOptions($event.detail.select.media_sizes)
+                        "
+                        select="label:name|value:id|description:location"
+                        :options="$userPrinters"
+                    />
+                    <div id="default-printer-size">
+                        <x-select.styled
+                            :label="__('Default Size')"
+                            wire:model="printerUserForm.default_size"
+                            :options="data_get(collect($printers)->firstWhere('id', $printerUserForm->printer_id), 'media_sizes', [''])"
+                        />
+                    </div>
+                @endif
+
+            @show
+        </form>
     @show
     <div class="border-b border-gray-200" x-data="{ active: 'roles' }">
         <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">
@@ -197,11 +210,10 @@
                             ->hasRole('Super Admin');
                     @endphp
 
-                    @foreach ($roles as $role)
-                        @if ($role['name'] === 'Super Admin' && ! $superAdmin)
+                    @foreach($roles as $role)
+                        @if($role['name'] === 'Super Admin' && ! $superAdmin)
                             @continue
                         @endif
-
                         <div class="flex">
                             <div class="flex-1 text-sm">
                                 {{ __($role['name']) }}
@@ -231,7 +243,7 @@
                 </div>
                 <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
                     <div class="grid grid-cols-6 gap-3">
-                        @foreach ($permissions as $permission)
+                        @foreach($permissions as $permission)
                             <div class="col-span-3 font-medium">
                                 {{ __($permission['name']) }}
                             </div>
@@ -253,16 +265,14 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="pt-3">
-                    {{ $permissions->links() }}
-                </div>
+                <div class="pt-3">{{ $permissions->links() }}</div>
             </div>
         @endcanAction
 
         @canAction(\FluxErp\Actions\User\UpdateUserTenants::class)
             <div x-show="active === 'tenants'" x-cloak>
                 <div class="max-h-96 space-y-3 overflow-y-auto">
-                    @foreach ($tenants as $tenant)
+                    @foreach($tenants as $tenant)
                         <div class="flex">
                             <div class="flex-1 text-sm">
                                 {{ $tenant['name'] }}
@@ -350,5 +360,5 @@
                 </div>
             </div>
         </div>
-    </x-slot>
+    </x-slot:footer>
 </x-card>

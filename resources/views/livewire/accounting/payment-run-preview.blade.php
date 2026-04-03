@@ -4,7 +4,7 @@
             return Object.values($wire.orders || {}).reduce(
                 (sum, order) => sum + parseFloat(order.amount || 0),
                 0,
-            )
+            );
         },
     }"
 >
@@ -31,7 +31,7 @@
                 <x-flux::table.head-cell>
                     {{ __('Actions') }}
                 </x-flux::table.head-cell>
-            </x-slot>
+            </x-slot:header>
             <template x-for="order in $wire.orders" :key="order.id">
                 <x-flux::table.row>
                     <x-flux::table.cell
@@ -41,19 +41,32 @@
                         x-text="order.contact_name || order.address_name || '-'"
                     ></x-flux::table.cell>
                     <x-flux::table.cell
-                        x-html="$nuxbe.format.money(order.total_gross_price, {colored: true})"
+                        x-html="
+                            $nuxbe.format.money(order.total_gross_price, {
+                                colored: true,
+                            })
+                        "
                     ></x-flux::table.cell>
                     <x-flux::table.cell>
                         <div>
                             <span
-                                x-html="$nuxbe.format.money(order.balance, { colored: true })"
+                                x-html="
+                                    $nuxbe.format.money(order.balance, {
+                                        colored: true,
+                                    })
+                                "
                             ></span>
                             <div
                                 x-show="order.balance_due_discount"
                                 class="text-xs text-gray-500"
                             >
                                 <span
-                                    x-html="$nuxbe.format.money(order.balance_due_discount, { colored: true })"
+                                    x-html="
+                                        $nuxbe.format.money(
+                                            order.balance_due_discount,
+                                            { colored: true },
+                                        )
+                                    "
                                 ></span>
                                 <span
                                     x-show="order.payment_discount_target_date"
@@ -80,14 +93,26 @@
                             />
                             <div class="flex flex-col gap-1">
                                 <x-button
-                                    x-show="order.balance_due_discount && order.payment_discount_percent && parseFloat(order.amount) !== Math.abs(parseFloat(order.balance_due_discount))"
+                                    x-show="
+                                        order.balance_due_discount &&
+                                        order.payment_discount_percent &&
+                                        parseFloat(order.amount) !==
+                                            Math.abs(
+                                                parseFloat(
+                                                    order.balance_due_discount,
+                                                ),
+                                            )
+                                    "
                                     wire:click="applyDiscount(order.id)"
                                     xs
                                     color="primary"
                                     :text="__('Apply Discount Amount')"
                                 />
                                 <x-button
-                                    x-show="parseFloat(order.amount) !== Math.abs(parseFloat(order.balance))"
+                                    x-show="
+                                        parseFloat(order.amount) !==
+                                        Math.abs(parseFloat(order.balance))
+                                    "
                                     wire:click="applyBalance(order.id)"
                                     xs
                                     color="secondary"
@@ -116,10 +141,14 @@
                 </x-flux::table.head-cell>
                 <x-flux::table.head-cell
                     class="font-bold"
-                    x-html="$nuxbe.format.money(Math.abs(totalAmount), {colored: true})"
+                    x-html="
+                        $nuxbe.format.money(Math.abs(totalAmount), {
+                            colored: true,
+                        })
+                    "
                 ></x-flux::table.head-cell>
                 <x-flux::table.head-cell></x-flux::table.head-cell>
-            </x-slot>
+            </x-slot:footer>
         </x-flux::table>
         <x-slot:footer>
             <div class="flex justify-end gap-4">
@@ -136,6 +165,6 @@
                     wire:flux-confirm="{{ __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes') }}"
                 />
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-card>
 </div>

@@ -4,15 +4,14 @@
         size="6xl"
         :title="__('Edit Variants')"
     >
-        <div
-            x-transition
-            x-show="! Object.values($wire.variants).length > 0"
-        >
+        <div x-transition x-show="!Object.values($wire.variants).length > 0">
             <div
                 class="flex gap-4"
                 x-on:data-table-row-clicked="
-                    $wire.loadOptions($event.detail.id ?? $event.detail.record.id)
-                    productOptionGroup = $event.detail.record ?? $event.detail
+                    $wire.loadOptions(
+                        $event.detail.id ?? $event.detail.record.id,
+                    );
+                    productOptionGroup = $event.detail.record ?? $event.detail;
                 "
             >
                 <div class="grow">
@@ -26,21 +25,30 @@
                     <x-card>
                         <x-slot:header>
                             <span x-text="productOptionGroup?.name"></span>
-                        </x-slot>
+                        </x-slot:header>
                         <template
                             x-for="productOption in $wire.productOptions"
                             :key="productOption.id"
                         >
                             <div class="flex gap-1.5">
                                 <x-checkbox
-                                    x-bind:id="'product-option' + productOption.id"
+                                    x-bind:id="
+                                        'product-option' + productOption.id
+                                    "
                                     x-bind:value="productOption.id"
-                                    x-model.number="$wire.selectedOptions[productOption.product_option_group_id]"
+                                    x-model.number="
+                                        $wire.selectedOptions[
+                                            productOption
+                                                .product_option_group_id
+                                        ]
+                                    "
                                 />
                                 <label
                                     x-text="productOption.name"
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-50"
-                                    x-bind:for="'product-option' + productOption.id"
+                                    x-bind:for="
+                                        'product-option' + productOption.id
+                                    "
                                 ></label>
                             </div>
                         </template>
@@ -76,7 +84,10 @@
                 <x-card class="text-center">
                     <div
                         class="text-2xl font-bold text-amber-600"
-                        x-text="$wire.variants?.restore?.filter((v) => v.selected).length ?? 0"
+                        x-text="
+                            $wire.variants?.restore?.filter((v) => v.selected)
+                                .length ?? 0
+                        "
                     ></div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         {{ __('Variants will be restored') }}
@@ -103,8 +114,19 @@
                             class="flex items-center gap-3 border-b border-gray-200 pb-2 dark:border-gray-700"
                         >
                             <x-toggle
-                                x-bind:checked="$wire.variants.restore.every(v => v.selected)"
-                                x-on:change="$wire.variants.restore.forEach((v, i) => $wire.variants.restore[i].selected = $event.target.checked)"
+                                x-bind:checked="
+                                    $wire.variants.restore.every(
+                                        (v) => v.selected,
+                                    )
+                                "
+                                x-on:change="
+                                    $wire.variants.restore.forEach(
+                                        (v, i) =>
+                                            ($wire.variants.restore[
+                                                i
+                                            ].selected = $event.target.checked),
+                                    )
+                                "
                             />
                             <span class="text-sm font-medium">
                                 {{ __('Select all') }}
@@ -116,7 +138,9 @@
                         >
                             <div class="flex items-center gap-3">
                                 <x-toggle
-                                    x-model="$wire.variants.restore[index].selected"
+                                    x-model="
+                                        $wire.variants.restore[index].selected
+                                    "
                                 />
                                 <span
                                     x-text="variant.name"
@@ -132,14 +156,14 @@
             <x-button
                 color="secondary"
                 light
-                x-show="! Object.values($wire.variants).length > 0"
+                x-show="!Object.values($wire.variants).length > 0"
                 flat
                 :text="__('Cancel')"
                 x-on:click="$tsui.close.modal('generate-variants-modal')"
             />
             <x-button
                 color="indigo"
-                x-show="! Object.values($wire.variants).length > 0"
+                x-show="!Object.values($wire.variants).length > 0"
                 spinner="next()"
                 :text="__('Next')"
                 wire:click="next()"
@@ -160,9 +184,13 @@
                 spinner="save()"
                 :text="__('Save')"
                 wire:flux-confirm.type.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
-                x-on:click="$wire.save().then(() => { $tsui.close.modal('generate-variants-modal'); })"
+                x-on:click="
+                    $wire.save().then(() => {
+                        $tsui.close.modal('generate-variants-modal');
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')

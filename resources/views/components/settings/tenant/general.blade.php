@@ -78,10 +78,7 @@
                 />
             </div>
             <div class="mt-2 flex flex-col gap-2">
-                <x-toggle
-                    :label="__('Active')"
-                    wire:model="tenant.is_active"
-                />
+                <x-toggle :label="__('Active')" wire:model="tenant.is_active" />
                 <x-toggle
                     :label="__('Is Default')"
                     wire:model="tenant.is_default"
@@ -100,7 +97,7 @@
                             {{ __('End') }}
                         </x-flux::table.head-cell>
                         <x-flux::table.head-cell></x-flux::table.head-cell>
-                    </x-slot>
+                    </x-slot:header>
                     <template
                         x-for="(hours, index) in $wire.tenant.opening_hours"
                     >
@@ -119,7 +116,12 @@
                                     icon="trash"
                                     color="red"
                                     sm
-                                    x-on:click="$wire.tenant.opening_hours.splice(index, 1)"
+                                    x-on:click="
+                                        $wire.tenant.opening_hours.splice(
+                                            index,
+                                            1,
+                                        )
+                                    "
                                 />
                             </td>
                         </tr>

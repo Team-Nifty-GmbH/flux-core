@@ -1,13 +1,16 @@
 @props([
     'supportsDocumentPreview' => false,
 ])
-@if ($supportsDocumentPreview)
+@if($supportsDocumentPreview)
     <div>
         <x-modal
             id="preview-{{ strtolower($this->getId()) }}"
             size="6xl"
             :title="__('Preview')"
-            x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
+            x-on:close="
+                $el.querySelector('iframe').src =
+                    'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'
+            "
         >
             <iframe
                 id="preview-iframe"
@@ -29,7 +32,7 @@
                     :text="__('Download')"
                     wire:click="downloadPreview()"
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     </div>
 @endif
@@ -44,7 +47,7 @@
             class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 text-left text-sm"
         >
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
-                @if ($printers ?? false)
+                @if($printers ?? false)
                     <div
                         class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
                     >
@@ -63,7 +66,7 @@
             >
                 {{ __('Download') }}
             </div>
-            @if ($supportsDocumentPreview)
+            @if($supportsDocumentPreview)
                 <div
                     class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
                 >
@@ -83,15 +86,23 @@
                     class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 py-2"
                 >
                     @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
-                        @if ($printers ?? false)
+                        @if($printers ?? false)
                             <div
                                 class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                             >
                                 <x-checkbox
                                     wire:model="selectedPrintLayouts.print"
                                     x-bind:value="printLayout.layout"
-                                    x-bind:checked="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
-                                    x-bind:disabled="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
+                                    x-bind:checked="
+                                        $wire.forcedPrintLayouts.print.includes(
+                                            printLayout.layout,
+                                        )
+                                    "
+                                    x-bind:disabled="
+                                        $wire.forcedPrintLayouts.print.includes(
+                                            printLayout.layout,
+                                        )
+                                    "
                                 />
                                 <span
                                     class="truncate"
@@ -107,8 +118,16 @@
                         <x-checkbox
                             wire:model="selectedPrintLayouts.email"
                             x-bind:value="printLayout.layout"
-                            x-bind:checked="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
-                            x-bind:disabled="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
+                            x-bind:checked="
+                                $wire.forcedPrintLayouts.email.includes(
+                                    printLayout.layout,
+                                )
+                            "
+                            x-bind:disabled="
+                                $wire.forcedPrintLayouts.email.includes(
+                                    printLayout.layout,
+                                )
+                            "
                         />
                         <span
                             class="truncate"
@@ -121,23 +140,39 @@
                         <x-checkbox
                             wire:model="selectedPrintLayouts.download"
                             x-bind:value="printLayout.layout"
-                            x-bind:checked="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
-                            x-bind:disabled="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
+                            x-bind:checked="
+                                $wire.forcedPrintLayouts.download.includes(
+                                    printLayout.layout,
+                                )
+                            "
+                            x-bind:disabled="
+                                $wire.forcedPrintLayouts.download.includes(
+                                    printLayout.layout,
+                                )
+                            "
                         />
                         <span
                             class="truncate"
                             x-text="printLayout.label"
                         ></span>
                     </div>
-                    @if ($supportsDocumentPreview)
+                    @if($supportsDocumentPreview)
                         <div
                             class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                         >
                             <x-checkbox
                                 wire:model="selectedPrintLayouts.preview"
                                 x-bind:value="printLayout.layout"
-                                x-bind:checked="$wire.forcedPrintLayouts.preview.includes(printLayout.layout)"
-                                x-bind:disabled="$wire.forcedPrintLayouts.preview.includes(printLayout.layout)"
+                                x-bind:checked="
+                                    $wire.forcedPrintLayouts.preview.includes(
+                                        printLayout.layout,
+                                    )
+                                "
+                                x-bind:disabled="
+                                    $wire.forcedPrintLayouts.preview.includes(
+                                        printLayout.layout,
+                                    )
+                                "
                             />
                             <span
                                 class="truncate"
@@ -152,8 +187,16 @@
                         <x-checkbox
                             wire:model="selectedPrintLayouts.force"
                             x-bind:value="printLayout.layout"
-                            x-bind:checked="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
-                            x-bind:disabled="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
+                            x-bind:checked="
+                                $wire.forcedPrintLayouts.force.includes(
+                                    printLayout.layout,
+                                )
+                            "
+                            x-bind:disabled="
+                                $wire.forcedPrintLayouts.force.includes(
+                                    printLayout.layout,
+                                )
+                            "
                         />
                         <span
                             class="truncate"
@@ -162,7 +205,7 @@
                     </div>
                 </div>
             </template>
-            @if ($printers ?? false)
+            @if($printers ?? false)
                 <div
                     class="flex flex-col gap-2 p-4"
                     x-collapse
@@ -172,7 +215,11 @@
                     <x-select.styled
                         :label="__('Printer')"
                         wire:model="printJobForm.printer_id"
-                        x-on:select="$tallstackuiSelect('print-job-size').setOptions($event.detail.select.media_sizes)"
+                        x-on:select="
+                            $tallstackuiSelect('print-job-size').setOptions(
+                                $event.detail.select.media_sizes,
+                            )
+                        "
                         select="label:name|value:id|description:location"
                         :options="$printers"
                     />
@@ -219,5 +266,5 @@
             loading="createDocuments"
             x-on:click="$wire.createDocuments().then(() => { $tsui.close.modal('create-documents-{{ strtolower($this->getId()) }}'); });"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

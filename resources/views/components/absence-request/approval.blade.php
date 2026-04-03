@@ -28,7 +28,7 @@
                         color="red"
                         wire:click="reject()"
                         icon="x-mark"
-                        x-bind:disabled="! $wire.absenceRequestForm.comment"
+                        x-bind:disabled="!$wire.absenceRequestForm.comment"
                     />
                 @endcanAction
 
@@ -40,7 +40,7 @@
                         color="secondary"
                         wire:click="revoke()"
                         icon="no-symbol"
-                        x-bind:disabled="! $wire.absenceRequestForm.comment"
+                        x-bind:disabled="!$wire.absenceRequestForm.comment"
                     />
                 @endcanAction
             </div>
@@ -49,10 +49,7 @@
 
     <x-card :header="__('Status History')">
         <div class="space-y-3">
-            <template
-                x-for="activity in $wire.activities"
-                :key="activity.id"
-            >
+            <template x-for="activity in $wire.activities" :key="activity.id">
                 <div
                     class="flex items-start space-x-3 border-b border-gray-200 pb-3 last:border-0 dark:border-gray-700"
                 >
@@ -76,7 +73,11 @@
                             />
                         </template>
                         <template
-                            x-if="! ['approved', 'rejected', 'revoked'].includes(activity.event)"
+                            x-if="
+                                !['approved', 'rejected', 'revoked'].includes(
+                                    activity.event,
+                                )
+                            "
                         >
                             <x-icon
                                 name="information-circle"
@@ -91,13 +92,18 @@
                             >
                                 {{ __('Status changed to') }}
                                 <span
-                                    x-text="activity.event.charAt(0).toUpperCase() + activity.event.slice(1)"
+                                    x-text="
+                                        activity.event.charAt(0).toUpperCase() +
+                                        activity.event.slice(1)
+                                    "
                                 ></span>
                             </p>
                             <p
                                 class="text-xs text-gray-500 dark:text-gray-400"
                                 x-text="
-                                    new Date(activity.created_at).toLocaleString('de-DE', {
+                                    new Date(
+                                        activity.created_at,
+                                    ).toLocaleString('de-DE', {
                                         day: '2-digit',
                                         month: '2-digit',
                                         year: 'numeric',

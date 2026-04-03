@@ -64,9 +64,7 @@
             },
         }"
     >
-        <div>
-            {{ $label ?? '' }}
-        </div>
+        <div>{{ $label ?? '' }}</div>
         <div
             class="relative flex flex-col items-center justify-center"
             x-on:drop="isDropping = false"
@@ -119,16 +117,16 @@
             <template
                 x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles"
             >
-                <x-card
-                    class="px-0! py-0!"
-                    x-show="! file.shouldDelete"
-                    x-cloak
-                >
+                <x-card class="px-0! py-0!" x-show="!file.shouldDelete" x-cloak>
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex w-0 flex-1 items-center gap-1.5">
                             <div class="shrink-0 rounded-md object-contain">
                                 <img
-                                    x-bind:src="file.preview_url ? file.preview_url : '#'"
+                                    x-bind:src="
+                                        file.preview_url
+                                            ? file.preview_url
+                                            : '#'
+                                    "
                                     class="h-16 w-16 rounded-md object-cover"
                                     alt=""
                                 />

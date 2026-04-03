@@ -16,7 +16,7 @@
             wire:model="stockPosting.description"
             :label="__('Description')"
         />
-        @if ($hasSerialNumbers)
+        @if($hasSerialNumbers)
             <hr />
             <x-select.styled
                 wire:model="stockPosting.serial_number.serial_number_range_id"
@@ -49,7 +49,12 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('create-stock-posting-modal')})"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success)
+                        $tsui.close.modal('create-stock-posting-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

@@ -21,12 +21,16 @@
         <x-slot:footer>
             <div class="w-full">
                 <div class="flex justify-between gap-x-4">
-                    @if (resolve_static(\FluxErp\Actions\Tenant\DeleteTenant::class, 'canPerformAction', [false]))
+                    @if(resolve_static(\FluxErp\Actions\Tenant\DeleteTenant::class, 'canPerformAction', [false]))
                         <x-button
                             light
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Tenant')]) }}"
                             x-bind:class="$wire.tenant.id > 0 || 'invisible'"
-                            x-on:click="$wire.delete().then((success) => {if(success) close();});"
+                            x-on:click="
+                                $wire.delete().then((success) => {
+                                    if (success) close();
+                                })
+                            "
                             flat
                             color="red"
                             :text="__('Delete')"
@@ -44,11 +48,16 @@
                         <x-button
                             color="indigo"
                             :text="__('Save')"
-                            x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('edit-tenant');});"
+                            x-on:click="
+                                $wire.save().then((success) => {
+                                    if (success)
+                                        $tsui.close.modal('edit-tenant');
+                                })
+                            "
                         />
                     </div>
                 </div>
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

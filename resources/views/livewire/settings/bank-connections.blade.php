@@ -51,10 +51,7 @@
             :min="0"
             step="1"
         />
-        <x-toggle
-            wire:model="bankConnection.is_active"
-            :label="__('Active')"
-        />
+        <x-toggle wire:model="bankConnection.is_active" :label="__('Active')" />
         <x-toggle
             wire:model="bankConnection.is_virtual"
             :label="__('Is Virtual')"
@@ -70,7 +67,11 @@
         <x-button
             :text="__('Save')"
             color="indigo"
-            x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('bank-connection-modal');});"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success) $tsui.close.modal('bank-connection-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

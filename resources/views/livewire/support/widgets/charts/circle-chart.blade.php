@@ -1,7 +1,7 @@
 @extends('flux::livewire.support.widgets.charts.chart')
 
 @section('options')
-    @if ($showDonutOptions ?? true)
+    @if($showDonutOptions ?? true)
         <x-select.native
             x-model="chartType"
             :options="[
@@ -20,6 +20,5 @@
             ]"
         />
     @endif
-
     @parent
 @endsection

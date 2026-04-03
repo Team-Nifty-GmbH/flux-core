@@ -18,7 +18,13 @@
                 name-attribute="label"
                 :with-search="true"
                 :hide-icon="true"
-                x-on:folder-tree-select="if (! $event.detail.children) { isLoading ? null : selectWidget($event.detail.component_name); }"
+                x-on:folder-tree-select="
+                    if (!$event.detail.children) {
+                        isLoading
+                            ? null
+                            : selectWidget($event.detail.component_name);
+                    }
+                "
             />
         </div>
         <x-slot:footer>
@@ -29,6 +35,6 @@
                     x-on:click="$tsui.close.modal('widget-list')"
                 />
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 @endteleport

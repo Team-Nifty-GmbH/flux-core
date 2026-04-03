@@ -2,8 +2,8 @@
     class="flex flex-col gap-4"
     x-data="{
         calculateReminderDate(days) {
-            if (! $wire.$parent.order.payment_target_date) {
-                return ''
+            if (!$wire.$parent.order.payment_target_date) {
+                return '';
             }
 
             return (
@@ -14,7 +14,7 @@
                         .toDate(),
                 ) +
                 ')'
-            )
+            );
         },
     }"
 >
@@ -32,7 +32,11 @@
                     <div>
                         <x-button
                             :text="__('Set Level')"
-                            x-on:click="$tsui.open.modal('reset-payment-reminder-level-modal')"
+                            x-on:click="
+                                $tsui.open.modal(
+                                    'reset-payment-reminder-level-modal',
+                                )
+                            "
                         />
                     </div>
                 @endcanAction
@@ -48,7 +52,13 @@
                     <span>{{ __('Payment target') }}</span>
                     <span
                         x-show="$wire.$parent.order.payment_target_date"
-                        x-text="'(' + $nuxbe.format.date($wire.$parent.order.payment_target_date) + ')'"
+                        x-text="
+                            '(' +
+                            $nuxbe.format.date(
+                                $wire.$parent.order.payment_target_date,
+                            ) +
+                            ')'
+                        "
                         class="text-xs"
                     ></span>
                 </div>
@@ -64,8 +74,17 @@
                 >
                     <span>{{ __('Payment Discount Target') }}</span>
                     <span
-                        x-show="$wire.$parent.order.payment_discount_target_date"
-                        x-text="'(' + $nuxbe.format.date($wire.$parent.order.payment_discount_target_date) + ')'"
+                        x-show="
+                            $wire.$parent.order.payment_discount_target_date
+                        "
+                        x-text="
+                            '(' +
+                            $nuxbe.format.date(
+                                $wire.$parent.order
+                                    .payment_discount_target_date,
+                            ) +
+                            ')'
+                        "
                         class="text-xs"
                     ></span>
                 </div>
@@ -84,7 +103,9 @@
                 <x-number
                     step="0.01"
                     min="0"
-                    x-model.number="$wire.$parent.order.payment_discount_percent"
+                    x-model.number="
+                        $wire.$parent.order.payment_discount_percent
+                    "
                 />
             </div>
             <div>
@@ -93,7 +114,11 @@
                 >
                     <span>{{ __('Payment Reminder Days 1') }}</span>
                     <span
-                        x-text="calculateReminderDate($wire.$parent.order.payment_reminder_days_1)"
+                        x-text="
+                            calculateReminderDate(
+                                $wire.$parent.order.payment_reminder_days_1,
+                            )
+                        "
                     ></span>
                 </div>
                 <x-number
@@ -131,7 +156,8 @@
                         x-text="
                             calculateReminderDate(
                                 $wire.$parent.order.payment_reminder_days_1 +
-                                    $wire.$parent.order.payment_reminder_days_2 +
+                                    $wire.$parent.order
+                                        .payment_reminder_days_2 +
                                     $wire.$parent.order.payment_reminder_days_3,
                             )
                         "
@@ -193,13 +219,14 @@
                         x-on:change="$wire.calcExchangeRate()"
                     >
                         <x-slot:label>
-                            {{ __('Order Currency Amount') }}
-                            (
+                            {{ __('Order Currency Amount') }} (
                             <span
-                                x-text="$wire.orderTransactionForm.orderCurrencyIso"
+                                x-text="
+                                    $wire.orderTransactionForm.orderCurrencyIso
+                                "
                             ></span>
                             )
-                        </x-slot>
+                        </x-slot:label>
                     </x-number>
                 </div>
             </div>
@@ -211,11 +238,14 @@
                 />
                 <x-button
                     :text="__('Save')"
-                    x-on:click="$wire.save().then((success) => {
-                        if (success) $tsui.close.modal('order-transaction-modal');
-                    })"
+                    x-on:click="
+                        $wire.save().then((success) => {
+                            if (success)
+                                $tsui.close.modal('order-transaction-modal');
+                        })
+                    "
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endteleport
 
@@ -225,7 +255,7 @@
     >
         <x-slot:title>
             {{ __('Set Payment Reminder Level') }}
-        </x-slot>
+        </x-slot:title>
         <x-number
             id="new-payment-reminder-level"
             wire:model="newPaymentReminderLevel"
@@ -237,12 +267,21 @@
             <x-button
                 color="secondary"
                 :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('reset-payment-reminder-level-modal')"
+                x-on:click="
+                    $tsui.close.modal('reset-payment-reminder-level-modal')
+                "
             />
             <x-button
                 :text="__('Save')"
-                x-on:click="$wire.resetPaymentReminderLevel().then((success) => {if (success) $tsui.close.modal('reset-payment-reminder-level-modal');})"
+                x-on:click="
+                    $wire.resetPaymentReminderLevel().then((success) => {
+                        if (success)
+                            $tsui.close.modal(
+                                'reset-payment-reminder-level-modal',
+                            );
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

@@ -50,63 +50,61 @@
 @endsection
 
 @section('content.right')
-@parent
-@section('content.right.summary.profit')
-    
-@endsection
+    @parent
+    @section('content.right.summary.profit')
 
-@section('content.right.order_dates')
-    <x-input
-        wire:model="order.invoice_number"
-        :label="__('Invoice number')"
-        :disabled="$order->is_locked"
-        class="w-full"
-    />
-    <x-date
-        wire:model="order.invoice_date"
-        required
-        :without-time="true"
-        :disabled="$order->is_locked"
-        :label="__('Invoice Date')"
-    />
-    <x-date
-        wire:model="order.system_delivery_date"
-        required
-        :without-time="true"
-        :disabled="$order->is_locked"
-        :label="__('Performance/Delivery date')"
-    />
-    <x-date
-        wire:model="order.system_delivery_date_end"
-        :without-time="true"
-        :disabled="$order->is_locked"
-        :label="__('Performance/Delivery date end')"
-    />
-    <x-date
-        wire:model="order.order_date"
-        :without-time="true"
-        :disabled="$order->is_locked"
-        :label="__('Order Date')"
-    />
-    <x-input wire:model="order.commission" :label="__('Commission')" />
-@endsection
-
-@section('content.right.invoice_preview')
-    <x-card class="space-y-3">
-        <div>
-            <iframe
-                class="object-contain"
-                width="100%"
-                height="400px"
-                type="{{ $order->invoice['mime_type'] ?? null }}"
-                src="{{ $order->invoice['url'] ?? null }}"
-            ></iframe>
-        </div>
-        <x-button
-            color="indigo"
-            :text="__('View')"
-            x-on:click="$nuxbe.openDetailModal($wire.order.invoice.url)"
+    @endsection
+    @section('content.right.order_dates')
+        <x-input
+            wire:model="order.invoice_number"
+            :label="__('Invoice number')"
+            :disabled="$order->is_locked"
+            class="w-full"
         />
-    </x-card>
+        <x-date
+            wire:model="order.invoice_date"
+            required
+            :without-time="true"
+            :disabled="$order->is_locked"
+            :label="__('Invoice Date')"
+        />
+        <x-date
+            wire:model="order.system_delivery_date"
+            required
+            :without-time="true"
+            :disabled="$order->is_locked"
+            :label="__('Performance/Delivery date')"
+        />
+        <x-date
+            wire:model="order.system_delivery_date_end"
+            :without-time="true"
+            :disabled="$order->is_locked"
+            :label="__('Performance/Delivery date end')"
+        />
+        <x-date
+            wire:model="order.order_date"
+            :without-time="true"
+            :disabled="$order->is_locked"
+            :label="__('Order Date')"
+        />
+        <x-input wire:model="order.commission" :label="__('Commission')" />
+    @endsection
+    @section('content.right.invoice_preview')
+        <x-card class="space-y-3">
+            <div>
+                <iframe
+                    class="object-contain"
+                    width="100%"
+                    height="400px"
+                    type="{{ $order->invoice['mime_type'] ?? null }}"
+                    src="{{ $order->invoice['url'] ?? null }}"
+                ></iframe>
+            </div>
+            <x-button
+                color="indigo"
+                :text="__('View')"
+                x-on:click="$nuxbe.openDetailModal($wire.order.invoice.url)"
+            />
+        </x-card>
     @show
 @endsection

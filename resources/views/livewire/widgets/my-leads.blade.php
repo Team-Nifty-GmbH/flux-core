@@ -7,22 +7,22 @@
                 {{ $this->getLabel() }}
             </h2>
             @section('options')
-            <div class="flex-none">
-                <x-dropdown icon="ellipsis-vertical" static>
-                    @foreach ($this->options() ?? [] as $option)
-                        <x-dropdown.items
-                            :text="data_get($option, 'label')"
-                            wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
-                        />
-                    @endforeach
-                </x-dropdown>
-            </div>
+                <div class="flex-none">
+                    <x-dropdown icon="ellipsis-vertical" static>
+                        @foreach($this->options() ?? [] as $option)
+                            <x-dropdown.items
+                                :text="data_get($option, 'label')"
+                                wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                </div>
             @show
         </div>
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
-        @forelse ($leads as $lead)
+        @forelse($leads as $lead)
             <div
                 class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
             >
@@ -41,7 +41,7 @@
                         <span class="truncate">
                             {{ $lead->address?->name ?? __('Unknown') }}
                         </span>
-                        @if ($lead->end)
+                        @if($lead->end)
                             <span>&middot;</span>
                             <span
                                 class="{{ $lead->end->isPast() ? 'text-red-500' : '' }}"

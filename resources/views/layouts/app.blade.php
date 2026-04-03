@@ -10,18 +10,18 @@
     ])
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
 >
-    <head>
-        <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
-        <x-flux::layouts.head.head />
-    </head>
-    <body
-        x-bind:class="{
-            'dark bg-secondary-800': darkTheme,
-            'bg-slate-50': ! darkTheme,
-        }"
-        class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
-    >
-        @section('wire.navigate.spinner')
+<head>
+    <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
+    <x-flux::layouts.head.head />
+</head>
+<body
+    x-bind:class="{
+        'dark bg-secondary-800': darkTheme,
+        'bg-slate-50': !darkTheme,
+    }"
+    class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
+>
+    @section('wire.navigate.spinner')
         @persist('spinner')
             <div
                 id="loading-overlay"
@@ -37,134 +37,135 @@
             </div>
         @endpersist
 
-        @show
-        @persist('notifications')
-            @if (auth()->check() && auth()->id())
-                <x-toast z-index="z-50" />
-            @endif
+    @show
+    @persist('notifications')
+        @if(auth()->check() && auth()->id())
+            <x-toast z-index="z-50" />
+        @endif
+        <x-dialog z-index="z-40" blur="md" align="center" />
+    @endpersist
 
-            <x-dialog z-index="z-40" blur="md" align="center" />
-        @endpersist
+    @auth('web')
+        @persist('mail')
+            <div id="mail">
+                <livewire:edit-mail lazy />
+            </div>
+            <div
+                x-data="{
+                    openUrl() {
+                        let urlObj = new URL($el.querySelector('iframe').src);
+                        urlObj.searchParams.delete('no-navigation');
 
-        @auth('web')
-            @persist('mail')
-                <div id="mail">
-                    <livewire:edit-mail lazy />
-                </div>
-                <div
-                    x-data="{
-                        openUrl() {
-                            let urlObj = new URL($el.querySelector('iframe').src)
-                            urlObj.searchParams.delete('no-navigation')
-
-                            window.open(urlObj)
-                            $tsui.close.modal('detail-modal')
-                        },
-                    }"
+                        window.open(urlObj);
+                        $tsui.close.modal('detail-modal');
+                    },
+                }"
+            >
+                <x-modal
+                    id="detail-modal"
+                    size="7xl"
+                    x-on:close="
+                        $el.querySelector('iframe').src =
+                            'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'
+                    "
                 >
-                    <x-modal
-                        id="detail-modal"
-                        size="7xl"
-                        x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
-                    >
-                        <div class="grid h-screen w-full">
-                            <iframe
-                                class="object-contain"
-                                height="100%"
-                                width="100%"
-                                id="detail-modal-iframe"
-                                src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
-                            ></iframe>
-                        </div>
-                        <x-slot:footer>
-                            <x-button
-                                color="secondary"
-                                light
-                                :text="__('Cancel')"
-                                x-on:click="$tsui.close.modal('detail-modal')"
-                            />
-                            <x-button
-                                color="indigo"
-                                :text="__('Open')"
-                                x-on:click="openUrl()"
-                            />
-                        </x-slot>
-                    </x-modal>
-                </div>
-            @endpersist
-
-            @persist('record-merging')
-                <livewire:record-merging lazy />
-            @endpersist
-        @endauth
-
-        <x-flux::layout>
-            @if (! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
-                <x-slot:header>
-                    <x-layout.header without-mobile-button>
+                    <div class="grid h-screen w-full">
+                        <iframe
+                            class="object-contain"
+                            height="100%"
+                            width="100%"
+                            id="detail-modal-iframe"
+                            src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
+                        ></iframe>
+                    </div>
+                    <x-slot:footer>
                         <x-button
-                            flat
-                            class="md:hidden"
-                            icon="bars-4"
-                            x-on:click="$dispatch('menu-force-open')"
+                            color="secondary"
+                            light
+                            :text="__('Cancel')"
+                            x-on:click="$tsui.close.modal('detail-modal')"
                         />
+                        <x-button
+                            color="indigo"
+                            :text="__('Open')"
+                            x-on:click="openUrl()"
+                        />
+                    </x-slot:footer>
+                </x-modal>
+            </div>
+        @endpersist
+        @persist('record-merging')
+            <livewire:record-merging lazy />
+        @endpersist
+    @endauth
+
+    <x-flux::layout>
+        @if(! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
+            <x-slot:header>
+                <x-layout.header without-mobile-button>
+                    <x-button
+                        flat
+                        class="md:hidden"
+                        icon="bars-4"
+                        x-on:click="$dispatch('menu-force-open')"
+                    />
+                    @auth('web')
+                        <div
+                            x-persist="layout.header.search - bar"
+                            class="hidden grow sm:block"
+                        >
+                            <livewire:features.search-bar />
+                        </div>
+                    @endauth
+
+                    <div class="grow sm:hidden"></div>
+
+                    <div class="flex shrink-0 gap-2">
                         @auth('web')
                             <div
-                                x-persist="layout.header.search-bar"
-                                class="hidden grow sm:block"
+                                x-persist="layout.header.search - bar - mobile"
                             >
-                                <livewire:features.search-bar />
+                                <livewire:features.search-bar
+                                    :mobile="true"
+                                    lazy
+                                />
                             </div>
                         @endauth
 
-                        <div class="grow sm:hidden"></div>
-
-                        <div class="flex shrink-0 gap-2">
-                            @auth('web')
-                                <div
-                                    x-persist="layout.header.search-bar-mobile"
-                                >
-                                    <livewire:features.search-bar
-                                        :mobile="true"
-                                        lazy
-                                    />
-                                </div>
-                            @endauth
-
-                            @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
-                                @persist('layout.header.cart')
-                                    @canAction(\FluxErp\Actions\Cart\CreateCart::class)
-                                        <livewire:cart.cart lazy />
-                                    @endcanAction
-                                @endpersist
-                            @endif
-
-                            @auth('web')
-                                @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                                    <livewire:work-time lazy />
+                        @if(resolve_static(\FluxErp\Models\PriceList::class, 'default'))
+                            @persist('layout.header.cart')
+                                @canAction(\FluxErp\Actions\Cart\CreateCart::class)
+                                    <livewire:cart.cart lazy />
                                 @endcanAction
-                            @endauth
-
-                            @persist('layout.header.notifications')
-                                <livewire:features.notifications lazy />
                             @endpersist
-                        </div>
-                    </x-layout.header>
-                </x-slot>
-            @endif
+                        @endif
 
-            @if (auth()->check() && auth()->id() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
-                <x-slot:menu>
-                    @php($navigation = true)
-                    @persist('navigation')
-                        <div id="nav">
-                            <livewire:navigation />
-                        </div>
-                    @endpersist
-                </x-slot>
-            @endif
+                        @auth('web')
+                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                                <livewire:work-time lazy />
+                            @endcanAction
+                        @endauth
 
-            {{ $slot }}
-        </x-flux::layout>
-    </body>
+                        @persist('layout.header.notifications')
+                            <livewire:features.notifications lazy />
+                        @endpersist
+                    </div>
+                </x-layout.header>
+            </x-slot:header>
+        @endif
+
+        @if(auth()->check() && auth()->id() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
+            <x-slot:menu>
+                @php($navigation = true)
+                @persist('navigation')
+                    <div id="nav">
+                        <livewire:navigation />
+                    </div>
+                @endpersist
+            </x-slot:menu>
+        @endif
+
+        {{ $slot }}
+    </x-flux::layout>
+</body>
 </html>

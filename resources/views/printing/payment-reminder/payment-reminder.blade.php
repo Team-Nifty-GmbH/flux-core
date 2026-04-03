@@ -4,7 +4,5 @@
     :subject="$subject"
 />
 <main>
-    <div>
-        {{ render_editor_blade($text, ['paymentReminder' => $model]) }}
-    </div>
+    <div>{{ render_editor_blade($text, ['paymentReminder' => $model]) }}</div>
 </main>

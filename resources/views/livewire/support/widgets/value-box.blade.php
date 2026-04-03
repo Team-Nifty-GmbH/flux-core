@@ -10,10 +10,10 @@
             >
                 {{ __($this->title()) }}
             </h2>
-            @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
+            @if($this instanceof \FluxErp\Contracts\HasWidgetOptions)
                 <div class="flex-none">
                     <x-dropdown icon="ellipsis-vertical" static>
-                        @foreach ($this->options() ?? [] as $option)
+                        @foreach($this->options() ?? [] as $option)
                             <x-dropdown.items
                                 :text="data_get($option, 'label')"
                                 x-on:click="$wire.{{ data_get($option, 'method') }}('{{ data_get($option, 'params') }}')"
@@ -31,7 +31,7 @@
                     class="flex-none truncate text-2xl font-bold whitespace-nowrap text-gray-900 dark:text-gray-100"
                     x-text="$wire.sum"
                 ></div>
-                @if ($shouldBePositive)
+                @if($shouldBePositive)
                     <template x-if="$wire.growthRate !== null">
                         <div>
                             <x-badge
@@ -41,7 +41,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                             <x-badge
@@ -51,7 +51,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                         </div>
@@ -66,7 +66,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                             <x-badge
@@ -76,7 +76,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                         </div>

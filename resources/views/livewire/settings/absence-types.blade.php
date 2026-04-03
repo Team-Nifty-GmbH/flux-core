@@ -140,15 +140,21 @@
                     class="space-y-3"
                     x-data="{
                         get absenceType() {
-                            if ($wire.absenceTypeForm.affects_sick_leave) return 'sick'
-                            if ($wire.absenceTypeForm.affects_vacation) return 'vacation'
-                            if ($wire.absenceTypeForm.affects_overtime) return 'overtime'
-                            return 'none'
+                            if ($wire.absenceTypeForm.affects_sick_leave)
+                                return 'sick';
+                            if ($wire.absenceTypeForm.affects_vacation)
+                                return 'vacation';
+                            if ($wire.absenceTypeForm.affects_overtime)
+                                return 'overtime';
+                            return 'none';
                         },
                         set absenceType(value) {
-                            $wire.absenceTypeForm.affects_sick_leave = value === 'sick'
-                            $wire.absenceTypeForm.affects_vacation = value === 'vacation'
-                            $wire.absenceTypeForm.affects_overtime = value === 'overtime'
+                            $wire.absenceTypeForm.affects_sick_leave =
+                                value === 'sick';
+                            $wire.absenceTypeForm.affects_vacation =
+                                value === 'vacation';
+                            $wire.absenceTypeForm.affects_overtime =
+                                value === 'overtime';
                         },
                     }"
                 >
@@ -252,6 +258,6 @@
                 color="primary"
                 x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $absenceTypeForm->modalName() }}') })"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-8" x-data="{ showCart: null }">
-    @forelse ($carts as $cart)
+    @forelse($carts as $cart)
         <livewire:cart.watchlist-card
             :cart="$cart"
             lazy

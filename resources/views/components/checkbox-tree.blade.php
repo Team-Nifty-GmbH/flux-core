@@ -32,14 +32,13 @@
                 @js($searchAttributes),
             )"
 >
-    <!-- Root Rendering of the Tree -->
-    {{ $header ?? null }}
+    <!-- Root Rendering of the Tree --> {{ $header ?? null }}
     <div class="tree-container flex w-full flex-col gap-4 lg:flex-row">
         <ul
             class="tree max-h-[50vh] shrink-0 grow overflow-auto pl-2 lg:max-h-none lg:w-1/2"
         >
             {{ $beforeTree ?? null }}
-            @if ($withSearch)
+            @if($withSearch)
                 <div class="pb-2">
                     <x-input
                         type="search"
@@ -50,7 +49,11 @@
             @endif
 
             <template
-                @if($withSearch) x-for="node in searchNodes(tree, search)" @else x-for="node in tree" @endif
+                @if($withSearch)
+                    x-for="node in searchNodes(tree, search)"
+                @else
+                    x-for="node in tree"
+                @endif
                 :key="node.id"
             >
                 <li>
@@ -73,7 +76,11 @@
                 <div
                     class="-ml-3 flex min-w-0 cursor-pointer items-center space-x-2 rounded px-1.5 text-sm text-gray-700 select-none dark:text-gray-50"
                     x-on:click="toggleSelect(node)"
-                    x-bind:class="selected?.id === node.id ? 'bg-indigo-500 dark:bg-indigo-700 text-white' : ''"
+                    x-bind:class="
+                        selected?.id === node.id
+                            ? 'bg-indigo-500 dark:bg-indigo-700 text-white'
+                            : ''
+                    "
                 >
                     <i
                         class="ph ph-caret-right text-base transition-transform duration-200"
@@ -84,18 +91,30 @@
                                     : 'rotate-0'
                                 : 'invisible'
                         "
-                        x-on:click.stop="node[childrenAttribute] ? toggleOpen(node, $event) : null"
+                        x-on:click.stop="
+                            node[childrenAttribute]
+                                ? toggleOpen(node, $event)
+                                : null
+                        "
                     ></i>
-                    @if ($selectable)
+                    @if($selectable)
                         <template x-if="node.isSelectable ?? true">
                             <div>
-                                @if ($checkbox?->isNotEmpty())
+                                @if($checkbox?->isNotEmpty())
                                     {{ $checkbox }}
                                 @else
                                     <x-checkbox
                                         sm
-                                        x-effect="$el.indeterminate = isIndeterminate(node)"
-                                        x-on:change="toggleCheck(node, $event.target.checked)"
+                                        x-effect="
+                                            $el.indeterminate =
+                                                isIndeterminate(node)
+                                        "
+                                        x-on:change="
+                                            toggleCheck(
+                                                node,
+                                                $event.target.checked,
+                                            )
+                                        "
                                         x-bind:checked="isChecked(node)"
                                         x-bind:value="node.id"
                                         class="form-checkbox"
@@ -105,8 +124,8 @@
                         </template>
                     @endif
 
-                    @if (! $hideIcon)
-                        @if ($nodeIcon ?? false)
+                    @if(! $hideIcon)
+                        @if($nodeIcon ?? false)
                             {{ $nodeIcon }}
                         @else
                             <i
@@ -130,29 +149,45 @@
                 </div>
                 <template x-if="Array.isArray(node[childrenAttribute])">
                     <ul
-                        @if ($sortable)
+                        @if($sortable)
                             x-sort="(item, position) => {{{ $attributes->get("moved", "null") }}}"
-                            x-sort:group="folder-tree"
+                            x-sort:group="folder - tree"
                         @endif
                         x-show="isOpen(node)"
                         x-transition
                         class="tree__children border-l border-gray-200 pl-4 dark:border-slate-500"
                     >
-                        @if ($sortable)
+                        @if($sortable)
                             <li
-                                x-bind:class="node[childrenAttribute]?.length ? 'h-0' : 'min-h-4'"
+                                x-bind:class="
+                                    node[childrenAttribute]?.length
+                                        ? 'h-0'
+                                        : 'min-h-4'
+                                "
                             ></li>
                         @endif
 
                         <template
-                            @if($withSearch) x-for="childNode in searchNodes(node[childrenAttribute] ?? [], search)" @else x-for="childNode in node[childrenAttribute] ?? []" @endif
+                            @if($withSearch)
+                                x-for="
+                                    childNode in
+                                    searchNodes(
+                                        node[childrenAttribute] ?? [],
+                                        search,
+                                    )
+                                "
+                            @else
+                                x-for="
+                                    childNode in node[childrenAttribute] ?? []
+                                "
+                            @endif
                             :key="childNode.id"
                         >
                             <!-- these are the lower levels -->
                             <li
                                 data-child-node
                                 class="tree__node flex flex-col pl-1.5"
-                                @if ($attributes->has("x-sort:item"))
+                                @if($attributes->has("x-sort:item"))
                                     x-sort:item="{{ $attributes->get("x-sort:item") }}"
                                     x-bind:data-id="{{ $attributes->get("x-sort:item") }}"
                                 @else

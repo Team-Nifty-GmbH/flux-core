@@ -24,15 +24,11 @@
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="translate-x-full"
     >
-        <div class="px-2 py-5">
-            {{ $slot }}
-        </div>
+        <div class="px-2 py-5">{{ $slot }}</div>
         <div
             class="bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 absolute sticky bottom-0 w-full rounded-xl rounded-t-none border-t px-4 py-4 sm:px-6"
         >
-            <div class="flex justify-end gap-x-4">
-                {{ $footer ?? '' }}
-            </div>
+            <div class="flex justify-end gap-x-4">{{ $footer ?? '' }}</div>
         </div>
     </aside>
 </div>

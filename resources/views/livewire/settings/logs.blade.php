@@ -4,8 +4,8 @@
     }"
     x-on:data-table-row-clicked="
         $wire.loadLog($event.detail.record.id).then((result) => {
-            log = result
-            $tsui.open.modal('show-log-modal')
+            log = result;
+            $tsui.open.modal('show-log-modal');
         })
     "
 >
@@ -49,7 +49,9 @@
             </div>
             <div
                 class="overflow-auto rounded-md bg-black p-1 font-mono whitespace-pre text-white"
-                x-text="JSON.stringify(JSON.parse(log?.context ?? '{}'), null, 4)"
+                x-text="
+                    JSON.stringify(JSON.parse(log?.context ?? '{}'), null, 4)
+                "
             ></div>
         </div>
         <x-slot:footer>
@@ -60,7 +62,7 @@
                 x-on:click="$tsui.close.modal('show-log-modal')"
                 class="mr-2"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <div class="mb-6 sm:flex sm:items-center">
         <div class="sm:flex-auto">

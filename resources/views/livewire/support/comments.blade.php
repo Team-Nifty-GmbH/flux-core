@@ -14,7 +14,7 @@
                 <template x-ref="textarea">
                     <x-flux::features.comments.input />
                 </template>
-                @if (resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
+                @if(resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
                     <x-flux::features.comments.input />
                 @endcan
 
@@ -59,7 +59,10 @@
                             <template>
                                 <ul>
                                     <li
-                                        x-bind:class="comment.is_sticky && 'bg-emerald-50 dark:bg-emerald-900'"
+                                        x-bind:class="
+                                            comment.is_sticky &&
+                                            'bg-emerald-50 dark:bg-emerald-900'
+                                        "
                                         class="px-4 py-6 sm:px-6"
                                     >
                                         <x-flux::features.comments.comment
@@ -71,17 +74,26 @@
                                     >
                                         <ul class="pl-12">
                                             <template
-                                                x-for="childcomment in comment.children"
+                                                x-for="
+                                                    childcomment in
+                                                    comment.children
+                                                "
                                                 :key="childcomment.id"
                                             >
                                                 <li
                                                     data-child-comment
                                                     class="tree__comment"
-                                                    x-bind:data-id="childcomment.id"
+                                                    x-bind:data-id="
+                                                        childcomment.id
+                                                    "
                                                 >
                                                     <template
                                                         x-template-outlet="$refs.treecommentTemplate.querySelector('template')"
-                                                        x-data="{ comment: childcomment, parent: comment }"
+                                                        x-data="{
+                                                            comment:
+                                                                childcomment,
+                                                            parent: comment,
+                                                        }"
                                                     ></template>
                                                 </li>
                                             </template>

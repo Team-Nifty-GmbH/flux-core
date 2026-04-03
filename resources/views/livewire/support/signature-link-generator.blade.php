@@ -1,14 +1,14 @@
 <div class="text-sm">
-    @if ($signedViews)
+    @if($signedViews)
         <div class="mb-4 flex flex-col">
             <p>{{ __('Signed Documents') }}:</p>
-            @foreach ($signedViews as $signedView)
+            @foreach($signedViews as $signedView)
                 <p class="mt-2">{{ __($signedView) }}</p>
             @endforeach
         </div>
     @endif
 
-    @if ($unsignedViews)
+    @if($unsignedViews)
         <div class="dropdown-full-w">
             <x-dropdown>
                 <x-slot:action>
@@ -21,8 +21,8 @@
                     >
                         {{ __('Add Signature') }}
                     </x-button>
-                </x-slot>
-                @foreach ($unsignedViews as $unsignedView)
+                </x-slot:action>
+                @foreach($unsignedViews as $unsignedView)
                     <x-dropdown.items
                         x-on:click="$wire.setPublicLink('{{ $unsignedView }}').then(() => show = false)"
                     >
@@ -33,9 +33,9 @@
         </div>
     @endif
 
-    @if ($generatedUrls)
+    @if($generatedUrls)
         <div class="mt-4">
-            @foreach ($generatedUrls as $label => $link)
+            @foreach($generatedUrls as $label => $link)
                 <x-clipboard :label="__($label)" :text="$link" />
             @endforeach
         </div>

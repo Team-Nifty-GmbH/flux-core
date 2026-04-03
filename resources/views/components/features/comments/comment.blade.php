@@ -2,7 +2,7 @@
     <div
         x-init="
             $nextTick(() => {
-                $el.querySelector('img').src = comment.user?.avatar_url
+                $el.querySelector('img').src = comment.user?.avatar_url;
             })
         "
     >
@@ -15,19 +15,22 @@
                     x-text="comment.created_by ?? '{{ __('Unknown') }}'"
                     class="font-medium text-gray-500"
                 ></div>
-                @if ($this->isPublic === true)
+                @if($this->isPublic === true)
                     <x-badge
                         flat
-                        x-bind:class="! comment.is_internal && 'hidden'"
+                        x-bind:class="!comment.is_internal && 'hidden'"
                         :text="__('Internal')"
                     ></x-badge>
                 @endif
             </div>
-            @if (auth()->check())
+            @if(auth()->check())
                 <x-dropdown icon="ellipsis-vertical" static>
                     @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
                         <x-dropdown.items
-                            x-on:click="toggleSticky(comment); show = false;"
+                            x-on:click="
+                                toggleSticky(comment);
+                                show = false;
+                            "
                         >
                             <span
                                 x-text="comment.is_sticky ? '{{ __('Unsticky') }}' : '{{ __('Sticky') }}'"
@@ -38,10 +41,10 @@
                     @canAction(\FluxErp\Actions\Comment\DeleteComment::class)
                         <x-dropdown.items>
                             <span
-                                x-bind:disabled="! comment.is_current_user"
+                                x-bind:disabled="!comment.is_current_user"
                                 x-on:click="
                                     $wire.delete(comment.id).then((success) => {
-                                        if (success) removeNode(comment)
+                                        if (success) removeNode(comment);
                                     })
                                 "
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
@@ -89,7 +92,9 @@
                                 x-cloak
                                 x-show="file.preview_url !== ''"
                                 class="h-full"
-                                x-on:click="$nuxbe.openDetailModal(file.original_url)"
+                                x-on:click="
+                                    $nuxbe.openDetailModal(file.original_url)
+                                "
                                 icon="eye"
                             />
                         </div>
@@ -99,20 +104,33 @@
         </div>
         <div class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-50">
             <span
-                x-text="$nuxbe.format.relativeTime(new Date(comment.created_at).getTime())"
+                x-text="
+                    $nuxbe.format.relativeTime(
+                        new Date(comment.created_at).getTime(),
+                    )
+                "
             ></span>
             <span
-                x-text="'(' + $nuxbe.format.datetime(new Date(comment.created_at)) + ')'"
+                x-text="
+                    '(' +
+                    $nuxbe.format.datetime(new Date(comment.created_at)) +
+                    ')'
+                "
             ></span>
             @canAction(\FluxErp\Actions\Comment\CreateComment::class)
                 <span class="">&middot;</span>
                 <button
                     type="button"
                     x-on:click.prevent="
-                        $refs.comments.querySelectorAll('.comment-input').forEach(function (el) {
-                            el.remove()
-                        })
-                        $el.parentNode.insertAdjacentHTML('beforeend', $refs.textarea.innerHTML)
+                        $refs.comments
+                            .querySelectorAll('.comment-input')
+                            .forEach(function (el) {
+                                el.remove();
+                            });
+                        $el.parentNode.insertAdjacentHTML(
+                            'beforeend',
+                            $refs.textarea.innerHTML,
+                        );
                     "
                 >
                     {{ __('Answer') }}

@@ -117,14 +117,14 @@
                     },
                 }"
             >
-                @if ($workTimeModelForm->cycle_weeks > 1)
+                @if($workTimeModelForm->cycle_weeks > 1)
                     {{-- Tabs for multiple weeks --}}
                     <div class="mb-6">
                         <div
                             class="border-b border-gray-200 dark:border-gray-700"
                         >
                             <nav class="-mb-px flex space-x-4">
-                                @for ($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
+                                @for($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
                                     <button
                                         type="button"
                                         x-on:click="activeWeek = {{ $i }}"
@@ -145,11 +145,16 @@
 
                 {{-- Schedule Table for every single week --}}
                 <template
-                    x-for="(week, weekIndex) in $wire.workTimeModelForm.schedules"
+                    x-for="
+                        (week, weekIndex) in $wire.workTimeModelForm.schedules
+                    "
                     :key="weekIndex"
                 >
                     <div
-                        x-show="activeWeek === weekIndex || $wire.workTimeModelForm.cycle_weeks === 1"
+                        x-show="
+                            activeWeek === weekIndex ||
+                            $wire.workTimeModelForm.cycle_weeks === 1
+                        "
                         x-cloak
                     >
                         <div class="overflow-x-auto">
@@ -202,8 +207,21 @@
                                             >
                                                 <x-input
                                                     type="time"
-                                                    x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].start_time"
-                                                    x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'start_time', $event.target.value)"
+                                                    x-model="
+                                                        $wire.workTimeModelForm
+                                                            .schedules[
+                                                            weekIndex
+                                                        ].days[dayNumber]
+                                                            .start_time
+                                                    "
+                                                    x-on:change="
+                                                        $wire.updateSchedule(
+                                                            weekIndex,
+                                                            dayNumber,
+                                                            'start_time',
+                                                            $event.target.value,
+                                                        )
+                                                    "
                                                     class="py-1!"
                                                 />
                                             </td>
@@ -212,8 +230,21 @@
                                             >
                                                 <x-input
                                                     type="time"
-                                                    x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].end_time"
-                                                    x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'end_time', $event.target.value)"
+                                                    x-model="
+                                                        $wire.workTimeModelForm
+                                                            .schedules[
+                                                            weekIndex
+                                                        ].days[dayNumber]
+                                                            .end_time
+                                                    "
+                                                    x-on:change="
+                                                        $wire.updateSchedule(
+                                                            weekIndex,
+                                                            dayNumber,
+                                                            'end_time',
+                                                            $event.target.value,
+                                                        )
+                                                    "
                                                     class="py-1!"
                                                 />
                                             </td>
@@ -221,8 +252,21 @@
                                                 class="px-6 py-4 whitespace-nowrap"
                                             >
                                                 <x-number
-                                                    x-model="$wire.workTimeModelForm.schedules[weekIndex].days[dayNumber].break_minutes"
-                                                    x-on:change="$wire.updateSchedule(weekIndex, dayNumber, 'break_minutes', $event.target.value)"
+                                                    x-model="
+                                                        $wire.workTimeModelForm
+                                                            .schedules[
+                                                            weekIndex
+                                                        ].days[dayNumber]
+                                                            .break_minutes
+                                                    "
+                                                    x-on:change="
+                                                        $wire.updateSchedule(
+                                                            weekIndex,
+                                                            dayNumber,
+                                                            'break_minutes',
+                                                            $event.target.value,
+                                                        )
+                                                    "
                                                     min="0"
                                                     max="480"
                                                     step="15"
@@ -236,7 +280,12 @@
                                                     class="font-medium"
                                                     x-html="
                                                         parseFloat(
-                                                            $wire.workTimeModelForm.schedules[weekIndex].days[dayNumber]?.work_hours ??
+                                                            $wire
+                                                                .workTimeModelForm
+                                                                .schedules[
+                                                                weekIndex
+                                                            ].days[dayNumber]
+                                                                ?.work_hours ??
                                                                 '0.00',
                                                         ).toFixed(2)
                                                     "

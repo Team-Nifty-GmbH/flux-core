@@ -60,7 +60,7 @@
                     :text="__('Save')"
                     wire:click="save()"
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endcanAction
 
@@ -88,11 +88,13 @@
                 <x-number wire:model="productPricesUpdate.alteration">
                     <x-slot:label>
                         <div class="flex gap-1.5">
-                            <span>
-                                {{ __('Alteration') }}
-                            </span>
+                            <span> {{ __('Alteration') }} </span>
                             <template
-                                x-if="$wire.productPricesUpdate.alteration !== null && $wire.productPricesUpdate.alteration != 0"
+                                x-if="
+                                    $wire.productPricesUpdate.alteration !==
+                                        null &&
+                                    $wire.productPricesUpdate.alteration != 0
+                                "
                             >
                                 <x-label>
                                     <x-slot:word>
@@ -109,11 +111,11 @@
                                                         : '{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol }})')
                                             "
                                         />
-                                    </x-slot>
+                                    </x-slot:word>
                                 </x-label>
                             </template>
                         </div>
-                    </x-slot>
+                    </x-slot:label>
                 </x-number>
                 <x-select.styled
                     wire:model="productPricesUpdate.rounding_method_enum"
@@ -121,7 +123,10 @@
                     :options="$roundingMethods"
                 />
                 <div
-                    x-show="$wire.productPricesUpdate.rounding_method_enum !== 'none'"
+                    x-show="
+                        $wire.productPricesUpdate.rounding_method_enum !==
+                        'none'
+                    "
                 >
                     <x-number
                         wire:model.number="productPricesUpdate.rounding_precision"
@@ -129,7 +134,11 @@
                     />
                 </div>
                 <div
-                    x-show="['nearest', 'end'].includes($wire.productPricesUpdate.rounding_method_enum)"
+                    x-show="
+                        ['nearest', 'end'].includes(
+                            $wire.productPricesUpdate.rounding_method_enum,
+                        )
+                    "
                 >
                     <x-number
                         wire:model.number="productPricesUpdate.rounding_number"
@@ -139,7 +148,11 @@
                     />
                 </div>
                 <div
-                    x-show="['nearest', 'end'].includes($wire.productPricesUpdate.rounding_method_enum)"
+                    x-show="
+                        ['nearest', 'end'].includes(
+                            $wire.productPricesUpdate.rounding_method_enum,
+                        )
+                    "
                 >
                     <x-select.styled
                         wire:model="productPricesUpdate.rounding_mode"
@@ -161,9 +174,14 @@
                     color="indigo"
                     :text="__('Save')"
                     wire:flux-confirm.type.warning="{{ __('wire:confirm.product-prices-update') }}"
-                    x-on:click="$wire.updatePrices().then((success) => {if(success) $tsui.close.modal('update-prices-modal');});"
+                    x-on:click="
+                        $wire.updatePrices().then((success) => {
+                            if (success)
+                                $tsui.close.modal('update-prices-modal');
+                        })
+                    "
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endcanAction
 </div>

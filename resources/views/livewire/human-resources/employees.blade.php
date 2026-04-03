@@ -1,15 +1,17 @@
 <div>
-    <x-modal
-        :id="$employeeForm->modalName()"
-        xl
-        :title="__('Create Employee')"
-    >
+    <x-modal :id="$employeeForm->modalName()" xl :title="__('Create Employee')">
         <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <div class="sm:col-span-2">
                 <x-select.styled
                     :label="__('User')"
                     wire:model="employeeForm.user_id"
-                    x-on:select="$wire.employeeForm.firstname = $event.detail.select?.firstname; $wire.employeeForm.lastname = $event.detail.select?.lastname; $wire.employeeForm.email = $event.detail.select?.email"
+                    x-on:select="
+                        $wire.employeeForm.firstname =
+                            $event.detail.select?.firstname;
+                        $wire.employeeForm.lastname =
+                            $event.detail.select?.lastname;
+                        $wire.employeeForm.email = $event.detail.select?.email;
+                    "
                     select="value:id"
                     unfiltered
                     :request="[
@@ -101,7 +103,7 @@
                     }
                 })"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <x-modal
         id="close-employee-day-modal"
@@ -117,12 +119,14 @@
             <x-button
                 :text="__('Save')"
                 color="primary"
-                x-on:click="$wire.closeEmployeeDay().then((success) => {
-                    if (success) {
-                        $tsui.close.modal('close-employee-day-modal');
-                    }
-                })"
+                x-on:click="
+                    $wire.closeEmployeeDay().then((success) => {
+                        if (success) {
+                            $tsui.close.modal('close-employee-day-modal');
+                        }
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

@@ -44,7 +44,11 @@
             />
             <div
                 x-cloak
-                x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0"
+                x-show="
+                    ['dailyAt', 'lastDayOfMonth'].indexOf(
+                        $wire.schedule.cron.methods.basic,
+                    ) >= 0
+                "
             >
                 <x-input
                     type="time"
@@ -79,7 +83,11 @@
             </div>
             <div
                 x-cloak
-                x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0"
+                x-show="
+                    ['monthlyOn', 'quarterlyOn'].indexOf(
+                        $wire.schedule.cron.methods.basic,
+                    ) >= 0
+                "
                 class="flex flex-col gap-4"
             >
                 <x-number
@@ -127,7 +135,14 @@
                 <x-select.styled
                     :label="__('Month')"
                     wire:model="schedule.cron.parameters.basic.0"
-                    x-on:select="document.getElementById('month-day-input').max = $event.detail.select.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.select.days);"
+                    x-on:select="
+                        document.getElementById('month-day-input').max =
+                            $event.detail.select.days;
+                        $wire.schedule.cron.parameters.basic[1] = Math.min(
+                            $wire.schedule.cron.parameters.basic[1],
+                            $event.detail.select.days,
+                        );
+                    "
                     select="label:name|value:id"
                     :options="[
                         ['id' => 1, 'name' => __('January'), 'days' => 31],
@@ -258,7 +273,10 @@
             <div
                 class="mb-2 grid grid-cols-2 items-center gap-1.5"
                 x-cloak
-                x-show="$wire.schedule.id && $wire.schedule.end_radio === 'recurrences'"
+                x-show="
+                    $wire.schedule.id &&
+                    $wire.schedule.end_radio === 'recurrences'
+                "
             >
                 <x-label :label="__('Current Recurrence')" />
                 <span class="flex justify-center">
@@ -327,7 +345,10 @@
 
                 <div
                     x-cloak
-                    x-show="$wire.schedule.parameters.autoPrint || $wire.schedule.parameters.autoSend"
+                    x-show="
+                        $wire.schedule.parameters.autoPrint ||
+                        $wire.schedule.parameters.autoSend
+                    "
                     class="flex flex-col gap-1.5"
                 >
                     <div id="schedule-print-layouts">
@@ -389,11 +410,15 @@
             />
             <x-button
                 color="indigo"
-                x-on:click="$wire.saveSchedule().then((success) => { if(success) $tsui.close.modal('edit-schedule'); })"
+                x-on:click="
+                    $wire.saveSchedule().then((success) => {
+                        if (success) $tsui.close.modal('edit-schedule');
+                    })
+                "
                 primary
                 :text="__('Save')"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <x-modal
         id="cancel-subscription"
@@ -567,7 +592,18 @@
                 <x-button
                     color="amber"
                     loading
-                    x-on:click="$wire.cancelSubscription(cancellationType, generateDocument, sendEmail).then((success) => { if(success) $tsui.close.modal('cancel-subscription'); })"
+                    x-on:click="
+                        $wire
+                            .cancelSubscription(
+                                cancellationType,
+                                generateDocument,
+                                sendEmail,
+                            )
+                            .then((success) => {
+                                if (success)
+                                    $tsui.close.modal('cancel-subscription');
+                            })
+                    "
                     :text="__('Confirm Cancellation')"
                 />
             </div>

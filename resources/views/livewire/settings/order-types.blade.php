@@ -115,5 +115,5 @@
             :text="__('Save')"
             x-on:click="$wire.save().then((success) => {if (success) $tsui.close.modal('{{ $orderType->modalName() }}');})"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

@@ -3,12 +3,12 @@
         addToast(event) {
             Alpine.$data(
                 $el.querySelector('#toasts').querySelector('[x-data]'),
-            ).add(event)
+            ).add(event);
         },
         removeAll() {
             Alpine.$data(
                 $el.querySelector('#toasts').querySelector('[x-data]'),
-            ).toasts = []
+            ).toasts = [];
         },
     }"
     x-init.once="
@@ -31,7 +31,7 @@
                 <x-button.circle sm color="red">
                     <x-slot:text>
                         <span x-text="$wire.unread"></span>
-                    </x-slot>
+                    </x-slot:text>
                 </x-button.circle>
             </div>
         </div>
@@ -59,10 +59,12 @@
                         color="indigo"
                         class="w-full"
                         :text="__('Mark all as read')"
-                        x-on:click.prevent="$wire.markAllAsRead().then(() => removeAll())"
+                        x-on:click.prevent="
+                            $wire.markAllAsRead().then(() => removeAll())
+                        "
                     />
                 </div>
-            </x-slot>
+            </x-slot:footer>
         </x-slide>
     </div>
 </div>

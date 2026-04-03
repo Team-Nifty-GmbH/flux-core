@@ -3,7 +3,7 @@
         x-data="{
             addUser(user) {
                 if (
-                    ! $wire.target.users.find(
+                    !$wire.target.users.find(
                         (targetUser) => targetUser.user_id === user.id,
                     )
                 ) {
@@ -12,14 +12,14 @@
                         label: user.label,
                         target_share: null,
                         is_percentage: null,
-                    })
+                    });
                 }
             },
 
             removeUser(user) {
                 $wire.target.users = $wire.target.users.filter(
                     (targetUser) => targetUser.user_id !== user.id,
-                )
+                );
             },
         }"
         class="flex flex-col gap-4"
@@ -31,7 +31,9 @@
         <x-select.styled
             :label="__('Model Type')"
             wire:model="target.model_type"
-            x-on:select="$wire.updateSelectableColumns($event.detail.select.value)"
+            x-on:select="
+                $wire.updateSelectableColumns($event.detail.select.value)
+            "
             :options="$modelTypes"
             searchable
         />
@@ -43,7 +45,9 @@
         <x-select.styled
             :label="__('Aggregate Type')"
             wire:model="target.aggregate_type"
-            x-on:select="$wire.updateAggregateColumnOptions($event.detail.select.value)"
+            x-on:select="
+                $wire.updateAggregateColumnOptions($event.detail.select.value)
+            "
             :options="$aggregateTypes"
         />
         <x-select.native
@@ -112,5 +116,5 @@
             :text="__('Save')"
             x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $target->modalName() }}')})"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

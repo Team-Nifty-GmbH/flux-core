@@ -1,40 +1,42 @@
 <div>
     <div
         id="main-navigation"
-        x-on:menu-force-open.window="menuOpen ? closeMenu(true) : showMenu(true)"
+        x-on:menu-force-open.window="
+            menuOpen ? closeMenu(true) : showMenu(true)
+        "
         x-data="{
             init() {
                 document.addEventListener('livewire:navigating', () => {
-                    this.closeMenu(true)
-                })
+                    this.closeMenu(true);
+                });
             },
             open: [],
             toggleMenu(key) {
                 if (this.isOpen(key)) {
-                    this.open = this.open.filter((item) => item !== key)
+                    this.open = this.open.filter((item) => item !== key);
                 } else {
-                    this.open.push(key)
+                    this.open.push(key);
                 }
             },
             isOpen(key) {
-                return this.open.includes(key) && this.menuOpen
+                return this.open.includes(key) && this.menuOpen;
             },
             showMenu(force = null) {
-                if (this.forced && ! force) {
-                    return
+                if (this.forced && !force) {
+                    return;
                 }
 
-                this.menuOpen = true
+                this.menuOpen = true;
                 if (force) {
-                    this.forced = true
+                    this.forced = true;
                 }
             },
             closeMenu(force = null) {
-                if (this.forced && ! force) {
-                    return
+                if (this.forced && !force) {
+                    return;
                 }
 
-                this.menuOpen = false
+                this.menuOpen = false;
             },
             forced: false,
             menuOpen: false,
@@ -47,17 +49,17 @@
                 class="flex flex-1 flex-col gap-6 space-y-2 overflow-x-hidden overflow-y-hidden px-2 py-4 hover:overflow-y-auto"
             >
                 <div>
-                    @foreach ($navigations as $key => $navigation)
+                    @foreach($navigations as $key => $navigation)
                         <div>
                             <a
-                                @if ((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard")
+                                @if((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard")
                                     )
                                     wire:current.exact="bg-indigo-500 dark:bg-indigo-700 text-white! hover:bg-indigo-600 nav-item-active"
                                 @else
                                     wire:current="bg-indigo-500 dark:bg-indigo-700 text-white! hover:bg-indigo-600 nav-item-active"
                                 @endif
                                 href="{{ data_get($navigation, "uri", "#") }}"
-                                @if ($navigation["children"] ?? false)
+                                @if($navigation["children"] ?? false)
                                     x-on:click.prevent="toggleMenu('{{ $key }}')"
                                     target="_blank"
                                 @else
@@ -78,7 +80,7 @@
                                 <span class="truncate text-sm text-white">
                                     {{ __($navigation["label"] ?? $key) }}
                                 </span>
-                                @if ($navigation["children"] ?? false)
+                                @if($navigation["children"] ?? false)
                                     <span
                                         aria-hidden="true"
                                         class="ml-auto pr-2 pl-2"
@@ -91,16 +93,16 @@
                                     </span>
                                 @endif
                             </a>
-                            @if ($navigation["children"] ?? false)
+                            @if($navigation["children"] ?? false)
                                 <div
                                     x-show="isOpen('{{ $key }}')"
                                     x-cloak
                                     x-collapse.duration.200ms
                                     class="mt-2 space-y-2 overflow-x-hidden text-white"
                                 >
-                                    @foreach ($navigation["children"] as $child)
+                                    @foreach($navigation["children"] as $child)
                                         <a
-                                            @if ((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard")
+                                            @if((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard")
                                                 )
                                                 wire:current.exact="rounded-md bg-indigo-600/50 dark:bg-indigo-700/5 hover:bg-indigo-600/10"
                                             @else
@@ -117,10 +119,12 @@
                         </div>
                     @endforeach
                 </div>
-                @if (! is_null($visits))
+                @if(! is_null($visits))
                     <div class="whitespace-nowrap">
                         <div
-                            x-on:click="frequentlyVisitedOpen = ! frequentlyVisitedOpen"
+                            x-on:click="
+                                frequentlyVisitedOpen = !frequentlyVisitedOpen
+                            "
                             class="dark:text-light dark:hover:bg-indigo flex cursor-pointer items-center rounded-md py-2 text-gray-500 text-white transition-colors hover:bg-gray-800/50"
                         >
                             <div class="w-16 flex-none">
@@ -137,16 +141,14 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="frequentlyVisitedOpen && '-rotate-90'"
+                                    x-bind:class="
+                                        frequentlyVisitedOpen && '-rotate-90'
+                                    "
                                 />
                             </span>
                         </div>
-                        <div
-                            x-show="frequentlyVisitedOpen"
-                            x-cloak
-                            x-collapse
-                        >
-                            @foreach ($visits as $visit)
+                        <div x-show="frequentlyVisitedOpen" x-cloak x-collapse>
+                            @foreach($visits as $visit)
                                 <a
                                     wire:navigate
                                     href="{{ $visit }}"
@@ -171,10 +173,10 @@
                     </div>
                 @endif
 
-                @if (! is_null($favorites))
+                @if(! is_null($favorites))
                     <div class="whitespace-nowrap">
                         <div
-                            x-on:click="favoritesOpen = ! favoritesOpen"
+                            x-on:click="favoritesOpen = !favoritesOpen"
                             class="dark:text-light dark:hover:bg-indigo flex cursor-pointer items-center rounded-md py-2 text-gray-500 text-white transition-colors hover:bg-gray-800/50"
                         >
                             <div class="w-16 flex-none">
@@ -205,7 +207,7 @@
                             x-collapse
                             class="max-w-full"
                         >
-                            @foreach ($favorites as $favorite)
+                            @foreach($favorites as $favorite)
                                 <div class="flex justify-between">
                                     <a
                                         wire:navigate
@@ -246,7 +248,7 @@
                             @endforeach
 
                             <x-button
-                                x-bind:class="! menuOpen && 'invisible'"
+                                x-bind:class="!menuOpen && 'invisible'"
                                 color="emerald"
                                 class="w-full"
                                 icon="plus"

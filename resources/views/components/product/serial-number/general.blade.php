@@ -4,14 +4,12 @@
             <div class="grid grid-cols-3 gap-4">
                 <x-input
                     :label="__('Serial number')"
-                    x-bind:readonly="! isEditing"
+                    x-bind:readonly="!isEditing"
                     wire:model.blur="serialNumber.serial_number"
                 />
             </div>
             <div class="grid grid-cols-3 gap-4">
-                <template
-                    x-for="address in $wire.serialNumber.addresses ?? []"
-                >
+                <template x-for="address in $wire.serialNumber.addresses ?? []">
                     <div class="space-y-2.5">
                         <x-input
                             :label="__('Customer')"
@@ -29,7 +27,7 @@
         </div>
     </x-card>
     <x-errors />
-    @if ($serialNumberId = data_get($this->serialNumber, 'id'))
+    @if($serialNumberId = data_get($this->serialNumber, 'id'))
         <x-card :header="__('Files')">
             <livewire:product.serial-number.media
                 wire:key="serial-number-media-{{ $serialNumberId }}"

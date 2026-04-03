@@ -3,12 +3,12 @@
     x-data="{
         data: [],
         async assignOrders(dataTableId) {
-            const dataTable = Livewire.find(dataTableId)
-            await $wire.assignOrders(dataTable.selected)
-            dataTable.selected = []
+            const dataTable = Livewire.find(dataTableId);
+            await $wire.assignOrders(dataTable.selected);
+            dataTable.selected = [];
         },
         async init() {
-            this.data = await $wire.loadTransactions()
+            this.data = await $wire.loadTransactions();
         },
     }"
 >
@@ -23,12 +23,21 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="$nuxbe.format.money($wire.transactionForm.amount, { colored: true })"
+                            x-html="
+                                $nuxbe.format.money(
+                                    $wire.transactionForm.amount,
+                                    { colored: true },
+                                )
+                            "
                         ></span>
                     </div>
                     <div
                         class="text-xs"
-                        x-text="$nuxbe.format.date($wire.transactionForm.booking_date)"
+                        x-text="
+                            $nuxbe.format.date(
+                                $wire.transactionForm.booking_date,
+                            )
+                        "
                     ></div>
                     <div
                         class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
@@ -36,19 +45,27 @@
                         <div x-text="$wire.transactionForm.purpose"></div>
                     </div>
                 </div>
-            </x-slot>
+            </x-slot:title>
             <livewire:accounting.order-list lazy />
             <x-slot:footer>
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$tsui.close.modal('transaction-assign-orders-modal')"
+                    x-on:click="
+                        $tsui.close.modal('transaction-assign-orders-modal')
+                    "
                 />
                 <x-button
                     :text="__('Assign')"
-                    x-on:click="assignOrders($root.querySelector('[tall-datatable]').parentNode.getAttribute('wire:id'))"
+                    x-on:click="
+                        assignOrders(
+                            $root
+                                .querySelector('[tall-datatable]')
+                                .parentNode.getAttribute('wire:id'),
+                        )
+                    "
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endteleport
 
@@ -62,12 +79,21 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="$nuxbe.format.money($wire.transactionForm.amount, { colored: true })"
+                            x-html="
+                                $nuxbe.format.money(
+                                    $wire.transactionForm.amount,
+                                    { colored: true },
+                                )
+                            "
                         ></span>
                     </div>
                     <div
                         class="text-xs"
-                        x-text="$nuxbe.format.date($wire.transactionForm.booking_date)"
+                        x-text="
+                            $nuxbe.format.date(
+                                $wire.transactionForm.booking_date,
+                            )
+                        "
                     ></div>
                     <div
                         class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
@@ -75,7 +101,7 @@
                         <div x-text="$wire.transactionForm.purpose"></div>
                     </div>
                 </div>
-            </x-slot>
+            </x-slot:title>
             <livewire:accounting.transactions.comments
                 :model-type="\FluxErp\Models\Transaction::class"
                 wire:model="transactionForm.id"
@@ -88,7 +114,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('transaction-comments-modal')"
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endteleport
 
@@ -127,10 +153,12 @@
                         <x-slot:label>
                             {{ __('Order Currency Amount') }} (
                             <span
-                                x-text="$wire.orderTransactionForm.orderCurrencyIso"
+                                x-text="
+                                    $wire.orderTransactionForm.orderCurrencyIso
+                                "
                             ></span>
                             )
-                        </x-slot>
+                        </x-slot:label>
                     </x-number>
                 </div>
             </div>
@@ -144,7 +172,7 @@
                     :text="__('Save')"
                     x-on:click="$wire.saveOrderTransaction()"
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endteleport
 
@@ -159,9 +187,9 @@
                                 <span
                                     x-text="$wire.suggestionCount ?? 0"
                                 ></span>
-                            </x-slot>
+                            </x-slot:text>
                         </x-badge>
-                    </x-slot>
+                    </x-slot:right>
                 </x-tab.items>
                 <x-tab.items :tab="__('Open transactions')">
                     <x-slot:right>
@@ -170,9 +198,9 @@
                                 <span
                                     x-text="$wire.unassignedCount ?? 0"
                                 ></span>
-                            </x-slot>
+                            </x-slot:text>
                         </x-badge>
-                    </x-slot>
+                    </x-slot:right>
                 </x-tab.items>
                 <div class="flex flex-row items-center gap-2">
                     <div class="w-full lg:w-1/2">
@@ -208,7 +236,7 @@
                                     x-on:click="show = !show"
                                     icon="funnel"
                                 />
-                            </x-slot>
+                            </x-slot:action>
                             <x-dropdown.items>
                                 <div class="w-full">
                                     <x-date
@@ -246,7 +274,16 @@
                                             borderless
                                             :image="route('icons', ['name' => 'user'])"
                                             class="ring-4 ring-offset-2"
-                                            x-bind:class="parseFloat(transaction.balance) === 0 ? 'ring-emerald-500' : (transaction.order_transactions_count > 0 ? 'ring-amber-500' : 'ring-red-500')"
+                                            x-bind:class="
+                                                parseFloat(
+                                                    transaction.balance,
+                                                ) === 0
+                                                    ? 'ring-emerald-500'
+                                                    : transaction.order_transactions_count >
+                                                        0
+                                                      ? 'ring-amber-500'
+                                                      : 'ring-red-500'
+                                            "
                                             x-bind:src="transaction?.avatar_url ?? '{{ route('icons', ['name' => 'user']) }}'"
                                         />
                                         <div
@@ -258,29 +295,48 @@
                                             ></div>
                                             <div
                                                 class="w-full font-semibold text-slate-400"
-                                                x-text="transaction.counterpart_iban"
+                                                x-text="
+                                                    transaction.counterpart_iban
+                                                "
                                             ></div>
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
                                         <div
                                             class="flex w-full justify-end text-lg font-semibold"
-                                            x-html="$nuxbe.format.money(transaction.amount, { colored: true })"
+                                            x-html="
+                                                $nuxbe.format.money(
+                                                    transaction.amount,
+                                                    { colored: true },
+                                                )
+                                            "
                                         ></div>
                                         <div
                                             class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
                                         >
                                             <span
-                                                x-text="$nuxbe.format.date(transaction.booking_date)"
+                                                x-text="
+                                                    $nuxbe.format.date(
+                                                        transaction.booking_date,
+                                                    )
+                                                "
                                             ></span>
                                             <x-dropdown icon="banknotes">
                                                 <div class="p-2">
                                                     <b
-                                                        x-text="transaction.bank_connection.bank_name"
+                                                        x-text="
+                                                            transaction
+                                                                .bank_connection
+                                                                .bank_name
+                                                        "
                                                     ></b>
                                                     <br />
                                                     <span
-                                                        x-text="transaction.bank_connection.iban"
+                                                        x-text="
+                                                            transaction
+                                                                .bank_connection
+                                                                .iban
+                                                        "
                                                     ></span>
                                                 </div>
                                             </x-dropdown>
@@ -296,9 +352,7 @@
                             <div
                                 class="flex w-full flex-col gap-2 py-2 lg:w-1/2"
                             >
-                                <template
-                                    x-for="order in transaction.orders"
-                                >
+                                <template x-for="order in transaction.orders">
                                     <div
                                         class="group flex flex-row items-center gap-2 px-2"
                                     >
@@ -315,7 +369,9 @@
                                             />
                                             <x-button.circle
                                                 x-cloak
-                                                x-show="! order.pivot.is_accepted"
+                                                x-show="
+                                                    !order.pivot.is_accepted
+                                                "
                                                 color="amber"
                                                 rounded
                                                 icon="link"
@@ -347,10 +403,16 @@
                                                 </div>
                                                 <div>
                                                     <div
-                                                        x-text="order.address_invoice?.name"
+                                                        x-text="
+                                                            order
+                                                                .address_invoice
+                                                                ?.name
+                                                        "
                                                     ></div>
                                                     <div
-                                                        x-text="order.invoice_number"
+                                                        x-text="
+                                                            order.invoice_number
+                                                        "
                                                     ></div>
                                                 </div>
                                             </div>
@@ -358,18 +420,35 @@
                                                 <div>
                                                     <div
                                                         class="flex w-full justify-end font-semibold"
-                                                        x-html="$nuxbe.format.money(order.pivot.amount, { colored: true })"
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                order.pivot
+                                                                    .amount,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
                                                     ></div>
                                                     <div
                                                         x-cloak
-                                                        x-show="order.pivot.order_currency_amount"
+                                                        x-show="
+                                                            order.pivot
+                                                                .order_currency_amount
+                                                        "
                                                         class="flex w-full justify-end text-xs text-slate-500"
                                                     >
                                                         <span
                                                             x-text="
-                                                                (order.currency?.iso ?? '') +
-                                                                    ' ' +
-                                                                    parseFloat(order.pivot.order_currency_amount || 0).toFixed(2)
+                                                                (order.currency
+                                                                    ?.iso ??
+                                                                    '') +
+                                                                ' ' +
+                                                                parseFloat(
+                                                                    order.pivot
+                                                                        .order_currency_amount ||
+                                                                        0,
+                                                                ).toFixed(2)
                                                             "
                                                         ></span>
                                                     </div>
@@ -377,7 +456,11 @@
                                                         class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
                                                     >
                                                         <span
-                                                            x-html="$nuxbe.format.date(order.invoice_date)"
+                                                            x-html="
+                                                                $nuxbe.format.date(
+                                                                    order.invoice_date,
+                                                                )
+                                                            "
                                                         ></span>
                                                     </div>
                                                 </div>
@@ -405,7 +488,10 @@
                                                 <x-button
                                                     sm
                                                     x-cloak
-                                                    x-show="transaction.suggestions > 0"
+                                                    x-show="
+                                                        transaction.suggestions >
+                                                        0
+                                                    "
                                                     color="emerald"
                                                     wire:click="acceptAll(transaction.id)"
                                                     :text="__('Accept')"
@@ -424,11 +510,17 @@
                                                             </span>
                                                             <span
                                                                 x-cloak
-                                                                x-show="transaction.comments_count"
-                                                                x-text="'(' + transaction.comments_count + ')'"
+                                                                x-show="
+                                                                    transaction.comments_count
+                                                                "
+                                                                x-text="
+                                                                    '(' +
+                                                                    transaction.comments_count +
+                                                                    ')'
+                                                                "
                                                             ></span>
                                                         </div>
-                                                    </x-slot>
+                                                    </x-slot:text>
                                                 </x-button>
                                                 <x-button
                                                     sm
@@ -436,7 +528,11 @@
                                                     color="gray"
                                                     wire:click="assignOrdersModal(transaction.id)"
                                                     x-cloak
-                                                    x-show="parseFloat(transaction.balance) !== 0"
+                                                    x-show="
+                                                        parseFloat(
+                                                            transaction.balance,
+                                                        ) !== 0
+                                                    "
                                                     :text="__('Assign order')"
                                                 />
                                                 <x-button
@@ -444,7 +540,11 @@
                                                     color="red"
                                                     wire:click="toggleIgnoreTransaction(transaction.id)"
                                                     x-cloak
-                                                    x-show="transaction.order_transactions_count === 0 && ! transaction.is_ignored"
+                                                    x-show="
+                                                        transaction.order_transactions_count ===
+                                                            0 &&
+                                                        !transaction.is_ignored
+                                                    "
                                                     :text="__('Ignore transaction')"
                                                 />
                                                 <x-button
@@ -452,7 +552,9 @@
                                                     color="emerald"
                                                     wire:click="toggleIgnoreTransaction(transaction.id)"
                                                     x-cloak
-                                                    x-show="transaction.is_ignored"
+                                                    x-show="
+                                                        transaction.is_ignored
+                                                    "
                                                     :text="__('Dont ignore transaction')"
                                                 />
                                             </div>
@@ -463,7 +565,12 @@
                                                     {{ __('Open') }}:
                                                 </span>
                                                 <span
-                                                    x-html="$nuxbe.format.money(transaction.balance, { colored: true })"
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            transaction.balance,
+                                                            { colored: true },
+                                                        )
+                                                    "
                                                 ></span>
                                             </div>
                                         </div>

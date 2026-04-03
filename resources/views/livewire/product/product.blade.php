@@ -40,9 +40,13 @@
                     :options="$languages"
                 />
             </div>
-            @if (resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
+            @if(resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
                 <x-button
-                    x-on:click="$wire.$dispatch('cart:add', {products: $wire.product.id})"
+                    x-on:click="
+                        $wire.$dispatch('cart:add', {
+                            products: $wire.product.id,
+                        })
+                    "
                     color="indigo"
                     icon="shopping-cart"
                     label="+"
@@ -71,9 +75,11 @@
                     color="indigo"
                     x-show="isEditing"
                     class="w-full"
-                    x-on:click="$wire.save().then((success) => {
-                        isEditing = false;
-                    });"
+                    x-on:click="
+                        $wire.save().then((success) => {
+                            isEditing = false;
+                        })
+                    "
                     :text="__('Save')"
                 />
                 <x-button
@@ -81,7 +87,10 @@
                     color="indigo"
                     x-show="isEditing"
                     class="w-full"
-                    x-on:click="isEditing = false; $wire.resetProduct()"
+                    x-on:click="
+                        isEditing = false;
+                        $wire.resetProduct();
+                    "
                     :text="__('Cancel')"
                 />
             @endcanAction

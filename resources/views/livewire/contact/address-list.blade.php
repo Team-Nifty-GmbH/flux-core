@@ -1,73 +1,77 @@
 @extends('flux::livewire.contact.contact-list')
 
 @section('modals')
-@parent
-{{ $this->renderCreateDocumentsModal() }}
-@canAction(\FluxErp\Actions\Lead\CreateLead::class)
-    <x-modal
-        :id="$leadForm->modalName()"
-        x-on:open="$tsui.focus('lead-name')"
-        persistent
-    >
-        <div class="flex flex-col gap-4">
-            <x-input
-                id="lead-name"
-                :label="__('Name')"
-                wire:model="leadForm.name"
-            />
-            <x-textarea
-                :label="__('Description')"
-                wire:model="leadForm.description"
-            />
-            <x-rating
-                wire:model.number="leadForm.score"
-                :text="__('Score')"
-                :quantity="5"
-                position="right"
-            />
-            @if (is_null(resolve_static(\FluxErp\Models\LeadState::class, 'default')?->probability_percentage))
-                <x-range
-                    wire:model.number="leadForm.probability_percentage"
-                    :hint="__('Probability to win this lead…')"
-                >
-                    <x-slot:label>
-                        <span
-                            x-cloak
-                            x-show="$wire.leadForm.probability_percentage !== null"
-                            x-text="$wire.leadForm.probability_percentage + '%'"
-                        ></span>
-                    </x-slot>
-                </x-range>
-            @endif
-
-            <hr />
-            <div class="flex flex-col gap-2">
-                <x-toggle
-                    :label="__('Assign to Agent')"
-                    wire:model="assignToAgent"
+    @parent
+    {{ $this->renderCreateDocumentsModal() }}
+    @canAction(\FluxErp\Actions\Lead\CreateLead::class)
+        <x-modal
+            :id="$leadForm->modalName()"
+            x-on:open="$tsui.focus('lead-name')"
+            persistent
+        >
+            <div class="flex flex-col gap-4">
+                <x-input
+                    id="lead-name"
+                    :label="__('Name')"
+                    wire:model="leadForm.name"
                 />
-                <div class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('Assign leads to the agent stored in the contact. If no agent is set, leads will be assigned to you.') }}
+                <x-textarea
+                    :label="__('Description')"
+                    wire:model="leadForm.description"
+                />
+                <x-rating
+                    wire:model.number="leadForm.score"
+                    :text="__('Score')"
+                    :quantity="5"
+                    position="right"
+                />
+                @if(is_null(resolve_static(\FluxErp\Models\LeadState::class, 'default')?->probability_percentage))
+                    <x-range
+                        wire:model.number="leadForm.probability_percentage"
+                        :hint="__('Probability to win this lead…')"
+                    >
+                        <x-slot:label>
+                            <span
+                                x-cloak
+                                x-show="
+                                    $wire.leadForm.probability_percentage !==
+                                    null
+                                "
+                                x-text="
+                                    $wire.leadForm.probability_percentage + '%'
+                                "
+                            ></span>
+                        </x-slot:label>
+                    </x-range>
+                @endif
+
+                <hr />
+                <div class="flex flex-col gap-2">
+                    <x-toggle
+                        :label="__('Assign to Agent')"
+                        wire:model="assignToAgent"
+                    />
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ __('Assign leads to the agent stored in the contact. If no agent is set, leads will be assigned to you.') }}
+                    </div>
                 </div>
             </div>
-        </div>
-        <x-slot:footer>
-            <x-button
-                color="secondary"
-                light
-                :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('{{ $leadForm->modalName() }}')"
-            />
-            <x-button
-                color="indigo"
-                :text="__('Save')"
-                x-on:click="$wire.createLeads().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
-            />
-        </x-slot>
-    </x-modal>
-@endcanAction
-
-@section('map')
-    <x-flux::map.fullscreen-container />
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    light
+                    :text="__('Cancel')"
+                    x-on:click="$tsui.close.modal('{{ $leadForm->modalName() }}')"
+                />
+                <x-button
+                    color="indigo"
+                    :text="__('Save')"
+                    x-on:click="$wire.createLeads().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
+                />
+            </x-slot:footer>
+        </x-modal>
+    @endcanAction
+    @section('map')
+        <x-flux::map.fullscreen-container />
     @show
 @endsection

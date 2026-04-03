@@ -25,7 +25,7 @@
                 <x-badge color="indigo">
                     <x-slot:text>
                         <span x-text="$wire.connection"></span>
-                    </x-slot>
+                    </x-slot:text>
                 </x-badge>
             </div>
             <div class="flex items-center justify-between">
@@ -35,7 +35,7 @@
                 <x-badge color="indigo">
                     <x-slot:text>
                         <span x-text="$wire.driver"></span>
-                    </x-slot>
+                    </x-slot:text>
                 </x-badge>
             </div>
 

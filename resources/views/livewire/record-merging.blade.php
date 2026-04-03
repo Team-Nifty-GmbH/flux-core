@@ -29,13 +29,20 @@
                         <template x-for="record in $wire.records">
                             <th
                                 class="border border-t-0 border-r-0 text-center"
-                                x-show="record.id !== $wire.mergeRecords.main_record.id"
+                                x-show="
+                                    record.id !==
+                                    $wire.mergeRecords.main_record.id
+                                "
                                 x-cloak
                             >
                                 <div class="flex flex-col items-center gap-1">
                                     <div class="flex items-center gap-2">
                                         <x-checkbox
-                                            x-bind:value="record.id === $wire.mergeRecords.main_record.id"
+                                            x-bind:value="
+                                                record.id ===
+                                                $wire.mergeRecords.main_record
+                                                    .id
+                                            "
                                             wire:click="toggleRecord(record.id)"
                                         />
                                         <span>
@@ -47,7 +54,7 @@
                             </th>
                         </template>
                     </x-flux::table.row>
-                </x-slot>
+                </x-slot:header>
 
                 <template x-for="column in $wire.columns">
                     <x-flux::table.row class="h-16">
@@ -104,7 +111,10 @@
                                 </span>
                             </template>
                             <div
-                                x-show="typeof $wire.mainRecord[column.name] !== 'boolean'"
+                                x-show="
+                                    typeof $wire.mainRecord[column.name] !==
+                                    'boolean'
+                                "
                                 x-cloak
                             >
                                 <span
@@ -115,13 +125,26 @@
                         <template x-for="record in $wire.records">
                             <td
                                 class="border border-r-0 border-b-0"
-                                x-show="record.id !== $wire.mergeRecords.main_record.id"
+                                x-show="
+                                    record.id !==
+                                    $wire.mergeRecords.main_record.id
+                                "
                                 x-cloak
                             >
                                 <div class="flex justify-center gap-x-2">
                                     <div class="flex items-center">
                                         <x-checkbox
-                                            x-bind:value="$wire.mergeRecords.merge_records.find((element) => element.id === record.id)?.columns.includes(column.name)"
+                                            x-bind:value="
+                                                $wire.mergeRecords.merge_records
+                                                    .find(
+                                                        (element) =>
+                                                            element.id ===
+                                                            record.id,
+                                                    )
+                                                    ?.columns.includes(
+                                                        column.name,
+                                                    )
+                                            "
                                             wire:click="toggleColumn(record.id, column.name)"
                                         />
                                     </div>
@@ -170,7 +193,10 @@
                                         </span>
                                     </template>
                                     <div
-                                        x-show="typeof record[column.name] !== 'boolean'"
+                                        x-show="
+                                            typeof record[column.name] !==
+                                            'boolean'
+                                        "
                                         x-cloak
                                     >
                                         <span
@@ -195,9 +221,13 @@
                 loading="merge"
                 :text="__('Merge')"
                 color="indigo"
-                x-on:click="$wire.merge().then((success) => {if(success) $tsui.close.modal('merge-records-modal');})"
+                x-on:click="
+                    $wire.merge().then((success) => {
+                        if (success) $tsui.close.modal('merge-records-modal');
+                    })
+                "
                 wire:flux-confirm.type.warning="{{ __('Merge Records|Are you sure? This cannot be made undone!|Cancel|Confirm') }}"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

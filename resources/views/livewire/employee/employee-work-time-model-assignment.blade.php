@@ -5,8 +5,16 @@
                 <x-select.styled
                     :label="__('Work Time Model')"
                     wire:model="employeeWorkTimeModelForm.work_time_model_id"
-                    x-on:select="$wire.employeeWorkTimeModelForm.annual_vacation_days = parseFloat($event.detail.select?.annual_vacation_days ?? 0)"
-                    x-on:remove="$wire.employeeWorkTimeModelForm.annual_vacation_days = null"
+                    x-on:select="
+                        $wire.employeeWorkTimeModelForm.annual_vacation_days =
+                            parseFloat(
+                                $event.detail.select?.annual_vacation_days ?? 0,
+                            )
+                    "
+                    x-on:remove="
+                        $wire.employeeWorkTimeModelForm.annual_vacation_days =
+                            null
+                    "
                     select="label:name|value:id"
                     unfiltered
                     :request="[
@@ -96,7 +104,11 @@
                 >
                     <template x-for="assignment in $wire.assignments">
                         <tr
-                            x-bind:class="assignment.is_current ? 'bg-green-50 dark:bg-green-900/20' : ''"
+                            x-bind:class="
+                                assignment.is_current
+                                    ? 'bg-green-50 dark:bg-green-900/20'
+                                    : ''
+                            "
                         >
                             <td
                                 class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
@@ -116,14 +128,26 @@
                                 class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                             >
                                 <span
-                                    x-text="assignment.valid_from ? $nuxbe.format.date(assignment.valid_from) : '-'"
+                                    x-text="
+                                        assignment.valid_from
+                                            ? $nuxbe.format.date(
+                                                  assignment.valid_from,
+                                              )
+                                            : '-'
+                                    "
                                 ></span>
                             </td>
                             <td
                                 class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                             >
                                 <span
-                                    x-text="assignment.valid_until ? $nuxbe.format.date(assignment.valid_until) : '-'"
+                                    x-text="
+                                        assignment.valid_until
+                                            ? $nuxbe.format.date(
+                                                  assignment.valid_until,
+                                              )
+                                            : '-'
+                                    "
                                 ></span>
                             </td>
                             <td
@@ -132,7 +156,9 @@
                                 <span
                                     x-text="
                                         assignment.annual_vacation_days
-                                            ? $nuxbe.format.int(assignment.annual_vacation_days)
+                                            ? $nuxbe.format.int(
+                                                  assignment.annual_vacation_days,
+                                              )
                                             : '-'
                                     "
                                 ></span>

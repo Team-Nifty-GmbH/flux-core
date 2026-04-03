@@ -42,7 +42,7 @@
         <div
             x-init="
                 $nextTick(() => {
-                    $el.querySelector('img').src = avatarUrl
+                    $el.querySelector('img').src = avatarUrl;
                 })
             "
         >
@@ -75,16 +75,40 @@
                         />
                         <x-button
                             color="indigo"
-                            x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, true, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
+                            x-on:click="
+                                saveComment(
+                                    $refs.textarea,
+                                    tempFilesId,
+                                    $refs.sticky,
+                                    true,
+                                    typeof comment !== 'undefined'
+                                        ? comment
+                                        : null,
+                                ).then((success) => {
+                                    if (success) clearPond();
+                                })
+                            "
                             spinner="saveComment"
                             wire:loading.attr="disabled"
                             x-bind:disabled="isLoadingFiles.length > 0"
                             :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
                         />
-                        @if (auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
+                        @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
                             <x-button
                                 color="indigo"
-                                x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
+                                x-on:click="
+                                    saveComment(
+                                        $refs.textarea,
+                                        tempFilesId,
+                                        $refs.sticky,
+                                        false,
+                                        typeof comment !== 'undefined'
+                                            ? comment
+                                            : null,
+                                    ).then((success) => {
+                                        if (success) clearPond();
+                                    })
+                                "
                                 spinner="saveComment"
                                 x-bind:disabled="isLoadingFiles.length > 0"
                                 wire:loading.attr="disabled"

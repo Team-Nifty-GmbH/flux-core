@@ -1,4 +1,4 @@
-@if ($default)
+@if($default)
     <div {{ $attributes }}>
         <svg
             class="relative m-auto h-full w-full"

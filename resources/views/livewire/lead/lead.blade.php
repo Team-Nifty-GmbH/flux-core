@@ -1,35 +1,40 @@
-<div class="flex min-h-full flex-col" x-data="{
-    isEditing: false,
-}">
+<div
+    class="flex min-h-full flex-col"
+    x-data="{
+        isEditing: false,
+    }"
+>
     <div
         class="mx-auto w-full md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center space-x-5">
             @section('lead.title')
-            @section('lead.title.avatar')
-            <x-avatar xl :image="$leadForm->avatar" />
-            @show
-            @section('lead.title.name')
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                    <div class="flex">
-                        <div class="pl-2">
-                            <span x-text="$wire.leadForm.name"></span>
-                        </div>
+                @section('lead.title.avatar')
+                    <x-avatar xl :image="$leadForm->avatar" />
+                @show
+                @section('lead.title.name')
+                    <div>
+                        <h1
+                            class="text-2xl font-bold text-gray-900 dark:text-gray-50"
+                        >
+                            <div class="flex">
+                                <div class="pl-2">
+                                    <span x-text="$wire.leadForm.name"></span>
+                                </div>
+                            </div>
+                        </h1>
+                        <a
+                            class="flex gap-1.5 font-semibold opacity-40"
+                            x-bind:href="$wire.leadForm.addressUrl"
+                            x-cloak
+                            x-show="$wire.leadForm.addressUrl"
+                            wire:navigate
+                        >
+                            <x-icon name="link" class="h-4 w-4" />
+                            <span x-text="$wire.leadForm.addressLabel"></span>
+                        </a>
                     </div>
-                </h1>
-                <a
-                    class="flex gap-1.5 font-semibold opacity-40"
-                    x-bind:href="$wire.leadForm.addressUrl"
-                    x-cloak
-                    x-show="$wire.leadForm.addressUrl"
-                    wire:navigate
-                >
-                    <x-icon name="link" class="h-4 w-4" />
-                    <span x-text="$wire.leadForm.addressLabel"></span>
-                </a>
-            </div>
-            @show
+                @show
             @show
         </div>
         <div
@@ -68,9 +73,11 @@
                 x-cloak
                 x-show="isEditing"
                 class="w-full"
-                x-on:click="$wire.save().then((success) => {
-                    isEditing = false;
-                });"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        isEditing = false;
+                    })
+                "
             />
             <x-button
                 :text="__('Cancel')"
@@ -81,7 +88,10 @@
                 x-cloak
                 x-show="isEditing"
                 class="w-full"
-                x-on:click="isEditing = false; $wire.resetForm();"
+                x-on:click="
+                    isEditing = false;
+                    $wire.resetForm();
+                "
             />
         </div>
     </div>

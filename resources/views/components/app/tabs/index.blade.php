@@ -13,7 +13,7 @@
     <div class="hidden sm:block">
         <div class="border-b border-gray-200">
             <nav class="mt-2 -mb-px flex space-x-8" aria-label="Tabs">
-                @foreach ($items as $item)
+                @foreach($items as $item)
                     <!-- Current: "border-purple-500 text-purple-600", Default: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200" -->
                     <div
                         wire:click="$set('tab', '{{ $item['view'] }}')"
@@ -28,7 +28,7 @@
                         {{ $item['label'] }}
 
                         <!-- Current: "bg-purple-100 text-purple-600", Default: "bg-gray-100 text-gray-900" -->
-                        @if (array_key_exists('notifications', $item))
+                        @if(array_key_exists('notifications', $item))
                             <span
                                 x-bind:class="
                                     active === '{{ $item['view'] }}'

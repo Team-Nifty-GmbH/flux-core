@@ -4,16 +4,18 @@
     }"
     x-on:sync-calendar-event.window="
         Object.keys($event.detail).forEach((key) => {
-            $wire.event[key] = $event.detail[key]
-        })
+            $wire.event[key] = $event.detail[key];
+        });
 
-        document.querySelectorAll('#edit-event-modal [wire\\:id]').forEach((el) => {
-            if (el.__livewire?.$wire?.event !== undefined) {
-                Object.keys($event.detail).forEach((key) => {
-                    el.__livewire.$wire.event[key] = $event.detail[key]
-                })
-            }
-        })
+        document
+            .querySelectorAll('#edit-event-modal [wire\\:id]')
+            .forEach((el) => {
+                if (el.__livewire?.$wire?.event !== undefined) {
+                    Object.keys($event.detail).forEach((key) => {
+                        el.__livewire.$wire.event[key] = $event.detail[key];
+                    });
+                }
+            });
     "
 >
     @teleport('body')
@@ -31,12 +33,16 @@
         <x-modal id="confirm-dialog" scope="headless" persistent center>
             <x-card>
                 <div
-                    x-show="$wire.event.was_repeatable && dialogType !== 'cancel'"
+                    x-show="
+                        $wire.event.was_repeatable && dialogType !== 'cancel'
+                    "
                     x-cloak
                     class="space-y-2"
                 >
                     <div
-                        x-show="! $wire.event.has_repeats || dialogType === 'delete'"
+                        x-show="
+                            !$wire.event.has_repeats || dialogType === 'delete'
+                        "
                         x-cloak
                     >
                         <x-radio
@@ -67,7 +73,9 @@
                     </div>
                 </div>
                 <div
-                    x-show="!$wire.event.was_repeatable || dialogType === 'cancel'"
+                    x-show="
+                        !$wire.event.was_repeatable || dialogType === 'cancel'
+                    "
                     x-cloak
                 >
                     <div
@@ -137,7 +145,7 @@
                             x-on:click="$dispatch('save-calendar-event')"
                         />
                     </div>
-                </x-slot>
+                </x-slot:footer>
             </x-card>
         </x-modal>
     @endteleport

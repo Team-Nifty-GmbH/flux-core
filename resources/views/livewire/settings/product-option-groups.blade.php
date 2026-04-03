@@ -9,22 +9,33 @@
         />
         <x-label>{{ __('Product Options') }}</x-label>
         <template
-            x-for="(option, index) in $wire.productOptionGroupForm.product_options"
+            x-for="
+                (option, index) in $wire.productOptionGroupForm.product_options
+            "
         >
             <div class="flex gap-1.5">
                 <x-input
-                    x-model="$wire.productOptionGroupForm.product_options[index].name"
+                    x-model="
+                        $wire.productOptionGroupForm.product_options[index].name
+                    "
                 />
                 <x-button
                     color="red"
                     icon="trash"
-                    x-on:click="$wire.productOptionGroupForm.product_options.splice(index, 1)"
+                    x-on:click="
+                        $wire.productOptionGroupForm.product_options.splice(
+                            index,
+                            1,
+                        )
+                    "
                 />
             </div>
         </template>
         <x-button
             color="indigo"
-            x-on:click="$wire.productOptionGroupForm.product_options.push({name: ''})"
+            x-on:click="
+                $wire.productOptionGroupForm.product_options.push({ name: '' })
+            "
         >
             {{ __('Add Product Option') }}
         </x-button>
@@ -41,7 +52,12 @@
             color="indigo"
             loading="save()"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-product-option-group-modal'); })"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success)
+                        $tsui.close.modal('edit-product-option-group-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

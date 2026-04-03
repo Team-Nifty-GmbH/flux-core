@@ -100,6 +100,6 @@
                     }
                 })"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

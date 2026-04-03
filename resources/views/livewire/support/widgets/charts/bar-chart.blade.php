@@ -1,7 +1,7 @@
 @extends('flux::livewire.support.widgets.charts.chart')
 @section('options')
     @parent
-    @if ($chartTypes)
+    @if($chartTypes)
         <x-select.native
             x-model="chartType"
             :options="[
@@ -22,20 +22,29 @@
     @endif
 @endsection
 
-@if ($showTotals)
+@if($showTotals)
     @section('chart')
         <div class="px-2">
             <div
                 class="soft-scrollbar h-20 w-full gap-8 overflow-x-auto rounded md:flex"
             >
                 <template
-                    x-for="seriesData in livewireOptions.series?.filter((series) => ! series.hideFromTotals)"
+                    x-for="
+                        seriesData in
+                        livewireOptions.series?.filter(
+                            (series) => !series.hideFromTotals,
+                        )
+                    "
                 >
                     <div class="flex flex-col gap-1">
                         <div
                             class="text-sm whitespace-nowrap text-gray-600 dark:text-gray-400"
                             x-cloak
-                            x-show="livewireOptions.series?.filter((series) => ! series.hideFromTotals).length > 1"
+                            x-show="
+                                livewireOptions.series?.filter(
+                                    (series) => !series.hideFromTotals,
+                                ).length > 1
+                            "
                             x-text="seriesData.name"
                         ></div>
                         <div class="flex items-center gap-2">
@@ -43,14 +52,20 @@
                                 class="text-2xl font-bold"
                                 x-bind:class="seriesData.colorName"
                                 x-text="
-                                    typeof defaultOptions.dataLabels.formatter === 'function'
-                                        ? defaultOptions.dataLabels.formatter(seriesData.sum)
+                                    typeof defaultOptions.dataLabels
+                                        .formatter === 'function'
+                                        ? defaultOptions.dataLabels.formatter(
+                                              seriesData.sum,
+                                          )
                                         : seriesData.sum
                                 "
                             ></div>
                             <x-badge
                                 x-cloak
-                                x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate > 0"
+                                x-show="
+                                    !isNaN(seriesData.growthRate) &&
+                                    seriesData.growthRate > 0
+                                "
                                 icon="chevron-up"
                                 color="emerald"
                             >
@@ -60,7 +75,10 @@
                             </x-badge>
                             <x-badge
                                 x-cloak
-                                x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate < 0"
+                                x-show="
+                                    !isNaN(seriesData.growthRate) &&
+                                    seriesData.growthRate < 0
+                                "
                                 icon="chevron-down"
                                 color="red"
                             >
@@ -70,7 +88,10 @@
                             </x-badge>
                             <x-badge
                                 x-cloak
-                                x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate == 0"
+                                x-show="
+                                    !isNaN(seriesData.growthRate) &&
+                                    seriesData.growthRate == 0
+                                "
                                 icon="chevron-right"
                                 color="gray"
                             >

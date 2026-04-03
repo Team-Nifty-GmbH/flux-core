@@ -8,7 +8,7 @@
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
-        @forelse ($tasks as $task)
+        @forelse($tasks as $task)
             <div
                 class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
             >
@@ -24,7 +24,7 @@
                         class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
                     >
                         {!! $task->state->badge() !!}
-                        @if ($task->due_date)
+                        @if($task->due_date)
                             <span
                                 class="{{ $task->due_date->isPast() ? 'text-red-500' : '' }}"
                             >
@@ -32,7 +32,7 @@
                             </span>
                         @endif
 
-                        @foreach ($task->users as $user)
+                        @foreach($task->users as $user)
                             <span
                                 class="{{ $user->getKey() === auth()->id() ? 'font-medium text-indigo-500' : '' }}"
                             >
@@ -73,7 +73,7 @@
                 {{ __('No tasks found') }}
             </div>
         @endforelse
-        @if ($hasMore)
+        @if($hasMore)
             <div class="flex justify-center pt-2">
                 <x-button
                     color="secondary"

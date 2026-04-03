@@ -11,9 +11,7 @@
         <td class="py-0 text-left font-semibold">
             {{ __('Related Invoice Number') }}:
         </td>
-        <td class="py-0 text-right">
-            {{ $model->parent?->invoice_number }}
-        </td>
+        <td class="py-0 text-right">{{ $model->parent?->invoice_number }}</td>
     </tr>
 @endsection
 

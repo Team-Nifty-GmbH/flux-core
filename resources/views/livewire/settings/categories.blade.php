@@ -5,50 +5,59 @@
                 document
                     .getElementById('category-parent-id')
                     .querySelector('[x-data]'),
-            )
+            );
             $tallstackuiSelect('category-parent-id').mergeRequestParams({
                 where: [['model_type', '=', $wire.category.model_type]],
-            })
+            });
         },
     }"
 >
     @section('modals')
-    <x-modal
-        id="edit-category-modal"
-        x-on:open="if (!$wire.category.id) $tallstackuiSelect('category-parent-id').clear(); setCategorySearch(); $tsui.focus('category-name');"
-        :title="__('Category')"
-    >
-        <div class="flex flex-col gap-1.5">
-            @section('modals.edit-category.content')
-            <x-input
-                id="category-name"
-                wire:model="category.name"
-                :label="__('Name')"
-            ></x-input>
-            <div class="mt-2">
-                <x-toggle
-                    wire:model="category.is_active"
-                    :label="__('Active')"
-                ></x-toggle>
-            </div>
-            <div x-bind:class="$wire.category.id && 'pointer-events-none'">
-                <x-select.styled
-                    x-bind:disabled="$wire.category.id"
-                    label="{{ __('Model') }}"
-                    placeholder="{{ __('Model') }}"
-                    x-on:select="setCategorySearch()"
-                    wire:model="category.model_type"
-                    required
-                    :options="$models"
-                />
-            </div>
-            <div id="category-parent-id">
-                <x-select.styled
-                    wire:model="category.parent_id"
-                    :label="__('Parent')"
-                    select="label:label|value:id"
-                    unfiltered
-                    :request="[
+        <x-modal
+            id="edit-category-modal"
+            x-on:open="
+                if (!$wire.category.id)
+                    $tallstackuiSelect('category-parent-id').clear();
+                setCategorySearch();
+                $tsui.focus('category-name');
+            "
+            :title="__('Category')"
+        >
+            <div class="flex flex-col gap-1.5">
+                @section('modals.edit-category.content')
+                    <x-input
+                        id="category-name"
+                        wire:model="category.name"
+                        :label="__('Name')"
+                    ></x-input>
+                    <div class="mt-2">
+                        <x-toggle
+                            wire:model="category.is_active"
+                            :label="__('Active')"
+                        ></x-toggle>
+                    </div>
+                    <div
+                        x-bind:class="
+                            $wire.category.id && 'pointer-events-none'
+                        "
+                    >
+                        <x-select.styled
+                            x-bind:disabled="$wire.category.id"
+                            label="{{ __('Model') }}"
+                            placeholder="{{ __('Model') }}"
+                            x-on:select="setCategorySearch()"
+                            wire:model="category.model_type"
+                            required
+                            :options="$models"
+                        />
+                    </div>
+                    <div id="category-parent-id">
+                        <x-select.styled
+                            wire:model="category.parent_id"
+                            :label="__('Parent')"
+                            select="label:label|value:id"
+                            unfiltered
+                            :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',
                         'params' => [
@@ -66,24 +75,29 @@
                             ],
                         ],
                     ]"
-                />
+                        />
+                    </div>
+                @show
             </div>
-            @show
-        </div>
-        <x-slot:footer>
-            <x-button
-                color="secondary"
-                light
-                flat
-                :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('edit-category-modal')"
-            />
-            <x-button
-                color="indigo"
-                :text="__('Save')"
-                x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('edit-category-modal');});"
-            />
-        </x-slot>
-    </x-modal>
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    light
+                    flat
+                    :text="__('Cancel')"
+                    x-on:click="$tsui.close.modal('edit-category-modal')"
+                />
+                <x-button
+                    color="indigo"
+                    :text="__('Save')"
+                    x-on:click="
+                        $wire.save().then((success) => {
+                            if (success)
+                                $tsui.close.modal('edit-category-modal');
+                        })
+                    "
+                />
+            </x-slot:footer>
+        </x-modal>
     @show
 </div>

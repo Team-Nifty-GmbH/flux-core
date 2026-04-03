@@ -6,7 +6,7 @@
     >
         <x-icon name="document-text" class="h-5 w-5" />
     </div>
-    @if ($count > 1)
+    @if($count > 1)
         <div
             class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white shadow"
         >
