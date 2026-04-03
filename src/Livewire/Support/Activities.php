@@ -45,7 +45,7 @@ abstract class Activities extends Component
         $activities = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
             ->firstOrFail()
-            ->activities()
+            ->activitiesAsSubject()
             ->with('causer:id,name')
             ->latest('id')
             ->paginate(perPage: $this->perPage * $this->page);

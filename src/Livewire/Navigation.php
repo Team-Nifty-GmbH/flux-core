@@ -108,7 +108,7 @@ class Navigation extends Component
         }
 
         return auth()->user()
-            ->activities()
+            ->activitiesAsSubject()
             ->selectRaw('count(*) as count, description')
             ->where('event', 'visit')
             ->groupBy('description')
