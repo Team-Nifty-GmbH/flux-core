@@ -5,6 +5,7 @@ coverage
 phpunit.xml
 phpstan.neon
 testbench.yaml
+/workbench
 /vendor
 node_modules
 reports
