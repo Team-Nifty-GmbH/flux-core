@@ -22,9 +22,9 @@
     </x-slot:header>
     <div
         class="flex flex-wrap gap-4 px-2 py-5 md:px-4"
-        @if ($cartForm->isUserOwned()) x-sort="
-            $wire.reOrder($item, $position)
-        " @endif
+        @if ($cartForm->isUserOwned())
+            x-sort="$wire.reOrder($item, $position)"
+        @endif
         x-cloak
         x-show="showCart === {{ $cartForm->id ?? 'null' }}"
         x-collapse

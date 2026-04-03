@@ -49,9 +49,11 @@
             @endif
 
             <template
-                @if ($withSearch) x-for="
-                    node in searchNodes(tree, search)
-                " @else x-for="node in tree" @endif
+                @if ($withSearch)
+                    x-for="node in searchNodes(tree, search)"
+                @else
+                    x-for="node in tree"
+                @endif
                 :key="node.id"
             >
                 <li>
@@ -166,15 +168,19 @@
                         @endif
 
                         <template
-                            @if ($withSearch) x-for="
-                                childNode in
-                                searchNodes(
-                                    node[childrenAttribute] ?? [],
-                                    search,
-                                )
-                            " @else x-for="
-                                childNode in node[childrenAttribute] ?? []
-                            " @endif
+                            @if ($withSearch)
+                                x-for="
+                                    childNode in
+                                    searchNodes(
+                                        node[childrenAttribute] ?? [],
+                                        search,
+                                    )
+                                "
+                            @else
+                                x-for="
+                                    childNode in node[childrenAttribute] ?? []
+                                "
+                            @endif
                             :key="childNode.id"
                         >
                             <!-- these are the lower levels -->
