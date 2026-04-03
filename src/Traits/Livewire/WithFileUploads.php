@@ -7,13 +7,13 @@ use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
-use FluxErp\Support\MediaLibrary\FluxMediaStream;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 trait WithFileUploads
 {
@@ -41,7 +41,7 @@ trait WithFileUploads
         return null;
     }
 
-    public function downloadCollection(int|string $id, array|string $collection): ?FluxMediaStream
+    public function downloadCollection(int|string $id, array|string $collection): ?StreamedResponse
     {
         // If $id is an integer we assume it's a media folder
         if (is_int($id)) {
@@ -49,12 +49,18 @@ trait WithFileUploads
                 ->whereKey($id)
                 ->first();
 
+            if (! $mediaFolder) {
+                return null;
+            }
+
+            $fileName = trim($mediaFolder->name);
             $actionData = [
-                'file_name' => trim($mediaFolder->name),
-                'media_folders' => [$mediaFolder?->getKey()],
+                'file_name' => $fileName,
+                'media_folders' => [$mediaFolder->getKey()],
             ];
         } else {
             $collection = is_array($collection) ? implode('.', $collection) : $collection;
+            $fileName = $collection;
 
             $actionData = [
                 'media' => resolve_static(Media::class, 'query')
@@ -72,10 +78,16 @@ trait WithFileUploads
         }
 
         try {
-            return DownloadMultipleMedia::make($actionData)
+            $stream = DownloadMultipleMedia::make($actionData)
                 ->checkPermission()
                 ->validate()
                 ->execute();
+
+            return response()->streamDownload(
+                fn () => $stream->getZipStream(),
+                str($fileName)->finish('.zip'),
+                ['Content-Type' => 'application/zip']
+            );
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }
