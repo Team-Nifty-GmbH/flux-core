@@ -87,7 +87,7 @@ class AbsenceRequest extends Component
             ->first();
 
         $this->activities = $model
-            ->activities()
+            ->activitiesAsSubject()
             ->where('log_name', 'absence_request_state_changes')
             ->with('causer')
             ->latest()

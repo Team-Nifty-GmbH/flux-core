@@ -12,7 +12,7 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use Illuminate\Validation\ValidationException;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Throwable;
 
 class ProcessSubscriptionOrder implements Repeatable

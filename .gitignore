@@ -10,3 +10,4 @@ testbench.yaml
 node_modules
 reports
 /dist
+/workbench
