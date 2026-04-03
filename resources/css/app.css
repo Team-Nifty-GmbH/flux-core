@@ -23,16 +23,6 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-/* Host project paths (when installed as vendor package) */
-@source '../../../../resources/**/*.blade.php';
-@source '../../../../resources/**/*.js';
-@source '../../../../app/Livewire/**/*.php';
-@source '../../../../app/Components/**/*.php';
-@source '../../../../vendor/tallstackui/tallstackui/src/**/*.php';
-@source '../../../../vendor/team-nifty-gmbh/tall-datatables/resources/**/*.blade.php';
-@source '../../../../vendor/team-nifty-gmbh/tall-datatables/src/**/*.php';
-
-/* Package-local paths (when building from package root / CI) */
 @source '../../resources/**/*.blade.php';
 @source '../../resources/**/*.js';
 @source '../../src/**/*.php';
