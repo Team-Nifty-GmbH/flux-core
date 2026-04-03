@@ -1,6 +1,6 @@
 <x-modal
     id="edit-record-origin-modal"
-    x-on:open="$focusOn('record-origin-name');"
+    x-on:open="$tsui.focus('record-origin-name');"
     :title="__('Record Origin')"
 >
     <div class="flex flex-col gap-1.5">
@@ -28,12 +28,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-record-origin-modal')"
+            x-on:click="$tsui.close.modal('edit-record-origin-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-record-origin-modal') })"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-record-origin-modal') })"
         />
     </x-slot>
 </x-modal>

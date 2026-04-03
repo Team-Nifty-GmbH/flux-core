@@ -87,7 +87,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         $this->productPropertyGroup->fill($productPropertyGroup);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-product-property-group-modal');
+            $tsui.open.modal('edit-product-property-group-modal');
         JS);
     }
 

@@ -28,12 +28,12 @@
                                 2xs
                                 color="red"
                                 text="-"
-                                x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"
+                                x-on:click.prevent="notificationChannel.channel_value.splice(notificationChannel.channel_value.indexOf(channelValue), 1)"
                             ></x-button.circle>
                         </div>
                         <div class="w-full">
                             <x-input
-                                class="flex-grow"
+                                class="grow"
                                 x-model="notificationChannel.channel_value[index]"
                             ></x-input>
                         </div>
@@ -53,7 +53,7 @@
                 light
                 flat
                 :text="__('Cancel')"
-                x-on:click="$modalClose('edit-notification-settings-modal')"
+                x-on:click="$tsui.close.modal('edit-notification-settings-modal')"
             />
             <x-button color="indigo" :text="__('Save')" wire:click="save()" />
         </x-slot>

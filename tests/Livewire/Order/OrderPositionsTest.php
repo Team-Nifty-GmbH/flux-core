@@ -232,8 +232,10 @@ test('can show related columns', function (): void {
         ->assertHasNoErrors();
 
     expect($component->get('enabledCols'))->toContain('order.uuid');
-    expect($component->get('data.data.0'))->toHaveKey('order.uuid');
-    expect($component->get('data.data.0')['order.uuid'])->toEqual($this->order->uuid);
+
+    $data = $component->instance()->getDataForTesting();
+    expect($data['data'][0])->toHaveKey('order.uuid');
+    expect($data['data'][0]['order.uuid'])->toEqual($this->order->uuid);
 });
 
 test('changed product id fills position data', function (): void {
@@ -375,7 +377,7 @@ test('edit new order position', function (): void {
         ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('orderPosition.vat_rate_id', $defaultVatRate->id)
-        ->assertExecutesJs("\$modalOpen('edit-order-position');");
+        ->assertExecutesJs("\$tsui.open.modal('edit-order-position');");
 });
 
 test('edit order position', function (): void {
@@ -387,7 +389,7 @@ test('edit order position', function (): void {
         ->assertHasNoErrors()
         ->assertSet('orderPosition.id', $orderPosition->id)
         ->assertSet('orderPosition.name', $orderPosition->name)
-        ->assertExecutesJs("\$modalOpen('edit-order-position');");
+        ->assertExecutesJs("\$tsui.open.modal('edit-order-position');");
 });
 
 test('get builder filters by order', function (): void {
@@ -610,7 +612,7 @@ test('show product', function (): void {
         ->call('showProduct', $this->product)
         ->assertOk()
         ->assertHasNoErrors()
-        ->assertExecutesJs("\$openDetailModal('{$this->product->getUrl()}');");
+        ->assertExecutesJs("\$nuxbe.openDetailModal('{$this->product->getUrl()}');");
 });
 
 test('switch view same view returns early', function (): void {
@@ -638,7 +640,8 @@ test('switch view to table', function (): void {
         ->assertOk()
         ->assertSet('orderPositionsView', 'table');
 
-    expect($component->get('data'))->not->toBeEmpty();
+    $data = $component->instance()->getDataForTesting();
+    expect($data)->not->toBeEmpty();
 });
 
 test('add order position uses product translation based on order language', function (): void {

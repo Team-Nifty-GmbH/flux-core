@@ -1,10 +1,11 @@
 <?php
 
-use FluxErp\Livewire\Support\FolderTree;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
 use FluxErp\Models\Permission;
+use FluxErp\Tests\Livewire\FolderTreeReadonlyTestClass;
+use FluxErp\Tests\Livewire\FolderTreeTestClass;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -430,15 +431,3 @@ test('can delete real media folder', function (): void {
     // Verify folder is deleted
     expect(MediaFolder::whereKey($folder->getKey())->exists())->toBeFalse();
 });
-
-class FolderTreeTestClass extends FolderTree
-{
-    protected string $modelType = Contact::class;
-}
-
-class FolderTreeReadonlyTestClass extends FolderTree
-{
-    public bool $isReadonly = true;
-
-    protected string $modelType = Contact::class;
-}

@@ -61,7 +61,8 @@
 
                             // on folder change, clear temp files - if confirmation is accepted
                             if (this.tempFilesId.length !== 0) {
-                                $interaction('dialog')
+                                $tsui
+                                    .interaction('dialog')
                                     .wireable($wire.__instance.id)
                                     .warning(
                                         '{{ __('Selected files not submitted') }}',
@@ -297,7 +298,7 @@
                                 <x-input
                                     :label="__('Size')"
                                     disabled
-                                    x-bind:value="window.fileSizeHumanReadable(selection?.size)"
+                                    x-bind:value="$nuxbe.format.fileSize(selection?.size)"
                                 />
                                 <x-input
                                     :label="__('File')"
@@ -323,7 +324,7 @@
                                             <x-button
                                                 x-cloak
                                                 x-show="previewSupported"
-                                                x-on:click="$openDetailModal(selection.original_url)"
+                                                x-on:click="$nuxbe.openDetailModal(selection.original_url)"
                                                 icon="eye"
                                                 class="h-full rounded-l-md"
                                                 color="indigo"
@@ -344,7 +345,7 @@
                             <object
                                 x-on:load="previewSupported = true"
                                 x-on:error="previewSupported = false"
-                                x-on:click="$openDetailModal(selection.original_url)"
+                                x-on:click="$nuxbe.openDetailModal(selection.original_url)"
                                 class="cursor-pointer object-contain"
                                 x-bind:type="selection.mime_type"
                                 x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"

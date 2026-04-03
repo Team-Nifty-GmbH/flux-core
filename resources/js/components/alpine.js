@@ -1,23 +1,24 @@
-import folders from './components/folders';
-import setupEditor from './components/tiptap';
-import floatingUiDropdown from './components/tiptap-dropdown.js';
-import tiptapExpandable from './components/tiptap-expandable.js';
-import workTime from './components/work-time.js';
-import calendar from './components/calendar.js';
-import dashboard from './components/dashboard';
-import signature from './components/signature-pad.js';
-import addressMap from './components/address-map';
-import filePond from './components/file-pond';
-import templateOutlet from './components/template-outlet';
+import folders from './folders';
+import setupEditor from './tiptap';
+import floatingUiDropdown from './tiptap-dropdown.js';
+import tiptapExpandable from './tiptap-expandable.js';
+import workTime from './work-time.js';
+import calendar from './calendar.js';
+import dashboard from './dashboard';
+import signature from './signature-pad.js';
+import addressMap from './address-map';
+import filePond from './file-pond';
+import templateOutlet from './template-outlet';
 import sort from '@alpinejs/sort';
 import collapse from '@alpinejs/collapse';
-import navigationSpinner from './components/navigation-spinner.js';
-import wireNavigation from './components/wire-navigation.js';
-import comments from './components/comments.js';
-import familyTree from './components/family-tree.js';
-import documentScanner from './components/document-scanner.js';
-import selectComponent from './components/tallstackui/select.js';
-import toastComponent from './components/tallstackui/toast.js';
+import navigationSpinner from './navigation-spinner.js';
+import wireNavigation from './wire-navigation.js';
+import comments from './comments.js';
+import familyTree from './family-tree.js';
+import documentScanner from './document-scanner.js';
+import selectComponent from './tallstackui/select.js';
+import toastComponent from './tallstackui/toast.js';
+import nuxbe from '../nuxbe.js';
 
 import { Calendar } from '@fullcalendar/core';
 import allLocales from '@fullcalendar/core/locales-all';
@@ -56,20 +57,17 @@ window.allLocales = allLocales;
 
 navigationSpinner();
 
-window.addEventListener('alpine:init', () => {
+if (window.Alpine?.version) {
     window.Alpine.plugin(sort);
     window.Alpine.plugin(collapse);
-});
-
-Alpine.directive('currency', (el, { expression }, { evaluate }) => {
-    const data = evaluate(expression);
-
-    el.innerText = formatters.money(data.value, data.currency);
-});
-
-Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
-    el.innerText = formatters.percentage(evaluate(expression));
-});
+    window.Alpine.plugin(nuxbe);
+} else {
+    window.addEventListener('alpine:init', () => {
+        window.Alpine.plugin(sort);
+        window.Alpine.plugin(collapse);
+        window.Alpine.plugin(nuxbe);
+    });
+}
 
 Alpine.directive('template-outlet', templateOutlet);
 Alpine.data('folder_tree', folders);
@@ -102,7 +100,7 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
 
     let promptAppend = directive.modifiers.includes('prompt')
         ? '<div>\n' +
-          '    <div class="relative mt-1 rounded-md shadow-sm">\n' +
+          '    <div class="relative mt-1 rounded-md shadow-xs">\n' +
           '    <div class="focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-dark-600 dark:text-dark-300 text-gray-600 ring-gray-300 dark:bg-dark-800 bg-white">\n' +
           '        <input id="prompt-value" class="dark:placeholder-dark-400 w-full rounded-md border-0 bg-transparent py-1.5 ring-0 placeholder:text-gray-400 focus:outline-hidden focus:ring-transparent sm:text-sm sm:leading-6">\n' +
           '    </div>\n' +
@@ -126,7 +124,8 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
     if (title === '') title = 'Are you sure?';
 
     el.__livewire_confirm = (action) => {
-        $interaction()
+        $tsui
+            .interaction('dialog')
             .wireable(component.id)
             [type](title, description)
             .confirm(confirmLabel, () => {

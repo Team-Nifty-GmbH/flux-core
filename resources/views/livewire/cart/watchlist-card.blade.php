@@ -1,4 +1,4 @@
-<x-card class="!px-0 !py-0">
+<x-card class="px-0! py-0!">
     <x-slot:header>
         <div class="flex justify-between">
             <div
@@ -42,15 +42,15 @@
                         color="red"
                         icon="x-mark"
                         wire:click="removeProduct({{ $cartFormItem['product_id'] }})"
-                        class="absolute right-2 top-2 z-10 h-4 w-4"
+                        class="absolute top-2 right-2 z-10 h-4 w-4"
                     />
                 @endif
 
-                <div class="rounded-lg border p-4 dark:border-secondary-700">
+                <div class="dark:border-secondary-700 rounded-lg border p-4">
                     <div class="font-semibold">
                         {{ $cartFormItem['name'] ?? ($cartFormItem['product']['name'] ?? __('Product')) }}
                     </div>
-                    <div class="text-sm text-secondary-500">
+                    <div class="text-secondary-500 text-sm">
                         {{ __('Amount') }}: {{ $cartFormItem['amount'] ?? 1 }}
                     </div>
                 </div>

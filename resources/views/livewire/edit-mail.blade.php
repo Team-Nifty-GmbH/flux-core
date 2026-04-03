@@ -178,7 +178,7 @@
                 <x-label :label="__('Attachments')" />
                 <label for="files">
                     <div
-                        class="flex min-h-[2rem] w-full gap-1 rounded-md bg-gray-100 p-1.5"
+                        class="flex min-h-8 w-full gap-1 rounded-md bg-gray-100 p-1.5"
                     >
                         <template x-for="file in $wire.mailMessage.attachments">
                             <x-badge white rounded>
@@ -227,7 +227,7 @@
                 x-show="! isMultiGroup"
                 color="secondary"
                 light
-                x-on:click="$modalClose('edit-mail')"
+                x-on:click="$tsui.close.modal('edit-mail')"
                 class="mr-2"
                 :text="__('Cancel')"
             />
@@ -262,7 +262,7 @@
                 x-show="! isMultiGroup || isLastGroup"
                 color="indigo"
                 loading="send"
-                x-on:click="$wire.send().then((success) => {if(success) $modalClose('edit-mail');})"
+                x-on:click="$wire.send().then((success) => {if(success) $tsui.close.modal('edit-mail');})"
                 class="ml-auto"
                 :text="__('Send')"
             />

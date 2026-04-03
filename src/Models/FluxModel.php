@@ -7,6 +7,7 @@ use FluxErp\Traits\Model\HasModelPermission;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use ReflectionClass;
 
 abstract class FluxModel extends Model
 {
@@ -36,5 +37,16 @@ abstract class FluxModel extends Model
         return static::query()->afterQuery(function () use ($scopeKeys): void {
             static::removeGlobalScopes($scopeKeys);
         });
+    }
+
+    public function resolveCollectionFromAttribute(): ?string
+    {
+        $parent = get_parent_class(static::class);
+
+        if ($parent && (new ReflectionClass($parent))->isAbstract()) {
+            return null;
+        }
+
+        return parent::resolveCollectionFromAttribute();
     }
 }

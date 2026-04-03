@@ -71,7 +71,7 @@ class ProductList extends BaseProductList
                 ->icon('plus')
                 ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
-                    $wire.new().then(() => {$modalOpen('create-product-modal');});
+                    $wire.new().then(() => {$tsui.open.modal('create-product-modal');});
                 JS),
         ];
     }
@@ -89,7 +89,7 @@ class ProductList extends BaseProductList
                 ->color('amber')
                 ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
-                    $modalOpen('update-prices-modal');
+                    $tsui.open.modal('update-prices-modal');
                 JS),
         ];
     }

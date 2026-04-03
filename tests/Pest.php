@@ -13,6 +13,18 @@ use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
 use Pest\Browser\Api\PendingAwaitablePage;
 
+if ($auditLocale = env('TRANSLATION_AUDIT_LOCALE')) {
+    require_once __DIR__ . '/Support/TranslationAuditCollector.php';
+    FluxErp\Tests\Support\TranslationAuditCollector::boot($auditLocale);
+
+    pest()->beforeEach(function () use ($auditLocale): void {
+        app()->setLocale($auditLocale);
+        app('translator')->handleMissingKeysUsing(function (string $key): void {
+            FluxErp\Tests\Support\TranslationAuditCollector::record($key);
+        });
+    });
+}
+
 pest()
     ->beforeEach(function (): void {
         /** @var $this FluxErp\Tests\TestCase */
@@ -75,10 +87,6 @@ pest()
 pest()
     ->extend(BrowserTestCase::class)
     ->beforeAll(function (): void {
-        // Sail/Docker sets PLAYWRIGHT_BROWSERS_PATH=0 which means "local to project" for
-        // npm install, but Playwright's run-server interprets 0 as an invalid path prefix.
-        // This override works when running tests on the host (outside Docker).
-        // Inside Docker, pass the env var via shell: PLAYWRIGHT_BROWSERS_PATH=... vendor/bin/testbench
         $browsersPath = dirname(__DIR__) . '/node_modules/playwright-core/.local-browsers';
         if (is_dir($browsersPath)) {
             putenv('PLAYWRIGHT_BROWSERS_PATH=' . $browsersPath);

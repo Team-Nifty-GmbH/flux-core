@@ -45,12 +45,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('{{ $this->modalName() }}')"
+            x-on:click="$tsui.close.modal('{{ $this->modalName() }}')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $this->modalName() }}')})"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $this->modalName() }}')})"
         />
     </x-slot>
 </x-modal>
@@ -66,7 +66,7 @@
         </div>
         <x-input
             id="token"
-            wire:model.defer="tokenForm.plain_text_token"
+            wire:model="tokenForm.plain_text_token"
             readonly
             :label="__('Token')"
         />

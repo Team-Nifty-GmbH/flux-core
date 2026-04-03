@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests;
 
-use FluxErp\Console\Commands\InstallAssets;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
@@ -32,44 +31,20 @@ abstract class BrowserTestCase extends TestCase
 
     public static function installAssets(): void
     {
-        static::deleteDirectory(__DIR__ . '/../public/build/assets/');
+        static::deleteDirectory(__DIR__ . '/../dist/assets/');
 
-        if (file_exists($manifest = __DIR__ . '/../public/build/manifest.json')) {
+        if (file_exists($manifest = __DIR__ . '/../dist/manifest.json')) {
             unlink($manifest);
         }
 
-        $testbenchConfigPath = __DIR__ . '/../vendor/orchestra/testbench-core/laravel/tailwind.config.mjs';
-        if (file_exists($testbenchConfigPath)) {
-            $stubContent = file_get_contents(__DIR__ . '/../stubs/tailwind/tailwind.config.mjs');
-
-            $configContent = str_replace(
-                '{{ relative_path }}',
-                '../../../..',
-                $stubContent
-            );
-
-            $configContent = str_replace(
-                '].concat(dataTablesConfig.content, fluxConfig.content),',
-                ',\n        \'../../../../resources/**/*.blade.php\',\n        \'../../../../resources/**/*.js\',\n        \'../../../../src/**/*.php\',\n    ].concat(dataTablesConfig.content, fluxConfig.content),',
-                $configContent
-            );
-
-            file_put_contents($testbenchConfigPath, $configContent);
-        }
-
-        InstallAssets::copyStubs(
-            force: true,
-            basePath: fn ($path = '') => __DIR__ . '/../' . $path
-        );
-
-        $process = Process::fromShellCommandline('npm i && npm run build', timeout: 180);
+        $process = Process::fromShellCommandline('npm i && npm run build', __DIR__ . '/..', timeout: 180);
         $process->run();
 
         while ($process->isRunning()) {
             usleep(1000);
         }
 
-        $jsFiles = glob(__DIR__ . '/../public/build/assets/*.js');
+        $jsFiles = glob(__DIR__ . '/../dist/assets/*.js');
         foreach ($jsFiles as $file) {
             $content = file_get_contents($file);
             if (substr($content, -1) === "\n") {
@@ -103,11 +78,16 @@ abstract class BrowserTestCase extends TestCase
 
     protected function setUp(): void
     {
+        $settingsPath = __DIR__ . '/../vendor/orchestra/testbench-core/laravel/database/settings';
+        if (! file_exists($settingsPath)) {
+            mkdir($settingsPath, 0755, true);
+        }
+
         parent::setUp();
 
         try {
             if (! file_exists(public_path('build'))) {
-                symlink(package_path('public/build'), public_path('build'));
+                symlink(package_path('dist'), public_path('build'));
             }
         } catch (Throwable) {
         }
@@ -154,10 +134,6 @@ abstract class BrowserTestCase extends TestCase
 
     protected function tsSelectOption(string $option): string
     {
-        $base = '//li[@role="option"][contains(., "' . $option . '")]';
-
-        return ! $this->lastClickedTsSelect
-            ? $base
-            : $this->lastClickedTsSelect . '/../..//ul' . $base;
+        return 'li[role="option"]:has-text("' . $option . '")';
     }
 }

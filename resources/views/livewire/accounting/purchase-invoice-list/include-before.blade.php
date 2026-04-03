@@ -176,7 +176,7 @@
                         />
                     </button>
                     <div x-cloak x-show="showPayment" x-collapse>
-                        <div class="grid grid-cols-2 gap-4 pb-2 pt-2">
+                        <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
                             @if (count($currencies ?? []) > 1)
                                 <div
                                     x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
@@ -256,7 +256,7 @@
                         />
                     </button>
                     <div x-cloak x-show="showBank" x-collapse>
-                        <div class="grid grid-cols-2 gap-4 pb-2 pt-2">
+                        <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
                             <div class="col-span-2">
                                 <x-select.styled
                                     :label="__('Lay out user')"
@@ -546,7 +546,7 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Delete')"
                             loading="delete"
-                            x-on:click="$wire.delete().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                            x-on:click="$wire.delete().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
                         />
                     @endcanAction
@@ -559,7 +559,7 @@
                         color="secondary"
                         light
                         :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-purchase-invoice-modal')"
+                        x-on:click="$tsui.close.modal('edit-purchase-invoice-modal')"
                     />
                     <x-button
                         color="indigo"
@@ -567,7 +567,7 @@
                         x-show="! $wire.purchaseInvoiceForm.order_id"
                         :text="__('Save')"
                         loading="save"
-                        x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                        x-on:click="$wire.save().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
                     />
                     @canAction(\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
                         <x-button
@@ -576,7 +576,7 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Finish')"
                             loading="finish"
-                            x-on:click="$wire.finish().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
+                            x-on:click="$wire.finish().then((success) => { if (success) $tsui.close.modal('edit-purchase-invoice-modal'); })"
                         />
                     @endcanAction
 
@@ -861,7 +861,7 @@
                                         />
                                         <canvas
                                             x-ref="cornerCanvas"
-                                            class="absolute left-0 top-0"
+                                            class="absolute top-0 left-0"
                                             style="touch-action: none"
                                             x-on:mousedown="startDrag($event)"
                                             x-on:mousemove="moveDrag($event)"
@@ -949,7 +949,7 @@
                 color="secondary"
                 light
                 :text="__('Close')"
-                x-on:click="$modalClose('bulk-pdf-upload-modal')"
+                x-on:click="$tsui.close.modal('bulk-pdf-upload-modal')"
             />
         </x-slot>
     </x-modal>

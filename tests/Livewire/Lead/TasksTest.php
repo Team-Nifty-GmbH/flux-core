@@ -1,9 +1,12 @@
 <?php
 
 use FluxErp\Livewire\Lead\Tasks;
+use FluxErp\Models\Lead;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
-    Livewire::test(Tasks::class)
+    $lead = Lead::factory()->create();
+
+    Livewire::test(Tasks::class, ['modelId' => $lead->getKey()])
         ->assertOk();
 });

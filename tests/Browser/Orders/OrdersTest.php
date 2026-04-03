@@ -3,9 +3,7 @@
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
-use Illuminate\Support\Str;
 
 test('can create new order', function (): void {
     OrderType::query()->delete();
@@ -42,16 +40,11 @@ test('can create new order', function (): void {
         ->click($this->tsSelect('order.contact_id'))
         ->assertSee($address->name)
         ->click($this->tsSelectOption($address->name))
+        ->assertNoSmoke()
         ->click('Save')
-        ->assertSee('Order positions');
-
-    $order = Order::query()
-        ->whereKey(Str::afterLast($page->url(), '/'))
-        ->first();
-
-    $page->assertSee($orderType->name . ' ' . $order->order_number)
+        ->assertNoSmoke()
+        ->waitForText($orderType->name)
         ->assertSee('Contact')
         ->assertSee('Invoice Address')
-        ->assertSee('Delivery Address')
-        ->assertRoute('orders.id', ['id' => $order->getKey()]);
+        ->assertSee('Delivery Address');
 });

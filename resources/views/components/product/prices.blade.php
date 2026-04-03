@@ -3,8 +3,10 @@
         init() {
             $wire.getPriceLists().then(() =>
                 $wire.priceLists.forEach((priceList) => {
-                    priceList.price_net = parseNumber(priceList.price_net)
-                    priceList.price_gross = parseNumber(priceList.price_gross)
+                    priceList.price_net = $nuxbe.parseNumber(priceList.price_net)
+                    priceList.price_gross = $nuxbe.parseNumber(
+                        priceList.price_gross,
+                    )
                 }),
             )
         },
@@ -13,20 +15,20 @@
 
             if (! vatRate) {
                 if (isNet) {
-                    priceList.price_gross = parseNumber(priceList.price_net)
+                    priceList.price_gross = $nuxbe.parseNumber(priceList.price_net)
                 } else {
-                    priceList.price_net = parseNumber(priceList.price_gross)
+                    priceList.price_net = $nuxbe.parseNumber(priceList.price_gross)
                 }
 
                 return
             }
 
             if (isNet) {
-                priceList.price_gross = parseNumber(
+                priceList.price_gross = $nuxbe.parseNumber(
                     priceList.price_net * (1 + vatRate),
                 )
             } else {
-                priceList.price_net = parseNumber(
+                priceList.price_net = $nuxbe.parseNumber(
                     priceList.price_gross / (1 + vatRate),
                 )
             }

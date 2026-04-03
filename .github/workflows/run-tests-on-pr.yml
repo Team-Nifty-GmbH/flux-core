@@ -7,12 +7,58 @@ on:
     branches: [main, dev]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PHP_VERSION: '8.5'
+  LARAVEL_VERSION: '13.*'
+  TESTBENCH_VERSION: '11.*'
+
 jobs:
-  laravel:
-    name: Laravel ${{ matrix.laravel }} (PHP ${{ matrix.php-versions }}) - ${{ matrix.browser }}
+  lint:
+    name: Lint
     runs-on: [self-hosted, Linux]
     container:
-      image: ghcr.io/team-nifty-gmbh/flux-ci:php${{ matrix.php-versions }}
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Fix git ownership
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Configure Composer GitHub auth
+        run: composer config --global github-oauth.github.com ${{ github.token }}
+
+      - name: Change Laravel Version Dependencies
+        run: composer require "laravel/framework:${{ env.LARAVEL_VERSION }}" "orchestra/testbench:${{ env.TESTBENCH_VERSION }}" --no-interaction --no-update
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install npm dependencies
+        run: npm i
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Pint
+        run: ./vendor/bin/pint --test --parallel
+
+      - name: Prettier
+        run: npx prettier . --check
+
+  unit-feature:
+    name: Unit & Feature Tests
+    needs: lint
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -30,16 +76,6 @@ jobs:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       MEILISEARCH_HOST: http://meilisearch:7700
-    strategy:
-      fail-fast: false
-      matrix:
-        php-versions: ['8.5']
-        browser: ['chrome']
-        laravel: ['12.*']
-        include:
-          - laravel: 12.*
-            testbench: 10.*
-
     services:
       mysql:
         image: mysql:8.0
@@ -55,7 +91,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-
       redis:
         image: redis
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -63,10 +98,7 @@ jobs:
         image: getmeili/meilisearch:latest
         options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
+      - uses: actions/checkout@v5
 
       - name: Fix git ownership
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -75,7 +107,7 @@ jobs:
         run: composer config --global github-oauth.github.com ${{ github.token }}
 
       - name: Change Laravel Version Dependencies
-        run: composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+        run: composer require "laravel/framework:${{ env.LARAVEL_VERSION }}" "orchestra/testbench:${{ env.TESTBENCH_VERSION }}" --no-interaction --no-update
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
@@ -83,11 +115,8 @@ jobs:
       - name: Install npm dependencies
         run: npm i
 
-      - name: Pint
-        run: ./vendor/bin/pint --test --parallel
-
-      - name: Prettier
-        run: npx prettier . --check
+      - name: Build frontend assets
+        run: npm run build
 
       - name: Clear Orchestra Testbench Cache
         run: ./vendor/bin/testbench view:clear
@@ -100,16 +129,160 @@ jobs:
       - name: Run Unit Tests
         run: composer test-unit
 
-      - name: Run Livewire Tests
-        run: composer test-livewire
-
       - name: Run Feature Tests
         run: composer test-feature
 
-      - name: Build assets and install Playwright
+  livewire:
+    name: Livewire Tests
+    needs: lint
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      BROADCAST_DRIVER: log
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MEILISEARCH_HOST: http://meilisearch:7700
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        options: >-
+          --tmpfs /var/lib/mysql
+          --tmpfs /var/log/mysql
+          --tmpfs /tmp
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+      redis:
+        image: redis
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Fix git ownership
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Configure Composer GitHub auth
+        run: composer config --global github-oauth.github.com ${{ github.token }}
+
+      - name: Change Laravel Version Dependencies
+        run: composer require "laravel/framework:${{ env.LARAVEL_VERSION }}" "orchestra/testbench:${{ env.TESTBENCH_VERSION }}" --no-interaction --no-update
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install npm dependencies
+        run: npm i
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Clear Orchestra Testbench Cache
+        run: ./vendor/bin/testbench view:clear
+
+      - name: Create schema
         run: |
-          ./vendor/bin/testbench flux:install-assets --force
-          npx playwright install chromium
+          ./vendor/bin/testbench migrate --force
+          ./vendor/bin/testbench schema:dump
+
+      - name: Run Livewire Tests
+        run: composer test-livewire
+
+  browser:
+    name: Browser Tests
+    needs: lint
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      BROADCAST_DRIVER: log
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MEILISEARCH_HOST: http://meilisearch:7700
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        options: >-
+          --tmpfs /var/lib/mysql
+          --tmpfs /var/log/mysql
+          --tmpfs /tmp
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+      redis:
+        image: redis
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Fix git ownership
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Configure Composer GitHub auth
+        run: composer config --global github-oauth.github.com ${{ github.token }}
+
+      - name: Change Laravel Version Dependencies
+        run: composer require "laravel/framework:${{ env.LARAVEL_VERSION }}" "orchestra/testbench:${{ env.TESTBENCH_VERSION }}" --no-interaction --no-update
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install npm dependencies
+        run: npm i
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Clear Orchestra Testbench Cache
+        run: ./vendor/bin/testbench view:clear
+
+      - name: Create schema
+        run: |
+          ./vendor/bin/testbench migrate --force
+          ./vendor/bin/testbench schema:dump
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
         env:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
@@ -119,10 +292,10 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
       - name: Upload Browser Test Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
-          name: browser-test-artifacts-${{ matrix.browser }}-${{ matrix.php-versions }}
+          name: browser-test-artifacts
           path: |
             tests/Browser/Screenshots/
             vendor/orchestra/testbench-core/laravel/storage/logs/
@@ -131,7 +304,7 @@ jobs:
   cleanup:
     name: Cleanup Docker resources
     runs-on: [self-hosted, Linux]
-    needs: laravel
+    needs: [unit-feature, livewire, browser]
     if: always()
     steps:
       - name: Prune unused Docker images older than 7 days

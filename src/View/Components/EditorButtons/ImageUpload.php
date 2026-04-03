@@ -33,7 +33,7 @@ class ImageUpload extends Component implements EditorButton
                             });
                         },
                         () => {
-                            \$interaction('toast')
+                            \$tsui.interaction('toast')
                                 .error('{$errorTitle}', '{$errorMessage}')
                                 .send();
                         }

@@ -1,0 +1,15 @@
+# Keys that intentionally have no English translation
+# (the key itself IS the English text, no entry in en.json needed)
+# Use * suffix for prefix matching
+
+# For English, most keys are self-describing since
+# the key text is already English. Only keys with
+# special en.json entries (like action.* prefixed keys)
+# are expected to exist.
+#
+# This ignore list captures keys that will never need
+# an en.json entry because the key IS the English text.
+
+# All non-prefixed keys are self-describing in English
+# and don't need explicit en.json entries.
+# Add specific patterns here as needed.

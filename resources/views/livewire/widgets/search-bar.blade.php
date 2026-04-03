@@ -6,7 +6,7 @@
     x-on:render-search-bar-widget.window="$wire.renderSearchBarWidget($event.detail.model, $event.detail.id)"
 >
     @if ($widgetComponent)
-        <x-flux::spinner />
+        <x-loading />
         <x-card card-classes="shadow-none">
             <livewire:is
                 wire:key="search-bar-{{ $widgetComponent }}-{{ $widgetId }}"

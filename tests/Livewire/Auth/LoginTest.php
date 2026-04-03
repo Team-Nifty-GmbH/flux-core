@@ -17,7 +17,7 @@ test('login link', function (): void {
         ->set('email', $this->user->email)
         ->call('login')
         ->assertNoRedirect()
-        ->assertDispatched('tallstackui:toast');
+        ->assertDispatched('ts-ui:toast');
 
     $this->assertGuest();
 
@@ -42,7 +42,7 @@ test('login wrong password', function (): void {
         ->set('password', 'wrongpassword')
         ->call('login')
         ->assertNoRedirect()
-        ->assertDispatched('tallstackui:toast');
+        ->assertDispatched('ts-ui:toast');
 
     $this->assertGuest();
 });

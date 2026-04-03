@@ -78,7 +78,7 @@ class Units extends UnitList
         $this->unit->fill($unit);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-unit-modal');
+            $tsui.open.modal('edit-unit-modal');
         JS);
     }
 

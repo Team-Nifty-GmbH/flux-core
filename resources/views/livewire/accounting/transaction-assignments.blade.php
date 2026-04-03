@@ -12,7 +12,7 @@
         },
     }"
 >
-    <x-flux::spinner />
+    <x-loading />
     @teleport('body')
         <x-modal id="transaction-assign-orders-modal" size="7xl">
             <x-slot:title>
@@ -23,12 +23,12 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
+                            x-html="$nuxbe.format.money($wire.transactionForm.amount, { colored: true })"
                         ></span>
                     </div>
                     <div
                         class="text-xs"
-                        x-text="formatters.date($wire.transactionForm.booking_date)"
+                        x-text="$nuxbe.format.date($wire.transactionForm.booking_date)"
                     ></div>
                     <div
                         class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
@@ -42,7 +42,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-assign-orders-modal')"
+                    x-on:click="$tsui.close.modal('transaction-assign-orders-modal')"
                 />
                 <x-button
                     :text="__('Assign')"
@@ -62,12 +62,12 @@
                         ></span>
                         <span
                             class="text-red-600"
-                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
+                            x-html="$nuxbe.format.money($wire.transactionForm.amount, { colored: true })"
                         ></span>
                     </div>
                     <div
                         class="text-xs"
-                        x-text="formatters.date($wire.transactionForm.booking_date)"
+                        x-text="$nuxbe.format.date($wire.transactionForm.booking_date)"
                     ></div>
                     <div
                         class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
@@ -86,7 +86,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-comments-modal')"
+                    x-on:click="$tsui.close.modal('transaction-comments-modal')"
                 />
             </x-slot>
         </x-modal>
@@ -95,7 +95,7 @@
     @teleport('body')
         <x-modal
             id="order-transaction-modal"
-            x-on:open="$focusOn('order-transaction-amount')"
+            x-on:open="$tsui.focus('order-transaction-amount')"
         >
             <div class="flex flex-col gap-4">
                 <x-number
@@ -138,7 +138,7 @@
                 <x-button
                     color="secondary"
                     :text="__('Cancel')"
-                    x-on:click="$modalClose('order-transaction-modal')"
+                    x-on:click="$tsui.close.modal('order-transaction-modal')"
                 />
                 <x-button
                     :text="__('Save')"
@@ -238,7 +238,7 @@
                             class="flex flex-col rounded border-2 border-slate-200 lg:flex-row"
                         >
                             <div
-                                class="flex w-full flex-col p-4 lg:w-1/2 lg:border-b-0 lg:border-r-2"
+                                class="flex w-full flex-col p-4 lg:w-1/2 lg:border-r-2 lg:border-b-0"
                             >
                                 <div class="flex justify-between gap-4">
                                     <div class="flex gap-4">
@@ -265,13 +265,13 @@
                                     <div class="flex flex-col gap-2">
                                         <div
                                             class="flex w-full justify-end text-lg font-semibold"
-                                            x-html="formatters.coloredMoney(transaction.amount)"
+                                            x-html="$nuxbe.format.money(transaction.amount, { colored: true })"
                                         ></div>
                                         <div
                                             class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
                                         >
                                             <span
-                                                x-text="formatters.date(transaction.booking_date)"
+                                                x-text="$nuxbe.format.date(transaction.booking_date)"
                                             ></span>
                                             <x-dropdown icon="banknotes">
                                                 <div class="p-2">
@@ -327,7 +327,7 @@
                                                 icon="link-slash"
                                                 wire:click="deleteOrderTransaction(order.pivot.pivot_id)"
                                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Assignment')]) }}"
-                                                class="absolute left-0 top-0 opacity-0 transition-opacity duration-200 group-hover/button:opacity-100"
+                                                class="absolute top-0 left-0 opacity-0 transition-opacity duration-200 group-hover/button:opacity-100"
                                             />
                                         </div>
                                         <div
@@ -342,7 +342,7 @@
                                                         color="secondary"
                                                         sm
                                                         icon="eye"
-                                                        x-on:click="$openDetailModal('{{ route('orders.id', ['id' => '__key__']) }}'.replace('__key__', order.id))"
+                                                        x-on:click="$nuxbe.openDetailModal('{{ route('orders.id', ['id' => '__key__']) }}'.replace('__key__', order.id))"
                                                     />
                                                 </div>
                                                 <div>
@@ -358,7 +358,7 @@
                                                 <div>
                                                     <div
                                                         class="flex w-full justify-end font-semibold"
-                                                        x-html="formatters.coloredMoney(order.pivot.amount)"
+                                                        x-html="$nuxbe.format.money(order.pivot.amount, { colored: true })"
                                                     ></div>
                                                     <div
                                                         x-cloak
@@ -377,7 +377,7 @@
                                                         class="flex w-full flex-row items-center justify-end gap-2 font-semibold"
                                                     >
                                                         <span
-                                                            x-html="formatters.date(order.invoice_date)"
+                                                            x-html="$nuxbe.format.date(order.invoice_date)"
                                                         ></span>
                                                     </div>
                                                 </div>
@@ -463,7 +463,7 @@
                                                     {{ __('Open') }}:
                                                 </span>
                                                 <span
-                                                    x-html="formatters.coloredMoney(transaction.balance)"
+                                                    x-html="$nuxbe.format.money(transaction.balance, { colored: true })"
                                                 ></span>
                                             </div>
                                         </div>

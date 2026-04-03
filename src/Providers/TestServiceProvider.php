@@ -50,7 +50,7 @@ class TestServiceProvider extends ServiceProvider
                     string|int|null $id = null
                 ) {
                     $this->assertDispatched(
-                        'tallstackui:toast',
+                        'ts-ui:toast',
                         function (
                             string $eventName,
                             array $params
@@ -114,7 +114,7 @@ class TestServiceProvider extends ServiceProvider
 
                     $this->assertStatus(200)
                         ->call('edit')
-                        ->assertExecutesJs('$modalOpen(\'' . $modalName . '\')');
+                        ->assertExecutesJs('$tsui.open.modal(\'' . $modalName . '\')');
 
                     foreach ($formValues as $propertyName => $propertyValue) {
                         $this->set($formPropertyName . '.' . $propertyName, $propertyValue);
@@ -135,13 +135,18 @@ class TestServiceProvider extends ServiceProvider
                 'datatableDelete',
                 function (Model $model, TestCase $testCase): Testable {
                     $this->assertStatus(200)
-                        ->call('loadData')
-                        ->assertCount('data.data', 1)
-                        ->assertSet('data.data.0.id', $model->getKey())
-                        ->call('delete', $model->getKey())
+                        ->call('loadData');
+
+                    $data = $this->instance()->getDataForTesting();
+                    expect($data['data'])->toHaveCount(1);
+                    expect($data['data'][0]['id'])->toBe($model->getKey());
+
+                    $this->call('delete', $model->getKey())
                         ->assertHasNoErrors()
-                        ->assertStatus(200)
-                        ->assertCount('data.data', 0);
+                        ->assertStatus(200);
+
+                    $data = $this->instance()->getDataForTesting();
+                    expect($data['data'])->toHaveCount(0);
 
                     if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
                         invade($testCase)->assertSoftDeleted($model);
@@ -159,9 +164,13 @@ class TestServiceProvider extends ServiceProvider
                 'datatableEdit',
                 function (Model $model, string $routeName): Testable {
                     $this->assertStatus(200)
-                        ->call('loadData')
-                        ->assertCount('data.data', 1)
-                        ->assertSet('data.data.0.id', $model->getKey())
+                        ->call('loadData');
+
+                    $data = $this->instance()->getDataForTesting();
+                    expect($data['data'])->toHaveCount(1);
+                    expect($data['data'][0]['id'])->toBe($model->getKey());
+
+                    $this
                         ->call('edit', $model->getKey())
                         ->assertHasNoErrors()
                         ->assertStatus(200)

@@ -28,7 +28,7 @@
                 <span x-text="$wire.update.version"></span>
             </x-slot>
             <div
-                class="prose max-w-full dark:prose-invert"
+                class="prose dark:prose-invert max-w-full"
                 x-html="$wire.update.readme"
             ></div>
             <x-slot:footer>
@@ -37,13 +37,13 @@
                     light
                     flat
                     :text="__('Close')"
-                    x-on:click="$modalClose('update-plugin-modal')"
+                    x-on:click="$tsui.close.modal('update-plugin-modal')"
                 />
                 <x-button
                     color="indigo"
                     :text="__('Update')"
                     loading="update"
-                    x-on:click="$wire.updatePackages($wire.update.package).then(() => $modalClose('update-plugin-modal'))"
+                    x-on:click="$wire.updatePackages($wire.update.package).then(() => $tsui.close.modal('update-plugin-modal'))"
                 />
             </x-slot>
         </x-modal>
@@ -51,7 +51,7 @@
 
     <x-modal id="more-plugin-modal" size="7xl">
         <div
-            class="prose max-w-full dark:prose-invert"
+            class="prose dark:prose-invert max-w-full"
             x-html="$wire.readme"
         ></div>
         <x-slot:footer>
@@ -60,7 +60,7 @@
                 light
                 flat
                 :text="__('Close')"
-                x-on:click="$modalClose('more-plugin-modal')"
+                x-on:click="$tsui.close.modal('more-plugin-modal')"
             />
         </x-slot>
     </x-modal>
@@ -110,7 +110,7 @@
                                 alt="Plugin Image"
                                 class="h-12 w-12 rounded-lg"
                             />
-                            <div class="flex-grow">
+                            <div class="grow">
                                 <div class="flex gap-1.5">
                                     <span x-text="plugin.name"></span>
                                     <x-badge
@@ -176,7 +176,7 @@
                     light
                     flat
                     :text="__('Close')"
-                    x-on:click="$modalClose('install-plugin-modal')"
+                    x-on:click="$tsui.close.modal('install-plugin-modal')"
                 />
             </x-slot>
         </x-modal>
@@ -218,7 +218,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Install')"
-                    x-on:click="$modalOpen('install')"
+                    x-on:click="$tsui.open.modal('install')"
                 />
             @endif
 
@@ -258,7 +258,7 @@
                     @endif
                 </div>
                 <div
-                    class="flex flex-grow gap-1.5"
+                    class="flex grow gap-1.5"
                     x-bind:class="! plugin.is_active && 'opacity-60'"
                 >
                     <img

@@ -5,7 +5,7 @@ namespace FluxErp\View\Components;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentSlot;
-use TallStackUi\Foundation\Attributes\SkipDebug;
+use TallStackUi\Attributes\SkipDebug;
 
 class Currency extends Component
 {

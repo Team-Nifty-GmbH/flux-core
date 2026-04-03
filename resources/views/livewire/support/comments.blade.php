@@ -19,7 +19,7 @@
                 @endcan
 
                 <div class="relative flex flex-col gap-12" x-ref="comments">
-                    <x-flux::spinner />
+                    <x-loading />
                     <div x-cloak x-show="stickyComments.length > 0">
                         <h3 class="pb-4">{{ __('Sticky comments') }}</h3>
                         <template
@@ -36,7 +36,7 @@
                         </template>
                     </div>
                     <div
-                        class="overflow-auto soft-scrollbar dark:divide-secondary-700"
+                        class="soft-scrollbar dark:divide-secondary-700 overflow-auto"
                     >
                         <h3 class="pb-4">{{ __('All comments') }}</h3>
                         <div class="tree-container w-full gap-4">

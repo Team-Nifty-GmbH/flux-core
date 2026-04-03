@@ -37,7 +37,7 @@ class Employees extends BaseEmployeeList
                 ->when(fn () => resolve_static(BulkCloseEmployeeDay::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
                     $wire.timeframe = [];
-                    $modalOpen('close-employee-day-modal');
+                    $tsui.open.modal('close-employee-day-modal');
                 JS),
         ];
     }

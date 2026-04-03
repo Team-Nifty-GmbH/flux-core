@@ -6,7 +6,7 @@
 @canAction(\FluxErp\Actions\Lead\CreateLead::class)
     <x-modal
         :id="$leadForm->modalName()"
-        x-on:open="$focusOn('lead-name')"
+        x-on:open="$tsui.focus('lead-name')"
         persistent
     >
         <div class="flex flex-col gap-4">
@@ -56,12 +56,12 @@
                 color="secondary"
                 light
                 :text="__('Cancel')"
-                x-on:click="$modalClose('{{ $leadForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $leadForm->modalName() }}')"
             />
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.createLeads().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
+                x-on:click="$wire.createLeads().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
             />
         </x-slot>
     </x-modal>

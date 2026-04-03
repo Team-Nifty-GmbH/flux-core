@@ -219,6 +219,7 @@ class CreateOrderPosition extends FluxAction
                     ];
                 }
 
+                $multiplier = $order->orderType?->order_type_enum?->multiplier() ?? 1;
                 $maxAmount = data_get(
                     array_find(
                         $this->calculateMaxAmounts(

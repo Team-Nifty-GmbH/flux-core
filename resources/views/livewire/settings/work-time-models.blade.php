@@ -72,7 +72,7 @@
                 :text="__('Cancel')"
                 color="secondary"
                 flat
-                x-on:click="$modalClose('{{ $workTimeModelForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $workTimeModelForm->modalName() }}')"
             />
             <x-button
                 :text="__('Create and Configure Schedule')"

@@ -1,6 +1,6 @@
 <x-modal
     id="edit-country-modal"
-    x-on:open="$focusOn('country.name')"
+    x-on:open="$tsui.focus('country.name')"
     :title="__('Country')"
 >
     <div class="flex flex-col gap-1.5">
@@ -34,12 +34,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('edit-country-modal')"
+            x-on:click="$tsui.close.modal('edit-country-modal')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $modalClose('edit-country-modal')})"
+            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-country-modal')})"
         />
     </x-slot>
 </x-modal>

@@ -16,7 +16,7 @@ trait MoneyChartFormattingTrait
     public function plotOptionsTotalFormatter(): string
     {
         return <<<'JS'
-            return window.formatters.money(w.globals.seriesTotals.reduce((a, b) => {
+            return window.$nuxbe.format.money(w.globals.seriesTotals.reduce((a, b) => {
               return a + b
             }, 0))
         JS;
@@ -37,7 +37,7 @@ trait MoneyChartFormattingTrait
     protected function moneyFormatterJs(): string
     {
         return <<<'JS'
-            return window.formatters.money(val);
+            return window.$nuxbe.format.money(val);
         JS;
     }
 }

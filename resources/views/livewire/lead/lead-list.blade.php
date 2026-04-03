@@ -1,7 +1,7 @@
 <div>
     <x-modal
         :id="$leadForm->modalName()"
-        x-on:open="$focusOn('lead-name')"
+        x-on:open="$tsui.focus('lead-name')"
         persistent
     >
         <div class="flex flex-col gap-4">
@@ -114,12 +114,12 @@
                 :text="__('Cancel')"
                 color="secondary"
                 light
-                x-on:click="$modalClose('{{ $leadForm->modalName() }}')"
+                x-on:click="$tsui.close.modal('{{ $leadForm->modalName() }}')"
             />
             <x-button
                 :text="__('Save')"
                 color="indigo"
-                x-on:click="$wire.save().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
+                x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
             />
         </x-slot>
     </x-modal>

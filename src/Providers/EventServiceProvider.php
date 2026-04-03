@@ -39,7 +39,7 @@ use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Queue\QueueManager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
-use TallStackUi\View\Components\Form\Date;
+use TallStackUi\Components\Form\Date;
 use Throwable;
 
 class EventServiceProvider extends ServiceProvider

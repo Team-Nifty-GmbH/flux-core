@@ -36,7 +36,6 @@ abstract class Activities extends Component
         return view('flux::livewire.support.activities');
     }
 
-    #[Renderless]
     public function loadData(): void
     {
         if (! $this->modelType || ! $this->modelId) {

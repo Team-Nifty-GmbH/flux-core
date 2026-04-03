@@ -11,7 +11,7 @@ export default function (tree) {
                 : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700';
 
             const baseClasses =
-                'whitespace-nowrap rounded-lg border px-4 py-2 text-sm font-medium shadow-sm transition-colors';
+                'whitespace-nowrap rounded-lg border px-4 py-2 text-sm font-medium shadow-xs transition-colors';
             const label = document.createTextNode(node.label).textContent;
 
             const nodeHtml = node.url

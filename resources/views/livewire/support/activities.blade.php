@@ -10,7 +10,7 @@
         },
     }"
 >
-    <x-spinner />
+    <x-loading />
     <ul role="list" class="-mb-1">
         <template
             x-for="(activity, index) in $wire.activities"
@@ -89,10 +89,10 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="whitespace-nowrap text-right text-sm text-gray-500"
+                                    class="text-right text-sm whitespace-nowrap text-gray-500"
                                 >
                                     <time
-                                        x-text="formatters.datetime(activity.created_at)"
+                                        x-text="$nuxbe.format.datetime(activity.created_at)"
                                     ></time>
                                 </div>
                             </div>

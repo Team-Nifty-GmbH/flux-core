@@ -4,7 +4,7 @@ namespace FluxErp\View\Components;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
-use TallStackUi\View\Components\Layout\Layout as TallStackUiLayout;
+use TallStackUi\Components\Layout\Main\Component as TallStackUiLayout;
 
 class Layout extends TallStackUiLayout
 {
@@ -13,7 +13,7 @@ class Layout extends TallStackUiLayout
         return view('flux::components.layouts.layout');
     }
 
-    public function personalization(): array
+    public function customization(): array
     {
         return Arr::dot([
             'wrapper' => [

@@ -3,7 +3,7 @@
     class="flex h-full max-h-full w-full flex-col gap-4 p-4 text-sm"
 >
     @if ($withSpinner)
-        <x-flux::spinner />
+        <x-loading />
     @endif
 
     <div class="flex w-full flex-row items-center justify-between gap-2">
@@ -41,7 +41,7 @@
                                     type="button"
                                     role="menuitem"
                                     tabindex="0"
-                                    class="focus:outline-hidden flex w-full cursor-pointer items-center whitespace-nowrap px-4 py-2 text-sm text-secondary-600 transition-colors duration-150 hover:bg-gray-100 focus:bg-gray-100 dark:text-dark-300 dark:hover:bg-dark-600 dark:focus:bg-dark-600"
+                                    class="text-secondary-600 dark:text-dark-300 dark:hover:bg-dark-600 dark:focus:bg-dark-600 flex w-full cursor-pointer items-center px-4 py-2 text-sm whitespace-nowrap transition-colors duration-150 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden"
                                     x-on:click="
                                         $wire.call(option.method, option.params ?? [])
                                         $refs.dropdown.dispatchEvent(new CustomEvent('select'))
@@ -59,7 +59,7 @@
     </div>
     <hr />
     <div
-        class="flex h-full flex-1 flex-grow flex-col justify-between gap-4 dark:text-gray-400"
+        class="flex h-full flex-1 grow flex-col justify-between gap-4 dark:text-gray-400"
     >
         @section('chart')
         <div class="chart h-full w-full"></div>

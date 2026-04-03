@@ -1,0 +1,293 @@
+name: Translation Audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PHP_VERSION: '8.5'
+  LARAVEL_VERSION: '12.*'
+  TESTBENCH_VERSION: '10.*'
+
+jobs:
+  discover-locales:
+    name: Discover Locales
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      locales: ${{ steps.find.outputs.locales }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Find locale JSON files
+        id: find
+        run: |
+          locales=$(ls lang/*.json 2>/dev/null | xargs -I{} basename {} .json | jq -R . | jq -s -c .)
+          echo "locales=$locales" >> $GITHUB_OUTPUT
+          echo "Found locales: $locales"
+
+  audit:
+    name: Audit ${{ matrix.locale }}
+    needs: discover-locales
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        locale: ${{ fromJson(needs.discover-locales.outputs.locales) }}
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      BROADCAST_DRIVER: log
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MEILISEARCH_HOST: http://meilisearch:7700
+      TRANSLATION_AUDIT_LOCALE: ${{ matrix.locale }}
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        options: >-
+          --tmpfs /var/lib/mysql
+          --tmpfs /var/log/mysql
+          --tmpfs /tmp
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+      redis:
+        image: redis
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        options: --health-cmd="curl -s http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Fix git ownership
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Configure Composer GitHub auth
+        run: composer config --global github-oauth.github.com ${{ github.token }}
+
+      - name: Change Laravel Version Dependencies
+        run: composer require "laravel/framework:${{ env.LARAVEL_VERSION }}" "orchestra/testbench:${{ env.TESTBENCH_VERSION }}" --no-interaction --no-update
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install npm dependencies
+        run: npm i
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Clear Orchestra Testbench Cache
+        run: ./vendor/bin/testbench view:clear
+
+      - name: Create schema
+        run: |
+          ./vendor/bin/testbench migrate --force
+          ./vendor/bin/testbench schema:dump
+
+      - name: Static analysis - scan code for literal keys
+        run: |
+          php -r '
+          $locale = getenv("TRANSLATION_AUDIT_LOCALE");
+          $target = json_decode(file_get_contents("lang/$locale.json"), true) ?: [];
+          $ignored = [];
+          $ignoredPatterns = [];
+          $ignoreFile = "lang/$locale.translation-ignore";
+          if (file_exists($ignoreFile)) {
+              foreach (file($ignoreFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                  $line = trim($line);
+                  if ($line === "" || str_starts_with($line, "#")) continue;
+                  if (str_ends_with($line, "*")) $ignoredPatterns[] = substr($line, 0, -1);
+                  else $ignored[$line] = true;
+              }
+          }
+
+          $isIgnored = function(string $key) use ($ignored, $ignoredPatterns): bool {
+              if (isset($ignored[$key])) return true;
+              foreach ($ignoredPatterns as $p) { if (str_starts_with($key, $p)) return true; }
+              return false;
+          };
+
+          $missing = [];
+
+          $dirs = ["src", "resources/views"];
+          foreach ($dirs as $dir) {
+              if (! is_dir($dir)) continue;
+              $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+              foreach ($it as $file) {
+                  if (! preg_match("/\.php$/", (string) $file)) continue;
+                  $content = file_get_contents((string) $file);
+                  preg_match_all("/\b__\(\s*['\x27]([^'\x27]+)['\x27]\s*[,)]/", $content, $m);
+                  foreach ($m[1] as $key) {
+                      if (! isset($target[$key]) && ! $isIgnored($key)) {
+                          $missing[$key] = true;
+                      }
+                  }
+              }
+          }
+
+          $keys = array_keys($missing);
+          sort($keys);
+
+          file_put_contents("missing-translations-static-$locale.json", json_encode([
+              "locale" => $locale,
+              "type" => "static",
+              "missing_count" => count($keys),
+              "missing_keys" => $keys,
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+          echo "Static analysis ($locale): " . count($keys) . " literal keys missing\n";
+          if (count($ignored) + count($ignoredPatterns) > 0) echo "  (" . (count($ignored) + count($ignoredPatterns)) . " ignore rules from $ignoreFile)\n";
+          '
+
+      - name: Static analysis - cross-locale comparison
+        run: |
+          php -r '
+          $locale = getenv("TRANSLATION_AUDIT_LOCALE");
+          $target = json_decode(file_get_contents("lang/$locale.json"), true) ?: [];
+          $ignored = [];
+          $ignoredPatterns = [];
+          $ignoreFile = "lang/$locale.translation-ignore";
+          if (file_exists($ignoreFile)) {
+              foreach (file($ignoreFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                  $line = trim($line);
+                  if ($line === "" || str_starts_with($line, "#")) continue;
+                  if (str_ends_with($line, "*")) $ignoredPatterns[] = substr($line, 0, -1);
+                  else $ignored[$line] = true;
+              }
+          }
+
+          $isIgnored = function(string $key) use ($ignored, $ignoredPatterns): bool {
+              if (isset($ignored[$key])) return true;
+              foreach ($ignoredPatterns as $p) { if (str_starts_with($key, $p)) return true; }
+              return false;
+          };
+
+          $otherKeys = [];
+          foreach (glob("lang/*.json") as $file) {
+              $other = basename($file, ".json");
+              if ($other === $locale) continue;
+              $data = json_decode(file_get_contents($file), true) ?: [];
+              foreach (array_keys($data) as $key) {
+                  $otherKeys[$key][] = $other;
+              }
+          }
+
+          $missing = [];
+          foreach ($otherKeys as $key => $locales) {
+              if (! isset($target[$key]) && ! $isIgnored($key)) {
+                  $missing[$key] = $locales;
+              }
+          }
+
+          ksort($missing);
+
+          file_put_contents("missing-translations-cross-$locale.json", json_encode([
+              "locale" => $locale,
+              "type" => "cross-locale",
+              "missing_count" => count($missing),
+              "missing_keys" => $missing,
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+          echo "Cross-locale ($locale): " . count($missing) . " keys exist in other locales but not in $locale\n";
+          '
+
+      - name: Runtime analysis - run tests
+        run: ./vendor/bin/testbench package:test --testsuite=Unit,Feature,Livewire
+        continue-on-error: true
+
+      - name: Generate summary
+        run: |
+          php -r '
+          $locale = getenv("TRANSLATION_AUDIT_LOCALE");
+          $allMissing = [];
+          $sources = [];
+
+          foreach (glob("missing-translations-*-$locale.json") as $file) {
+              $data = json_decode(file_get_contents($file), true);
+              if (! $data) continue;
+              $type = $data["type"];
+              $sources[$type] = $data["missing_count"];
+
+              $keys = $data["missing_keys"] ?? [];
+              if (isset($keys[0])) {
+                  foreach ($keys as $key) $allMissing[$key][] = $type;
+              } else {
+                  foreach (array_keys($keys) as $key) $allMissing[$key][] = $type;
+              }
+          }
+
+          ksort($allMissing);
+
+          $ignoredCount = 0;
+          $ignoreFile = "lang/$locale.translation-ignore";
+          if (file_exists($ignoreFile)) {
+              foreach (file($ignoreFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                  $line = trim($line);
+                  if ($line !== "" && !str_starts_with($line, "#")) $ignoredCount++;
+              }
+          }
+
+          $summary = [
+              "locale" => $locale,
+              "total_unique_missing" => count($allMissing),
+              "ignored_rules" => $ignoredCount,
+              "by_source" => $sources,
+              "missing_keys" => $allMissing,
+          ];
+
+          file_put_contents("translation-audit-$locale.json", json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+          echo "=== Translation Audit Summary: $locale ===\n";
+          echo "Total unique missing keys: " . count($allMissing) . "\n";
+          if ($ignoredCount > 0) echo "Ignored rules (via $ignoreFile): $ignoredCount\n";
+          foreach ($sources as $type => $count) {
+              echo "  $type: $count\n";
+          }
+          echo "\n";
+
+          if (count($allMissing) > 0 && count($allMissing) <= 200) {
+              foreach ($allMissing as $key => $srcs) {
+                  echo "  - " . $key . " (" . implode(", ", $srcs) . ")\n";
+              }
+          } elseif (count($allMissing) > 200) {
+              echo "  (too many to list, see artifact)\n";
+          }
+          '
+
+      - name: Upload audit reports
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: translation-audit-${{ matrix.locale }}
+          path: |
+            translation-audit-${{ matrix.locale }}.json
+            missing-translations-*-${{ matrix.locale }}.json
+          retention-days: 30

@@ -1,15 +1,6 @@
-@use('FluxErp\Providers\ViewServiceProvider')
 <div>
-    @vite([
-        ViewServiceProvider::getRealPackageAssetPath(
-            '/resources/js/alpine.js',
-            'team-nifty-gmbh/flux-erp',
-        ),
-        ViewServiceProvider::getRealPackageAssetPath(
-            '/resources/css/app.css',
-            'team-nifty-gmbh/flux-erp',
-        ),
-    ])
+    @fluxStyles
+    @fluxScripts
     <div
         x-cloak
         x-show="id === null"
@@ -63,7 +54,7 @@
                 </div>
             </div>
             <div
-                class="mb-4 mr-10 mt-4 flex h-8 w-full justify-end space-x-5 lg:mr-0"
+                class="mt-4 mr-10 mb-4 flex h-8 w-full justify-end space-x-5 lg:mr-0"
             >
                 <x-button
                     x-cloak

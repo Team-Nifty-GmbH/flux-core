@@ -59,33 +59,33 @@
         </div>
 
         <div
-            class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"
+            class="ring-opacity-5 overflow-hidden shadow ring-1 ring-black md:rounded-lg"
         >
             <table class="min-w-full divide-y divide-gray-300">
                 <thead class="bg-gray-50 dark:bg-gray-800">
                     <tr>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
                             {{ __('Work Time Model') }}
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
                             {{ __('Valid From') }}
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
                             {{ __('Valid Until') }}
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
                             {{ __('Vacation Days') }}
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
                         >
                             {{ __('Note') }}
                         </th>
@@ -99,7 +99,7 @@
                             x-bind:class="assignment.is_current ? 'bg-green-50 dark:bg-green-900/20' : ''"
                         >
                             <td
-                                class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100"
+                                class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
                             >
                                 <span
                                     x-text="assignment.work_time_model"
@@ -113,26 +113,26 @@
                                 </template>
                             </td>
                             <td
-                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+                                class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                             >
                                 <span
-                                    x-text="assignment.valid_from ? window.formatters.date(assignment.valid_from) : '-'"
+                                    x-text="assignment.valid_from ? $nuxbe.format.date(assignment.valid_from) : '-'"
                                 ></span>
                             </td>
                             <td
-                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+                                class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                             >
                                 <span
-                                    x-text="assignment.valid_until ? window.formatters.date(assignment.valid_until) : '-'"
+                                    x-text="assignment.valid_until ? $nuxbe.format.date(assignment.valid_until) : '-'"
                                 ></span>
                             </td>
                             <td
-                                class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+                                class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
                             >
                                 <span
                                     x-text="
                                         assignment.annual_vacation_days
-                                            ? window.formatters.int(assignment.annual_vacation_days)
+                                            ? $nuxbe.format.int(assignment.annual_vacation_days)
                                             : '-'
                                     "
                                 ></span>

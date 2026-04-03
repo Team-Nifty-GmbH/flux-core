@@ -83,7 +83,7 @@ class VariantList extends ProductList
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => <<<'JS'
-                        $modalOpen('generate-variants-modal')
+                        $tsui.open.modal('generate-variants-modal')
                     JS,
                 ])
                 ->when(
