@@ -6,19 +6,19 @@
                 :text="__(':count orders without coordinates', ['count' => $this->getOrdersWithoutCoordinatesCount()])"
             />
         @endif
-    </x-slot>
+    </x-slot:controls>
 </x-flux::map.fullscreen-container>
 <div
     x-data="{
         updateContactId(id) {
             $tallstackuiSelect('invoice-address-id').mergeRequestParams({
                 where: [['contact_id', '=', id]],
-            })
+            });
             $tallstackuiSelect('delivery-address-id').mergeRequestParams({
                 where: [['contact_id', '=', id]],
-            })
+            });
 
-            $wire.fetchContactData()
+            $wire.fetchContactData();
         },
     }"
 >
@@ -41,7 +41,9 @@
                         class="pb-4"
                         wire:model="order.contact_id"
                         required
-                        x-on:select="updateContactId($event.detail.select.contact_id)"
+                        x-on:select="
+                            updateContactId($event.detail.select.contact_id)
+                        "
                         select="label:label|value:contact_id"
                         unfiltered
                         :request="[
@@ -167,13 +169,10 @@
                 :text="__('Save')"
                 wire:click="save()"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 
-    <x-modal
-        id="create-collective-order-modal"
-        :title="__('Collective Order')"
-    >
+    <x-modal id="create-collective-order-modal" :title="__('Collective Order')">
         <div class="flex flex-col gap-4">
             <x-select.styled
                 :label="__('Collective Order Type')"
@@ -223,7 +222,7 @@
                 :text="__('Create')"
                 wire:click="createCollectiveOrders()"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     {{ $this->renderCreateDocumentsModal() }}
 </div>

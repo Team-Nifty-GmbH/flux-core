@@ -13,8 +13,7 @@
                     <div
                         class="text-sm font-semibold text-gray-900 dark:text-gray-50"
                     >
-                        {{ $order['order_number'] }}
-                        {{ $order['address_invoice']['label'] }}
+                        {{ $order['order_number'] }} {{ $order['address_invoice']['label'] }}
                     </div>
                     <x-label class="opacity-60">
                         {{ __($order['order_type']['name']) }}
@@ -31,7 +30,7 @@
                 ></x-button>
             </div>
         </div>
-    </x-slot>
+    </x-slot:header>
     <div class="pb-2 font-semibold uppercase">{{ __('General') }}</div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Customer')" />
@@ -65,12 +64,22 @@
         <x-label :label="__('Payment state')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-html="$nuxbe.format.state($wire.order.payment_state, formatter.payment_state[1])"
+            x-html="
+                $nuxbe.format.state(
+                    $wire.order.payment_state,
+                    formatter.payment_state[1],
+                )
+            "
         ></div>
         <x-label :label="__('Total net')" />
         <div
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
-            x-text="$nuxbe.format.money($wire.order.total_net_price, $wire.order.currency)"
+            x-text="
+                $nuxbe.format.money(
+                    $wire.order.total_net_price,
+                    $wire.order.currency,
+                )
+            "
         ></div>
     </div>
     <div class="pt-8 pb-2 font-semibold uppercase">
@@ -93,7 +102,7 @@
                 <x-flux::table.head-cell>
                     {{ __('Total Net Price') }}
                 </x-flux::table.head-cell>
-            </x-slot>
+            </x-slot:header>
             <template x-for="orderPosition in $wire.orderPositions">
                 <x-flux::table.row>
                     <x-flux::table.cell
@@ -105,7 +114,11 @@
                     ></x-flux::table.cell>
                     <x-flux::table.cell
                         class="text-right"
-                        x-html="$nuxbe.format.money(orderPosition.total_net_price, {colored: true})"
+                        x-html="
+                            $nuxbe.format.money(orderPosition.total_net_price, {
+                                colored: true,
+                            })
+                        "
                     ></x-flux::table.cell>
                 </x-flux::table.row>
             </template>
@@ -114,7 +127,11 @@
     <x-button
         loading
         color="indigo"
-        x-on:click="$wire.orderPositions.length < 1 ? $wire.loadOrderPositions() : $wire.orderPositions = []"
+        x-on:click="
+            $wire.orderPositions.length < 1
+                ? $wire.loadOrderPositions()
+                : ($wire.orderPositions = [])
+        "
     >
         <span
             x-text="$wire.orderPositions.length < 1 ? '{{ __('Show') }}' : '{{ __('Hide') }}'"

@@ -5,7 +5,9 @@
 <div
     class="h-full"
     x-data="{ tallStackUiMenuMobile: false }"
-    x-on:tallstackui-menu-mobile.window="tallStackUiMenuMobile = $event.detail.status"
+    x-on:tallstackui-menu-mobile.window="
+        tallStackUiMenuMobile = $event.detail.status
+    "
 >
     @if ($top)
         {{ $top }}
@@ -21,9 +23,7 @@
                 {{ $header }}
             @endif
 
-            <main class="{{ $personalize['main'] }}">
-                {{ $slot }}
-            </main>
+            <main class="{{ $personalize['main'] }}">{{ $slot }}</main>
         </div>
     </div>
     @if ($footer)

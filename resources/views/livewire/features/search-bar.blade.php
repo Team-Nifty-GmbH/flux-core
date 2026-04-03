@@ -2,22 +2,22 @@
     x-data="{
         init() {
             $watch('showDropdown', (value) => {
-                if (! value) {
-                    this.showDetails(null, null)
+                if (!value) {
+                    this.showDetails(null, null);
                 }
-            })
+            });
         },
         showDropdown: false,
         detailModel: null,
         detailId: null,
         showDetails(model, id) {
             if (model === this.detailModel && id === this.detailId) {
-                return
+                return;
             }
 
-            this.detailModel = model
-            this.detailId = id
-            $dispatch('render-search-bar-widget', { model: model, id: id })
+            this.detailModel = model;
+            this.detailId = id;
+            $dispatch('render-search-bar-widget', { model: model, id: id });
         },
     }"
     x-on:click.outside="showDropdown = false"
@@ -43,14 +43,14 @@
     >
         <x-card class="relative px-0! py-0! pb-2">
             <div
-                x-show="$wire.search.length && ! Object.keys($wire.return).length"
+                x-show="
+                    $wire.search.length && !Object.keys($wire.return).length
+                "
                 x-cloak
                 class="flex w-full items-center justify-center py-1.5"
             >
                 <x-icon name="magnifying-glass" class="mr-2 h-5 w-5" />
-                <div>
-                    {{ __('No results…') }}
-                </div>
+                <div>{{ __('No results…') }}</div>
             </div>
             <x-loading />
             <div
@@ -66,7 +66,9 @@
                             <ul class="mt-2 text-sm text-gray-800" role="none">
                                 <template x-for="item in items">
                                     <li
-                                        x-on:mouseover.debounce.500ms="showDetails(model, item.id)"
+                                        x-on:mouseover.debounce.500ms="
+                                            showDetails(model, item.id)
+                                        "
                                         class="flex cursor-pointer items-center space-x-1.5 px-4 py-2 select-none hover:bg-indigo-600 hover:text-white"
                                         wire:click="showDetail(model, item.id)"
                                     >

@@ -1,6 +1,6 @@
 <x-modal x-on:close="$wire.resetDiscount()" id="edit-discount-modal">
     <div class="flex flex-col gap-4">
-        <div x-cloak x-show="! $wire.discountForm.id">
+        <div x-cloak x-show="!$wire.discountForm.id">
             <x-select.styled
                 :label="__('Type')"
                 x-on:select="$wire.discountForm.model_id = null"
@@ -86,7 +86,7 @@
                 max="100"
             />
         </div>
-        <div x-cloak x-show="! $wire.discountForm.is_percentage">
+        <div x-cloak x-show="!$wire.discountForm.is_percentage">
             <x-number
                 :label="__('Discount Flat')"
                 wire:model="discountForm.discount"
@@ -98,7 +98,11 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('edit-discount-modal');})"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success) $tsui.close.modal('edit-discount-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

@@ -1,4 +1,4 @@
-@props([
+@props ([
     'wireMethod' => 'loadMap',
     'autoload' => false,
 ])
@@ -28,7 +28,9 @@
         x-transition:leave="transition duration-200 ease-in"
         x-transition:leave-start="scale-100 transform opacity-100"
         x-transition:leave-end="scale-95 transform opacity-0"
-        x-bind:class="isFullscreen ? 'flex-1 flex flex-col min-h-0' : 'z-0 py-4'"
+        x-bind:class="
+            isFullscreen ? 'flex-1 flex flex-col min-h-0' : 'z-0 py-4'
+        "
     >
         <div
             class="w-full"
@@ -55,25 +57,35 @@
                     <x-button.circle
                         color="secondary"
                         light
-                        x-on:click="isFullscreen = !isFullscreen; $nextTick(() => resizeMap())"
+                        x-on:click="
+                            isFullscreen = !isFullscreen;
+                            $nextTick(() => resizeMap());
+                        "
                         icon="arrows-pointing-out"
                     />
                     <x-button.circle
                         color="secondary"
                         light
-                        x-on:click="isFullscreen = false; $wire.$set('showMap', false, true)"
+                        x-on:click="
+                            isFullscreen = false;
+                            $wire.$set('showMap', false, true);
+                        "
                         icon="x-mark"
                     />
                 </div>
             </div>
             <div
                 x-intersect.once="onChange()"
-                x-bind:class="isFullscreen ? 'flex-1 min-h-0 flex flex-col' : ''"
+                x-bind:class="
+                    isFullscreen ? 'flex-1 min-h-0 flex flex-col' : ''
+                "
                 class="border-secondary-200 dark:border-secondary-600 overflow-hidden rounded-lg border"
             >
                 <div
                     id="map"
-                    x-bind:class="isFullscreen ? 'flex-1 w-full' : 'h-96 min-w-96'"
+                    x-bind:class="
+                        isFullscreen ? 'flex-1 w-full' : 'h-96 min-w-96'
+                    "
                 ></div>
             </div>
         </div>

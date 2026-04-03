@@ -1,6 +1,6 @@
 <x-modal
     id="edit-record-origin-modal"
-    x-on:open="$tsui.focus('record-origin-name');"
+    x-on:open="$tsui.focus('record-origin-name')"
     :title="__('Record Origin')"
 >
     <div class="flex flex-col gap-1.5">
@@ -9,7 +9,7 @@
             wire:model="recordOriginForm.name"
             :label="__('Name')"
         />
-        <div x-cloak x-show="! $wire.recordOriginForm.id">
+        <div x-cloak x-show="!$wire.recordOriginForm.id">
             <x-select.styled
                 :label="__('Origin type')"
                 wire:model="recordOriginForm.model_type"
@@ -33,7 +33,11 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-record-origin-modal') })"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success) $tsui.close.modal('edit-record-origin-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

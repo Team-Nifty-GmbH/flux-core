@@ -1,20 +1,14 @@
-@extends('flux::printing.order.order')
+@extends ('flux::printing.order.order')
 
-@section('positions.header')
+@section ('positions.header')
     <tr>
-        <th class="pr-8 text-left font-normal">
-            {{ __('Pos.') }}
-        </th>
-        <th class="pr-8 text-left font-normal">
-            {{ __('Name') }}
-        </th>
-        <th class="pr-8 text-center font-normal">
-            {{ __('Amount') }}
-        </th>
+        <th class="pr-8 text-left font-normal">{{ __('Pos.') }}</th>
+        <th class="pr-8 text-left font-normal">{{ __('Name') }}</th>
+        <th class="pr-8 text-center font-normal">{{ __('Amount') }}</th>
     </tr>
 @endsection
 
-@section('positions.positions')
+@section ('positions.positions')
     @foreach ($model->orderPositions as $position)
         <tbody class="bg-uneven">
             <tr>
@@ -37,23 +31,20 @@
                     <p class="font-italic text-xs">
                         {{ $position->product_number }}
                     </p>
-                    <p class="font-semibold">
-                        {{ $position->name }}
-                    </p>
+                    <p class="font-semibold">{{ $position->name }}</p>
                 </td>
                 <td class="py-4 pr-8 text-center align-top">
-                    {{ Number::format($position->amount) }}
-                    {{ data_get($position, 'product.unit.abbreviation') }}
+                    {{ Number::format($position->amount) }} {{ data_get($position, 'product.unit.abbreviation') }}
                 </td>
             </tr>
         </tbody>
     @endforeach
 @endsection
 
-@section('summary')
-    
+@section ('summary')
+
 @endsection
 
-@section('total')
-    
+@section ('total')
+
 @endsection

@@ -68,7 +68,11 @@
                 </div>
                 <div
                     x-cloak
-                    x-show="['nearest', 'end'].includes($wire.priceList.rounding_method_enum)"
+                    x-show="
+                        ['nearest', 'end'].includes(
+                            $wire.priceList.rounding_method_enum,
+                        )
+                    "
                 >
                     <x-number
                         wire:model.number="priceList.rounding_number"
@@ -79,7 +83,11 @@
                 </div>
                 <div
                     x-cloak
-                    x-show="['nearest', 'end'].includes($wire.priceList.rounding_method_enum)"
+                    x-show="
+                        ['nearest', 'end'].includes(
+                            $wire.priceList.rounding_method_enum,
+                        )
+                    "
                 >
                     <x-select.styled
                         wire:model="priceList.rounding_mode"
@@ -115,7 +123,7 @@
                             {{ __('Is Percentage') }}
                         </th>
                         <th class="w-16 px-3 py-3"></th>
-                    </x-slot>
+                    </x-slot:header>
                     <template
                         x-for="(category, index) in $wire.discountedCategories"
                         x-bind:key="category.id"
@@ -127,13 +135,17 @@
                             ></td>
                             <td class="px-3 py-4 whitespace-nowrap">
                                 <x-number
-                                    x-model.number="category.discounts[0].discount"
+                                    x-model.number="
+                                        category.discounts[0].discount
+                                    "
                                     :disabled="! ($priceList->id ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                 />
                             </td>
                             <td class="px-3 py-4 text-center whitespace-nowrap">
                                 <x-toggle
-                                    x-model.boolean="category.discounts[0].is_percentage"
+                                    x-model.boolean="
+                                        category.discounts[0].is_percentage
+                                    "
                                     :disabled="! ($priceList->id ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                 />
                             </td>
@@ -143,7 +155,9 @@
                                         icon="trash"
                                         color="red"
                                         flat
-                                        x-on:click="$wire.removeCategoryDiscount(index)"
+                                        x-on:click="
+                                            $wire.removeCategoryDiscount(index)
+                                        "
                                     />
                                 @endif
                             </td>
@@ -204,8 +218,12 @@
             <x-button
                 color="primary"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-price-list-modal')})"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        if (success) $tsui.close.modal('edit-price-list-modal');
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

@@ -1,5 +1,5 @@
 <div>
-    @use(Illuminate\Support\Number)
+    @use (Illuminate\Support\Number)
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <x-card :header="__('Basic Information')">
             <div class="space-y-4">
@@ -80,8 +80,7 @@
                 <div class="flex items-center justify-between">
                     <span class="text-sm">{{ __('Sick Hours Used') }}</span>
                     <span class="font-medium text-red-600 dark:text-red-400">
-                        {{ Number::format(data_get($this->employeeDayForm, 'sick_hours_used', 0)) . 'h' }}
-                        ({{ Number::format(data_get($this->employeeDayForm, 'sick_days_used', 0)) . ' ' . __('Days') }})
+                        {{ Number::format(data_get($this->employeeDayForm, 'sick_hours_used', 0)) . 'h' }} ({{ Number::format(data_get($this->employeeDayForm, 'sick_days_used', 0)) . ' ' . __('Days') }})
                     </span>
                 </div>
 
@@ -90,8 +89,7 @@
                         {{ __('Vacation Hours Used') }}
                     </span>
                     <span class="font-medium text-red-600 dark:text-red-400">
-                        {{ Number::format(data_get($this->employeeDayForm, 'vacation_hours_used', 0)) . 'h' }}
-                        ({{ Number::format(data_get($this->employeeDayForm, 'vacation_days_used', 0)) . ' ' . __('Days') }})
+                        {{ Number::format(data_get($this->employeeDayForm, 'vacation_hours_used', 0)) . 'h' }} ({{ Number::format(data_get($this->employeeDayForm, 'vacation_days_used', 0)) . ' ' . __('Days') }})
                     </span>
                 </div>
 

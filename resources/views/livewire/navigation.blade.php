@@ -1,40 +1,42 @@
 <div>
     <div
         id="main-navigation"
-        x-on:menu-force-open.window="menuOpen ? closeMenu(true) : showMenu(true)"
+        x-on:menu-force-open.window="
+            menuOpen ? closeMenu(true) : showMenu(true)
+        "
         x-data="{
             init() {
                 document.addEventListener('livewire:navigating', () => {
-                    this.closeMenu(true)
-                })
+                    this.closeMenu(true);
+                });
             },
             open: [],
             toggleMenu(key) {
                 if (this.isOpen(key)) {
-                    this.open = this.open.filter((item) => item !== key)
+                    this.open = this.open.filter((item) => item !== key);
                 } else {
-                    this.open.push(key)
+                    this.open.push(key);
                 }
             },
             isOpen(key) {
-                return this.open.includes(key) && this.menuOpen
+                return this.open.includes(key) && this.menuOpen;
             },
             showMenu(force = null) {
-                if (this.forced && ! force) {
-                    return
+                if (this.forced && !force) {
+                    return;
                 }
 
-                this.menuOpen = true
+                this.menuOpen = true;
                 if (force) {
-                    this.forced = true
+                    this.forced = true;
                 }
             },
             closeMenu(force = null) {
-                if (this.forced && ! force) {
-                    return
+                if (this.forced && !force) {
+                    return;
                 }
 
-                this.menuOpen = false
+                this.menuOpen = false;
             },
             forced: false,
             menuOpen: false,
@@ -120,7 +122,9 @@
                 @if (! is_null($visits))
                     <div class="whitespace-nowrap">
                         <div
-                            x-on:click="frequentlyVisitedOpen = ! frequentlyVisitedOpen"
+                            x-on:click="
+                                frequentlyVisitedOpen = !frequentlyVisitedOpen
+                            "
                             class="dark:text-light dark:hover:bg-indigo flex cursor-pointer items-center rounded-md py-2 text-gray-500 text-white transition-colors hover:bg-gray-800/50"
                         >
                             <div class="w-16 flex-none">
@@ -137,15 +141,13 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="frequentlyVisitedOpen && '-rotate-90'"
+                                    x-bind:class="
+                                        frequentlyVisitedOpen && '-rotate-90'
+                                    "
                                 />
                             </span>
                         </div>
-                        <div
-                            x-show="frequentlyVisitedOpen"
-                            x-cloak
-                            x-collapse
-                        >
+                        <div x-show="frequentlyVisitedOpen" x-cloak x-collapse>
                             @foreach ($visits as $visit)
                                 <a
                                     wire:navigate
@@ -174,7 +176,7 @@
                 @if (! is_null($favorites))
                     <div class="whitespace-nowrap">
                         <div
-                            x-on:click="favoritesOpen = ! favoritesOpen"
+                            x-on:click="favoritesOpen = !favoritesOpen"
                             class="dark:text-light dark:hover:bg-indigo flex cursor-pointer items-center rounded-md py-2 text-gray-500 text-white transition-colors hover:bg-gray-800/50"
                         >
                             <div class="w-16 flex-none">
@@ -246,7 +248,7 @@
                             @endforeach
 
                             <x-button
-                                x-bind:class="! menuOpen && 'invisible'"
+                                x-bind:class="!menuOpen && 'invisible'"
                                 color="emerald"
                                 class="w-full"
                                 icon="plus"

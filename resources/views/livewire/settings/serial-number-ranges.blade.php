@@ -1,12 +1,9 @@
-<x-modal
-    id="edit-serial-number-range-modal"
-    :title="__('Serial Number Range')"
->
+<x-modal id="edit-serial-number-range-modal" :title="__('Serial Number Range')">
     <div class="flex flex-col gap-1.5">
         <div
             class="flex flex-col gap-1.5"
             x-cloak
-            x-show="! $wire.serialNumberRange.id"
+            x-show="!$wire.serialNumberRange.id"
         >
             <x-select.styled
                 wire:model="serialNumberRange.model_type"
@@ -134,7 +131,12 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-serial-number-range-modal')})"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success)
+                        $tsui.close.modal('edit-serial-number-range-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

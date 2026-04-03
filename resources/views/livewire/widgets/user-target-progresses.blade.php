@@ -1,5 +1,5 @@
-@extends('flux::livewire.widgets.my-target-progresses')
-@section('options')
+@extends ('flux::livewire.widgets.my-target-progresses')
+@section ('options')
     <div class="px-2">
         <x-select.styled
             autocomplete="off"

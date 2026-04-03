@@ -2,11 +2,11 @@
     class="flow-root"
     x-data="{
         init() {
-            $wire.loadData()
+            $wire.loadData();
         },
         activeActivity: null,
         showProperties(id) {
-            this.activeActivity = this.activeActivity === id ? null : id
+            this.activeActivity = this.activeActivity === id ? null : id;
         },
     }"
 >
@@ -21,7 +21,7 @@
                     <div
                         x-bind:class="
                             activity.id === activeActivity &&
-                                'border-gray-200 dark:border-secondary-500 rounded-md border'
+                            'border-gray-200 dark:border-secondary-500 rounded-md border'
                         "
                     >
                         <div class="relative flex space-x-3 p-1.5">
@@ -29,7 +29,8 @@
                                 <div
                                     x-init="
                                         $nextTick(() => {
-                                            $el.querySelector('img').src = activity.causer.avatar_url
+                                            $el.querySelector('img').src =
+                                                activity.causer.avatar_url;
                                         })
                                     "
                                 >
@@ -49,13 +50,17 @@
                                             x-text="activity.causer.name"
                                         ></span>
                                         <span
-                                            x-on:click="showProperties(activity.id)"
+                                            x-on:click="
+                                                showProperties(activity.id)
+                                            "
                                             href="#"
                                             class="cursor-pointer font-medium text-gray-900 dark:text-white"
                                             x-text="activity.event"
                                         ></span>
                                         <div
-                                            x-show="activity.id === activeActivity"
+                                            x-show="
+                                                activity.id === activeActivity
+                                            "
                                             x-collapse
                                             x-cloak
                                         >
@@ -65,7 +70,13 @@
                                             <template
                                                 x-for="
                                                     (value, name) in
-                                                        Object.fromEntries(Object.entries(activity.properties.attributes ?? {}))
+                                                    Object.fromEntries(
+                                                        Object.entries(
+                                                            activity.properties
+                                                                .attributes ??
+                                                                {},
+                                                        ),
+                                                    )
                                                 "
                                             >
                                                 <div>
@@ -75,13 +86,26 @@
                                                     ></span>
                                                     <span
                                                         x-html="
-                                                            activity.properties.old && activity.properties.old[name]
-                                                                ? activity.properties.old[name] + '<span> -></span>'
+                                                            activity.properties
+                                                                .old &&
+                                                            activity.properties
+                                                                .old[name]
+                                                                ? activity
+                                                                      .properties
+                                                                      .old[
+                                                                      name
+                                                                  ] +
+                                                                  '<span> -></span>'
                                                                 : ''
                                                         "
                                                     ></span>
                                                     <span
-                                                        x-text="typeof value === 'undefined' ? '' : value"
+                                                        x-text="
+                                                            typeof value ===
+                                                            'undefined'
+                                                                ? ''
+                                                                : value
+                                                        "
                                                     ></span>
                                                 </div>
                                             </template>
@@ -92,7 +116,11 @@
                                     class="text-right text-sm whitespace-nowrap text-gray-500"
                                 >
                                     <time
-                                        x-text="$nuxbe.format.datetime(activity.created_at)"
+                                        x-text="
+                                            $nuxbe.format.datetime(
+                                                activity.created_at,
+                                            )
+                                        "
                                     ></time>
                                 </div>
                             </div>

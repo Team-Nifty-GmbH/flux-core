@@ -21,7 +21,7 @@
                     >
                         {{ __('Add Signature') }}
                     </x-button>
-                </x-slot>
+                </x-slot:action>
                 @foreach ($unsignedViews as $unsignedView)
                     <x-dropdown.items
                         x-on:click="$wire.setPublicLink('{{ $unsignedView }}').then(() => show = false)"

@@ -5,40 +5,41 @@
         sortBy: 'table',
         sortDirection: 'asc',
         sortedTables() {
-            if (! $wire.tables) return []
+            if (!$wire.tables) return [];
 
-            const tables = [...$wire.tables]
+            const tables = [...$wire.tables];
             return tables.sort((a, b) => {
-                let aVal, bVal
+                let aVal, bVal;
 
                 if (this.sortBy === 'size') {
                     // Use raw size in bytes
-                    aVal = parseInt(a.size)
-                    bVal = parseInt(b.size)
+                    aVal = parseInt(a.size);
+                    bVal = parseInt(b.size);
                 } else if (this.sortBy === 'rows') {
-                    aVal = parseInt(a.rows)
-                    bVal = parseInt(b.rows)
+                    aVal = parseInt(a.rows);
+                    bVal = parseInt(b.rows);
                 } else if (this.sortBy === 'database') {
-                    aVal = a.database.toLowerCase()
-                    bVal = b.database.toLowerCase()
+                    aVal = a.database.toLowerCase();
+                    bVal = b.database.toLowerCase();
                 } else {
-                    aVal = a.table.toLowerCase()
-                    bVal = b.table.toLowerCase()
+                    aVal = a.table.toLowerCase();
+                    bVal = b.table.toLowerCase();
                 }
 
                 if (this.sortDirection === 'asc') {
-                    return aVal > bVal ? 1 : -1
+                    return aVal > bVal ? 1 : -1;
                 } else {
-                    return aVal < bVal ? 1 : -1
+                    return aVal < bVal ? 1 : -1;
                 }
-            })
+            });
         },
         sort(column) {
             if (this.sortBy === column) {
-                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'
+                this.sortDirection =
+                    this.sortDirection === 'asc' ? 'desc' : 'asc';
             } else {
-                this.sortBy = column
-                this.sortDirection = 'asc'
+                this.sortBy = column;
+                this.sortDirection = 'asc';
             }
         },
     }"
@@ -65,7 +66,7 @@
             <x-badge color="indigo">
                 <x-slot:text>
                     <span x-text="$wire.connection"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
         </div>
         <div class="flex items-center justify-between">
@@ -75,7 +76,7 @@
             <x-badge color="indigo">
                 <x-slot:text>
                     <span x-text="$wire.driver"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
         </div>
         <div class="flex items-center justify-between">
@@ -112,7 +113,7 @@
             <x-badge color="indigo">
                 <x-slot:text>
                     <span x-text="$wire.platform.version"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
         </div>
     </div>
@@ -132,9 +133,11 @@
                             <i
                                 class="ph ph-caret-down text-xs transition-transform duration-200"
                                 x-bind:class="
-                                    sortBy === 'database' && sortDirection === 'desc'
+                                    sortBy === 'database' &&
+                                    sortDirection === 'desc'
                                         ? 'rotate-0 opacity-100'
-                                        : sortBy === 'database' && sortDirection === 'asc'
+                                        : sortBy === 'database' &&
+                                            sortDirection === 'asc'
                                           ? 'rotate-180 opacity-100'
                                           : 'opacity-50'
                                 "
@@ -150,9 +153,11 @@
                             <i
                                 class="ph ph-caret-down text-xs transition-transform duration-200"
                                 x-bind:class="
-                                    sortBy === 'table' && sortDirection === 'desc'
+                                    sortBy === 'table' &&
+                                    sortDirection === 'desc'
                                         ? 'rotate-0 opacity-100'
-                                        : sortBy === 'table' && sortDirection === 'asc'
+                                        : sortBy === 'table' &&
+                                            sortDirection === 'asc'
                                           ? 'rotate-180 opacity-100'
                                           : 'opacity-50'
                                 "
@@ -168,9 +173,11 @@
                             <i
                                 class="ph ph-caret-down text-xs transition-transform duration-200"
                                 x-bind:class="
-                                    sortBy === 'rows' && sortDirection === 'desc'
+                                    sortBy === 'rows' &&
+                                    sortDirection === 'desc'
                                         ? 'rotate-0 opacity-100'
-                                        : sortBy === 'rows' && sortDirection === 'asc'
+                                        : sortBy === 'rows' &&
+                                            sortDirection === 'asc'
                                           ? 'rotate-180 opacity-100'
                                           : 'opacity-50'
                                 "
@@ -186,9 +193,11 @@
                             <i
                                 class="ph ph-caret-down text-xs transition-transform duration-200"
                                 x-bind:class="
-                                    sortBy === 'size' && sortDirection === 'desc'
+                                    sortBy === 'size' &&
+                                    sortDirection === 'desc'
                                         ? 'rotate-0 opacity-100'
-                                        : sortBy === 'size' && sortDirection === 'asc'
+                                        : sortBy === 'size' &&
+                                            sortDirection === 'asc'
                                           ? 'rotate-180 opacity-100'
                                           : 'opacity-50'
                                 "

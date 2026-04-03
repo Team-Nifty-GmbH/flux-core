@@ -3,34 +3,40 @@
         init() {
             $wire.getPriceLists().then(() =>
                 $wire.priceLists.forEach((priceList) => {
-                    priceList.price_net = $nuxbe.parseNumber(priceList.price_net)
+                    priceList.price_net = $nuxbe.parseNumber(
+                        priceList.price_net,
+                    );
                     priceList.price_gross = $nuxbe.parseNumber(
                         priceList.price_gross,
-                    )
+                    );
                 }),
-            )
+            );
         },
         recalculate(priceList, isNet) {
-            const vatRate = Number($wire.product.vat_rate?.rate_percentage)
+            const vatRate = Number($wire.product.vat_rate?.rate_percentage);
 
-            if (! vatRate) {
+            if (!vatRate) {
                 if (isNet) {
-                    priceList.price_gross = $nuxbe.parseNumber(priceList.price_net)
+                    priceList.price_gross = $nuxbe.parseNumber(
+                        priceList.price_net,
+                    );
                 } else {
-                    priceList.price_net = $nuxbe.parseNumber(priceList.price_gross)
+                    priceList.price_net = $nuxbe.parseNumber(
+                        priceList.price_gross,
+                    );
                 }
 
-                return
+                return;
             }
 
             if (isNet) {
                 priceList.price_gross = $nuxbe.parseNumber(
                     priceList.price_net * (1 + vatRate),
-                )
+                );
             } else {
                 priceList.price_net = $nuxbe.parseNumber(
                     priceList.price_gross / (1 + vatRate),
-                )
+                );
             }
         },
     }"
@@ -61,24 +67,24 @@
                         :text="__('Purchase Price')"
                     />
                     <x-badge
-                        x-show="priceList.parent && ! priceList.price_id"
+                        x-show="priceList.parent && !priceList.price_id"
                         color="amber"
                         x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)"
                     />
                     <div x-show="priceList.parent">
                         <x-toggle
                             x-model.boolean="priceList.is_editable"
-                            x-bind:disabled="! isEditing"
+                            x-bind:disabled="!isEditing"
                             label="{{ __('Override calculated price') }}"
                         />
                     </div>
                 </div>
-            </x-slot>
+            </x-slot:header>
             <x-input
                 :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 class="net-price"
                 type="number"
-                x-on:input="recalculate(priceList, true);"
+                x-on:input="recalculate(priceList, true)"
                 x-bind:readonly="!isEditing || !priceList.is_editable"
                 label="{{ __('Price net') }}"
                 x-model="priceList.price_net"
@@ -87,7 +93,7 @@
                 :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 class="gross-price"
                 type="number"
-                x-on:input="recalculate(priceList, false);"
+                x-on:input="recalculate(priceList, false)"
                 x-bind:readonly="!isEditing || !priceList.is_editable"
                 label="{{ __('Price gross') }}"
                 x-model="priceList.price_gross"

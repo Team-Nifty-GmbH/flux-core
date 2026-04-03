@@ -24,12 +24,10 @@
     />
     <div class="flex flex-col text-right">
         <div class="font-semibold">
-            {{ Number::currency(number: $cartItem->total, locale: app()->getLocale()) }}
-            *
+            {{ Number::currency(number: $cartItem->total, locale: app()->getLocale()) }} *
         </div>
         <div class="text-secondary-400">
-            {{ Number::currency(number: $cartItem->price, locale: app()->getLocale()) }}
-            / {{ __('Piece') }} *
+            {{ Number::currency(number: $cartItem->price, locale: app()->getLocale()) }} / {{ __('Piece') }} *
         </div>
     </div>
 </div>

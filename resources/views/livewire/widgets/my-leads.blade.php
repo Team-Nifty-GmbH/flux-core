@@ -6,17 +6,17 @@
             >
                 {{ $this->getLabel() }}
             </h2>
-            @section('options')
-            <div class="flex-none">
-                <x-dropdown icon="ellipsis-vertical" static>
-                    @foreach ($this->options() ?? [] as $option)
-                        <x-dropdown.items
-                            :text="data_get($option, 'label')"
-                            wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
-                        />
-                    @endforeach
-                </x-dropdown>
-            </div>
+            @section ('options')
+                <div class="flex-none">
+                    <x-dropdown icon="ellipsis-vertical" static>
+                        @foreach ($this->options() ?? [] as $option)
+                            <x-dropdown.items
+                                :text="data_get($option, 'label')"
+                                wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                </div>
             @show
         </div>
         <hr class="mt-2" />

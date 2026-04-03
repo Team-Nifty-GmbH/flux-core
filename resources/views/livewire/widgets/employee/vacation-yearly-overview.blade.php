@@ -54,13 +54,13 @@
         >
             @forelse ($yearlyData as $year)
                 <tr
-                    @class([
+                    @class ([
                         'bg-primary-50 dark:bg-primary-900/20' => $year['is_current'],
                     ])
                 >
                     <td class="px-4 py-2 whitespace-nowrap">
                         <span
-                            @class([
+                            @class ([
                                 'font-semibold' => $year['is_current'],
                             ])
                         >
@@ -69,8 +69,7 @@
                                 <div
                                     class="mt-1 text-xs text-gray-500 dark:text-gray-400"
                                 >
-                                    {{ __('Entry') }}:
-                                    {{ $year['employment_date'] }}
+                                    {{ __('Entry') }}: {{ $year['employment_date'] }}
                                 </div>
                             @endif
 
@@ -78,8 +77,7 @@
                                 <div
                                     class="mt-1 text-xs text-gray-500 dark:text-gray-400"
                                 >
-                                    {{ __('Exit') }}:
-                                    {{ $year['termination_date'] }}
+                                    {{ __('Exit') }}: {{ $year['termination_date'] }}
                                 </div>
                             @endif
                         </span>
@@ -168,7 +166,7 @@
                     </td>
                     <td class="px-4 py-2 text-right whitespace-nowrap">
                         <div
-                            @class([
+                            @class ([
                                 'text-green-600 dark:text-green-400' =>
                                     (float) str_replace(',', '', $year['remaining_days']) > 0,
                                 'text-red-600 dark:text-red-400' =>
@@ -197,9 +195,7 @@
         @if (count($yearlyData) > 0)
             <tfoot>
                 <tr class="bg-gray-50 font-semibold dark:bg-gray-800">
-                    <td class="px-4 py-3 text-left">
-                        {{ __('Summary') }}
-                    </td>
+                    <td class="px-4 py-3 text-left">{{ __('Summary') }}</td>
                     <td class="px-4 py-3 text-right">
                         <span class="text-gray-400 dark:text-gray-600">-</span>
                     </td>
@@ -254,7 +250,7 @@
                         @endphp
 
                         <div
-                            @class([
+                            @class ([
                                 'text-green-600 dark:text-green-400' => $currentBalanceFloat > 0,
                                 'text-red-600 dark:text-red-400' => $currentBalanceFloat < 0,
                             ])

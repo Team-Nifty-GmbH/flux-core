@@ -52,14 +52,12 @@
             :text="__('Save')"
             x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $this->modalName() }}')})"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>
 <x-modal persistent id="copy-token-modal" :title="__('Copy token')">
     <div class="flex flex-col gap-4">
         <div class="text-sm text-gray-500">
-            <p>
-                {{ __('Copy the token to your clipboard.') }}
-            </p>
+            <p>{{ __('Copy the token to your clipboard.') }}</p>
             <span class="font-semibold text-red-500">
                 {{ __('The token will not be shown again after closing the modal.') }}
             </span>
@@ -78,5 +76,5 @@
             wire:click="modalClose('copy-token-modal')"
             wire:flux-confirm.type.warning="{{ __('Token saved|Confirm that you copied the token.') }}"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

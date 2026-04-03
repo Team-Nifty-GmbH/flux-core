@@ -2,24 +2,24 @@
     class="flex items-center justify-center gap-x-2"
     x-data="{
         browserDarkMode() {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
         },
         enable() {
-            $wire.dark = true
-            window.localStorage.setItem('dark', true)
-            document.documentElement.classList.add('dark')
+            $wire.dark = true;
+            window.localStorage.setItem('dark', true);
+            document.documentElement.classList.add('dark');
         },
         disable() {
-            $wire.dark = false
-            window.localStorage.setItem('dark', false)
-            document.documentElement.classList.remove('dark')
+            $wire.dark = false;
+            window.localStorage.setItem('dark', false);
+            document.documentElement.classList.remove('dark');
         },
         syncDarkMode() {
-            $wire.dark ? this.enable() : this.disable()
+            $wire.dark ? this.enable() : this.disable();
         },
         init() {
-            this.syncDarkMode()
-            $wire.$watch('dark', () => this.syncDarkMode())
+            this.syncDarkMode();
+            $wire.$watch('dark', () => this.syncDarkMode());
         },
     }"
 >

@@ -2,7 +2,10 @@
     <x-modal
         id="edit-project"
         x-on:open="$tsui.focus('project-name')"
-        x-on:create-project.window="$wire.resetForm(); $tsui.close.modal('edit-project');"
+        x-on:create-project.window="
+            $wire.resetForm();
+            $tsui.close.modal('edit-project');
+        "
     >
         <div
             x-data="{ isEditing: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')) }"
@@ -28,6 +31,6 @@
                     }
                 });"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

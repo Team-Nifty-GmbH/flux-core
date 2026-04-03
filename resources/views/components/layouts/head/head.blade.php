@@ -25,7 +25,7 @@
     http-equiv="refresh"
     content="{{ config('session.lifetime') * 60 + 1 }}"
 />
-@stack('meta')
+@stack ('meta')
 <tallstackui:script />
-@stack('scripts')
+@stack ('scripts')
 {{ $slot }}

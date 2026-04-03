@@ -2,7 +2,7 @@
     <x-card>
         <x-slot:title>
             {{ __('Images') }}
-        </x-slot>
+        </x-slot:title>
         <livewire:product.media-grid
             :is-searchable="false"
             wire:model="product"

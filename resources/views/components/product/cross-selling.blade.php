@@ -1,10 +1,10 @@
 <div
     x-data="{
         init() {
-            $wire.getProductCrossSellings()
+            $wire.getProductCrossSellings();
         },
         pushProduct: function (product, index) {
-            $wire.productCrossSellings[index].products.push(product)
+            $wire.productCrossSellings[index].products.push(product);
         },
     }"
     class="space-y-5"
@@ -13,7 +13,13 @@
         <div id="select">
             <x-select.styled
                 :label="__('Assign product')"
-                x-on:select="pushProduct($event.detail.select, $el.closest('[data-index]').getAttribute('data-index')); clear()"
+                x-on:select="
+                    pushProduct(
+                        $event.detail.select,
+                        $el.closest('[data-index]').getAttribute('data-index'),
+                    );
+                    clear();
+                "
                 class="pb-4"
                 select="label:name|value:id|description:product_number"
                 unfiltered
@@ -38,7 +44,7 @@
                 <div class="flex w-full justify-between">
                     <span x-text="productCrossSelling.name"></span>
                 </div>
-            </x-slot>
+            </x-slot:header>
             <div class="flex flex-col gap-4">
                 <x-input
                     x-bind:readonly="!isEditing"
@@ -62,12 +68,19 @@
                     <x-button
                         color="indigo"
                         :text="__('Add product')"
-                        x-on:click="$el.parentNode.appendChild(document.getElementById('select'))"
+                        x-on:click="
+                            $el.parentNode.appendChild(
+                                document.getElementById('select'),
+                            )
+                        "
                     />
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <template
-                        x-for="(product, productIndex) in productCrossSelling.products"
+                        x-for="
+                            (product, productIndex) in
+                            productCrossSelling.products
+                        "
                     >
                         <div
                             class="grid grid-cols-3 text-sm font-medium text-gray-700 dark:text-gray-400"
@@ -78,26 +91,36 @@
                                 >
                                     <img
                                         class="shrink-0 object-cover object-center"
-                                        x-bind:src="product.avatar_url ?? product.src"
+                                        x-bind:src="
+                                            product.avatar_url ?? product.src
+                                        "
                                     />
                                 </div>
                                 <span x-text="product.product_number"></span>
                             </div>
                             <span x-text="product.name"></span>
                             <div
-                                x-show="productCrossSelling.products.length > 1 && isEditing"
+                                x-show="
+                                    productCrossSelling.products.length > 1 &&
+                                    isEditing
+                                "
                                 x-transition
                             >
                                 <x-button.circle
                                     icon="trash"
                                     color="red"
-                                    x-on:click="productCrossSelling.products.splice(productIndex, 1)"
+                                    x-on:click="
+                                        productCrossSelling.products.splice(
+                                            productIndex,
+                                            1,
+                                        )
+                                    "
                                 />
                             </div>
                         </div>
                     </template>
                 </div>
-            </x-slot>
+            </x-slot:footer>
             <x-slot:header>
                 <div x-show="isEditing" x-cloak x-transition>
                     <x-button
@@ -107,7 +130,7 @@
                         {{ __('Delete') }}
                     </x-button>
                 </div>
-            </x-slot>
+            </x-slot:header>
         </x-card>
     </template>
     <div class="flex w-full justify-center">

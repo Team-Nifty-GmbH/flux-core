@@ -25,7 +25,11 @@
                 wire:model="absenceRequestForm.absence_type_id"
                 :label="__('Absence Type')"
                 required
-                x-on:select="showSickNote = $event.detail.select.affects_sick_leave; if (!showSickNote) $wire.absenceRequestForm.sick_note_issued_date = null"
+                x-on:select="
+                    showSickNote = $event.detail.select.affects_sick_leave;
+                    if (!showSickNote)
+                        $wire.absenceRequestForm.sick_note_issued_date = null;
+                "
                 select="value:id"
                 unfiltered
                 :request="[
@@ -163,5 +167,5 @@
             color="primary"
             x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $absenceRequestForm->modalName() }}')})"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

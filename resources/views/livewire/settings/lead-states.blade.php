@@ -10,26 +10,41 @@
                 <span
                     x-cloak
                     x-show="$wire.leadStateForm.probability_percentage !== null"
-                    x-text="$nuxbe.format.percentage($wire.leadStateForm.probability_percentage / 100)"
+                    x-text="
+                        $nuxbe.format.percentage(
+                            $wire.leadStateForm.probability_percentage / 100,
+                        )
+                    "
                 ></span>
-            </x-slot>
+            </x-slot:label>
         </x-range>
         <x-toggle
             :label="__('Default')"
             lg
-            x-on:change="if($event.target.checked) $wire.leadStateForm.is_won = false; $wire.leadStateForm.is_lost = false"
+            x-on:change="
+                if ($event.target.checked) $wire.leadStateForm.is_won = false;
+                $wire.leadStateForm.is_lost = false;
+            "
             wire:model.boolean="leadStateForm.is_default"
         />
         <x-toggle
             :label="__('Is Won')"
             lg
-            x-on:change="if($event.target.checked) $wire.leadStateForm.is_default = false; $wire.leadStateForm.is_lost = false"
+            x-on:change="
+                if ($event.target.checked)
+                    $wire.leadStateForm.is_default = false;
+                $wire.leadStateForm.is_lost = false;
+            "
             wire:model.boolean="leadStateForm.is_won"
         />
         <x-toggle
             :label="__('Is Lost')"
             lg
-            x-on:change="if($event.target.checked) $wire.leadStateForm.is_default = false; $wire.leadStateForm.is_won = false"
+            x-on:change="
+                if ($event.target.checked)
+                    $wire.leadStateForm.is_default = false;
+                $wire.leadStateForm.is_won = false;
+            "
             wire:model.boolean="leadStateForm.is_lost"
         />
     </div>
@@ -46,5 +61,5 @@
             :text="__('Save')"
             x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('{{ $leadStateForm->modalName() }}')})"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

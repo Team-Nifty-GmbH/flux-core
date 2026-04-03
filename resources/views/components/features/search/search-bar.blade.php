@@ -1,10 +1,10 @@
 <div
     x-data="{
         get show() {
-            return $wire.show
+            return $wire.show;
         },
         set show(value) {
-            $wire.show = value
+            $wire.show = value;
         },
     }"
 >
@@ -40,9 +40,7 @@
                     x-show="!results"
                 >
                     <x-icon name="magnifying-glass" class="h-4 w-4" />
-                    <span>
-                        {{ __('No results…') }}
-                    </span>
+                    <span> {{ __('No results…') }} </span>
                 </div>
             </div>
         </div>

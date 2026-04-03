@@ -1,5 +1,5 @@
 <div>
-    @use(Illuminate\Support\Number)
+    @use (Illuminate\Support\Number)
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >

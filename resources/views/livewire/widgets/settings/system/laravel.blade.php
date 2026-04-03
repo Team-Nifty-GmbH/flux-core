@@ -21,7 +21,7 @@
             <x-badge color="indigo">
                 <x-slot:text>
                     <span x-text="$wire.version"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
         </div>
         <div class="flex items-center justify-between">
@@ -35,7 +35,7 @@
             >
                 <x-slot:text>
                     <span x-text="$wire.environment"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
             <x-badge
                 color="amber"
@@ -44,7 +44,7 @@
             >
                 <x-slot:text>
                     <span x-text="$wire.environment"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
         </div>
         <div class="flex items-center justify-between">
@@ -60,7 +60,7 @@
             <x-badge
                 color="green"
                 x-cloak
-                x-show="! $wire.debug_mode"
+                x-show="!$wire.debug_mode"
                 :text="__('Disabled')"
             />
         </div>

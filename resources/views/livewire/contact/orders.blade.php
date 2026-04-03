@@ -15,7 +15,9 @@
                         wire:model="order.contact_id"
                         required
                         disabled
-                        x-on:select="updateContactId($event.detail.select.value)"
+                        x-on:select="
+                            updateContactId($event.detail.select.value)
+                        "
                         select="label:label|value:contact_id"
                         unfiltered
                         :request="[
@@ -140,6 +142,6 @@
                 :text="__('Save')"
                 wire:click="save()"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

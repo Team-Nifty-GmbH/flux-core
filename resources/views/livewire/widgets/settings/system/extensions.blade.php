@@ -20,7 +20,7 @@
             <x-badge color="green">
                 <x-slot:text>
                     <span x-text="extension"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
         </template>
     </div>

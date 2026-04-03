@@ -1,6 +1,6 @@
 <div>
     <div class="flex flex-col gap-1.5">
-        @canAction(\FluxErp\Actions\Project\CreateProject::class)
+        @canAction (\FluxErp\Actions\Project\CreateProject::class)
             <x-toggle
                 :label="__('Existing project')"
                 wire:model="existingProject"
@@ -19,11 +19,11 @@
                 ]"
             />
         </div>
-        @canAction(\FluxErp\Actions\Project\CreateProject::class)
+        @canAction (\FluxErp\Actions\Project\CreateProject::class)
             <div
                 class="flex flex-col gap-1.5"
                 x-cloak
-                x-show="! $wire.existingProject"
+                x-show="!$wire.existingProject"
             >
                 <x-input :label="__('Project Name')" wire:model="form.name" />
                 <x-date
@@ -51,7 +51,11 @@
             loading="createTasks"
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('create-tasks');})"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success) $tsui.close.modal('create-tasks');
+                })
+            "
         />
     </div>
 </div>

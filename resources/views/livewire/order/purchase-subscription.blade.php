@@ -1,7 +1,7 @@
-@extends('flux::livewire.order.purchase')
-@section('modals')
+@extends ('flux::livewire.order.purchase')
+@section ('modals')
     @parent
-    @use(FluxErp\Enums\OrderTypeEnum)
+    @use (FluxErp\Enums\OrderTypeEnum)
     <x-modal id="edit-schedule" :title="__('Edit Schedule')">
         <div class="flex flex-col gap-1.5">
             <x-select.styled
@@ -53,7 +53,11 @@
             />
             <div
                 x-cloak
-                x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0"
+                x-show="
+                    ['dailyAt', 'lastDayOfMonth'].indexOf(
+                        $wire.schedule.cron.methods.basic,
+                    ) >= 0
+                "
             >
                 <x-time
                     :label="__('Time')"
@@ -88,7 +92,11 @@
             </div>
             <div
                 x-cloak
-                x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0"
+                x-show="
+                    ['monthlyOn', 'quarterlyOn'].indexOf(
+                        $wire.schedule.cron.methods.basic,
+                    ) >= 0
+                "
                 class="flex flex-col gap-4"
             >
                 <x-number
@@ -136,7 +144,14 @@
                 <x-select.styled
                     :label="__('Month')"
                     wire:model="schedule.cron.parameters.basic.0"
-                    x-on:select="document.getElementById('month-day-input').max = $event.detail.select.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.select.days);"
+                    x-on:select="
+                        document.getElementById('month-day-input').max =
+                            $event.detail.select.days;
+                        $wire.schedule.cron.parameters.basic[1] = Math.min(
+                            $wire.schedule.cron.parameters.basic[1],
+                            $event.detail.select.days,
+                        );
+                    "
                     select="label:name|value:id"
                     :options="[
                         ['id' => 1, 'name' => __('January'), 'days' => 31],
@@ -185,15 +200,19 @@
             />
             <x-button
                 color="indigo"
-                x-on:click="$wire.saveSchedule().then((success) => { if(success) $tsui.close.modal('edit-schedule'); })"
+                x-on:click="
+                    $wire.saveSchedule().then((success) => {
+                        if (success) $tsui.close.modal('edit-schedule');
+                    })
+                "
                 primary
                 :text="__('Save')"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 @endsection
 
-@section('actions')
+@section ('actions')
     @parent
     <x-button
         color="indigo"

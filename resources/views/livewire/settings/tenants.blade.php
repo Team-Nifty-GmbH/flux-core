@@ -11,12 +11,12 @@
             </div>
         </div>
         <div wire:ignore>
-            @include('tall-datatables::livewire.data-table')
+            @include ('tall-datatables::livewire.data-table')
         </div>
     </div>
     <x-modal size="6xl" id="edit-tenant" :title="__('Tenant')">
         <x-flux::tabs :$tabs wire:model="tab" wire:loading>
-            @includeWhen($tab === 'general', 'flux::components.settings.tenant.general')
+            @includeWhen ($tab === 'general', 'flux::components.settings.tenant.general')
         </x-flux::tabs>
         <x-slot:footer>
             <div class="w-full">
@@ -26,7 +26,11 @@
                             light
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Tenant')]) }}"
                             x-bind:class="$wire.tenant.id > 0 || 'invisible'"
-                            x-on:click="$wire.delete().then((success) => {if(success) close();});"
+                            x-on:click="
+                                $wire.delete().then((success) => {
+                                    if (success) close();
+                                })
+                            "
                             flat
                             color="red"
                             :text="__('Delete')"
@@ -44,11 +48,16 @@
                         <x-button
                             color="indigo"
                             :text="__('Save')"
-                            x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('edit-tenant');});"
+                            x-on:click="
+                                $wire.save().then((success) => {
+                                    if (success)
+                                        $tsui.close.modal('edit-tenant');
+                                })
+                            "
                         />
                     </div>
                 </div>
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

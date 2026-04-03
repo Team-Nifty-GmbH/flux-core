@@ -77,9 +77,14 @@
                 color="indigo"
                 loading="save"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-bundle-product-modal'); })"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        if (success)
+                            $tsui.close.modal('edit-bundle-product-modal');
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <div
         class="flex flex-col gap-2"

@@ -9,39 +9,45 @@
         formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
-    @section('modals')
-    {{ $this->renderCreateDocumentsModal() }}
-    @canAction(\FluxErp\Actions\Task\CreateTask::class)
-        <x-modal id="create-tasks">
-            <livewire:order.order-project lazy :order="$order->id" />
-        </x-modal>
-    @endcanAction
-
-    <x-modal id="replicate-order">
-        <section
-            x-data="{
-                updateContactId(id) {
-                    $tallstackuiSelect('invoice-address-id').mergeRequestParams({
-                        where: [['contact_id', '=', id]],
-                    })
-                    $tallstackuiSelect('delivery-address-id').mergeRequestParams({
-                        where: [['contact_id', '=', id]],
-                    })
-                    $wire.fetchContactData(true)
-                },
-            }"
-        >
-            <div
-                class="divide-secondary-200 space-y-2.5 divide-y"
-                x-bind:class="$wire.disableReplicateModalInputs && 'pointer-events-none'"
+    @section ('modals')
+        {{ $this->renderCreateDocumentsModal() }}
+        @canAction (\FluxErp\Actions\Task\CreateTask::class)
+            <x-modal id="create-tasks">
+                <livewire:order.order-project lazy :order="$order->id" />
+            </x-modal>
+        @endcanAction
+        <x-modal id="replicate-order">
+            <section
+                x-data="{
+                    updateContactId(id) {
+                        $tallstackuiSelect(
+                            'invoice-address-id',
+                        ).mergeRequestParams({
+                            where: [['contact_id', '=', id]],
+                        });
+                        $tallstackuiSelect(
+                            'delivery-address-id',
+                        ).mergeRequestParams({
+                            where: [['contact_id', '=', id]],
+                        });
+                        $wire.fetchContactData(true);
+                    },
+                }"
             >
-                <x-select.styled
-                    :label="__('Order type')"
-                    wire:model="replicateOrder.order_type_id"
-                    required
-                    select="label:name|value:id"
-                    unfiltered
-                    :request="[
+                <div
+                    class="divide-secondary-200 space-y-2.5 divide-y"
+                    x-bind:class="
+                        $wire.disableReplicateModalInputs &&
+                        'pointer-events-none'
+                    "
+                >
+                    <x-select.styled
+                        :label="__('Order type')"
+                        wire:model="replicateOrder.order_type_id"
+                        required
+                        select="label:name|value:id"
+                        unfiltered
+                        :request="[
                         'url' => route('search', \FluxErp\Models\OrderType::class),
                         'method' => 'POST',
                         'params' => [
@@ -66,17 +72,19 @@
                             ],
                         ],
                     ]"
-                />
-                <div class="pt-4">
-                    <x-select.styled
-                        :label="__('Contact')"
-                        class="pb-4"
-                        wire:model="replicateOrder.contact_id"
-                        required
-                        x-on:select="updateContactId($event.detail.select.contact_id)"
-                        select="label:label|value:contact_id"
-                        unfiltered
-                        :request="[
+                    />
+                    <div class="pt-4">
+                        <x-select.styled
+                            :label="__('Contact')"
+                            class="pb-4"
+                            wire:model="replicateOrder.contact_id"
+                            required
+                            x-on:select="
+                                updateContactId($event.detail.select.contact_id)
+                            "
+                            select="label:label|value:contact_id"
+                            unfiltered
+                            :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
                             'params' => [
@@ -98,16 +106,16 @@
                                 'with' => 'contact.media',
                             ],
                         ]"
-                    />
-                    <div id="invoice-address-id">
-                        <x-select.styled
-                            class="pb-4"
-                            :label="__('Invoice Address')"
-                            wire:model="replicateOrder.address_invoice_id"
-                            required
-                            select="label:label|value:id"
-                            unfiltered
-                            :request="[
+                        />
+                        <div id="invoice-address-id">
+                            <x-select.styled
+                                class="pb-4"
+                                :label="__('Invoice Address')"
+                                wire:model="replicateOrder.address_invoice_id"
+                                required
+                                select="label:label|value:id"
+                                unfiltered
+                                :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
                                 'params' => [
@@ -121,17 +129,17 @@
                                     ],
                                 ],
                             ]"
-                        />
-                    </div>
-                    <div id="delivery-address-id">
-                        <x-select.styled
-                            :label="__('Delivery Address')"
-                            class="pb-4"
-                            wire:model="replicateOrder.address_delivery_id"
-                            required
-                            select="label:label|value:id"
-                            unfiltered
-                            :request="[
+                            />
+                        </div>
+                        <div id="delivery-address-id">
+                            <x-select.styled
+                                :label="__('Delivery Address')"
+                                class="pb-4"
+                                wire:model="replicateOrder.address_delivery_id"
+                                required
+                                select="label:label|value:id"
+                                unfiltered
+                                :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
                                 'params' => [
@@ -145,112 +153,120 @@
                                     ],
                                 ],
                             ]"
+                            />
+                        </div>
+                    </div>
+                    <div class="space-y-3 pt-4">
+                        <x-select.styled
+                            :label="__('Tenant')"
+                            required
+                            autocomplete="off"
+                            wire:model="replicateOrder.tenant_id"
+                            select="label:name|value:id"
+                            :options="$tenants"
+                        />
+                        <x-select.styled
+                            :label="__('Price list')"
+                            required
+                            autocomplete="off"
+                            wire:model="replicateOrder.price_list_id"
+                            select="label:name|value:id"
+                            :options="$priceLists"
+                        />
+                        <x-select.styled
+                            :label="__('Payment method')"
+                            required
+                            autocomplete="off"
+                            wire:model="replicateOrder.payment_type_id"
+                            select="label:name|value:id"
+                            :options="$paymentTypes"
+                        />
+                        <x-select.styled
+                            :label="__('Language')"
+                            required
+                            autocomplete="off"
+                            wire:model="replicateOrder.language_id"
+                            select="label:name|value:id"
+                            :options="$languages"
                         />
                     </div>
                 </div>
-                <div class="space-y-3 pt-4">
-                    <x-select.styled
-                        :label="__('Tenant')"
-                        required
-                        autocomplete="off"
-                        wire:model="replicateOrder.tenant_id"
-                        select="label:name|value:id"
-                        :options="$tenants"
-                    />
-                    <x-select.styled
-                        :label="__('Price list')"
-                        required
-                        autocomplete="off"
-                        wire:model="replicateOrder.price_list_id"
-                        select="label:name|value:id"
-                        :options="$priceLists"
-                    />
-                    <x-select.styled
-                        :label="__('Payment method')"
-                        required
-                        autocomplete="off"
-                        wire:model="replicateOrder.payment_type_id"
-                        select="label:name|value:id"
-                        :options="$paymentTypes"
-                    />
-                    <x-select.styled
-                        :label="__('Language')"
-                        required
-                        autocomplete="off"
-                        wire:model="replicateOrder.language_id"
-                        select="label:name|value:id"
-                        :options="$languages"
+            </section>
+            <x-errors />
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    light
+                    flat
+                    :text="__('Cancel')"
+                    x-on:click="$tsui.close.modal('replicate-order')"
+                />
+                <x-button
+                    loading="saveReplicate"
+                    color="indigo"
+                    :text="__('Save')"
+                    wire:click="saveReplicate()"
+                />
+            </x-slot:footer>
+        </x-modal>
+        <x-modal
+            id="edit-discount"
+            x-on:open="$tsui.focus('discount-name')"
+            x-trap="show"
+            x-on:keyup.enter="
+                $wire.saveDiscount().then((success) => {
+                    if (success) $tsui.close.modal('edit-discount');
+                })
+            "
+        >
+            <div class="flex flex-col gap-1.5">
+                <x-input
+                    wire:model="discount.name"
+                    :label="__('Name')"
+                    id="discount-name"
+                />
+                <div x-cloak x-show="$wire.discount.is_percentage">
+                    <x-input
+                        prefix="%"
+                        type="number"
+                        x-on:focus=""
+                        :label="__('Discount')"
+                        wire:model="discount.discount"
+                        x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
                     />
                 </div>
-            </div>
-        </section>
-        <x-errors />
-        <x-slot:footer>
-            <x-button
-                color="secondary"
-                light
-                flat
-                :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('replicate-order')"
-            />
-            <x-button
-                loading="saveReplicate"
-                color="indigo"
-                :text="__('Save')"
-                wire:click="saveReplicate()"
-            />
-        </x-slot>
-    </x-modal>
-    <x-modal
-        id="edit-discount"
-        x-on:open="$tsui.focus('discount-name')"
-        x-trap="show"
-        x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $tsui.close.modal('edit-discount');})"
-    >
-        <div class="flex flex-col gap-1.5">
-            <x-input
-                wire:model="discount.name"
-                :label="__('Name')"
-                id="discount-name"
-            />
-            <div x-cloak x-show="$wire.discount.is_percentage">
-                <x-input
-                    prefix="%"
-                    type="number"
-                    x-on:focus=""
-                    :label="__('Discount')"
-                    wire:model="discount.discount"
-                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
+                <div x-cloak x-show="!$wire.discount.is_percentage">
+                    <x-input
+                        :prefix="data_get($order, 'currency.symbol')"
+                        type="number"
+                        :label="__('Discount')"
+                        wire:model="discount.discount"
+                        x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
+                    />
+                </div>
+                <x-toggle
+                    wire:model="discount.is_percentage"
+                    :label="__('Is Percentage')"
                 />
             </div>
-            <div x-cloak x-show="! $wire.discount.is_percentage">
-                <x-input
-                    :prefix="data_get($order, 'currency.symbol')"
-                    type="number"
-                    :label="__('Discount')"
-                    wire:model="discount.discount"
-                    x-on:change="$el.value = $nuxbe.parseNumber($el.value)"
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    light
+                    :text="__('Cancel')"
+                    x-on:click="$tsui.close.modal('edit-discount')"
                 />
-            </div>
-            <x-toggle
-                wire:model="discount.is_percentage"
-                :label="__('Is Percentage')"
-            />
-        </div>
-        <x-slot:footer>
-            <x-button
-                color="secondary"
-                light
-                :text="__('Cancel')"
-                x-on:click="$tsui.close.modal('edit-discount')"
-            />
-            <x-button
-                color="indigo"
-                :text="__('Save')"
-                x-on:click="$wire.saveDiscount().then((success) => {if(success) $tsui.close.modal('edit-discount');})"
-            />
-        </x-slot>
-    </x-modal>
+                <x-button
+                    color="indigo"
+                    :text="__('Save')"
+                    x-on:click="
+                        $wire.saveDiscount().then((success) => {
+                            if (success) $tsui.close.modal('edit-discount');
+                        })
+                    "
+                />
+            </x-slot:footer>
+        </x-modal>
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
@@ -272,7 +288,7 @@
                             />
                             <x-icon
                                 x-cloak
-                                x-show="! $wire.order.is_locked"
+                                x-show="!$wire.order.is_locked"
                                 name="lock-open"
                             />
                         </div>
@@ -287,26 +303,25 @@
                                     x-text="
                                         $wire.order.invoice_number
                                             ? $wire.order.invoice_number
-                                            : $wire.order.order_number || $wire.order.id
+                                            : $wire.order.order_number ||
+                                              $wire.order.id
                                     "
                                 ></span>
                             </div>
                         </div>
                         @if ($order->payment_reminder_current_level)
-                            @switch($order->payment_reminder_current_level)
-                                @case(1)
+                            @switch ($order->payment_reminder_current_level)
+                                @case (1)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
                                         color="amber"
                                     />
-
                                     @break
-                                @case(2)
+                                @case (2)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
                                         color="orange"
                                     />
-
                                     @break
                                 @default
                                     <x-badge
@@ -328,15 +343,26 @@
                 <a
                     wire:navigate
                     class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200"
-                    x-bind:href="($wire.order.parent?.url ?? $wire.order.created_from?.url) || ''"
-                    x-show="$wire.order.parent?.url || $wire.order.created_from?.url"
+                    x-bind:href="
+                        ($wire.order.parent?.url ??
+                            $wire.order.created_from?.url) ||
+                        ''
+                    "
+                    x-show="
+                        $wire.order.parent?.url || $wire.order.created_from?.url
+                    "
                 >
                     <i
                         class="ph ph-copy size-4"
-                        x-bind:class="$wire.order.parent?.url ? 'ph-link' : 'ph-copy'"
+                        x-bind:class="
+                            $wire.order.parent?.url ? 'ph-link' : 'ph-copy'
+                        "
                     ></i>
                     <span
-                        x-text="$wire.order.parent?.label ?? $wire.order.created_from?.label"
+                        x-text="
+                            $wire.order.parent?.label ??
+                            $wire.order.created_from?.label
+                        "
                     ></span>
                 </a>
             </div>
@@ -384,52 +410,64 @@
         class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            @section('content.left-wrapper')
-            <section
-                class="relative w-full xl:max-w-96 xl:basis-2/12"
-                wire:ignore
-            >
-                <div class="sticky top-6 flex flex-col gap-4">
-                    @section('contact-address-card')
-                    <x-card>
-                        <x-slot:header>
-                            <div
-                                class="flex w-full items-center justify-between gap-4"
-                            >
-                                <div>{{ __('Contact') }}</div>
-                                <x-button
-                                    color="secondary"
-                                    light
-                                    wire:navigate
-                                    icon="eye"
-                                    :href="route('contacts.id?', data_get($order, 'contact_id', ''))"
-                                />
-                            </div>
-                        </x-slot>
-                        <div
-                            x-data="{
-                                updateContactId(id) {
-                                    $tallstackuiSelect('invoice-address-id').mergeRequestParams({
-                                        where: [['contact_id', '=', id]],
-                                    })
-                                    $tallstackuiSelect('delivery-address-id').mergeRequestParams({
-                                        where: [['contact_id', '=', id]],
-                                    })
+            @section ('content.left-wrapper')
+                <section
+                    class="relative w-full xl:max-w-96 xl:basis-2/12"
+                    wire:ignore
+                >
+                    <div class="sticky top-6 flex flex-col gap-4">
+                        @section ('contact-address-card')
+                            <x-card>
+                                <x-slot:header>
+                                    <div
+                                        class="flex w-full items-center justify-between gap-4"
+                                    >
+                                        <div>{{ __('Contact') }}</div>
+                                        <x-button
+                                            color="secondary"
+                                            light
+                                            wire:navigate
+                                            icon="eye"
+                                            :href="route('contacts.id?', data_get($order, 'contact_id', ''))"
+                                        />
+                                    </div>
+                                </x-slot:header>
+                                <div
+                                    x-data="{
+                                        updateContactId(id) {
+                                            $tallstackuiSelect(
+                                                'invoice-address-id',
+                                            ).mergeRequestParams({
+                                                where: [
+                                                    ['contact_id', '=', id],
+                                                ],
+                                            });
+                                            $tallstackuiSelect(
+                                                'delivery-address-id',
+                                            ).mergeRequestParams({
+                                                where: [
+                                                    ['contact_id', '=', id],
+                                                ],
+                                            });
 
-                                    $wire.fetchContactData()
-                                },
-                            }"
-                        >
-                            <x-select.styled
-                                class="pb-4"
-                                :label="__('Contact')"
-                                :disabled="$order->is_locked"
-                                wire:model="order.contact_id"
-                                required
-                                x-on:select="updateContactId($event.detail.select.value)"
-                                select="label:label|value:contact_id"
-                                unfiltered
-                                :request="[
+                                            $wire.fetchContactData();
+                                        },
+                                    }"
+                                >
+                                    <x-select.styled
+                                        class="pb-4"
+                                        :label="__('Contact')"
+                                        :disabled="$order->is_locked"
+                                        wire:model="order.contact_id"
+                                        required
+                                        x-on:select="
+                                            updateContactId(
+                                                $event.detail.select.value,
+                                            )
+                                        "
+                                        select="label:label|value:contact_id"
+                                        unfiltered
+                                        :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
                                     'params' => [
@@ -451,47 +489,49 @@
                                         'with' => 'contact.media',
                                     ],
                                 ]"
-                            />
-                        </div>
-                    </x-card>
-                    @show
-                    @section('invoice-address-card')
-                    <x-card>
-                        <x-slot:header>
-                            <div
-                                class="flex w-full items-center justify-between gap-4"
-                            >
-                                <div>{{ __('Invoice Address') }}</div>
-                                @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
-                                    <div class="flex gap-1">
-                                        <x-button
-                                            x-cloak
-                                            x-show="! $wire.order.is_locked"
-                                            color="secondary"
-                                            light
-                                            icon="arrow-path"
-                                            wire:click="refreshAddress('invoice')"
-                                        />
-                                        <x-button
-                                            color="secondary"
-                                            light
-                                            wire:navigate
-                                            icon="eye"
-                                            :href="route('address.id', $invoiceAddressId)"
-                                        />
+                                    />
+                                </div>
+                            </x-card>
+                        @show
+                        @section ('invoice-address-card')
+                            <x-card>
+                                <x-slot:header>
+                                    <div
+                                        class="flex w-full items-center justify-between gap-4"
+                                    >
+                                        <div>{{ __('Invoice Address') }}</div>
+                                        @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
+                                            <div class="flex gap-1">
+                                                <x-button
+                                                    x-cloak
+                                                    x-show="
+                                                        !$wire.order.is_locked
+                                                    "
+                                                    color="secondary"
+                                                    light
+                                                    icon="arrow-path"
+                                                    wire:click="refreshAddress('invoice')"
+                                                />
+                                                <x-button
+                                                    color="secondary"
+                                                    light
+                                                    wire:navigate
+                                                    icon="eye"
+                                                    :href="route('address.id', $invoiceAddressId)"
+                                                />
+                                            </div>
+                                        @endif
                                     </div>
-                                @endif
-                            </div>
-                        </x-slot>
-                        <div id="order-invoice-address-id">
-                            <x-select.styled
-                                :disabled="$order->is_locked"
-                                class="pb-4"
-                                wire:model.live="order.address_invoice_id"
-                                required
-                                select="label:label|value:id"
-                                unfiltered
-                                :request="[
+                                </x-slot:header>
+                                <div id="order-invoice-address-id">
+                                    <x-select.styled
+                                        :disabled="$order->is_locked"
+                                        class="pb-4"
+                                        wire:model.live="order.address_invoice_id"
+                                        required
+                                        select="label:label|value:id"
+                                        unfiltered
+                                        :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
                                     'params' => [
@@ -505,71 +545,84 @@
                                         ],
                                     ],
                                 ]"
-                            />
-                        </div>
-                        <div class="text-sm">
-                            <p
-                                class="truncate first-line:font-semibold"
-                                x-html="
-                                    [
-                                        $wire.order.address_invoice?.company,
-                                        [
-                                            $wire.order.address_invoice?.firstname,
-                                            $wire.order.address_invoice?.lastname,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(' '),
-                                        $wire.order.address_invoice?.addition,
-                                        $wire.order.address_invoice?.street,
-                                        [$wire.order.address_invoice?.zip, $wire.order.address_invoice?.city]
-                                            .filter(Boolean)
-                                            .join(' '),
-                                        $wire.order.address_invoice?.country?.name,
-                                    ]
-                                        .filter(Boolean)
-                                        .join('<br>')
-                                "
-                            ></p>
-                        </div>
-                    </x-card>
-                    @show
-                    @section('delivery-address-card')
-                    <x-card>
-                        <x-slot:header>
-                            <div
-                                class="flex w-full items-center justify-between gap-4"
-                            >
-                                <div>{{ __('Delivery Address') }}</div>
-                                @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
-                                    <div class="flex gap-1">
-                                        <x-button
-                                            x-cloak
-                                            x-show="! $wire.order.is_locked"
-                                            color="secondary"
-                                            light
-                                            icon="arrow-path"
-                                            wire:click="refreshAddress('delivery')"
-                                        />
-                                        <x-button
-                                            color="secondary"
-                                            light
-                                            wire:navigate
-                                            icon="eye"
-                                            :href="route('address.id', $deliveryAddressId)"
-                                        />
+                                    />
+                                </div>
+                                <div class="text-sm">
+                                    <p
+                                        class="truncate first-line:font-semibold"
+                                        x-html="
+                                            [
+                                                $wire.order.address_invoice
+                                                    ?.company,
+                                                [
+                                                    $wire.order.address_invoice
+                                                        ?.firstname,
+                                                    $wire.order.address_invoice
+                                                        ?.lastname,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' '),
+                                                $wire.order.address_invoice
+                                                    ?.addition,
+                                                $wire.order.address_invoice
+                                                    ?.street,
+                                                [
+                                                    $wire.order.address_invoice
+                                                        ?.zip,
+                                                    $wire.order.address_invoice
+                                                        ?.city,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' '),
+                                                $wire.order.address_invoice
+                                                    ?.country?.name,
+                                            ]
+                                                .filter(Boolean)
+                                                .join('<br>')
+                                        "
+                                    ></p>
+                                </div>
+                            </x-card>
+                        @show
+                        @section ('delivery-address-card')
+                            <x-card>
+                                <x-slot:header>
+                                    <div
+                                        class="flex w-full items-center justify-between gap-4"
+                                    >
+                                        <div>{{ __('Delivery Address') }}</div>
+                                        @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
+                                            <div class="flex gap-1">
+                                                <x-button
+                                                    x-cloak
+                                                    x-show="
+                                                        !$wire.order.is_locked
+                                                    "
+                                                    color="secondary"
+                                                    light
+                                                    icon="arrow-path"
+                                                    wire:click="refreshAddress('delivery')"
+                                                />
+                                                <x-button
+                                                    color="secondary"
+                                                    light
+                                                    wire:navigate
+                                                    icon="eye"
+                                                    :href="route('address.id', $deliveryAddressId)"
+                                                />
+                                            </div>
+                                        @endif
                                     </div>
-                                @endif
-                            </div>
-                        </x-slot>
-                        <div id="order-delivery-address-id">
-                            <x-select.styled
-                                :disabled="$order->is_locked"
-                                class="pb-4"
-                                wire:model.live="order.address_delivery_id"
-                                required
-                                select="label:label|value:id"
-                                unfiltered
-                                :request="[
+                                </x-slot:header>
+                                <div id="order-delivery-address-id">
+                                    <x-select.styled
+                                        :disabled="$order->is_locked"
+                                        class="pb-4"
+                                        wire:model.live="order.address_delivery_id"
+                                        required
+                                        select="label:label|value:id"
+                                        unfiltered
+                                        :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
                                     'params' => [
@@ -583,152 +636,167 @@
                                         ],
                                     ],
                                 ]"
-                            />
-                        </div>
-                        <div
-                            class="text-sm"
-                            x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'"
-                        >
-                            <p
-                                class="truncate first-line:font-semibold"
-                                x-html="
-                                    [
-                                        $wire.order.address_delivery?.company,
-                                        [
-                                            $wire.order.address_delivery?.firstname,
-                                            $wire.order.address_delivery?.lastname,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(' '),
-                                        $wire.order.address_delivery?.addition,
-                                        $wire.order.address_delivery?.street,
-                                        [$wire.order.address_delivery?.zip, $wire.order.address_delivery?.city]
-                                            .filter(Boolean)
-                                            .join(' '),
-                                        $wire.order.address_delivery?.country?.name,
-                                    ]
-                                        .filter(Boolean)
-                                        .join('<br>')
-                                "
-                            ></p>
-                        </div>
-                    </x-card>
-                    @show
-                    @section('general-card')
-                    <x-card
-                        :header="__('Additional Addresses')"
-                        minimize="mount"
-                    >
-                        <div class="space-y-3 px-2 py-5">
-                            <livewire:order.additional-addresses
-                                lazy
-                                :order-id="$order->id"
-                                :tenant-id="$order->tenant_id"
-                            />
-                        </div>
-                    </x-card>
-                    <x-card
-                        :header="__('Order Informations')"
-                        minimize="mount"
-                    >
-                        <div class="space-y-3 px-2 py-5">
-                            @if (count($tenants) > 1)
-                                <x-select.styled
-                                    disabled
-                                    :label="__('Tenant')"
-                                    required
-                                    autocomplete="off"
-                                    wire:model.live="order.tenant_id"
-                                    select="label:name|value:id"
-                                    :options="$tenants"
-                                />
-                            @endif
+                                    />
+                                </div>
+                                <div
+                                    class="text-sm"
+                                    x-bind:class="
+                                        $wire.order.address_delivery_id ===
+                                            $wire.order.address_invoice_id &&
+                                        'hidden'
+                                    "
+                                >
+                                    <p
+                                        class="truncate first-line:font-semibold"
+                                        x-html="
+                                            [
+                                                $wire.order.address_delivery
+                                                    ?.company,
+                                                [
+                                                    $wire.order.address_delivery
+                                                        ?.firstname,
+                                                    $wire.order.address_delivery
+                                                        ?.lastname,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' '),
+                                                $wire.order.address_delivery
+                                                    ?.addition,
+                                                $wire.order.address_delivery
+                                                    ?.street,
+                                                [
+                                                    $wire.order.address_delivery
+                                                        ?.zip,
+                                                    $wire.order.address_delivery
+                                                        ?.city,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(' '),
+                                                $wire.order.address_delivery
+                                                    ?.country?.name,
+                                            ]
+                                                .filter(Boolean)
+                                                .join('<br>')
+                                        "
+                                    ></p>
+                                </div>
+                            </x-card>
+                        @show
+                        @section ('general-card')
+                            <x-card
+                                :header="__('Additional Addresses')"
+                                minimize="mount"
+                            >
+                                <div class="space-y-3 px-2 py-5">
+                                    <livewire:order.additional-addresses
+                                        lazy
+                                        :order-id="$order->id"
+                                        :tenant-id="$order->tenant_id"
+                                    />
+                                </div>
+                            </x-card>
+                            <x-card
+                                :header="__('Order Informations')"
+                                minimize="mount"
+                            >
+                                <div class="space-y-3 px-2 py-5">
+                                    @if (count($tenants) > 1)
+                                        <x-select.styled
+                                            disabled
+                                            :label="__('Tenant')"
+                                            required
+                                            autocomplete="off"
+                                            wire:model.live="order.tenant_id"
+                                            select="label:name|value:id"
+                                            :options="$tenants"
+                                        />
+                                    @endif
 
-                            <x-select.styled
-                                :label="__('Commission Agent')"
-                                :disabled="$order->is_locked"
-                                autocomplete="off"
-                                wire:model="order.agent_id"
-                                select="label:label|value:id"
-                                unfiltered
-                                :request="[
+                                    <x-select.styled
+                                        :label="__('Commission Agent')"
+                                        :disabled="$order->is_locked"
+                                        autocomplete="off"
+                                        wire:model="order.agent_id"
+                                        select="label:label|value:id"
+                                        unfiltered
+                                        :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
                                     ],
                                 ]"
-                            />
-                            <x-select.styled
-                                :label="__('Responsible User')"
-                                autocomplete="off"
-                                wire:model="order.responsible_user_id"
-                                select="label:label|value:id"
-                                unfiltered
-                                :request="[
+                                    />
+                                    <x-select.styled
+                                        :label="__('Responsible User')"
+                                        autocomplete="off"
+                                        wire:model="order.responsible_user_id"
+                                        select="label:label|value:id"
+                                        unfiltered
+                                        :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
                                     ],
                                 ]"
-                            />
-                            <x-select.styled
-                                :label="__('Assigned')"
-                                autocomplete="off"
-                                multiple
-                                wire:model="order.users"
-                                select="label:label|value:id"
-                                unfiltered
-                                :request="[
+                                    />
+                                    <x-select.styled
+                                        :label="__('Assigned')"
+                                        autocomplete="off"
+                                        multiple
+                                        wire:model="order.users"
+                                        select="label:label|value:id"
+                                        unfiltered
+                                        :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
                                     ],
                                 ]"
-                            />
-                            <x-select.styled
-                                :label="__('Price list')"
-                                required
-                                autocomplete="off"
-                                wire:model.live="order.price_list_id"
-                                x-bind:disabled="$wire.order.is_locked"
-                                :disabled="$order->is_locked"
-                                select="label:name|value:id"
-                                :options="$priceLists"
-                            />
-                            <x-select.styled
-                                :label="__('Tax Exemption')"
-                                autocomplete="off"
-                                wire:model="order.vat_rate_id"
-                                x-bind:disabled="$wire.order.is_locked"
-                                :disabled="$order->is_locked"
-                                select="label:name|value:id"
-                                :options="$vatRates"
-                            />
-                            <x-select.styled
-                                :label="__('Payment method')"
-                                required
-                                autocomplete="off"
-                                wire:model="order.payment_type_id"
-                                select="label:name|value:id"
-                                :options="$paymentTypes"
-                            />
-                            @if ($contactBankConnections)
-                                <x-select.styled
-                                    wire:model="order.contact_bank_connection_id"
-                                    :label="__('Bank connection')"
-                                    select="label:iban|value:id"
-                                    :options="$contactBankConnections"
-                                />
-                            @endif
+                                    />
+                                    <x-select.styled
+                                        :label="__('Price list')"
+                                        required
+                                        autocomplete="off"
+                                        wire:model.live="order.price_list_id"
+                                        x-bind:disabled="$wire.order.is_locked"
+                                        :disabled="$order->is_locked"
+                                        select="label:name|value:id"
+                                        :options="$priceLists"
+                                    />
+                                    <x-select.styled
+                                        :label="__('Tax Exemption')"
+                                        autocomplete="off"
+                                        wire:model="order.vat_rate_id"
+                                        x-bind:disabled="$wire.order.is_locked"
+                                        :disabled="$order->is_locked"
+                                        select="label:name|value:id"
+                                        :options="$vatRates"
+                                    />
+                                    <x-select.styled
+                                        :label="__('Payment method')"
+                                        required
+                                        autocomplete="off"
+                                        wire:model="order.payment_type_id"
+                                        select="label:name|value:id"
+                                        :options="$paymentTypes"
+                                    />
+                                    @if ($contactBankConnections)
+                                        <x-select.styled
+                                            wire:model="order.contact_bank_connection_id"
+                                            :label="__('Bank connection')"
+                                            select="label:iban|value:id"
+                                            :options="$contactBankConnections"
+                                        />
+                                    @endif
 
-                            <x-select.styled
-                                wire:model="order.lead_id"
-                                select="label:label|value:id"
-                                unfiltered
-                                :request="[
+                                    <x-select.styled
+                                        wire:model="order.lead_id"
+                                        select="label:label|value:id"
+                                        unfiltered
+                                        :request="[
                                     'url' => route('search', \FluxErp\Models\Lead::class),
                                     'method' => 'POST',
                                     'params' => [
@@ -750,460 +818,639 @@
                                         ],
                                     ],
                                 ]"
-                            >
-                                <x-slot:label>
-                                    <x-link
-                                        icon="link"
-                                        :text="__('Lead')"
-                                        href="#"
-                                        wire:navigate
-                                        x-bind:href="$wire.order.lead_id ? '{{ route('sales.lead.id', ':id') }}'.replace(':id', $wire.order.lead_id) : '#'"
-                                    />
-                                </x-slot>
-                            </x-select.styled>
-
-                            @if (count($languages) > 1)
-                                <x-select.styled
-                                    :label="__('Language')"
-                                    required
-                                    autocomplete="off"
-                                    wire:model="order.language_id"
-                                    select="label:name|value:id"
-                                    :options="$languages"
-                                />
-                            @endif
-                        </div>
-                    </x-card>
-                    @show
-                    @section('state-card')
-                    <x-card>
-                        <div class="flex flex-col gap-3">
-                            <x-flux::state
-                                class="w-full"
-                                align="bottom-start"
-                                :label="__('Order state')"
-                                wire:model="order.state"
-                                formatters="formatter.state"
-                                available="availableStates.state"
-                            />
-                            <x-flux::state
-                                align="bottom-start"
-                                :label="__('Payment state')"
-                                wire:model="order.payment_state"
-                                formatters="formatter.payment_state"
-                                available="availableStates.payment_state"
-                            />
-                            <x-flux::state
-                                align="bottom-start"
-                                :label="__('Delivery state')"
-                                wire:model="order.delivery_state"
-                                formatters="formatter.delivery_state"
-                                available="availableStates.delivery_state"
-                            />
-                        </div>
-                    </x-card>
-                    @show
-                </div>
-            </section>
-            @show
-        </x-slot>
-        <x-slot:append>
-            @section('content.right-wrapper')
-            <section
-                class="relative w-full xl:max-w-96 xl:basis-2/12"
-                wire:ignore
-            >
-                <div class="sticky top-6 space-y-6">
-                    @section('content.right')
-                    <x-card>
-                        <div class="space-y-4">
-                            @section('actions')
-                            @if ($printLayouts)
-                                <x-button
-                                    color="indigo"
-                                    class="w-full"
-                                    icon="document-text"
-                                    wire:click="openCreateDocumentsModal()"
-                                    :text="__('Create Documents')"
-                                />
-                                <div class="dropdown-full-w">
-                                    <x-dropdown>
-                                        <x-slot:action>
-                                            <x-button
-                                                color="secondary"
-                                                light
-                                                class="w-full"
-                                                icon="magnifying-glass"
-                                                x-on:click="show = !show"
-                                                :text="__('Preview')"
-                                            />
-                                        </x-slot>
-                                        <template
-                                            x-for="printLayout in $wire.printLayouts"
-                                        >
-                                            <x-dropdown.items
-                                                x-on:click="$wire.openPreview(printLayout.layout, '{{ morph_alias(\FluxErp\Models\Order::class) }}', $wire.order.id).then(() => show = false)"
-                                            >
-                                                <span
-                                                    x-text="printLayout.label"
-                                                ></span>
-                                            </x-dropdown.items>
-                                        </template>
-                                    </x-dropdown>
-                                </div>
-                                <livewire:order.signature-link-generator
-                                    lazy
-                                    wire:model="order.id"
-                                />
-                            @endif
-
-                            @foreach ($additionalModelActions as $modelAction)
-                                {{ $modelAction }}
-                            @endforeach
-
-                            @show
-                        </div>
-                    </x-card>
-                    <x-card>
-                        <div class="text-sm">
-                            @section('content.right.summary')
-                            <div
-                                x-cloak
-                                x-show="
-                                    ($wire.order.subtotal_net_price ?? $wire.order.total_net_price) !==
-                                        ($wire.order.total_base_net_price ?? '0.0000000000')
-                                "
-                            >
-                                <div class="flex justify-between p-2.5">
-                                    <div>
-                                        {{ __('Sum net without discount') }}
-                                    </div>
-                                    <div>
-                                        <span
-                                            x-html="$nuxbe.format.money($wire.order.total_base_net_price ?? 0, { colored: true })"
-                                        ></span>
-                                    </div>
-                                </div>
-                                <div
-                                    class="flex justify-between p-2.5"
-                                    x-cloak
-                                    x-show="$wire.order.total_position_discount_percentage != 0"
-                                >
-                                    <div>
-                                        <span>
-                                            {{ __('Position discounts') }}
-                                        </span>
-                                        <span
-                                            x-html="$nuxbe.format.percentage($wire.order.total_position_discount_percentage ?? 0)"
-                                        ></span>
-                                    </div>
-                                    <div>
-                                        <span
-                                            x-html="
-                                                $nuxbe.format.money(
-                                                    ($wire.order.total_position_discount_flat ?? 0, { colored: true }) * -1,
-                                                )
-                                            "
-                                        ></span>
-                                    </div>
-                                </div>
-                                <div
-                                    class="flex justify-between p-2.5"
-                                    x-cloak
-                                    x-show="$wire.order.total_position_discount_percentage != 0"
-                                >
-                                    <div>
-                                        <span>
-                                            {{ __('Sum net discounted') }}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span
-                                            x-html="
-                                                $nuxbe.format.money($wire.order.total_base_discounted_net_price ?? 0, {
-                                                    colored: true,
-                                                })
-                                            "
-                                        ></span>
-                                    </div>
-                                </div>
-                                <div
-                                    x-sort="$wire.reOrderDiscount($item, $position)"
-                                >
-                                    <template
-                                        x-for="discount in $wire.order.discounts"
-                                        :key="`${discount.id}-${discount.order_column}`"
                                     >
+                                        <x-slot:label>
+                                            <x-link
+                                                icon="link"
+                                                :text="__('Lead')"
+                                                href="#"
+                                                wire:navigate
+                                                x-bind:href="$wire.order.lead_id ? '{{ route('sales.lead.id', ':id') }}'.replace(':id', $wire.order.lead_id) : '#'"
+                                            />
+                                        </x-slot:label>
+                                    </x-select.styled>
+
+                                    @if (count($languages) > 1)
+                                        <x-select.styled
+                                            :label="__('Language')"
+                                            required
+                                            autocomplete="off"
+                                            wire:model="order.language_id"
+                                            select="label:name|value:id"
+                                            :options="$languages"
+                                        />
+                                    @endif
+                                </div>
+                            </x-card>
+                        @show
+                        @section ('state-card')
+                            <x-card>
+                                <div class="flex flex-col gap-3">
+                                    <x-flux::state
+                                        class="w-full"
+                                        align="bottom-start"
+                                        :label="__('Order state')"
+                                        wire:model="order.state"
+                                        formatters="formatter.state"
+                                        available="availableStates.state"
+                                    />
+                                    <x-flux::state
+                                        align="bottom-start"
+                                        :label="__('Payment state')"
+                                        wire:model="order.payment_state"
+                                        formatters="formatter.payment_state"
+                                        available="availableStates.payment_state"
+                                    />
+                                    <x-flux::state
+                                        align="bottom-start"
+                                        :label="__('Delivery state')"
+                                        wire:model="order.delivery_state"
+                                        formatters="formatter.delivery_state"
+                                        available="availableStates.delivery_state"
+                                    />
+                                </div>
+                            </x-card>
+                        @show
+                    </div>
+                </section>
+            @show
+        </x-slot:prepend>
+        <x-slot:append>
+            @section ('content.right-wrapper')
+                <section
+                    class="relative w-full xl:max-w-96 xl:basis-2/12"
+                    wire:ignore
+                >
+                    <div class="sticky top-6 space-y-6">
+                        @section ('content.right')
+                            <x-card>
+                                <div class="space-y-4">
+                                    @section ('actions')
+                                        @if ($printLayouts)
+                                            <x-button
+                                                color="indigo"
+                                                class="w-full"
+                                                icon="document-text"
+                                                wire:click="openCreateDocumentsModal()"
+                                                :text="__('Create Documents')"
+                                            />
+                                            <div class="dropdown-full-w">
+                                                <x-dropdown>
+                                                    <x-slot:action>
+                                                        <x-button
+                                                            color="secondary"
+                                                            light
+                                                            class="w-full"
+                                                            icon="magnifying-glass"
+                                                            x-on:click="
+                                                                show = !show
+                                                            "
+                                                            :text="__('Preview')"
+                                                        />
+                                                    </x-slot:action>
+                                                    <template
+                                                        x-for="
+                                                            printLayout in
+                                                            $wire.printLayouts
+                                                        "
+                                                    >
+                                                        <x-dropdown.items
+                                                            x-on:click="$wire.openPreview(printLayout.layout, '{{ morph_alias(\FluxErp\Models\Order::class) }}', $wire.order.id).then(() => show = false)"
+                                                        >
+                                                            <span
+                                                                x-text="
+                                                                    printLayout.label
+                                                                "
+                                                            ></span>
+                                                        </x-dropdown.items>
+                                                    </template>
+                                                </x-dropdown>
+                                            </div>
+                                            <livewire:order.signature-link-generator
+                                                lazy
+                                                wire:model="order.id"
+                                            />
+                                        @endif
+                                        @foreach ($additionalModelActions as $modelAction)
+                                            {{ $modelAction }}
+                                        @endforeach
+
+                                    @show
+                                </div>
+                            </x-card>
+                            <x-card>
+                                <div class="text-sm">
+                                    @section ('content.right.summary')
                                         <div
-                                            class="flex cursor-ns-resize items-center justify-between p-2.5"
-                                            x-sort:item="discount.id"
+                                            x-cloak
+                                            x-show="
+                                                ($wire.order
+                                                    .subtotal_net_price ??
+                                                    $wire.order
+                                                        .total_net_price) !==
+                                                ($wire.order
+                                                    .total_base_net_price ??
+                                                    '0.0000000000')
+                                            "
                                         >
                                             <div
-                                                class="flex items-center gap-1.5"
+                                                class="flex justify-between p-2.5"
                                             >
-                                                @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
-                                                    <div>
-                                                        <x-button.circle
-                                                            color="red"
-                                                            icon="x-mark"
-                                                            2xs
-                                                            wire:click="deleteDiscount(discount.id)"
-                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Discount')]) }}"
-                                                        />
-                                                    </div>
-                                                @endif
-
+                                                <div>
+                                                    {{ __('Sum net without discount') }}
+                                                </div>
                                                 <div>
                                                     <span
-                                                        x-html="discount.name"
-                                                    ></span>
-                                                    <span
-                                                        x-html="$nuxbe.format.percentage(discount.discount_percentage ?? 0)"
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                $wire.order
+                                                                    .total_base_net_price ??
+                                                                    0,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
                                                     ></span>
                                                 </div>
                                             </div>
+                                            <div
+                                                class="flex justify-between p-2.5"
+                                                x-cloak
+                                                x-show="
+                                                    $wire.order
+                                                        .total_position_discount_percentage !=
+                                                    0
+                                                "
+                                            >
+                                                <div>
+                                                    <span>
+                                                        {{ __('Position discounts') }}
+                                                    </span>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.percentage(
+                                                                $wire.order
+                                                                    .total_position_discount_percentage ??
+                                                                    0,
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                                <div>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                ($wire.order
+                                                                    .total_position_discount_flat ??
+                                                                    0,
+                                                                {
+                                                                    colored: true,
+                                                                }) * -1,
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="flex justify-between p-2.5"
+                                                x-cloak
+                                                x-show="
+                                                    $wire.order
+                                                        .total_position_discount_percentage !=
+                                                    0
+                                                "
+                                            >
+                                                <div>
+                                                    <span>
+                                                        {{ __('Sum net discounted') }}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                $wire.order
+                                                                    .total_base_discounted_net_price ??
+                                                                    0,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                x-sort="
+                                                    $wire.reOrderDiscount(
+                                                        $item,
+                                                        $position,
+                                                    )
+                                                "
+                                            >
+                                                <template
+                                                    x-for="
+                                                        discount in
+                                                        $wire.order.discounts
+                                                    "
+                                                    :key="`${discount.id}-${discount.order_column}`"
+                                                >
+                                                    <div
+                                                        class="flex cursor-ns-resize items-center justify-between p-2.5"
+                                                        x-sort:item="
+                                                            discount.id
+                                                        "
+                                                    >
+                                                        <div
+                                                            class="flex items-center gap-1.5"
+                                                        >
+                                                            @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
+                                                                <div>
+                                                                    <x-button.circle
+                                                                        color="red"
+                                                                        icon="x-mark"
+                                                                        2xs
+                                                                        wire:click="deleteDiscount(discount.id)"
+                                                                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Discount')]) }}"
+                                                                    />
+                                                                </div>
+                                                            @endif
+
+                                                            <div>
+                                                                <span
+                                                                    x-html="
+                                                                        discount.name
+                                                                    "
+                                                                ></span>
+                                                                <span
+                                                                    x-html="
+                                                                        $nuxbe.format.percentage(
+                                                                            discount.discount_percentage ??
+                                                                                0,
+                                                                        )
+                                                                    "
+                                                                ></span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <span
+                                                                x-html="
+                                                                    $nuxbe.format.money(
+                                                                        (discount.discount_flat ??
+                                                                            0,
+                                                                        {
+                                                                            colored: true,
+                                                                        }) * -1,
+                                                                    )
+                                                                "
+                                                            ></span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
+                                            <div class="w-full">
+                                                <x-button
+                                                    color="secondary"
+                                                    light
+                                                    class="w-full"
+                                                    wire:click="editDiscount()"
+                                                    :text="__('Add discount')"
+                                                />
+                                            </div>
+                                        @endif
+                                        <div
+                                            class="flex justify-between p-2.5 opacity-50"
+                                            x-cloak
+                                            x-show="
+                                                ($wire.order
+                                                    .total_discount_percentage ??
+                                                    0) != 0
+                                            "
+                                        >
                                             <div>
                                                 <span
-                                                    x-html="$nuxbe.format.money((discount.discount_flat ?? 0, { colored: true }) * -1)"
+                                                    >{{ __('Total discount') }}</span
+                                                >
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.percentage(
+                                                            $wire.order
+                                                                .total_discount_percentage ??
+                                                                0,
+                                                        )
+                                                    "
+                                                ></span>
+                                            </div>
+                                            <div>
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            ($wire.order
+                                                                .total_discount_flat ??
+                                                                0,
+                                                            { colored: true }) *
+                                                                -1,
+                                                        )
+                                                    "
                                                 ></span>
                                             </div>
                                         </div>
-                                    </template>
+                                        <div
+                                            class="flex justify-between p-2.5"
+                                            x-cloak
+                                            x-show="
+                                                $wire.order.subtotal_net_price >
+                                                0
+                                            "
+                                        >
+                                            <div>{{ __('Subtotal net') }}</div>
+                                            <div>
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            $wire.order
+                                                                .subtotal_net_price,
+                                                            { colored: true },
+                                                        )
+                                                    "
+                                                ></span>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="flex justify-between p-2.5 opacity-50"
+                                            x-cloak
+                                            x-show="
+                                                $wire.order.subtotal_net_price >
+                                                0
+                                            "
+                                        >
+                                            <div>
+                                                {{ __('Split Orders net') }}
+                                            </div>
+                                            <div>
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            $wire.order
+                                                                .total_net_price -
+                                                                $wire.order
+                                                                    .subtotal_net_price,
+                                                            { colored: true },
+                                                        )
+                                                    "
+                                                ></span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between p-2.5">
+                                            <div>{{ __('Sum net') }}</div>
+                                            <div>
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            $wire.order
+                                                                .total_net_price ??
+                                                                0,
+                                                            { colored: true },
+                                                        )
+                                                    "
+                                                ></span>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <template
+                                            x-for="
+                                                vat in $wire.order.total_vats
+                                            "
+                                        >
+                                            <div
+                                                class="flex justify-between p-2.5"
+                                            >
+                                                <div>
+                                                    <span
+                                                        >{{ __('Plus ') }}</span
+                                                    >
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.percentage(
+                                                                vat.vat_rate_percentage ??
+                                                                    0,
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                                <div>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                vat.total_vat_price ??
+                                                                    0,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div
+                                            class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
+                                        >
+                                            <div>{{ __('Total Gross') }}</div>
+                                            <div>
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            $wire.order
+                                                                .total_gross_price ??
+                                                                0,
+                                                            { colored: true },
+                                                        )
+                                                    "
+                                                ></span>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
+                                        >
+                                            <div>{{ __('Balance') }}</div>
+                                            <div>
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            $wire.order
+                                                                .balance ?? 0,
+                                                            { colored: true },
+                                                        )
+                                                    "
+                                                ></span>
+                                            </div>
+                                        </div>
+                                        <div
+                                            x-cloak
+                                            x-show="
+                                                $wire.order.balance_due_discount
+                                            "
+                                            class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
+                                        >
+                                            <div>
+                                                {{ __('Balance Due Discount') }}
+                                                <span
+                                                    x-show="
+                                                        $wire.order
+                                                            .payment_discount_target_date
+                                                    "
+                                                    class="text-xs text-gray-500 dark:text-gray-400"
+                                                >
+                                                    ({{ __('until') }}
+                                                    <span
+                                                        x-text="
+                                                            $nuxbe.format.date(
+                                                                $wire.order
+                                                                    .payment_discount_target_date,
+                                                            )
+                                                        "
+                                                    ></span>
+                                                    )
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span
+                                                    x-html="
+                                                        $nuxbe.format.money(
+                                                            $wire.order
+                                                                .balance_due_discount ??
+                                                                0,
+                                                            { colored: true },
+                                                        )
+                                                    "
+                                                ></span>
+                                            </div>
+                                        </div>
+                                        @section ('content.right.summary.profit')
+                                            <hr />
+                                            <div
+                                                class="flex justify-between p-2.5"
+                                            >
+                                                <div>{{ __('Margin') }}</div>
+                                                <div>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                $wire.order
+                                                                    .margin ??
+                                                                    0,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="flex justify-between p-2.5"
+                                            >
+                                                <div>
+                                                    {{ __('Gross Profit') }}
+                                                </div>
+                                                <div>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                $wire.order
+                                                                    .gross_profit ??
+                                                                    0,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                            </div>
+                                        @show
+                                    @show
                                 </div>
-                            </div>
-                            @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
-                                <div class="w-full">
-                                    <x-button
-                                        color="secondary"
-                                        light
-                                        class="w-full"
-                                        wire:click="editDiscount()"
-                                        :text="__('Add discount')"
-                                    />
+                            </x-card>
+                            <x-card>
+                                <div class="space-y-3">
+                                    @section ('content.right.order_dates')
+                                        <x-date
+                                            wire:model="order.invoice_date"
+                                            :without-time="true"
+                                            :disabled="true"
+                                            :label="__('Invoice Date')"
+                                        />
+                                        <x-date
+                                            wire:model="order.system_delivery_date"
+                                            :without-time="true"
+                                            :disabled="$order->is_locked"
+                                            :label="__('Performance/Delivery date')"
+                                        />
+                                        <x-date
+                                            wire:model="order.system_delivery_date_end"
+                                            :without-time="true"
+                                            :disabled="$order->is_locked"
+                                            :label="__('Performance/Delivery date end')"
+                                        />
+                                        <x-date
+                                            wire:model="order.order_date"
+                                            :without-time="true"
+                                            :disabled="$order->is_locked"
+                                            :label="__('Order Date')"
+                                        />
+                                        <x-input
+                                            wire:model="order.commission"
+                                            :label="__('Commission')"
+                                        />
+                                        <x-date
+                                            wire:model="order.payment_reminder_next_date"
+                                            :without-time="true"
+                                            :label="__('Payment Reminder Next Date')"
+                                        />
+                                    @show
                                 </div>
-                            @endif
-
+                            </x-card>
+                        @show
+                        <x-card>
                             <div
-                                class="flex justify-between p-2.5 opacity-50"
-                                x-cloak
-                                x-show="($wire.order.total_discount_percentage ?? 0) != 0"
+                                class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
                             >
-                                <div>
-                                    <span>{{ __('Total discount') }}</span>
-                                    <span
-                                        x-html="$nuxbe.format.percentage($wire.order.total_discount_percentage ?? 0)"
-                                    ></span>
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="
-                                            $nuxbe.format.money(
-                                                ($wire.order.total_discount_flat ?? 0, { colored: true }) * -1,
+                                <div class="flex gap-0.5">
+                                    <div class="">{{ __('Created At') }}:</div>
+                                    <div
+                                        x-text="
+                                            $nuxbe.format.datetime(
+                                                $wire.order.created_at,
                                             )
                                         "
-                                    ></span>
+                                    ></div>
+                                    <div
+                                        x-text="$wire.order.created_by || '{{ __('Unknown') }}'"
+                                    ></div>
                                 </div>
-                            </div>
-                            <div
-                                class="flex justify-between p-2.5"
-                                x-cloak
-                                x-show="$wire.order.subtotal_net_price > 0"
-                            >
-                                <div>
-                                    {{ __('Subtotal net') }}
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="$nuxbe.format.money($wire.order.subtotal_net_price, { colored: true })"
-                                    ></span>
-                                </div>
-                            </div>
-                            <div
-                                class="flex justify-between p-2.5 opacity-50"
-                                x-cloak
-                                x-show="$wire.order.subtotal_net_price > 0"
-                            >
-                                <div>
-                                    {{ __('Split Orders net') }}
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="
-                                            $nuxbe.format.money(
-                                                $wire.order.total_net_price - $wire.order.subtotal_net_price,
-                                                { colored: true },
+                                <div class="flex gap-0.5">
+                                    <div class="">{{ __('Updated At') }}:</div>
+                                    <div
+                                        x-text="
+                                            $nuxbe.format.datetime(
+                                                $wire.order.updated_at,
                                             )
                                         "
-                                    ></span>
+                                    ></div>
+                                    <div
+                                        x-text="$wire.order.updated_by || '{{ __('Unknown') }}'"
+                                    ></div>
                                 </div>
                             </div>
-                            <div class="flex justify-between p-2.5">
-                                <div>
-                                    {{ __('Sum net') }}
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="$nuxbe.format.money($wire.order.total_net_price ?? 0, { colored: true })"
-                                    ></span>
-                                </div>
-                            </div>
-                            <hr />
-                            <template x-for="vat in $wire.order.total_vats">
-                                <div class="flex justify-between p-2.5">
-                                    <div>
-                                        <span>{{ __('Plus ') }}</span>
-                                        <span
-                                            x-html="$nuxbe.format.percentage(vat.vat_rate_percentage ?? 0)"
-                                        ></span>
-                                    </div>
-                                    <div>
-                                        <span
-                                            x-html="$nuxbe.format.money(vat.total_vat_price ?? 0, { colored: true })"
-                                        ></span>
-                                    </div>
-                                </div>
-                            </template>
-                            <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
-                            >
-                                <div>
-                                    {{ __('Total Gross') }}
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="$nuxbe.format.money($wire.order.total_gross_price ?? 0, { colored: true })"
-                                    ></span>
-                                </div>
-                            </div>
-                            <div
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
-                            >
-                                <div>
-                                    {{ __('Balance') }}
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="$nuxbe.format.money($wire.order.balance ?? 0, { colored: true })"
-                                    ></span>
-                                </div>
-                            </div>
-                            <div
-                                x-cloak
-                                x-show="$wire.order.balance_due_discount"
-                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
-                            >
-                                <div>
-                                    {{ __('Balance Due Discount') }}
-                                    <span
-                                        x-show="$wire.order.payment_discount_target_date"
-                                        class="text-xs text-gray-500 dark:text-gray-400"
-                                    >
-                                        ({{ __('until') }}
-                                        <span
-                                            x-text="$nuxbe.format.date($wire.order.payment_discount_target_date)"
-                                        ></span>
-                                        )
-                                    </span>
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="$nuxbe.format.money($wire.order.balance_due_discount ?? 0, { colored: true })"
-                                    ></span>
-                                </div>
-                            </div>
-                            @section('content.right.summary.profit')
-                            <hr />
-                            <div class="flex justify-between p-2.5">
-                                <div>
-                                    {{ __('Margin') }}
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="$nuxbe.format.money($wire.order.margin ?? 0, { colored: true })"
-                                    ></span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between p-2.5">
-                                <div>
-                                    {{ __('Gross Profit') }}
-                                </div>
-                                <div>
-                                    <span
-                                        x-html="$nuxbe.format.money($wire.order.gross_profit ?? 0, { colored: true })"
-                                    ></span>
-                                </div>
-                            </div>
-                            @show
-                            @show
-                        </div>
-                    </x-card>
-                    <x-card>
-                        <div class="space-y-3">
-                            @section('content.right.order_dates')
-                            <x-date
-                                wire:model="order.invoice_date"
-                                :without-time="true"
-                                :disabled="true"
-                                :label="__('Invoice Date')"
-                            />
-                            <x-date
-                                wire:model="order.system_delivery_date"
-                                :without-time="true"
-                                :disabled="$order->is_locked"
-                                :label="__('Performance/Delivery date')"
-                            />
-                            <x-date
-                                wire:model="order.system_delivery_date_end"
-                                :without-time="true"
-                                :disabled="$order->is_locked"
-                                :label="__('Performance/Delivery date end')"
-                            />
-                            <x-date
-                                wire:model="order.order_date"
-                                :without-time="true"
-                                :disabled="$order->is_locked"
-                                :label="__('Order Date')"
-                            />
-                            <x-input
-                                wire:model="order.commission"
-                                :label="__('Commission')"
-                            />
-                            <x-date
-                                wire:model="order.payment_reminder_next_date"
-                                :without-time="true"
-                                :label="__('Payment Reminder Next Date')"
-                            />
-                            @show
-                        </div>
-                    </x-card>
-                    @show
-                    <x-card>
-                        <div
-                            class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
-                        >
-                            <div class="flex gap-0.5">
-                                <div class="">{{ __('Created At') }}:</div>
-                                <div
-                                    x-text="$nuxbe.format.datetime($wire.order.created_at)"
-                                ></div>
-                                <div
-                                    x-text="$wire.order.created_by || '{{ __('Unknown') }}'"
-                                ></div>
-                            </div>
-                            <div class="flex gap-0.5">
-                                <div class="">{{ __('Updated At') }}:</div>
-                                <div
-                                    x-text="$nuxbe.format.datetime($wire.order.updated_at)"
-                                ></div>
-                                <div
-                                    x-text="$wire.order.updated_by || '{{ __('Unknown') }}'"
-                                ></div>
-                            </div>
-                        </div>
-                    </x-card>
-                </div>
-            </section>
+                        </x-card>
+                    </div>
+                </section>
             @show
-        </x-slot>
+        </x-slot:append>
     </x-flux::tabs>
 </div>

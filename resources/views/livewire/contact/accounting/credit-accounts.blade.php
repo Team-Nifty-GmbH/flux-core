@@ -19,11 +19,16 @@
             />
             <x-button
                 color="primary"
-                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-contact-bank-connection'); })"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        if (success)
+                            $tsui.close.modal('edit-contact-bank-connection');
+                    })
+                "
                 primary
                 :text="__('Save')"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <x-modal id="transaction-details-modal">
         <div class="flex flex-col gap-2">
@@ -71,8 +76,13 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.saveTransaction().then((success) => {if(success) $tsui.close.modal('transaction-details-modal');})"
+                x-on:click="
+                    $wire.saveTransaction().then((success) => {
+                        if (success)
+                            $tsui.close.modal('transaction-details-modal');
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

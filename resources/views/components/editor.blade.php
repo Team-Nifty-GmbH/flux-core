@@ -1,9 +1,9 @@
-@props([
+@props ([
     "editable" => true,
 ])
 
 <div>
-    <div @if(!$tooltipDropdown) class="mb-1" @endif>
+    <div @if (!$tooltipDropdown) class="mb-1" @endif>
         <x-label :text="$label ?? ''" />
     </div>
     <div
@@ -121,12 +121,7 @@
                             position="right"
                             color="primary"
                         />
-                        <div
-                            x-collapse
-                            x-cloak
-                            x-show="expanded"
-                            class="pt-2"
-                        >
+                        <div x-collapse x-cloak x-show="expanded" class="pt-2">
                             @foreach ($collapsible->dropdownContent() as $action)
                                 {!! $action->render() !!}
                             @endforeach

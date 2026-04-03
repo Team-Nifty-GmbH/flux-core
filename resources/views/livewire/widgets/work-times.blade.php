@@ -1,5 +1,5 @@
-@extends('flux::livewire.support.widgets.charts.bar-chart')
-@section('options')
+@extends ('flux::livewire.support.widgets.charts.bar-chart')
+@section ('options')
     <div class="px-6">
         <x-select.styled
             autocomplete="off"

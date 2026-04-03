@@ -1,5 +1,5 @@
-@use(\Illuminate\Support\Fluent)
-@use(\FluxErp\Settings\SubscriptionSettings)
+@use (\Illuminate\Support\Fluent)
+@use (\FluxErp\Settings\SubscriptionSettings)
 
 <x-flux::print.first-page-header
     :address="Fluent::make($model->address_invoice)"
@@ -12,9 +12,7 @@
                     <td class="py-0 text-left font-semibold">
                         {{ __('Order no.') }}
                     </td>
-                    <td class="py-0 text-right">
-                        {{ $model->order_number }}
-                    </td>
+                    <td class="py-0 text-right">{{ $model->order_number }}</td>
                 </tr>
                 <tr class="leading-none">
                     <td class="py-0 text-left font-semibold">
@@ -34,7 +32,7 @@
                 </tr>
             </tbody>
         </table>
-    </x-slot>
+    </x-slot:right-block>
 </x-flux::print.first-page-header>
 <main class="pt-6">
     <div class="prose-sm">

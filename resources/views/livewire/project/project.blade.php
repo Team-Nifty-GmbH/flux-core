@@ -1,49 +1,53 @@
-<div x-data="{
-    isEditing: false,
-}">
+<div
+    x-data="{
+        isEditing: false,
+    }"
+>
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center space-x-5">
-            @section('project.title')
-            @section('project.title.avatar')
-            <label for="avatar" class="cursor-pointer">
-                <x-avatar xl :image="$avatar" />
-            </label>
-            <input
-                type="file"
-                accept="image/*"
-                id="avatar"
-                class="hidden"
-                wire:model.live="avatar"
-            />
-            @show
-            @section('project.title.name')
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                    <div class="flex">
-                        <div class="pl-2">
-                            <span
-                                x-text="$wire.project.project_number"
-                            ></span>
-                            <span
-                                class="opacity-40 transition-opacity hover:opacity-100"
-                                x-text="$wire.project.name"
-                            ></span>
-                        </div>
+            @section ('project.title')
+                @section ('project.title.avatar')
+                    <label for="avatar" class="cursor-pointer">
+                        <x-avatar xl :image="$avatar" />
+                    </label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="avatar"
+                        class="hidden"
+                        wire:model.live="avatar"
+                    />
+                @show
+                @section ('project.title.name')
+                    <div>
+                        <h1
+                            class="text-2xl font-bold text-gray-900 dark:text-gray-50"
+                        >
+                            <div class="flex">
+                                <div class="pl-2">
+                                    <span
+                                        x-text="$wire.project.project_number"
+                                    ></span>
+                                    <span
+                                        class="opacity-40 transition-opacity hover:opacity-100"
+                                        x-text="$wire.project.name"
+                                    ></span>
+                                </div>
+                            </div>
+                        </h1>
+                        <a
+                            class="flex gap-1.5 font-semibold opacity-40"
+                            x-bind:href="$wire.project.parent?.url"
+                            x-cloak
+                            x-show="$wire.project.parent?.url"
+                        >
+                            <x-icon name="link" class="h-4 w-4" />
+                            <span x-text="$wire.project.parent?.label"></span>
+                        </a>
                     </div>
-                </h1>
-                <a
-                    class="flex gap-1.5 font-semibold opacity-40"
-                    x-bind:href="$wire.project.parent?.url"
-                    x-cloak
-                    x-show="$wire.project.parent?.url"
-                >
-                    <x-icon name="link" class="h-4 w-4" />
-                    <span x-text="$wire.project.parent?.label"></span>
-                </a>
-            </div>
-            @show
+                @show
             @show
         </div>
         <div
@@ -67,7 +71,7 @@
                     )
                 "
             />
-            @canAction(\FluxErp\Actions\Project\DeleteProject::class)
+            @canAction (\FluxErp\Actions\Project\DeleteProject::class)
                 <x-button
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
                     color="red"
@@ -91,9 +95,11 @@
                 x-cloak
                 x-show="isEditing"
                 class="w-full"
-                x-on:click="$wire.save().then((success) => {
-                    isEditing = false;
-                });"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        isEditing = false;
+                    })
+                "
                 :text="__('Save')"
             />
             <x-button
@@ -105,7 +111,10 @@
                 loading="save"
                 x-show="isEditing"
                 class="w-full"
-                x-on:click="isEditing = false; $wire.resetForm();"
+                x-on:click="
+                    isEditing = false;
+                    $wire.resetForm();
+                "
             />
         </div>
     </div>

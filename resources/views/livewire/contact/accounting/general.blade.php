@@ -1,173 +1,173 @@
 <div
     class="flex flex-col gap-4"
-    x-bind:class="! $wire.$parent.$parent.edit && 'pointer-events-none'"
+    x-bind:class="!$wire.$parent.$parent.edit && 'pointer-events-none'"
 >
-    @section('commercial')
-    <x-card>
-        <div class="flex flex-col gap-1.5">
-            <x-select.styled
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.price_list_id"
-                :label="__('Price group')"
-                select="label:name|value:id"
-                :options="$priceLists"
-            />
-            <x-select.styled
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.payment_type_id"
-                :label="__('Payment type')"
-                select="label:name|value:id"
-                :options="$paymentTypes"
-            />
-            <x-select.styled
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.purchase_payment_type_id"
-                :label="__('Purchase Payment Type')"
-                select="label:name|value:id"
-                :options="$purchasePaymentTypes"
-            />
-            <x-select.styled
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.currency_id"
-                :label="__('Currency')"
-                select="label:name|value:id"
-                :options="$currencies"
-            />
-            <x-select.styled
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.vat_rate_id"
-                :label="__('Tax Exemption')"
-                select="label:name|value:id"
-                :options="$vatRates"
-            />
-            <x-select.styled
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                :label="__('Commission Agent')"
-                wire:model="contact.agent_id"
-                select="label:label|value:id"
-                unfiltered
-                :request="[
+    @section ('commercial')
+        <x-card>
+            <div class="flex flex-col gap-1.5">
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.price_list_id"
+                    :label="__('Price group')"
+                    select="label:name|value:id"
+                    :options="$priceLists"
+                />
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.payment_type_id"
+                    :label="__('Payment type')"
+                    select="label:name|value:id"
+                    :options="$paymentTypes"
+                />
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.purchase_payment_type_id"
+                    :label="__('Purchase Payment Type')"
+                    select="label:name|value:id"
+                    :options="$purchasePaymentTypes"
+                />
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.currency_id"
+                    :label="__('Currency')"
+                    select="label:name|value:id"
+                    :options="$currencies"
+                />
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.vat_rate_id"
+                    :label="__('Tax Exemption')"
+                    select="label:name|value:id"
+                    :options="$vatRates"
+                />
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    :label="__('Commission Agent')"
+                    wire:model="contact.agent_id"
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
                     'params' => [
                         'with' => 'media',
                     ],
                 ]"
-            />
-            <x-select.styled
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                :label="__('Approval User')"
-                wire:model="contact.approval_user_id"
-                select="label:label|value:id"
-                unfiltered
-                :request="[
+                />
+                <x-select.styled
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    :label="__('Approval User')"
+                    wire:model="contact.approval_user_id"
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
                     'params' => [
                         'with' => 'media',
                     ],
                 ]"
-            />
-        </div>
-    </x-card>
+                />
+            </div>
+        </x-card>
     @show
-    @section('accounting')
-    <x-card>
-        <div class="flex flex-col gap-1.5">
-            <x-toggle
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.has_delivery_lock"
-                :label="__('Has Delivery Lock')"
-            />
-            <x-number
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.credit_line"
-                :label="__('Credit line')"
-            />
-            <x-input
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.creditor_number"
-                :label="__('Creditor number')"
-            />
-            <x-input
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.debtor_number"
-                :label="__('Debtor number')"
-            />
-            <x-input
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.vat_id"
-                :label="__('VAT number')"
-            />
-            <x-input
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                wire:model="contact.customs_identifier"
-                :label="__('Customs Identifier')"
-            />
-        </div>
-    </x-card>
+    @section ('accounting')
+        <x-card>
+            <div class="flex flex-col gap-1.5">
+                <x-toggle
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.has_delivery_lock"
+                    :label="__('Has Delivery Lock')"
+                />
+                <x-number
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.credit_line"
+                    :label="__('Credit line')"
+                />
+                <x-input
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.creditor_number"
+                    :label="__('Creditor number')"
+                />
+                <x-input
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.debtor_number"
+                    :label="__('Debtor number')"
+                />
+                <x-input
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.vat_id"
+                    :label="__('VAT number')"
+                />
+                <x-input
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    wire:model="contact.customs_identifier"
+                    :label="__('Customs Identifier')"
+                />
+            </div>
+        </x-card>
     @show
-    @section('terms')
-    <x-card>
-        <div class="flex flex-col gap-1.5">
-            <x-number
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                step="1"
-                min="0"
-                wire:model="contact.payment_target_days"
-                :label="__('Payment Target Days')"
-            />
-            <x-number
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                step="1"
-                min="1"
-                wire:model="contact.payment_reminder_days_1"
-                :label="__('Payment Reminder 1 Days')"
-            />
-            <x-number
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                step="1"
-                min="1"
-                wire:model="contact.payment_reminder_days_2"
-                :label="__('Payment Reminder 2 Days')"
-            />
-            <x-number
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                step="1"
-                min="1"
-                wire:model="contact.payment_reminder_days_3"
-                :label="__('Payment Reminder 3 Days')"
-            />
-            <x-number
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                step="1"
-                min="1"
-                wire:model="contact.discount_days"
-                :label="__('Payment Discount Days')"
-            />
-            <x-number
-                x-bind:disabled="! $wire.$parent.$parent.edit"
-                step="0.01"
-                min="0"
-                max="100"
-                wire:model="contact.discount_percent"
-                :label="__('Payment Discount Percent')"
-            />
-        </div>
-    </x-card>
+    @section ('terms')
+        <x-card>
+            <div class="flex flex-col gap-1.5">
+                <x-number
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    step="1"
+                    min="0"
+                    wire:model="contact.payment_target_days"
+                    :label="__('Payment Target Days')"
+                />
+                <x-number
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    step="1"
+                    min="1"
+                    wire:model="contact.payment_reminder_days_1"
+                    :label="__('Payment Reminder 1 Days')"
+                />
+                <x-number
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    step="1"
+                    min="1"
+                    wire:model="contact.payment_reminder_days_2"
+                    :label="__('Payment Reminder 2 Days')"
+                />
+                <x-number
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    step="1"
+                    min="1"
+                    wire:model="contact.payment_reminder_days_3"
+                    :label="__('Payment Reminder 3 Days')"
+                />
+                <x-number
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    step="1"
+                    min="1"
+                    wire:model="contact.discount_days"
+                    :label="__('Payment Discount Days')"
+                />
+                <x-number
+                    x-bind:disabled="!$wire.$parent.$parent.edit"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    wire:model="contact.discount_percent"
+                    :label="__('Payment Discount Percent')"
+                />
+            </div>
+        </x-card>
     @show
-    @section('texts')
-    <x-card class="flex flex-col gap-4">
-        <x-flux::editor
-            wire:model="contact.header"
-            scope="contact"
-            :label="__('Header')"
-        />
-        <x-flux::editor
-            wire:model="contact.footer"
-            scope="contact"
-            :label="__('Footer')"
-        />
-    </x-card>
+    @section ('texts')
+        <x-card class="flex flex-col gap-4">
+            <x-flux::editor
+                wire:model="contact.header"
+                scope="contact"
+                :label="__('Header')"
+            />
+            <x-flux::editor
+                wire:model="contact.footer"
+                scope="contact"
+                :label="__('Footer')"
+            />
+        </x-card>
     @show
 </div>

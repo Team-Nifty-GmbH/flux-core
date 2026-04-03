@@ -41,7 +41,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                             <x-badge
@@ -51,7 +51,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                         </div>
@@ -66,7 +66,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                             <x-badge
@@ -76,7 +76,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                         </div>

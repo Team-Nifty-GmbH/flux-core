@@ -12,9 +12,7 @@
                     <div>
                         {{ __('The login link is invalid or has expired.') }}
                     </div>
-                    <div>
-                        {{ __('Please request a new one.') }}
-                    </div>
+                    <div>{{ __('Please request a new one.') }}</div>
                 </div>
                 <x-button
                     color="indigo"

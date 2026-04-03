@@ -78,7 +78,7 @@
                     />
                 </div>
             </div>
-        </x-slot>
+        </x-slot:header>
 
         <div>
             <x-loading wire:loading />
@@ -201,6 +201,6 @@
                     </x-button>
                 @endforeach
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-card>
 </div>

@@ -7,126 +7,144 @@
     class="flex h-full"
 >
     <livewire:features.calendar.calendar-event-edit wire:model="event" />
-    @section('calendar-modal')
-    @teleport('body')
-        <x-modal id="calendar-modal" :title="__('Edit Calendar')">
-            @section('calendar-edit')
-            <div class="flex flex-col gap-4">
-                <div id="parent-calendar-select">
-                    <x-select.styled
-                        wire:model="calendar.parent_id"
-                        :label="__('Parent Calendar')"
-                        required
-                        select="label:label|value:id"
-                        :request="[
+    @section ('calendar-modal')
+        @teleport ('body')
+            <x-modal id="calendar-modal" :title="__('Edit Calendar')">
+                @section ('calendar-edit')
+                    <div class="flex flex-col gap-4">
+                        <div id="parent-calendar-select">
+                            <x-select.styled
+                                wire:model="calendar.parent_id"
+                                :label="__('Parent Calendar')"
+                                required
+                                select="label:label|value:id"
+                                :request="[
                             'url' => route('calendar-search'),
                             'method' => 'POST',
                             'params' => [
                                 'onlyGroups' => true,
                             ]
                         ]"
-                    />
-                </div>
-                <x-input
-                    wire:model="calendar.name"
-                    :label="__('Calendar Name')"
-                />
-                <x-input
-                    class="p-0"
-                    type="color"
-                    :label="__('Color')"
-                    wire:model="calendar.color"
-                />
-                <div x-show="!$wire.calendar.id" x-cloak>
-                    <x-checkbox
-                        wire:model="calendar.is_group"
-                        :label="__('Is Group')"
-                    />
-                </div>
-                <div x-show="!$wire.calendar.is_group" x-cloak>
-                    <x-checkbox
-                        wire:model="calendar.has_repeatable_events"
-                        :label="__('Has repeatable events')"
-                    />
-                </div>
-                @canAction(\FluxErp\Actions\Calendar\CreatePublicCalendar::class)
-                    <x-checkbox
-                        wire:model="calendar.is_public"
-                        :label="__('Public')"
-                    />
-                @endcanAction
-
-                <div x-show="!$wire.calendar.is_group" x-cloak>
-                    <x-card :header="__('Custom Properties')">
-                        <div class="flex flex-col gap-4">
-                            <x-button.circle
-                                class="mr-2"
-                                color="indigo"
-                                icon="plus"
-                                wire:click="addCustomProperty()"
                             />
-                            <template
-                                x-for="(customProperty, index) in $wire.calendar.custom_properties ?? []"
-                            >
-                                <div class="flex gap-x-4">
-                                    <div class="pt-6">
-                                        <x-button.circle
-                                            color="red"
-                                            icon="trash"
-                                            wire:click="removeCustomProperty(index)"
-                                        />
-                                    </div>
-                                    <div class="max-w-sm">
-                                        <x-select.styled
-                                            x-model="customProperty.field_type"
-                                            :label="__('Field Type')"
-                                            required
-                                            :options="$this->fieldTypes"
-                                        />
-                                    </div>
-                                    <div class="w-full">
-                                        <x-input
-                                            x-model="customProperty.name"
-                                            :label="__('Name')"
-                                        />
-                                    </div>
-                                </div>
-                            </template>
                         </div>
-                    </x-card>
-                </div>
-            </div>
-            @show
-            <x-slot:footer>
-                <div class="flex w-full justify-between gap-2">
-                    <div>
-                        <x-button
-                            x-show="$wire.calendar.is_editable && '{{ resolve_static(\FluxErp\Actions\Calendar\DeleteCalendar::class, 'canPerformAction', [false]) }}'"
-                            flat
-                            color="red"
-                            :text="__('Delete')"
-                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar')]) }}"
-                            x-on:click="$wire.deleteCalendar().then((deletedId) => {if(deletedId !== false) deleteCalendar(deletedId);})"
+                        <x-input
+                            wire:model="calendar.name"
+                            :label="__('Calendar Name')"
                         />
+                        <x-input
+                            class="p-0"
+                            type="color"
+                            :label="__('Color')"
+                            wire:model="calendar.color"
+                        />
+                        <div x-show="!$wire.calendar.id" x-cloak>
+                            <x-checkbox
+                                wire:model="calendar.is_group"
+                                :label="__('Is Group')"
+                            />
+                        </div>
+                        <div x-show="!$wire.calendar.is_group" x-cloak>
+                            <x-checkbox
+                                wire:model="calendar.has_repeatable_events"
+                                :label="__('Has repeatable events')"
+                            />
+                        </div>
+                        @canAction (\FluxErp\Actions\Calendar\CreatePublicCalendar::class)
+                            <x-checkbox
+                                wire:model="calendar.is_public"
+                                :label="__('Public')"
+                            />
+                        @endcanAction
+
+                        <div x-show="!$wire.calendar.is_group" x-cloak>
+                            <x-card :header="__('Custom Properties')">
+                                <div class="flex flex-col gap-4">
+                                    <x-button.circle
+                                        class="mr-2"
+                                        color="indigo"
+                                        icon="plus"
+                                        wire:click="addCustomProperty()"
+                                    />
+                                    <template
+                                        x-for="
+                                            (customProperty, index) in
+                                                $wire.calendar
+                                                    .custom_properties ?? []
+                                        "
+                                    >
+                                        <div class="flex gap-x-4">
+                                            <div class="pt-6">
+                                                <x-button.circle
+                                                    color="red"
+                                                    icon="trash"
+                                                    wire:click="removeCustomProperty(index)"
+                                                />
+                                            </div>
+                                            <div class="max-w-sm">
+                                                <x-select.styled
+                                                    x-model="
+                                                        customProperty.field_type
+                                                    "
+                                                    :label="__('Field Type')"
+                                                    required
+                                                    :options="$this->fieldTypes"
+                                                />
+                                            </div>
+                                            <div class="w-full">
+                                                <x-input
+                                                    x-model="
+                                                        customProperty.name
+                                                    "
+                                                    :label="__('Name')"
+                                                />
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </x-card>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <x-button
-                            color="secondary"
-                            light
-                            flat
-                            :text="__('Cancel')"
-                            x-on:click="$tsui.close.modal('calendar-modal');"
-                        />
-                        <x-button
-                            color="indigo"
-                            :text="__('Save')"
-                            x-on:click="saveCalendar().then((success) => {if(success) $tsui.close.modal('calendar-modal');})"
-                        />
+                @show
+                <x-slot:footer>
+                    <div class="flex w-full justify-between gap-2">
+                        <div>
+                            <x-button
+                                x-show="$wire.calendar.is_editable && '{{ resolve_static(\FluxErp\Actions\Calendar\DeleteCalendar::class, 'canPerformAction', [false]) }}'"
+                                flat
+                                color="red"
+                                :text="__('Delete')"
+                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar')]) }}"
+                                x-on:click="
+                                    $wire.deleteCalendar().then((deletedId) => {
+                                        if (deletedId !== false)
+                                            deleteCalendar(deletedId);
+                                    })
+                                "
+                            />
+                        </div>
+                        <div class="flex gap-2">
+                            <x-button
+                                color="secondary"
+                                light
+                                flat
+                                :text="__('Cancel')"
+                                x-on:click="$tsui.close.modal('calendar-modal')"
+                            />
+                            <x-button
+                                color="indigo"
+                                :text="__('Save')"
+                                x-on:click="
+                                    saveCalendar().then((success) => {
+                                        if (success)
+                                            $tsui.close.modal('calendar-modal');
+                                    })
+                                "
+                            />
+                        </div>
                     </div>
-                </div>
-            </x-slot>
-        </x-modal>
-    @endteleport
+                </x-slot:footer>
+            </x-modal>
+        @endteleport
 
     @show
     @if ($showCalendars)
@@ -135,33 +153,38 @@
                 x-data="{
                     checkedCallback: function (calendarItem) {
                         return this.isLeaf(calendarItem)
-                            ? calendar?.getEventSourceById(calendarItem.id) !== null
+                            ? calendar?.getEventSourceById(calendarItem.id) !==
+                                  null
                             : (calendarItem.children || []).every((child) =>
                                   this.isChecked(child),
-                              )
+                              );
                     },
                     storeSettings: () => {
                         $wire.toggleEventSource(
                             calendar
                                 .getEventSources()
                                 .map((source) => source.internalEventSource),
-                        )
+                        );
                     },
                 }"
                 x-on:folder-tree-uncheck="
                     (event) => {
-                        hideEventSource(event.detail)
-                        storeSettings()
+                        hideEventSource(event.detail);
+                        storeSettings();
                     }
                 "
                 x-on:folder-tree-check="
                     (event) => {
-                        showEventSource(event.detail)
-                        storeSettings()
+                        showEventSource(event.detail);
+                        storeSettings();
                     }
                 "
-                x-on:folder-tree-select="(event) => $wire.$set('calendarObject', event.detail)"
-                x-on:folder-tree-unselect="() => $wire.$set('calendarObject', null)"
+                x-on:folder-tree-select="
+                    (event) => $wire.$set('calendarObject', event.detail)
+                "
+                x-on:folder-tree-unselect="
+                    () => $wire.$set('calendarObject', null)
+                "
                 class="w-full pt-2"
             >
                 <x-flux::checkbox-tree
@@ -171,33 +194,51 @@
                     selectable="true"
                     hide-icon="true"
                     checked-callback="checkedCallback"
-                    x-on:calendar-initialized.window="(event) => checked = event.detail.getEventSources().map(source => source.internalEventSource.publicId)"
+                    x-on:calendar-initialized.window="
+                        (event) =>
+                            (checked = event.detail
+                                .getEventSources()
+                                .map(
+                                    (source) =>
+                                        source.internalEventSource.publicId,
+                                ))
+                    "
                 >
-                    @canAction(\FluxErp\Actions\Calendar\CreateCalendar::class)
+                    @canAction (\FluxErp\Actions\Calendar\CreateCalendar::class)
                         <x-slot:beforeTree>
                             <x-button
                                 class="mb-2"
                                 :text="__('Create Calendar')"
                                 wire:click="editCalendar()"
                             />
-                        </x-slot>
+                        </x-slot:beforeTree>
                     @endcanAction
 
                     <x-slot:checkbox>
-                        @section('checkbox-slot')
-                        <x-checkbox
-                            sm
-                            x-on:folder-tree-uncheck.window="$el.checked = isChecked(node); $el.indeterminate = isIndeterminate(node);"
-                            x-on:folder-tree-check.window="$el.checked = isChecked(node); $el.indeterminate = isIndeterminate(node);"
-                            x-effect="$el.indeterminate = isIndeterminate(node)"
-                            x-bind:checked="isChecked(node)"
-                            x-on:change="toggleCheck(node, $event.target.checked)"
-                            x-bind:value="node.id"
-                            x-bind:style="'background-color: ' + node.color"
-                            class="form-checkbox"
-                        />
+                        @section ('checkbox-slot')
+                            <x-checkbox
+                                sm
+                                x-on:folder-tree-uncheck.window="
+                                    $el.checked = isChecked(node);
+                                    $el.indeterminate = isIndeterminate(node);
+                                "
+                                x-on:folder-tree-check.window="
+                                    $el.checked = isChecked(node);
+                                    $el.indeterminate = isIndeterminate(node);
+                                "
+                                x-effect="
+                                    $el.indeterminate = isIndeterminate(node)
+                                "
+                                x-bind:checked="isChecked(node)"
+                                x-on:change="
+                                    toggleCheck(node, $event.target.checked)
+                                "
+                                x-bind:value="node.id"
+                                x-bind:style="'background-color: ' + node.color"
+                                class="form-checkbox"
+                            />
                         @show
-                    </x-slot>
+                    </x-slot:checkbox>
                     <x-slot:suffix>
                         <div class="size-6 shrink-0">
                             <svg
@@ -218,7 +259,7 @@
                                 />
                             </svg>
                         </div>
-                        @canAction(\FluxErp\Actions\Calendar\UpdateCalendar::class)
+                        @canAction (\FluxErp\Actions\Calendar\UpdateCalendar::class)
                             <div
                                 class="flex cursor-pointer items-center gap-1"
                                 x-cloak
@@ -226,8 +267,8 @@
                             >
                                 <i
                                     x-on:click="
-                                        calendarItem = node
-                                        $wire.editCalendar(node.id)
+                                        calendarItem = node;
+                                        $wire.editCalendar(node.id);
                                     "
                                     class="ph ph-note-pencil"
                                     x-cloak
@@ -245,7 +286,7 @@
                                 ></i>
                             </div>
                         @endcanAction
-                    </x-slot>
+                    </x-slot:suffix>
                 </x-flux::checkbox-tree>
             </div>
         </div>

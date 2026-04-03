@@ -1,49 +1,52 @@
 <div
     x-data="{
-    calculatePositionTotal(position) {
-        if (! position || typeof position.is_net === 'undefined') {
-            return 0;
-        }
-
-        const unitPrice = position.is_net ? position.unit_net_price : position.unit_gross_price;
-        const subtotal = parseFloat(position.amount || 0) * parseFloat(unitPrice || 0);
-        const discount = parseFloat(position.discount_percentage || 0);
-
-        return subtotal * (1 - discount);
-    },
-    getSubtotal() {
-        if (! $wire.replicateOrder?.order_positions) {
-            return 0;
-        }
-
-        return $wire.replicateOrder.order_positions.reduce((total, position) => {
-            return total + this.calculatePositionTotal(position);
-        }, 0);
-    },
-    getTotalAmount() {
-        let total = this.getSubtotal();
-
-        for (const discount of ($wire.parentOrder?.discounts || [])) {
-            if (discount.is_percentage) {
-                total = total * (1 - parseFloat(discount.discount));
-            } else {
-                total = total - parseFloat(discount.discount);
+        calculatePositionTotal(position) {
+            if (!position || typeof position.is_net === 'undefined') {
+                return 0;
             }
-        }
 
-        return total;
-    }
-}"
+            const unitPrice = position.is_net
+                ? position.unit_net_price
+                : position.unit_gross_price;
+            const subtotal =
+                parseFloat(position.amount || 0) * parseFloat(unitPrice || 0);
+            const discount = parseFloat(position.discount_percentage || 0);
+
+            return subtotal * (1 - discount);
+        },
+        getSubtotal() {
+            if (!$wire.replicateOrder?.order_positions) {
+                return 0;
+            }
+
+            return $wire.replicateOrder.order_positions.reduce(
+                (total, position) => {
+                    return total + this.calculatePositionTotal(position);
+                },
+                0,
+            );
+        },
+        getTotalAmount() {
+            let total = this.getSubtotal();
+
+            for (const discount of $wire.parentOrder?.discounts || []) {
+                if (discount.is_percentage) {
+                    total = total * (1 - parseFloat(discount.discount));
+                } else {
+                    total = total - parseFloat(discount.discount);
+                }
+            }
+
+            return total;
+        },
+    }"
 >
     <div class="mx-auto max-w-(--breakpoint-2xl) px-4 pb-6 sm:px-6 lg:px-8">
         <div
             class="mx-auto pb-6 md:flex md:items-center md:justify-between md:space-x-5"
         >
             <div class="flex items-center gap-5">
-                <x-avatar
-                    xl
-                    :image="data_get($parentOrder, 'avatarUrl', '')"
-                />
+                <x-avatar xl :image="data_get($parentOrder, 'avatarUrl', '')" />
                 <div>
                     <h1
                         class="text-2xl font-bold text-gray-900 dark:text-gray-50"
@@ -53,9 +56,7 @@
                     <p
                         class="text-sm font-medium text-gray-500 dark:text-gray-400"
                     >
-                        {{ __("Parent Order") }}:
-                        {{ data_get($parentOrder, "order_number") }} •
-                        {{ data_get($parentOrder, "address_invoice.name") }}
+                        {{ __("Parent Order") }}: {{ data_get($parentOrder, "order_number") }} • {{ data_get($parentOrder, "address_invoice.name") }}
                     </p>
                 </div>
             </div>
@@ -151,20 +152,21 @@
                                             <div
                                                 class="text-sm text-gray-600 dark:text-gray-400"
                                             >
-                                                {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso")) }}@if (data_get($position, "unit_abbreviation"))/ {{ data_get($position, "unit_abbreviation") }}
+                                                {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso")) }}
+                                                @if (data_get($position, "unit_abbreviation"))
+                                                    / {{ data_get($position, "unit_abbreviation") }}
                                                 @endif
                                             </div>
                                             @if (data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
                                                 <div
                                                     class="text-sm text-red-500"
                                                 >
-                                                    -{{ Number::percentage(bcmul(data_get($position, "discount_percentage") ?? 0, 100), 2) }}
-                                                    {{ __("Discount") }}
+                                                    -{{ Number::percentage(bcmul(data_get($position, "discount_percentage") ?? 0, 100), 2) }} {{ __("Discount") }}
                                                 </div>
                                             @endif
                                         </div>
                                     </div>
-                                </x-slot>
+                                </x-slot:value>
                                 <x-slot:actions>
                                     <x-number
                                         wire:model.number="replicateOrder.order_positions.{{ $index }}.amount"
@@ -176,7 +178,7 @@
                                         icon="trash"
                                         wire:click="removePosition({{ $index }})"
                                     />
-                                </x-slot>
+                                </x-slot:actions>
                             </x-flux::list-item>
                         @empty
                             <div class="py-8 text-center text-gray-500">
@@ -215,7 +217,6 @@
                                     </span>
                                 </div>
                             @endforeach
-
                             <hr class="my-2" />
                         @endif
 
@@ -246,7 +247,10 @@
                     :text="$this->getTitle()"
                     wire:click="save()"
                     loading
-                    x-bind:disabled="!$wire.replicateOrder.order_type_id || !$wire.replicateOrder.order_positions.length"
+                    x-bind:disabled="
+                        !$wire.replicateOrder.order_type_id ||
+                        !$wire.replicateOrder.order_positions.length
+                    "
                 />
             </div>
         </x-card>

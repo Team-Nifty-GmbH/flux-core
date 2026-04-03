@@ -57,5 +57,5 @@
             x-on:click="$tsui.close.modal('new-ticket-modal')"
         />
         <x-button color="indigo" :text="__('Save')" wire:click="save()" />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

@@ -26,7 +26,10 @@
                         <td class="pb-2 text-right">
                             @if ($shouldBePositive)
                                 <template
-                                    x-if="item.growthRate !== null && ! isNaN(item.growthRate)"
+                                    x-if="
+                                        item.growthRate !== null &&
+                                        !isNaN(item.growthRate)
+                                    "
                                 >
                                     <div>
                                         <x-badge
@@ -37,7 +40,7 @@
                                         >
                                             <x-slot:left>
                                                 <i class="ph ph-caret-up"></i>
-                                            </x-slot>
+                                            </x-slot:left>
                                             <span
                                                 x-text="item.growthRate + '%'"
                                             ></span>
@@ -50,7 +53,7 @@
                                         >
                                             <x-slot:left>
                                                 <i class="ph ph-caret-down"></i>
-                                            </x-slot>
+                                            </x-slot:left>
                                             <span
                                                 x-text="item.growthRate + '%'"
                                             ></span>
@@ -59,7 +62,10 @@
                                 </template>
                             @else
                                 <template
-                                    x-if="item.growthRate !== null && ! isNaN(item.growthRate)"
+                                    x-if="
+                                        item.growthRate !== null &&
+                                        !isNaN(item.growthRate)
+                                    "
                                 >
                                     <div>
                                         <x-badge
@@ -70,7 +76,7 @@
                                         >
                                             <x-slot:left>
                                                 <i class="ph ph-caret-up"></i>
-                                            </x-slot>
+                                            </x-slot:left>
                                             <span
                                                 x-text="item.growthRate + '%'"
                                             ></span>
@@ -83,7 +89,7 @@
                                         >
                                             <x-slot:left>
                                                 <i class="ph ph-caret-down"></i>
-                                            </x-slot>
+                                            </x-slot:left>
                                             <span
                                                 x-text="item.growthRate + '%'"
                                             ></span>
@@ -99,7 +105,7 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-right"></i>
-                                </x-slot>
+                                </x-slot:left>
                                 <span>{{ __('New') }}</span>
                             </x-badge>
                             <template x-if="isNaN(item.growthRate)">

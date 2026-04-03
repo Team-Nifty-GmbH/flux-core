@@ -44,7 +44,7 @@
                     ></x-button>
                 </div>
             </div>
-        </x-slot>
+        </x-slot:header>
     @endif
 
     <div class="pb-2 font-semibold uppercase">
@@ -56,7 +56,11 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="$nuxbe.format.money($wire.address.total_net, { colored: true })"
+                x-html="
+                    $nuxbe.format.money($wire.address.total_net, {
+                        colored: true,
+                    })
+                "
             ></span>
         </div>
         <x-label :label="__('Invoices')" />
@@ -70,7 +74,11 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="$nuxbe.format.money($wire.address.balance, { colored: true })"
+                x-html="
+                    $nuxbe.format.money($wire.address.balance, {
+                        colored: true,
+                    })
+                "
             ></span>
         </div>
         <x-label :label="__('Revenue this year')" />
@@ -78,7 +86,11 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="$nuxbe.format.money($wire.address.revenue_this_year, { colored: true })"
+                x-html="
+                    $nuxbe.format.money($wire.address.revenue_this_year, {
+                        colored: true,
+                    })
+                "
             ></span>
         </div>
         <x-label :label="__('Revenue last year')" />
@@ -86,7 +98,11 @@
             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
         >
             <span
-                x-html="$nuxbe.format.money($wire.address.revenue_last_year, { colored: true })"
+                x-html="
+                    $nuxbe.format.money($wire.address.revenue_last_year, {
+                        colored: true,
+                    })
+                "
             ></span>
         </div>
         <hr class="col-span-2" />
@@ -97,7 +113,7 @@
                     <x-label>
                         <x-slot:word>
                             <span x-text="order.name"></span>
-                        </x-slot>
+                        </x-slot:word>
                     </x-label>
                     <div
                         class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
@@ -147,10 +163,15 @@
                 <x-label>
                     <x-slot:word>
                         <span x-text="contactOption.label"></span>
-                    </x-slot>
+                    </x-slot:word>
                 </x-label>
                 <a
-                    x-bind:href="hrefFromContactOption(contactOption.type, contactOption.value)"
+                    x-bind:href="
+                        hrefFromContactOption(
+                            contactOption.type,
+                            contactOption.value,
+                        )
+                    "
                     class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"
                     x-text="contactOption.value"
                 ></a>

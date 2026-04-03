@@ -132,17 +132,22 @@
             <x-button
                 color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((task) => {
-                    if (task) {
-                        close();
-                    }
-                });"
+                x-on:click="
+                    $wire.save().then((task) => {
+                        if (task) {
+                            close();
+                        }
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <x-button
         color="indigo"
-        x-on:click="$wire.resetTask(); $tsui.open.modal('create-task-modal');"
+        x-on:click="
+            $wire.resetTask();
+            $tsui.open.modal('create-task-modal');
+        "
         :text="__('Create Task')"
     />
 </div>

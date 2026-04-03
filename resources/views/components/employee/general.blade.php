@@ -17,9 +17,11 @@
             x-cloak
             x-show="isEditing"
             class="w-full"
-            x-on:click="$wire.save().then((success) => {
-                isEditing = false;
-            });"
+            x-on:click="
+                $wire.save().then((success) => {
+                    isEditing = false;
+                })
+            "
             :text="__('Save')"
         />
         <x-button
@@ -31,7 +33,10 @@
             loading="save"
             x-show="isEditing"
             class="w-full"
-            x-on:click="isEditing = false; $wire.resetForm();"
+            x-on:click="
+                isEditing = false;
+                $wire.resetForm();
+            "
         />
     </div>
 </div>

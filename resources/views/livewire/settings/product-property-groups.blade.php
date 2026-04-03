@@ -13,24 +13,35 @@
             </div>
             <div
                 class="col-span-2"
-                x-show="$wire.productPropertyGroup.product_properties.length > 0"
+                x-show="
+                    $wire.productPropertyGroup.product_properties.length > 0
+                "
                 x-cloak
             >
                 <x-label :label="__('Property Type')" />
             </div>
         </div>
         <template
-            x-for="(property, index) in $wire.productPropertyGroup.product_properties"
+            x-for="
+                (property, index) in
+                $wire.productPropertyGroup.product_properties
+            "
         >
             <div class="grid grid-cols-6 space-x-2">
                 <div class="col-span-3">
                     <x-input
-                        x-model="$wire.productPropertyGroup.product_properties[index].name"
+                        x-model="
+                            $wire.productPropertyGroup.product_properties[index]
+                                .name
+                        "
                     />
                 </div>
                 <div class="col-span-2">
                     <x-select.native
-                        x-model="$wire.productPropertyGroup.product_properties[index].property_type_enum"
+                        x-model="
+                            $wire.productPropertyGroup.product_properties[index]
+                                .property_type_enum
+                        "
                         required
                         select="label:label|value:name"
                         :options="$propertyTypes"
@@ -40,14 +51,24 @@
                     <x-button
                         color="red"
                         icon="trash"
-                        x-on:click="$wire.productPropertyGroup.product_properties.splice(index, 1)"
+                        x-on:click="
+                            $wire.productPropertyGroup.product_properties.splice(
+                                index,
+                                1,
+                            )
+                        "
                     />
                 </div>
             </div>
         </template>
         <x-button
             color="indigo"
-            x-on:click="$wire.productPropertyGroup.product_properties.push({name: '', property_type_enum: 'text'})"
+            x-on:click="
+                $wire.productPropertyGroup.product_properties.push({
+                    name: '',
+                    property_type_enum: 'text',
+                })
+            "
         >
             {{ __('Add Product Property') }}
         </x-button>
@@ -64,7 +85,12 @@
             color="indigo"
             loading="save()"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-product-property-group-modal'); })"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success)
+                        $tsui.close.modal('edit-product-property-group-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

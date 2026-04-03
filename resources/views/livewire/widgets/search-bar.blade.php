@@ -3,7 +3,9 @@
     x-cloak
     x-show="$wire.show"
     class="relative"
-    x-on:render-search-bar-widget.window="$wire.renderSearchBarWidget($event.detail.model, $event.detail.id)"
+    x-on:render-search-bar-widget.window="
+        $wire.renderSearchBarWidget($event.detail.model, $event.detail.id)
+    "
 >
     @if ($widgetComponent)
         <x-loading />

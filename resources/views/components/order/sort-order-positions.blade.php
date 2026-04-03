@@ -3,16 +3,16 @@
         expandedPositions: [],
 
         isExpanded(id) {
-            return this.expandedPositions.includes(parseInt(id))
+            return this.expandedPositions.includes(parseInt(id));
         },
 
         toggleExpand(id) {
             if (this.isExpanded(id)) {
                 this.expandedPositions = this.expandedPositions.filter(
                     (item) => item !== parseInt(id),
-                )
+                );
             } else {
-                this.expandedPositions.push(parseInt(id))
+                this.expandedPositions.push(parseInt(id));
             }
         },
     }"
@@ -21,7 +21,7 @@
         class="mt-2 space-y-2"
         @if (! $this->order->is_locked)
             x-sort="$wire.movePosition($item, $position)"
-            x-sort:group="nested-positions"
+            x-sort:group="nested - positions"
         @endif
     >
         <x-loading />

@@ -1,7 +1,7 @@
 <div>
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
-            <div class="mt-2 mb-2" x-cloak x-show="! $wire.workTime.id">
+            <div class="mt-2 mb-2" x-cloak x-show="!$wire.workTime.id">
                 <x-toggle
                     :label="__('Is Daily Work Time')"
                     wire:model="workTime.is_daily_work_time"
@@ -10,12 +10,15 @@
             <div
                 class="flex flex-col gap-1.5"
                 x-cloak
-                x-show="! $wire.workTime.is_daily_work_time"
+                x-show="!$wire.workTime.is_daily_work_time"
             >
                 <x-select.styled
                     :label="__('Work Time Type')"
                     wire:model="workTime.work_time_type_id"
-                    x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
+                    x-on:select="
+                        $wire.workTime.is_billable =
+                            $event.detail.select.is_billable
+                    "
                     select="label:name|value:id"
                     :options="$workTimeTypes"
                 />
@@ -28,7 +31,9 @@
             </div>
             <div
                 x-cloak
-                x-show="! $wire.workTime.is_daily_work_time || ! $wire.workTime.id"
+                x-show="
+                    !$wire.workTime.is_daily_work_time || !$wire.workTime.id
+                "
             >
                 <x-select.styled
                     :label="__('User')"
@@ -66,7 +71,7 @@
             <div
                 class="flex flex-col gap-1.5"
                 x-cloak
-                x-show="! $wire.workTime.is_daily_work_time"
+                x-show="!$wire.workTime.is_daily_work_time"
             >
                 <x-select.styled
                     :label="__('Contact')"
@@ -111,7 +116,12 @@
                     <x-select.styled
                         :label="__('Record')"
                         wire:model="workTime.trackable_id"
-                        x-on:select="$event.detail.select.contact_id ? $wire.workTime.contact_id = $event.detail.select.contact_id : null"
+                        x-on:select="
+                            $event.detail.select.contact_id
+                                ? ($wire.workTime.contact_id =
+                                      $event.detail.select.contact_id)
+                                : null
+                        "
                         select="label:label|value:id"
                         unfiltered
                         :request="[
@@ -144,13 +154,19 @@
                 color="indigo"
                 loading
                 x-on:click="
-                    $wire.workTime.local_started_at = dayjs($wire.workTime.started_at).format();
-                    $wire.workTime.local_ended_at = dayjs($wire.workTime.ended_at).format();
-                    $wire.save().then((success) => { if (success) $tsui.close.modal('edit-work-time-modal'); })
+                    $wire.workTime.local_started_at = dayjs(
+                        $wire.workTime.started_at,
+                    ).format();
+                    $wire.workTime.local_ended_at = dayjs(
+                        $wire.workTime.ended_at,
+                    ).format();
+                    $wire.save().then((success) => {
+                        if (success) $tsui.close.modal('edit-work-time-modal');
+                    });
                 "
                 :text="__('Save')"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <x-modal id="create-orders-modal">
         <div class="flex flex-col gap-1.5">
@@ -236,10 +252,14 @@
             <x-button
                 color="indigo"
                 loading
-                x-on:click="$wire.createOrders().then(() => { $tsui.close.modal('create-orders-modal'); })"
+                x-on:click="
+                    $wire.createOrders().then(() => {
+                        $tsui.close.modal('create-orders-modal');
+                    })
+                "
                 :text="__('Create Orders')"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <div x-data="{ isBillable: true }">
         <x-modal id="toggle-is-billable-modal">
@@ -252,15 +272,23 @@
                     light
                     flat
                     :text="__('Cancel')"
-                    x-on:click="$tsui.close.modal('toggle-is-billable-modal'); isBillable = true;"
+                    x-on:click="
+                        $tsui.close.modal('toggle-is-billable-modal');
+                        isBillable = true;
+                    "
                 />
                 <x-button
                     color="indigo"
                     loading
-                    x-on:click="$wire.toggleIsBillable(isBillable).then(() => { $tsui.close.modal('toggle-is-billable-modal'); isBillable = true; })"
+                    x-on:click="
+                        $wire.toggleIsBillable(isBillable).then(() => {
+                            $tsui.close.modal('toggle-is-billable-modal');
+                            isBillable = true;
+                        })
+                    "
                     :text="__('Apply')"
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     </div>
 </div>

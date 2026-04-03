@@ -1,5 +1,5 @@
-@use(FluxErp\Facades\Editor)
-@use(FluxErp\Models\Order)
+@use (FluxErp\Facades\Editor)
+@use (FluxErp\Models\Order)
 
 <div class="flex flex-col gap-4">
     <div>

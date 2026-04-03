@@ -1,4 +1,4 @@
-@props(['count' => 1])
+@props (['count' => 1])
 
 <div class="relative">
     <div

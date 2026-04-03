@@ -21,7 +21,7 @@
             <x-badge color="indigo">
                 <x-slot:text>
                     <span x-text="$wire.version"></span>
-                </x-slot>
+                </x-slot:text>
             </x-badge>
         </div>
         <div class="flex items-center justify-between">

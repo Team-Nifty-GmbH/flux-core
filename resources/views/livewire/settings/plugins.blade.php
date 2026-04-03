@@ -4,13 +4,13 @@
     x-data="{
         showOnlyFluxPlugins: true,
         get installed() {
-            if (! this.showOnlyFluxPlugins) return $wire.installed
+            if (!this.showOnlyFluxPlugins) return $wire.installed;
 
             return Object.fromEntries(
                 Object.entries($wire.installed).filter(
                     ([key, value]) => value.is_flux_plugin,
                 ),
-            )
+            );
         },
     }"
 >
@@ -26,7 +26,7 @@
                 <span>{{ __('Update') }}</span>
                 <span x-text="$wire.update.package"></span>
                 <span x-text="$wire.update.version"></span>
-            </x-slot>
+            </x-slot:title>
             <div
                 class="prose dark:prose-invert max-w-full"
                 x-html="$wire.update.readme"
@@ -43,9 +43,15 @@
                     color="indigo"
                     :text="__('Update')"
                     loading="update"
-                    x-on:click="$wire.updatePackages($wire.update.package).then(() => $tsui.close.modal('update-plugin-modal'))"
+                    x-on:click="
+                        $wire
+                            .updatePackages($wire.update.package)
+                            .then(() =>
+                                $tsui.close.modal('update-plugin-modal'),
+                            )
+                    "
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endif
 
@@ -62,7 +68,7 @@
                 :text="__('Close')"
                 x-on:click="$tsui.close.modal('more-plugin-modal')"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
         <x-modal
@@ -91,7 +97,7 @@
                                 wire:flux-confirm.type.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"
                             />
                         </div>
-                    </x-slot>
+                    </x-slot:footer>
                 </x-flux::features.media.upload-form-object>
                 <x-input
                     type="search"
@@ -178,7 +184,7 @@
                     :text="__('Close')"
                     x-on:click="$tsui.close.modal('install-plugin-modal')"
                 />
-            </x-slot>
+            </x-slot:footer>
         </x-modal>
     @endif
 
@@ -192,7 +198,7 @@
             />
         </x-card>
     </div>
-    @error('checkForUpdates')
+    @error ('checkForUpdates')
         <div>
             <x-card class="gap-4 rounded-xl bg-red-500 text-white">
                 <span>{!! $message !!}</span>
@@ -200,7 +206,7 @@
         </div>
     @enderror
 
-    @error('update')
+    @error ('update')
         <div>
             <x-card class="gap-4 rounded-xl bg-red-500 text-white">
                 <span>{!! $message !!}</span>
@@ -249,7 +255,12 @@
                     @if (resolve_static(\FluxErp\Actions\Plugins\ToggleActive::class, 'canPerformAction', [false]))
                         <div
                             x-cloak
-                            x-bind:class="! (plugin.can_uninstall && ! plugin.offer_install) && 'invisible'"
+                            x-bind:class="
+                                !(
+                                    plugin.can_uninstall &&
+                                    !plugin.offer_install
+                                ) && 'invisible'
+                            "
                         >
                             <x-toggle
                                 x-model="$wire.installed[key].is_active"
@@ -259,7 +270,7 @@
                 </div>
                 <div
                     class="flex grow gap-1.5"
-                    x-bind:class="! plugin.is_active && 'opacity-60'"
+                    x-bind:class="!plugin.is_active && 'opacity-60'"
                 >
                     <img
                         x-bind:src="
@@ -282,7 +293,10 @@
                             ></span>
                             <div
                                 x-cloak
-                                x-show="plugin.is_flux_plugin && plugin.name !== 'team-nifty-gmbh/flux-erp'"
+                                x-show="
+                                    plugin.is_flux_plugin &&
+                                    plugin.name !== 'team-nifty-gmbh/flux-erp'
+                                "
                             >
                                 <x-badge
                                     color="emerald"
@@ -294,10 +308,7 @@
                             class="text-xs font-semibold"
                             x-text="'{{ __('Version') }}' + ': ' + plugin.version"
                         ></div>
-                        <div
-                            class="text-xs"
-                            x-text="plugin.description"
-                        ></div>
+                        <div class="text-xs" x-text="plugin.description"></div>
                         <a
                             x-bind:href="plugin.homepage"
                             x-text="plugin.homepage"
@@ -351,7 +362,7 @@
                                     <x-slot:label>
                                         <span>{{ __('Update to') }}</span>
                                         <span x-text="plugin.latest" />
-                                    </x-slot>
+                                    </x-slot:label>
                                 </x-button>
                             </div>
                         @endif

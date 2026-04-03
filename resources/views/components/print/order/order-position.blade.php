@@ -1,4 +1,4 @@
-@use(Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
+@use (Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-2 pr-8 align-top">
@@ -17,9 +17,7 @@
                 />
             @endif
 
-            <p class="font-italic text-xs">
-                {{ $position->product_number }}
-            </p>
+            <p class="font-italic text-xs">{{ $position->product_number }}</p>
             <p class="font-semibold">
                 {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>

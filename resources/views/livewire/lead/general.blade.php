@@ -59,7 +59,7 @@
                             wire:navigate
                             x-bind:href="$wire.leadForm.address_id ? '{{ route('address.id', ':id') }}'.replace(':id', $wire.leadForm.address_id) : '#'"
                         />
-                    </x-slot>
+                    </x-slot:label>
                 </x-select.styled>
             </div>
             <div x-bind:class="!isEditing && 'pointer-events-none'">
@@ -147,7 +147,7 @@
                             wire:navigate
                             x-bind:href="$wire.leadForm.recommended_by_address_id ? '{{ route('address.id', ':id') }}'.replace(':id', $wire.leadForm.recommended_by_address_id) : '#'"
                         />
-                    </x-slot>
+                    </x-slot:label>
                 </x-select.styled>
             </div>
             <div x-bind:class="!isEditing && 'pointer-events-none'">
@@ -207,10 +207,16 @@
                     <x-slot:label>
                         <span
                             x-cloak
-                            x-show="$wire.leadForm.probability_percentage !== null"
-                            x-text="$nuxbe.format.percentage($wire.leadForm.probability_percentage / 100)"
+                            x-show="
+                                $wire.leadForm.probability_percentage !== null
+                            "
+                            x-text="
+                                $nuxbe.format.percentage(
+                                    $wire.leadForm.probability_percentage / 100,
+                                )
+                            "
                         ></span>
-                    </x-slot>
+                    </x-slot:label>
                 </x-range>
             </div>
             <div
@@ -275,7 +281,7 @@
                     <x-slot:label>
                         <div class="flex items-center gap-2">
                             <x-label :label="__('Tags')" />
-                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                            @canAction (\FluxErp\Actions\Tag\CreateTag::class)
                                 <x-button.circle
                                     sm
                                     icon="plus"
@@ -285,7 +291,7 @@
                                 />
                             @endcanAction
                         </div>
-                    </x-slot>
+                    </x-slot:label>
                 </x-select.styled>
             </div>
         </div>

@@ -19,10 +19,12 @@
                 x-on:click="showCart = showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id ?? 'null' }}"
             />
         </div>
-    </x-slot>
+    </x-slot:header>
     <div
         class="flex flex-wrap gap-4 px-2 py-5 md:px-4"
-        @if($cartForm->isUserOwned()) x-sort="$wire.reOrder($item, $position)" @endif
+        @if ($cartForm->isUserOwned()) x-sort="
+            $wire.reOrder($item, $position)
+        " @endif
         x-cloak
         x-show="showCart === {{ $cartForm->id ?? 'null' }}"
         x-collapse
@@ -31,10 +33,9 @@
             @if (is_null($cartFormItem))
                 @continue
             @endif
-
             <div
                 class="relative z-0"
-                @if($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['id'] }}" @endif
+                @if ($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['id'] }}" @endif
             >
                 @if ($cartForm->isUserOwned())
                     <x-button.circle
@@ -83,5 +84,5 @@
             wire:click="addToCart()"
             :text="__('Add products to cart')"
         />
-    </x-slot>
+    </x-slot:footer>
 </x-card>

@@ -22,7 +22,7 @@
                 <x-badge color="indigo">
                     <x-slot:text>
                         <span x-text="$wire.driver"></span>
-                    </x-slot>
+                    </x-slot:text>
                 </x-badge>
             </div>
         </div>

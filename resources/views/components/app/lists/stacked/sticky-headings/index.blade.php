@@ -24,12 +24,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Leslie Abbott
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Co-Founder / CEO
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Leslie Abbott</p>
+                            <p class="truncate text-sm text-gray-500">Co-Founder / CEO</p>
                         </a>
                     </div>
                 </div>
@@ -53,12 +49,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Hector Adams
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                VP, Marketing
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Hector Adams</p>
+                            <p class="truncate text-sm text-gray-500">VP, Marketing</p>
                         </a>
                     </div>
                 </div>
@@ -82,12 +74,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Blake Alexander
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Account Coordinator
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Blake Alexander</p>
+                            <p class="truncate text-sm text-gray-500">Account Coordinator</p>
                         </a>
                     </div>
                 </div>
@@ -111,12 +99,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Fabricio Andrews
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Senior Art Director
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Fabricio Andrews</p>
+                            <p class="truncate text-sm text-gray-500">Senior Art Director</p>
                         </a>
                     </div>
                 </div>
@@ -149,12 +133,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Angela Beaver
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Chief Strategy Officer
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Angela Beaver</p>
+                            <p class="truncate text-sm text-gray-500">Chief Strategy Officer</p>
                         </a>
                     </div>
                 </div>
@@ -178,12 +158,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Yvette Blanchard
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Studio Artist
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Yvette Blanchard</p>
+                            <p class="truncate text-sm text-gray-500">Studio Artist</p>
                         </a>
                     </div>
                 </div>
@@ -207,12 +183,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Lawrence Brooks
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Content Specialist
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Lawrence Brooks</p>
+                            <p class="truncate text-sm text-gray-500">Content Specialist</p>
                         </a>
                     </div>
                 </div>
@@ -245,12 +217,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Jeffrey Clark
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Senior Art Director
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Jeffrey Clark</p>
+                            <p class="truncate text-sm text-gray-500">Senior Art Director</p>
                         </a>
                     </div>
                 </div>
@@ -274,12 +242,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Kathryn Cooper
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Associate Creative Director
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Kathryn Cooper</p>
+                            <p class="truncate text-sm text-gray-500">Associate Creative Director</p>
                         </a>
                     </div>
                 </div>
@@ -312,12 +276,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Alicia Edwards
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Junior Copywriter
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Alicia Edwards</p>
+                            <p class="truncate text-sm text-gray-500">Junior Copywriter</p>
                         </a>
                     </div>
                 </div>
@@ -341,12 +301,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Benjamin Emerson
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Director, Print Operations
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Benjamin Emerson</p>
+                            <p class="truncate text-sm text-gray-500">Director, Print Operations</p>
                         </a>
                     </div>
                 </div>
@@ -370,12 +326,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Jillian Erics
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Designer
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Jillian Erics</p>
+                            <p class="truncate text-sm text-gray-500">Designer</p>
                         </a>
                     </div>
                 </div>
@@ -399,12 +351,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Chelsea Evans
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Human Resources Manager
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Chelsea Evans</p>
+                            <p class="truncate text-sm text-gray-500">Human Resources Manager</p>
                         </a>
                     </div>
                 </div>
@@ -437,12 +385,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Michael Gillard
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Co-Founder / CTO
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Michael Gillard</p>
+                            <p class="truncate text-sm text-gray-500">Co-Founder / CTO</p>
                         </a>
                     </div>
                 </div>
@@ -466,12 +410,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Dries Giuessepe
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Manager, Business Relations
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Dries Giuessepe</p>
+                            <p class="truncate text-sm text-gray-500">Manager, Business Relations</p>
                         </a>
                     </div>
                 </div>
@@ -504,12 +444,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Jenny Harrison
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Studio Artist
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Jenny Harrison</p>
+                            <p class="truncate text-sm text-gray-500">Studio Artist</p>
                         </a>
                     </div>
                 </div>
@@ -533,12 +469,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Lindsay Hatley
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Front-end Developer
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Lindsay Hatley</p>
+                            <p class="truncate text-sm text-gray-500">Front-end Developer</p>
                         </a>
                     </div>
                 </div>
@@ -562,12 +494,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Anna Hill
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Partner, Creative
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Anna Hill</p>
+                            <p class="truncate text-sm text-gray-500">Partner, Creative</p>
                         </a>
                     </div>
                 </div>
@@ -600,12 +528,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Courtney Samuels
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Designer
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Courtney Samuels</p>
+                            <p class="truncate text-sm text-gray-500">Designer</p>
                         </a>
                     </div>
                 </div>
@@ -629,12 +553,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Tom Simpson
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Director, Product Development
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Tom Simpson</p>
+                            <p class="truncate text-sm text-gray-500">Director, Product Development</p>
                         </a>
                     </div>
                 </div>
@@ -667,12 +587,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Floyd Thompson
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Principal Designer
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Floyd Thompson</p>
+                            <p class="truncate text-sm text-gray-500">Principal Designer</p>
                         </a>
                     </div>
                 </div>
@@ -696,12 +612,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Leonard Timmons
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Senior Designer
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Leonard Timmons</p>
+                            <p class="truncate text-sm text-gray-500">Senior Designer</p>
                         </a>
                     </div>
                 </div>
@@ -725,12 +637,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Whitney Trudeau
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Copywriter
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Whitney Trudeau</p>
+                            <p class="truncate text-sm text-gray-500">Copywriter</p>
                         </a>
                     </div>
                 </div>
@@ -763,12 +671,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Kristin Watson
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                VP, Human Resources
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Kristin Watson</p>
+                            <p class="truncate text-sm text-gray-500">VP, Human Resources</p>
                         </a>
                     </div>
                 </div>
@@ -792,12 +696,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Emily Wilson
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                VP, User Experience
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Emily Wilson</p>
+                            <p class="truncate text-sm text-gray-500">VP, User Experience</p>
                         </a>
                     </div>
                 </div>
@@ -830,12 +730,8 @@
                                 class="absolute inset-0"
                                 aria-hidden="true"
                             ></span>
-                            <p class="text-sm font-medium text-gray-900">
-                                Emma Young
-                            </p>
-                            <p class="truncate text-sm text-gray-500">
-                                Senior Front-end Developer
-                            </p>
+                            <p class="text-sm font-medium text-gray-900">Emma Young</p>
+                            <p class="truncate text-sm text-gray-500">Senior Front-end Developer</p>
                         </a>
                     </div>
                 </div>

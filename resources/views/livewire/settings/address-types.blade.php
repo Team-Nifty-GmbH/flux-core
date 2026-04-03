@@ -25,10 +25,7 @@
                 wire:model="addressType.is_unique"
             />
         </div>
-        <x-toggle
-            :label="__('Is Locked')"
-            wire:model="addressType.is_locked"
-        />
+        <x-toggle :label="__('Is Locked')" wire:model="addressType.is_locked" />
     </div>
     <x-slot:footer>
         <x-button
@@ -41,7 +38,11 @@
         <x-button
             color="indigo"
             :text="__('Save')"
-            x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-address-type-modal')})"
+            x-on:click="
+                $wire.save().then((success) => {
+                    if (success) $tsui.close.modal('edit-address-type-modal');
+                })
+            "
         />
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

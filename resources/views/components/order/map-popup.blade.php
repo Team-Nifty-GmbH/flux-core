@@ -1,4 +1,4 @@
-@props([
+@props ([
     'orders' => [],
 ])
 
@@ -9,9 +9,7 @@
                 {{ data_get($item, 'address.company') ?? data_get($item, 'address.name') }}
             </div>
             <div class="text-sm text-gray-600">
-                {{ data_get($item, 'address.street') }},
-                {{ data_get($item, 'address.zip') }}
-                {{ data_get($item, 'address.city') }}
+                {{ data_get($item, 'address.street') }}, {{ data_get($item, 'address.zip') }} {{ data_get($item, 'address.city') }}
             </div>
             <div class="text-sm">
                 @if (data_get($item, 'order.invoice_number'))

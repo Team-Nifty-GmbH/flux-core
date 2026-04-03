@@ -1,7 +1,7 @@
 <div
     x-on:start-time-tracking.window="
-        relatedSelected($event.detail.trackable_type)
-        $wire.start($event.detail)
+        relatedSelected($event.detail.trackable_type);
+        $wire.start($event.detail);
     "
     x-data="workTime($wire, '{{ route('search', '') }}')"
     x-init.once="load()"
@@ -11,7 +11,10 @@
             <x-select.styled
                 :label="__('Work Time Type')"
                 wire:model="workTime.work_time_type_id"
-                x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
+                x-on:select="
+                    $wire.workTime.is_billable =
+                        $event.detail.select.is_billable
+                "
                 select="label:name|value:id"
                 :options="$workTimeTypes"
             />
@@ -92,22 +95,29 @@
                 color="indigo"
                 :text="__('Start')"
                 loading
-                x-on:click="$wire.save().then((success) => { if (success) $tsui.close.modal('work-time-modal'); })"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        if (success) $tsui.close.modal('work-time-modal');
+                    })
+                "
             >
                 <x-slot:label>
                     <span
                         x-text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'"
                     ></span>
-                </x-slot>
+                </x-slot:label>
             </x-button>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <x-button
         rounded
         color="indigo"
-        x-on:click="open = ! open"
+        x-on:click="open = !open"
         x-ref="button"
-        x-bind:class="$wire.workTime.is_pause && 'ring-amber-500 text-white bg-amber-500 hover:bg-amber-600 hover:ring-amber-600 dark:ring-offset-slate-800 dark:bg-amber-700 dark:ring-amber-700 dark:hover:bg-amber-600 dark:hover:ring-amber-600'"
+        x-bind:class="
+            $wire.workTime.is_pause &&
+            'ring-amber-500 text-white bg-amber-500 hover:bg-amber-600 hover:ring-amber-600 dark:ring-offset-slate-800 dark:bg-amber-700 dark:ring-amber-700 dark:hover:bg-amber-600 dark:hover:ring-amber-600'
+        "
         icon="clock"
     >
         <div x-text="msTimeToString(time)"></div>
@@ -136,11 +146,11 @@
                         icon="x-mark"
                     />
                 </div>
-            </x-slot>
+            </x-slot:header>
             <div class="flex w-full gap-1.5">
                 <x-button
                     class="w-full"
-                    x-show="! $wire.dailyWorkTime.id"
+                    x-show="!$wire.dailyWorkTime.id"
                     color="emerald"
                     :text="__('Start Workday')"
                     x-on:click="$wire.toggleWorkDay(true)"
@@ -154,14 +164,18 @@
                 />
                 <x-button
                     class="w-1/2"
-                    x-show="$wire.dailyWorkTime.id && ! $wire.dailyWorkTimePause.id"
+                    x-show="
+                        $wire.dailyWorkTime.id && !$wire.dailyWorkTimePause.id
+                    "
                     color="amber"
                     :text="__('Pause')"
                     x-on:click="$wire.togglePauseWorkDay(true)"
                 />
                 <x-button
                     class="w-1/2"
-                    x-show="$wire.dailyWorkTime.id && $wire.dailyWorkTimePause.id"
+                    x-show="
+                        $wire.dailyWorkTime.id && $wire.dailyWorkTimePause.id
+                    "
                     color="emerald"
                     :text="__('Continue')"
                     x-on:click="$wire.togglePauseWorkDay(false)"
@@ -187,12 +201,18 @@
                             ></div>
                             <div
                                 class="text-xs text-gray-500 dark:text-gray-400"
-                                x-text="$nuxbe.format.datetime(workTime.started_at)"
+                                x-text="
+                                    $nuxbe.format.datetime(workTime.started_at)
+                                "
                             ></div>
                             <x-badge color="indigo">
                                 <div
                                     x-bind:data-id="workTime.id"
-                                    x-init="$el.innerText = msTimeToString(calculateTime(workTime))"
+                                    x-init="
+                                        $el.innerText = msTimeToString(
+                                            calculateTime(workTime),
+                                        )
+                                    "
                                 ></div>
                             </x-badge>
                         </div>
@@ -200,7 +220,7 @@
                     <div class="flex justify-end gap-x-4">
                         <x-button
                             class="w-1/2"
-                            x-show="! workTime.ended_at"
+                            x-show="!workTime.ended_at"
                             color="amber"
                             icon="pause"
                             :text="__('Pause')"

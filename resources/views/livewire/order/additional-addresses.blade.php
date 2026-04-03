@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4">
     <div wire:ignore>
-        @teleport('body')
+        @teleport ('body')
             <x-modal id="edit-address-assignment">
                 <div class="flex flex-col gap-4">
                     <x-select.styled
@@ -43,15 +43,24 @@
                         light
                         flat
                         :text="__('Cancel')"
-                        x-on:click="$tsui.close.modal('edit-address-assignment')"
+                        x-on:click="
+                            $tsui.close.modal('edit-address-assignment')
+                        "
                     />
                     <x-button
                         color="indigo"
                         loading="save"
-                        x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('edit-address-assignment');})"
+                        x-on:click="
+                            $wire.save().then((success) => {
+                                if (success)
+                                    $tsui.close.modal(
+                                        'edit-address-assignment',
+                                    );
+                            })
+                        "
                         :text="__('Save')"
                     />
-                </x-slot>
+                </x-slot:footer>
             </x-modal>
         @endteleport
     </div>
@@ -77,7 +86,7 @@
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address assignment')]) }}"
                     />
                 </div>
-            </x-slot>
+            </x-slot:header>
         </x-card>
     @endforeach
 

@@ -102,10 +102,12 @@
                     <x-slot:label>
                         <span
                             x-cloak
-                            x-show="$wire.leadForm.probability_percentage !== null"
+                            x-show="
+                                $wire.leadForm.probability_percentage !== null
+                            "
                             x-text="$wire.leadForm.probability_percentage + '%'"
                         ></span>
-                    </x-slot>
+                    </x-slot:label>
                 </x-range>
             @endif
         </div>
@@ -121,6 +123,6 @@
                 color="indigo"
                 x-on:click="$wire.save().then((success) => {if(success) $tsui.close.modal('{{ $leadForm->modalName() }}');})"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

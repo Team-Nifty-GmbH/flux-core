@@ -75,7 +75,9 @@
             </div>
             <div class="flex gap-1.5">
                 <template
-                    x-for="(model, index) in $wire.communication.communicatables"
+                    x-for="
+                        (model, index) in $wire.communication.communicatables
+                    "
                 >
                     <x-badge flat color="indigo" cl>
                         <x-slot name="left" class="p-0.5">
@@ -92,14 +94,19 @@
                         </x-slot>
                         <x-slot:text>
                             <span x-text="model.label"></span>
-                        </x-slot>
+                        </x-slot:text>
                         <x-slot
                             name="right"
                             class="relative flex size-2 items-center"
                         >
                             <button
                                 type="button"
-                                x-on:click="$wire.communication.communicatables.splice(index, 1)"
+                                x-on:click="
+                                    $wire.communication.communicatables.splice(
+                                        index,
+                                        1,
+                                    )
+                                "
                             >
                                 <x-icon name="x-mark" class="size-4" />
                             </button>
@@ -117,7 +124,7 @@
             <div id="communicatable-id" x-show="modelType" x-cloak>
                 <x-select.styled
                     :label="__('Record')"
-                    x-on:select="modelId = $event.detail?.select.value;"
+                    x-on:select="modelId = $event.detail?.select.value"
                     x-model="modelId"
                     select="label:label|value:id"
                     unfiltered
@@ -132,7 +139,11 @@
             </div>
             <div
                 class="flex flex-col gap-4"
-                x-show="$wire.communication.communication_type_enum === 'phone-call' || $wire.communication.communication_type_enum === 'letter'"
+                x-show="
+                    $wire.communication.communication_type_enum ===
+                        'phone-call' ||
+                    $wire.communication.communication_type_enum === 'letter'
+                "
             >
                 <x-select.styled
                     :label="__('Address')"
@@ -162,10 +173,7 @@
                         ],
                     ]"
                 />
-                <x-textarea
-                    :label="__('To')"
-                    wire:model="communication.to.0"
-                />
+                <x-textarea :label="__('To')" wire:model="communication.to.0" />
             </div>
             <div
                 class="flex flex-col gap-1.5"
@@ -177,15 +185,24 @@
                         <x-badge flat color="indigo" cl>
                             <x-slot:text>
                                 <span x-text="to"></span>
-                            </x-slot>
+                            </x-slot:text>
                             <x-slot
                                 name="right"
                                 class="relative flex h-2 w-2 items-center"
                             >
                                 <button
                                     type="button"
-                                    x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
-                                    x-on:click="$wire.communication.to.splice($wire.communication.to.indexOf(to), 1)"
+                                    x-bind:disabled="
+                                        $wire.communication.id &&
+                                        $wire.communication
+                                            .communication_type_enum === 'mail'
+                                    "
+                                    x-on:click="
+                                        $wire.communication.to.splice(
+                                            $wire.communication.to.indexOf(to),
+                                            1,
+                                        )
+                                    "
                                 >
                                     <x-icon name="x-mark" class="h-4 w-4" />
                                 </button>
@@ -198,7 +215,10 @@
                     x-on:blur="addReceiver($event, 'to')"
                     x-on:keyup="addReceiver($event, 'to')"
                     class="w-full"
-                    x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
+                    x-bind:disabled="
+                        $wire.communication.id &&
+                        $wire.communication.communication_type_enum === 'mail'
+                    "
                 />
             </div>
             <div
@@ -212,15 +232,24 @@
                         <x-badge flat color="indigo" cl>
                             <x-slot:text>
                                 <span x-text="cc"></span>
-                            </x-slot>
+                            </x-slot:text>
                             <x-slot
                                 name="right"
                                 class="relative flex h-2 w-2 items-center"
                             >
                                 <button
                                     type="button"
-                                    x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
-                                    x-on:click="$wire.communication.cc.splice($wire.communication.cc.indexOf(to), 1)"
+                                    x-bind:disabled="
+                                        $wire.communication.id &&
+                                        $wire.communication
+                                            .communication_type_enum === 'mail'
+                                    "
+                                    x-on:click="
+                                        $wire.communication.cc.splice(
+                                            $wire.communication.cc.indexOf(to),
+                                            1,
+                                        )
+                                    "
                                 >
                                     <x-icon name="x-mark" class="h-4 w-4" />
                                 </button>
@@ -233,7 +262,10 @@
                     x-on:blur="addReceiver($event, 'cc')"
                     x-on:keyup="addReceiver($event, 'cc')"
                     class="w-full"
-                    x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
+                    x-bind:disabled="
+                        $wire.communication.id &&
+                        $wire.communication.communication_type_enum === 'mail'
+                    "
                 />
             </div>
             <div
@@ -247,15 +279,24 @@
                         <x-badge flat color="indigo" cl>
                             <x-slot:text>
                                 <span x-text="bcc"></span>
-                            </x-slot>
+                            </x-slot:text>
                             <x-slot
                                 name="right"
                                 class="relative flex h-2 w-2 items-center"
                             >
                                 <button
                                     type="button"
-                                    x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
-                                    x-on:click="$wire.communication.bcc.splice($wire.communication.bcc.indexOf(to), 1)"
+                                    x-bind:disabled="
+                                        $wire.communication.id &&
+                                        $wire.communication
+                                            .communication_type_enum === 'mail'
+                                    "
+                                    x-on:click="
+                                        $wire.communication.bcc.splice(
+                                            $wire.communication.bcc.indexOf(to),
+                                            1,
+                                        )
+                                    "
                                 >
                                     <x-icon name="x-mark" class="h-4 w-4" />
                                 </button>
@@ -268,7 +309,10 @@
                     x-on:blur="addReceiver($event, 'bcc')"
                     x-on:keyup="addReceiver($event, 'bcc')"
                     class="w-full"
-                    x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
+                    x-bind:disabled="
+                        $wire.communication.id &&
+                        $wire.communication.communication_type_enum === 'mail'
+                    "
                 />
             </div>
             <div class="grow">
@@ -276,7 +320,10 @@
                     wire:model="communication.subject"
                     class="w-full"
                     :label="__('Subject')"
-                    x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
+                    x-bind:disabled="
+                        $wire.communication.id &&
+                        $wire.communication.communication_type_enum === 'mail'
+                    "
                 />
             </div>
             <div
@@ -300,7 +347,10 @@
             <x-select.styled
                 multiple
                 wire:model.number="communication.tags"
-                x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
+                x-bind:disabled="
+                    $wire.communication.id &&
+                    $wire.communication.communication_type_enum === 'mail'
+                "
                 select="label:label|value:id"
                 unfiltered
                 :request="[
@@ -321,7 +371,7 @@
                 <x-slot:label>
                     <div class="flex items-center gap-2">
                         <x-label :label="__('Tags')" />
-                        @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                        @canAction (\FluxErp\Actions\Tag\CreateTag::class)
                             <x-button.circle
                                 sm
                                 icon="plus"
@@ -331,13 +381,16 @@
                             />
                         @endcanAction
                     </div>
-                </x-slot>
+                </x-slot:label>
             </x-select.styled>
             <x-flux::features.media.upload-form-object
                 :text="__('Attachments')"
                 wire:model="attachments"
                 :multiple="true"
-                x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
+                x-bind:disabled="
+                    $wire.communication.id &&
+                    $wire.communication.communication_type_enum === 'mail'
+                "
             />
         </div>
 
@@ -350,24 +403,36 @@
             />
             <x-button
                 color="indigo"
-                x-on:click="$wire.save().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        if (success) $tsui.close.modal('edit-communication');
+                    })
+                "
                 primary
                 loading="save"
                 :text="__('Save')"
             />
             <div
                 x-cloak
-                x-show="$wire.communication.communication_type_enum === 'mail' && !$wire.communication.id"
+                x-show="
+                    $wire.communication.communication_type_enum === 'mail' &&
+                    !$wire.communication.id
+                "
             >
                 <x-button
                     color="indigo"
-                    x-on:click="$wire.send().then((success) => { if(success) $tsui.close.modal('edit-communication'); })"
+                    x-on:click="
+                        $wire.send().then((success) => {
+                            if (success)
+                                $tsui.close.modal('edit-communication');
+                        })
+                    "
                     primary
                     loading="send"
                     :text="__('Send')"
                 />
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     <x-modal id="create-preview" :title="__('Create Preview')">
         <div class="grid grid-cols-3 gap-1.5">
@@ -401,8 +466,12 @@
                 color="indigo"
                 :text="__('Continue')"
                 loading="createDocuments"
-                x-on:click="$wire.createDocuments().then(() => { $tsui.close.modal('create-preview'); });"
+                x-on:click="
+                    $wire.createDocuments().then(() => {
+                        $tsui.close.modal('create-preview');
+                    })
+                "
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>
