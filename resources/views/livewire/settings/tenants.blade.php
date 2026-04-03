@@ -11,17 +11,17 @@
             </div>
         </div>
         <div wire:ignore>
-            @include ('tall-datatables::livewire.data-table')
+            @include('tall-datatables::livewire.data-table')
         </div>
     </div>
     <x-modal size="6xl" id="edit-tenant" :title="__('Tenant')">
         <x-flux::tabs :$tabs wire:model="tab" wire:loading>
-            @includeWhen ($tab === 'general', 'flux::components.settings.tenant.general')
+            @includeWhen($tab === 'general', 'flux::components.settings.tenant.general')
         </x-flux::tabs>
         <x-slot:footer>
             <div class="w-full">
                 <div class="flex justify-between gap-x-4">
-                    @if (resolve_static(\FluxErp\Actions\Tenant\DeleteTenant::class, 'canPerformAction', [false]))
+                    @if(resolve_static(\FluxErp\Actions\Tenant\DeleteTenant::class, 'canPerformAction', [false]))
                         <x-button
                             light
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Tenant')]) }}"

@@ -13,7 +13,7 @@
     }"
 >
     <x-loading />
-    @teleport ('body')
+    @teleport('body')
         <x-modal id="transaction-assign-orders-modal" size="7xl">
             <x-slot:title>
                 <div class="flex w-full flex-col">
@@ -69,7 +69,7 @@
         </x-modal>
     @endteleport
 
-    @teleport ('body')
+    @teleport('body')
         <x-modal id="transaction-comments-modal">
             <x-slot:title>
                 <div class="flex w-full flex-col">
@@ -118,7 +118,7 @@
         </x-modal>
     @endteleport
 
-    @teleport ('body')
+    @teleport('body')
         <x-modal
             id="order-transaction-modal"
             x-on:open="$tsui.focus('order-transaction-amount')"

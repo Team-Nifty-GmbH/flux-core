@@ -15,7 +15,7 @@
                     x-text="comment.created_by ?? '{{ __('Unknown') }}'"
                     class="font-medium text-gray-500"
                 ></div>
-                @if ($this->isPublic === true)
+                @if($this->isPublic === true)
                     <x-badge
                         flat
                         x-bind:class="!comment.is_internal && 'hidden'"
@@ -23,9 +23,9 @@
                     ></x-badge>
                 @endif
             </div>
-            @if (auth()->check())
+            @if(auth()->check())
                 <x-dropdown icon="ellipsis-vertical" static>
-                    @canAction (\FluxErp\Actions\Comment\UpdateComment::class)
+                    @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
                         <x-dropdown.items
                             x-on:click="
                                 toggleSticky(comment);
@@ -38,7 +38,7 @@
                         </x-dropdown.items>
                     @endcanAction
 
-                    @canAction (\FluxErp\Actions\Comment\DeleteComment::class)
+                    @canAction(\FluxErp\Actions\Comment\DeleteComment::class)
                         <x-dropdown.items>
                             <span
                                 x-bind:disabled="!comment.is_current_user"
@@ -117,7 +117,7 @@
                     ')'
                 "
             ></span>
-            @canAction (\FluxErp\Actions\Comment\CreateComment::class)
+            @canAction(\FluxErp\Actions\Comment\CreateComment::class)
                 <span class="">&middot;</span>
                 <button
                     type="button"

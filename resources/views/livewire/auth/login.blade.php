@@ -9,7 +9,7 @@
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
             <div class="mt-6">
-                @section ('password-reset-dialog')
+                @section('password-reset-dialog')
                     <x-modal id="password-reset" :title="__('Reset password')">
                         <x-input
                             id="reset-email"
@@ -30,7 +30,7 @@
                         </x-slot:footer>
                     </x-modal>
                 @show
-                @section ('login-form')
+                @section('login-form')
                     <form class="flex flex-col gap-6" wire:submit="login()">
                         <x-input
                             id="email"

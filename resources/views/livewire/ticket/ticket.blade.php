@@ -4,7 +4,7 @@
         formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes')),
     }"
 >
-    @section ('header')
+    @section('header')
         <div class="flex items-center space-x-5">
             <div
                 x-init="
@@ -33,8 +33,8 @@
     <div
         class="mt-6 flex flex-col-reverse justify-end space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
     >
-        @section ('buttons')
-            @canAction (\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+        @section('buttons')
+            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
                 <x-button
                     x-cloak
                     x-show="$wire.ticket.id"
@@ -55,7 +55,7 @@
                     <div class="hidden sm:block">{{ __('Track Time') }}</div>
                 </x-button>
             @endcanAction
-            @canAction (\FluxErp\Actions\Ticket\DeleteTicket::class)
+            @canAction(\FluxErp\Actions\Ticket\DeleteTicket::class)
                 <x-button
                     x-cloak
                     x-show="$wire.ticket.id"
@@ -70,7 +70,7 @@
     </div>
     <div class="w-full pt-6 lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
         <section class="relative basis-10/12">
-            @section ('content')
+            @section('content')
                 <div class="pr-6 md:flex md:space-x-12">
                     <div class="flex-1">
                         <div class="space-y-5 dark:text-gray-50">
@@ -85,8 +85,8 @@
                                     :label="__('Description')"
                                 />
                             </x-card>
-                            @section ('content.widget')
-                                @if ($ticket->model_type &&
+                            @section('content.widget')
+                                @if($ticket->model_type &&
                             ($widgetComponent = resolve_static(
                                 morphed_model($ticket->model_type),
                                 'getLivewireComponentWidget'
@@ -108,7 +108,7 @@
                                         <x-label :label="__('Attachments')" />
                                     </div>
                                 </x-slot:header>
-                                @section ('content.attachments')
+                                @section('content.attachments')
                                     <livewire:ticket.media
                                         :model-id="data_get($ticket, 'id')"
                                     />
@@ -128,7 +128,7 @@
         </section>
         <section class="basis-2/12">
             <div class="sticky top-6 space-y-6">
-                @section ('details')
+                @section('details')
                     <x-card :header="__('Details')">
                         <div class="space-y-4">
                             <x-flux::state
@@ -237,7 +237,7 @@
                         </div>
                     </x-card>
                 @show
-                @section ('attributes')
+                @section('attributes')
                     <x-card>
                         <div
                             class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"

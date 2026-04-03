@@ -108,7 +108,7 @@
                                 {{ __('Actual/Target') }}
                             </div>
                         </th>
-                        @foreach ($this->calendarDays as $calDay)
+                        @foreach($this->calendarDays as $calDay)
                             <th
                                 class="{{ $calDay['isToday'] ? 'border-t-2 border-r-2 border-l-2 border-yellow-400 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900' : ($calDay['isWeekend'] ? 'bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800') }} border-r border-b px-1 py-2 text-center text-xs font-medium dark:border-gray-700"
                             >
@@ -122,7 +122,7 @@
                                 >
                                     {{ $calDay['weekDay'] }}
                                 </div>
-                                @if ($calDay['isToday'])
+                                @if($calDay['isToday'])
                                     <div
                                         class="text-xs font-bold text-yellow-600 dark:text-yellow-400"
                                     >
@@ -134,7 +134,7 @@
                     </tr>
                 </thead>
 
-                @foreach ($this->employeesByDepartment as $departmentId => $employees)
+                @foreach($this->employeesByDepartment as $departmentId => $employees)
                     <tbody wire:key="dept-{{ $departmentId }}">
                         <tr
                             class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
@@ -162,7 +162,7 @@
                             </td>
                         </tr>
 
-                        @foreach ($employees as $employee)
+                        @foreach($employees as $employee)
                             <livewire:human-resources.attendance-overview-row
                                 :key="'row-' . $employee['id'] . '-' . $this->year . '-' . $this->month"
                                 :employeeId="$employee['id']"
@@ -181,7 +181,7 @@
 
         <x-slot:footer>
             <div class="flex flex-wrap items-center gap-4">
-                @foreach ($absenceTypes as $type)
+                @foreach($absenceTypes as $type)
                     <x-button
                         x-on:click="toggleStatus('{{ $type['id'] }}')"
                         color="secondary"

@@ -36,7 +36,7 @@
         </div>
     </td>
 
-    @foreach ($calendarDays as $dateKey => $calDay)
+    @foreach($calendarDays as $dateKey => $calDay)
         @php
             $dayData = data_get($employee, 'days.' . $dateKey);
         @endphp
@@ -45,7 +45,7 @@
         >
             <div class="flex flex-col items-center justify-center gap-1">
                 {{-- Holiday --}}
-                @if ($dayData && data_get($dayData, 'is_holiday'))
+                @if($dayData && data_get($dayData, 'is_holiday'))
                     @php
                         $isHalfDayHoliday = data_get($dayData, 'is_half_day_holiday');
                     @endphp
@@ -60,7 +60,7 @@
                         <span class="truncate px-0.5 text-[10px]">
                             {{ data_get($absenceTypes, 'holiday.icon', '🎉') }}
                         </span>
-                        @if ($isHalfDayHoliday)
+                        @if($isHalfDayHoliday)
                             <div
                                 class="absolute inset-0 bg-white/40"
                                 style="
@@ -82,7 +82,7 @@
                 @endif
 
                 {{-- Present (actual hours > 0) --}}
-                @if ($dayData && data_get($dayData, 'actual_hours', 0) > 0)
+                @if($dayData && data_get($dayData, 'actual_hours', 0) > 0)
                     <div
                         x-on:click="$wire.showEmployeeDay({{ data_get($dayData, 'id', 'null') }})"
                         x-cloak
@@ -97,7 +97,7 @@
                 @endif
 
                 {{-- Currently Working --}}
-                @if ($dayData && data_get($dayData, 'is_daily_work_time'))
+                @if($dayData && data_get($dayData, 'is_daily_work_time'))
                     <div
                         x-on:click="$wire.showWorkTime('{{ $dateKey }}')"
                         x-cloak
@@ -112,8 +112,8 @@
                 @endif
 
                 {{-- Absence Requests --}}
-                @if ($dayData && ! empty(data_get($dayData, 'absence_requests')))
-                    @foreach (data_get($dayData, 'absence_requests') as $absence)
+                @if($dayData && ! empty(data_get($dayData, 'absence_requests')))
+                    @foreach(data_get($dayData, 'absence_requests') as $absence)
                         @php
                             $isHalfDay = data_get($absence, 'day_part') && data_get($absence, 'day_part') !== 'full_day';
                         @endphp
@@ -129,7 +129,7 @@
                             <span class="truncate px-0.5 text-[10px]">
                                 {{ data_get($absenceTypes, data_get($absence, 'absence_type_id') . '.icon', '') }}
                             </span>
-                            @if ($isHalfDay)
+                            @if($isHalfDay)
                                 <div
                                     class="absolute inset-0 bg-white/40"
                                     style="
@@ -152,7 +152,7 @@
                 @endif
 
                 {{-- Unexcused Absence (also show for half-day holidays where no work was done) --}}
-                @if ($dayData && data_get($dayData, 'is_work_day') && empty(data_get($dayData, 'absence_requests')) && data_get($dayData, 'actual_hours', 0) == 0 && (! data_get($dayData, 'is_holiday') || data_get($dayData, 'is_half_day_holiday')) && ! data_get($calDay, 'isFuture') && ! data_get($calDay, 'isToday'))
+                @if($dayData && data_get($dayData, 'is_work_day') && empty(data_get($dayData, 'absence_requests')) && data_get($dayData, 'actual_hours', 0) == 0 && (! data_get($dayData, 'is_holiday') || data_get($dayData, 'is_half_day_holiday')) && ! data_get($calDay, 'isFuture') && ! data_get($calDay, 'isToday'))
                     <div
                         x-on:click="{{ data_get($dayData, 'id') ? "\$wire.showEmployeeDay(" . data_get($dayData, 'id') . ')' : '' }}"
                         x-cloak

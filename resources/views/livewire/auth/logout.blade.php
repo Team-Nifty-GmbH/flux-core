@@ -12,13 +12,13 @@
         },
     }"
 >
-    @section ('content')
-        @section ('content.logo')
+    @section('content')
+        @section('content.logo')
             <div class="sm:mx-auto sm:w-full sm:max-w-md">
                 <x-flux::logo fill="#0690FA" class="h-24" />
             </div>
         @show
-        @section ('content.form')
+        @section('content.form')
             <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
                     <div class="flex flex-col gap-4">

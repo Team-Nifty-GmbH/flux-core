@@ -27,7 +27,7 @@
         </div>
     </x-card>
     <x-errors />
-    @if ($serialNumberId = data_get($this->serialNumber, 'id'))
+    @if($serialNumberId = data_get($this->serialNumber, 'id'))
         <x-card :header="__('Files')">
             <livewire:product.serial-number.media
                 wire:key="serial-number-media-{{ $serialNumberId }}"

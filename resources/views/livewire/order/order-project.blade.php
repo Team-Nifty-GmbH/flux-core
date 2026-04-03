@@ -1,6 +1,6 @@
 <div>
     <div class="flex flex-col gap-1.5">
-        @canAction (\FluxErp\Actions\Project\CreateProject::class)
+        @canAction(\FluxErp\Actions\Project\CreateProject::class)
             <x-toggle
                 :label="__('Existing project')"
                 wire:model="existingProject"
@@ -19,7 +19,7 @@
                 ]"
             />
         </div>
-        @canAction (\FluxErp\Actions\Project\CreateProject::class)
+        @canAction(\FluxErp\Actions\Project\CreateProject::class)
             <div
                 class="flex flex-col gap-1.5"
                 x-cloak

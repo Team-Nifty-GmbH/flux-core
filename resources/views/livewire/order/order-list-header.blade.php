@@ -65,13 +65,13 @@
         x-on:open="$tsui.focus('order-position-name')"
         persistent
     >
-        @section ('order-position-detail-modal.content')
+        @section('order-position-detail-modal.content')
             <div class="relative">
                 <x-loading wire:target="position" />
                 <div class="space-y-6 p-4">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div class="space-y-4">
-                            @section ('order-position-detail-modal.content.left')
+                            @section('order-position-detail-modal.content.left')
                                 <div class="flex items-center gap-4">
                                     <x-checkbox
                                         wire:model.boolean="orderPosition.is_free_text"
@@ -148,7 +148,7 @@
                                     ],
                                 ]"
                                     />
-                                    @if (resolve_static(\FluxErp\Models\Warehouse::class, 'query')->count() > 1)
+                                    @if(resolve_static(\FluxErp\Models\Warehouse::class, 'query')->count() > 1)
                                         <div
                                             x-cloak
                                             x-show="
@@ -216,7 +216,7 @@
                             }"
                             class="space-y-4"
                         >
-                            @section ('order-position-detail-modal.content.right')
+                            @section('order-position-detail-modal.content.right')
                                 <div class="grid grid-cols-2 gap-4">
                                     <x-input
                                         type="number"
@@ -434,7 +434,7 @@
                                                         )
                                                 "
                                             />
-                                            @if (resolve_static(\FluxErp\Models\LedgerAccount::class, 'query')->where('ledger_account_type_enum', $order->isPurchase ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue)->exists())
+                                            @if(resolve_static(\FluxErp\Models\LedgerAccount::class, 'query')->where('ledger_account_type_enum', $order->isPurchase ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue)->exists())
                                                 <x-select.styled
                                                     :label="__('Ledger Account')"
                                                     wire:model.number="orderPosition.ledger_account_id"
@@ -458,7 +458,7 @@
                                                 />
                                             @endif
 
-                                            @if (resolve_static(\FluxErp\Models\ContactBankConnection::class, 'query')->where('contact_id', $order->contact_id)->where('is_credit_account', true)->exists())
+                                            @if(resolve_static(\FluxErp\Models\ContactBankConnection::class, 'query')->where('contact_id', $order->contact_id)->where('is_credit_account', true)->exists())
                                                 <x-select.styled
                                                     :label="__('Credit Account')"
                                                     wire:model.number="orderPosition.credit_account_id"
@@ -520,7 +520,7 @@
                         </div>
                     </div>
 
-                    @section ('order-position-detail-modal.content.bottom')
+                    @section('order-position-detail-modal.content.bottom')
                         <x-flux::editor
                             wire:model="orderPosition.description"
                             scope="orderPosition"

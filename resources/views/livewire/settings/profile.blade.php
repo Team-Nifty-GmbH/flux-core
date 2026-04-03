@@ -19,8 +19,8 @@
         },
     }"
 >
-    @section ('profile')
-        @section ('profile.form')
+    @section('profile')
+        @section('profile.form')
             <form class="space-y-5">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="w-full md:flex md:space-x-6">
@@ -73,7 +73,7 @@
                 />
             </form>
         @show
-        @section ('profile.web-push')
+        @section('profile.web-push')
             <div class="space-y-6 pt-8">
                 <x-card>
                     <div class="space-y-4">
@@ -537,7 +537,7 @@
                 </x-card>
             </div>
         @show
-        @section ('profile.fcm-push')
+        @section('profile.fcm-push')
             <div class="space-y-6 pt-8">
                 <x-card>
                     <div class="space-y-4">
@@ -623,7 +623,7 @@
                 </x-card>
             </div>
         @show
-        @section ('profile.notifications')
+        @section('profile.notifications')
             <x-flux::table>
                 <x-slot:title>
                     <h2 class="pt-6 dark:text-white">

@@ -5,13 +5,13 @@
             formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
         }"
     >
-        @section ('task-content')
+        @section('task-content')
             <x-input
                 x-bind:readonly="!isEditing"
                 wire:model="task.name"
                 :label="__('Name')"
             />
-            @section ('task.model')
+            @section('task.model')
                 <x-link
                     sm
                     href="#"
@@ -26,8 +26,8 @@
                     </x-slot:text>
                 </x-link>
             @show
-            @section ('task-content.selects')
-                @section ('task-content.selects.project')
+            @section('task-content.selects')
+                @section('task-content.selects.project')
                     <div
                         x-show="$wire.task.id"
                         x-bind:class="!isEditing && 'pointer-events-none'"
@@ -55,7 +55,7 @@
                         </x-select.styled>
                     </div>
                 @show
-                @section ('task-content.selects.responsible-users')
+                @section('task-content.selects.responsible-users')
                     <div x-bind:class="!isEditing && 'pointer-events-none'">
                         <x-select.styled
                             :label="__('Responsible User')"
@@ -79,8 +79,8 @@
                 class="flex justify-between gap-x-4"
                 x-bind:class="!isEditing && 'pointer-events-none'"
             >
-                @section ('task-content.dates')
-                    @section ('task-content.start')
+                @section('task-content.dates')
+                    @section('task-content.start')
                         <div class="flex flex-col gap-2">
                             <div class="flex flex-row gap-x-4">
                                 <x-date
@@ -123,7 +123,7 @@
                             </div>
                         </div>
                     @show
-                    @section ('task-content.due')
+                    @section('task-content.due')
                         <div class="flex flex-col gap-2">
                             <div class="flex flex-row gap-x-4">
                                 <x-date
@@ -168,7 +168,7 @@
                     @show
                 @show
             </div>
-            @section ('task-content.multi-selects')
+            @section('task-content.multi-selects')
                 <x-flux::state
                     x-bind:class="!isEditing && 'pointer-events-none'"
                     class="w-full"
@@ -260,7 +260,7 @@
                     <x-slot:label>
                         <div class="flex items-center gap-2">
                             <x-label :label="__('Tags')" />
-                            @canAction (\FluxErp\Actions\Tag\CreateTag::class)
+                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                                 <x-button.circle
                                     sm
                                     icon="plus"

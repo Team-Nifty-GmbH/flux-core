@@ -7,7 +7,7 @@
         $wire.renderSearchBarWidget($event.detail.model, $event.detail.id)
     "
 >
-    @if ($widgetComponent)
+    @if($widgetComponent)
         <x-loading />
         <x-card card-classes="shadow-none">
             <livewire:is

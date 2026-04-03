@@ -1,12 +1,12 @@
 <div class="flex flex-col gap-4 md:flex-row">
     <div class="flex flex-col gap-6" wire:ignore>
-        @section ('left-side-bar')
+        @section('left-side-bar')
             <div
                 class="max-h-56 min-w-96 overflow-auto md:max-h-none"
                 x-data="{ addressSearch: '' }"
             >
                 <x-card>
-                    @canAction (\FluxErp\Actions\Address\CreateAddress::class)
+                    @canAction(\FluxErp\Actions\Address\CreateAddress::class)
                         <x-slot:header>
                             <div
                                 class="flex w-full items-center justify-between gap-4"
@@ -28,7 +28,7 @@
                     @endcanAction
 
                     <div class="flex flex-col gap-1.5">
-                        @section ('left-side-bar.address-list')
+                        @section('left-side-bar.address-list')
                             <x-input
                                 type="search"
                                 x-model="addressSearch"
@@ -68,7 +68,7 @@
                                         <div
                                             class="text-sm text-ellipsis whitespace-nowrap"
                                         >
-                                            @section ('left-side-bar.address-list.address')
+                                            @section('left-side-bar.address-list.address')
                                                 <p
                                                     class="first-line:font-semibold"
                                                     x-html="
@@ -80,7 +80,7 @@
                                             @show
                                         </div>
                                         <div class="flex flex-col gap-0.5">
-                                            @section ('left-side-bar.address-list.badges')
+                                            @section('left-side-bar.address-list.badges')
                                                 <x-badge
                                                     x-show="
                                                         addressItem.is_main_address
@@ -114,7 +114,7 @@
                     </div>
                 </x-card>
             </div>
-            @section ('left-lide-bar.contact-attributes')
+            @section('left-lide-bar.contact-attributes')
                 <x-card>
                     <div
                         class="flex flex-col gap-1.5"
@@ -220,7 +220,7 @@
                     </div>
                 </x-card>
             @show
-            @section ('left-lide-bar.address-widget')
+            @section('left-lide-bar.address-widget')
                 <x-card>
                     <livewire:widgets.address
                         lazy
@@ -239,9 +239,9 @@
             <x-slot:header>
                 <div class="flex w-full items-center justify-between gap-4">
                     <div>{{ __('Details') }}</div>
-                    @section ('address-details.actions')
+                    @section('address-details.actions')
                         <div class="flex gap-2">
-                            @canAction (\FluxErp\Actions\Address\UpdateAddress::class)
+                            @canAction(\FluxErp\Actions\Address\UpdateAddress::class)
                                 <div
                                     x-cloak
                                     x-show="$wire.edit"
@@ -287,7 +287,7 @@
                                 </div>
                             @endcanAction
 
-                            @canAction (\FluxErp\Actions\Address\DeleteAddress::class)
+                            @canAction(\FluxErp\Actions\Address\DeleteAddress::class)
                                 <div
                                     x-cloak
                                     x-show="!$wire.address.is_main_address"

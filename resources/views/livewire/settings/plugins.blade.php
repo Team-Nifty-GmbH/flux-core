@@ -14,13 +14,13 @@
         },
     }"
 >
-    @if (resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
+    @if(resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
         <x-dialog id="uninstall">
             <x-checkbox id="delete-data" label="{{ __('Delete all data') }}" />
         </x-dialog>
     @endif
 
-    @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
+    @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
         <x-modal id="update-plugin-modal" size="7xl">
             <x-slot:title>
                 <span>{{ __('Update') }}</span>
@@ -70,7 +70,7 @@
             />
         </x-slot:footer>
     </x-modal>
-    @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
+    @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
         <x-modal
             id="install-plugin-modal"
             size="7xl"
@@ -198,7 +198,7 @@
             />
         </x-card>
     </div>
-    @error ('checkForUpdates')
+    @error('checkForUpdates')
         <div>
             <x-card class="gap-4 rounded-xl bg-red-500 text-white">
                 <span>{!! $message !!}</span>
@@ -206,7 +206,7 @@
         </div>
     @enderror
 
-    @error ('update')
+    @error('update')
         <div>
             <x-card class="gap-4 rounded-xl bg-red-500 text-white">
                 <span>{!! $message !!}</span>
@@ -220,7 +220,7 @@
             x-model="showOnlyFluxPlugins"
         />
         <div class="flex gap-1.5">
-            @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
+            @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
                 <x-button
                     color="indigo"
                     :text="__('Install')"
@@ -228,7 +228,7 @@
                 />
             @endif
 
-            @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
+            @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
                 <div x-transition x-show="$wire.outdated === 0">
                     <x-button
                         color="emerald"
@@ -252,7 +252,7 @@
         <x-card>
             <div class="flex justify-between gap-4">
                 <div class="flex flex-none items-center gap-1.5">
-                    @if (resolve_static(\FluxErp\Actions\Plugins\ToggleActive::class, 'canPerformAction', [false]))
+                    @if(resolve_static(\FluxErp\Actions\Plugins\ToggleActive::class, 'canPerformAction', [false]))
                         <div
                             x-cloak
                             x-bind:class="
@@ -331,7 +331,7 @@
                             :text="__('More')"
                             wire:click="more(key)"
                         />
-                        @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
+                        @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.offer_install">
                                 <x-button
                                     color="emerald"
@@ -341,7 +341,7 @@
                             </div>
                         @endif
 
-                        @if (resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
+                        @if(resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.can_uninstall">
                                 <x-button
                                     color="red"
@@ -352,7 +352,7 @@
                             </div>
                         @endif
 
-                        @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
+                        @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.latest">
                                 <x-button
                                     color="emerald"

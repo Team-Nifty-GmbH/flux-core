@@ -1,8 +1,8 @@
 <x-card>
-    @section ('user-edit')
+    @section('user-edit')
         <form class="space-y-5">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @section ('user-edit.personal-data')
+                @section('user-edit.personal-data')
                     <x-input
                         :label="__('Firstname')"
                         wire:model="userForm.firstname"
@@ -22,7 +22,7 @@
             </div>
             <hr />
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @section ('user-edit.employment')
+                @section('user-edit.employment')
                     <x-date
                         :without-time="true"
                         :label="__('Date Of Birth')"
@@ -50,7 +50,7 @@
                 @show
             </div>
             <hr />
-            @section ('user-edit.selects')
+            @section('user-edit.selects')
                 <x-select.styled
                     wire:model="userForm.language_id"
                     searchable
@@ -72,7 +72,7 @@
                     :options="$users"
                 />
             @show
-            @section ('user-edit.attributes')
+            @section('user-edit.attributes')
                 <x-checkbox
                     :label="__('Active')"
                     wire:model="userForm.is_active"
@@ -87,7 +87,7 @@
                 />
             @show
             <hr />
-            @section ('user-edit.bank-connection')
+            @section('user-edit.bank-connection')
                 <x-input
                     wire:model="userForm.account_holder"
                     :label="__('Account Holder')"
@@ -99,7 +99,7 @@
                     :label="__('Bank Name')"
                 />
             @show
-            @section ('user-edit.mail-accounts')
+            @section('user-edit.mail-accounts')
                 <x-select.styled
                     :label="__('Mail Accounts')"
                     wire:model="userForm.mail_accounts"
@@ -108,8 +108,8 @@
                     :options="$mailAccounts"
                 />
             @show
-            @section ('user-edit.default-mail-account')
-                @if ($userForm->mail_accounts)
+            @section('user-edit.default-mail-account')
+                @if($userForm->mail_accounts)
                     <x-select.styled
                         :label="__('Default Mail Account')"
                         wire:model="userForm.default_mail_account_id"
@@ -119,7 +119,7 @@
                 @endif
 
             @show
-            @section ('user-edit.printers')
+            @section('user-edit.printers')
                 <x-select.styled
                     :label="__('Printers')"
                     wire:model="userForm.printers"
@@ -128,8 +128,8 @@
                     :options="$printers"
                 />
             @show
-            @section ('user-edit.default-printer')
-                @if ($userPrinters)
+            @section('user-edit.default-printer')
+                @if($userPrinters)
                     <x-select.styled
                         :label="__('Default Printer')"
                         wire:model="printerUserForm.pivot_id"
@@ -201,7 +201,7 @@
                 {{ __('Commission Rates') }}
             </div>
         </nav>
-        @canAction (\FluxErp\Actions\Role\UpdateUserRoles::class)
+        @canAction(\FluxErp\Actions\Role\UpdateUserRoles::class)
             <div x-show="active === 'roles'" x-cloak>
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @php
@@ -210,8 +210,8 @@
                             ->hasRole('Super Admin');
                     @endphp
 
-                    @foreach ($roles as $role)
-                        @if ($role['name'] === 'Super Admin' && ! $superAdmin)
+                    @foreach($roles as $role)
+                        @if($role['name'] === 'Super Admin' && ! $superAdmin)
                             @continue
                         @endif
                         <div class="flex">
@@ -233,7 +233,7 @@
             </div>
         @endcanAction
 
-        @canAction (\FluxErp\Actions\Permission\UpdateUserPermissions::class)
+        @canAction(\FluxErp\Actions\Permission\UpdateUserPermissions::class)
             <div x-show="active === 'permissions'" x-cloak>
                 <div class="pb-3">
                     <x-input
@@ -243,7 +243,7 @@
                 </div>
                 <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
                     <div class="grid grid-cols-6 gap-3">
-                        @foreach ($permissions as $permission)
+                        @foreach($permissions as $permission)
                             <div class="col-span-3 font-medium">
                                 {{ __($permission['name']) }}
                             </div>
@@ -269,10 +269,10 @@
             </div>
         @endcanAction
 
-        @canAction (\FluxErp\Actions\User\UpdateUserTenants::class)
+        @canAction(\FluxErp\Actions\User\UpdateUserTenants::class)
             <div x-show="active === 'tenants'" x-cloak>
                 <div class="max-h-96 space-y-3 overflow-y-auto">
-                    @foreach ($tenants as $tenant)
+                    @foreach($tenants as $tenant)
                         <div class="flex">
                             <div class="flex-1 text-sm">
                                 {{ $tenant['name'] }}
@@ -336,7 +336,7 @@
     <x-slot:footer>
         <div class="w-full">
             <div class="flex justify-between gap-x-4">
-                @canAction (\FluxErp\Actions\User\DeleteUser::class)
+                @canAction(\FluxErp\Actions\User\DeleteUser::class)
                     <x-button
                         color="red"
                         :text="__('Delete')"

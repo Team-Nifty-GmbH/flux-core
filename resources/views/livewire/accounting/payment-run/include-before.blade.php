@@ -68,7 +68,7 @@
             </div>
             <hr class="py-4" />
             <div class="flex flex-col gap-4">
-                @section ('payment-properties')
+                @section('payment-properties')
                     <x-select.styled
                         wire:model="paymentRunForm.bank_connection_id"
                         searchable

@@ -9,9 +9,9 @@
         formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
-    @section ('modals')
+    @section('modals')
         {{ $this->renderCreateDocumentsModal() }}
-        @canAction (\FluxErp\Actions\Task\CreateTask::class)
+        @canAction(\FluxErp\Actions\Task\CreateTask::class)
             <x-modal id="create-tasks">
                 <livewire:order.order-project lazy :order="$order->id" />
             </x-modal>
@@ -309,15 +309,15 @@
                                 ></span>
                             </div>
                         </div>
-                        @if ($order->payment_reminder_current_level)
-                            @switch ($order->payment_reminder_current_level)
-                                @case (1)
+                        @if($order->payment_reminder_current_level)
+                            @switch($order->payment_reminder_current_level)
+                                @case(1)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
                                         color="amber"
                                     />
                                     @break
-                                @case (2)
+                                @case(2)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
                                         color="orange"
@@ -331,7 +331,7 @@
                             @endswitch
                         @endif
 
-                        @if ($order->hasContactDeliveryLock)
+                        @if($order->hasContactDeliveryLock)
                             <x-badge
                                 :text="__('Has Delivery Lock')"
                                 color="red"
@@ -370,7 +370,7 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
-            @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
+            @if(resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
                     color="secondary"
                     light
@@ -381,7 +381,7 @@
                 />
             @endif
 
-            @if (resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
+            @if(resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
                 <x-button
                     color="secondary"
                     light
@@ -392,7 +392,7 @@
                 />
             @endif
 
-            @if ((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, 'canPerformAction', [false]))
+            @if((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, 'canPerformAction', [false]))
                 <x-button
                     color="indigo"
                     loading="save"
@@ -410,13 +410,13 @@
         class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            @section ('content.left-wrapper')
+            @section('content.left-wrapper')
                 <section
                     class="relative w-full xl:max-w-96 xl:basis-2/12"
                     wire:ignore
                 >
                     <div class="sticky top-6 flex flex-col gap-4">
-                        @section ('contact-address-card')
+                        @section('contact-address-card')
                             <x-card>
                                 <x-slot:header>
                                     <div
@@ -493,14 +493,14 @@
                                 </div>
                             </x-card>
                         @show
-                        @section ('invoice-address-card')
+                        @section('invoice-address-card')
                             <x-card>
                                 <x-slot:header>
                                     <div
                                         class="flex w-full items-center justify-between gap-4"
                                     >
                                         <div>{{ __('Invoice Address') }}</div>
-                                        @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
+                                        @if($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
                                             <div class="flex gap-1">
                                                 <x-button
                                                     x-cloak
@@ -584,14 +584,14 @@
                                 </div>
                             </x-card>
                         @show
-                        @section ('delivery-address-card')
+                        @section('delivery-address-card')
                             <x-card>
                                 <x-slot:header>
                                     <div
                                         class="flex w-full items-center justify-between gap-4"
                                     >
                                         <div>{{ __('Delivery Address') }}</div>
-                                        @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
+                                        @if($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
                                             <div class="flex gap-1">
                                                 <x-button
                                                     x-cloak
@@ -682,7 +682,7 @@
                                 </div>
                             </x-card>
                         @show
-                        @section ('general-card')
+                        @section('general-card')
                             <x-card
                                 :header="__('Additional Addresses')"
                                 minimize="mount"
@@ -700,7 +700,7 @@
                                 minimize="mount"
                             >
                                 <div class="space-y-3 px-2 py-5">
-                                    @if (count($tenants) > 1)
+                                    @if(count($tenants) > 1)
                                         <x-select.styled
                                             disabled
                                             :label="__('Tenant')"
@@ -783,7 +783,7 @@
                                         select="label:name|value:id"
                                         :options="$paymentTypes"
                                     />
-                                    @if ($contactBankConnections)
+                                    @if($contactBankConnections)
                                         <x-select.styled
                                             wire:model="order.contact_bank_connection_id"
                                             :label="__('Bank connection')"
@@ -830,7 +830,7 @@
                                         </x-slot:label>
                                     </x-select.styled>
 
-                                    @if (count($languages) > 1)
+                                    @if(count($languages) > 1)
                                         <x-select.styled
                                             :label="__('Language')"
                                             required
@@ -843,7 +843,7 @@
                                 </div>
                             </x-card>
                         @show
-                        @section ('state-card')
+                        @section('state-card')
                             <x-card>
                                 <div class="flex flex-col gap-3">
                                     <x-flux::state
@@ -876,17 +876,17 @@
             @show
         </x-slot:prepend>
         <x-slot:append>
-            @section ('content.right-wrapper')
+            @section('content.right-wrapper')
                 <section
                     class="relative w-full xl:max-w-96 xl:basis-2/12"
                     wire:ignore
                 >
                     <div class="sticky top-6 space-y-6">
-                        @section ('content.right')
+                        @section('content.right')
                             <x-card>
                                 <div class="space-y-4">
-                                    @section ('actions')
-                                        @if ($printLayouts)
+                                    @section('actions')
+                                        @if($printLayouts)
                                             <x-button
                                                 color="indigo"
                                                 class="w-full"
@@ -931,7 +931,7 @@
                                                 wire:model="order.id"
                                             />
                                         @endif
-                                        @foreach ($additionalModelActions as $modelAction)
+                                        @foreach($additionalModelActions as $modelAction)
                                             {{ $modelAction }}
                                         @endforeach
 
@@ -940,7 +940,7 @@
                             </x-card>
                             <x-card>
                                 <div class="text-sm">
-                                    @section ('content.right.summary')
+                                    @section('content.right.summary')
                                         <div
                                             x-cloak
                                             x-show="
@@ -1065,7 +1065,7 @@
                                                         <div
                                                             class="flex items-center gap-1.5"
                                                         >
-                                                            @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
+                                                            @if(! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
                                                                 <div>
                                                                     <x-button.circle
                                                                         color="red"
@@ -1110,7 +1110,7 @@
                                                 </template>
                                             </div>
                                         </div>
-                                        @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
+                                        @if(! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
                                             <div class="w-full">
                                                 <x-button
                                                     color="secondary"
@@ -1330,7 +1330,7 @@
                                                 ></span>
                                             </div>
                                         </div>
-                                        @section ('content.right.summary.profit')
+                                        @section('content.right.summary.profit')
                                             <hr />
                                             <div
                                                 class="flex justify-between p-2.5"
@@ -1378,7 +1378,7 @@
                             </x-card>
                             <x-card>
                                 <div class="space-y-3">
-                                    @section ('content.right.order_dates')
+                                    @section('content.right.order_dates')
                                         <x-date
                                             wire:model="order.invoice_date"
                                             :without-time="true"

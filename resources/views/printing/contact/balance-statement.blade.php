@@ -1,12 +1,12 @@
-@use (Illuminate\Support\Number)
+@use(Illuminate\Support\Number)
 <x-flux::print.first-page-header
     :address="$model->invoiceAddress ?? $model->mainAddress"
 >
     <x-slot:right-block>
         <div class="inline-block">
-            @section ('first-page-right-block')
+            @section('first-page-right-block')
                 <div class="inline-block">
-                    @section ('first-page-right-block.labels')
+                    @section('first-page-right-block.labels')
                         <div class="font-semibold">
                             {{ __('Customer no.') }}:
                         </div>
@@ -14,7 +14,7 @@
                     @show
                 </div>
                 <div class="inline-block pl-6 text-right">
-                    @section ('first-page-right-block.values')
+                    @section('first-page-right-block.values')
                         <div>{{ $model->customer_number }}</div>
                         <div>
                             {{ now()->locale(app()->getLocale())->isoFormat('L') }}
@@ -28,10 +28,10 @@
 <main>
     <div class="prose-xs pt-10 pb-4">{!! $model->header !!}</div>
     <div class="pb-6">
-        @section ('positions')
+        @section('positions')
             <table class="w-full table-auto text-xs">
                 <thead class="border-b-2 border-black">
-                    @section ('positions.header')
+                    @section('positions.header')
                         <tr>
                             <th class="text-left font-normal">
                                 {{ __('Order no.') }}
@@ -54,8 +54,8 @@
                         </tr>
                     @show
                 </thead>
-                @section ('positions.body')
-                    @foreach ($model->orders()->unpaid()->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
+                @section('positions.body')
+                    @foreach($model->orders()->unpaid()->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
                         <x-flux::print.order.order :order="$order" />
                     @endforeach
 
@@ -64,7 +64,7 @@
         @show
     </div>
     <div class="pb-6">
-        @section ('total')
+        @section('total')
             <table class="w-full">
                 <tbody class="break-inside-avoid">
                     <tr>

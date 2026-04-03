@@ -6,14 +6,14 @@
             >
                 {{ $this->getLabel() }}
             </h2>
-            @if ($count > 0)
+            @if($count > 0)
                 <x-badge color="red" :text="(string) $count" />
             @endif
         </div>
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
-        @forelse ($tickets as $ticket)
+        @forelse($tickets as $ticket)
             <div
                 class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
             >
@@ -32,7 +32,7 @@
                         <span class="truncate">
                             {{ data_get($ticket, 'authenticatable.name') }}
                         </span>
-                        @if ($ticket->created_at)
+                        @if($ticket->created_at)
                             <span>&middot;</span>
                             <span>
                                 {{ $ticket->created_at->locale(app()->getLocale())->diffForHumans() }}
@@ -56,7 +56,7 @@
                 {{ __('No escalated tickets') }}
             </div>
         @endforelse
-        @if ($hasMore)
+        @if($hasMore)
             <div class="flex justify-center pt-2">
                 <x-button
                     color="secondary"

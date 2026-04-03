@@ -7,10 +7,10 @@
     class="flex h-full"
 >
     <livewire:features.calendar.calendar-event-edit wire:model="event" />
-    @section ('calendar-modal')
-        @teleport ('body')
+    @section('calendar-modal')
+        @teleport('body')
             <x-modal id="calendar-modal" :title="__('Edit Calendar')">
-                @section ('calendar-edit')
+                @section('calendar-edit')
                     <div class="flex flex-col gap-4">
                         <div id="parent-calendar-select">
                             <x-select.styled
@@ -49,7 +49,7 @@
                                 :label="__('Has repeatable events')"
                             />
                         </div>
-                        @canAction (\FluxErp\Actions\Calendar\CreatePublicCalendar::class)
+                        @canAction(\FluxErp\Actions\Calendar\CreatePublicCalendar::class)
                             <x-checkbox
                                 wire:model="calendar.is_public"
                                 :label="__('Public')"
@@ -147,7 +147,7 @@
         @endteleport
 
     @show
-    @if ($showCalendars)
+    @if($showCalendars)
         <div class="whitespace-nowrap" wire:ignore>
             <div
                 x-data="{
@@ -204,7 +204,7 @@
                                 ))
                     "
                 >
-                    @canAction (\FluxErp\Actions\Calendar\CreateCalendar::class)
+                    @canAction(\FluxErp\Actions\Calendar\CreateCalendar::class)
                         <x-slot:beforeTree>
                             <x-button
                                 class="mb-2"
@@ -215,7 +215,7 @@
                     @endcanAction
 
                     <x-slot:checkbox>
-                        @section ('checkbox-slot')
+                        @section('checkbox-slot')
                             <x-checkbox
                                 sm
                                 x-on:folder-tree-uncheck.window="
@@ -259,7 +259,7 @@
                                 />
                             </svg>
                         </div>
-                        @canAction (\FluxErp\Actions\Calendar\UpdateCalendar::class)
+                        @canAction(\FluxErp\Actions\Calendar\UpdateCalendar::class)
                             <div
                                 class="flex cursor-pointer items-center gap-1"
                                 x-cloak

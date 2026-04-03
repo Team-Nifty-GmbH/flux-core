@@ -22,22 +22,22 @@
     </x-slot:header>
     <div
         class="flex flex-wrap gap-4 px-2 py-5 md:px-4"
-        @if ($cartForm->isUserOwned())
+        @if($cartForm->isUserOwned())
             x-sort="$wire.reOrder($item, $position)"
         @endif
         x-cloak
         x-show="showCart === {{ $cartForm->id ?? 'null' }}"
         x-collapse
     >
-        @foreach ($cartForm->cart_items ?? [] as $cartFormItem)
-            @if (is_null($cartFormItem))
+        @foreach($cartForm->cart_items ?? [] as $cartFormItem)
+            @if(is_null($cartFormItem))
                 @continue
             @endif
             <div
                 class="relative z-0"
-                @if ($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['id'] }}" @endif
+                @if($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['id'] }}" @endif
             >
-                @if ($cartForm->isUserOwned())
+                @if($cartForm->isUserOwned())
                     <x-button.circle
                         xs
                         color="red"
@@ -58,7 +58,7 @@
             </div>
         @endforeach
     </div>
-    @if ($cartForm->isUserOwned())
+    @if($cartForm->isUserOwned())
         <hr />
         <div class="p-4">
             <x-toggle
@@ -70,7 +70,7 @@
     @endif
 
     <x-slot:footer>
-        @if ($cartForm->isUserOwned())
+        @if($cartForm->isUserOwned())
             <x-button
                 color="red"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Watchlist')]) }}"

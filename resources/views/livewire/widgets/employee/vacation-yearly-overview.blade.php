@@ -52,20 +52,20 @@
         <tbody
             class="dark:divide-dark-500/20 dark:bg-dark-700 divide-y divide-gray-200 bg-white"
         >
-            @forelse ($yearlyData as $year)
+            @forelse($yearlyData as $year)
                 <tr
-                    @class ([
+                    @class([
                         'bg-primary-50 dark:bg-primary-900/20' => $year['is_current'],
                     ])
                 >
                     <td class="px-4 py-2 whitespace-nowrap">
                         <span
-                            @class ([
+                            @class([
                                 'font-semibold' => $year['is_current'],
                             ])
                         >
                             {{ $year['year'] }}
-                            @if ($year['employment_date'])
+                            @if($year['employment_date'])
                                 <div
                                     class="mt-1 text-xs text-gray-500 dark:text-gray-400"
                                 >
@@ -73,7 +73,7 @@
                                 </div>
                             @endif
 
-                            @if ($year['termination_date'])
+                            @if($year['termination_date'])
                                 <div
                                     class="mt-1 text-xs text-gray-500 dark:text-gray-400"
                                 >
@@ -83,7 +83,7 @@
                         </span>
                     </td>
                     <td class="px-4 py-2 text-right whitespace-nowrap">
-                        @if ($year['carryover_days'] != '0.0')
+                        @if($year['carryover_days'] != '0.0')
                             <span class="font-medium">
                                 {{ $year['carryover_days'] }}
                             </span>
@@ -99,7 +99,7 @@
                         @endif
                     </td>
                     <td class="px-4 py-2 text-right whitespace-nowrap">
-                        @if ($year['expired_carryover_days'] != '0.0')
+                        @if($year['expired_carryover_days'] != '0.0')
                             <span class="font-medium">
                                 {{ $year['expired_carryover_days'] }}
                             </span>
@@ -123,7 +123,7 @@
                         </span>
                     </td>
                     <td class="px-4 py-2 text-right whitespace-nowrap">
-                        @if ($year['adjustments_days'] != '0.0')
+                        @if($year['adjustments_days'] != '0.0')
                             <span class="font-medium">
                                 {{ $year['adjustments_days'] }}
                             </span>
@@ -166,7 +166,7 @@
                     </td>
                     <td class="px-4 py-2 text-right whitespace-nowrap">
                         <div
-                            @class ([
+                            @class([
                                 'text-green-600 dark:text-green-400' =>
                                     (float) str_replace(',', '', $year['remaining_days']) > 0,
                                 'text-red-600 dark:text-red-400' =>
@@ -192,7 +192,7 @@
                 </tr>
             @endforelse
         </tbody>
-        @if (count($yearlyData) > 0)
+        @if(count($yearlyData) > 0)
             <tfoot>
                 <tr class="bg-gray-50 font-semibold dark:bg-gray-800">
                     <td class="px-4 py-3 text-left">{{ __('Summary') }}</td>
@@ -215,7 +215,7 @@
                             $totalAdjustmentsDays = collect($yearlyData)->sum(fn ($y) => (float) str_replace(',', '.', $y['adjustments_days']));
                         @endphp
 
-                        @if ($totalAdjustmentsDays != 0)
+                        @if($totalAdjustmentsDays != 0)
                             {{ Number::format($totalAdjustmentsDays, 2) }}
                             <span class="text-xs">{{ __('days') }}</span>
                         @else
@@ -250,7 +250,7 @@
                         @endphp
 
                         <div
-                            @class ([
+                            @class([
                                 'text-green-600 dark:text-green-400' => $currentBalanceFloat > 0,
                                 'text-red-600 dark:text-red-400' => $currentBalanceFloat < 0,
                             ])

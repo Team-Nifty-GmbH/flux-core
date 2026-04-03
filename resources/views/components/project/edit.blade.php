@@ -1,7 +1,7 @@
-@props (['collapsed' => false])
+@props(['collapsed' => false])
 <div x-data="{ expanded: false }" class="space-y-8 divide-y divide-gray-200">
     <div class="space-y-2.5">
-        @section ('general')
+        @section('general')
             <x-input
                 :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Project Number')])"
                 x-bind:readonly="!isEditing"
@@ -16,7 +16,7 @@
             />
         @show
         <div
-            @if ($collapsed) x-collapse x-show="expanded" x-cloak @endif
+            @if($collapsed) x-collapse x-show="expanded" x-cloak @endif
             class="space-y-2.5 p-0.5"
         >
             <div
@@ -37,7 +37,7 @@
                 />
             </div>
             <div class="flex justify-between gap-x-4">
-                @section ('dates')
+                @section('dates')
                     <x-date
                         without-time
                         x-bind:readonly="!isEditing"
@@ -70,7 +70,7 @@
                 wire:model="project.description"
                 :label="__('Description')"
             />
-            @section ('connections')
+            @section('connections')
                 <div x-bind:class="!isEditing && 'pointer-events-none'">
                     <x-select.styled
                         x-bind:readonly="!isEditing"
@@ -150,7 +150,7 @@
                     </x-select.styled>
                 </div>
             @show
-            @section ('budget')
+            @section('budget')
                 <x-number
                     :label="__('Budget')"
                     x-bind:readonly="!isEditing"
@@ -166,7 +166,7 @@
                 />
             @show
         </div>
-        @if ($collapsed)
+        @if($collapsed)
             <x-badge
                 outline
                 md

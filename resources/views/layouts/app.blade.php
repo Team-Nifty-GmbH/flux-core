@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-@props (['navigation' => request()->boolean('no-navigation')])
+@props(['navigation' => request()->boolean('no-navigation')])
 <html
     x-data="tallstackui_darkTheme()"
-    @class ([
+    @class([
         'sort-scrollbar',
         'h-full',
         'text-sm',
@@ -21,8 +21,8 @@
     }"
     class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
 >
-    @section ('wire.navigate.spinner')
-        @persist ('spinner')
+    @section('wire.navigate.spinner')
+        @persist('spinner')
             <div
                 id="loading-overlay"
                 class="fixed inset-0 hidden overflow-y-auto p-4"
@@ -38,15 +38,15 @@
         @endpersist
 
     @show
-    @persist ('notifications')
-        @if (auth()->check() && auth()->id())
+    @persist('notifications')
+        @if(auth()->check() && auth()->id())
             <x-toast z-index="z-50" />
         @endif
         <x-dialog z-index="z-40" blur="md" align="center" />
     @endpersist
 
-    @auth ('web')
-        @persist ('mail')
+    @auth('web')
+        @persist('mail')
             <div id="mail">
                 <livewire:edit-mail lazy />
             </div>
@@ -94,13 +94,13 @@
                 </x-modal>
             </div>
         @endpersist
-        @persist ('record-merging')
+        @persist('record-merging')
             <livewire:record-merging lazy />
         @endpersist
     @endauth
 
     <x-flux::layout>
-        @if (! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
+        @if(! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
             <x-slot:header>
                 <x-layout.header without-mobile-button>
                     <x-button
@@ -109,7 +109,7 @@
                         icon="bars-4"
                         x-on:click="$dispatch('menu-force-open')"
                     />
-                    @auth ('web')
+                    @auth('web')
                         <div
                             x-persist="layout.header.search - bar"
                             class="hidden grow sm:block"
@@ -121,7 +121,7 @@
                     <div class="grow sm:hidden"></div>
 
                     <div class="flex shrink-0 gap-2">
-                        @auth ('web')
+                        @auth('web')
                             <div
                                 x-persist="layout.header.search - bar - mobile"
                             >
@@ -132,21 +132,21 @@
                             </div>
                         @endauth
 
-                        @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
-                            @persist ('layout.header.cart')
-                                @canAction (\FluxErp\Actions\Cart\CreateCart::class)
+                        @if(resolve_static(\FluxErp\Models\PriceList::class, 'default'))
+                            @persist('layout.header.cart')
+                                @canAction(\FluxErp\Actions\Cart\CreateCart::class)
                                     <livewire:cart.cart lazy />
                                 @endcanAction
                             @endpersist
                         @endif
 
-                        @auth ('web')
-                            @canAction (\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                        @auth('web')
+                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
                                 <livewire:work-time lazy />
                             @endcanAction
                         @endauth
 
-                        @persist ('layout.header.notifications')
+                        @persist('layout.header.notifications')
                             <livewire:features.notifications lazy />
                         @endpersist
                     </div>
@@ -154,10 +154,10 @@
             </x-slot:header>
         @endif
 
-        @if (auth()->check() && auth()->id() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
+        @if(auth()->check() && auth()->id() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
             <x-slot:menu>
-                @php ($navigation = true)
-                @persist ('navigation')
+                @php($navigation = true)
+                @persist('navigation')
                     <div id="nav">
                         <livewire:navigation />
                     </div>

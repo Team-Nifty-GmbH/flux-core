@@ -1,5 +1,5 @@
-@extends ('flux::printing.order.order')
-@section ('first-page-right-block.rows')
+@extends('flux::printing.order.order')
+@section('first-page-right-block.rows')
     @parent
     <tr>
         <td class="py-0 text-left font-semibold">{{ __('Refund Date') }}:</td>
@@ -15,7 +15,7 @@
     </tr>
 @endsection
 
-@section ('total')
+@section('total')
     @parent
     <div>
         {{ render_editor_blade($model->paymentType()->withTrashed()->value('description'),['model' => $model],) }}

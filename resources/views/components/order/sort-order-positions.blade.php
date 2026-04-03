@@ -19,13 +19,13 @@
 >
     <div
         class="mt-2 space-y-2"
-        @if (! $this->order->is_locked)
+        @if(! $this->order->is_locked)
             x-sort="$wire.movePosition($item, $position)"
             x-sort:group="nested - positions"
         @endif
     >
         <x-loading />
-        @foreach ($this->getSortableOrderPositions() as $position)
+        @foreach($this->getSortableOrderPositions() as $position)
             <x-flux::order.order-position-sort-item
                 :position="$position"
                 :row-actions="$rowActions"

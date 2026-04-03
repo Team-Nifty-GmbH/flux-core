@@ -1,4 +1,4 @@
-@props ([
+@props([
     'onlyPostal' => false,
     'countries' => resolve_static(\FluxErp\Models\Country::class, 'query')
         ->get(['id', 'name'])
@@ -8,7 +8,7 @@
         ->toArray(),
 ])
 <div class="table w-full table-auto gap-1.5" x-ref="address">
-    @section ('contact')
+    @section('contact')
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
             <x-label
                 :label="__('Company')"
@@ -106,7 +106,7 @@
             </div>
         </div>
     @show
-    @section ('address')
+    @section('address')
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
             <x-label :label="__('Street')" for="{{ md5('address.street') }}" />
             <div class="col-span-2">
@@ -162,8 +162,8 @@
             </div>
         </div>
     @show
-    @section ('contact-channels')
-        @if (! $onlyPostal)
+    @section('contact-channels')
+        @if(! $onlyPostal)
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label
                     :label="__('Date Of Birth')"
@@ -178,7 +178,7 @@
                 </div>
             </div>
         @endif
-        @section ('contact-channels.email')
+        @section('contact-channels.email')
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label
                     :label="__('Email')"
@@ -213,7 +213,7 @@
                 </div>
             </div>
         @show
-        @section ('contact-channels.phone')
+        @section('contact-channels.phone')
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label
                     :label="__('Phone')"
@@ -247,7 +247,7 @@
                 </div>
             </div>
         @show
-        @section ('contact-channels.phone_mobile')
+        @section('contact-channels.phone_mobile')
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label
                     :label="__('Phone Mobile')"
@@ -281,8 +281,8 @@
                 </div>
             </div>
         @show
-        @if (! $onlyPostal)
-            @section ('contact-channels.url')
+        @if(! $onlyPostal)
+            @section('contact-channels.url')
                 <div
                     class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
                 >
@@ -383,7 +383,7 @@
                         <x-slot:label>
                             <div class="flex items-center gap-2">
                                 <x-label :label="__('Tags')" />
-                                @canAction (\FluxErp\Actions\Tag\CreateTag::class)
+                                @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                                     <x-button.circle
                                         sm
                                         icon="plus"
@@ -420,8 +420,8 @@
 
     @show
 </div>
-@section ('attributes')
-    @if (! $onlyPostal)
+@section('attributes')
+    @if(! $onlyPostal)
         <h3
             class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
         >
@@ -429,7 +429,7 @@
         </h3>
         <hr class="py-2" />
         <div class="flex flex-col gap-1.5">
-            @section ('attributes.toggles')
+            @section('attributes.toggles')
                 <x-toggle
                     :label="__('Active')"
                     x-bind:disabled="!$wire.edit"
@@ -464,7 +464,7 @@
             {{ __('Contact options') }}
         </h3>
         <hr class="py-2" />
-        @section ('attributes.contact-options')
+        @section('attributes.contact-options')
             <div
                 class="flex flex-col gap-1.5"
                 x-data="{
@@ -565,7 +565,7 @@
                 </div>
             </div>
         @show
-        @section ('attributes.map')
+        @section('attributes.map')
             <div
                 x-data="addressMap($wire, 'address', true, '{{ auth()->user() ?->getAvatarUrl() }}')"
                 class="pt-6"

@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4">
     <div wire:ignore>
-        @teleport ('body')
+        @teleport('body')
             <x-modal id="edit-address-assignment">
                 <div class="flex flex-col gap-4">
                     <x-select.styled
@@ -64,7 +64,7 @@
             </x-modal>
         @endteleport
     </div>
-    @foreach ($form->addresses as $address)
+    @foreach($form->addresses as $address)
         <x-card :header="$address['address_type']">
             <div class="text-sm">
                 {!! implode('<br>', $address['address']) !!}

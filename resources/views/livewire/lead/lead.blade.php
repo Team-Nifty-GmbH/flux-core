@@ -8,11 +8,11 @@
         class="mx-auto w-full md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center space-x-5">
-            @section ('lead.title')
-                @section ('lead.title.avatar')
+            @section('lead.title')
+                @section('lead.title.avatar')
                     <x-avatar xl :image="$leadForm->avatar" />
                 @show
-                @section ('lead.title.name')
+                @section('lead.title.name')
                     <div>
                         <h1
                             class="text-2xl font-bold text-gray-900 dark:text-gray-50"

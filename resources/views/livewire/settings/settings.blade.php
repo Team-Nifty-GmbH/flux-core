@@ -46,7 +46,7 @@
                 </div>
             </x-slot:header>
             <x-loading />
-            @if ($settingComponent)
+            @if($settingComponent)
                 <livewire:is
                     :component="$settingComponent"
                     :key="$settingComponent"

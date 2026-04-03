@@ -2,14 +2,14 @@
     x-data="apexCharts($wire)"
     class="flex h-full max-h-full w-full flex-col gap-4 p-4 text-sm"
 >
-    @if ($withSpinner)
+    @if($withSpinner)
         <x-loading />
     @endif
 
     <div class="flex w-full flex-row items-center justify-between gap-2">
         <div class="min-w-0 flex-1">
-            @section ('title')
-                @if ($this->showTitle())
+            @section('title')
+                @if($this->showTitle())
                     <div class="flex w-full">
                         <h2
                             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
@@ -21,8 +21,8 @@
                 </div>
             @show
             <div class="flex items-center gap-2">
-                @section ('options')
-                    @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
+                @section('options')
+                    @if($this instanceof \FluxErp\Contracts\HasWidgetOptions)
                         <div class="flex-none">
                             <x-dropdown
                                 icon="ellipsis-vertical"
@@ -71,7 +71,7 @@
         <div
             class="flex h-full flex-1 grow flex-col justify-between gap-4 dark:text-gray-400"
         >
-            @section ('chart')
+            @section('chart')
                 <div class="chart h-full w-full"></div>
             @show
         </div>

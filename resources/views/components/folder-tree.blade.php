@@ -1,6 +1,6 @@
 <ul>
-    @foreach ($tree as $treeItem)
-        @if (array_key_exists("children", $treeItem))
+    @foreach($tree as $treeItem)
+        @if(array_key_exists("children", $treeItem))
             <li>
                 <div class="block flex rounded py-1 pl-5">
                     <div
@@ -16,7 +16,7 @@
                     </div>
                     <div
                         class="cursor-default pl-2"
-                        @if (auth()->user()->can("action.media.upload"))
+                        @if(auth()->user()->can("action.media.upload"))
                             wire:click="showFolder('{{ $treeItem["collection_name"] }}', {{ (int) $treeItem["is_static"] }})"
                         @endif
                     >

@@ -18,7 +18,7 @@
         },
     }"
 >
-    @include ('flux::livewire.transactions.transactions')
+    @include('flux::livewire.transactions.transactions')
     <x-card :header="__('Payment Reminder')">
         <div class="flex flex-col gap-4">
             <div class="flex items-end gap-2">
@@ -28,7 +28,7 @@
                         :label="__('Payment Reminder Next Date')"
                     />
                 </div>
-                @canAction (\FluxErp\Actions\Order\ResetPaymentReminderLevel::class)
+                @canAction(\FluxErp\Actions\Order\ResetPaymentReminderLevel::class)
                     <div>
                         <x-button
                             :text="__('Set Level')"
@@ -186,7 +186,7 @@
         </div>
     </x-card>
 
-    @teleport ('body')
+    @teleport('body')
         <x-modal
             id="order-transaction-modal"
             x-on:open="$tsui.focus('order-transaction-amount')"

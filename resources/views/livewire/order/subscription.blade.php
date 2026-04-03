@@ -1,5 +1,5 @@
-@extends ('flux::livewire.order.order')
-@section ('modals')
+@extends('flux::livewire.order.order')
+@section('modals')
     @parent
     <x-modal id="edit-schedule" :title="__('Edit Schedule')" persistent>
         <div class="flex flex-col gap-1.5">
@@ -611,7 +611,7 @@
     </x-modal>
 @endsection
 
-@section ('actions')
+@section('actions')
     @parent
     <x-button
         color="indigo"

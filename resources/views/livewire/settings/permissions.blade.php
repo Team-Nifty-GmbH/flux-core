@@ -1,6 +1,6 @@
 <x-modal id="edit-role-users-modal">
     <div class="flex flex-col gap-1.5">
-        @foreach ($users as $user)
+        @foreach($users as $user)
             <div class="flex">
                 <div class="flex-1 font-medium">{{ $user['name'] }}</div>
                 <div class="">

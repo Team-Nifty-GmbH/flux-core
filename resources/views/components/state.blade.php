@@ -15,7 +15,7 @@
     @endif
 }"
 >
-    @if ($label ?? false)
+    @if($label ?? false)
         <div class="mb-1">
             <x-label> {{ $label }} </x-label>
         </div>

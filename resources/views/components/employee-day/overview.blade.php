@@ -1,5 +1,5 @@
 <div>
-    @use (Illuminate\Support\Number)
+    @use(Illuminate\Support\Number)
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <x-card :header="__('Basic Information')">
             <div class="space-y-4">

@@ -6,7 +6,7 @@
             :label="__('Address Type Code')"
             required
         />
-        @if (count($tenants) > 1)
+        @if(count($tenants) > 1)
             <div>
                 <x-select.styled
                     :label="__('Tenants')"

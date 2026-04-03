@@ -5,8 +5,8 @@
             class="mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8"
         >
             <div class="flex items-center space-x-5">
-                @section ('contact.title')
-                    @section ('contact.title.avatar')
+                @section('contact.title')
+                    @section('contact.title.avatar')
                         <label for="avatar" class="cursor-pointer">
                             <x-avatar xl :image="$avatar" />
                         </label>
@@ -18,7 +18,7 @@
                             wire:model.live="avatar"
                         />
                     @show
-                    @section ('contact.title.name')
+                    @section('contact.title.name')
                         <div>
                             <h1
                                 class="text-2xl font-bold text-gray-900 dark:text-gray-50"
@@ -37,8 +37,8 @@
             <div
                 class="mt-6 flex flex-col-reverse justify-stretch gap-2 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:gap-x-2 sm:space-x-reverse md:mt-0 md:flex-row md:gap-x-2"
             >
-                @section ('contact.buttons')
-                    @canAction (\FluxErp\Actions\Contact\UpdateContact::class)
+                @section('contact.buttons')
+                    @canAction(\FluxErp\Actions\Contact\UpdateContact::class)
                         <div x-cloak x-show="$wire.edit" class="flex gap-x-2">
                             <x-button
                                 color="secondary"
@@ -63,7 +63,7 @@
                             />
                         </div>
                     @endcanAction
-                    @canAction (\FluxErp\Actions\Contact\DeleteContact::class)
+                    @canAction(\FluxErp\Actions\Contact\DeleteContact::class)
                         <x-button
                             color="red"
                             :text="__('Delete') "

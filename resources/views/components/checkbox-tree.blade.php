@@ -1,4 +1,4 @@
-@props ([
+@props([
     "selectable" => false,
     "sortable" => false,
     "hideIcon" => false,
@@ -38,7 +38,7 @@
             class="tree max-h-[50vh] shrink-0 grow overflow-auto pl-2 lg:max-h-none lg:w-1/2"
         >
             {{ $beforeTree ?? null }}
-            @if ($withSearch)
+            @if($withSearch)
                 <div class="pb-2">
                     <x-input
                         type="search"
@@ -49,7 +49,7 @@
             @endif
 
             <template
-                @if ($withSearch)
+                @if($withSearch)
                     x-for="node in searchNodes(tree, search)"
                 @else
                     x-for="node in tree"
@@ -97,10 +97,10 @@
                                 : null
                         "
                     ></i>
-                    @if ($selectable)
+                    @if($selectable)
                         <template x-if="node.isSelectable ?? true">
                             <div>
-                                @if ($checkbox?->isNotEmpty())
+                                @if($checkbox?->isNotEmpty())
                                     {{ $checkbox }}
                                 @else
                                     <x-checkbox
@@ -124,8 +124,8 @@
                         </template>
                     @endif
 
-                    @if (! $hideIcon)
-                        @if ($nodeIcon ?? false)
+                    @if(! $hideIcon)
+                        @if($nodeIcon ?? false)
                             {{ $nodeIcon }}
                         @else
                             <i
@@ -149,7 +149,7 @@
                 </div>
                 <template x-if="Array.isArray(node[childrenAttribute])">
                     <ul
-                        @if ($sortable)
+                        @if($sortable)
                             x-sort="(item, position) => {{{ $attributes->get("moved", "null") }}}"
                             x-sort:group="folder - tree"
                         @endif
@@ -157,7 +157,7 @@
                         x-transition
                         class="tree__children border-l border-gray-200 pl-4 dark:border-slate-500"
                     >
-                        @if ($sortable)
+                        @if($sortable)
                             <li
                                 x-bind:class="
                                     node[childrenAttribute]?.length
@@ -168,7 +168,7 @@
                         @endif
 
                         <template
-                            @if ($withSearch)
+                            @if($withSearch)
                                 x-for="
                                     childNode in
                                     searchNodes(
@@ -187,7 +187,7 @@
                             <li
                                 data-child-node
                                 class="tree__node flex flex-col pl-1.5"
-                                @if ($attributes->has("x-sort:item"))
+                                @if($attributes->has("x-sort:item"))
                                     x-sort:item="{{ $attributes->get("x-sort:item") }}"
                                     x-bind:data-id="{{ $attributes->get("x-sort:item") }}"
                                 @else

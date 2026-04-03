@@ -9,7 +9,7 @@
             />
 
             <div class="flex flex-wrap gap-2">
-                @canAction (\FluxErp\Actions\AbsenceRequest\ApproveAbsenceRequest::class)
+                @canAction(\FluxErp\Actions\AbsenceRequest\ApproveAbsenceRequest::class)
                     <x-button
                         x-cloak
                         x-show="$wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Approved->value }}'"
@@ -20,7 +20,7 @@
                     />
                 @endcanAction
 
-                @canAction (\FluxErp\Actions\AbsenceRequest\RejectAbsenceRequest::class)
+                @canAction(\FluxErp\Actions\AbsenceRequest\RejectAbsenceRequest::class)
                     <x-button
                         x-cloak
                         x-show="$wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Rejected->value }}'"
@@ -32,7 +32,7 @@
                     />
                 @endcanAction
 
-                @canAction (\FluxErp\Actions\AbsenceRequest\RevokeAbsenceRequest::class)
+                @canAction(\FluxErp\Actions\AbsenceRequest\RevokeAbsenceRequest::class)
                     <x-button
                         x-cloak
                         x-show="$wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Revoked->value }}' && $wire.absenceRequestForm.state !== '{{ \FluxErp\Enums\AbsenceRequestStateEnum::Pending->value }}'"

@@ -15,7 +15,7 @@
         },
     }"
 >
-    @if (! $withoutHeader)
+    @if(! $withoutHeader)
         <x-slot:header>
             <div
                 class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0"

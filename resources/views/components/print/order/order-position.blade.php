@@ -1,4 +1,4 @@
-@use (Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
+@use(Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-2 pr-8 align-top">
@@ -8,7 +8,7 @@
             class="py-2 pr-8 align-top"
             style="padding-left: {{ $position->depth * 15 }}px"
         >
-            @if ($position->is_alternative)
+            @if($position->is_alternative)
                 <x-badge
                     color="amber"
                     class="mb-2"
@@ -26,13 +26,13 @@
             </div>
         </td>
         <td class="py-2 pr-8 text-center align-top">
-            @if (! $position->is_free_text && ! $position->is_bundle_position)
+            @if(! $position->is_free_text && ! $position->is_bundle_position)
                 {{ Number::format($position->amount) }}
                 {{ data_get($position, 'product.unit.abbreviation') }}
             @endif
         </td>
         <td class="py-2 text-right align-top">
-            @if (bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) === 1)
+            @if(bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) === 1)
                 <div class="text-xs whitespace-nowrap">
                     <div class="line-through">
                         {{ Number::currency($isNet ? $position->total_base_net_price : $position->total_base_gross_price) }}

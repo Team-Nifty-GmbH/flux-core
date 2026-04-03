@@ -1,4 +1,4 @@
-@section ('order-positions-footer-card')
+@section('order-positions-footer-card')
     <div
         wire:ignore
         x-show="!$wire.order.is_locked"
@@ -20,7 +20,7 @@
                 "
             >
                 <div class="flex flex-col gap-4">
-                    @section ('order-positions-footer-card.inputs')
+                    @section('order-positions-footer-card.inputs')
                         <x-select.styled
                             class="pb-4"
                             :label="__('Product')"
@@ -77,7 +77,7 @@
                     @show
                 </div>
                 <div class="flex w-full items-center justify-end gap-2 pt-2">
-                    @section ('order-positions-footer-card.buttons')
+                    @section('order-positions-footer-card.buttons')
                         <div
                             x-transition
                             x-cloak

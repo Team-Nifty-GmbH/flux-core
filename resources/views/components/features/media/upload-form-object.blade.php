@@ -3,7 +3,7 @@
     $target = $wireModel . '.file';
 @endphp
 
-@props ([
+@props([
     'multiple' => true,
     'label' => null,
 ])
@@ -109,7 +109,7 @@
                 type="file"
                 x-bind:id="uploadObjectId"
                 class="hidden"
-                @if ($multiple) multiple @endif
+                @if($multiple) multiple @endif
                 x-on:change="handleFileSelect($event)"
             />
         </div>

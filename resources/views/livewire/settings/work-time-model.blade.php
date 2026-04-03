@@ -117,14 +117,14 @@
                     },
                 }"
             >
-                @if ($workTimeModelForm->cycle_weeks > 1)
+                @if($workTimeModelForm->cycle_weeks > 1)
                     {{-- Tabs for multiple weeks --}}
                     <div class="mb-6">
                         <div
                             class="border-b border-gray-200 dark:border-gray-700"
                         >
                             <nav class="-mb-px flex space-x-4">
-                                @for ($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
+                                @for($i = 0; $i < $workTimeModelForm->cycle_weeks; $i++)
                                     <button
                                         type="button"
                                         x-on:click="activeWeek = {{ $i }}"

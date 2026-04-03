@@ -1,9 +1,9 @@
-@extends ('flux::livewire.contact.contact-list')
+@extends('flux::livewire.contact.contact-list')
 
-@section ('modals')
+@section('modals')
     @parent
     {{ $this->renderCreateDocumentsModal() }}
-    @canAction (\FluxErp\Actions\Lead\CreateLead::class)
+    @canAction(\FluxErp\Actions\Lead\CreateLead::class)
         <x-modal
             :id="$leadForm->modalName()"
             x-on:open="$tsui.focus('lead-name')"
@@ -25,7 +25,7 @@
                     :quantity="5"
                     position="right"
                 />
-                @if (is_null(resolve_static(\FluxErp\Models\LeadState::class, 'default')?->probability_percentage))
+                @if(is_null(resolve_static(\FluxErp\Models\LeadState::class, 'default')?->probability_percentage))
                     <x-range
                         wire:model.number="leadForm.probability_percentage"
                         :hint="__('Probability to win this lead…')"
@@ -71,7 +71,7 @@
             </x-slot:footer>
         </x-modal>
     @endcanAction
-    @section ('map')
+    @section('map')
         <x-flux::map.fullscreen-container />
     @show
 @endsection

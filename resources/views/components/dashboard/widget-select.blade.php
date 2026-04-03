@@ -1,4 +1,4 @@
-@teleport ('body')
+@teleport('body')
     <x-modal id="widget-list" scrollable>
         <div class="h-full overflow-auto p-2.5">
             <div class="flex items-center justify-between pb-6">

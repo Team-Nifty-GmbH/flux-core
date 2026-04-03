@@ -1,7 +1,7 @@
-@extends ('flux::livewire.support.widgets.charts.chart')
-@section ('options')
+@extends('flux::livewire.support.widgets.charts.chart')
+@section('options')
     @parent
-    @if ($chartTypes)
+    @if($chartTypes)
         <x-select.native
             x-model="chartType"
             :options="[
@@ -22,8 +22,8 @@
     @endif
 @endsection
 
-@if ($showTotals)
-    @section ('chart')
+@if($showTotals)
+    @section('chart')
         <div class="px-2">
             <div
                 class="soft-scrollbar h-20 w-full gap-8 overflow-x-auto rounded md:flex"

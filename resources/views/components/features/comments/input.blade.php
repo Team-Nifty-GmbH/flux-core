@@ -54,7 +54,7 @@
                     <x-flux::editor class="comment-input" scope="comment" />
                 </div>
                 <div class="grow pt-4">
-                    @canAction (\FluxErp\Actions\Media\UploadMedia::class)
+                    @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                         <div class="flex flex-col items-end">
                             <div class="mb-4 w-full">
                                 <input
@@ -93,7 +93,7 @@
                             x-bind:disabled="isLoadingFiles.length > 0"
                             :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
                         />
-                        @if (auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
+                        @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
                             <x-button
                                 color="indigo"
                                 x-on:click="

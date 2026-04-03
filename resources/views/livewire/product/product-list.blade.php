@@ -1,5 +1,5 @@
 <div x-data="{ isEditing: true }">
-    @canAction (\FluxErp\Actions\Product\CreateProduct::class)
+    @canAction(\FluxErp\Actions\Product\CreateProduct::class)
         <x-modal
             id="create-product-modal"
             :title="__('New Product')"
@@ -64,7 +64,7 @@
         </x-modal>
     @endcanAction
 
-    @canAction (\FluxErp\Actions\Product\ProductPricesUpdate::class)
+    @canAction(\FluxErp\Actions\Product\ProductPricesUpdate::class)
         <x-modal id="update-prices-modal" :title="__('Update prices')">
             <div class="flex flex-col gap-1.5">
                 <x-select.styled

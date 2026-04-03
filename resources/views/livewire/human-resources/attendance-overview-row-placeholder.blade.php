@@ -18,7 +18,7 @@
             class="mx-auto h-4 w-12 rounded bg-gray-200 dark:bg-gray-700"
         ></div>
     </td>
-    @foreach ($calendarDays as $calDay)
+    @foreach($calendarDays as $calDay)
         <td
             class="{{ data_get($calDay, 'isWeekend') ? 'bg-gray-100 dark:bg-gray-700' : '' }} border-r border-b px-1 py-1 dark:border-gray-700"
         >

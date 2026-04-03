@@ -1,9 +1,9 @@
-@props ([
+@props([
     "position",
 ])
 <div
     id="{{ data_get($position, "id") }}"
-    @if (! $this->order->is_locked)
+    @if(! $this->order->is_locked)
         x-sort:item="{{ data_get($position, "id") }}"
     @endif
     x-data="{ record: @js($position) }"
@@ -11,7 +11,7 @@
 >
     <div
         class="rounded-md border bg-white p-3 shadow-xs"
-        @if (! $this->order->is_locked)
+        @if(! $this->order->is_locked)
             x-bind:class="{
                 'cursor-move':
                     ! {{ data_get($position, "is_bundle_position") ? "true" : "false" }},
@@ -22,7 +22,7 @@
     >
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
-                @if (data_get($position, "is_free_text") || count(data_get($position, "children", [])) > 0)
+                @if(data_get($position, "is_free_text") || count(data_get($position, "children", [])) > 0)
                     <button
                         x-on:click="toggleExpand({{ data_get($position, "id") }})"
                         type="button"
@@ -44,7 +44,7 @@
             </div>
 
             <div class="flex items-center space-x-4">
-                @if (data_get($position, "amount") && data_get($position, "unit_price"))
+                @if(data_get($position, "amount") && data_get($position, "unit_price"))
                     <div class="text-sm text-gray-600">
                         {{ is_null(data_get($position, "total_net_price")) ? null : data_get($position, "amount") . " × " . Number::currency(data_get($position, "unit_price"), data_get($this->order->currency, "iso"), app()->getLocale()) }}
                     </div>
@@ -58,7 +58,7 @@
                     }}
                 </div>
                 <div>
-                    @foreach ($rowActions ?? [] as $rowAction)
+                    @foreach($rowActions ?? [] as $rowAction)
                         {{ $rowAction }}
                     @endforeach
                 </div>
@@ -75,19 +75,19 @@
         <div
             class="nested-sortable space-y-2"
             data-parent-id="{{ data_get($position, "id") }}"
-            @if (! $this->order->is_locked)
+            @if(! $this->order->is_locked)
                 x-sort="$wire.movePosition($item, $position, {{ data_get($position, "id") }})"
                 x-sort:group="{{ data_get($position, "is_free_text") ? "nested-positions" : "bundle-positions-" . data_get($position, "id") }}"
             @endif
         >
-            @if (count($children = data_get($position, "children", [])) > 0)
-                @foreach ($children as $child)
+            @if(count($children = data_get($position, "children", [])) > 0)
+                @foreach($children as $child)
                     <x-flux::order.order-position-sort-item
                         :position="$child"
                         :row-actions="$rowActions"
                     />
                 @endforeach
-            @elseif (data_get($position, "is_free_text"))
+            @elseif(data_get($position, "is_free_text"))
                 <div
                     class="empty-sort-placeholder flex h-8 items-center justify-center rounded-md border border-dashed border-gray-300"
                 >

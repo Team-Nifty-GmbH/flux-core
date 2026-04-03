@@ -1,8 +1,8 @@
 <div>
     <x-card>
         <div class="grid grid-cols-1 space-y-2.5">
-            @section ('event-edit.content')
-                @section ('event-edit.calendar-select')
+            @section('event-edit.content')
+                @section('event-edit.calendar-select')
                     <div
                         x-show="!$wire.event.calendar_type"
                         id="calendar-select"
@@ -31,7 +31,7 @@
                         />
                     </div>
                 @show
-                @section ('event-edit.model')
+                @section('event-edit.model')
                     <x-link
                         sm
                         href="#"
@@ -48,7 +48,7 @@
                         </x-slot:text>
                     </x-link>
                 @show
-                @section ('event-edit.input-fields')
+                @section('event-edit.input-fields')
                     <x-input
                         x-ref="autofocus"
                         :label="__('Title') . '*'"
@@ -67,7 +67,7 @@
                         x-bind:disabled="!$wire.event.is_editable ?? false"
                     />
                 @show
-                @section ('event-edit.timespan')
+                @section('event-edit.timespan')
                     <div class="grid grid-cols-3 items-center gap-1.5">
                         <x-label> {{ __('Start') }} </x-label>
                         <div>
@@ -135,7 +135,7 @@
                         </div>
                     </div>
                 @show
-                @section ('event-edit.custom-properties')
+                @section('event-edit.custom-properties')
                     <template
                         x-for="
                             customProperty in $wire.event.extended_props ?? []
@@ -233,7 +233,7 @@
                         </div>
                     </template>
                 @show
-                @section ('event-edit.repeatable')
+                @section('event-edit.repeatable')
                     <div class="mb-2" x-show="$wire.event.is_repeatable">
                         <x-checkbox
                             :label="__('Repeatable')"
@@ -532,7 +532,7 @@
                         </div>
                     </div>
                 @show
-                @section ('event-edit.has-taken-place')
+                @section('event-edit.has-taken-place')
                     <div class="mb-2">
                         <x-checkbox
                             :label="__('Has taken place')"
@@ -544,7 +544,7 @@
             @show
         </div>
         <x-slot:footer>
-            @section ('event-edit.footer')
+            @section('event-edit.footer')
                 <div class="flex w-full justify-between gap-2">
                     <div
                         class="flex justify-start gap-2"
@@ -608,7 +608,7 @@
                                 "
                             />
                         </div>
-                        @canAction (\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)
+                        @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)
                             <div
                                 x-show="
                                     $wire.event.is_editable &&

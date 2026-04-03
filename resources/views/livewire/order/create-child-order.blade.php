@@ -126,7 +126,7 @@
                         {{ __("Selected Positions") }}
                     </h3>
                     <div class="space-y-2">
-                        @forelse ($replicateOrder->order_positions as $index => $position)
+                        @forelse($replicateOrder->order_positions as $index => $position)
                             <x-flux::list-item :item="[]">
                                 <x-slot:value>
                                     <div
@@ -153,11 +153,11 @@
                                                 class="text-sm text-gray-600 dark:text-gray-400"
                                             >
                                                 {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso")) }}
-                                                @if (data_get($position, "unit_abbreviation"))
+                                                @if(data_get($position, "unit_abbreviation"))
                                                     / {{ data_get($position, "unit_abbreviation") }}
                                                 @endif
                                             </div>
-                                            @if (data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
+                                            @if(data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
                                                 <div
                                                     class="text-sm text-red-500"
                                                 >
@@ -192,7 +192,7 @@
                         x-show="$wire.replicateOrder.order_positions.length > 0"
                         x-cloak
                     >
-                        @if (count(data_get($parentOrder, "discounts") ?? []) > 0)
+                        @if(count(data_get($parentOrder, "discounts") ?? []) > 0)
                             <div
                                 class="flex items-center justify-between text-gray-600 dark:text-gray-400"
                             >
@@ -201,7 +201,7 @@
                                     x-html="$nuxbe.format.money(getSubtotal(), {colored: true, currency: '{{ data_get($parentOrder, 'currency.iso') }}'})"
                                 ></span>
                             </div>
-                            @foreach (data_get($parentOrder, "discounts") ?? [] as $discount)
+                            @foreach(data_get($parentOrder, "discounts") ?? [] as $discount)
                                 <div
                                     class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400"
                                 >
@@ -209,7 +209,7 @@
                                         {{ data_get($discount, "name") ?? __("Discount") }}
                                     </span>
                                     <span class="text-red-500">
-                                        @if (data_get($discount, "is_percentage"))
+                                        @if(data_get($discount, "is_percentage"))
                                             -{{ Number::percentage(bcmul(data_get($discount, "discount") ?? 0, 100), 2) }}
                                         @else
                                             -{{ Number::currency(data_get($discount, "discount"), data_get($parentOrder, "currency.iso")) }}

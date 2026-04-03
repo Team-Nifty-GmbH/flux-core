@@ -13,8 +13,8 @@
                 showBank: false,
             }"
         >
-            @section ('invoice-file')
-                @section ('invoice-upload')
+            @section('invoice-file')
+                @section('invoice-upload')
                     <div x-cloak x-show="!$wire.purchaseInvoiceForm.id">
                         <x-flux::features.media.upload-form-object
                             :label="__('Invoice')"
@@ -24,7 +24,7 @@
                         />
                     </div>
                 @show
-                @section ('invoice-preview')
+                @section('invoice-preview')
                     <div x-cloak x-show="$wire.purchaseInvoiceForm.id">
                         <iframe
                             width="100%"
@@ -39,8 +39,8 @@
             @show
 
             <div class="flex flex-col gap-4 overflow-auto px-2">
-                @section ('tenant')
-                    @if (count($tenants ?? []) > 1)
+                @section('tenant')
+                    @if(count($tenants ?? []) > 1)
                         <div
                             x-bind:class="
                                 $wire.purchaseInvoiceForm.order_id &&
@@ -61,7 +61,7 @@
 
                 @show
 
-                @section ('basic-info')
+                @section('basic-info')
                     <div
                         class="flex items-end gap-2"
                         x-bind:class="
@@ -95,7 +95,7 @@
                             ]"
                             />
                         </div>
-                        @canAction (\FluxErp\Actions\Contact\CreateContact::class)
+                        @canAction(\FluxErp\Actions\Contact\CreateContact::class)
                             <x-button
                                 x-cloak
                                 x-show="!$wire.purchaseInvoiceForm.order_id"
@@ -203,7 +203,7 @@
                     </div>
                 @show
 
-                @section ('payment-settings')
+                @section('payment-settings')
                     <div
                         class="border-t border-gray-200 pt-2 dark:border-gray-700"
                     >
@@ -221,7 +221,7 @@
                         </button>
                         <div x-cloak x-show="showPayment" x-collapse>
                             <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
-                                @if (count($currencies ?? []) > 1)
+                                @if(count($currencies ?? []) > 1)
                                     <div
                                         x-bind:class="
                                             $wire.purchaseInvoiceForm
@@ -310,7 +310,7 @@
                     </div>
                 @show
 
-                @section ('bank-data')
+                @section('bank-data')
                     <div class="border-t border-gray-200 dark:border-gray-700">
                         <button
                             type="button"
@@ -374,7 +374,7 @@
                     </div>
                 @show
 
-                @section ('purchase-invoice-positions')
+                @section('purchase-invoice-positions')
                     <div
                         class="border-t border-gray-200 pt-4 dark:border-gray-700"
                         x-data="{
@@ -484,7 +484,7 @@
                                             {{ __('Position') }}
                                             <span x-text="index + 1"></span>
                                         </span>
-                                        @canAction (\FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition::class)
+                                        @canAction(\FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition::class)
                                             <x-button
                                                 x-cloak
                                                 x-show="
@@ -672,7 +672,7 @@
                         </div>
 
                         <div class="flex justify-center pt-4">
-                            @canAction (\FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition::class)
+                            @canAction(\FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition::class)
                                 <x-button
                                     x-cloak
                                     x-show="!$wire.purchaseInvoiceForm.order_id"
@@ -703,11 +703,11 @@
         </div>
 
         <x-slot:footer>
-            @section ('footer-buttons')
+            @section('footer-buttons')
                 <div class="flex justify-between">
                     <div>
-                        @section ('footer-buttons.left')
-                            @canAction (\FluxErp\Actions\PurchaseInvoice\ForceDeletePurchaseInvoice::class)
+                        @section('footer-buttons.left')
+                            @canAction(\FluxErp\Actions\PurchaseInvoice\ForceDeletePurchaseInvoice::class)
                                 <x-button
                                     color="red"
                                     x-cloak
@@ -732,7 +732,7 @@
                         @show
                     </div>
                     <div class="flex gap-2">
-                        @section ('footer-buttons.right')
+                        @section('footer-buttons.right')
                             <x-button
                                 color="secondary"
                                 light
@@ -758,7 +758,7 @@
                                     })
                                 "
                             />
-                            @canAction (\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
+                            @canAction(\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
                                 <x-button
                                     color="indigo"
                                     x-cloak
@@ -849,7 +849,7 @@
                         }"
                     >
                         <div x-ref="upload">
-                            @canAction (\FluxErp\Actions\Media\UploadMedia::class)
+                            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                                 <div class="flex flex-col items-end">
                                     <div class="mb-4 w-full">
                                         <input
@@ -887,7 +887,7 @@
                     </div>
                 </div>
 
-                @canAction (\FluxErp\Actions\Media\UploadMedia::class)
+                @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                     <div
                         x-cloak
                         x-show="'ontouchstart' in window || isNativeApp"
@@ -1015,7 +1015,7 @@
                 @endcanAction
             </div>
 
-            @canAction (\FluxErp\Actions\Media\UploadMedia::class)
+            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                 <template x-teleport="body">
                     <div
                         x-cloak

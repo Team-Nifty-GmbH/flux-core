@@ -281,7 +281,7 @@
                     <x-slot:label>
                         <div class="flex items-center gap-2">
                             <x-label :label="__('Tags')" />
-                            @canAction (\FluxErp\Actions\Tag\CreateTag::class)
+                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                                 <x-button.circle
                                     sm
                                     icon="plus"

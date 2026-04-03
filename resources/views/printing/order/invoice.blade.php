@@ -1,6 +1,6 @@
-@extends ('flux::printing.order.order')
+@extends('flux::printing.order.order')
 
-@section ('first-page-right-block.rows')
+@section('first-page-right-block.rows')
     @parent
     <tr>
         <td class="py-0 text-left font-semibold">{{ __('Invoice Date') }}:</td>
@@ -13,7 +13,7 @@
             {{ __('Performance Date') }}:
         </td>
         <td class="p-0 text-right">
-            @if ($model->system_delivery_date_end && $model->system_delivery_date_end->format('Y-m-d') !== $model->system_delivery_date->format('Y-m-d'))
+            @if($model->system_delivery_date_end && $model->system_delivery_date_end->format('Y-m-d') !== $model->system_delivery_date->format('Y-m-d'))
                 {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
                 -
                 {{ ($model->system_delivery_date_end ?: now())->locale(app()->getLocale())->isoFormat('L') }}
@@ -24,7 +24,7 @@
     </tr>
 @endsection
 
-@section ('total')
+@section('total')
     @parent
     <div>
         {{ render_editor_blade($model->paymentType()->withTrashed()->value('description'),['model' => $model],) }}

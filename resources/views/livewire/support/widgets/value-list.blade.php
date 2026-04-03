@@ -24,7 +24,7 @@
                             x-text="item.value"
                         ></td>
                         <td class="pb-2 text-right">
-                            @if ($shouldBePositive)
+                            @if($shouldBePositive)
                                 <template
                                     x-if="
                                         item.growthRate !== null &&
@@ -125,7 +125,7 @@
                 </template>
             </tbody>
         </table>
-        @if ($this->hasLoadMore())
+        @if($this->hasLoadMore())
             <div
                 class="mt-4 flex w-full justify-center"
                 x-cloak

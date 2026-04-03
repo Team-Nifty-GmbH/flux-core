@@ -9,12 +9,12 @@
                 x-sort:item="childNode"
             >
                 <x-slot:beforeTree>
-                    @section ('folder-tree.before-tree')
+                    @section('folder-tree.before-tree')
                     @show
                 </x-slot:beforeTree>
                 <x-slot:afterTree>
-                    @section ('folder-tree.after-tree')
-                        @canAction (\FluxErp\Actions\MediaFolder\CreateMediaFolder::class)
+                    @section('folder-tree.after-tree')
+                        @canAction(\FluxErp\Actions\MediaFolder\CreateMediaFolder::class)
                             <x-button
                                 class="my-2 w-full whitespace-nowrap"
                                 x-cloak
@@ -142,8 +142,8 @@
                         x-ref="upload"
                     >
                         <div class="flex flex-wrap gap-2">
-                            @section ('folder-tree.upload.buttons')
-                                @canAction (\FluxErp\Actions\MediaFolder\DeleteMediaFolder::class)
+                            @section('folder-tree.upload.buttons')
+                                @canAction(\FluxErp\Actions\MediaFolder\DeleteMediaFolder::class)
                                     <x-button
                                         x-cloak
                                         x-show="!$wire.isReadonly && !readOnly"
@@ -170,7 +170,7 @@
                                         "
                                     />
                                 @endcanAction
-                                @canAction (\FluxErp\Actions\MediaFolder\CreateMediaFolder::class)
+                                @canAction(\FluxErp\Actions\MediaFolder\CreateMediaFolder::class)
                                     <x-button
                                         x-cloak
                                         x-show="
@@ -189,7 +189,7 @@
                                     }).then((folder) => { if (folder) addFolder(selectionProxy, folder); })"
                                     />
                                 @endcanAction
-                                @canAction (\FluxErp\Actions\Media\DownloadMultipleMedia::class)
+                                @canAction(\FluxErp\Actions\Media\DownloadMultipleMedia::class)
                                     <x-button
                                         color="secondary"
                                         light
@@ -201,8 +201,8 @@
 
                             @show
                         </div>
-                        @section ('folder-tree.upload.attributes')
-                            @canAction (\FluxErp\Actions\MediaFolder\UpdateMediaFolder::class)
+                        @section('folder-tree.upload.attributes')
+                            @canAction(\FluxErp\Actions\MediaFolder\UpdateMediaFolder::class)
                                 <div
                                     class="flex flex-col gap-3 md:flex-row md:items-end"
                                 >
@@ -241,7 +241,7 @@
                                     />
                                 </div>
                             @endcanAction
-                            @canAction (\FluxErp\Actions\Media\UploadMedia::class)
+                            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                                 <div
                                     class="flex flex-col"
                                     x-cloak
@@ -287,7 +287,7 @@
                                 :text="__('Download')"
                                 x-on:click="$wire.download(selection.id)"
                             />
-                            @canAction (\FluxErp\Actions\Media\DeleteMedia::class)
+                            @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                                 <x-button
                                     x-cloak
                                     x-show="!$wire.isReadonly && !readOnly"
@@ -309,8 +309,8 @@
                             @endcanAction
                         </div>
                         <div class="flex flex-col gap-1.5">
-                            @section ('folder-tree.upload.media')
-                                @canAction (\FluxErp\Actions\Media\UploadMedia::class)
+                            @section('folder-tree.upload.media')
+                                @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                                     <x-input
                                         :text="__('Name')"
                                         disabled

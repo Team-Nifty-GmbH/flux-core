@@ -12,7 +12,7 @@
         },
     }"
 >
-    @section ('modals')
+    @section('modals')
         <x-modal
             id="edit-category-modal"
             x-on:open="
@@ -24,7 +24,7 @@
             :title="__('Category')"
         >
             <div class="flex flex-col gap-1.5">
-                @section ('modals.edit-category.content')
+                @section('modals.edit-category.content')
                     <x-input
                         id="category-name"
                         wire:model="category.name"

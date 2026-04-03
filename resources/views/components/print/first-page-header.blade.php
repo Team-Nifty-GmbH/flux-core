@@ -1,8 +1,8 @@
 <div class="cover-page z-10 h-auto overflow-auto bg-white">
-    @section ('first-page-logo')
+    @section('first-page-logo')
         <div class="grid h-32 content-center">
             <div class="m-auto max-h-72 text-center">
-                @if ($tenant->logo)
+                @if($tenant->logo)
                     <img class="logo m-auto" src="{{ $tenant->logo }}" />
                 @else
                     <div class="text-5xl font-semibold">
@@ -15,7 +15,7 @@
     <table class="w-full">
         <tr>
             <td colspan="2" class="text-2xs w-full pt-6 pb-1">
-                @section ('tenant-address')
+                @section('tenant-address')
                     <div>{{ $tenant->postal_address_one_line }}</div>
                     <div class="black-bar"></div>
                 @show
@@ -24,11 +24,11 @@
         <tr class="h-4">
             <td colspan="2"></td>
         </tr>
-        @section ('recipient-address')
+        @section('recipient-address')
             <tr>
                 <td class="w-1/2 align-top">
-                    @section ('recipient-address.left-block')
-                        @if ($slot->isNotEmpty())
+                    @section('recipient-address.left-block')
+                        @if($slot->isNotEmpty())
                             {!! $slot !!}
                         @else
                             <address class="text-xs not-italic">
@@ -43,7 +43,7 @@
                                 <div>
                                     {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
                                 </div>
-                                @if ($address->country_name ?? null)
+                                @if($address->country_name ?? null)
                                     <div>{{ $address->country_name }}</div>
                                 @endif
                             </address>
@@ -51,7 +51,7 @@
                     @show
                 </td>
                 <td class="w-1/2 align-top">
-                    @section ('recipient-address.right-block')
+                    @section('recipient-address.right-block')
                         <div
                             class="float-right inline-block max-w-full text-xs"
                         >
@@ -62,7 +62,7 @@
             </tr>
         @show
     </table>
-    @section ('first-page-subject')
+    @section('first-page-subject')
         <h1 class="pt-20 text-xl font-semibold">{{ $subject ?? '' }}</h1>
     @show
 </div>

@@ -1,5 +1,5 @@
 <div>
-    @use (Illuminate\Support\Number)
+    @use(Illuminate\Support\Number)
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
@@ -16,12 +16,12 @@
                         />
                     </div>
 
-                    @if (bccomp($plusMinusOvertime = data_get($this->employeeDayForm, 'plus_minus_overtime_hours') ?? 0, 0) === 1)
+                    @if(bccomp($plusMinusOvertime = data_get($this->employeeDayForm, 'plus_minus_overtime_hours') ?? 0, 0) === 1)
                         <x-badge
                             color="emerald"
                             :text="__('Overtime') . ': ' . Number::format($plusMinusOvertime) . 'h'"
                         />
-                    @elseif (bccomp($plusMinusOvertime, 0) === -1)
+                    @elseif(bccomp($plusMinusOvertime, 0) === -1)
                         <x-badge
                             color="red"
                             :text="__('Deficit') . ': ' . Number::format($plusMinusOvertime) . 'h'"
@@ -33,7 +33,7 @@
                         />
                     @endif
 
-                    @if (data_get($employeeDayForm, 'is_holiday'))
+                    @if(data_get($employeeDayForm, 'is_holiday'))
                         <x-badge color="blue" :text="__('Holiday')" />
                     @endif
                 </div>

@@ -8,7 +8,7 @@
         <hr class="mt-2" />
     </div>
     <div class="flex flex-1 items-center justify-around gap-6">
-        @if ($firstResponseHours !== null || $resolutionHours !== null)
+        @if($firstResponseHours !== null || $resolutionHours !== null)
             <div class="flex flex-col items-center gap-1">
                 <span class="{{ $firstResponseColor }} text-3xl font-bold">
                     {{ $firstResponseFormatted }}

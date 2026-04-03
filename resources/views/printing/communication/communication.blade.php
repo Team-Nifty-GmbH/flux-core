@@ -2,7 +2,7 @@
     {!! nl2br(implode('<br>', $model->to)) !!}
     <x-slot:right-block>
         <div class="inline-block">
-            @section ('first-page-right-block')
+            @section('first-page-right-block')
                 <div class="text-xs">
                     {{ ($model->date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
                 </div>

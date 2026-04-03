@@ -371,7 +371,7 @@
                 <x-slot:label>
                     <div class="flex items-center gap-2">
                         <x-label :label="__('Tags')" />
-                        @canAction (\FluxErp\Actions\Tag\CreateTag::class)
+                        @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                             <x-button.circle
                                 sm
                                 icon="plus"
@@ -439,7 +439,7 @@
             <div class="text-sm font-semibold">{{ __('Print') }}</div>
             <div class="text-sm font-semibold">{{ __('Email') }}</div>
             <div class="text-sm font-semibold">{{ __('Download') }}</div>
-            @foreach ($printLayouts as $printLayout)
+            @foreach($printLayouts as $printLayout)
                 <x-checkbox
                     wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}"
                     :label="__($printLayout)"

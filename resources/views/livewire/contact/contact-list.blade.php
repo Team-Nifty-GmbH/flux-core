@@ -1,6 +1,6 @@
 <div>
-    @section ('modals')
-        @canAction (\FluxErp\Actions\Contact\UpdateContact::class)
+    @section('modals')
+        @canAction(\FluxErp\Actions\Contact\UpdateContact::class)
             <x-modal id="assign-agent-modal" persistent>
                 <x-select.styled
                     :label="__('Commission Agent')"

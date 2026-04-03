@@ -8,7 +8,7 @@
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
-        @forelse ($invoices as $invoice)
+        @forelse($invoices as $invoice)
             <div
                 class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
             >

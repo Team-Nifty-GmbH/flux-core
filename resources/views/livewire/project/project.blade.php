@@ -7,8 +7,8 @@
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center space-x-5">
-            @section ('project.title')
-                @section ('project.title.avatar')
+            @section('project.title')
+                @section('project.title.avatar')
                     <label for="avatar" class="cursor-pointer">
                         <x-avatar xl :image="$avatar" />
                     </label>
@@ -20,7 +20,7 @@
                         wire:model.live="avatar"
                     />
                 @show
-                @section ('project.title.name')
+                @section('project.title.name')
                     <div>
                         <h1
                             class="text-2xl font-bold text-gray-900 dark:text-gray-50"
@@ -71,7 +71,7 @@
                     )
                 "
             />
-            @canAction (\FluxErp\Actions\Project\DeleteProject::class)
+            @canAction(\FluxErp\Actions\Project\DeleteProject::class)
                 <x-button
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
                     color="red"

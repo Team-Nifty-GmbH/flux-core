@@ -1,6 +1,6 @@
 <div class="space-y-5" x-data wire:key="products-general">
     <x-card class="space-y-2.5" :header="__('General')">
-        @section ('general')
+        @section('general')
             <x-input
                 x-bind:readonly="!isEditing"
                 label="{{ __('Product number') }}"
@@ -20,8 +20,8 @@
         @show
     </x-card>
     <x-card class="space-y-2.5" :header="__('Attributes')">
-        @section ('attributes')
-            @section ('bools')
+        @section('attributes')
+            @section('bools')
                 <x-checkbox
                     x-bind:disabled="!isEditing"
                     label="{{ __('Is active') }}"
@@ -217,7 +217,7 @@
             <x-slot:label>
                 <div class="flex items-center gap-2">
                     <x-label :label="__('Tags')" />
-                    @canAction (\FluxErp\Actions\Tag\CreateTag::class)
+                    @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                         <x-button.circle
                             sm
                             icon="plus"
@@ -239,7 +239,7 @@
         :header="__('Product Properties')"
         x-data="{ productPropertyGroup: null }"
     >
-        @section ('product-properties')
+        @section('product-properties')
             <x-modal
                 id="edit-product-properties-modal"
                 size="6xl"
@@ -416,7 +416,7 @@
     </x-card>
 
     <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
-        @section ('suppliers')
+        @section('suppliers')
             <template x-for="(supplier, index) in $wire.product.suppliers">
                 <x-flux::list-item :item="[]">
                     <x-slot:value>

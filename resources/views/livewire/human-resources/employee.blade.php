@@ -7,8 +7,8 @@
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center space-x-5">
-            @section ('employee.title')
-                @section ('employee.title.avatar')
+            @section('employee.title')
+                @section('employee.title.avatar')
                     <label for="avatar" class="cursor-pointer">
                         <x-avatar xl :image="$avatar" />
                     </label>
@@ -20,7 +20,7 @@
                         wire:model.live="avatar"
                     />
                 @show
-                @section ('employee.title.name')
+                @section('employee.title.name')
                     <div>
                         <h1
                             class="text-2xl font-bold text-gray-900 dark:text-gray-50"

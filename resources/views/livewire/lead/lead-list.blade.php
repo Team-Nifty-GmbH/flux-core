@@ -94,7 +94,7 @@
                 :quantity="5"
                 position="right"
             />
-            @if (is_null(resolve_static(\FluxErp\Models\LeadState::class, 'default')?->probability_percentage))
+            @if(is_null(resolve_static(\FluxErp\Models\LeadState::class, 'default')?->probability_percentage))
                 <x-range
                     wire:model.number="leadForm.probability_percentage"
                     :hint="__('Probability to win this lead…')"

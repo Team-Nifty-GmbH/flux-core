@@ -9,24 +9,24 @@
         tallStackUiMenuMobile = $event.detail.status
     "
 >
-    @if ($top)
+    @if($top)
         {{ $top }}
     @endif
 
-    @if ($menu)
+    @if($menu)
         {{ $menu }}
     @endif
 
     <div class="{{ $personalize['wrapper.first'] }}">
         <div class="{{ $personalize['wrapper.second'] }}">
-            @if ($header)
+            @if($header)
                 {{ $header }}
             @endif
 
             <main class="{{ $personalize['main'] }}">{{ $slot }}</main>
         </div>
     </div>
-    @if ($footer)
+    @if($footer)
         {{ $footer }}
     @endif
 </div>

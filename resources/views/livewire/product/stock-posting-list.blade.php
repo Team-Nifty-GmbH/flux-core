@@ -16,7 +16,7 @@
             wire:model="stockPosting.description"
             :label="__('Description')"
         />
-        @if ($hasSerialNumbers)
+        @if($hasSerialNumbers)
             <hr />
             <x-select.styled
                 wire:model="stockPosting.serial_number.serial_number_range_id"

@@ -6,7 +6,7 @@
         persistent
         x-on:close="$wire.taskId = $wire.task.id"
     >
-        @section ('replicate-task-modal')
+        @section('replicate-task-modal')
             <div class="flex flex-col gap-2">
                 <x-select.styled
                     :label="__('Task')"
@@ -187,7 +187,7 @@
                     <x-slot:label>
                         <div class="flex items-center gap-2">
                             <x-label :label="__('Tags')" />
-                            @canAction (\FluxErp\Actions\Tag\CreateTag::class)
+                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                                 <x-button.circle
                                     sm
                                     icon="plus"
@@ -244,7 +244,7 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
-            @canAction (\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
                 <x-button
                     color="secondary"
                     light
@@ -264,7 +264,7 @@
                 </x-button>
             @endcanAction
 
-            @canAction (\FluxErp\Actions\Task\DeleteTask::class)
+            @canAction(\FluxErp\Actions\Task\DeleteTask::class)
                 <x-button
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
                     color="red"
@@ -273,7 +273,7 @@
                 />
             @endcanAction
 
-            @canAction (\FluxErp\Actions\Task\ReplicateTask::class)
+            @canAction(\FluxErp\Actions\Task\ReplicateTask::class)
                 <x-button
                     color="indigo"
                     :text="__('Replicate')"
@@ -281,7 +281,7 @@
                 />
             @endcanAction
 
-            @canAction (\FluxErp\Actions\Task\UpdateTask::class)
+            @canAction(\FluxErp\Actions\Task\UpdateTask::class)
                 <x-button
                     color="indigo"
                     x-show="!isEditing"

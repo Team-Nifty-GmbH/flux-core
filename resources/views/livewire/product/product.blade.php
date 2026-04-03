@@ -40,7 +40,7 @@
                     :options="$languages"
                 />
             </div>
-            @if (resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
+            @if(resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
                 <x-button
                     x-on:click="
                         $wire.$dispatch('cart:add', {
@@ -53,7 +53,7 @@
                 />
             @endif
 
-            @canAction (\FluxErp\Actions\Product\DeleteProduct::class)
+            @canAction(\FluxErp\Actions\Product\DeleteProduct::class)
                 <x-button
                     color="red"
                     :text="__('Delete') "
@@ -62,7 +62,7 @@
                 />
             @endcanAction
 
-            @canAction (\FluxErp\Actions\Product\UpdateProduct::class)
+            @canAction(\FluxErp\Actions\Product\UpdateProduct::class)
                 <x-button
                     color="indigo"
                     x-show="!isEditing"

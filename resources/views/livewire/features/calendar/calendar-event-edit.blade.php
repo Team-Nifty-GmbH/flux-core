@@ -18,7 +18,7 @@
             });
     "
 >
-    @teleport ('body')
+    @teleport('body')
         <x-modal id="edit-event-modal" scope="headless" persistent>
             <div>
                 <livewire:dynamic-component
@@ -29,7 +29,7 @@
         </x-modal>
     @endteleport
 
-    @teleport ('body')
+    @teleport('body')
         <x-modal id="confirm-dialog" scope="headless" persistent center>
             <x-card>
                 <div

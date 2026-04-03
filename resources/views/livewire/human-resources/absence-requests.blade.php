@@ -6,7 +6,7 @@
 >
     <div class="flex flex-col gap-4" x-data="{ showSickNote: false }">
         <div class="grid grid-cols-2 gap-4">
-            @if ($this->canChooseEmployee())
+            @if($this->canChooseEmployee())
                 <x-select.styled
                     wire:model="absenceRequestForm.employee_id"
                     :label="__('Employee')"
@@ -146,7 +146,7 @@
             :label="__('Is Emergency')"
         />
 
-        @if ($this->canChooseEmployee())
+        @if($this->canChooseEmployee())
             <x-select.styled
                 wire:model="absenceRequestForm.state"
                 :label="__('Status')"

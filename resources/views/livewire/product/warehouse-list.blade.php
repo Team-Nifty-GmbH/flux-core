@@ -6,7 +6,7 @@
                 $wire.warehouseId = $event.detail.record.id
             "
         >
-            @include ('tall-datatables::livewire.data-table')
+            @include('tall-datatables::livewire.data-table')
         </div>
         <div class="grow">
             <livewire:product.stock-posting-list

@@ -1,6 +1,6 @@
 <x-modal id="edit-vat-rate-modal" :title="__('Vat Rate')">
     <div class="flex flex-col gap-1.5">
-        @section ('settings.vat-rates.inputs')
+        @section('settings.vat-rates.inputs')
             <x-input wire:model="vatRate.name" :label="__('Name')" />
             <x-number
                 wire:model="vatRate.rate_percentage_frontend"
@@ -25,7 +25,7 @@
         @show
     </div>
     <x-slot:footer>
-        @section ('settings.vat-rates.buttons')
+        @section('settings.vat-rates.buttons')
             <x-button
                 color="secondary"
                 light

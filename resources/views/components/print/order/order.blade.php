@@ -1,4 +1,4 @@
-@use (Illuminate\Support\Number)
+@use(Illuminate\Support\Number)
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-4 align-top">{{ $order->order_number }}</td>
