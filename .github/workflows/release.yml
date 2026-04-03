@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: [self-hosted, Linux]
+    container:
+      image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      VERSION: ${{ inputs.version }}
+      PAT: ${{ secrets.PAT }}
+
+    steps:
+      - name: Normalize version
+        run: echo "VERSION=${VERSION#v}" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          token: ${{ env.PAT }}
+
+      - name: Fix git ownership
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Verify tag does not exist
+        run: |
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "Error: Tag v${{ env.VERSION }} already exists"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Create release tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f dist/
+          git commit -m "Build assets for v${{ env.VERSION }}"
+          git tag v${{ env.VERSION }}
+          git push origin v${{ env.VERSION }}
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create v${{ env.VERSION }} --title "v${{ env.VERSION }}" --generate-notes
