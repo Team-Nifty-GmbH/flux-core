@@ -28,7 +28,6 @@ test('tab livewire sub-component keeps identity after parent re-render', functio
 
     // Click refresh to trigger parent re-render and wait for Livewire response
     $page->click('Refresh');
-    $page->script('() => new Promise(r => setTimeout(r, 2000))');
 
     $wireIdAfter = $page->script(<<<'JS'
         () => {

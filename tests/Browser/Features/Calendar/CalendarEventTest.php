@@ -250,7 +250,6 @@ test('clicking a new date resets the event form', function (): void {
     waitForElement($page, '[x-ref="autofocus"]');
 
     // Wait for Livewire roundtrip to complete
-    $page->script('() => new Promise(r => setTimeout(r, 2000))');
 
     // Read the title — it should be empty, not "First Event Title"
     $title = $page->script(<<<'JS'

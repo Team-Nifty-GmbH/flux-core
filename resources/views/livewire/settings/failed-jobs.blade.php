@@ -4,7 +4,7 @@
             <pre
                 class="max-h-96 overflow-auto rounded-md bg-black p-1 font-mono text-white"
             >
-                <template x-for="line in $wire.failedJob.exception">
+                <template x-for="line in $wire.failedJob?.exception ?? []">
                     <div class="flex gap-1.5">
                         <span x-html="line"></span>
                     </div>
@@ -14,7 +14,7 @@
                 class="max-h-96 overflow-auto rounded-md bg-black p-1 font-mono text-white"
             >
                 <div class="flex gap-1.5">
-                    <span x-text="JSON.stringify($wire.failedJob.payload, null, 4)"></span>
+                    <span x-text="JSON.stringify($wire.failedJob?.payload, null, 4)"></span>
                 </div>
             </pre>
             <x-slot:footer>
