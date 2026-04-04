@@ -2,7 +2,6 @@
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactOption;
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create();
@@ -42,7 +41,6 @@ test('contact detail page loads with tabs', function (): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
 
-
     $tabCount = $page->script(<<<'JS'
         () => document.querySelectorAll('[wire\\:click*="tab"], [x-on\\:click*="tab"], button[wire\\:click]').length
     JS);
@@ -55,7 +53,6 @@ test('contact detail shows address data', function (): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
 
-
     $page->assertSee('Test Company GmbH');
     $page->assertNoJavascriptErrors();
 });
@@ -63,7 +60,6 @@ test('contact detail shows address data', function (): void {
 test('contact address edit toggle works', function (): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
-
 
     // Find and click edit button
     $page->script(<<<'JS'
@@ -80,7 +76,6 @@ test('contact address edit toggle works', function (): void {
 test('contact tabs switch without errors', function (): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
-
 
     // Click through all visible tabs
     $page->script(<<<'JS'

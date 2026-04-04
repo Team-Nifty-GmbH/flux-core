@@ -93,6 +93,7 @@ test('x-loading component renders inside Livewire', function (): void {
     $hasLoadingElements = $page->script(<<<'JS'
         () => document.querySelectorAll('[wire\\:loading], [wire\\:loading\\.delay]').length > 0
     JS);
+    expect($$hasLoadingElements)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });
@@ -102,10 +103,10 @@ test('TallStackUI select components initialize', function (): void {
         ->assertRoute('settings')
         ->assertNoSmoke();
 
-
     $hasSelects = $page->script(<<<'JS'
         () => document.querySelectorAll('[ts-select], [x-ref="tsuiSelect"], select[wire\\:model]').length > 0
     JS);
+    expect($$hasSelects)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });

@@ -9,7 +9,6 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 

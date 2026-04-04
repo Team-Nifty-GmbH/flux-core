@@ -107,6 +107,7 @@ test('data table pagination renders', function (): void {
             return !!(nav || perPage);
         }
     JS);
+    expect($$hasPagination)->toBeTrue();
 
     expect($hasPagination)->toBeTrue();
     $page->assertNoJavascriptErrors();

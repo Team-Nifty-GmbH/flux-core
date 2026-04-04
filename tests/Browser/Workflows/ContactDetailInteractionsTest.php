@@ -2,7 +2,6 @@
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactBankConnection;
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create();

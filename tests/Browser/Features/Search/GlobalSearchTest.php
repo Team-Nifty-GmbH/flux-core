@@ -15,6 +15,7 @@ test('global search bar exists and is focusable', function (): void {
             return false;
         }
     JS);
+    expect($$hasSearch)->toBeTrue();
 
     expect($hasSearch)->toBeTrue();
     $page->assertNoJavascriptErrors();

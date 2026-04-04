@@ -44,7 +44,6 @@ test('product detail has tabs', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
 
-
     $tabCount = $page->script(<<<'JS'
         () => document.querySelectorAll('[wire\\:click*="tab"], button[wire\\:click]').length
     JS);
@@ -56,7 +55,6 @@ test('product detail has tabs', function (): void {
 test('product detail tabs switch without errors', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
-
 
     $page->script(<<<'JS'
         () => {
@@ -110,6 +108,7 @@ test('product description editor initializes', function (): void {
     $hasEditor = $page->script(<<<'JS'
         () => !!document.querySelector('.ProseMirror, [contenteditable="true"]')
     JS);
+    expect($$hasEditor)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });

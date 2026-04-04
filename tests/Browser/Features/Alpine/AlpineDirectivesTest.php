@@ -24,6 +24,7 @@ test('Alpine sort plugin is loaded', function (): void {
             return !!window.Alpine?._directives?.sort;
         }
     JS);
+    expect($$hasSortPlugin)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });
@@ -37,6 +38,7 @@ test('Alpine collapse plugin is loaded', function (): void {
     $hasCollapse = $page->script(<<<'JS'
         () => document.querySelectorAll('[x-collapse]').length >= 0
     JS);
+    expect($$hasCollapse)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });
@@ -101,6 +103,7 @@ test('x-show/x-bind reactive bindings work', function (): void {
             return (xShow.length + xBind.length) > 0;
         }
     JS);
+    expect($$hasReactiveBindings)->toBeTrue();
 
     expect($hasReactiveBindings)->toBeTrue();
     $page->assertNoJavascriptErrors();

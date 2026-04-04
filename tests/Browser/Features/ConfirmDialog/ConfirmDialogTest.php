@@ -5,7 +5,6 @@ test('wire:flux-confirm dialog renders on button click', function (): void {
         ->assertRoute('settings')
         ->assertNoSmoke();
 
-
     // Find any element with wire:flux-confirm and click it
     $hasConfirm = $page->script(<<<'JS'
         () => {
@@ -13,6 +12,7 @@ test('wire:flux-confirm dialog renders on button click', function (): void {
             return !!el;
         }
     JS);
+    expect($$hasConfirm)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });
@@ -42,6 +42,7 @@ test('$tsui.interaction dialog shows confirm/cancel buttons', function (): void 
             return !!dialog;
         }
     JS);
+    expect($$hasDialog)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });
