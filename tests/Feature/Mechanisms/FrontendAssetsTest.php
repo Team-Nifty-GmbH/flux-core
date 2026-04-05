@@ -244,6 +244,40 @@ describe('SupportAutoInjectedAssets', function (): void {
     });
 });
 
+describe('Octane Compatibility', function (): void {
+    test('hasRenderedScripts resets between requests', function (): void {
+        config(['flux.inject_assets' => true]);
+
+        $instance = app(FrontendAssets::class);
+
+        // First request - renders scripts via @fluxScripts directive
+        FrontendAssets::scripts();
+        expect($instance->hasRenderedScripts)->toBeTrue();
+
+        // Simulate RequestHandled (end of first request)
+        $response = $this->actingAsGuest()->get(route('login'));
+        $response->assertOk();
+
+        // After request, flags should be reset for the next request
+        expect($instance->hasRenderedScripts)->toBeFalse()
+            ->and($instance->hasRenderedStyles)->toBeFalse();
+    });
+
+    test('auto inject works on consecutive requests', function (): void {
+        config(['flux.inject_assets' => true]);
+
+        // First request
+        $response1 = $this->actingAsGuest()->get(route('login'));
+        $response1->assertOk();
+        expect($response1->getContent())->toContain('<link rel="stylesheet"');
+
+        // Second request - should also get assets injected
+        $response2 = $this->actingAsGuest()->get(route('login'));
+        $response2->assertOk();
+        expect($response2->getContent())->toContain('<link rel="stylesheet"');
+    });
+});
+
 describe('Blade Directives', function (): void {
     test('fluxStyles directive returns valid php code', function (): void {
         $directive = FrontendAssets::fluxStyles();
