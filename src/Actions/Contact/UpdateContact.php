@@ -122,7 +122,7 @@ class UpdateContact extends FluxAction
             : resolve_static(Contact::class, 'query')
                 ->whereKey($this->getData('id'))
                 ->value('payment_type_id');
-        if ($paymentTypeId || $this->getData('tenants')) {
+        if ($paymentTypeId && ($paymentTypeId || $this->getData('tenants'))) {
             $tenants = $this->getData('tenants') ?? resolve_static(ContactTenant::class, 'query')
                 ->where('contact_id', $this->getData('id'))
                 ->pluck('tenant_id')
@@ -140,7 +140,7 @@ class UpdateContact extends FluxAction
                         __(
                             'Payment type with id: \':paymentTypeId\' doesnt match with the associated tenants',
                             [
-                                'paymentTypeId' => $this->getData('payment_type_id'),
+                                'paymentTypeId' => $paymentTypeId,
                             ]
                         ),
                     ],

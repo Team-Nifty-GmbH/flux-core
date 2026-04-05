@@ -84,13 +84,14 @@ class UpdateWorkTime extends FluxAction
                 });
         }
 
-        if ($this->data['is_locked']) {
-            $workTime->total_time_ms =
-                bcsub(
+        if ($this->getData('is_locked')) {
+            $workTime->total_time_ms = $workTime->ended_at
+                ? bcsub(
                     $workTime->started_at->diffInMilliseconds($workTime->ended_at),
                     $workTime->paused_time_ms ?? 0,
                     0
-                );
+                )
+                : 0;
 
             if ($workTime->is_pause) {
                 $workTime->total_time_ms = bcmul($workTime->total_time_ms, -1, 0);
