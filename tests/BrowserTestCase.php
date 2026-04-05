@@ -31,25 +31,63 @@ abstract class BrowserTestCase extends TestCase
 
     public static function installAssets(): void
     {
-        static::deleteDirectory(__DIR__ . '/../dist/assets/');
+        $lockFile = __DIR__ . '/../dist/.build-lock';
+        $manifest = __DIR__ . '/../dist/manifest.json';
 
-        if (file_exists($manifest = __DIR__ . '/../dist/manifest.json')) {
-            unlink($manifest);
-        }
-
-        $process = Process::fromShellCommandline('npm i && npm run build', __DIR__ . '/..', timeout: 180);
-        $process->run();
-
-        while ($process->isRunning()) {
-            usleep(1000);
-        }
-
-        $jsFiles = glob(__DIR__ . '/../dist/assets/*.js');
-        foreach ($jsFiles as $file) {
-            $content = file_get_contents($file);
-            if (substr($content, -1) === "\n") {
-                file_put_contents($file, rtrim($content, "\n"));
+        // If manifest already exists and is valid, skip rebuilding.
+        // This prevents parallel workers from rebuilding simultaneously.
+        if (file_exists($manifest) && filesize($manifest) > 10) {
+            $data = json_decode(file_get_contents($manifest), true);
+            if (! empty($data) && isset($data['resources/js/app.js'])) {
+                return;
             }
+        }
+
+        // Use file lock to ensure only one process builds at a time
+        $lockDir = dirname($lockFile);
+        if (! is_dir($lockDir)) {
+            mkdir($lockDir, 0755, true);
+        }
+
+        $lock = fopen($lockFile, 'c');
+        if (! flock($lock, LOCK_EX)) {
+            fclose($lock);
+
+            return;
+        }
+
+        try {
+            // Double-check after acquiring lock (another worker may have built)
+            if (file_exists($manifest) && filesize($manifest) > 10) {
+                $data = json_decode(file_get_contents($manifest), true);
+                if (! empty($data) && isset($data['resources/js/app.js'])) {
+                    return;
+                }
+            }
+
+            static::deleteDirectory(__DIR__ . '/../dist/assets/');
+
+            if (file_exists($manifest)) {
+                unlink($manifest);
+            }
+
+            $process = Process::fromShellCommandline('npm i && npm run build', __DIR__ . '/..', timeout: 180);
+            $process->run();
+
+            while ($process->isRunning()) {
+                usleep(1000);
+            }
+
+            $jsFiles = glob(__DIR__ . '/../dist/assets/*.js');
+            foreach ($jsFiles as $file) {
+                $content = file_get_contents($file);
+                if (substr($content, -1) === "\n") {
+                    file_put_contents($file, rtrim($content, "\n"));
+                }
+            }
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
         }
     }
 

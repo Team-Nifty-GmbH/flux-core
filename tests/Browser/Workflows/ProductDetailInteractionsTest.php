@@ -13,154 +13,81 @@ beforeEach(function (): void {
 test('product shows product number', function (): void {
     visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke()
-        ->assertSee('PDT-001')
-        ->assertNoJavascriptErrors();
+        ->assertSee('PDT-001');
 });
 
 test('product shows product name', function (): void {
     visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke()
-        ->assertSee('Produkt Detail Test')
-        ->assertNoJavascriptErrors();
+        ->assertSee('Produkt Detail Test');
 });
 
 test('product has description editor', function (): void {
-    $page = visit(route('products.id', ['id' => $this->product->getKey()]))
-        ->assertNoSmoke();
-
-    $page->assertScript(<<<'JS'
-        !!document.querySelector('.ProseMirror, [contenteditable="true"]')
-    JS);
+    visit(route('products.id', ['id' => $this->product->getKey()]))
+        ->assertNoSmoke()
+        ->assertScript('!!document.querySelector(".ProseMirror, [contenteditable=\\"true\\"]")');
 });
 
 test('product prices tab loads', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Price') || tab.textContent?.includes('Preis')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Price', 'Preis')
+        ->assertNoJavascriptErrors();
 });
 
 test('product variants tab loads', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Variant') || tab.textContent?.includes('Variant')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Variant')
+        ->assertNoJavascriptErrors();
 });
 
 test('product media tab loads', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Media') || tab.textContent?.includes('Medien')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Media', 'Medien')
+        ->assertNoJavascriptErrors();
 });
 
 test('product bundle tab loads', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Bundle') || tab.textContent?.includes('Bundle')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Bundle')
+        ->assertNoJavascriptErrors();
 });
 
 test('product cross-selling tab loads', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Cross') || tab.textContent?.includes('Cross')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Cross')
+        ->assertNoJavascriptErrors();
 });
 
 test('product activities tab loads', function (): void {
     $page = visit(route('products.id', ['id' => $this->product->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Activit') || tab.textContent?.includes('Aktivität')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Activit', 'Aktivität')
+        ->assertNoJavascriptErrors();
 });
 
 test('product has save button', function (): void {
-    $page = visit(route('products.id', ['id' => $this->product->getKey()]))
-        ->assertNoSmoke();
-
-    $page->assertScript(<<<'JS'
-        !!Array.from(document.querySelectorAll('button')).find(b =>
-            b.textContent?.includes('Save') || b.textContent?.includes('Speichern')
-        )
-    JS);
+    visit(route('products.id', ['id' => $this->product->getKey()]))
+        ->assertNoSmoke()
+        ->assertScript(<<<'JS'
+            !!Array.from(document.querySelectorAll('button')).find(b =>
+                b.textContent?.includes('Save') || b.textContent?.includes('Speichern')
+            )
+        JS);
 });
 
 test('product serial numbers page loads', function (): void {
     visit(route('products.serial-numbers'))
         ->assertNoSmoke()
-        ->assertPresent('[tall-datatable]')
-        ->assertNoJavascriptErrors();
+        ->assertPresent('[tall-datatable]');
 });

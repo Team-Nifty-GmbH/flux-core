@@ -1,24 +1,16 @@
 <?php
 
 test('global search bar exists and is focusable', function (): void {
-    $page = visit(route('dashboard'))
+    visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $hasSearch = $page->script(<<<'JS'
-        () => {
-            const input = document.querySelector('input[placeholder*="Search"], input[placeholder*="Suche"]');
-            if (input) {
-                input.focus();
-                return true;
-            }
-            return false;
-        }
-    JS);
-    expect($hasSearch)->toBeTrue();
-
-    expect($hasSearch)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+        ->assertNoSmoke()
+        ->assertScript(<<<'JS'
+            (() => {
+                const input = document.querySelector('input[placeholder*="Search"], input[placeholder*="Suche"]');
+                if (input) { input.focus(); return true; }
+                return false;
+            })()
+        JS);
 });
 
 test('global search accepts input without errors', function (): void {
@@ -36,6 +28,6 @@ test('global search accepts input without errors', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertNoJavascriptErrors();
 });

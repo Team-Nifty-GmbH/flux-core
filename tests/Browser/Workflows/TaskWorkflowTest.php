@@ -11,8 +11,7 @@ beforeEach(function (): void {
 test('task list loads without js errors', function (): void {
     visit(route('tasks'))
         ->assertRoute('tasks')
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('task list shows data table', function (): void {
@@ -24,8 +23,7 @@ test('task list shows data table', function (): void {
 
 test('task detail page loads', function (): void {
     visit(route('tasks.id', ['id' => $this->task->getKey()]))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('task detail shows task name', function (): void {

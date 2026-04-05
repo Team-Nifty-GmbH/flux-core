@@ -19,49 +19,26 @@ test('contact list loads and shows contacts', function (): void {
         ->assertRoute('contacts.contacts')
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Contact list did not render')), 10000);
-            const check = () => {
-                if (document.querySelectorAll('tbody tr').length > 0) {
-                    clearTimeout(timeout);
-                    resolve();
-                } else {
-                    setTimeout(check, 200);
-                }
-            };
-            check();
-        })
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    waitForDataTable($page)
+        ->assertNoJavascriptErrors();
 });
 
 test('contact detail page loads with tabs', function (): void {
-    $page = visit('/contacts/contacts/' . $this->contact->getKey())
-        ->assertNoSmoke();
-
-    $tabCount = $page->script(<<<'JS'
-        () => document.querySelectorAll('[wire\\:click*="tab"], [x-on\\:click*="tab"], button[wire\\:click]').length
-    JS);
-
-    expect($tabCount)->toBeGreaterThan(0);
-    $page->assertNoJavascriptErrors();
+    visit('/contacts/contacts/' . $this->contact->getKey())
+        ->assertNoSmoke()
+        ->assertScript("document.querySelectorAll('[wire\\\\:click*=\"tab\"], [x-on\\\\:click*=\"tab\"], button[wire\\\\:click]').length > 0");
 });
 
 test('contact detail shows address data', function (): void {
-    $page = visit('/contacts/contacts/' . $this->contact->getKey())
-        ->assertNoSmoke();
-
-    $page->assertSee('Test Company GmbH');
-    $page->assertNoJavascriptErrors();
+    visit('/contacts/contacts/' . $this->contact->getKey())
+        ->assertNoSmoke()
+        ->assertSee('Test Company GmbH');
 });
 
 test('contact address edit toggle works', function (): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
 
-    // Find and click edit button
     $page->script(<<<'JS'
         () => {
             const editBtn = document.querySelector('[x-on\\:click*="edit"], button[wire\\:click*="edit"]');
@@ -69,15 +46,14 @@ test('contact address edit toggle works', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(0.5)
+        ->assertNoJavascriptErrors();
 });
 
 test('contact tabs switch without errors', function (): void {
     $page = visit('/contacts/contacts/' . $this->contact->getKey())
         ->assertNoSmoke();
 
-    // Click through all visible tabs
     $page->script(<<<'JS'
         () => {
             const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
@@ -85,10 +61,9 @@ test('contact tabs switch without errors', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertNoJavascriptErrors();
 
-    // Click third tab if available
     $page->script(<<<'JS'
         () => {
             const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
@@ -96,8 +71,8 @@ test('contact tabs switch without errors', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertNoJavascriptErrors();
 });
 
 test('address list loads and shows addresses', function (): void {
@@ -105,20 +80,6 @@ test('address list loads and shows addresses', function (): void {
         ->assertRoute('contacts.addresses')
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Address list did not render')), 10000);
-            const check = () => {
-                if (document.querySelectorAll('tbody tr').length > 0) {
-                    clearTimeout(timeout);
-                    resolve();
-                } else {
-                    setTimeout(check, 200);
-                }
-            };
-            check();
-        })
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    waitForDataTable($page)
+        ->assertNoJavascriptErrors();
 });

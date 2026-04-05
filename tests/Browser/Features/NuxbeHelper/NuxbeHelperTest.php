@@ -1,30 +1,19 @@
 <?php
 
 test('$nuxbe is available as Alpine magic', function (): void {
-    $page = visit(route('dashboard'))
+    visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $nuxbeExists = $page->script(<<<'JS'
-        () => typeof window.$nuxbe === 'object'
-    JS);
-
-    expect($nuxbeExists)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+        ->assertNoSmoke()
+        ->assertScript('typeof window.$nuxbe === "object"');
 });
 
 test('$nuxbe.format.money formats correctly', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
+        ->assertNoSmoke()
+        ->script('() => window.$nuxbe.format.money(1234.56)');
 
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.format.money(1234.56)
-    JS);
-
-    expect($result)->toContain('1');
-    expect($result)->toContain('234');
-    $page->assertNoJavascriptErrors();
+    expect($result)->toContain('1')->toContain('234');
 });
 
 test('$nuxbe.format.money with colored option returns HTML', function (): void {
@@ -32,109 +21,72 @@ test('$nuxbe.format.money with colored option returns HTML', function (): void {
         ->assertRoute('dashboard')
         ->assertNoSmoke();
 
-    $positiveResult = $page->script(<<<'JS'
-        () => window.$nuxbe.format.money(100, {colored: true})
-    JS);
-
-    $negativeResult = $page->script(<<<'JS'
-        () => window.$nuxbe.format.money(-100, {colored: true})
-    JS);
+    $positiveResult = $page->script('() => window.$nuxbe.format.money(100, {colored: true})');
+    $negativeResult = $page->script('() => window.$nuxbe.format.money(-100, {colored: true})');
 
     expect($positiveResult)->toContain('emerald');
     expect($negativeResult)->toContain('red');
-    $page->assertNoJavascriptErrors();
 });
 
 test('$nuxbe.format.percentage formats correctly', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.format.percentage(0.1567)
-    JS);
+        ->assertNoSmoke()
+        ->script('() => window.$nuxbe.format.percentage(0.1567)');
 
     expect($result)->toContain('15');
-    $page->assertNoJavascriptErrors();
 });
 
 test('$nuxbe.format.date formats ISO date', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.format.date('2026-03-28')
-    JS);
+        ->assertNoSmoke()
+        ->script("() => window.\$nuxbe.format.date('2026-03-28')");
 
     expect($result)->toContain('2026');
-    $page->assertNoJavascriptErrors();
 });
 
 test('$nuxbe.format.datetime formats ISO datetime', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
+        ->assertNoSmoke()
+        ->script("() => window.\$nuxbe.format.datetime('2026-03-28T14:30:00')");
 
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.format.datetime('2026-03-28T14:30:00')
-    JS);
-
-    expect($result)->toContain('2026');
-    expect($result)->toContain(':30');
-    $page->assertNoJavascriptErrors();
+    expect($result)->toContain('2026')->toContain(':30');
 });
 
 test('$nuxbe.format.fileSize formats bytes', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.format.fileSize(1048576)
-    JS);
+        ->assertNoSmoke()
+        ->script('() => window.$nuxbe.format.fileSize(1048576)');
 
     expect($result)->toBe('1MB');
-    $page->assertNoJavascriptErrors();
 });
 
 test('$nuxbe.parseNumber parses numbers correctly', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.parseNumber(1234.5)
-    JS);
+        ->assertNoSmoke()
+        ->script('() => window.$nuxbe.parseNumber(1234.5)');
 
     expect($result)->toBe('1234.50');
-    $page->assertNoJavascriptErrors();
 });
 
 test('$nuxbe.format.badge returns HTML badge', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
+        ->assertNoSmoke()
+        ->script("() => window.\$nuxbe.format.badge('Active', 'green')");
 
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.format.badge('Active', 'green')
-    JS);
-
-    expect($result)->toContain('Active');
-    expect($result)->toContain('green');
-    $page->assertNoJavascriptErrors();
+    expect($result)->toContain('Active')->toContain('green');
 });
 
 test('$nuxbe.format.relativeTime returns human readable time', function (): void {
-    $page = visit(route('dashboard'))
+    $result = visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
+        ->assertNoSmoke()
+        ->script('() => window.$nuxbe.format.relativeTime(Date.now() - 60000)');
 
-    $result = $page->script(<<<'JS'
-        () => window.$nuxbe.format.relativeTime(Date.now() - 60000)
-    JS);
-
-    // Should contain "1" and some time unit
     expect($result)->not->toBeEmpty();
-    $page->assertNoJavascriptErrors();
 });

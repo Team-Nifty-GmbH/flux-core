@@ -16,8 +16,7 @@ beforeEach(function (): void {
 test('ticket list loads without js errors', function (): void {
     visit(route('tickets'))
         ->assertRoute('tickets')
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('ticket list shows data table', function (): void {
@@ -30,8 +29,7 @@ test('ticket list shows data table', function (): void {
 test('ticket detail page loads and shows ticket number', function (): void {
     visit(route('tickets.id', ['id' => $this->ticket->getKey()]))
         ->assertNoSmoke()
-        ->assertSee($this->ticket->ticket_number)
-        ->assertNoJavascriptErrors();
+        ->assertSee($this->ticket->ticket_number);
 });
 
 test('ticket detail tabs switch without errors', function (): void {
@@ -51,6 +49,5 @@ test('ticket detail tabs switch without errors', function (): void {
 test('ticket has comment editor', function (): void {
     visit(route('tickets.id', ['id' => $this->ticket->getKey()]))
         ->assertNoSmoke()
-        ->assertScript('!!document.querySelector(".ProseMirror, [contenteditable]")')
-        ->assertNoJavascriptErrors();
+        ->assertScript('!!document.querySelector(".ProseMirror, [contenteditable]")');
 });

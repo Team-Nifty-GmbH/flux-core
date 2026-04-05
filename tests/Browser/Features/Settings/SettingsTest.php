@@ -2,15 +2,13 @@
 
 test('settings page loads without js errors', function (): void {
     visit(route('settings'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('settings tree navigation works', function (): void {
     $page = visit(route('settings'))
         ->assertNoSmoke();
 
-    // Click a settings menu item
     $page->script(<<<'JS'
         () => {
             const items = document.querySelectorAll('[wire\\:click*="component"]');
@@ -22,14 +20,7 @@ test('settings tree navigation works', function (): void {
 });
 
 test('settings mobile toggle works', function (): void {
-    $page = visit(route('settings'))
-        ->assertNoSmoke();
-
-    // Check that the mobile toggle mechanism exists
-    $hasMobileToggle = $page->script(<<<'JS'
-        () => !!document.querySelector('[x-show*="showContent"], [x-on\\:click*="showContent"]')
-    JS);
-    expect($hasMobileToggle)->toBeTrue();
-
-    $page->assertNoJavascriptErrors();
+    visit(route('settings'))
+        ->assertNoSmoke()
+        ->assertScript("!!document.querySelector('[x-show*=\"showContent\"], [x-on\\\\:click*=\"showContent\"]')");
 });

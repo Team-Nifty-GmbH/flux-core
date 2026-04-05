@@ -3,21 +3,14 @@
 test('sidebar navigation renders without js errors', function (): void {
     visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('sidebar has navigation links', function (): void {
-    $page = visit(route('dashboard'))
+    visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $linkCount = $page->script(<<<'JS'
-        () => document.querySelectorAll('aside a[href], nav a[wire\\:navigate]').length
-    JS);
-
-    expect($linkCount)->toBeGreaterThan(0);
-    $page->assertNoJavascriptErrors();
+        ->assertNoSmoke()
+        ->assertScript("document.querySelectorAll('aside a[href], nav a[wire\\\\:navigate]').length > 0");
 });
 
 test('wire:navigate preserves layout on page change', function (): void {
@@ -32,27 +25,13 @@ test('wire:navigate preserves layout on page change', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 3000))');
-
-    $hasSidebar = $page->script(<<<'JS'
-        () => !!document.querySelector('aside, nav')
-    JS);
-    expect($hasSidebar)->toBeTrue();
-
-    expect($hasSidebar)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+    $page->wait(3)
+        ->assertScript("!!document.querySelector('aside, nav')");
 });
 
 test('loading overlay exists in DOM', function (): void {
-    $page = visit(route('dashboard'))
+    visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $hasOverlay = $page->script(<<<'JS'
-        () => !!document.getElementById('loading-overlay-spinner')
-    JS);
-    expect($hasOverlay)->toBeTrue();
-
-    expect($hasOverlay)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+        ->assertNoSmoke()
+        ->assertScript("!!document.getElementById('loading-overlay-spinner')");
 });

@@ -73,7 +73,7 @@ function visitOrderDetail(Order $order): mixed
         ->assertNoSmoke();
 
     $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
+        () => new Promise((resolve) => {
             const timeout = setTimeout(() => resolve(), 10000);
             const check = () => {
                 const el = document.querySelector('[tall-datatable], [wire\\:id]');
@@ -96,70 +96,37 @@ test('order list page loads with order type tabs', function (): void {
         ->assertRoute('orders.orders')
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Order list did not render')), 10000);
-            const check = () => {
-                if (document.querySelectorAll('tbody tr').length > 0) {
-                    clearTimeout(timeout);
-                    resolve();
-                } else {
-                    setTimeout(check, 200);
-                }
-            };
-            check();
-        })
-    JS);
-
-    $page->assertSee($this->orderType->name);
-    $page->assertNoJavascriptErrors();
+    waitForDataTable($page)
+        ->assertSee($this->orderType->name)
+        ->assertNoJavascriptErrors();
 });
 
 test('order detail page loads and shows order data', function (): void {
-    $page = visitOrderDetail($this->order);
-
-    $page->assertSee($this->order->order_number);
-    $page->assertNoJavascriptErrors();
+    visitOrderDetail($this->order)
+        ->assertSee($this->order->order_number)
+        ->assertNoJavascriptErrors();
 });
 
 test('order detail tabs are rendered', function (): void {
-    $page = visitOrderDetail($this->order);
-
-    $tabCount = $page->script(<<<'JS'
-        () => document.querySelectorAll('[wire\\:click*="tab"]').length
-    JS);
-
-    expect($tabCount)->toBeGreaterThan(0);
-    $page->assertNoJavascriptErrors();
+    visitOrderDetail($this->order)
+        ->assertScript("document.querySelectorAll('[wire\\\\:click*=\"tab\"]').length > 0");
 });
 
 test('order positions are displayed', function (): void {
-    $page = visitOrderDetail($this->order);
-
-    $page->assertSee('Test Position');
-    $page->assertNoJavascriptErrors();
+    visitOrderDetail($this->order)
+        ->assertSee('Test Position');
 });
 
 test('order totals display with $nuxbe formatting', function (): void {
-    $page = visitOrderDetail($this->order);
-
-    // Check totals section exists and renders numbers
-    $hasTotals = $page->script(<<<'JS'
-        () => {
-            const moneyElements = document.querySelectorAll('[x-html*="$nuxbe.format.money"], [x-text*="$nuxbe.format"]');
-            return moneyElements.length > 0;
-        }
-    JS);
-    expect($hasTotals)->toBeTrue();
-
-    expect($hasTotals)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+    visitOrderDetail($this->order)
+        ->assertScript(<<<'JS'
+            document.querySelectorAll('[x-html*="$nuxbe.format.money"], [x-text*="$nuxbe.format"]').length > 0
+        JS);
 });
 
 test('order save button works', function (): void {
     $page = visitOrderDetail($this->order);
 
-    // Find and click save button
     $page->script(<<<'JS'
         () => {
             const saveBtn = Array.from(document.querySelectorAll('button'))
@@ -174,7 +141,6 @@ test('order save button works', function (): void {
 test('order detail switching tabs works without errors', function (): void {
     $page = visitOrderDetail($this->order);
 
-    // Click through tabs
     $page->script(<<<'JS'
         () => {
             const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
@@ -182,8 +148,8 @@ test('order detail switching tabs works without errors', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertNoJavascriptErrors();
 
     $page->script(<<<'JS'
         () => {
@@ -192,14 +158,13 @@ test('order detail switching tabs works without errors', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertNoJavascriptErrors();
 });
 
 test('order position edit modal opens', function (): void {
     $page = visitOrderDetail($this->order);
 
-    // Click on a position row to open edit modal
     $page->script(<<<'JS'
         () => {
             const row = document.querySelector('[tall-datatable] tbody tr, [data-row]');
@@ -207,22 +172,15 @@ test('order position edit modal opens', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertNoJavascriptErrors();
 });
 
 test('order date fields render correctly', function (): void {
-    $page = visitOrderDetail($this->order);
-
-    $hasDateFields = $page->script(<<<'JS'
-        () => {
-            const dateInputs = document.querySelectorAll('input[type="date"], [x-text*="$nuxbe.format.date"]');
-            return dateInputs.length > 0;
-        }
-    JS);
-    expect($hasDateFields)->toBeTrue();
-
-    $page->assertNoJavascriptErrors();
+    visitOrderDetail($this->order)
+        ->assertScript(<<<'JS'
+            document.querySelectorAll('input[type="date"], [x-text*="$nuxbe.format.date"]').length > 0
+        JS);
 });
 
 test('order replicate button opens dialog', function (): void {
@@ -237,6 +195,6 @@ test('order replicate button opens dialog', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1000))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1)
+        ->assertNoJavascriptErrors();
 });

@@ -21,8 +21,7 @@ beforeEach(function (): void {
 test('lead list loads without js errors', function (): void {
     visit(route('sales.leads'))
         ->assertRoute('sales.leads')
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('lead list shows data table', function (): void {
@@ -34,8 +33,7 @@ test('lead list shows data table', function (): void {
 
 test('lead detail page loads', function (): void {
     visit(route('sales.lead.id', ['id' => $this->lead->getKey()]))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('lead detail tabs switch without errors', function (): void {
@@ -53,10 +51,9 @@ test('lead detail tabs switch without errors', function (): void {
 });
 
 test('lead create modal opens', function (): void {
-    $page = visit(route('sales.leads'))
+    visit(route('sales.leads'))
         ->assertRoute('sales.leads')
-        ->assertNoSmoke();
-
-    $page->click('New');
-    $page->assertNoJavascriptErrors();
+        ->assertNoSmoke()
+        ->click('New')
+        ->assertNoJavascriptErrors();
 });

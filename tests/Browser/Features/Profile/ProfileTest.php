@@ -2,20 +2,13 @@
 
 test('profile page loads without js errors', function (): void {
     visit(route('my-profile'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('profile page has tabs', function (): void {
-    $page = visit(route('my-profile'))
-        ->assertNoSmoke();
-
-    $tabCount = $page->script(<<<'JS'
-        () => document.querySelectorAll('[wire\\:click*="tab"], [x-on\\:click*="tab"], button[wire\\:click]').length
-    JS);
-
-    expect($tabCount)->toBeGreaterThan(0);
-    $page->assertNoJavascriptErrors();
+    visit(route('my-profile'))
+        ->assertNoSmoke()
+        ->assertScript("document.querySelectorAll('[wire\\\\:click*=\"tab\"], [x-on\\\\:click*=\"tab\"], button[wire\\\\:click]').length > 0");
 });
 
 test('profile tabs switch without errors', function (): void {

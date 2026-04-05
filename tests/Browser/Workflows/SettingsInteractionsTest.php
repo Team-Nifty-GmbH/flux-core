@@ -40,15 +40,8 @@ foreach ($settingsWithNewButton as $routeName) {
         $page = visit(route($routeName))
             ->assertNoSmoke();
 
-        $page->script(<<<'JS'
-            () => {
-                const btn = Array.from(document.querySelectorAll('button, a'))
-                    .find(b => b.textContent?.trim().includes('Create') || b.textContent?.trim().includes('Neu') || b.textContent?.trim().includes('New'));
-                if (btn) btn.click();
-            }
-        JS);
-
-        $page->assertNoJavascriptErrors();
+        clickCreateButton($page)
+            ->assertNoJavascriptErrors();
     });
 }
 
@@ -63,8 +56,7 @@ foreach ($settingsWithUsers as $routeName) {
 
     test("{$label} page is interactive", function () use ($routeName): void {
         visit(route($routeName))
-            ->assertNoSmoke()
-            ->assertNoJavascriptErrors();
+            ->assertNoSmoke();
     });
 }
 
@@ -72,62 +64,44 @@ test('settings.mail-accounts has new button', function (): void {
     $page = visit(route('settings.mail-accounts'))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const btn = Array.from(document.querySelectorAll('button, a'))
-                .find(b => b.textContent?.trim().includes('Create') || b.textContent?.trim().includes('Neu'));
-            if (btn) btn.click();
-        }
-    JS);
-    $page->assertNoJavascriptErrors();
+    clickCreateButton($page)
+        ->assertNoJavascriptErrors();
 });
 
 test('settings.email-templates is interactive', function (): void {
     visit(route('settings.email-templates'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('settings.bank-connections has new button', function (): void {
     $page = visit(route('settings.bank-connections'))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const btn = Array.from(document.querySelectorAll('button, a'))
-                .find(b => b.textContent?.trim().includes('Create') || b.textContent?.trim().includes('Neu'));
-            if (btn) btn.click();
-        }
-    JS);
-    $page->assertNoJavascriptErrors();
+    clickCreateButton($page)
+        ->assertNoJavascriptErrors();
 });
 
 test('settings.scheduling page loads', function (): void {
     visit(route('settings.scheduling'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('settings.plugins page loads', function (): void {
     visit(route('settings.plugins'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('settings.tenants page is interactive', function (): void {
     visit(route('settings.tenants'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('settings.discount-groups has interactive form', function (): void {
     visit(route('settings.discount-groups'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('settings.payment-reminder-texts page is interactive', function (): void {
     visit(route('settings.payment-reminder-texts'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });

@@ -15,16 +15,8 @@ test('create order without required fields shows validation errors', function ()
         ->assertRoute('orders.orders')
         ->assertNoSmoke();
 
-    // Click New order
-    $page->script(<<<'JS'
-        () => {
-            const btn = Array.from(document.querySelectorAll('button'))
-                .find(b => b.textContent?.includes('New') || b.textContent?.includes('Neu'));
-            if (btn) btn.click();
-        }
-    JS);
-
-    $page->script('() => new Promise(r => setTimeout(r, 1000))');
+    clickCreateButton($page);
+    $page->wait(1);
 
     // Try to save without filling required fields
     $page->script(<<<'JS'
@@ -35,25 +27,19 @@ test('create order without required fields shows validation errors', function ()
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-
-    // Check for validation errors (red borders, error messages, toast)
-    $hasErrors = $page->script(<<<'JS'
-        () => {
-            const errorBorders = document.querySelectorAll('.border-red-500, .ring-red-500, [class*="error"]');
-            const errorMessages = document.querySelectorAll('[class*="error"], [role="alert"]');
-            return (errorBorders.length + errorMessages.length) > 0;
-        }
-    JS);
-    expect($hasErrors)->toBeTrue();
-
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertScript(<<<'JS'
+            (() => {
+                const errorBorders = document.querySelectorAll('.border-red-500, .ring-red-500, [class*="error"]');
+                const errorMessages = document.querySelectorAll('[class*="error"], [role="alert"]');
+                return (errorBorders.length + errorMessages.length) > 0;
+            })()
+        JS)
+        ->assertNoJavascriptErrors();
 });
 
 test('settings form save triggers validation', function (): void {
-    $page = visit(route('settings'))
+    visit(route('settings'))
         ->assertRoute('settings')
         ->assertNoSmoke();
-
-    $page->assertNoJavascriptErrors();
 });

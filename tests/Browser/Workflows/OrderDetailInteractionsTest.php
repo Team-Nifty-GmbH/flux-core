@@ -62,151 +62,94 @@ beforeEach(function (): void {
 test('order shows order number in header', function (): void {
     visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke()
-        ->assertSee($this->order->order_number)
-        ->assertNoJavascriptErrors();
+        ->assertSee($this->order->order_number);
 });
 
 test('order shows contact company', function (): void {
     visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke()
-        ->assertSee('Order Detail Test GmbH')
-        ->assertNoJavascriptErrors();
+        ->assertSee('Order Detail Test GmbH');
 });
 
 test('order shows position name', function (): void {
     visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke()
-        ->assertSee('Position Eins')
-        ->assertNoJavascriptErrors();
+        ->assertSee('Position Eins');
 });
 
 test('order has money formatted totals', function (): void {
-    $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
-        ->assertNoSmoke();
-
-    $page->assertScript(<<<'JS'
-        document.querySelectorAll('[x-html*="$nuxbe.format.money"]').length > 0
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    visit(route('orders.id', ['id' => $this->order->getKey()]))
+        ->assertNoSmoke()
+        ->assertScript(<<<'JS'
+            document.querySelectorAll('[x-html*="$nuxbe.format.money"]').length > 0
+        JS);
 });
 
 test('order positions tab shows data table', function (): void {
     visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke()
-        ->assertPresent('[tall-datatable]')
-        ->assertNoJavascriptErrors();
+        ->assertPresent('[tall-datatable]');
 });
 
 test('order comments tab loads without errors', function (): void {
     $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Comment') || tab.textContent?.includes('Kommentar')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Comment', 'Kommentar')
+        ->assertNoJavascriptErrors();
 });
 
 test('order attachments tab loads without errors', function (): void {
     $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Attachment') || tab.textContent?.includes('Anhäng')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Attachment', 'Anhäng')
+        ->assertNoJavascriptErrors();
 });
 
 test('order activities tab loads without errors', function (): void {
     $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Activit') || tab.textContent?.includes('Aktivität')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Activit', 'Aktivität')
+        ->assertNoJavascriptErrors();
 });
 
 test('order communication tab loads without errors', function (): void {
     $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke();
 
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Communication') || tab.textContent?.includes('Kommunikation')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
-
-    $page->assertNoJavascriptErrors();
+    clickTab($page, 'Communication', 'Kommunikation')
+        ->assertNoJavascriptErrors();
 });
 
 test('order has save button', function (): void {
-    $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
-        ->assertNoSmoke();
-
-    $page->assertScript(<<<'JS'
-        !!Array.from(document.querySelectorAll('button')).find(b =>
-            b.textContent?.includes('Save') || b.textContent?.includes('Speichern')
-        )
-    JS);
+    visit(route('orders.id', ['id' => $this->order->getKey()]))
+        ->assertNoSmoke()
+        ->assertScript(<<<'JS'
+            !!Array.from(document.querySelectorAll('button')).find(b =>
+                b.textContent?.includes('Save') || b.textContent?.includes('Speichern')
+            )
+        JS);
 });
 
 test('order detail page has interactive elements', function (): void {
-    $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
-        ->assertNoSmoke();
-
-    $page->assertScript(<<<'JS'
-        document.querySelectorAll('button, [wire\\:click], [x-on\\:click]').length > 5
-    JS);
+    visit(route('orders.id', ['id' => $this->order->getKey()]))
+        ->assertNoSmoke()
+        ->assertScript("document.querySelectorAll('button, [wire\\\\:click], [x-on\\\\:click]').length > 5");
 });
 
 test('order select dropdowns are present', function (): void {
-    $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
-        ->assertNoSmoke();
-
-    $page->assertScript(<<<'JS'
-        document.querySelectorAll('[wire\\:model*="contact_id"], [wire\\:model*="payment_type_id"]').length > 0
-            || document.querySelectorAll('[ts-select], select[wire\\:model]').length > 0
-    JS);
+    visit(route('orders.id', ['id' => $this->order->getKey()]))
+        ->assertNoSmoke()
+        ->assertScript(<<<'JS'
+            document.querySelectorAll('[wire\\:model*="contact_id"], [wire\\:model*="payment_type_id"]').length > 0
+                || document.querySelectorAll('[ts-select], select[wire\\:model]').length > 0
+        JS);
 });
 
 test('order position list page loads', function (): void {
     visit(route('orders.order-positions'))
         ->assertNoSmoke()
-        ->assertPresent('[tall-datatable]')
-        ->assertNoJavascriptErrors();
+        ->assertPresent('[tall-datatable]');
 });

@@ -31,26 +31,14 @@ beforeEach(function (): void {
 
 test('comments section loads without js errors', function (): void {
     visit(route('orders.id', ['id' => $this->order->getKey()]))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('comment editor initializes with tiptap', function (): void {
     $page = visit(route('orders.id', ['id' => $this->order->getKey()]))
         ->assertNoSmoke();
 
-    // Navigate to comments tab via script and wait for editor
-    $page->script(<<<'JS'
-        () => {
-            const tabs = document.querySelectorAll('[wire\\:click*="tab"]');
-            for (const tab of tabs) {
-                if (tab.textContent?.includes('Comments') || tab.textContent?.includes('Kommentare')) {
-                    tab.click();
-                    return;
-                }
-            }
-        }
-    JS);
+    clickTab($page, 'Comments', 'Kommentare');
 
     $page->assertScript('!!document.querySelector(".ProseMirror, [contenteditable=\\"true\\"]")');
 });

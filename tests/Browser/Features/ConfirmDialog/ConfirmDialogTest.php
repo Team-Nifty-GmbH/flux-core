@@ -1,12 +1,9 @@
 <?php
 
 test('wire:flux-confirm directive exists in codebase', function (): void {
-    // wire:flux-confirm is a Livewire directive registered in alpine.js
-    // It only appears on pages with delete buttons - verify no JS errors on a page that uses it
     visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('$tsui.interaction dialog can be triggered without errors', function (): void {

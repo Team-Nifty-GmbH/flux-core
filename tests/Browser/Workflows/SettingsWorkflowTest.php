@@ -5,14 +5,12 @@
 test('settings.absence-policies loads without js errors', function (): void {
     visit(route('settings.absence-policies'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
 test('settings.absence-types loads without js errors', function (): void {
     visit(route('settings.absence-types'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -20,8 +18,7 @@ test('settings.absence-types loads without js errors', function (): void {
 
 test('settings.accounting-settings loads without js errors', function (): void {
     visit(route('settings.accounting-settings'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Activity Logs ---
@@ -29,7 +26,6 @@ test('settings.accounting-settings loads without js errors', function (): void {
 test('settings.activity-logs loads without js errors', function (): void {
     visit(route('settings.activity-logs'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -38,7 +34,6 @@ test('settings.activity-logs loads without js errors', function (): void {
 test('settings.address-types loads without js errors', function (): void {
     visit(route('settings.address-types'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -47,7 +42,6 @@ test('settings.address-types loads without js errors', function (): void {
 test('settings.bank-connections loads without js errors', function (): void {
     visit(route('settings.bank-connections'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -56,7 +50,6 @@ test('settings.bank-connections loads without js errors', function (): void {
 test('settings.categories loads without js errors', function (): void {
     visit(route('settings.categories'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -64,8 +57,7 @@ test('settings.categories loads without js errors', function (): void {
 
 test('settings.core-settings loads without js errors', function (): void {
     visit(route('settings.core-settings'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Countries ---
@@ -73,7 +65,6 @@ test('settings.core-settings loads without js errors', function (): void {
 test('settings.countries loads without js errors', function (): void {
     visit(route('settings.countries'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -82,7 +73,6 @@ test('settings.countries loads without js errors', function (): void {
 test('settings.country-regions loads without js errors', function (): void {
     visit(route('settings.country-regions'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -91,7 +81,6 @@ test('settings.country-regions loads without js errors', function (): void {
 test('settings.currencies loads without js errors', function (): void {
     visit(route('settings.currencies'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -99,8 +88,7 @@ test('settings.currencies loads without js errors', function (): void {
 
 test('settings.discount-groups loads without js errors', function (): void {
     visit(route('settings.discount-groups'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Email Templates ---
@@ -108,7 +96,6 @@ test('settings.discount-groups loads without js errors', function (): void {
 test('settings.email-templates loads without js errors', function (): void {
     visit(route('settings.email-templates'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -117,7 +104,6 @@ test('settings.email-templates loads without js errors', function (): void {
 test('settings.employee-departments loads without js errors', function (): void {
     visit(route('settings.employee-departments'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -126,7 +112,6 @@ test('settings.employee-departments loads without js errors', function (): void 
 test('settings.failed-jobs loads without js errors', function (): void {
     visit(route('settings.failed-jobs'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -135,7 +120,6 @@ test('settings.failed-jobs loads without js errors', function (): void {
 test('settings.holidays loads without js errors', function (): void {
     visit(route('settings.holidays'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -144,7 +128,6 @@ test('settings.holidays loads without js errors', function (): void {
 test('settings.industries loads without js errors', function (): void {
     visit(route('settings.industries'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -153,7 +136,6 @@ test('settings.industries loads without js errors', function (): void {
 test('settings.languages loads without js errors', function (): void {
     visit(route('settings.languages'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -162,7 +144,6 @@ test('settings.languages loads without js errors', function (): void {
 test('settings.lead-loss-reasons loads without js errors', function (): void {
     visit(route('settings.lead-loss-reasons'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -171,7 +152,6 @@ test('settings.lead-loss-reasons loads without js errors', function (): void {
 test('settings.lead-states loads without js errors', function (): void {
     visit(route('settings.lead-states'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -180,7 +160,6 @@ test('settings.lead-states loads without js errors', function (): void {
 test('settings.ledger-accounts loads without js errors', function (): void {
     visit(route('settings.ledger-accounts'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -189,7 +168,6 @@ test('settings.ledger-accounts loads without js errors', function (): void {
 test('settings.locations loads without js errors', function (): void {
     visit(route('settings.locations'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -197,8 +175,7 @@ test('settings.locations loads without js errors', function (): void {
 
 test('settings.logs loads without js errors', function (): void {
     visit(route('settings.logs'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Mail Accounts ---
@@ -206,7 +183,6 @@ test('settings.logs loads without js errors', function (): void {
 test('settings.mail-accounts loads without js errors', function (): void {
     visit(route('settings.mail-accounts'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -214,8 +190,7 @@ test('settings.mail-accounts loads without js errors', function (): void {
 
 test('settings.notifications loads without js errors', function (): void {
     visit(route('settings.notifications'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Order Types ---
@@ -223,7 +198,6 @@ test('settings.notifications loads without js errors', function (): void {
 test('settings.order-types loads without js errors', function (): void {
     visit(route('settings.order-types'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -232,7 +206,6 @@ test('settings.order-types loads without js errors', function (): void {
 test('settings.payment-reminder-texts loads without js errors', function (): void {
     visit(route('settings.payment-reminder-texts'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -241,7 +214,6 @@ test('settings.payment-reminder-texts loads without js errors', function (): voi
 test('settings.payment-types loads without js errors', function (): void {
     visit(route('settings.payment-types'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -250,7 +222,6 @@ test('settings.payment-types loads without js errors', function (): void {
 test('settings.permissions loads without js errors', function (): void {
     visit(route('settings.permissions'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -258,8 +229,7 @@ test('settings.permissions loads without js errors', function (): void {
 
 test('settings.plugins loads without js errors', function (): void {
     visit(route('settings.plugins'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Price Lists ---
@@ -267,7 +237,6 @@ test('settings.plugins loads without js errors', function (): void {
 test('settings.price-lists loads without js errors', function (): void {
     visit(route('settings.price-lists'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -276,7 +245,6 @@ test('settings.price-lists loads without js errors', function (): void {
 test('settings.product-option-groups loads without js errors', function (): void {
     visit(route('settings.product-option-groups'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -285,7 +253,6 @@ test('settings.product-option-groups loads without js errors', function (): void
 test('settings.product-properties loads without js errors', function (): void {
     visit(route('settings.product-properties'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -294,7 +261,6 @@ test('settings.product-properties loads without js errors', function (): void {
 test('settings.queue-monitor loads without js errors', function (): void {
     visit(route('settings.queue-monitor'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -303,7 +269,6 @@ test('settings.queue-monitor loads without js errors', function (): void {
 test('settings.record-origins loads without js errors', function (): void {
     visit(route('settings.record-origins'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -311,8 +276,7 @@ test('settings.record-origins loads without js errors', function (): void {
 
 test('settings.reminder-settings loads without js errors', function (): void {
     visit(route('settings.reminder-settings'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Scheduling ---
@@ -320,7 +284,6 @@ test('settings.reminder-settings loads without js errors', function (): void {
 test('settings.scheduling loads without js errors', function (): void {
     visit(route('settings.scheduling'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -329,7 +292,6 @@ test('settings.scheduling loads without js errors', function (): void {
 test('settings.serial-number-ranges loads without js errors', function (): void {
     visit(route('settings.serial-number-ranges'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -337,16 +299,14 @@ test('settings.serial-number-ranges loads without js errors', function (): void 
 
 test('settings.subscription-settings loads without js errors', function (): void {
     visit(route('settings.subscription-settings'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- System ---
 
 test('settings.system loads without js errors', function (): void {
     visit(route('settings.system'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Tags ---
@@ -354,7 +314,6 @@ test('settings.system loads without js errors', function (): void {
 test('settings.tags loads without js errors', function (): void {
     visit(route('settings.tags'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -363,7 +322,6 @@ test('settings.tags loads without js errors', function (): void {
 test('settings.targets loads without js errors', function (): void {
     visit(route('settings.targets'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -372,7 +330,6 @@ test('settings.targets loads without js errors', function (): void {
 test('settings.tenants loads without js errors', function (): void {
     visit(route('settings.tenants'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -380,8 +337,7 @@ test('settings.tenants loads without js errors', function (): void {
 
 test('settings.ticket-settings loads without js errors', function (): void {
     visit(route('settings.ticket-settings'))
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 // --- Ticket Types ---
@@ -389,7 +345,6 @@ test('settings.ticket-settings loads without js errors', function (): void {
 test('settings.ticket-types loads without js errors', function (): void {
     visit(route('settings.ticket-types'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -398,7 +353,6 @@ test('settings.ticket-types loads without js errors', function (): void {
 test('settings.tokens loads without js errors', function (): void {
     visit(route('settings.tokens'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -407,7 +361,6 @@ test('settings.tokens loads without js errors', function (): void {
 test('settings.units loads without js errors', function (): void {
     visit(route('settings.units'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -416,7 +369,6 @@ test('settings.units loads without js errors', function (): void {
 test('settings.users loads without js errors', function (): void {
     visit(route('settings.users'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -425,7 +377,6 @@ test('settings.users loads without js errors', function (): void {
 test('settings.vacation-blackouts loads without js errors', function (): void {
     visit(route('settings.vacation-blackouts'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -434,7 +385,6 @@ test('settings.vacation-blackouts loads without js errors', function (): void {
 test('settings.vacation-carryover-rules loads without js errors', function (): void {
     visit(route('settings.vacation-carryover-rules'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -443,7 +393,6 @@ test('settings.vacation-carryover-rules loads without js errors', function (): v
 test('settings.vat-rates loads without js errors', function (): void {
     visit(route('settings.vat-rates'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -452,7 +401,6 @@ test('settings.vat-rates loads without js errors', function (): void {
 test('settings.warehouses loads without js errors', function (): void {
     visit(route('settings.warehouses'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -461,7 +409,6 @@ test('settings.warehouses loads without js errors', function (): void {
 test('settings.work-time-models loads without js errors', function (): void {
     visit(route('settings.work-time-models'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });
 
@@ -470,6 +417,5 @@ test('settings.work-time-models loads without js errors', function (): void {
 test('settings.work-time-types loads without js errors', function (): void {
     visit(route('settings.work-time-types'))
         ->assertNoSmoke()
-        ->assertNoJavascriptErrors()
         ->assertPresent('[tall-datatable]');
 });

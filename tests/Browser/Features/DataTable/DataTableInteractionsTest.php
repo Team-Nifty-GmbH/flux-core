@@ -31,26 +31,11 @@ beforeEach(function (): void {
 
 function visitList(): mixed
 {
-    $page = visit(route('orders.orders'))
-        ->assertRoute('orders.orders')
-        ->assertNoSmoke();
-
-    $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('DataTable did not render')), 10000);
-            const check = () => {
-                if (document.querySelectorAll('tbody tr').length > 0) {
-                    clearTimeout(timeout);
-                    resolve();
-                } else {
-                    setTimeout(check, 200);
-                }
-            };
-            check();
-        })
-    JS);
-
-    return $page;
+    return waitForDataTable(
+        visit(route('orders.orders'))
+            ->assertRoute('orders.orders')
+            ->assertNoSmoke()
+    );
 }
 
 test('data table checkbox select works', function (): void {
@@ -59,14 +44,12 @@ test('data table checkbox select works', function (): void {
     $page->script(<<<'JS'
         () => {
             const checkbox = document.querySelector('tbody tr input[type="checkbox"]');
-            if (checkbox) {
-                checkbox.click();
-            }
+            if (checkbox) checkbox.click();
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(0.5)
+        ->assertNoJavascriptErrors();
 });
 
 test('data table select all checkbox works', function (): void {
@@ -79,8 +62,8 @@ test('data table select all checkbox works', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(0.5)
+        ->assertNoJavascriptErrors();
 });
 
 test('data table column settings gear button opens', function (): void {
@@ -93,24 +76,19 @@ test('data table column settings gear button opens', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(0.5)
+        ->assertNoJavascriptErrors();
 });
 
 test('data table pagination renders', function (): void {
-    $page = visitList();
-
-    $hasPagination = $page->script(<<<'JS'
-        () => {
-            const nav = document.querySelector('nav[aria-label*="Pagination"], nav.isolate');
-            const perPage = document.querySelector('select');
-            return !!(nav || perPage);
-        }
-    JS);
-    expect($hasPagination)->toBeTrue();
-
-    expect($hasPagination)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+    visitList()
+        ->assertScript(<<<'JS'
+            (() => {
+                const nav = document.querySelector('nav[aria-label*="Pagination"], nav.isolate');
+                const perPage = document.querySelector('select');
+                return !!(nav || perPage);
+            })()
+        JS);
 });
 
 test('data table search input works', function (): void {
@@ -127,6 +105,6 @@ test('data table search input works', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1500))');
-    $page->assertNoJavascriptErrors();
+    $page->wait(1.5)
+        ->assertNoJavascriptErrors();
 });

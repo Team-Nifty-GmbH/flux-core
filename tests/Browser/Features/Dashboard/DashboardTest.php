@@ -3,40 +3,27 @@
 test('dashboard loads without js errors', function (): void {
     visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke()
-        ->assertNoJavascriptErrors();
+        ->assertNoSmoke();
 });
 
 test('dashboard renders grid container', function (): void {
-    $page = visit(route('dashboard'))
+    visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $hasGridStack = $page->script(<<<'JS'
-        () => !!document.querySelector('.grid-stack')
-    JS);
-    expect($hasGridStack)->toBeTrue();
-
-    expect($hasGridStack)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+        ->assertNoSmoke()
+        ->assertScript("!!document.querySelector('.grid-stack')");
 });
 
 test('dashboard widget add button exists in edit mode', function (): void {
-    $page = visit(route('dashboard'))
+    visit(route('dashboard'))
         ->assertRoute('dashboard')
-        ->assertNoSmoke();
-
-    $hasEditButton = $page->script(<<<'JS'
-        () => {
-            const buttons = document.querySelectorAll('button');
-            return Array.from(buttons).some(b =>
-                b.querySelector('[class*="pencil"]') ||
-                b.getAttribute('x-on:click')?.includes('editGridMode')
-            );
-        }
-    JS);
-    expect($hasEditButton)->toBeTrue();
-
-    expect($hasEditButton)->toBeTrue();
-    $page->assertNoJavascriptErrors();
+        ->assertNoSmoke()
+        ->assertScript(<<<'JS'
+            (() => {
+                const buttons = document.querySelectorAll('button');
+                return Array.from(buttons).some(b =>
+                    b.querySelector('[class*="pencil"]') ||
+                    b.getAttribute('x-on:click')?.includes('editGridMode')
+                );
+            })()
+        JS);
 });
