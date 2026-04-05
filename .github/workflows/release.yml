@@ -46,12 +46,6 @@ jobs:
       - name: Configure Composer GitHub auth
         run: composer config --global github-oauth.github.com ${{ github.token }}
 
-      - name: Configure private Packagist auth
-        if: ${{ secrets.AUTH_BASE64 != '' }}
-        run: |
-          mkdir -p /github/home/.config/composer
-          echo "${{ secrets.AUTH_BASE64 }}" | base64 -d > /github/home/.config/composer/auth.json
-
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --no-dev
 
