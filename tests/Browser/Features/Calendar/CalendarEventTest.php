@@ -29,42 +29,9 @@ function visitCalendar(): mixed
         ->assertRoute('calendars')
         ->assertNoSmoke();
 
-    // Wait for FullCalendar to render
-    $page->script(<<<'JS'
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Calendar did not initialize')), 10000);
-            const check = () => {
-                if (document.querySelector('[calendar-root] .fc')) {
-                    clearTimeout(timeout);
-                    resolve();
-                } else {
-                    setTimeout(check, 200);
-                }
-            };
-            check();
-        })
-    JS);
+    waitForElement($page, '[calendar-root] .fc', 10000);
 
     return $page;
-}
-
-function waitForElement(mixed $page, string $selector, int $timeout = 5000): void
-{
-    $page->script(<<<JS
-        () => new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Element not found: {$selector}')), {$timeout});
-            const check = () => {
-                const el = document.querySelector('{$selector}');
-                if (el && el.offsetParent !== null) {
-                    clearTimeout(timeout);
-                    resolve();
-                } else {
-                    setTimeout(check, 200);
-                }
-            };
-            check();
-        })
-    JS);
 }
 
 test('calendar page loads without js errors', function (): void {
@@ -106,9 +73,8 @@ test('saving a new calendar event works without js errors', function (): void {
         }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 1000))');
-
-    $page->assertNoJavascriptErrors();
+    $page->wait(1)
+        ->assertNoJavascriptErrors();
 });
 
 test('editing a calendar event opens modal and syncs via $wire.$set', function (): void {
@@ -152,12 +118,10 @@ test('editing a calendar event opens modal and syncs via $wire.$set', function (
         }
     JS);
 
-    // Wait for modal to actually be visible (not just in DOM)
     waitForElement($page, '#edit-event-modal');
 
     $page->assertNoJavascriptErrors();
 
-    // Verify event data was synced via $wire.$set by reading Livewire component state
     $title = $page->script(<<<'JS'
         () => new Promise((resolve, reject) => {
             const timeout = setTimeout(() => resolve('timeout'), 10000);
@@ -189,7 +153,6 @@ test('clicking a new date resets the event form', function (): void {
 
     $page = visitCalendar();
 
-    // First: open modal via date-click and fill title
     $start = Carbon::tomorrow()->setTime(14, 0);
     $page->script(<<<JS
         () => {
@@ -209,7 +172,6 @@ test('clicking a new date resets the event form', function (): void {
 
     waitForElement($page, '[x-ref="autofocus"]');
 
-    // Type a title into the input
     $page->script(<<<'JS'
         () => {
             const input = document.querySelector('[x-ref="autofocus"]');
@@ -219,17 +181,14 @@ test('clicking a new date resets the event form', function (): void {
         }
     JS);
 
-    // Wait for Livewire to process the input
-    $page->script('() => new Promise(r => setTimeout(r, 1000))');
+    $page->wait(1);
 
-    // Close the modal
     $page->script(<<<'JS'
         () => { $tsui.close.modal('edit-event-modal'); }
     JS);
 
-    $page->script('() => new Promise(r => setTimeout(r, 500))');
+    $page->wait(0.5);
 
-    // Second: click a different date
     $newStart = Carbon::tomorrow()->addDay()->setTime(10, 0);
     $page->script(<<<JS
         () => {
@@ -249,10 +208,6 @@ test('clicking a new date resets the event form', function (): void {
 
     waitForElement($page, '[x-ref="autofocus"]');
 
-    // Wait for Livewire roundtrip to complete
-    $page->script('() => new Promise(r => setTimeout(r, 2000))');
-
-    // Read the title — it should be empty, not "First Event Title"
     $title = $page->script(<<<'JS'
         () => {
             const modal = document.querySelector('#edit-event-modal');
@@ -293,7 +248,6 @@ test('clicking different events shows correct data without one-behind lag', func
 
     $calendarId = $calendar->getKey();
 
-    // Click event A
     $page->script(<<<JS
         () => {
             window.Livewire.dispatch('calendar-event-click', {
@@ -318,7 +272,6 @@ test('clicking different events shows correct data without one-behind lag', func
 
     waitForElement($page, '#edit-event-modal');
 
-    // Read title from child component — should be Event Alpha
     $titleA = $page->script(<<<'JS'
         () => new Promise((resolve, reject) => {
             const timeout = setTimeout(() => resolve('timeout'), 10000);
@@ -341,11 +294,9 @@ test('clicking different events shows correct data without one-behind lag', func
 
     expect($titleA)->toBe('Event Alpha');
 
-    // Close modal
     $page->script("() => { \$tsui.close.modal('edit-event-modal'); }");
-    $page->script('() => new Promise(r => setTimeout(r, 500))');
+    $page->wait(0.5);
 
-    // Click event B
     $page->script(<<<JS
         () => {
             window.Livewire.dispatch('calendar-event-click', {
@@ -370,7 +321,6 @@ test('clicking different events shows correct data without one-behind lag', func
 
     waitForElement($page, '#edit-event-modal');
 
-    // Read title — should be Event Beta, NOT Event Alpha
     $titleB = $page->script(<<<'JS'
         () => new Promise((resolve, reject) => {
             const timeout = setTimeout(() => resolve('timeout'), 10000);

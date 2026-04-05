@@ -50,7 +50,7 @@ class FrontendAssets
         foreach ($cssEntries as $entry) {
             if (isset($manifest[$entry])) {
                 $file = $manifest[$entry]['file'];
-                $url = route('flux.assets.file', ['file' => $file]);
+                $url = route('flux.assets.file', ['file' => $file], absolute: false);
                 $html .= '<link rel="stylesheet" href="' . $url . '">' . "\n";
             }
         }
@@ -65,7 +65,7 @@ class FrontendAssets
 
                 if (isset($packageManifest[$entry])) {
                     $file = $packageManifest[$entry]['file'];
-                    $url = route('flux.assets.package', ['package' => $packageName, 'file' => $file]);
+                    $url = route('flux.assets.package', ['package' => $packageName, 'file' => $file], absolute: false);
                     $html .= '<link rel="stylesheet" href="' . $url . '">' . "\n";
                 }
             }
@@ -98,7 +98,7 @@ class FrontendAssets
             }
 
             $file = $manifest[$entry]['file'];
-            $url = route('flux.assets.file', ['file' => $file]);
+            $url = route('flux.assets.file', ['file' => $file], absolute: false);
             $html .= '<script type="module" src="' . $url . '"></script>' . "\n";
         }
 
@@ -113,7 +113,7 @@ class FrontendAssets
 
                 if (isset($packageManifest[$entry])) {
                     $file = $packageManifest[$entry]['file'];
-                    $url = route('flux.assets.package', ['package' => $packageName, 'file' => $file]);
+                    $url = route('flux.assets.package', ['package' => $packageName, 'file' => $file], absolute: false);
                     $html .= '<script type="module" src="' . $url . '"></script>' . "\n";
                 }
             }

@@ -43,7 +43,7 @@ test('can create new order', function (): void {
         ->assertNoSmoke()
         ->click('Save')
         ->assertNoSmoke()
-        ->waitForText($orderType->name)
+        ->assertSee($orderType->name)
         ->assertSee('Contact')
         ->assertSee('Invoice Address')
         ->assertSee('Delivery Address');

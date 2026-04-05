@@ -11,6 +11,7 @@ use FluxErp\Settings\CoreSettings;
 use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
+use Pest\Browser\Api\AwaitableWebpage;
 use Pest\Browser\Api\PendingAwaitablePage;
 
 if ($auditLocale = env('TRANSLATION_AUDIT_LOCALE')) {
@@ -108,4 +109,95 @@ function visitLivewire(string $component, array $options = []): ArrayablePending
     Route::get($uri = '/livewire-test/' . uniqid(), $component);
 
     return visit($uri, $options);
+}
+
+/**
+ * Wait for a DataTable to render at least one row.
+ */
+function waitForDataTable(PendingAwaitablePage|AwaitableWebpage $page): PendingAwaitablePage|AwaitableWebpage
+{
+    $page->script(<<<'JS'
+        () => new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('DataTable did not render')), 10000);
+            const check = () => {
+                if (document.querySelectorAll('tbody tr').length > 0) {
+                    clearTimeout(timeout);
+                    resolve();
+                } else {
+                    setTimeout(check, 200);
+                }
+            };
+            check();
+        })
+    JS);
+
+    return $page;
+}
+
+/**
+ * Click a tab whose text matches one of the provided labels.
+ */
+function clickTab(PendingAwaitablePage|AwaitableWebpage $page, string ...$labels): PendingAwaitablePage|AwaitableWebpage
+{
+    $labelsJson = json_encode($labels);
+
+    $page->script(<<<JS
+        () => {
+            const labels = {$labelsJson};
+            const tabs = document.querySelectorAll('[wire\\\\:click*="tab"]');
+            for (const tab of tabs) {
+                for (const label of labels) {
+                    if (tab.textContent?.includes(label)) {
+                        tab.click();
+                        return;
+                    }
+                }
+            }
+        }
+    JS);
+
+    return $page;
+}
+
+/**
+ * Click a create/new button on the page.
+ */
+function clickCreateButton(PendingAwaitablePage|AwaitableWebpage $page): PendingAwaitablePage|AwaitableWebpage
+{
+    $page->script(<<<'JS'
+        () => {
+            const btn = Array.from(document.querySelectorAll('button, a'))
+                .find(b => {
+                    const text = b.textContent?.trim();
+                    return text?.includes('Create') || text?.includes('Neu') || text?.includes('New');
+                });
+            if (btn) btn.click();
+        }
+    JS);
+
+    return $page;
+}
+
+/**
+ * Wait for an element to appear in the DOM and be visible.
+ */
+function waitForElement(PendingAwaitablePage|AwaitableWebpage $page, string $selector, int $timeout = 5000): PendingAwaitablePage|AwaitableWebpage
+{
+    $page->script(<<<JS
+        () => new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Element not found: {$selector}')), {$timeout});
+            const check = () => {
+                const el = document.querySelector('{$selector}');
+                if (el && el.offsetParent !== null) {
+                    clearTimeout(timeout);
+                    resolve();
+                } else {
+                    setTimeout(check, 200);
+                }
+            };
+            check();
+        })
+    JS);
+
+    return $page;
 }
