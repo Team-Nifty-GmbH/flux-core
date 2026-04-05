@@ -15,7 +15,7 @@ test('dashboard renders grid container', function (): void {
     $hasGridStack = $page->script(<<<'JS'
         () => !!document.querySelector('.grid-stack')
     JS);
-    expect($$hasGridStack)->toBeTrue();
+    expect($hasGridStack)->toBeTrue();
 
     expect($hasGridStack)->toBeTrue();
     $page->assertNoJavascriptErrors();
@@ -35,7 +35,7 @@ test('dashboard widget add button exists in edit mode', function (): void {
             );
         }
     JS);
-    expect($$hasEditButton)->toBeTrue();
+    expect($hasEditButton)->toBeTrue();
 
     expect($hasEditButton)->toBeTrue();
     $page->assertNoJavascriptErrors();

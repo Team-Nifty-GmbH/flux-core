@@ -108,7 +108,7 @@ test('product description editor initializes', function (): void {
     $hasEditor = $page->script(<<<'JS'
         () => !!document.querySelector('.ProseMirror, [contenteditable="true"]')
     JS);
-    expect($$hasEditor)->toBeTrue();
+    expect($hasEditor)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });

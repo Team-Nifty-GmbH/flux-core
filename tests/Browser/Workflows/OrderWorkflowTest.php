@@ -150,7 +150,7 @@ test('order totals display with $nuxbe formatting', function (): void {
             return moneyElements.length > 0;
         }
     JS);
-    expect($$hasTotals)->toBeTrue();
+    expect($hasTotals)->toBeTrue();
 
     expect($hasTotals)->toBeTrue();
     $page->assertNoJavascriptErrors();
@@ -220,7 +220,7 @@ test('order date fields render correctly', function (): void {
             return dateInputs.length > 0;
         }
     JS);
-    expect($$hasDateFields)->toBeTrue();
+    expect($hasDateFields)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });

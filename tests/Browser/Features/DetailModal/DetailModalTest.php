@@ -8,7 +8,7 @@ test('detail modal iframe exists in DOM', function (): void {
     $hasIframe = $page->script(<<<'JS'
         () => !!document.getElementById('detail-modal-iframe')
     JS);
-    expect($$hasIframe)->toBeTrue();
+    expect($hasIframe)->toBeTrue();
 
     expect($hasIframe)->toBeTrue();
     $page->assertNoJavascriptErrors();
@@ -22,7 +22,7 @@ test('$nuxbe.openDetailModal function exists', function (): void {
     $hasFunction = $page->script(<<<'JS'
         () => typeof window.$nuxbe.openDetailModal === 'function'
     JS);
-    expect($$hasFunction)->toBeTrue();
+    expect($hasFunction)->toBeTrue();
 
     expect($hasFunction)->toBeTrue();
     $page->assertNoJavascriptErrors();

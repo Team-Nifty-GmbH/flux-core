@@ -12,7 +12,7 @@ test('wire:flux-confirm dialog renders on button click', function (): void {
             return !!el;
         }
     JS);
-    expect($$hasConfirm)->toBeTrue();
+    expect($hasConfirm)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });
@@ -42,7 +42,7 @@ test('$tsui.interaction dialog shows confirm/cancel buttons', function (): void 
             return !!dialog;
         }
     JS);
-    expect($$hasDialog)->toBeTrue();
+    expect($hasDialog)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });

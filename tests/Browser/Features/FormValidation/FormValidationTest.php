@@ -45,7 +45,7 @@ test('create order without required fields shows validation errors', function ()
             return (errorBorders.length + errorMessages.length) > 0;
         }
     JS);
-    expect($$hasErrors)->toBeTrue();
+    expect($hasErrors)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });

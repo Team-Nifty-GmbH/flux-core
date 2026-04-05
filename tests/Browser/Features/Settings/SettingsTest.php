@@ -29,7 +29,7 @@ test('settings mobile toggle works', function (): void {
     $hasMobileToggle = $page->script(<<<'JS'
         () => !!document.querySelector('[x-show*="showContent"], [x-on\\:click*="showContent"]')
     JS);
-    expect($$hasMobileToggle)->toBeTrue();
+    expect($hasMobileToggle)->toBeTrue();
 
     $page->assertNoJavascriptErrors();
 });

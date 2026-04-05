@@ -37,7 +37,7 @@ test('wire:navigate preserves layout on page change', function (): void {
     $hasSidebar = $page->script(<<<'JS'
         () => !!document.querySelector('aside, nav')
     JS);
-    expect($$hasSidebar)->toBeTrue();
+    expect($hasSidebar)->toBeTrue();
 
     expect($hasSidebar)->toBeTrue();
     $page->assertNoJavascriptErrors();
@@ -51,7 +51,7 @@ test('loading overlay exists in DOM', function (): void {
     $hasOverlay = $page->script(<<<'JS'
         () => !!document.getElementById('loading-overlay-spinner')
     JS);
-    expect($$hasOverlay)->toBeTrue();
+    expect($hasOverlay)->toBeTrue();
 
     expect($hasOverlay)->toBeTrue();
     $page->assertNoJavascriptErrors();
