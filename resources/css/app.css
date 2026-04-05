@@ -23,13 +23,9 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-@source '../../../../resources/**/*.blade.php';
-@source '../../../../resources/**/*.js';
-@source '../../../../app/Livewire/**/*.php';
-@source '../../../../app/Components/**/*.php';
-@source '../../../../vendor/tallstackui/tallstackui/src/**/*.php';
-@source '../../../../vendor/team-nifty-gmbh/tall-datatables/resources/**/*.blade.php';
-@source '../../../../vendor/team-nifty-gmbh/tall-datatables/src/**/*.php';
+@source '../../vendor/tallstackui/tallstackui/src/**/*.php';
+@source '../../vendor/team-nifty-gmbh/tall-datatables/resources/**/*.blade.php';
+@source '../../vendor/team-nifty-gmbh/tall-datatables/src/**/*.php';
 
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
