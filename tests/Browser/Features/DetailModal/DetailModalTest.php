@@ -11,7 +11,7 @@ test('$nuxbe.openDetailModal function exists', function (): void {
     visit(route('dashboard'))
         ->assertRoute('dashboard')
         ->assertNoSmoke()
-        ->assertScript("typeof window.$nuxbe.openDetailModal === 'function'");
+        ->assertScript("typeof window.\$nuxbe.openDetailModal === 'function'");
 });
 
 test('detail modal opens without js errors', function (): void {

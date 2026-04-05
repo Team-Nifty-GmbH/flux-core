@@ -11,6 +11,7 @@ use FluxErp\Settings\CoreSettings;
 use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
+use Pest\Browser\Api\AwaitableWebpage;
 use Pest\Browser\Api\PendingAwaitablePage;
 
 if ($auditLocale = env('TRANSLATION_AUDIT_LOCALE')) {
@@ -113,7 +114,7 @@ function visitLivewire(string $component, array $options = []): ArrayablePending
 /**
  * Wait for a DataTable to render at least one row.
  */
-function waitForDataTable(PendingAwaitablePage $page): PendingAwaitablePage
+function waitForDataTable(PendingAwaitablePage|AwaitableWebpage $page): PendingAwaitablePage|AwaitableWebpage
 {
     $page->script(<<<'JS'
         () => new Promise((resolve, reject) => {
@@ -136,7 +137,7 @@ function waitForDataTable(PendingAwaitablePage $page): PendingAwaitablePage
 /**
  * Click a tab whose text matches one of the provided labels.
  */
-function clickTab(PendingAwaitablePage $page, string ...$labels): PendingAwaitablePage
+function clickTab(PendingAwaitablePage|AwaitableWebpage $page, string ...$labels): PendingAwaitablePage|AwaitableWebpage
 {
     $labelsJson = json_encode($labels);
 
@@ -161,7 +162,7 @@ function clickTab(PendingAwaitablePage $page, string ...$labels): PendingAwaitab
 /**
  * Click a create/new button on the page.
  */
-function clickCreateButton(PendingAwaitablePage $page): PendingAwaitablePage
+function clickCreateButton(PendingAwaitablePage|AwaitableWebpage $page): PendingAwaitablePage|AwaitableWebpage
 {
     $page->script(<<<'JS'
         () => {
@@ -180,7 +181,7 @@ function clickCreateButton(PendingAwaitablePage $page): PendingAwaitablePage
 /**
  * Wait for an element to appear in the DOM and be visible.
  */
-function waitForElement(PendingAwaitablePage $page, string $selector, int $timeout = 5000): PendingAwaitablePage
+function waitForElement(PendingAwaitablePage|AwaitableWebpage $page, string $selector, int $timeout = 5000): PendingAwaitablePage|AwaitableWebpage
 {
     $page->script(<<<JS
         () => new Promise((resolve, reject) => {
