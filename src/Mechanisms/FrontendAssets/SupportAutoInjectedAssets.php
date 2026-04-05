@@ -65,28 +65,34 @@ class SupportAutoInjectedAssets
     protected function registerRequestHandledListener(): void
     {
         Event::listen(RequestHandled::class, function (RequestHandled $handled): void {
-            if (! static::shouldInjectAssets($handled)) {
-                return;
+            $frontendAssets = app(FrontendAssets::class);
+
+            try {
+                if (! static::shouldInjectAssets($handled)) {
+                    return;
+                }
+
+                $html = $handled->response->getContent();
+
+                if (! Str::contains($html, '</html>')) {
+                    return;
+                }
+
+                $assetsHead = $frontendAssets::styles()->toHtml()
+                    . $frontendAssets::scripts()->toHtml();
+
+                if (blank($assetsHead)) {
+                    return;
+                }
+
+                $originalContent = $handled->response->original;
+                $handled->response->setContent(
+                    static::injectAssets($html, $assetsHead, '')
+                );
+                $handled->response->original = $originalContent;
+            } finally {
+                $frontendAssets->resetRenderedFlags();
             }
-
-            $html = $handled->response->getContent();
-
-            if (! Str::contains($html, '</html>')) {
-                return;
-            }
-
-            $assetsHead = resolve_static(FrontendAssets::class, 'styles')->toHtml()
-                . resolve_static(FrontendAssets::class, 'scripts')->toHtml();
-
-            if ($assetsHead === '') {
-                return;
-            }
-
-            $originalContent = $handled->response->original;
-            $handled->response->setContent(
-                static::injectAssets($html, $assetsHead, '')
-            );
-            $handled->response->original = $originalContent;
         });
     }
 }

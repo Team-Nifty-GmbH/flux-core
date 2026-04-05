@@ -184,6 +184,12 @@ class FrontendAssets
         $this->registerBladeDirectives();
     }
 
+    public function resetRenderedFlags(): void
+    {
+        $this->hasRenderedScripts = false;
+        $this->hasRenderedStyles = false;
+    }
+
     public function registerManifest(string $name, string $path, array $entries = []): void
     {
         static::$registeredManifests[$name] = [
