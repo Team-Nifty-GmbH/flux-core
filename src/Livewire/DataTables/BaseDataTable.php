@@ -34,6 +34,13 @@ abstract class BaseDataTable extends DataTable
         return response()->noContent();
     }
 
+    protected function getDisplayTimezone(): string
+    {
+        return data_get(auth()->user(), 'timezone')
+            ?? config('flux.display_timezone')
+            ?? config('app.timezone');
+    }
+
     protected function getModel(): string
     {
         return resolve_static($this->model, 'class');
