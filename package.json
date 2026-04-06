@@ -33,7 +33,7 @@
         "@tiptap/starter-kit": "^3.10.5",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
         "alpinejs": "^3.13.2",
-        "apexcharts": "^5.2.0",
+        "apexcharts": "^5.10.5",
         "autoprefixer": "^10.4.16",
         "axios": "^1.6.4",
         "dayjs": "^1.11.11",
