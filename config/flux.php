@@ -13,6 +13,8 @@ return [
 
     'rate_limit' => env('API_RATE_LIMIT', 60),
 
+    'display_timezone' => env('FLUX_DISPLAY_TIMEZONE'),
+
     'media' => [
         'conversion' => env('MEDIA_CONVERSIONS_DISK', 'public'),
         'disk' => env('MEDIA_DISK', 'local'),
