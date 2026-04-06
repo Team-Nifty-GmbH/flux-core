@@ -6,6 +6,7 @@ use FluxErp\Models\Permission;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
 use FluxErp\Traits\Action\SupportsApiRequests;
+use FluxErp\Traits\Action\SupportsTesting;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Support\Arrayable;
@@ -20,7 +21,7 @@ use Throwable;
 
 abstract class FluxAction
 {
-    use Conditionable, HasActionEvents, Makeable, SupportsApiRequests;
+    use Conditionable, HasActionEvents, Makeable, SupportsApiRequests, SupportsTesting;
 
     protected static bool $hasPermission = true;
 

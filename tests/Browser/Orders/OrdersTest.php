@@ -30,14 +30,22 @@ test('can create new order', function (): void {
 
     $page = visit(route('orders.orders'))
         ->assertRoute('orders.orders')
-        ->assertNoSmoke()
-        ->assertSee('New order')
-        ->click('New order')
-        ->assertSee('Order type')
-        ->click($this->tsSelect('order.order_type_id'))
+        ->assertNoSmoke();
+
+    // Wait for Livewire to fully hydrate before clicking
+    $page->assertPresent('[tall-datatable]');
+
+    $page->click('New order');
+
+    // assertSee('Order type') would match the DataTable column header,
+    // so wait for the actual select element inside the modal instead
+    waitForElement($page, 'div[x-data*="order.order_type_id"] button[x-ref="button"]', 15000);
+
+    $page->click($this->tsSelect('order.order_type_id'))
         ->assertSee($orderType->name)
-        ->click($this->tsSelectOption($orderType->name))
-        ->click($this->tsSelect('order.contact_id'))
+        ->click($this->tsSelectOption($orderType->name));
+
+    $page->click($this->tsSelect('order.contact_id'))
         ->assertSee($address->name)
         ->click($this->tsSelectOption($address->name))
         ->assertNoSmoke()
