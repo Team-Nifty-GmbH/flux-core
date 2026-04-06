@@ -3,28 +3,30 @@
 use FluxErp\Rules\Bic;
 use Illuminate\Support\Facades\Validator;
 
-function validateBic(string $value): bool
-{
-    return Validator::make(['bic' => $value], ['bic' => app(Bic::class)])->passes();
-}
+beforeEach(function (): void {
+    $this->validate = fn (string $value) => Validator::make(
+        ['bic' => $value],
+        ['bic' => app(Bic::class)]
+    )->passes();
+});
 
 test('valid 8 char bic passes', function (): void {
-    expect(validateBic('COBADEFF'))->toBeTrue();
+    expect(($this->validate)('COBADEFF'))->toBeTrue();
 });
 
 test('valid 11 char bic passes', function (): void {
-    expect(validateBic('COBADEFFXXX'))->toBeTrue();
+    expect(($this->validate)('COBADEFFXXX'))->toBeTrue();
 });
 
 test('lowercase bic passes', function (): void {
-    expect(validateBic('cobadeff'))->toBeTrue();
+    expect(($this->validate)('cobadeff'))->toBeTrue();
 });
 
 test('wrong length fails', function (): void {
-    expect(validateBic('COBADE'))->toBeFalse();
-    expect(validateBic('COBADEFFXXXX'))->toBeFalse();
+    expect(($this->validate)('COBADE'))->toBeFalse();
+    expect(($this->validate)('COBADEFFXXXX'))->toBeFalse();
 });
 
 test('invalid characters fail', function (): void {
-    expect(validateBic('12345678'))->toBeFalse();
+    expect(($this->validate)('12345678'))->toBeFalse();
 });

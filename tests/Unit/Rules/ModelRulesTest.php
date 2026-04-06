@@ -17,8 +17,10 @@ test('ModelExists passes for existing model', function (): void {
 });
 
 test('ModelExists fails for non-existing model', function (): void {
+    $nonExistingId = (Currency::query()->max('id') ?? 0) + 9999;
+
     $passes = Validator::make(
-        ['id' => 999999],
+        ['id' => $nonExistingId],
         ['id' => app(ModelExists::class, ['model' => Currency::class])]
     )->passes();
 
@@ -26,8 +28,10 @@ test('ModelExists fails for non-existing model', function (): void {
 });
 
 test('ModelDoesntExist passes when model does not exist', function (): void {
+    $nonExistingId = (Currency::query()->max('id') ?? 0) + 9999;
+
     $passes = Validator::make(
-        ['id' => 999999],
+        ['id' => $nonExistingId],
         ['id' => app(ModelDoesntExist::class, ['model' => Currency::class])]
     )->passes();
 

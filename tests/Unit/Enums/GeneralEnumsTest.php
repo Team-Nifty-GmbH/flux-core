@@ -12,42 +12,49 @@ use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Enums\SepaMandateTypeEnum;
 
-test('BundleTypeEnum has values', function (): void {
-    expect(BundleTypeEnum::values())->toContain('standard', 'group');
+test('BundleTypeEnum has standard and group', function (): void {
+    expect(BundleTypeEnum::values())->toBe(['group', 'standard']);
 });
 
-test('CommunicationTypeEnum has values', function (): void {
-    expect(CommunicationTypeEnum::toArray())->toBeArray()->not->toBeEmpty();
+test('CommunicationTypeEnum has mail letter phone-call', function (): void {
+    expect(CommunicationTypeEnum::values())->toContain('mail', 'letter', 'phone-call');
 });
 
-test('DayPartEnum has values', function (): void {
-    expect(DayPartEnum::toArray())->toBeArray()->not->toBeEmpty();
+test('DayPartEnum has full_day first_half second_half', function (): void {
+    expect(DayPartEnum::values())->toContain('full_day', 'first_half', 'second_half');
 });
 
-test('DevicePlatformEnum has values', function (): void {
-    expect(DevicePlatformEnum::values())->toContain('android', 'ios', 'web');
+test('DevicePlatformEnum has all platforms', function (): void {
+    expect(DevicePlatformEnum::values())->toBe(['android', 'ios', 'web']);
 });
 
-test('FrequenciesEnum basic frequencies', function (): void {
+test('FrequenciesEnum basic frequencies include daily weekly monthly yearly', function (): void {
     $basic = FrequenciesEnum::getBasicFrequencies();
 
-    expect($basic)->toBeArray()->toContain('daily', 'weekly', 'monthly');
+    expect($basic)->toContain('daily', 'weekly', 'monthly', 'yearly');
 });
 
-test('LedgerAccountTypeEnum has values', function (): void {
-    expect(LedgerAccountTypeEnum::toArray())->toBeArray()->not->toBeEmpty();
+test('FrequenciesEnum has day and time constraints', function (): void {
+    expect(FrequenciesEnum::getDayConstraints())->toBeArray()->not->toBeEmpty();
+    expect(FrequenciesEnum::getTimeConstraints())->toBeArray()->not->toBeEmpty();
 });
 
-test('OvertimeCompensationEnum has values', function (): void {
-    expect(OvertimeCompensationEnum::values())->toContain('payment', 'time_off', 'none');
+test('LedgerAccountTypeEnum has revenue and expense', function (): void {
+    $values = LedgerAccountTypeEnum::values();
+
+    expect($values)->toContain('revenue', 'expense');
 });
 
-test('PaymentRunTypeEnum has values', function (): void {
-    expect(PaymentRunTypeEnum::values())->toContain('direct_debit', 'money_transfer');
+test('OvertimeCompensationEnum has all options', function (): void {
+    expect(OvertimeCompensationEnum::values())->toBe(['payment', 'time_off', 'mixed', 'none']);
 });
 
-test('PropertyTypeEnum has values', function (): void {
-    expect(PropertyTypeEnum::toArray())->toBeArray()->not->toBeEmpty();
+test('PaymentRunTypeEnum has direct_debit and money_transfer', function (): void {
+    expect(PaymentRunTypeEnum::values())->toBe(['direct_debit', 'money_transfer']);
+});
+
+test('PropertyTypeEnum has text and option', function (): void {
+    expect(PropertyTypeEnum::values())->toBe(['option', 'text']);
 });
 
 test('RoundingMethodEnum apply with none returns original', function (): void {
@@ -56,6 +63,6 @@ test('RoundingMethodEnum apply with none returns original', function (): void {
     expect($result)->toEqual(10.456);
 });
 
-test('SepaMandateTypeEnum has values', function (): void {
-    expect(SepaMandateTypeEnum::values())->toContain('B2B', 'BASIC');
+test('SepaMandateTypeEnum has B2B and BASIC', function (): void {
+    expect(SepaMandateTypeEnum::values())->toBe(['B2B', 'BASIC']);
 });
