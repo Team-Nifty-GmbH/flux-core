@@ -44,12 +44,14 @@ trait CalculatesPositionAvailability
      */
     protected function resolveChildAmount(object $item, int $rootId): string
     {
+        $signedAmount = $item->signed_amount ?? '0';
+
         if ($item->origin_position_id !== $rootId) {
-            return $item->signed_amount;
+            return $signedAmount;
         }
 
-        return bccomp($item->signed_amount, '0') < 0
-            ? bcmul($item->signed_amount, '-1')
-            : $item->signed_amount;
+        return bccomp($signedAmount, '0') === -1
+            ? bcmul($signedAmount, '-1')
+            : $signedAmount;
     }
 }
