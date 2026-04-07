@@ -25,16 +25,16 @@ RUN apt-get update \
     && curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xb8dc7e53946656efbce4c1dd71daeaab4ad4cab6' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/ppa_ondrej_php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu noble main" > /etc/apt/sources.list.d/ppa_ondrej_php.list \
     && apt-get update \
-    && apt-get install -y php8.4-cli php8.4-dev \
-       php8.4-pgsql php8.4-sqlite3 php8.4-gd \
-       php8.4-curl php8.4-mongodb \
-       php8.4-imap php8.4-mysql php8.4-mbstring \
-       php8.4-xml php8.4-zip php8.4-bcmath php8.4-soap \
-       php8.4-intl php8.4-readline \
-       php8.4-ldap \
-       php8.4-msgpack php8.4-igbinary php8.4-redis php8.4-swoole \
-       php8.4-memcached php8.4-pcov php8.4-imagick php8.4-xdebug \
-    && apt-get install -y php8.4-fpm \
+    && apt-get install -y php8.5-cli php8.5-dev \
+       php8.5-pgsql php8.5-sqlite3 php8.5-gd \
+       php8.5-curl php8.5-mongodb \
+       php8.5-imap php8.5-mysql php8.5-mbstring \
+       php8.5-xml php8.5-zip php8.5-bcmath php8.5-soap \
+       php8.5-intl php8.5-readline \
+       php8.5-ldap \
+       php8.5-msgpack php8.5-igbinary php8.5-redis php8.5-swoole \
+       php8.5-memcached php8.5-pcov php8.5-imagick php8.5-xdebug \
+    && apt-get install -y php8.5-fpm \
     && apt-get install nginx -y \
     && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
@@ -62,7 +62,7 @@ RUN curl -L https://github.com/php/frankenphp/releases/latest/download/frankenph
 
 RUN mkdir -p /etc/nginx/ssl
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx-selfsigned.key -out /etc/nginx/ssl/nginx-selfsigned.crt -subj "/C=US/ST=Default/L=Default/O=Default/CN=laravel.test"
-RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.4
+RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.5
 
 RUN userdel -r ubuntu
 RUN groupadd --force -g $WWWGROUP sail
@@ -70,8 +70,8 @@ RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
 RUN git config --global --add safe.directory /var/www/html
 
 RUN sed -i 's/user www-data;/user sail;/g' /etc/nginx/nginx.conf
-RUN sed -i 's/user = www-data/user = sail/g' /etc/php/8.4/fpm/pool.d/www.conf
-RUN sed -i 's/group = www-data/group = sail/g' /etc/php/8.4/fpm/pool.d/www.conf
+RUN sed -i 's/user = www-data/user = sail/g' /etc/php/8.5/fpm/pool.d/www.conf
+RUN sed -i 's/group = www-data/group = sail/g' /etc/php/8.5/fpm/pool.d/www.conf
 
 # Allow all types to ghostscript
 RUN sed -i 's/rights="none" pattern="PDF"/rights="read | write" pattern="PDF"/g' /etc/ImageMagick-6/policy.xml
@@ -80,7 +80,7 @@ COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY nginx /etc/nginx/sites-available/default
 COPY nginx-common /etc/nginx/snippets
-COPY php.ini /etc/php/8.4/cli/conf.d/99-sail.ini
+COPY php.ini /etc/php/8.5/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 8000

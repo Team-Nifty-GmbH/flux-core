@@ -43,7 +43,7 @@ location ~ \.php$ {
     include fastcgi_params;
     fastcgi_index index.php;
     fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-    fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+    fastcgi_pass unix:/run/php/php8.5-fpm.sock;
 }
 
 # deny access to .htaccess files, if Apache's document root
