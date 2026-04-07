@@ -20,8 +20,11 @@ class ShareFilter extends FluxAction
 
     public function performAction(): DatatableUserSetting
     {
-        $setting = DatatableUserSetting::query()->findOrFail($this->data['id']);
-        $setting->is_shared = $this->data['is_shared'];
+        $setting = resolve_static(DatatableUserSetting::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
+
+        $setting->is_shared = $this->getData('is_shared');
         $setting->save();
 
         return $setting;
