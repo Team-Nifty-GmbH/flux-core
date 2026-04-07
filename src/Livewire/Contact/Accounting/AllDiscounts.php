@@ -14,7 +14,7 @@ class AllDiscounts extends DiscountList
 
     public bool $isFilterable = false;
 
-    public function loadData(): void
+    public function loadData(bool $forceRender = false): void
     {
         $this->initialized = true;
 

@@ -238,9 +238,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->count();
     }
 
-    public function loadData(): void
+    public function loadData(bool $forceRender = false): void
     {
-        parent::loadData();
+        parent::loadData($forceRender);
 
         if ($this->showMap) {
             $this->updatedShowMap();

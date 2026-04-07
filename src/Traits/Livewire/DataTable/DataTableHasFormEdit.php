@@ -13,7 +13,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 trait DataTableHasFormEdit
 {
-    abstract public function loadData(): void;
+    abstract public function loadData(bool $forceRender = false): void;
 
     public function bootDataTableHasFormEdit(): void
     {
