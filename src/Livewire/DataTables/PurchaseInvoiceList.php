@@ -33,6 +33,8 @@ class PurchaseInvoiceList extends BaseDataTable
 {
     use WithDocumentScanning, WithFilePond, WithFileUploads;
 
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'url',
         'media.file_name',

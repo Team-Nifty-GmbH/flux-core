@@ -6,6 +6,8 @@ use FluxErp\Models\PaymentReminder;
 
 class PaymentReminderList extends BaseDataTable
 {
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'order.invoice_number',
         'reminder_level',

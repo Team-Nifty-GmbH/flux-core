@@ -15,6 +15,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TransactionList extends BaseDataTable
 {
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'bank_connection.name',
         'value_date',
