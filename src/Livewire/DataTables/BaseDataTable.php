@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\DataTable\ShareFilter;
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Http\Response;
@@ -44,5 +45,15 @@ abstract class BaseDataTable extends DataTable
     protected function getModel(): string
     {
         return resolve_static($this->model, 'class');
+    }
+
+    protected function canSaveDefaultColumns(): bool
+    {
+        return auth()->user()?->hasRole('Super Admin') ?? false;
+    }
+
+    protected function canShareFilters(): bool
+    {
+        return resolve_static(ShareFilter::class, 'canPerformAction', [false]);
     }
 }
