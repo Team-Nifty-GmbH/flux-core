@@ -12,7 +12,7 @@ chmod -R ugo+rw /.composer
 
 if service --status-all | grep -Fq 'nginx'; then
     service nginx restart
-    service php8.4-fpm restart
+    service php8.5-fpm restart
 fi
 
 if [ $# -gt 0 ]; then
