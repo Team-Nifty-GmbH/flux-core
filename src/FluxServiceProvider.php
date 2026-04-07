@@ -143,11 +143,11 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function bootCommands(): void
     {
-        $this->commands(
-            file_exists($cachePath = $this->app->bootstrapPath('cache/flux-commands.php'))
-                ? require $cachePath
-                : once(fn () => $this->findCommands())
-        );
+        $commands = file_exists($cachePath = $this->app->bootstrapPath('cache/flux-commands.php'))
+            ? array_filter(require $cachePath, fn (string $class) => class_exists($class))
+            : once(fn () => $this->findCommands());
+
+        $this->commands($commands);
     }
 
     protected function bootRoutes(): void
