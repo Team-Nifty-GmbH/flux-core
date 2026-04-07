@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PrintJobList extends BaseDataTable
 {
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'user.name',
         'media.name',
