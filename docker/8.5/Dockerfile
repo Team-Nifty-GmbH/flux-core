@@ -32,7 +32,7 @@ RUN apt-get update \
        php8.5-xml php8.5-zip php8.5-bcmath php8.5-soap \
        php8.5-intl php8.5-readline \
        php8.5-ldap \
-       php8.5-msgpack php8.5-igbinary php8.5-redis php8.5-swoole \
+       php8.5-msgpack php8.5-igbinary php8.5-redis \
        php8.5-memcached php8.5-pcov php8.5-imagick php8.5-xdebug \
     && apt-get install -y php8.5-fpm \
     && apt-get install nginx -y \
@@ -41,7 +41,6 @@ RUN apt-get update \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
     && apt-get update \
     && apt-get install -y nodejs \
-    && npm install -g npm \
     && npm install -g pnpm \
     && npm install -g bun \
     && npx playwright install-deps \
@@ -56,6 +55,10 @@ RUN apt-get update \
     && apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN pecl install swoole-6.2.0 \
+    && echo "extension=swoole.so" > /etc/php/8.5/cli/conf.d/25-swoole.ini \
+    && echo "extension=swoole.so" > /etc/php/8.5/fpm/conf.d/25-swoole.ini
 
 RUN curl -L https://github.com/php/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /usr/local/bin/frankenphp \
     && chmod +x /usr/local/bin/frankenphp
