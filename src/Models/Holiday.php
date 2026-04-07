@@ -62,7 +62,7 @@ class Holiday extends FluxModel
             ->where(fn (Builder $query) => $query
                 ->where('month', $date->month)
                 ->where('day', $date->day)
-                ->orWhere('date', $date)
+                ->orWhere('date', $date->toDateString())
             )
             ->when(
                 $locationId,
