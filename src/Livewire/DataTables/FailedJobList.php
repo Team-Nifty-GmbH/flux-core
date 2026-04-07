@@ -6,6 +6,8 @@ use FluxErp\Models\FailedJob;
 
 class FailedJobList extends BaseDataTable
 {
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'connection',
         'queue',
