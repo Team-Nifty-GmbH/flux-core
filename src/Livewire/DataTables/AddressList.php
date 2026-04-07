@@ -183,9 +183,9 @@ class AddressList extends BaseDataTable
     #[Renderless]
     public function evaluate(): void {}
 
-    public function loadData(): void
+    public function loadData(bool $forceRender = false): void
     {
-        parent::loadData();
+        parent::loadData($forceRender);
 
         if ($this->showMap) {
             $this->updatedShowMap();

@@ -52,7 +52,7 @@ class AttendanceOverview extends Component
         );
     }
 
-    public function loadData(): void
+    public function loadData(bool $forceRender = false): void
     {
         $this->monthName = Carbon::create($this->year, $this->month)
             ->locale(app()->getLocale())

@@ -2,11 +2,13 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\DataTable\ShareFilter;
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Renderless;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
@@ -15,7 +17,7 @@ abstract class BaseDataTable extends DataTable
     use Actions, HasEloquentListeners;
 
     #[Renderless]
-    public function export(array $columns = []): Response|BinaryFileResponse
+    public function export(array $columns = [], string $format = 'xlsx'): Response|BinaryFileResponse|StreamedResponse
     {
         ExportDataTableJob::dispatch(
             serialize($this),
@@ -44,5 +46,15 @@ abstract class BaseDataTable extends DataTable
     protected function getModel(): string
     {
         return resolve_static($this->model, 'class');
+    }
+
+    protected function canSaveDefaultColumns(): bool
+    {
+        return auth()->user()?->hasRole('Super Admin') ?? false;
+    }
+
+    protected function canShareFilters(): bool
+    {
+        return resolve_static(ShareFilter::class, 'canPerformAction', [false]);
     }
 }
