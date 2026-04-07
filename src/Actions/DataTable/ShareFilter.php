@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\DataTable;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Rulesets\DataTable\ShareFilterRuleset;
 use TeamNiftyGmbH\DataTable\Models\DatatableUserSetting;
 
 class ShareFilter extends FluxAction
@@ -14,7 +15,7 @@ class ShareFilter extends FluxAction
 
     protected function getRulesets(): string|array
     {
-        return [];
+        return ShareFilterRuleset::class;
     }
 
     public function performAction(): DatatableUserSetting
@@ -24,13 +25,5 @@ class ShareFilter extends FluxAction
         $setting->save();
 
         return $setting;
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->rules = [
-            'id' => ['required', 'exists:datatable_user_settings,id'],
-            'is_shared' => ['required', 'boolean'],
-        ];
     }
 }
