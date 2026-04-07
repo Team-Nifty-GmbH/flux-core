@@ -20,6 +20,8 @@ class TicketList extends BaseDataTable
 
     public $attachments;
 
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'ticket_number',
         'ticket_type.name',

@@ -8,6 +8,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class LogList extends BaseDataTable
 {
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'id',
         'message',

@@ -6,6 +6,8 @@ use FluxErp\Models\AbsenceRequest;
 
 class AbsenceRequestList extends BaseDataTable
 {
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'employee.name',
         'absence_type.name',

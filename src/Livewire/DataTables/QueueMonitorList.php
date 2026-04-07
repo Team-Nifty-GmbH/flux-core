@@ -6,6 +6,8 @@ use FluxErp\Models\QueueMonitor;
 
 class QueueMonitorList extends BaseDataTable
 {
+    public bool $positiveEmptyState = true;
+
     public array $enabledCols = [
         'job_batch.name',
         'name',
