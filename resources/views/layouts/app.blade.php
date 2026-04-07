@@ -141,9 +141,11 @@
                         @endif
 
                         @auth('web')
-                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                                <livewire:work-time lazy />
-                            @endcanAction
+                            @persist('layout.header.work-time')
+                                @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                                    <livewire:work-time lazy />
+                                @endcanAction
+                            @endpersist
                         @endauth
 
                         @persist('layout.header.notifications')
