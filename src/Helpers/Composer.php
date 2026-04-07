@@ -207,6 +207,7 @@ class Composer extends BaseComposer
     protected function getProcess(array $command, array $env = []): Process
     {
         $defaultEnv = [
+            'HOME' => getenv('HOME') ?: '/tmp',
             'XDEBUG_MODE' => 'off',
         ];
 
