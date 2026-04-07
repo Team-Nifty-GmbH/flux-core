@@ -25,7 +25,7 @@ test('boot commands filters out non-existing cached command classes', function (
 
         expect($commands)->not->toContain('NonExistent\\Command\\ShouldBeFiltered');
     } finally {
-        if ($original) {
+        if ($original !== null) {
             file_put_contents($cachePath, $original);
         } elseif (file_exists($cachePath)) {
             unlink($cachePath);
