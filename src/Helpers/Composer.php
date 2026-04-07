@@ -207,12 +207,13 @@ class Composer extends BaseComposer
     protected function getProcess(array $command, array $env = []): Process
     {
         $defaultEnv = [
+            'HOME' => getenv('HOME') ?: sys_get_temp_dir(),
             'XDEBUG_MODE' => 'off',
         ];
 
         $env = array_merge(
-            $env,
-            $defaultEnv
+            $defaultEnv,
+            $env
         );
 
         return parent::getProcess($command, $env);
