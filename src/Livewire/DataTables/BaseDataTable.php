@@ -8,6 +8,7 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Renderless;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
@@ -16,7 +17,7 @@ abstract class BaseDataTable extends DataTable
     use Actions, HasEloquentListeners;
 
     #[Renderless]
-    public function export(array $columns = []): Response|BinaryFileResponse
+    public function export(array $columns = [], string $format = 'xlsx'): Response|BinaryFileResponse|StreamedResponse
     {
         ExportDataTableJob::dispatch(
             serialize($this),
