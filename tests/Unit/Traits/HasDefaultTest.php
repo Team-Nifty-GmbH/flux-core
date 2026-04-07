@@ -22,8 +22,12 @@ test('setting new default unsets previous default', function (): void {
     expect($second->fresh()->is_default)->toBeTrue();
 });
 
-test('deleting default model clears cache', function (): void {
-    $default = Language::default();
+test('deleting default model invalidates cache', function (): void {
+    $vatRate = VatRate::factory()->create(['is_default' => true]);
 
-    expect($default)->not->toBeNull();
+    expect(VatRate::default()->getKey())->toBe($vatRate->getKey());
+
+    $vatRate->delete();
+
+    expect(VatRate::default()?->getKey())->not->toBe($vatRate->getKey());
 });

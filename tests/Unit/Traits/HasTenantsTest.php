@@ -48,5 +48,6 @@ test('whereHasTenant scope filters by tenant', function (): void {
         ->whereHasTenant($this->dbTenant->getKey())
         ->pluck('id');
 
-    expect($results)->toContain($attached->getKey());
+    expect($results)->toContain($attached->getKey())
+        ->not->toContain($otherAttached->getKey());
 });
