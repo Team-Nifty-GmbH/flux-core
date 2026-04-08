@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Communication;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class CommunicationList extends BaseDataTable
@@ -41,18 +42,14 @@ class CommunicationList extends BaseDataTable
         ]);
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $array = parent::itemToArray($item);
-
-        if ($array['communication_type_enum'] ?? false) {
-            $array['communication_type_enum'] = __(Str::headline($array['communication_type_enum']));
+        if (is_string($itemArray['communication_type_enum'] ?? null)) {
+            $itemArray['communication_type_enum'] = __(Str::headline($itemArray['communication_type_enum']));
         }
 
-        if ($array['text_body'] ?? false) {
-            $array['text_body'] = Str::limit($array['text_body'], 100);
+        if (is_string($itemArray['text_body'] ?? null)) {
+            $itemArray['text_body'] = Str::limit($itemArray['text_body'], 100);
         }
-
-        return $array;
     }
 }
