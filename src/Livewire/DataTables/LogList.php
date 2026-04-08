@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Log;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -124,12 +125,10 @@ class LogList extends BaseDataTable
         parent::startSearch();
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $item = parent::itemToArray($item);
-
-        $item['message'] = Str::limit($item['message'], 150);
-
-        return $item;
+        if (is_string($itemArray['message'] ?? null)) {
+            $itemArray['message'] = Str::limit($itemArray['message'], 150);
+        }
     }
 }
