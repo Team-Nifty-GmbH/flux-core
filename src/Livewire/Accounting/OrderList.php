@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Livewire\DataTables\OrderList as DataTableOrderList;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Modelable;
 
 class OrderList extends DataTableOrderList
 {
@@ -17,6 +18,9 @@ class OrderList extends DataTableOrderList
     ];
 
     public bool $isSelectable = true;
+
+    #[Modelable]
+    public array $selected = [];
 
     public int $perPage = 10;
 
