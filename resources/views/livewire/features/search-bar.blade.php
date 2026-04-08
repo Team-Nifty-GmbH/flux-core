@@ -52,7 +52,6 @@
                 <x-icon name="magnifying-glass" class="mr-2 h-5 w-5" />
                 <div>{{ __('No results…') }}</div>
             </div>
-            <x-loading />
             <div
                 class="dark:divide-secondary-600 flex flex-row divide-x divide-gray-100"
             >

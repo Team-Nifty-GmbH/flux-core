@@ -81,7 +81,6 @@
         </x-slot:header>
 
         <div>
-            <x-loading wire:loading />
             <table
                 class="dark:divide-dark-500/50 min-w-full divide-y divide-gray-200"
             >

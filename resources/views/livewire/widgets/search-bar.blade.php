@@ -8,7 +8,6 @@
     "
 >
     @if($widgetComponent)
-        <x-loading />
         <x-card card-classes="shadow-none">
             <livewire:is
                 wire:key="search-bar-{{ $widgetComponent }}-{{ $widgetId }}"

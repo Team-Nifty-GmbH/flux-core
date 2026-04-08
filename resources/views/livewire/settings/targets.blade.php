@@ -24,7 +24,6 @@
         }"
         class="flex flex-col gap-4"
     >
-        <x-loading />
         <x-input wire:model="target.name" :label="__('Title')" required />
         <x-date :label="__('Start')" wire:model="target.start_date" />
         <x-date :label="__('End')" wire:model="target.end_date" />

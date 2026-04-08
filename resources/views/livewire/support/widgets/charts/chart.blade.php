@@ -2,10 +2,6 @@
     x-data="apexCharts($wire)"
     class="flex h-full max-h-full w-full flex-col gap-4 p-4 text-sm"
 >
-    @if($withSpinner)
-        <x-loading />
-    @endif
-
     <div class="flex w-full flex-row items-center justify-between gap-2">
         <div class="min-w-0 flex-1">
             @section('title')
