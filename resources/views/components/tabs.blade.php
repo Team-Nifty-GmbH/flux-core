@@ -4,10 +4,17 @@
 <div
     class="mt-2"
     x-data="{
+        loadingTab: null,
         get tab() { return $wire.{{ $attributes->wire('model')->value() }} },
         set tab(value) { $wire.$set('{{ $attributes->wire('model')->value() }}', value) },
         tabButtonClicked(tabButton) {
+            this.loadingTab = tabButton.dataset.tabName
             this.tabSelected = this.tab = tabButton.dataset.tabName
+        },
+        init() {
+            Livewire.hook('commit', ({ succeed }) => {
+                succeed(() => { this.loadingTab = null })
+            })
         },
     }"
     wire:ignore
@@ -15,13 +22,16 @@
     <div class="pb-2.5">
         <div class="dark:border-secondary-700 border-b border-gray-200">
             <nav
-                class="soft-scrollbar flex overflow-x-auto"
+                class="soft-scrollbar flex items-center overflow-x-auto"
                 x-ref="tabButtons"
                 wire:loading.class="pointer-events-none"
             >
                 @foreach ($tabs as $tabButton)
                     {{ $tabButton }}
                 @endforeach
+                <div x-cloak x-show="loadingTab" class="ml-2 flex items-center">
+                    <x-flux::spinner-svg class="!h-4 !w-4 !p-0" />
+                </div>
             </nav>
         </div>
     </div>
