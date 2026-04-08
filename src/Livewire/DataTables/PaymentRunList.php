@@ -6,6 +6,7 @@ use FluxErp\Livewire\Forms\PaymentRunForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\PaymentRun;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -61,6 +62,7 @@ class PaymentRunList extends BaseDataTable
         return true;
     }
 
+    #[Renderless]
     public function edit(PaymentRun $paymentRun): void
     {
         $this->loadPaymentRun($paymentRun);

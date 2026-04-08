@@ -48,3 +48,22 @@ test('edit loads orders into payment run form', function (): void {
         ->and($orders)->not->toBeEmpty()
         ->and($orders[0]['id'])->toBe($order->getKey());
 });
+
+test('edit is renderless so it does not trigger empty re-render', function (): void {
+    $paymentRun = PaymentRun::query()->create([
+        'payment_run_type_enum' => 'money_transfer',
+        'state' => 'open',
+    ]);
+
+    // DataTable.dehydrate() clears $this->data after each render.
+    // If edit() triggers a re-render, render() sees initialized=true,
+    // skips loadData(), and renders with empty data → table goes blank.
+    // edit() must be #[Renderless] to avoid this.
+    $component = Livewire::test(PaymentRunList::class)
+        ->call('edit', $paymentRun);
+
+    $method = new ReflectionMethod(PaymentRunList::class, 'edit');
+    $attributes = $method->getAttributes(\Livewire\Attributes\Renderless::class);
+
+    expect($attributes)->not->toBeEmpty('edit() must have #[Renderless] to prevent clearing table data');
+});
