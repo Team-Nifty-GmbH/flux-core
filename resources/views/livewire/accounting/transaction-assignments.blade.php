@@ -51,7 +51,7 @@
                 />
                 <x-button
                     :text="__('Assign')"
-                    wire:click="assignOrders(selectedOrders)"
+                    wire:click="assignOrders"
                 />
             </x-slot:footer>
         </x-modal>

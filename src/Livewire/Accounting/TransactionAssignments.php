@@ -108,12 +108,12 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
-    public function assignOrders(array $orders): void
+    public function assignOrders(): void
     {
         $transactionCurrencyId = $this->transactionForm->currency_id;
 
         resolve_static(Order::class, 'query')
-            ->whereKey($orders)
+            ->whereKey($this->selectedOrders)
             ->get(['id', 'currency_id', 'balance'])
             ->each(function (Order $order) use ($transactionCurrencyId): void {
                 $data = [

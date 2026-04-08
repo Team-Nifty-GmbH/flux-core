@@ -44,7 +44,7 @@ test('assign orders from selectedOrders property', function (): void {
     Livewire::test(TransactionAssignments::class)
         ->call('assignOrdersModal', $transaction)
         ->set('selectedOrders', [$order->getKey()])
-        ->call('assignOrders', [$order->getKey()])
+        ->call('assignOrders')
         ->assertOk();
 
     expect(OrderTransaction::query()
