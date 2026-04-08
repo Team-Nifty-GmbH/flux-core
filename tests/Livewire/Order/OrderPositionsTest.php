@@ -481,6 +481,22 @@ test('item to array formatting', function (): void {
     expect($formatted)->toHaveKey('alternative_tag');
 });
 
+test('augmentItemArray injects order currency for money formatter', function (): void {
+    $usdCurrency = Currency::factory()->create(['iso' => 'USD', 'name' => 'Dollar']);
+    $this->order->update(['currency_id' => $usdCurrency->getKey()]);
+    $this->orderForm->fill($this->order->fresh(['currency']));
+
+    $orderPosition = $this->order->orderPositions->first();
+    $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm]);
+
+    $method = new ReflectionMethod(OrderPositions::class, 'augmentItemArray');
+    $itemArray = [];
+    $method->invokeArgs($component->instance(), [&$itemArray, $orderPosition]);
+
+    expect($itemArray)->toHaveKey('currency')
+        ->and($itemArray['currency']['iso'])->toBe('USD');
+});
+
 test('listeners configuration', function (): void {
     $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm]);
     $listeners = $component->instance()->getListeners();
