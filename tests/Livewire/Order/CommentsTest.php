@@ -56,6 +56,42 @@ beforeEach(function (): void {
     $comments->first()->update(['is_sticky' => true]);
 });
 
+test('loadComments returns is_internal as boolean', function (): void {
+    // Create one internal and one non-internal comment
+    Comment::query()->where('model_id', $this->order->id)->delete();
+    Comment::factory()->create([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->id,
+        'is_internal' => true,
+    ]);
+    Comment::factory()->create([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->id,
+        'is_internal' => false,
+    ]);
+
+    Livewire::withoutLazyLoading()
+        ->test(Comments::class, ['modelId' => $this->order->id])
+        ->call('loadComments')
+        ->assertReturned(function (array $comments): true {
+            $data = data_get($comments, 'data');
+            expect($data)->toHaveCount(2);
+
+            foreach ($data as $comment) {
+                // Must be actual boolean, not string "0"/"1"
+                // JS treats "0" as truthy which breaks x-bind:class
+                expect($comment['is_internal'])->toBeIn([true, false]);
+            }
+
+            $internal = collect($data)->where('is_internal', true);
+            $public = collect($data)->where('is_internal', false);
+            expect($internal)->toHaveCount(1)
+                ->and($public)->toHaveCount(1);
+
+            return true;
+        });
+});
+
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])
