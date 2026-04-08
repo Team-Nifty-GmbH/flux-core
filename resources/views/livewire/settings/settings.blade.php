@@ -45,7 +45,6 @@
                     <div x-text="$wire.setting.path"></div>
                 </div>
             </x-slot:header>
-            <x-loading />
             @if($settingComponent)
                 <livewire:is
                     :component="$settingComponent"

@@ -67,7 +67,6 @@
     >
         @section('order-position-detail-modal.content')
             <div class="relative">
-                <x-loading wire:target="position" />
                 <div class="space-y-6 p-4">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div class="space-y-4">

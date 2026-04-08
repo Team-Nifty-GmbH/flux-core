@@ -1,5 +1,4 @@
 <div class="flex h-full w-full gap-4 p-4">
-    <x-loading />
     <div class="flex flex-col justify-center">
         <x-icon :name="$this->icon()" class="text-primary-500 h-10 w-10" />
     </div>

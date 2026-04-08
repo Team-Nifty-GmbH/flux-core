@@ -30,9 +30,6 @@
     {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6 grow flex flex-col xl:flex-row']) }}
 >
     {{ $prepend ?? '' }}
-    @if ($attributes->has('wire:loading'))
-        <x-loading {{ $attributes->thatStartWith('wire:loading') }} />
-    @endif
 
     <div class="min-w-0 w-full">
         @if ($slot->isNotEmpty())
