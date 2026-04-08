@@ -60,6 +60,14 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         });
     }
 
+    protected function casts(): array
+    {
+        return [
+            'is_internal' => 'boolean',
+            'is_sticky' => 'boolean',
+        ];
+    }
+
     public function broadcastChannel(): string
     {
         return $this->model_type . '.' . $this->model_id;
