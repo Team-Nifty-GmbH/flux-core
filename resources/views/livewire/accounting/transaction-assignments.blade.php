@@ -2,11 +2,6 @@
     x-on:refresh-transactions.window="init()"
     x-data="{
         data: [],
-        async assignOrders(dataTableId) {
-            const dataTable = Livewire.find(dataTableId);
-            await $wire.assignOrders(dataTable.selected);
-            dataTable.selected = [];
-        },
         async init() {
             this.data = await $wire.loadTransactions();
         },
@@ -45,7 +40,7 @@
                     </div>
                 </div>
             </x-slot:title>
-            <livewire:accounting.order-list lazy />
+            <livewire:accounting.order-list wire:model="selectedOrders" lazy />
             <x-slot:footer>
                 <x-button
                     color="secondary"
@@ -56,13 +51,7 @@
                 />
                 <x-button
                     :text="__('Assign')"
-                    x-on:click="
-                        assignOrders(
-                            $root
-                                .querySelector('[tall-datatable]')
-                                .parentNode.getAttribute('wire:id'),
-                        )
-                    "
+                    wire:click="assignOrders(selectedOrders)"
                 />
             </x-slot:footer>
         </x-modal>

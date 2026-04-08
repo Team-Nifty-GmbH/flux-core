@@ -36,6 +36,8 @@ class TransactionAssignments extends Component
 
     public ?string $search = null;
 
+    public array $selectedOrders = [];
+
     public ?int $suggestionCount = null;
 
     #[Url]
@@ -140,6 +142,7 @@ class TransactionAssignments extends Component
                 }
             });
 
+        $this->selectedOrders = [];
         $this->refreshTransactions();
         $this->js(<<<'JS'
             $tsui.close.modal('transaction-assign-orders-modal');
