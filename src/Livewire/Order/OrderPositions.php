@@ -358,7 +358,7 @@ class OrderPositions extends OrderPositionList
     public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
-        if ($orderPosition->exists) {
+        if ($orderPosition?->exists) {
             $this->orderPosition->fill($orderPosition);
             $this->orderPosition->is_bundle_parent = $orderPosition->is_free_text
                 && $orderPosition->children()->whereNotNull('amount')->exists();

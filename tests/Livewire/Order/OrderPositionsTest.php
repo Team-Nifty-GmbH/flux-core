@@ -380,6 +380,17 @@ test('edit new order position', function (): void {
         ->assertExecutesJs("\$tsui.open.modal('edit-order-position');");
 });
 
+test('edit order position without argument opens empty modal', function (): void {
+    $defaultVatRate = VatRate::factory()->create(['is_default' => true]);
+
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('editOrderPosition')
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('orderPosition.vat_rate_id', $defaultVatRate->id)
+        ->assertExecutesJs("\$tsui.open.modal('edit-order-position');");
+});
+
 test('edit order position', function (): void {
     $orderPosition = $this->order->orderPositions->first();
 
