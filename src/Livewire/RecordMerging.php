@@ -86,6 +86,14 @@ class RecordMerging extends Component
     #[On('show-record-merging')]
     public function showRecordMerging(array $recordIds, string $modelClass): void
     {
+        if (! class_exists($modelClass)) {
+            $this->toast()
+                ->error(__('Invalid model class.'))
+                ->send();
+
+            return;
+        }
+
         $this->mergeRecords->model_type = morph_alias($modelClass);
 
         $records = resolve_static($modelClass, 'query')
