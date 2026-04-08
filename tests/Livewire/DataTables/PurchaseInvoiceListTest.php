@@ -1,8 +1,8 @@
 <?php
 
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
-use FluxErp\Models\Media;
 use FluxErp\Models\PurchaseInvoice;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -31,7 +31,7 @@ test('augmentItemArray sets url from media', function (): void {
 
     $media = $purchaseInvoice
         ->addMedia(
-            \Illuminate\Http\UploadedFile::fake()->image('invoice.jpg')
+            UploadedFile::fake()->image('invoice.jpg')
         )
         ->toMediaCollection('purchase_invoice');
 
