@@ -49,10 +49,7 @@
                         $tsui.close.modal('transaction-assign-orders-modal')
                     "
                 />
-                <x-button
-                    :text="__('Assign')"
-                    wire:click="assignOrders"
-                />
+                <x-button :text="__('Assign')" wire:click="assignOrders" />
             </x-slot:footer>
         </x-modal>
     @endteleport

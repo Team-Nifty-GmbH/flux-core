@@ -45,6 +45,8 @@ class MediaGrid extends MediaList
 
     protected function augmentItemArray(array &$itemArray, Model $item): void
     {
+        parent::augmentItemArray($itemArray, $item);
+
         /** @var Media $item */
         $itemArray['url'] = $item->hasGeneratedConversion('thumb_400x400')
             ? $item->getUrl('thumb_400x400')
