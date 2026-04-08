@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Livewire\DataTables\FailedJobList;
 use FluxErp\Models\FailedJob;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -35,12 +36,8 @@ class FailedJobs extends FailedJobList
         JS);
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $array = parent::itemToArray($item);
-
-        $array['exception'] = data_get(explode("\n", $item->exception ?? ''), 0);
-
-        return $array;
+        $itemArray['exception'] = data_get(explode("\n", $item->exception ?? ''), 0);
     }
 }

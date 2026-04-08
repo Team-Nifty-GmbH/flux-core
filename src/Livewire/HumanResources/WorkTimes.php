@@ -15,6 +15,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Model\Trackable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -222,11 +223,10 @@ class WorkTimes extends WorkTimeList
         );
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $item = parent::itemToArray($item);
-        $item['name'] = __($item['name']);
-
-        return $item;
+        if (is_string($itemArray['name'] ?? null)) {
+            $itemArray['name'] = __($itemArray['name']);
+        }
     }
 }

@@ -21,6 +21,7 @@ use FluxErp\Traits\Livewire\WithDocumentScanning;
 use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
@@ -202,9 +203,9 @@ class PurchaseInvoiceList extends BaseDataTable
         return true;
     }
 
-    public function mountSupportsCache(): void
+    public function mountStoresSettings(): void
     {
-        parent::mountSupportsCache();
+        parent::mountStoresSettings();
 
         if (! $this->userFilters) {
             $this->userFilters = [
@@ -349,10 +350,8 @@ class PurchaseInvoiceList extends BaseDataTable
         );
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $itemArray = parent::itemToArray($item);
-
         $media = $item->media->first() ?? $item->invoice;
         if ($media?->hasGeneratedConversion('thumb_400x400')) {
             $itemArray['url'] = $media?->getUrl('thumb_400x400');
@@ -361,7 +360,5 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $itemArray['media.file_name'] = $media?->file_name;
-
-        return $itemArray;
     }
 }

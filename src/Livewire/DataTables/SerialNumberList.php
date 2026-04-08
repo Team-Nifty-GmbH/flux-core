@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\SerialNumber;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class SerialNumberList extends BaseDataTable
 {
@@ -30,12 +31,9 @@ class SerialNumberList extends BaseDataTable
         ]);
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['avatar'] = $item->product?->getAvatarUrl();
-        $returnArray['contacts'] = $item->addresses->toSerialNumber()->pluck('quantity', 'name')->toArray() ?: null;
-
-        return $returnArray;
+        $itemArray['avatar'] = $item->product?->getAvatarUrl();
+        $itemArray['contacts'] = $item->addresses->toSerialNumber()->pluck('quantity', 'name')->toArray() ?: null;
     }
 }

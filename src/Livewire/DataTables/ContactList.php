@@ -9,6 +9,7 @@ use FluxErp\Models\User;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -143,11 +144,8 @@ class ContactList extends BaseDataTable
         return true;
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['avatar'] = $item->getAvatarUrl();
-
-        return $returnArray;
+        $itemArray['avatar'] = $item->getAvatarUrl();
     }
 }

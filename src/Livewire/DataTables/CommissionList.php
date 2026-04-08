@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Commission\CreateCommissionCreditNotes;
 use FluxErp\Models\Commission;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -105,10 +106,8 @@ class CommissionList extends BaseDataTable
         );
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $item->commission_rate = $item->commission_rate['commission_rate'];
-
-        return parent::itemToArray($item);
+        $itemArray['commission_rate'] = data_get($item->commission_rate, 'commission_rate');
     }
 }

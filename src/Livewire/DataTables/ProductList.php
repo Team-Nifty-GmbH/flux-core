@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Product;
+use Illuminate\Database\Eloquent\Model;
 
 class ProductList extends BaseDataTable
 {
@@ -29,11 +30,8 @@ class ProductList extends BaseDataTable
         ];
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['product_image'] = $item->getAvatarUrl();
-
-        return $returnArray;
+        $itemArray['product_image'] = $item->getAvatarUrl();
     }
 }

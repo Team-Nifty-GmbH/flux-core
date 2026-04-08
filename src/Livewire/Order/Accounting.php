@@ -14,6 +14,7 @@ use FluxErp\Models\Transaction;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
@@ -189,11 +190,8 @@ class Accounting extends OrderTransactionList
         );
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $array = parent::itemToArray($item);
-        $array['currency_iso'] = $item->transaction?->currency?->iso;
-
-        return $array;
+        $itemArray['currency_iso'] = $item->transaction?->currency?->iso;
     }
 }

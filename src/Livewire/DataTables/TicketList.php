@@ -9,6 +9,7 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -172,17 +173,13 @@ class TicketList extends BaseDataTable
         ]);
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $returnArray = parent::itemToArray($item);
-
         /** @var Ticket $item */
         if ($related = $item->morphTo('model')->getResults()) {
-            $returnArray['related'] = method_exists($related, 'getLabel') ? $related->getLabel() : null;
+            $itemArray['related'] = method_exists($related, 'getLabel') ? $related->getLabel() : null;
         }
 
-        $returnArray['user'] = $item->authenticatable?->getLabel();
-
-        return $returnArray;
+        $itemArray['user'] = $item->authenticatable?->getLabel();
     }
 }

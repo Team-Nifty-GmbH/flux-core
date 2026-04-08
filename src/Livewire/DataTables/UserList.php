@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class UserList extends BaseDataTable
 {
@@ -54,11 +55,8 @@ class UserList extends BaseDataTable
         return $returnKeys;
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['avatar'] = $item->getAvatarUrl();
-
-        return $returnArray;
+        $itemArray['avatar'] = $item->getAvatarUrl();
     }
 }
