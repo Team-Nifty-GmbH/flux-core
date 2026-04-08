@@ -7,6 +7,7 @@ use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -128,12 +129,10 @@ class MediaList extends BaseDataTable
         ];
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
         /** @var Media $item */
-        $item->makeVisible('collection_name');
-
-        $itemArray = parent::itemToArray($item);
+        $itemArray['collection_name'] = $item->collection_name;
         $itemArray['url'] = $item->hasGeneratedConversion('thumb')
             ? $item->getUrl('thumb')
             : (
@@ -142,7 +141,5 @@ class MediaList extends BaseDataTable
                     : route('icons', ['name' => 'document'])
             );
         $itemArray['original_url'] = $item->original_url;
-
-        return $itemArray;
     }
 }

@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Models\Media;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -42,10 +43,9 @@ class MediaGrid extends MediaList
         return 'tall-datatables::layouts.grid';
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
         /** @var Media $item */
-        $itemArray = parent::itemToArray($item);
         $itemArray['url'] = $item->hasGeneratedConversion('thumb_400x400')
             ? $item->getUrl('thumb_400x400')
             : (
@@ -53,7 +53,5 @@ class MediaGrid extends MediaList
                     ? $item->getUrl()
                     : route('icons', ['name' => 'document'])
             );
-
-        return $itemArray;
     }
 }

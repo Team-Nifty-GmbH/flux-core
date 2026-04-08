@@ -17,6 +17,7 @@ use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
@@ -705,25 +706,21 @@ class OrderPositions extends OrderPositionList
         ];
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $item = parent::itemToArray($item);
+        $itemArray['indentation'] = '';
+        $itemArray['unit_price'] = $item->is_net
+            ? $item->unit_net_price ?? 0
+            : $item->unit_gross_price ?? 0;
+        $itemArray['alternative_tag'] = $item->is_alternative ? __('Alternative') : '';
 
-        $item['indentation'] = '';
-        $item['unit_price'] = data_get($item, 'is_net')
-            ? data_get($item, 'unit_net_price', 0)
-            : data_get($item, 'unit_gross_price', 0);
-        $item['alternative_tag'] = data_get($item, 'is_alternative') ? __('Alternative') : '';
-
-        if (($depth = str_word_count(data_get($item, 'slug_position', ''), 0, '.')) > 0) {
+        if (($depth = str_word_count($item->slug_position ?? '', 0, '.')) > 0) {
             $indent = $depth * 20;
-            $item['indentation'] = <<<HTML
+            $itemArray['indentation'] = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">
                     </div>
                     HTML;
         }
-
-        return $item;
     }
 
     protected function recalculateOrderTotals(): void

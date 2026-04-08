@@ -12,6 +12,7 @@ use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -299,11 +300,8 @@ class AddressList extends BaseDataTable
         return $item->language_id;
     }
 
-    protected function itemToArray($item): array
+    protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['avatar'] = $item->getAvatarUrl();
-
-        return $returnArray;
+        $itemArray['avatar'] = $item->getAvatarUrl();
     }
 }
