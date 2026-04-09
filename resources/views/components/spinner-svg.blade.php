@@ -1,6 +1,5 @@
 <svg
-    {{ $attributes }}
-    class="mr-2 inline h-10 w-10 animate-spin fill-blue-600 p-1.5 text-gray-200 dark:text-gray-600"
+    {{ $attributes->merge(['class' => 'mr-2 inline h-10 w-10 animate-spin fill-blue-600 p-1.5 text-gray-200 dark:text-gray-600']) }}
     viewBox="0 0 100 101"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

@@ -34,6 +34,44 @@ function visitCalendar(): mixed
     return $page;
 }
 
+test('calendar spinner disappears after toggling calendar', function (): void {
+    createCalendarWithOwner(['name' => 'SpinnerTestCalendar']);
+
+    $page = visitCalendar();
+
+    // Find the checkbox for our calendar and uncheck it
+    $page->script('() => {
+        const checkbox = Array.from(document.querySelectorAll("[x-bind\\\\:value]"))
+            .find(cb => cb.closest("[x-data]")?.textContent.includes("SpinnerTestCalendar"));
+        if (checkbox && checkbox.checked) checkbox.click();
+    }');
+
+    // Wait a moment then re-check it
+    $page->script('() => new Promise(r => setTimeout(r, 500))');
+
+    $page->script('() => {
+        const checkbox = Array.from(document.querySelectorAll("[x-bind\\\\:value]"))
+            .find(cb => cb.closest("[x-data]")?.textContent.includes("SpinnerTestCalendar"));
+        if (checkbox && !checkbox.checked) checkbox.click();
+    }');
+
+    // Wait for events to load
+    $page->script('() => new Promise(r => setTimeout(r, 3000))');
+
+    // Spinner (animate-spin) must not be visible
+    $page->script('() => {
+        const spinners = document.querySelectorAll(".animate-spin");
+        const visibleSpinners = Array.from(spinners).filter(s => {
+            const style = window.getComputedStyle(s);
+            return style.display !== "none" && style.visibility !== "hidden"
+                && s.offsetParent !== null;
+        });
+        if (visibleSpinners.length > 0) {
+            throw new Error("Spinner still visible after calendar toggle! Found " + visibleSpinners.length + " visible spinners");
+        }
+    }');
+});
+
 test('calendar page loads without js errors', function (): void {
     createCalendarWithOwner();
 

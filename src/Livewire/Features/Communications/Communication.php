@@ -208,7 +208,7 @@ abstract class Communication extends CommunicationList
             ?->getKey() ?? 'default';
 
         $this->attachments->reset();
-        if ($communication->id) {
+        if ($communication?->id) {
             $this->attachments->fill($communication->getMedia('attachments'));
         } elseif ($this->modelType && $this->modelId) {
             $this->addCommunicatable(morph_alias($this->modelType), $this->modelId);

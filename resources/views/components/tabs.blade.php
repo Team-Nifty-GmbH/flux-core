@@ -8,12 +8,21 @@
         get tab() { return $wire.{{ $attributes->wire('model')->value() }} },
         set tab(value) { $wire.$set('{{ $attributes->wire('model')->value() }}', value) },
         tabButtonClicked(tabButton) {
+            this.$refs.tabButtons
+                .querySelectorAll('[data-tab-name]')
+                .forEach(btn => btn.classList.remove('animate-pulse'))
+            tabButton.classList.add('animate-pulse')
             this.loadingTab = tabButton.dataset.tabName
             this.tabSelected = this.tab = tabButton.dataset.tabName
         },
         init() {
             Livewire.hook('commit', ({ succeed }) => {
-                succeed(() => { this.loadingTab = null })
+                succeed(() => {
+                    this.$refs.tabButtons
+                        .querySelectorAll('.animate-pulse')
+                        .forEach(btn => btn.classList.remove('animate-pulse'))
+                    this.loadingTab = null
+                })
             })
         },
     }"
@@ -29,9 +38,6 @@
                 @foreach ($tabs as $tabButton)
                     {{ $tabButton }}
                 @endforeach
-                <div x-cloak x-show="loadingTab" class="ml-2 flex items-center">
-                    <x-flux::spinner-svg class="!h-4 !w-4 !p-0" />
-                </div>
             </nav>
         </div>
     </div>
