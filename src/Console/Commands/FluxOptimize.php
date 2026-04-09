@@ -484,7 +484,7 @@ class FluxOptimize extends Command
     protected function optimizeModelInfo(): void
     {
         if ($this->forget) {
-            TeamNiftyGmbH\DataTable\Helpers\SchemaInfo::flush();
+            \TeamNiftyGmbH\DataTable\Helpers\SchemaInfo::flush();
         }
     }
 }
