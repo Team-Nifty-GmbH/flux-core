@@ -21,7 +21,7 @@ trait HasDefault
                 fn () => resolve_static(static::class, 'query')
                     ->where(static::$defaultColumn, true)
                     ->first()
-                    ?->toArray()
+                    ?->getAttributes()
             );
 
         if (! is_null($attributes) && ! is_array($attributes)) {
@@ -29,7 +29,7 @@ trait HasDefault
             $attributes = resolve_static(static::class, 'query')
                 ->where(static::$defaultColumn, true)
                 ->first()
-                ?->toArray();
+                ?->getAttributes();
         }
 
         if (! $attributes) {

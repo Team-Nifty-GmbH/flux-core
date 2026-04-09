@@ -47,6 +47,20 @@ test('default works with serializable_classes disabled', function (): void {
         ->and($languageFromCache->getKey())->toBe($language->getKey());
 });
 
+test('default model does not shadow media relation with cached array', function (): void {
+    $tenant = FluxErp\Models\Tenant::factory()->create(['is_default' => true]);
+
+    $tenant->addMedia(Illuminate\Http\UploadedFile::fake()->image('logo.png'))
+        ->toMediaCollection('logo');
+
+    Cache::memo()->forget('default_' . morph_alias(FluxErp\Models\Tenant::class));
+
+    $default = resolve_static(FluxErp\Models\Tenant::class, 'default');
+
+    expect($default)->not->toBeNull();
+    expect($default->getFirstMedia('logo'))->toBeInstanceOf(Spatie\MediaLibrary\MediaCollections\Models\Media::class);
+});
+
 test('deleting default model invalidates cache', function (): void {
     $vatRate = VatRate::factory()->create(['is_default' => true]);
 
