@@ -83,6 +83,7 @@
             >
                 <div
                     id="map"
+                    wire:ignore
                     x-bind:class="
                         isFullscreen ? 'flex-1 w-full' : 'h-96 min-w-96'
                     "

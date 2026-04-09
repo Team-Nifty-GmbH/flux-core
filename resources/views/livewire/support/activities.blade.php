@@ -1,9 +1,6 @@
 <div
     class="flow-root"
     x-data="{
-        init() {
-            $wire.loadData();
-        },
         activeActivity: null,
         showProperties(id) {
             this.activeActivity = this.activeActivity === id ? null : id;

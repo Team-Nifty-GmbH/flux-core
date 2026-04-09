@@ -570,7 +570,7 @@
                 x-data="addressMap($wire, 'address', true, '{{ auth()->user() ?->getAvatarUrl() }}')"
                 class="pt-6"
             >
-                <div id="map" x-show="showMap"></div>
+                <div id="map" wire:ignore x-cloak x-show="showMap"></div>
             </div>
         @show
     @endif

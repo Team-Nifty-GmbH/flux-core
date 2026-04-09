@@ -13,6 +13,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -215,7 +216,7 @@ class AddressList extends BaseDataTable
             ])
             ->with([
                 'contact:id',
-                'contact.media' => fn (Builder $query): Builder => $query->where('collection_name', 'avatar'),
+                'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
             ])
             ->get()
             ->toMap()

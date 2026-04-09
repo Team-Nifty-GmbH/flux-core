@@ -1,7 +1,12 @@
-import L from 'leaflet';
+import leaflet from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Set global L before anything else — markercluster and all map code
+// must use the same L instance to avoid instanceof failures.
+window.L = leaflet;
+const L = window.L;
 
 // remove default icon - take what vite generated
 delete L.Icon.Default.prototype._getIconUrl;
@@ -12,11 +17,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
-// leaflet.markercluster expects L as a global variable (window.L), not as
-// an ES module import. Vite/Rollup may evaluate the plugin before leaflet
-// sets window.L, causing L.MarkerClusterGroup to be undefined. Loading the
-// plugin dynamically after ensuring window.L is set avoids this race.
-window.L = L;
+// leaflet.markercluster registers itself on window.L
 const markerClusterReady = import('leaflet.markercluster');
 
 export default function (
@@ -31,8 +32,40 @@ export default function (
         async init() {
             await markerClusterReady;
 
-            // init map
-            this.map = L.map('map');
+            if (autoload) {
+                this.$nextTick(() => {
+                    this.addMarkers();
+                });
+            }
+
+            if (typeof $wire[propertyName] !== 'function') {
+                this.$watch(
+                    '$wire.' + propertyName + '.latitude',
+                    this.onChange.bind(this),
+                );
+                this.$watch(
+                    '$wire.' + propertyName + '.longitude',
+                    this.onChange.bind(this),
+                );
+            }
+        },
+        async _initMap() {
+            if (this.map) {
+                return;
+            }
+
+            await markerClusterReady;
+
+            if (this.map) {
+                return;
+            }
+
+            const el = document.getElementById('map');
+            if (!el) {
+                return;
+            }
+
+            this.map = L.map(el);
             this.markers = L.markerClusterGroup({
                 iconCreateFunction: function (cluster) {
                     let count = 0;
@@ -60,26 +93,11 @@ export default function (
                     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             }).addTo(this.map);
 
-            // ensure that the property is wrapped in an object
-            if (autoload) {
-                this.$nextTick(() => {
-                    this.addMarkers();
-                });
-            }
-
-            if (typeof $wire[propertyName] !== 'function') {
-                // side-effect -> update map only when coordinates change
-                this.$watch(
-                    '$wire.' + propertyName + '.latitude',
-                    this.onChange.bind(this),
-                );
-                this.$watch(
-                    '$wire.' + propertyName + '.longitude',
-                    this.onChange.bind(this),
-                );
-            }
+            new ResizeObserver(() => this.map?.invalidateSize()).observe(el);
         },
-        addMarkers(addresses = null) {
+        async addMarkers(addresses = null) {
+            await this._initMap();
+
             if (!this.markers) {
                 return;
             }
@@ -191,8 +209,13 @@ export default function (
             }
         },
         onChange() {
-            this.$nextTick(() => {
-                // create view
+            this.$nextTick(async () => {
+                await this._initMap();
+
+                if (this.map) {
+                    this.map.invalidateSize();
+                }
+
                 this.addMarkers();
             });
         },

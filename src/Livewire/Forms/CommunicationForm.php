@@ -59,6 +59,10 @@ class CommunicationForm extends FluxForm
 
     public function fill($values): void
     {
+        if (is_null($values)) {
+            return;
+        }
+
         if ($values instanceof Communication) {
             $values->loadMissing(['tags:id', 'communicatables']);
             $values->communicatables->map(function (Communicatable $communicatable): void {

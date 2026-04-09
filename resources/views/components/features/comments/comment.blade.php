@@ -18,9 +18,10 @@
                 @if($this->isPublic === true)
                     <x-badge
                         flat
-                        x-bind:class="!comment.is_internal && 'hidden'"
+                        x-cloak
+                        x-show="comment.is_internal"
                         :text="__('Internal')"
-                    ></x-badge>
+                    />
                 @endif
             </div>
             @if(auth()->check())
