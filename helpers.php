@@ -3,14 +3,8 @@
 if (! function_exists('all_models')) {
     function all_models(): Illuminate\Support\Collection
     {
-        return TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()
-            ->merge(
-                TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all(
-                    flux_path('src/Models'),
-                    flux_path('src'),
-                    'FluxErp'
-                )
-            );
+        return collect(Illuminate\Database\Eloquent\Relations\Relation::morphMap())
+            ->values();
     }
 }
 
