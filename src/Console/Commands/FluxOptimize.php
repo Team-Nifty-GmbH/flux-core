@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Livewire\Component;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
+use TeamNiftyGmbH\DataTable\Helpers\SchemaInfo;
 
 class FluxOptimize extends Command
 {
@@ -484,7 +485,7 @@ class FluxOptimize extends Command
     protected function optimizeModelInfo(): void
     {
         if ($this->forget) {
-            TeamNiftyGmbH\DataTable\Helpers\SchemaInfo::flush();
+            SchemaInfo::flush();
         }
     }
 }
