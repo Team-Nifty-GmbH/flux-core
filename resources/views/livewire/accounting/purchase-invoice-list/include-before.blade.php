@@ -137,12 +137,12 @@
                                 select="label:name|value:id"
                                 :options="$paymentTypes"
                                 x-on:select="
-                                    if (
+                                    showBank =
                                         $event.detail.select
                                             ?.requires_manual_transfer &&
                                         !$wire.purchaseInvoiceForm.iban
-                                    )
-                                        showBank = true;
+                                            ? true
+                                            : showBank
                                 "
                             />
                         </div>
