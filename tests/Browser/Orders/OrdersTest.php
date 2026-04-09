@@ -32,7 +32,7 @@ test('can create new order', function (): void {
         ->assertRoute('orders.orders')
         ->assertNoSmoke();
 
-    waitForElement($page, '[tall-datatable] [wire\\:id]');
+    waitForElement($page, '[tall-datatable] [wire\\\\:id]');
 
     $page->click('New order');
 
