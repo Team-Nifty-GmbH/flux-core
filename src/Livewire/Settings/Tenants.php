@@ -156,7 +156,6 @@ class Tenants extends TenantList
             $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
         }
 
-
         $this->js(<<<'JS'
             $tsui.open.modal('edit-tenant');
         JS);
