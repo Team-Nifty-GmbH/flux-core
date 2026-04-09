@@ -167,7 +167,7 @@
                                                 <div
                                                     class="text-sm text-gray-600 dark:text-gray-400"
                                                 >
-                                                    {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso")) }}
+                                                    {{ Number::currency((data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price")) ?? 0, data_get($parentOrder, "currency.iso")) }}
                                                     @if(data_get($position, "unit_abbreviation"))
                                                         / {{ data_get($position, "unit_abbreviation") }}
                                                     @endif
