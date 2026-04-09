@@ -17,7 +17,13 @@ L.Icon.Default.mergeOptions({
 // sets window.L, causing L.MarkerClusterGroup to be undefined. Loading the
 // plugin dynamically after ensuring window.L is set avoids this race.
 window.L = L;
-const markerClusterReady = import('leaflet.markercluster');
+const markerClusterReady = import('leaflet.markercluster').then(() => {
+    // Ensure the plugin registered on global L
+    if (!L.MarkerClusterGroup && window.L.MarkerClusterGroup) {
+        L.MarkerClusterGroup = window.L.MarkerClusterGroup;
+        L.markerClusterGroup = window.L.markerClusterGroup;
+    }
+});
 
 export default function (
     $wire,

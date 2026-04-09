@@ -96,7 +96,7 @@
                 :id="'bundle-type-enum-' . data_get($bundleType, 'value') . '-radio'"
                 name="bundle-type-enum-radio"
                 wire:model="product.bundle_type_enum"
-                x-bind:disabled="!edit"
+                x-bind:disabled="!isEditing"
                 :label="data_get($bundleType, 'label')"
                 :value="data_get($bundleType, 'value')"
             />

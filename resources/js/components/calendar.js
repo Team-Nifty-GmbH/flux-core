@@ -247,27 +247,7 @@ const calendar = () => {
                     this.calendarItem = calendar;
                 }
 
-                calendar.events = (info, successCallback, failureCallback) => {
-                    calendar.isLoading = true;
-
-                    const componentSnapshot =
-                        this.$wire.__instance?.snapshotEncoded || null;
-
-                    axios
-                        .post('/calendar-events', {
-                            info: info,
-                            calendar: calendar,
-                            componentSnapshot: componentSnapshot,
-                        })
-                        .then((response) => {
-                            successCallback(
-                                response.data.map(this.mapDatesToUtc),
-                            );
-                        })
-                        .finally(() => {
-                            calendar.isLoading = false;
-                        });
-                };
+                this.assignEventsFetcher(calendar);
             });
 
             return this.calendars;
@@ -293,10 +273,56 @@ const calendar = () => {
             this.height =
                 this.$el.parentNode.offsetHeight - this.$el.offsetTop - 2;
         },
+        _pendingRequests: {},
+        assignEventsFetcher(calendar) {
+            const calendarId = calendar.id;
+            const self = this;
+
+            calendar.events = (info, successCallback) => {
+                // Abort previous request for this calendar
+                self._pendingRequests[calendarId]?.abort();
+                const controller = new AbortController();
+                self._pendingRequests[calendarId] = controller;
+                calendar.isLoading = true;
+
+                const componentSnapshot =
+                    self.$wire.__instance?.snapshotEncoded || null;
+
+                axios
+                    .post(
+                        '/calendar-events',
+                        {
+                            info: info,
+                            calendar: calendar,
+                            componentSnapshot: componentSnapshot,
+                        },
+                        { signal: controller.signal },
+                    )
+                    .then((response) => {
+                        successCallback(response.data.map(self.mapDatesToUtc));
+                    })
+                    .catch((error) => {
+                        if (!axios.isCancel(error)) {
+                            throw error;
+                        }
+                    })
+                    .finally(() => {
+                        calendar.isLoading = false;
+                        delete self._pendingRequests[calendarId];
+                    });
+            };
+        },
         showEventSource(calendar) {
+            if (!calendar.events) {
+                this.assignEventsFetcher(calendar);
+            }
+
             this.calendar.addEventSource(calendar);
         },
         hideEventSource(calendar) {
+            this._pendingRequests[calendar.id]?.abort();
+            delete this._pendingRequests[calendar.id];
+            calendar.isLoading = false;
             this.calendar.getEventSourceById(calendar.id)?.remove();
         },
         init() {
