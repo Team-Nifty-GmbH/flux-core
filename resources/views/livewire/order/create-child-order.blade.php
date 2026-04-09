@@ -127,59 +127,75 @@
                     </h3>
                     <div class="space-y-2">
                         @forelse($replicateOrder->order_positions as $index => $position)
-                            <x-flux::list-item :item="[]">
-                                <x-slot:value>
-                                    <div
-                                        class="flex w-full items-start justify-between"
+                            @if(data_get($position, "is_free_text"))
+                                <div
+                                    class="dark:bg-secondary-700 flex items-center justify-between rounded bg-gray-100 px-3 py-2 font-semibold"
+                                >
+                                    <span
+                                        >{{ data_get($position, "name") }}</span
                                     >
-                                        <div class="flex-1">
-                                            <span>
-                                                {{ data_get($position, "name") }}
-                                            </span>
-                                            <div
-                                                class="text-sm text-gray-600 dark:text-gray-400"
-                                            >
-                                                {!! data_get($position, "description") !!}
-                                            </div>
-                                        </div>
-                                        <div class="ml-4 text-right">
-                                            <div class="font-semibold">
-                                                <span
-                                                    x-text="calculatePositionTotal($wire.replicateOrder.order_positions?.[{{ $index }}] || {}).toLocaleString(document.documentElement.lang, {minimumFractionDigits: 2, maximumFractionDigits: 2})"
-                                                ></span>
-                                                {{ data_get($parentOrder, "currency.symbol") }}
-                                            </div>
-                                            <div
-                                                class="text-sm text-gray-600 dark:text-gray-400"
-                                            >
-                                                {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso")) }}
-                                                @if(data_get($position, "unit_abbreviation"))
-                                                    / {{ data_get($position, "unit_abbreviation") }}
-                                                @endif
-                                            </div>
-                                            @if(data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
-                                                <div
-                                                    class="text-sm text-red-500"
-                                                >
-                                                    -{{ Number::percentage(bcmul(data_get($position, "discount_percentage") ?? 0, 100), 2) }} {{ __("Discount") }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </x-slot:value>
-                                <x-slot:actions>
-                                    <x-number
-                                        wire:model.number="replicateOrder.order_positions.{{ $index }}.amount"
-                                        min="0"
-                                        :max="data_get($position, 'amount', 0)"
-                                    />
                                     <x-button
                                         color="red"
                                         icon="trash"
+                                        sm
                                         wire:click="removePosition({{ $index }})"
                                     />
-                                </x-slot:actions>
-                            </x-flux::list-item>
+                                </div>
+                            @else
+                                <x-flux::list-item :item="[]">
+                                    <x-slot:value>
+                                        <div
+                                            class="flex w-full items-start justify-between"
+                                        >
+                                            <div class="flex-1">
+                                                <span>
+                                                    {{ data_get($position, "name") }}
+                                                </span>
+                                                <div
+                                                    class="text-sm text-gray-600 dark:text-gray-400"
+                                                >
+                                                    {!! data_get($position, "description") !!}
+                                                </div>
+                                            </div>
+                                            <div class="ml-4 text-right">
+                                                <div class="font-semibold">
+                                                    <span
+                                                        x-text="calculatePositionTotal($wire.replicateOrder.order_positions?.[{{ $index }}] || {}).toLocaleString(document.documentElement.lang, {minimumFractionDigits: 2, maximumFractionDigits: 2})"
+                                                    ></span>
+                                                    {{ data_get($parentOrder, "currency.symbol") }}
+                                                </div>
+                                                <div
+                                                    class="text-sm text-gray-600 dark:text-gray-400"
+                                                >
+                                                    {{ Number::currency(data_get($position, "is_net") ? data_get($position, "unit_net_price") : data_get($position, "unit_gross_price"), data_get($parentOrder, "currency.iso")) }}
+                                                    @if(data_get($position, "unit_abbreviation"))
+                                                        / {{ data_get($position, "unit_abbreviation") }}
+                                                    @endif
+                                                </div>
+                                                @if(data_get($position, "discount_percentage") && bccomp(data_get($position, "discount_percentage"), 0) === 1)
+                                                    <div
+                                                        class="text-sm text-red-500"
+                                                    >
+                                                        -{{ Number::percentage(bcmul(data_get($position, "discount_percentage") ?? 0, 100), 2) }} {{ __("Discount") }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </x-slot:value>
+                                    <x-slot:actions>
+                                        <x-number
+                                            wire:model.number="replicateOrder.order_positions.{{ $index }}.amount"
+                                            min="0"
+                                            :max="data_get($position, 'amount', 0)"
+                                        />
+                                        <x-button
+                                            color="red"
+                                            icon="trash"
+                                            wire:click="removePosition({{ $index }})"
+                                        />
+                                    </x-slot:actions>
+                                </x-flux::list-item>
+                            @endif
                         @empty
                             <div class="py-8 text-center text-gray-500">
                                 {{ __("No positions selected") }}

@@ -3,14 +3,17 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\DataTables\OrderPositionList;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Traits\CalculatesPositionAvailability;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Number;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\On;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class ReplicateOrderPositionList extends OrderPositionList
@@ -50,6 +53,14 @@ class ReplicateOrderPositionList extends OrderPositionList
         return [];
     }
 
+    #[On('updateAlreadyTakenPositions')]
+    public function updateAlreadyTakenPositions(array $alreadyTakenPositions): void
+    {
+        $this->alreadyTakenPositions = $alreadyTakenPositions;
+        $this->selected = [];
+        $this->loadData();
+    }
+
     public function getFormatters(): array
     {
         return array_merge(
@@ -64,7 +75,7 @@ class ReplicateOrderPositionList extends OrderPositionList
     public function getSelectAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag([
-            'x-show' => '! record.is_bundle_position',
+            'x-show' => '! record.is_bundle_position && ! (record.is_free_text && record.has_children)',
         ]);
     }
 
@@ -114,45 +125,93 @@ class ReplicateOrderPositionList extends OrderPositionList
             )
             : [];
 
-        foreach ($tree as $key => &$item) {
-            if (data_get($item, 'is_free_text')) {
+        // First pass: remove taken positions
+        foreach ($tree as $key => $item) {
+            // Free text and bundle positions taken by ID
+            if (in_array(data_get($item, 'id'), $this->alreadyTakenPositions)) {
+                unset($tree[$key]);
+
                 continue;
             }
 
+            // Real positions also checked by signed_amount
+            if (! data_get($item, 'is_free_text') && ! data_get($item, 'is_bundle_position')) {
+                $totalAmount = data_get(
+                    array_find($maxAmounts, fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')),
+                    'signed_amount'
+                );
+
+                if (bccomp($totalAmount, 0) !== 1) {
+                    unset($tree[$key]);
+                }
+            }
+        }
+
+        // Second pass: remove bundle positions without parent and
+        // free text blocks without remaining real children
+        foreach ($tree as $key => $item) {
             if (data_get($item, 'is_bundle_position')) {
-                if (
-                    is_null(
-                        array_find_key(
-                            $tree,
-                            fn (array $value): bool => data_get($value, 'id') === data_get($item, 'parent_id')
-                        )
-                    )
-                ) {
+                $parentExists = collect($tree)
+                    ->contains(fn (array $v) => data_get($v, 'id') === data_get($item, 'parent_id'));
+
+                if (! $parentExists) {
                     unset($tree[$key]);
                 }
 
                 continue;
             }
 
-            $totalAmount = data_get(
-                array_find($maxAmounts, fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')),
-                'signed_amount'
-            );
+            if (data_get($item, 'is_free_text') && data_get($item, 'has_children')) {
+                $hasRemainingChildren = collect($tree)
+                    ->contains(fn (array $child) => data_get($child, 'parent_id') === data_get($item, 'id')
+                        && ! data_get($child, 'is_free_text'));
 
-            if (bccomp($totalAmount, 0) !== 1 || in_array(data_get($item, 'id'), $this->alreadyTakenPositions)) {
-                unset($tree[$key]);
+                if (! $hasRemainingChildren) {
+                    unset($tree[$key]);
+                }
+            }
+        }
 
-                continue;
+        // Third pass: format remaining items for display
+        $currencyIso = data_get(
+            resolve_static(Order::class, 'query')
+                ->whereKey($this->orderId)
+                ->with('currency:id,iso')
+                ->first(['id', 'currency_id']),
+            'currency.iso',
+            'EUR'
+        );
+
+        foreach ($tree as $key => &$item) {
+            $totalAmount = null;
+
+            if (! data_get($item, 'is_free_text') && ! data_get($item, 'is_bundle_position')) {
+                $totalAmount = data_get(
+                    array_find($maxAmounts, fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')),
+                    'signed_amount'
+                );
             }
 
             $item = Arr::only(Arr::dot($item), $returnKeys);
             $item['totalAmount'] = $totalAmount;
             $item['indentation'] = '';
-            $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
-            $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
+            $item['unit_price'] = data_get($item, 'is_net')
+                ? data_get($item, 'unit_net_price', 0)
+                : data_get($item, 'unit_gross_price', 0);
+            $item['alternative_tag'] = data_get($item, 'is_alternative') ? __('Alternative') : '';
 
-            if ($item['depth'] > 0) {
-                $indent = $item['depth'] * 20;
+            // Format money values
+            foreach (['unit_net_price', 'total_net_price'] as $moneyCol) {
+                $raw = data_get($item, $moneyCol);
+
+                if (! is_null($raw)) {
+                    $formatted = Number::currency((float) $raw, $currencyIso);
+                    $item[$moneyCol] = ['raw' => $raw, 'display' => e($formatted)];
+                }
+            }
+
+            if (data_get($item, 'depth', 0) > 0) {
+                $indent = data_get($item, 'depth') * 20;
                 $item['indentation'] = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">
                     </div>
@@ -160,7 +219,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             }
         }
 
-        return array_values($tree);
+        return ['data' => array_values($tree)];
     }
 
     protected function getReturnKeys(): array

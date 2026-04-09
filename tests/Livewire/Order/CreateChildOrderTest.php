@@ -263,6 +263,420 @@ test('shows correct title for retoure', function (): void {
     expect($component->instance()->getTitle())->toEqual(__('Create Retoure'));
 });
 
+test('can take free text positions', function (): void {
+    $vatRate = VatRate::factory()->create();
+
+    $freeText = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'Free Text Note',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    $component->set('selectedPositions', [$freeText->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+    $freeTextPosition = collect($positions)->firstWhere('id', $freeText->getKey());
+
+    expect($freeTextPosition)->not->toBeNull()
+        ->and($freeTextPosition['name'])->toBe('Free Text Note');
+});
+
+test('can take mix of real and free text positions', function (): void {
+    $vatRate = VatRate::factory()->create();
+    $realPosition = $this->parentOrder->orderPositions()->first();
+
+    $freeText = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'Section Header',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    $component->set('selectedPositions', [$freeText->getKey(), $realPosition->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+
+    expect($positions)->toHaveCount(2);
+
+    $names = collect($positions)->pluck('name')->toArray();
+    expect($names)->toContain('Section Header')
+        ->and($names)->toContain($realPosition->name);
+});
+
+test('takeOrderPositions dispatches updateAlreadyTakenPositions', function (): void {
+    $orderPosition = $this->parentOrder->orderPositions()->first();
+
+    Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ])
+        ->set('selectedPositions', [$orderPosition->getKey()])
+        ->call('takeOrderPositions')
+        ->assertDispatched('updateAlreadyTakenPositions', fn ($name, $params) => in_array($orderPosition->getKey(), $params['alreadyTakenPositions'])
+        );
+});
+
+test('removePosition dispatches updateAlreadyTakenPositions', function (): void {
+    $orderPosition = $this->parentOrder->orderPositions()->first();
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ])
+        ->set('selectedPositions', [$orderPosition->getKey()])
+        ->call('takeOrderPositions');
+
+    $component->call('removePosition', 0)
+        ->assertDispatched('updateAlreadyTakenPositions', fn ($name, $params) => empty($params['alreadyTakenPositions'])
+        );
+});
+
+test('taken positions follow tree order regardless of selection order', function (): void {
+    $vatRate = VatRate::factory()->create();
+    $existingPosition = $this->parentOrder->orderPositions()->where('is_free_text', false)->first();
+
+    // Create a second real position
+    $secondPosition = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'Second Position',
+        'amount' => 3,
+        'signed_amount' => 3,
+        'unit_net_price' => 50,
+        'unit_gross_price' => 59.50,
+        'total_net_price' => 150,
+        'total_gross_price' => 178.50,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    // Select in reverse order
+    $component->set('selectedPositions', [$secondPosition->getKey(), $existingPosition->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+    $ids = array_column($positions, 'id');
+
+    // Tree order: existing (lower ID) before second (higher ID)
+    expect(array_search($existingPosition->getKey(), $ids))
+        ->toBeLessThan(array_search($secondPosition->getKey(), $ids));
+});
+
+test('selecting child position auto-includes parent block', function (): void {
+    $vatRate = VatRate::factory()->create();
+
+    $block = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'AutoBlock',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $child = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $block->getKey(),
+        'name' => 'BlockChild',
+        'amount' => 2,
+        'signed_amount' => 2,
+        'unit_net_price' => 100,
+        'unit_gross_price' => 119,
+        'total_net_price' => 200,
+        'total_gross_price' => 238,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    // Only select the child — block should be auto-included
+    $component->set('selectedPositions', [$child->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+    $ids = array_column($positions, 'id');
+
+    expect($ids)->toContain($block->getKey())
+        ->and($ids)->toContain($child->getKey());
+});
+
+test('block stays visible on left when only some children are taken', function (): void {
+    $vatRate = VatRate::factory()->create();
+
+    $block = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'PartialBlock',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $child1 = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $block->getKey(),
+        'name' => 'TakenChild',
+        'amount' => 2,
+        'signed_amount' => 2,
+        'unit_net_price' => 100,
+        'unit_gross_price' => 119,
+        'total_net_price' => 200,
+        'total_gross_price' => 238,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $block->getKey(),
+        'name' => 'RemainingChild',
+        'amount' => 3,
+        'signed_amount' => 3,
+        'unit_net_price' => 50,
+        'unit_gross_price' => 59.50,
+        'total_net_price' => 150,
+        'total_gross_price' => 178.50,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    // Take only child1
+    $component->set('selectedPositions', [$child1->getKey()])
+        ->call('takeOrderPositions');
+
+    // alreadyTakenPositions must NOT contain the block ID
+    // so the block stays visible on the left with remaining children
+    $dispatched = $component->effects['dispatches'] ?? [];
+    $updateEvent = collect($dispatched)->firstWhere('name', 'updateAlreadyTakenPositions');
+    $takenIds = data_get($updateEvent, 'params.alreadyTakenPositions', []);
+
+    expect($takenIds)->toContain($child1->getKey())
+        ->and($takenIds)->not->toContain($block->getKey());
+});
+
+test('removing block removes all its children from right list', function (): void {
+    $vatRate = VatRate::factory()->create();
+
+    $block = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'RemovableBlock',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $child = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $block->getKey(),
+        'name' => 'BlockChildToRemove',
+        'amount' => 2,
+        'signed_amount' => 2,
+        'unit_net_price' => 100,
+        'unit_gross_price' => 119,
+        'total_net_price' => 200,
+        'total_gross_price' => 238,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    // Take child (block auto-included)
+    $component->set('selectedPositions', [$child->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+    expect($positions)->toHaveCount(2);
+
+    // Find block index and remove it
+    $blockIndex = array_search(
+        $block->getKey(),
+        array_column($positions, 'id')
+    );
+
+    $component->call('removePosition', $blockIndex);
+
+    // Both block and child should be gone
+    $remaining = $component->get('replicateOrder.order_positions');
+    $remainingIds = array_column($remaining, 'id');
+
+    expect($remainingIds)->not->toContain($block->getKey())
+        ->and($remainingIds)->not->toContain($child->getKey());
+});
+
+test('nested blocks: selecting deep child includes all ancestor blocks', function (): void {
+    $vatRate = VatRate::factory()->create();
+
+    $outerBlock = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'OuterBlock',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $innerBlock = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $outerBlock->getKey(),
+        'name' => 'InnerBlock',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $deepChild = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $innerBlock->getKey(),
+        'name' => 'DeepChild',
+        'amount' => 1,
+        'signed_amount' => 1,
+        'unit_net_price' => 200,
+        'unit_gross_price' => 238,
+        'total_net_price' => 200,
+        'total_gross_price' => 238,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    // Select only the deep child
+    $component->set('selectedPositions', [$deepChild->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+    $ids = array_column($positions, 'id');
+
+    expect($ids)->toContain($outerBlock->getKey())
+        ->and($ids)->toContain($innerBlock->getKey())
+        ->and($ids)->toContain($deepChild->getKey());
+});
+
+test('nested blocks: removing outer block removes everything inside', function (): void {
+    $vatRate = VatRate::factory()->create();
+
+    $outerBlock = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'name' => 'OuterToRemove',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $innerBlock = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $outerBlock->getKey(),
+        'name' => 'InnerToRemove',
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $deepChild = OrderPosition::factory()->create([
+        'order_id' => $this->parentOrder->getKey(),
+        'vat_rate_id' => $vatRate->getKey(),
+        'parent_id' => $innerBlock->getKey(),
+        'name' => 'DeepChildToRemove',
+        'amount' => 1,
+        'signed_amount' => 1,
+        'unit_net_price' => 200,
+        'unit_gross_price' => 238,
+        'total_net_price' => 200,
+        'total_gross_price' => 238,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    $component->set('selectedPositions', [$deepChild->getKey()])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+    $outerIndex = array_search($outerBlock->getKey(), array_column($positions, 'id'));
+
+    // Remove outer block — everything inside must go
+    $component->call('removePosition', $outerIndex);
+
+    $remaining = $component->get('replicateOrder.order_positions');
+    $remainingIds = array_column($remaining, 'id');
+
+    expect($remainingIds)->not->toContain($outerBlock->getKey())
+        ->and($remainingIds)->not->toContain($innerBlock->getKey())
+        ->and($remainingIds)->not->toContain($deepChild->getKey());
+});
+
+test('can take all positions with wildcard selection', function (): void {
+    $component = Livewire::test(CreateChildOrder::class, [
+        'orderId' => $this->parentOrder->getKey(),
+        'type' => OrderTypeEnum::Retoure->value,
+    ]);
+
+    $component->set('selectedPositions', ['*'])
+        ->call('takeOrderPositions');
+
+    $positions = $component->get('replicateOrder.order_positions');
+
+    expect($positions)->not->toBeEmpty();
+});
+
 test('shows correct title for split order', function (): void {
     $component = Livewire::test(CreateChildOrder::class, [
         'orderId' => $this->parentOrder->id,
