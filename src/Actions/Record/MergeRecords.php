@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use ReflectionException;
 use ReflectionMethod;
-use Spatie\ModelInfo\ModelInfo;
+use TeamNiftyGmbH\DataTable\Helpers\RelationFinder;
 
 class MergeRecords extends FluxAction
 {
@@ -80,8 +80,8 @@ class MergeRecords extends FluxAction
         );
 
         // Move related records to the main record depending on the respective relation
-        $relations = data_get(ModelInfo::forModel($mainRecord), 'relations')
-            ?->filter(function ($relation) {
+        $relations = RelationFinder::forModel($mainRecord)
+            ->filter(function ($relation) {
                 return in_array(
                     $relation->type,
                     [
@@ -301,8 +301,8 @@ class MergeRecords extends FluxAction
         // Validate morphTo relations to ensure that the foreign key and morph type are from the same record
         $model = morphed_model($this->getData('model_type'));
 
-        $morphTos = data_get(ModelInfo::forModel($model), 'relations')
-            ?->filter(function ($relation) {
+        $morphTos = RelationFinder::forModel($model)
+            ->filter(function ($relation) {
                 return $relation->type === MorphTo::class;
             });
 

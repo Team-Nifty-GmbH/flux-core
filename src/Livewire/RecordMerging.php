@@ -15,9 +15,9 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use Spatie\ModelInfo\Relations\RelationFinder;
 use Spatie\ModelStates\State;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Helpers\RelationFinder;
 
 class RecordMerging extends Component
 {

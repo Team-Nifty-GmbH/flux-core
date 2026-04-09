@@ -67,8 +67,9 @@ class Navigation extends Component
         data_forget($menuAll, 'settings.children');
         $menuHash = md5(serialize($menuAll));
 
-        if (Session::has('navigations.' . $menuHash)) {
-            return Session::get('navigations.' . $menuHash);
+        $cached = Session::get('navigations.' . $menuHash);
+        if (is_array($cached)) {
+            return collect($cached);
         }
 
         $guard = explode('_', Auth::guard()->getName());
@@ -96,7 +97,7 @@ class Navigation extends Component
             }
         }
 
-        Session::put('navigations.' . $menuHash, collect($navigations));
+        Session::put('navigations.' . $menuHash, $navigations);
 
         return collect($navigations);
     }

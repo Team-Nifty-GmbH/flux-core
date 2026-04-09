@@ -9,7 +9,6 @@ use FluxErp\Livewire\DataTables\TagList;
 use FluxErp\Livewire\Forms\TagForm;
 use FluxErp\Models\Tag;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -148,17 +147,7 @@ class Tags extends TagList
         return array_merge(
             parent::getViewData(),
             [
-                'taggables' => model_info_all()
-                    ->filter(fn ($modelInfo) => in_array(
-                        HasTags::class,
-                        class_uses_recursive($modelInfo->class)
-                    ))
-                    ->unique('morphClass')
-                    ->map(fn ($modelInfo) => [
-                        'label' => __(Str::headline($modelInfo->morphClass)),
-                        'value' => $modelInfo->morphClass,
-                    ])
-                    ->toArray(),
+                'taggables' => get_models_with_trait(HasTags::class),
             ]
         );
     }

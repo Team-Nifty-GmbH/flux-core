@@ -484,11 +484,10 @@ class FluxOptimize extends Command
     protected function optimizeModelInfo(): void
     {
         if ($this->forget) {
-            Cache::forget(config('tall-datatables.cache_key') . '.modelInfo');
-
-            return;
+            $cacheKey = config('tall-datatables.cache_key');
+            Cache::forget($cacheKey . '.modelInfo');
+            Cache::forget($cacheKey . '.modelFinder');
+            Cache::forget($cacheKey . '.with');
         }
-
-        model_info_all();
     }
 }

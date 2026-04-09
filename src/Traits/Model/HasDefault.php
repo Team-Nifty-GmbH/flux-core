@@ -13,11 +13,33 @@ trait HasDefault
 
     public static function default(): ?static
     {
-        return Cache::memo()
+        $cacheKey = 'default_' . morph_alias(static::class);
+
+        $attributes = Cache::memo()
             ->rememberForever(
-                'default_' . morph_alias(static::class),
-                fn () => resolve_static(static::class, 'query')->where(static::$defaultColumn, true)->first()
+                $cacheKey,
+                fn () => resolve_static(static::class, 'query')
+                    ->where(static::$defaultColumn, true)
+                    ->first()
+                    ?->toArray()
             );
+
+        if (! is_null($attributes) && ! is_array($attributes)) {
+            Cache::memo()->forget($cacheKey);
+            $attributes = resolve_static(static::class, 'query')
+                ->where(static::$defaultColumn, true)
+                ->first()
+                ?->toArray();
+        }
+
+        if (! $attributes) {
+            return null;
+        }
+
+        $model = app(static::class)->forceFill($attributes)->syncOriginal();
+        $model->exists = true;
+
+        return $model;
     }
 
     protected static function bootHasDefault(): void
@@ -25,7 +47,7 @@ trait HasDefault
         static::saving(
             function (Model $model): void {
                 if ($model->isDirty(static::$defaultColumn)) {
-                    Cache::forget('default_' . morph_alias(static::class));
+                    Cache::memo()->forget('default_' . morph_alias(static::class));
 
                     if ($model->{static::$defaultColumn}) {
                         $model->setUpdatedDefault();
@@ -53,6 +75,8 @@ trait HasDefault
 
         static::deleted(function (Model $model): void {
             if ($model->{static::$defaultColumn}) {
+                Cache::memo()->forget('default_' . morph_alias(static::class));
+
                 $default = static::query()->first();
                 if ($default) {
                     $default->{static::$defaultColumn} = true;

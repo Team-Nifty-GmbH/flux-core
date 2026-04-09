@@ -15,9 +15,9 @@ use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
-use Spatie\ModelInfo\ModelInfo;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
@@ -48,13 +48,14 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
 
     protected static function booted(): void
     {
-        model_info_all()
-            ->filter(fn (ModelInfo $modelInfo) => in_array(
+        collect(Relation::morphMap())
+            ->filter(fn (string $class) => in_array(
                 Categorizable::class,
-                class_uses_recursive($modelInfo->class)
+                class_uses_recursive($class)
             ))
-            ->each(function (ModelInfo $modelInfo): void {
-                $relationName = Str::of(class_basename($modelInfo->class))->camel()->plural()->toString();
+            ->each(function (string $class): void {
+                $resolved = resolve_static($class, 'class');
+                $relationName = Str::of(class_basename($resolved))->camel()->plural()->toString();
 
                 if (method_exists(static::class, $relationName)) {
                     return;
@@ -62,8 +63,8 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
 
                 static::resolveRelationUsing(
                     $relationName,
-                    function (Category $category) use ($modelInfo) {
-                        return $category->morphedByMany($modelInfo->class, 'categorizable', 'categorizable')
+                    function (Category $category) use ($resolved) {
+                        return $category->morphedByMany($resolved, 'categorizable', 'categorizable')
                             ->using(Pivots\Categorizable::class);
                     }
                 );
