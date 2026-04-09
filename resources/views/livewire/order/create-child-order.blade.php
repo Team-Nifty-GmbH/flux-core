@@ -128,8 +128,12 @@
                     <div class="space-y-2">
                         @forelse($replicateOrder->order_positions as $index => $position)
                             @if(data_get($position, "is_free_text"))
-                                <div class="flex items-center justify-between rounded bg-gray-100 px-3 py-2 font-semibold dark:bg-secondary-700">
-                                    <span>{{ data_get($position, "name") }}</span>
+                                <div
+                                    class="dark:bg-secondary-700 flex items-center justify-between rounded bg-gray-100 px-3 py-2 font-semibold"
+                                >
+                                    <span
+                                        >{{ data_get($position, "name") }}</span
+                                    >
                                     <x-button
                                         color="red"
                                         icon="trash"
