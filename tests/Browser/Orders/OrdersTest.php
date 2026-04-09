@@ -32,7 +32,18 @@ test('can create new order', function (): void {
         ->assertRoute('orders.orders')
         ->assertNoSmoke();
 
-    waitForElement($page, '[tall-datatable] [wire\\\\:id]');
+    $page->script("() => new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('Livewire not ready')), 10000);
+        const check = () => {
+            if (window.Livewire) {
+                clearTimeout(timeout);
+                resolve();
+            } else {
+                setTimeout(check, 200);
+            }
+        };
+        check();
+    })");
 
     $page->click('New order');
 
