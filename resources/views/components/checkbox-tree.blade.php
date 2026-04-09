@@ -86,7 +86,7 @@
                         class="ph ph-caret-right text-base transition-transform duration-200"
                         x-bind:class="
                             node[childrenAttribute]
-                                ? isOpen(node)
+                                ? search?.length > 0 || isOpen(node)
                                     ? 'rotate-90'
                                     : 'rotate-0'
                                 : 'invisible'
@@ -153,7 +153,7 @@
                             x-sort="(item, position) => {{{ $attributes->get("moved", "null") }}}"
                             x-sort:group="folder - tree"
                         @endif
-                        x-show="isOpen(node)"
+                        x-show="search?.length > 0 || isOpen(node)"
                         x-transition
                         class="tree__children border-l border-gray-200 pl-4 dark:border-slate-500"
                     >
