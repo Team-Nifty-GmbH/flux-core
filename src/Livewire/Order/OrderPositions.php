@@ -705,7 +705,7 @@ class OrderPositions extends OrderPositionList
 
     protected function augmentItemArray(array &$itemArray, Model $item): void
     {
-        $itemArray['currency'] = $this->order->currency;
+        $itemArray['currency'] = ['iso' => data_get($this->order->currency, 'iso')];
         $itemArray['indentation'] = '';
         $itemArray['unit_price'] = $item->is_net
             ? $item->unit_net_price ?? 0
