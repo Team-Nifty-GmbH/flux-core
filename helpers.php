@@ -14,27 +14,19 @@ if (! function_exists('all_models')) {
     }
 }
 
-if (! function_exists('model_info_all')) {
-    function model_info_all(): Illuminate\Support\Collection
-    {
-        return TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels()
-            ->merge(
-                TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels(
-                    flux_path('src/Models'),
-                    flux_path('src'),
-                    'FluxErp')
-            );
-    }
-}
-
 if (! function_exists('get_models_with_trait')) {
     function get_models_with_trait(string $trait, ?callable $mapCallback = null): array
     {
-        $morphMap = Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+        $models = Illuminate\Support\Facades\Cache::memo()
+            ->rememberForever(
+                'models_with_trait:' . $trait,
+                fn () => collect(Illuminate\Database\Eloquent\Relations\Relation::morphMap())
+                    ->filter(fn (string $class) => in_array($trait, class_uses_recursive($class)))
+                    ->all()
+            );
 
-        return collect($morphMap)
-            ->filter(fn ($class, $alias) => in_array($trait, class_uses_recursive(morphed_model($alias))))
-            ->map($mapCallback ?? fn ($class, $alias) => [
+        return collect($models)
+            ->map($mapCallback ?? fn (string $class, string $alias) => [
                 'label' => __(Illuminate\Support\Str::headline($alias)),
                 'value' => $alias,
             ])

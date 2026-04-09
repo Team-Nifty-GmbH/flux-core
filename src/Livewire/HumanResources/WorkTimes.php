@@ -16,10 +16,8 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Model\Trackable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -199,17 +197,7 @@ class WorkTimes extends WorkTimeList
                 'workTimeTypes' => resolve_static(WorkTimeType::class, 'query')
                     ->get(['id', 'name', 'is_billable'])
                     ->toArray(),
-                'trackableTypes' => model_info_all()
-                    ->unique('morphClass')
-                    ->filter(fn (ModelInfo $modelInfo) => in_array(
-                        Trackable::class,
-                        class_uses_recursive($modelInfo->class)
-                    ))
-                    ->map(fn ($modelInfo) => [
-                        'label' => __(Str::headline($modelInfo->morphClass)),
-                        'value' => $modelInfo->morphClass,
-                    ])
-                    ->toArray(),
+                'trackableTypes' => get_models_with_trait(Trackable::class),
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->where('is_hidden', false)
                     ->where('is_active', true)

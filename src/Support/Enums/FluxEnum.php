@@ -18,22 +18,36 @@ abstract class FluxEnum implements EnumInterface, SerializesCastableAttributes
 
     public static function cases(): array
     {
-        return Cache::memo()->rememberForever(
-            'flux.enums.' . resolve_static(static::class, 'class'),
+        $cacheKey = 'flux.enums.' . resolve_static(static::class, 'class');
+
+        $cases = Cache::memo()->rememberForever(
+            $cacheKey,
             function (): array {
                 $reflection = new ReflectionClass(resolve_static(static::class, 'class'));
 
                 return Arr::mapWithKeys(
                     $reflection->getConstants(ReflectionClassConstant::IS_FINAL),
                     fn (int|string|array $value, string $key) => [
-                        $key => (object) [
-                            'name' => $key,
-                            'value' => $value,
-                        ],
+                        $key => ['name' => $key, 'value' => $value],
                     ],
                 );
             }
         );
+
+        // Fallback: stale cache may contain stdClass objects from before this fix
+        if (! empty($cases) && ! is_array(Arr::first($cases))) {
+            Cache::memo()->forget($cacheKey);
+
+            $reflection = new ReflectionClass(resolve_static(static::class, 'class'));
+            $cases = Arr::mapWithKeys(
+                $reflection->getConstants(ReflectionClassConstant::IS_FINAL),
+                fn (int|string|array $value, string $key) => [
+                    $key => ['name' => $key, 'value' => $value],
+                ],
+            );
+        }
+
+        return array_map(fn (array $case) => (object) $case, $cases);
     }
 
     public static function from(int|string $value): object

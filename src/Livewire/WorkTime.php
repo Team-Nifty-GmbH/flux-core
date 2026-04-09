@@ -11,11 +11,9 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Throwable;
 
@@ -63,17 +61,7 @@ class WorkTime extends Component
                 ->select(['id', 'name', 'is_billable'])
                 ->get()
                 ->toArray(),
-            'trackableTypes' => model_info_all()
-                ->unique('morphClass')
-                ->filter(fn (ModelInfo $modelInfo) => in_array(
-                    Trackable::class,
-                    class_uses_recursive($modelInfo->class)
-                ))
-                ->map(fn ($modelInfo) => [
-                    'label' => __(Str::headline($modelInfo->morphClass)),
-                    'value' => $modelInfo->morphClass,
-                ])
-                ->toArray(),
+            'trackableTypes' => get_models_with_trait(Trackable::class),
         ]);
     }
 

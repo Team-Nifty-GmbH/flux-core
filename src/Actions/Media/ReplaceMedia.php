@@ -7,6 +7,7 @@ use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\ReplaceMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -118,17 +119,11 @@ class ReplaceMedia extends FluxAction
 
     protected function replaceOldMediaOnModels(int|string $oldMediaId, Model $newMedia): void
     {
-        model_info_all()
-            ->filter(
-                fn ($modelInfo) => is_a(
-                    resolve_static($modelInfo->class, 'class'),
-                    HasMediaForeignKey::class,
-                    true
-                )
-            )
+        collect(Relation::morphMap())
+            ->filter(fn (string $class) => is_a($class, HasMediaForeignKey::class, true))
             ->each(
-                fn ($modelInfo) => resolve_static(
-                    $modelInfo->class,
+                fn (string $class) => resolve_static(
+                    $class,
                     'mediaReplaced',
                     [
                         'oldMediaId' => $oldMediaId,

@@ -14,7 +14,7 @@ use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
+use Illuminate\Support\Facades\Schema;
 
 class SerialNumberRange extends FluxModel
 {
@@ -79,8 +79,12 @@ class SerialNumberRange extends FluxModel
             return $defaultAttributes;
         }
 
+        $modelInstance = app(morphed_model($this->model_type));
         $modelAttributes = array_fill_keys(
-            ModelInfo::forModel(morphed_model($this->model_type))->attributes->pluck('name')->toArray(),
+            array_merge(
+                Schema::getColumnListing($modelInstance->getTable()),
+                $modelInstance->getAppends()
+            ),
             null
         );
 
