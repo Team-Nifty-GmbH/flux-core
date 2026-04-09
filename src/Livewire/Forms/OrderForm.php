@@ -203,7 +203,7 @@ class OrderForm extends FluxForm
                 'orderType:id,order_type_enum',
                 'contact:id,has_delivery_lock',
                 'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
-                'currency:id,symbol',
+                'currency:id,iso,symbol',
                 'discounts' => fn (MorphMany $query) => $query->ordered()
                     ->select([
                         'id',
