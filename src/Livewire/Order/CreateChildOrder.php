@@ -103,8 +103,26 @@ class CreateChildOrder extends Component
 
     public function removePosition(int $index): void
     {
+        $position = $this->replicateOrder->order_positions[$index] ?? null;
         unset($this->replicateOrder->order_positions[$index]);
+
+        // If removing a block, also remove all descendants recursively
+        if ($position && data_get($position, 'is_free_text')) {
+            $positionId = data_get($position, 'id');
+            $descendantIds = resolve_static(OrderPosition::class, 'query')
+                ->whereKey($positionId)
+                ->first()
+                ?->descendantKeys() ?? [];
+
+            $this->replicateOrder->order_positions = array_filter(
+                $this->replicateOrder->order_positions,
+                fn ($p) => ! in_array(data_get($p, 'id'), $descendantIds)
+            );
+        }
+
         $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
+
+        $this->dispatchAlreadyTakenPositions();
     }
 
     #[Renderless]
@@ -138,12 +156,44 @@ class CreateChildOrder extends Component
     public function takeOrderPositions(): void
     {
         $takeAllWithPercentage = $this->percentage && $this->percentage > 0;
+        $positionIds = [];
 
         if ($takeAllWithPercentage) {
             $this->replicateOrder->order_positions = [];
         } else {
             $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
-            $positionIds = array_diff($this->selectedPositions, $alreadySelectedIds, ['*']);
+
+            // Resolve wildcard '*' to all available position IDs
+            if (in_array('*', $this->selectedPositions)) {
+                $this->selectedPositions = resolve_static(OrderPosition::class, 'query')
+                    ->where('order_id', $this->orderId)
+                    ->pluck('id')
+                    ->toArray();
+            }
+
+            // Auto-include all ancestor blocks via single CTE query per selected position
+            $selectedWithParents = collect($this->selectedPositions);
+            $selectedPositions = resolve_static(OrderPosition::class, 'query')
+                ->whereKey($this->selectedPositions)
+                ->whereNotNull('parent_id')
+                ->get();
+
+            $allAncestorIds = $selectedPositions
+                ->flatMap(fn (OrderPosition $pos) => $pos->ancestorKeys())
+                ->unique();
+
+            if ($allAncestorIds->isNotEmpty()) {
+                $selectedWithParents = $selectedWithParents->merge($allAncestorIds);
+
+                // Add free text siblings in ancestor blocks
+                $freeTextSiblings = resolve_static(OrderPosition::class, 'query')
+                    ->whereIn('parent_id', $allAncestorIds)
+                    ->where('is_free_text', true)
+                    ->pluck('id');
+                $selectedWithParents = $selectedWithParents->merge($freeTextSiblings);
+            }
+
+            $positionIds = array_diff($selectedWithParents->unique()->toArray(), $alreadySelectedIds);
 
             if (! $positionIds) {
                 $this->selectedPositions = [];
@@ -169,8 +219,14 @@ class CreateChildOrder extends Component
             )
         );
 
+        $realPositionIds = array_column($maxAmounts, 'id');
+        $freeTextIds = resolve_static(OrderPosition::class, 'query')
+            ->whereKey($positionIds)
+            ->where('is_free_text', true)
+            ->pluck('id')
+            ->toArray();
+
         $orderPositions = resolve_static(OrderPosition::class, 'query')
-            ->whereKey(array_column($maxAmounts, 'id'))
             ->with(['product.unit:id,abbreviation'])
             ->select([
                 'id',
@@ -183,27 +239,39 @@ class CreateChildOrder extends Component
                 'total_gross_price',
                 'discount_percentage',
                 'is_net',
+                'is_free_text',
             ])
-            ->get()
-            ->map(function (OrderPosition $position) use ($maxAmounts): OrderPosition {
-                $position->setRelation(
-                    'maxAmount',
-                    data_get(
-                        array_find(
-                            $maxAmounts,
-                            fn (array $value): bool => data_get($value, 'id') === $position->getKey()
-                        ),
-                        'signed_amount'
-                    )
-                );
-
-                return $position;
-            });
+            ->whereKey(array_merge($realPositionIds, $freeTextIds))
+            ->get();
 
         foreach ($orderPositions as $orderPosition) {
+            if ($orderPosition->is_free_text) {
+                $this->replicateOrder->order_positions[] = [
+                    'id' => $orderPosition->getKey(),
+                    'amount' => 0,
+                    'name' => $orderPosition->name,
+                    'description' => $orderPosition->description,
+                    'unit_net_price' => 0,
+                    'unit_gross_price' => 0,
+                    'total_net_price' => 0,
+                    'total_gross_price' => 0,
+                    'discount_percentage' => 0,
+                    'is_net' => $orderPosition->is_net,
+                    'is_free_text' => true,
+                    'unit_abbreviation' => null,
+                ];
+
+                continue;
+            }
+
+            $amount = data_get(
+                array_find($maxAmounts, fn (array $v) => data_get($v, 'id') === $orderPosition->getKey()),
+                'signed_amount'
+            );
+
             $amount = $takeAllWithPercentage
-                ? bcround(bcmul($orderPosition->maxAmount, bcdiv($this->percentage, 100)), 2)
-                : $orderPosition->maxAmount;
+                ? bcround(bcmul($amount, bcdiv($this->percentage, 100)), 2)
+                : $amount;
 
             if (bccomp($amount, 0) === 1) {
                 $this->replicateOrder->order_positions[] = [
@@ -222,10 +290,49 @@ class CreateChildOrder extends Component
             }
         }
 
+        $this->sortPositionsByTreeOrder();
+
         if ($takeAllWithPercentage) {
             $this->percentage = null;
         }
 
         $this->selectedPositions = [];
+
+        $this->dispatchAlreadyTakenPositions();
+    }
+
+    protected function dispatchAlreadyTakenPositions(): void
+    {
+        // Exclude block headers so blocks stay visible on the left
+        // while they still have remaining children
+        $takenIds = collect($this->replicateOrder->order_positions)->pluck('id');
+        $blockIds = resolve_static(OrderPosition::class, 'query')
+            ->whereKey($takenIds)
+            ->where('is_free_text', true)
+            ->whereHas('children')
+            ->pluck('id');
+
+        $this->dispatch(
+            'updateAlreadyTakenPositions',
+            alreadyTakenPositions: $takenIds->diff($blockIds)->values()->toArray()
+        );
+    }
+
+    protected function sortPositionsByTreeOrder(): void
+    {
+        $treeOrder = to_flat_tree(
+            resolve_static(OrderPosition::class, 'familyTree')
+                ->where('order_id', $this->orderId)
+                ->whereNull('parent_id')
+                ->get()
+                ->toArray()
+        );
+        $orderMap = array_flip(array_column($treeOrder, 'id'));
+
+        usort(
+            $this->replicateOrder->order_positions,
+            fn ($left, $right) => data_get($orderMap, data_get($left, 'id'), PHP_INT_MAX)
+                <=> data_get($orderMap, data_get($right, 'id'), PHP_INT_MAX)
+        );
     }
 }
