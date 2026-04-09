@@ -178,8 +178,14 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function findCommands(): array
     {
+        $path = flux_path('src/Console/Commands');
+
+        if (! is_dir($path)) {
+            return [];
+        }
+
         $iterator = Finder::create()
-            ->in(flux_path('src/Console/Commands'))
+            ->in($path)
             ->files()
             ->name('*.php')
             ->sortByName();
@@ -187,10 +193,17 @@ class FluxServiceProvider extends ServiceProvider
         $commandClasses = [];
 
         foreach ($iterator as $file) {
-            $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
-            $classNamespace = '\\FluxErp\\';
-            $class = $classNamespace . str_replace('.php', '', $classPath);
-            $commandClasses[] = $class;
+            $relativePath = $file->getRelativePathname();
+
+            $class = 'FluxErp\\Console\\Commands\\' . str_replace(
+                ['/', '.php'],
+                ['\\', ''],
+                $relativePath
+            );
+
+            if (class_exists($class)) {
+                $commandClasses[] = $class;
+            }
         }
 
         return $commandClasses;
