@@ -79,8 +79,12 @@ class SerialNumberRange extends FluxModel
             return $defaultAttributes;
         }
 
+        $modelInstance = app(morphed_model($this->model_type));
         $modelAttributes = array_fill_keys(
-            Schema::getColumnListing(app(morphed_model($this->model_type))->getTable()),
+            array_merge(
+                Schema::getColumnListing($modelInstance->getTable()),
+                $modelInstance->getAppends()
+            ),
             null
         );
 
