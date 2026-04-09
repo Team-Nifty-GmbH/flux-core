@@ -122,7 +122,9 @@ class SepaMandates extends SepaMandateList
     public function edit(?SepaMandate $sepaMandate = null): void
     {
         $this->sepaMandate->reset();
-        $this->sepaMandate->fill($sepaMandate);
+        if (! is_null($sepaMandate)) {
+            $this->sepaMandate->fill($sepaMandate);
+        }
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-sepa-mandate-modal');

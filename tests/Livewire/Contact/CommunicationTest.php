@@ -13,3 +13,9 @@ test('can call edit without arguments to create new communication', function ():
         ->call('edit')
         ->assertOk();
 });
+
+test('can call edit with null to create a new communication', function (): void {
+    Livewire::test(Communication::class)
+        ->call('edit', null)
+        ->assertOk();
+});

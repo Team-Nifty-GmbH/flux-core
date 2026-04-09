@@ -79,9 +79,11 @@ class ProductOptionGroups extends ProductOptionGroupList
 
     public function edit(?ProductOptionGroup $productOptionGroup = null): void
     {
-        $productOptionGroup->loadMissing('productOptions:id,product_option_group_id,name');
         $this->productOptionGroupForm->reset();
-        $this->productOptionGroupForm->fill($productOptionGroup);
+        if (! is_null($productOptionGroup)) {
+            $productOptionGroup->loadMissing('productOptions:id,product_option_group_id,name');
+            $this->productOptionGroupForm->fill($productOptionGroup);
+        }
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-product-option-group-modal');

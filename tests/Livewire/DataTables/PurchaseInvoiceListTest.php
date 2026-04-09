@@ -49,3 +49,10 @@ test('augmentItemArray sets url from media', function (): void {
         ->and($itemArray)->toHaveKey('media.file_name')
         ->and($itemArray['media.file_name'])->toBe('invoice.jpg');
 });
+
+test('open new modal', function (): void {
+    Livewire::test(PurchaseInvoiceList::class)
+        ->call('edit', null)
+        ->assertOk()
+        ->assertHasNoErrors();
+});

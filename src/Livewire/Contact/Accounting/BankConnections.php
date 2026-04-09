@@ -77,7 +77,9 @@ class BankConnections extends BaseContactBankConnectionList
     public function edit(?ContactBankConnection $contactBankConnection = null): void
     {
         $this->contactBankConnection->reset();
-        $this->contactBankConnection->fill($contactBankConnection);
+        if (! is_null($contactBankConnection)) {
+            $this->contactBankConnection->fill($contactBankConnection);
+        }
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-contact-bank-connection');

@@ -94,7 +94,10 @@ class Permissions extends RoleList
     public function edit(?Role $role, string $modal = 'edit-role-permissions-modal'): void
     {
         $this->roleForm->reset();
-        $this->roleForm->fill($role);
+        if (! is_null($role)) {
+            $this->roleForm->fill($role);
+        }
+
         $this->permissions = $this->getPermissionTree();
 
         $this->js(<<<JS
