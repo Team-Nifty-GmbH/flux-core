@@ -32,8 +32,7 @@ test('can create new order', function (): void {
         ->assertRoute('orders.orders')
         ->assertNoSmoke();
 
-    // Wait for Livewire to fully hydrate before clicking
-    $page->assertPresent('[tall-datatable]');
+    waitForElement($page, '[tall-datatable] [wire\\:id]');
 
     $page->click('New order');
 
