@@ -160,7 +160,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             }
         }
 
-        return array_values($tree);
+        return ['data' => array_values($tree)];
     }
 
     protected function getReturnKeys(): array
