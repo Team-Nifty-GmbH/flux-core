@@ -4,6 +4,7 @@ namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
 use FluxErp\Support\Enums\FluxEnum;
+use Illuminate\Database\Eloquent\Model;
 
 class SalutationEnum extends FluxEnum
 {
@@ -53,5 +54,14 @@ class SalutationEnum extends FluxEnum
                 default => __('salutation.informal.no_salutation', $parameter),
             };
         }
+    }
+
+    public function get(Model $model, string $key, mixed $value, array $attributes): ?object
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        return static::tryFrom($value) ?? (object) ['name' => $value, 'value' => $value];
     }
 }

@@ -155,7 +155,7 @@ test('create address maximum', function (): void {
     expect($dbAddress->country_id)->toEqual($address['country_id']);
     expect($dbAddress->company)->toEqual($address['company']);
     expect($dbAddress->title)->toEqual($address['title']);
-    expect($dbAddress->salutation)->toEqual($address['salutation']);
+    expect($dbAddress->salutation->value)->toEqual($address['salutation']);
     expect($dbAddress->firstname)->toEqual($address['firstname']);
     expect($dbAddress->lastname)->toEqual($address['lastname']);
     expect($dbAddress->addition)->toEqual($address['addition']);
@@ -230,7 +230,7 @@ test('get address', function (): void {
     expect($jsonAddress->contact_id)->toEqual($this->addresses[0]->contact_id);
     expect($jsonAddress->company)->toEqual($this->addresses[0]->company);
     expect($jsonAddress->title)->toEqual($this->addresses[0]->title);
-    expect($jsonAddress->salutation)->toEqual($this->addresses[0]->salutation);
+    expect($jsonAddress->salutation)->toEqual($this->addresses[0]->salutation->value);
     expect($jsonAddress->firstname)->toEqual($this->addresses[0]->firstname);
     expect($jsonAddress->lastname)->toEqual($this->addresses[0]->lastname);
     expect($jsonAddress->addition)->toEqual($this->addresses[0]->addition);
@@ -279,7 +279,7 @@ test('get addresses', function (): void {
                 $jsonAddress->contact_id === $address->contact_id &&
                 $jsonAddress->company === $address->company &&
                 $jsonAddress->title === $address->title &&
-                $jsonAddress->salutation === $address->salutation &&
+                $jsonAddress->salutation === $address->salutation?->value &&
                 $jsonAddress->firstname === $address->firstname &&
                 $jsonAddress->lastname === $address->lastname &&
                 $jsonAddress->addition === $address->addition &&
@@ -394,7 +394,7 @@ test('update address maximum', function (): void {
     expect($dbAddress->contact_id)->toEqual($address['contact_id']);
     expect($dbAddress->company)->toEqual($address['company']);
     expect($dbAddress->title)->toEqual($address['title']);
-    expect($dbAddress->salutation)->toEqual($address['salutation']);
+    expect($dbAddress->salutation->value)->toEqual($address['salutation']);
     expect($dbAddress->firstname)->toEqual($address['firstname']);
     expect($dbAddress->lastname)->toEqual($address['lastname']);
     expect($dbAddress->addition)->toEqual($address['addition']);
