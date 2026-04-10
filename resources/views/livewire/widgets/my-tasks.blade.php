@@ -39,6 +39,17 @@
                             </span>
                         @endif
 
+                        @if($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
+                            <span>&middot;</span>
+                            <a
+                                href="{{ $task->model->getUrl() }}"
+                                wire:navigate
+                                class="truncate hover:text-indigo-500"
+                            >
+                                {{ $task->model->getLabel() }}
+                            </a>
+                        @endif
+
                         @if($task->due_date)
                             <span>&middot;</span>
                             <span

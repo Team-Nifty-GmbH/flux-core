@@ -24,6 +24,16 @@
                         class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
                     >
                         {!! $task->state->badge() !!}
+                        @if($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
+                            <a
+                                href="{{ $task->model->getUrl() }}"
+                                wire:navigate
+                                class="truncate hover:text-indigo-500"
+                            >
+                                {{ $task->model->getLabel() }}
+                            </a>
+                        @endif
+
                         @if($task->due_date)
                             <span
                                 class="{{ $task->due_date->isPast() ? 'text-red-500' : '' }}"
