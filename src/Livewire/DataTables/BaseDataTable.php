@@ -17,7 +17,7 @@ abstract class BaseDataTable extends DataTable
     use Actions, HasEloquentListeners;
 
     #[Renderless]
-    public function export(array $columns = [], string $format = 'xlsx'): Response|BinaryFileResponse|StreamedResponse
+    public function export(array $columns = [], string $format = 'xlsx', bool $formatted = true): Response|BinaryFileResponse|StreamedResponse
     {
         ExportDataTableJob::dispatch(
             serialize($this),
