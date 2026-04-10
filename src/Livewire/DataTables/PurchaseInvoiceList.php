@@ -294,6 +294,15 @@ class PurchaseInvoiceList extends BaseDataTable
         return true;
     }
 
+    public function loadData(bool $forceRender = false): void
+    {
+        parent::loadData($forceRender);
+
+        if (! in_array('url', $this->enabledCols)) {
+            array_unshift($this->enabledCols, 'url');
+        }
+    }
+
     protected function getScannedDocumentAction(): string
     {
         return CreatePurchaseInvoice::class;
@@ -302,6 +311,11 @@ class PurchaseInvoiceList extends BaseDataTable
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with(['media', 'invoice']);
+    }
+
+    protected function getRequiredCols(): array
+    {
+        return ['url'];
     }
 
     protected function getLayout(): string

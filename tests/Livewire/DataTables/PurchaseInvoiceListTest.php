@@ -50,6 +50,13 @@ test('augmentItemArray sets url from media', function (): void {
         ->and($itemArray['media.file_name'])->toBe('invoice.jpg');
 });
 
+test('url column is always present after loadData', function (): void {
+    $component = Livewire::test(PurchaseInvoiceList::class)
+        ->call('loadData');
+
+    expect($component->get('enabledCols'))->toContain('url');
+});
+
 test('edit with null resets form and opens modal', function (): void {
     Livewire::test(PurchaseInvoiceList::class)
         ->call('edit', null)
