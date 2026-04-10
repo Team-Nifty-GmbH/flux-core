@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
-      libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev \
+      libzip-dev libicu-dev libonig-dev libexif-dev libmagickwand-dev libxslt1-dev \
       gnupg ca-certificates \
     && if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
          curl -sL "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-community-client-core_8.0.42-1debian12_amd64.deb" -o /tmp/mysql-client.deb \
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
          apt-get install -y --no-install-recommends default-mysql-client; \
        fi \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif pcntl sockets \
+    && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath intl exif pcntl sockets xsl \
     && pecl install imagick redis xdebug && docker-php-ext-enable imagick redis xdebug \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
