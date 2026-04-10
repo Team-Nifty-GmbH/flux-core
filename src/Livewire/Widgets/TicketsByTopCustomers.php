@@ -63,7 +63,7 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
         ];
 
         $topCustomers = resolve_static(Address::class, 'query')
-            ->join('tickets', function (JoinClause $join) {
+            ->join('tickets', function (JoinClause $join): void {
                 $join->on('addresses.id', '=', 'tickets.authenticatable_id')
                     ->where('tickets.authenticatable_type', morph_alias(Address::class));
             })
