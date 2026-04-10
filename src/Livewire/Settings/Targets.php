@@ -74,8 +74,6 @@ class Targets extends TargetList
         } else {
             $this->aggregateColumns = [];
         }
-
-        $this->forceRender();
     }
 
     public function updateSelectableColumns(?string $modelType = null): void
@@ -98,8 +96,6 @@ class Targets extends TargetList
             $this->target->aggregate_type = data_get($this->aggregateTypes, '0.value');
             $this->target->owner_column = data_get($this->ownerColumns, '0.value');
         }
-
-        $this->forceRender();
     }
 
     protected function getViewData(): array

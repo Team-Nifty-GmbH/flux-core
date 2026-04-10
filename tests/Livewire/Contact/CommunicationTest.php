@@ -8,8 +8,25 @@ test('renders successfully', function (): void {
         ->assertOk();
 });
 
-test('can call edit without arguments to create new communication', function (): void {
+test('edit without arguments resets form and opens modal', function (): void {
     Livewire::test(Communication::class)
         ->call('edit')
-        ->assertOk();
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('communication.id', null)
+        ->assertSet('communication.subject', null)
+        ->assertSet('communication.to', [])
+        ->assertSet('communication.cc', [])
+        ->assertSet('communication.bcc', [])
+        ->assertOpensModal('edit-communication');
+});
+
+test('edit with null resets form and opens modal', function (): void {
+    Livewire::test(Communication::class)
+        ->call('edit', null)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('communication.id', null)
+        ->assertSet('communication.subject', null)
+        ->assertOpensModal('edit-communication');
 });

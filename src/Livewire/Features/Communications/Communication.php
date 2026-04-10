@@ -201,7 +201,10 @@ abstract class Communication extends CommunicationList
     public function edit(?CommunicationModel $communication = null): void
     {
         $this->communication->reset();
-        $this->communication->fill($communication);
+        if (! is_null($communication)) {
+            $this->communication->fill($communication);
+        }
+
         $this->communication->mail_account_id ??= auth()
             ->user()
             ->defaultMailAccount()

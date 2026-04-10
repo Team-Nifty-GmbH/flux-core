@@ -142,25 +142,26 @@ class Tenants extends TenantList
     public function edit(?Tenant $record = null): void
     {
         $this->tenant->reset();
-        $record->load('bankConnections:id');
-        $tenant = $record->toArray();
-        $tenant['bank_connections'] = array_column($tenant['bank_connections'], 'id');
-        $tenant['opening_hours'] = $tenant['opening_hours'] ?? [];
+        $this->logo->reset();
+        $this->logoSmall->reset();
 
-        $this->tenant->fill($tenant);
+        if (! is_null($record)) {
+            $record->load('bankConnections:id');
+            $tenant = $record->toArray();
+            $tenant['bank_connections'] = array_column($tenant['bank_connections'], 'id');
+            $tenant['opening_hours'] = $tenant['opening_hours'] ?? [];
 
-        $this->logo->fill($record->getMedia('logo')->first() ?? []);
-        $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
+            $this->tenant->fill($tenant);
+            $this->logo->fill($record->getMedia('logo')->first() ?? []);
+            $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
+        }
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-tenant');
         JS);
     }
 
-    public function updatingTab(): void
-    {
-        $this->forceRender();
-    }
+    public function updatingTab(): void {}
 
     protected function getBuilder(Builder $builder): Builder
     {

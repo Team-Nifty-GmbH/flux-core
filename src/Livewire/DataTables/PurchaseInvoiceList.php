@@ -128,7 +128,7 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->reset();
         $this->mediaForm->reset();
 
-        if ($purchaseInvoice->exists) {
+        if ($purchaseInvoice?->exists) {
             $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
             $this->purchaseInvoiceForm->fill($purchaseInvoice);
             $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')

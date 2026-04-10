@@ -82,9 +82,11 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     #[Renderless]
     public function edit(?ProductPropertyGroup $productPropertyGroup = null): void
     {
-        $productPropertyGroup->loadMissing('productProperties:id,product_property_group_id,name,property_type_enum');
         $this->productPropertyGroup->reset();
-        $this->productPropertyGroup->fill($productPropertyGroup);
+        if (! is_null($productPropertyGroup)) {
+            $productPropertyGroup->loadMissing('productProperties:id,product_property_group_id,name,property_type_enum');
+            $this->productPropertyGroup->fill($productPropertyGroup);
+        }
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-product-property-group-modal');

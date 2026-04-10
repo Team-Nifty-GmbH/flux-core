@@ -79,10 +79,7 @@ class ProjectTaskList extends BaseTaskList
         ];
     }
 
-    public function updatedTaskTab(): void
-    {
-        $this->forceRender();
-    }
+    public function updatedTaskTab(): void {}
 
     protected function getBuilder(Builder $builder): Builder
     {
