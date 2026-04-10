@@ -1298,7 +1298,7 @@ test('replicate order preserves free text block parent-child structure', functio
         ->and($newBlock->parent_id)->toBeNull();
 
     $newChildren = $newPositions->where('parent_id', $newBlock->getKey());
-    expect($newChildren)->toHaveCount(2);
-    expect($newChildren->pluck('name')->sort()->values()->all())
+    expect($newChildren)->toHaveCount(2)
+        ->and($newChildren->pluck('name')->sort()->values()->all())
         ->toBe(['Child Position 1', 'Child Position 2']);
 });
