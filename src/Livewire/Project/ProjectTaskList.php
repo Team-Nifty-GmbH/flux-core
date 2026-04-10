@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Project;
 
+use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
@@ -12,7 +13,9 @@ use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class ProjectTaskList extends BaseTaskList
 {
@@ -79,10 +82,46 @@ class ProjectTaskList extends BaseTaskList
         ];
     }
 
+    public function kanbanMoveItem(int|string $id, string $targetLane): void
+    {
+        try {
+            UpdateTask::make([
+                'id' => $id,
+                'state' => $targetLane,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
     public function updatedTaskTab(): void {}
+
+    protected function availableLayouts(): array
+    {
+        return ['table', 'kanban'];
+    }
 
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('project_id', $this->projectId);
+    }
+
+    protected function kanbanColumn(): string
+    {
+        return 'state';
+    }
+
+    protected function kanbanLanes(): array
+    {
+        return collect($this->availableStates)
+            ->mapWithKeys(fn (array $state) => [
+                $state['name'] => [
+                    'label' => $state['label'],
+                ],
+            ])
+            ->toArray();
     }
 }
