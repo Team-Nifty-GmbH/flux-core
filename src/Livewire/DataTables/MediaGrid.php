@@ -20,15 +20,6 @@ class MediaGrid extends MediaList
         'url' => 'image',
     ];
 
-    public function loadData(bool $forceRender = false): void
-    {
-        parent::loadData($forceRender);
-
-        if (! in_array('url', $this->enabledCols)) {
-            array_unshift($this->enabledCols, 'url');
-        }
-    }
-
     public function deleteMedia(Media $media): bool
     {
         try {
@@ -45,11 +36,6 @@ class MediaGrid extends MediaList
         $this->loadData();
 
         return true;
-    }
-
-    protected function getRequiredCols(): array
-    {
-        return ['url'];
     }
 
     protected function getLayout(): string
