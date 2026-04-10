@@ -23,7 +23,7 @@ use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
 {
-    use IsTimeFrameAwareWidget, Widgetable;
+    use Widgetable;
 
     public ?array $chart = [
         'type' => 'bar',
@@ -47,26 +47,13 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
         return view('flux::livewire.support.widgets.charts.chart');
     }
 
-    #[Renderless]
-    public function calculateByTimeFrame(): void
-    {
-        $this->calculateChart();
-        $this->updateData();
-    }
-
     public function calculateChart(): void
     {
-        $dateRange = [
-            $this->getStart()->toDateTimeString(),
-            $this->getEnd()->toDateTimeString(),
-        ];
-
         $allStates = TicketState::all();
         $endStates = $this->getEndStates($allStates);
 
         $topCustomers = resolve_static(Ticket::class, 'query')
             ->where('authenticatable_type', morph_alias(Address::class))
-            ->whereBetween('created_at', $dateRange)
             ->whereNotIn('state', $endStates)
             ->groupBy('authenticatable_type', 'authenticatable_id')
             ->selectRaw('authenticatable_type, authenticatable_id, COUNT(*) as total')
@@ -118,7 +105,6 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
 
         $ticketsByCustomer = resolve_static(Ticket::class, 'query')
             ->where('authenticatable_type', morph_alias(Address::class))
-            ->whereBetween('created_at', $dateRange)
             ->whereNotIn('state', $endStates)
             ->where(function (Builder $query) use ($topCustomers): void {
                 foreach ($topCustomers as $customer) {
@@ -211,16 +197,12 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
         $authenticatableId = data_get($params, 'authenticatable_id');
         $name = data_get($params, 'name');
 
-        $start = $this->getStart()->toDateTimeString();
-        $end = $this->getEnd()->toDateTimeString();
-
         SessionFilter::make(
             Livewire::new(resolve_static(TicketList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('authenticatable_type', $authenticatableType)
                 ->where('authenticatable_id', $authenticatableId)
-                ->whereNotIn('state', $this->getEndStates())
-                ->whereBetween('created_at', [$start, $end]),
+                ->whereNotIn('state', $this->getEndStates()),
             __('Tickets by :customer', ['customer' => $name]),
         )
             ->store();
