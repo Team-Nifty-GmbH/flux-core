@@ -1220,3 +1220,85 @@ test('does not set parent_id when creating refund', function (): void {
     expect($refund->parent_id)->toBeNull()
         ->and($refund->created_from_id)->toBe($order->getKey());
 });
+
+test('replicate order preserves free text block parent-child structure', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_locked' => false,
+    ]);
+
+    $block = OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => VatRate::default()->getKey(),
+        'is_free_text' => true,
+        'name' => 'Block Header',
+        'amount' => null,
+    ]);
+
+    OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => VatRate::default()->getKey(),
+        'parent_id' => $block->getKey(),
+        'is_free_text' => false,
+        'name' => 'Child Position 1',
+        'amount' => 2,
+        'unit_net_price' => 100,
+        'unit_gross_price' => 119,
+    ]);
+
+    OrderPosition::factory()->create([
+        'order_id' => $order->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'vat_rate_id' => VatRate::default()->getKey(),
+        'parent_id' => $block->getKey(),
+        'is_free_text' => false,
+        'name' => 'Child Position 2',
+        'amount' => 1,
+        'unit_net_price' => 50,
+        'unit_gross_price' => 59.5,
+    ]);
+
+    $replicated = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $orderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    $newPositions = $replicated->orderPositions()
+        ->orderBy('slug_position')
+        ->get();
+
+    expect($newPositions)->toHaveCount(3);
+
+    $newBlock = $newPositions->firstWhere('is_free_text', true);
+    expect($newBlock)->not->toBeNull()
+        ->and($newBlock->name)->toBe('Block Header')
+        ->and($newBlock->parent_id)->toBeNull();
+
+    $newChildren = $newPositions->where('parent_id', $newBlock->getKey());
+    expect($newChildren)->toHaveCount(2);
+    expect($newChildren->pluck('name')->sort()->values()->all())
+        ->toBe(['Child Position 1', 'Child Position 2']);
+});
