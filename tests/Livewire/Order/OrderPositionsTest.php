@@ -516,38 +516,68 @@ test('mount initializes component', function (): void {
     expect($component->get('orderPositionsView'))->toEqual('table');
 });
 
-test('move position', function (): void {
-    $orderPosition = $this->order->orderPositions->first();
-    $originalSortNumber = $orderPosition->sort_number;
-
-    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
-        ->call('movePosition', $orderPosition, 2)
-        ->assertOk()
-        ->assertHasNoErrors();
-
-    $updatedPosition = $orderPosition->refresh();
-    expect($updatedPosition->sort_number)->toEqual(2);
-    $this->assertNotEquals($originalSortNumber, $updatedPosition->sort_number);
-});
-
-test('move position with parent', function (): void {
-    $parentPosition = OrderPosition::factory()->create([
+test('move position converts zero-based index to one-based sort number', function (): void {
+    // x-sort passes 0-based index from SortableJS
+    OrderPosition::factory()->count(4)->create([
         'order_id' => $this->order->id,
         'tenant_id' => $this->dbTenant->getKey(),
         'is_free_text' => false,
         'is_alternative' => false,
     ]);
 
-    $orderPosition = $this->order->orderPositions->first();
+    $positions = $this->order->orderPositions()->ordered()->get();
+    $firstPosition = $positions->first();
+
+    // Simulate x-sort: drag first item to end (0-based index = count - 1)
+    $zeroBasedTarget = $positions->count() - 1;
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
-        ->call('movePosition', $orderPosition, 1, $parentPosition->id)
+        ->call('movePosition', $firstPosition, $zeroBasedTarget)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect($firstPosition->refresh()->sort_number)->toEqual($positions->count());
+});
+
+test('move position up converts zero-based index correctly', function (): void {
+    OrderPosition::factory()->count(4)->create([
+        'order_id' => $this->order->id,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+    ]);
+
+    $positions = $this->order->orderPositions()->ordered()->get();
+    $lastPosition = $positions->last();
+
+    // Simulate x-sort: drag last item to second position (0-based index = 1)
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('movePosition', $lastPosition, 1)
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect($lastPosition->refresh()->sort_number)->toEqual(2);
+});
+
+test('move position with parent converts zero-based index', function (): void {
+    $parentPosition = OrderPosition::factory()->create([
+        'order_id' => $this->order->id,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $orderPosition = $this->order->orderPositions->first();
+
+    // x-sort passes 0-based index: 0 = first child position
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('movePosition', $orderPosition, 0, $parentPosition->id)
         ->assertOk()
         ->assertHasNoErrors();
 
     $updatedPosition = $orderPosition->refresh();
-    expect($updatedPosition->parent_id)->toEqual($parentPosition->id);
-    expect($updatedPosition->sort_number)->toEqual(1);
+    expect($updatedPosition->parent_id)->toEqual($parentPosition->id)
+        ->and($updatedPosition->sort_number)->toEqual(1);
 });
 
 test('quick add order position', function (): void {

@@ -432,6 +432,8 @@ class OrderPositions extends OrderPositionList
 
     public function movePosition(OrderPosition $position, int $newPosition, ?int $parentId = null): void
     {
+        $newPosition++;
+
         if ($position->parent_id === $parentId && $position->sort_number === $newPosition) {
             return;
         }
