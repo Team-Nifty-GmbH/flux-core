@@ -50,9 +50,13 @@ test('augmentItemArray sets url from media', function (): void {
         ->and($itemArray['media.file_name'])->toBe('invoice.jpg');
 });
 
-test('open new modal', function (): void {
+test('edit with null resets form and opens modal', function (): void {
     Livewire::test(PurchaseInvoiceList::class)
         ->call('edit', null)
         ->assertOk()
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertSet('purchaseInvoiceForm.id', null)
+        ->assertSet('purchaseInvoiceForm.invoice_number', null)
+        ->assertSet('purchaseInvoiceForm.contact_id', null)
+        ->assertOpensModal('edit-purchase-invoice-modal');
 });

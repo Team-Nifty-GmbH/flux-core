@@ -8,9 +8,12 @@ test('renders successfully', function (): void {
         ->assertOk();
 });
 
-test('open new modal', function (): void {
+test('edit with null resets form and opens modal', function (): void {
     Livewire::test(SepaMandates::class)
         ->call('edit', null)
         ->assertOk()
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertSet('sepaMandate.id', null)
+        ->assertSet('sepaMandate.contact_bank_connection_id', null)
+        ->assertOpensModal('edit-sepa-mandate-modal');
 });

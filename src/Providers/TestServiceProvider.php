@@ -37,6 +37,41 @@ class TestServiceProvider extends ServiceProvider
             );
         }
 
+        if (! Testable::hasMacro('assertOpensModal')) {
+            Testable::macro(
+                'assertOpensModal',
+                function (?string $modalName = null) {
+                    if (is_null($modalName)) {
+                        $instance = $this->instance();
+
+                        if (method_exists($instance, 'modalName')) {
+                            $modalName = invade($instance)->modalName();
+                        } else {
+                            foreach (get_object_vars($instance) as $value) {
+                                if (
+                                    is_object($value)
+                                    && in_array(
+                                        \FluxErp\Traits\Livewire\Form\SupportsAutoRender::class,
+                                        class_uses_recursive($value)
+                                    )
+                                ) {
+                                    $modalName = $value->modalName();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    Assert::assertNotNull($modalName, 'Could not determine modal name.');
+
+                    $this->assertExecutesJs("\$tsui.open.modal('{$modalName}')");
+                    $this->assertSeeHtml('id="' . $modalName . '"');
+
+                    return $this;
+                }
+            );
+        }
+
         if (! Testable::hasMacro('assertToastNotification')) {
             Testable::macro(
                 'assertToastNotification',

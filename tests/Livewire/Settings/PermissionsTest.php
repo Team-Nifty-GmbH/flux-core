@@ -8,9 +8,13 @@ test('renders successfully', function (): void {
         ->assertOk();
 });
 
-test('open new modal', function (): void {
+test('edit with null resets form and opens modal', function (): void {
     Livewire::test(Permissions::class)
         ->call('edit', null)
         ->assertOk()
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertSet('roleForm.id', null)
+        ->assertSet('roleForm.name', null)
+        ->assertSet('roleForm.guard_name', null)
+        ->assertOpensModal('edit-role-permissions-modal');
 });

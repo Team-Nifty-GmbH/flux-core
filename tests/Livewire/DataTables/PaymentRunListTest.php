@@ -40,7 +40,8 @@ test('edit loads orders into payment run form', function (): void {
     $paymentRun->orders()->attach($order->getKey(), ['amount' => '100.00']);
 
     $component = Livewire::test(PaymentRunList::class)
-        ->call('edit', $paymentRun);
+        ->call('edit', $paymentRun)
+        ->assertOpensModal('execute-payment-run');
 
     $orders = $component->get('paymentRunForm.orders');
 

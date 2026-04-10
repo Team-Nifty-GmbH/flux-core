@@ -35,6 +35,7 @@ test('can update email template', function (): void {
     Livewire::test(EmailTemplates::class)
         ->assertOk()
         ->call('edit', $this->emailTemplate->id)
+        ->assertOpensModal()
         ->assertSet('emailTemplateForm.id', $this->emailTemplate->id)
         ->set('emailTemplateForm.name', 'Updated Name')
         ->set('emailTemplateForm.subject', 'Updated Subject')
@@ -53,6 +54,7 @@ test('can delete email template', function (): void {
     Livewire::test(EmailTemplates::class)
         ->assertOk()
         ->call('edit', $emailTemplateId)
+        ->assertOpensModal()
         ->call('delete', $emailTemplateId)
         ->assertOk()
         ->assertHasNoErrors();
@@ -94,6 +96,7 @@ test('can edit existing template and load form data', function (): void {
     Livewire::test(EmailTemplates::class)
         ->assertOk()
         ->call('edit', $this->emailTemplate->id)
+        ->assertOpensModal()
         ->assertSet('emailTemplateForm.id', $this->emailTemplate->id)
         ->assertSet('emailTemplateForm.name', $this->emailTemplate->name)
         ->assertSet('emailTemplateForm.subject', $this->emailTemplate->subject);

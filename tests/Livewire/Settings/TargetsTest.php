@@ -25,6 +25,8 @@ test('edit preserves saved dropdown values', function (): void {
 
     Livewire::test(Targets::class)
         ->call('edit', $target->getKey())
+        ->assertOk()
+        ->assertOpensModal()
         ->assertSet('target.timeframe_column', 'invoice_date')
         ->assertSet('target.aggregate_type', 'sum')
         ->assertSet('target.aggregate_column', 'total_net_price')

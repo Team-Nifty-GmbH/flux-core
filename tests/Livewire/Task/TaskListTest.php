@@ -9,6 +9,7 @@ test('create new task', function (): void {
     Livewire::actingAs($this->user)
         ->test(TaskList::class)
         ->call('edit')
+        ->assertOpensModal('new-task-modal')
         ->assertSet('task.responsible_user_id', $this->user->id)
         ->set('task.name', $taskName = Str::uuid())
         ->set('task.description', $taskDescription = Str::uuid())
