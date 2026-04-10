@@ -341,11 +341,11 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     protected function casts(): array
     {
         return [
-            'date_of_birth' => 'date',
             'salutation' => SalutationEnum::class,
-            'advertising_state' => AdvertisingState::class,
+            'date_of_birth' => 'date',
             'password' => 'hashed',
             'search_aliases' => 'array',
+            'advertising_state' => AdvertisingState::class,
             'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',

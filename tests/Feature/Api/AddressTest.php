@@ -155,7 +155,7 @@ test('create address maximum', function (): void {
     expect($dbAddress->country_id)->toEqual($address['country_id']);
     expect($dbAddress->company)->toEqual($address['company']);
     expect($dbAddress->title)->toEqual($address['title']);
-    expect($dbAddress->salutation)->toEqual($address['salutation']);
+    expect($dbAddress->salutation->value)->toEqual($address['salutation']);
     expect($dbAddress->firstname)->toEqual($address['firstname']);
     expect($dbAddress->lastname)->toEqual($address['lastname']);
     expect($dbAddress->addition)->toEqual($address['addition']);
@@ -394,7 +394,7 @@ test('update address maximum', function (): void {
     expect($dbAddress->contact_id)->toEqual($address['contact_id']);
     expect($dbAddress->company)->toEqual($address['company']);
     expect($dbAddress->title)->toEqual($address['title']);
-    expect($dbAddress->salutation)->toEqual($address['salutation']);
+    expect($dbAddress->salutation->value)->toEqual($address['salutation']);
     expect($dbAddress->firstname)->toEqual($address['firstname']);
     expect($dbAddress->lastname)->toEqual($address['lastname']);
     expect($dbAddress->addition)->toEqual($address['addition']);
