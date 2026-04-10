@@ -877,3 +877,52 @@ test('updating amount on bundle group parent propagates to children', function (
     expect((float) $child1->amount)->toEqual(6);
     expect((float) $child2->amount)->toEqual(15);
 });
+
+test('add order position in list view re-renders with new position', function (): void {
+    $existingPosition = $this->order->orderPositions->first();
+    $testName = 'New List View Position';
+
+    $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('switchView', 'list');
+
+    // Verify existing position is shown in list view
+    $component->assertSeeHtml($existingPosition->name);
+
+    $component
+        ->set('orderPosition.name', $testName)
+        ->set('orderPosition.amount', 1)
+        ->set('orderPosition.unit_price', 50)
+        ->set('orderPosition.vat_rate_id', $this->vatRate->id)
+        ->call('addOrderPosition')
+        ->assertReturned(true)
+        ->assertSeeHtml($testName);
+});
+
+test('quick add in list view re-renders with new position', function (): void {
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('switchView', 'list')
+        ->set('orderPosition.product_id', $this->product->id)
+        ->call('changedProductId', $this->product)
+        ->call('quickAdd')
+        ->assertReturned(true)
+        ->assertSeeHtml($this->product->name);
+});
+
+test('sort group names match between top level and free text children', function (): void {
+    OrderPosition::factory()->create([
+        'order_id' => $this->order->id,
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+    ]);
+
+    $html = Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->call('switchView', 'list')
+        ->html();
+
+    preg_match_all('/x-sort:group="([^"]*)"/', $html, $matches);
+    $groups = array_filter($matches[1], fn ($g) => ! str_starts_with($g, 'bundle'));
+
+    expect($groups)->not->toBeEmpty();
+    expect(array_unique($groups))->toHaveCount(1, 'Sort group names must match between top level and free text children');
+});

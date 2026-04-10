@@ -21,7 +21,7 @@
         class="mt-2 space-y-2"
         @if(! $this->order->is_locked)
             x-sort="$wire.movePosition($item, $position)"
-            x-sort:group="nested - positions"
+            x-sort:group="nested_positions"
         @endif
     >
         @foreach($this->getSortableOrderPositions() as $position)
