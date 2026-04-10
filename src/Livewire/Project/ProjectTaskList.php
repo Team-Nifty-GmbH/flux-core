@@ -43,12 +43,13 @@ class ProjectTaskList extends BaseTaskList
         $this->task->project_id = $this->projectId;
 
         $this->availableStates = app(Task::class)->getStatesFor('state')
-            ->map(function (string $state) {
-                return [
-                    'label' => __(Str::headline($state)),
-                    'name' => $state,
-                ];
-            })
+            ->map(fn (string $state) => [
+                'label' => __(Str::headline($state)),
+                'name' => $state,
+                'is_end_state' => $state::$isEndState,
+            ])
+            ->sortBy('is_end_state')
+            ->values()
             ->toArray();
     }
 
@@ -92,6 +93,10 @@ class ProjectTaskList extends BaseTaskList
                 ->checkPermission()
                 ->validate()
                 ->execute();
+
+            $this->toast()
+                ->success(__('Task Updated'))
+                ->send();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }
