@@ -81,16 +81,18 @@
 
     @if ($canEdit)
         <div class="flex flex-col items-center gap-2 md:flex-row">
-            <x-button
-                color="secondary"
-                loading
-                light
-                x-cloak
-                x-show="!editGrid"
-                x-on:click="editGridMode(true)"
-                icon="pencil"
-                class="shrink-0"
-            />
+            <div class="mt-4">
+                <x-button
+                    color="secondary"
+                    loading
+                    light
+                    x-cloak
+                    x-show="!editGrid"
+                    x-on:click="editGridMode(true)"
+                    icon="pencil"
+                    class="shrink-0"
+                />
+            </div>
             <div x-cloak x-show="editGrid" class="flex gap-2">
                 <x-button
                     color="secondary"
