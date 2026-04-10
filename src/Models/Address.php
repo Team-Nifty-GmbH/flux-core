@@ -342,6 +342,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     {
         return [
             'date_of_birth' => 'date',
+            'salutation' => SalutationEnum::class,
             'advertising_state' => AdvertisingState::class,
             'password' => 'hashed',
             'search_aliases' => 'array',
