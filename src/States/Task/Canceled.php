@@ -8,6 +8,8 @@ class Canceled extends TaskState
 
     public static $name = 'canceled';
 
+    public static int $order = 4;
+
     public function color(): string
     {
         return static::$color ?? 'red';

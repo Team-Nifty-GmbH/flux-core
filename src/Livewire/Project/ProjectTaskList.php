@@ -7,6 +7,7 @@ use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use FluxErp\States\Task\TaskState;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
@@ -42,13 +43,13 @@ class ProjectTaskList extends BaseTaskList
 
         $this->task->project_id = $this->projectId;
 
-        $this->availableStates = app(Task::class)->getStatesFor('state')
-            ->map(fn (string $state) => [
-                'label' => __(Str::headline($state)),
-                'name' => $state,
-                'is_end_state' => $state::$isEndState,
+        $this->availableStates = TaskState::all()
+            ->map(fn (string $stateClass, string $morphName) => [
+                'label' => __(Str::headline($morphName)),
+                'name' => $morphName,
+                'order' => $stateClass::$order,
             ])
-            ->sortBy('is_end_state')
+            ->sortBy('order')
             ->values()
             ->toArray();
     }
@@ -86,16 +87,22 @@ class ProjectTaskList extends BaseTaskList
     public function kanbanMoveItem(int|string $id, string $targetLane): void
     {
         try {
-            UpdateTask::make([
-                'id' => $id,
+            $task = resolve_static(Task::class, 'query')
+                ->whereKey($id)
+                ->first(['id', 'start_date', 'due_date']);
+
+            resolve_static(UpdateTask::class, 'make', [[
+                'id' => $task->getKey(),
                 'state' => $targetLane,
-            ])
+                'start_date' => $task->start_date,
+                'due_date' => $task->due_date,
+            ]])
                 ->checkPermission()
                 ->validate()
                 ->execute();
 
             $this->toast()
-                ->success(__('Task Updated'))
+                ->success(__(':model saved', ['model' => __('Task')]))
                 ->send();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
@@ -121,12 +128,19 @@ class ProjectTaskList extends BaseTaskList
 
     protected function kanbanLanes(): array
     {
+        $task = app(Task::class);
+
         return collect($this->availableStates)
-            ->mapWithKeys(fn (array $state) => [
-                $state['name'] => [
-                    'label' => $state['label'],
-                ],
-            ])
+            ->mapWithKeys(function (array $state) use ($task) {
+                $task->state = $state['name'];
+
+                return [
+                    $state['name'] => [
+                        'label' => $state['label'],
+                        'color' => $task->state->color(),
+                    ],
+                ];
+            })
             ->toArray();
     }
 }
