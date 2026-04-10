@@ -167,13 +167,8 @@ class OrderPositions extends OrderPositionList
         ];
     }
 
-    #[Renderless]
     public function addOrderPosition(bool $reload = true): bool
     {
-        if ($this->orderPositionsView !== 'table') {
-            $this->forceRender();
-        }
-
         $this->orderPosition->order_id = $this->order->id;
         $this->orderPosition->vat_rate_id = $this->order->vat_rate_id ?? $this->orderPosition->vat_rate_id;
 
@@ -187,7 +182,10 @@ class OrderPositions extends OrderPositionList
 
         if ($reload) {
             $this->recalculateOrderTotals();
-            $this->loadData();
+
+            if ($this->orderPositionsView === 'table') {
+                $this->loadData();
+            }
         }
 
         $this->orderPosition->reset();
@@ -276,13 +274,8 @@ class OrderPositions extends OrderPositionList
         }
     }
 
-    #[Renderless]
     public function deleteOrderPosition(): bool
     {
-        if ($this->orderPositionsView !== 'table') {
-            $this->forceRender();
-        }
-
         try {
             $this->orderPosition->delete();
         } catch (ValidationException|UnauthorizedException $e) {
@@ -291,7 +284,10 @@ class OrderPositions extends OrderPositionList
             return false;
         }
 
-        $this->loadData();
+        if ($this->orderPositionsView === 'table') {
+            $this->loadData();
+        }
+
         $this->recalculateOrderTotals();
 
         return true;
@@ -455,7 +451,6 @@ class OrderPositions extends OrderPositionList
         }
     }
 
-    #[Renderless]
     public function quickAdd(): bool
     {
         $product = null;

@@ -77,7 +77,7 @@
             data-parent-id="{{ data_get($position, "id") }}"
             @if(! $this->order->is_locked)
                 x-sort="$wire.movePosition($item, $position, {{ data_get($position, "id") }})"
-                x-sort:group="{{ data_get($position, "is_free_text") ? "nested-positions" : "bundle-positions-" . data_get($position, "id") }}"
+                x-sort:group="{{ data_get($position, "is_free_text") ? "nested_positions" : "bundle-positions-" . data_get($position, "id") }}"
             @endif
         >
             @if(count($children = data_get($position, "children", [])) > 0)
