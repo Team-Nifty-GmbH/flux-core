@@ -157,14 +157,12 @@ class ReplicateOrder extends FluxAction
             }
         }
 
-        $newOrderPositions = collect();
+        $positionIdMap = [];
         foreach ($orderPositions as $orderPosition) {
             $orderPosition['order_id'] = $order->id;
 
-            if (data_get($orderPosition, 'parent_id')) {
-                $orderPosition['parent_id'] = $newOrderPositions
-                    ->firstWhere('origin_position_id', $orderPosition['parent_id'])
-                    ?->getKey();
+            if ($parentId = data_get($orderPosition, 'parent_id')) {
+                $orderPosition['parent_id'] = $positionIdMap[$parentId] ?? null;
             }
 
             $originalPositionId = data_get($orderPosition, 'id');
@@ -220,7 +218,7 @@ class ReplicateOrder extends FluxAction
                 ->validate()
                 ->execute();
 
-            $newOrderPositions->push($newPosition);
+            $positionIdMap[$originalPositionId] = $newPosition->getKey();
 
             $this->replicateDiscounts(
                 modelType: morph_alias(OrderPosition::class),

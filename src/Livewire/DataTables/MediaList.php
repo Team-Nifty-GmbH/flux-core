@@ -117,7 +117,7 @@ class MediaList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->addSelect('model_type', 'disk', 'conversions_disk');
+        return $builder->addSelect('model_type', 'disk', 'conversions_disk', 'generated_conversions', 'mime_type');
     }
 
     protected function getLeftAppends(): array
