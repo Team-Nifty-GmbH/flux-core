@@ -35,7 +35,7 @@
         "alpinejs": "^3.13.2",
         "apexcharts": "^5.10.5",
         "autoprefixer": "^10.4.16",
-        "axios": "^1.6.4",
+        "axios": "^1.15.0",
         "dayjs": "^1.11.11",
         "filepond": "^4.31.3",
         "filepond-plugin-image-preview": "^4.6.12",
