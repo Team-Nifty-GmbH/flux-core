@@ -154,7 +154,7 @@ trait WithFileUploads
 
         $response = [];
         DB::transaction(
-            function () use (&$response) {
+            function () use (&$response): void {
                 foreach ($this->filesArray as $file) {
                     $response[] = UploadMedia::make($file)
                         ->checkPermission()
