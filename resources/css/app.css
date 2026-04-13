@@ -19,6 +19,10 @@
     layer(base);
 
 @import 'tailwindcss';
+@import '../../vendor/tallstackui/tallstackui/css/plugins/custom-scrollbar.css';
+@import '../../vendor/tallstackui/tallstackui/css/plugins/soft-scrollbar.css';
+@import '../../vendor/tallstackui/tallstackui/css/plugins/command-palette-scrollbar.css';
+@import '../../vendor/tallstackui/tallstackui/css/plugins/number-appearance-none.css';
 
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
@@ -93,6 +97,28 @@
     --color-dark-800: #1e293b;
     --color-dark-900: #0f172a;
     --color-dark-950: #020617;
+
+    --animate-progress: progress 2s linear forwards;
+    --animate-indeterminate: indeterminate 1.5s cubic-bezier(0.4, 0, 0.2, 1)
+        infinite;
+
+    @keyframes progress {
+        0% {
+            width: 0;
+        }
+        100% {
+            width: 100%;
+        }
+    }
+
+    @keyframes indeterminate {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(400%);
+        }
+    }
 }
 
 @variant dark (&:where(.dark, .dark *));
