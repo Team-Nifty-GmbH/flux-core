@@ -8,6 +8,8 @@ use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
 use FluxErp\Models\MediaFolder;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
@@ -98,25 +100,27 @@ trait WithFileUploads
     public function prepareForMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): void
     {
         $this->filesArrayDirty = true;
-        $property = $this->getPropertyValue($name);
-        $property = ! is_array($property) ? [$property] : $property;
+        $files = Arr::wrap($this->getPropertyValue($name));
 
         $modelId = $modelId ?: $this->modelId ?? null;
         $modelType = $modelType ?: $this->modelType;
 
         $collection = $this->collection ?: 'default';
 
-        foreach ($property as $file) {
-            /** @var TemporaryUploadedFile $file */
-            $this->filesArray[] = [
-                'key' => $file->getFilename(),
-                'name' => $file->getClientOriginalName(),
-                'file_name' => $file->getClientOriginalName(),
-                'model_id' => $modelId,
-                'model_type' => $modelType,
-                'collection_name' => $collection,
-                'media' => $file->getRealPath(),
-            ];
+        $keys = data_get($this->filesArray, '*.key') ?? [];
+        foreach ($files as $file) {
+            if (! in_array($file->getFilename(), $keys)) {
+                /** @var TemporaryUploadedFile $file */
+                $this->filesArray[] = [
+                    'key' => $file->getFilename(),
+                    'name' => $file->getClientOriginalName(),
+                    'file_name' => $file->getClientOriginalName(),
+                    'model_id' => $modelId,
+                    'model_type' => $modelType,
+                    'collection_name' => $collection,
+                    'media' => $file->getRealPath(),
+                ];
+            }
         }
     }
 
@@ -129,23 +133,38 @@ trait WithFileUploads
 
     public function saveFileUploadsToMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): array
     {
-        if (! $this->filesArray && ! $this->filesArrayDirty) {
-            $this->prepareForMediaLibrary($name, $modelId, $modelType);
-        } else {
+        $files = Arr::wrap($this->getPropertyValue($name));
+        $filenames = array_map(fn (TemporaryUploadedFile $file) => $file->getFilename(), $files);
+
+        $this->filesArray = array_filter(
+            $this->filesArray,
+            fn (array $media) => in_array(data_get($media, 'key'), $filenames)
+        );
+
+        if ($this->filesArray && $this->filesArrayDirty) {
             $this->filesArray = array_map(
                 fn ($file) => array_merge($file, ['model_type' => $modelType, 'model_id' => $modelId]),
                 $this->filesArray
             );
         }
 
-        $response = [];
-        foreach ($this->filesArray as $file) {
-            $response[] = UploadMedia::make($file)
-                ->checkPermission()
-                ->validate()
-                ->execute()
-                ->toArray();
+        if (count($this->filesArray) !== count($files)) {
+            $this->prepareForMediaLibrary($name, $modelId, $modelType);
         }
+
+        $response = [];
+        DB::transaction(
+            function () use (&$response) {
+                foreach ($this->filesArray as $file) {
+                    $response[] = UploadMedia::make($file)
+                        ->checkPermission()
+                        ->validate()
+                        ->execute()
+                        ->toArray();
+                }
+            },
+            5
+        );
 
         $this->filesArray = [];
         $this->filesArrayDirty = false;

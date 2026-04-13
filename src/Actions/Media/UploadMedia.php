@@ -81,6 +81,7 @@ class UploadMedia extends FluxAction
                         ]
                     )
                 )
+                ->preservingOriginal()
                 ->storingConversionsOnDisk(config('flux.media.conversion'))
                 ->toMediaCollection(collectionName: $this->getData('collection_name'), diskName: $diskName);
         } catch (FileUnacceptableForCollection $e) {
