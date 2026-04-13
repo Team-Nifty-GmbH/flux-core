@@ -179,9 +179,7 @@ class ScheduleForm extends FluxForm
             $event = $event->{$method}();
         }
 
-        $dates = [];
         $dueAt = $this->due_at ? Carbon::parse($this->due_at) : null;
-        $from = $dueAt ? $dueAt->copy() : now();
         $endsAt = $this->end_radio === 'ends_at' && $this->ends_at
             ? Carbon::parse($this->ends_at)
             : null;
@@ -189,18 +187,21 @@ class ScheduleForm extends FluxForm
             ? max(0, $this->recurrences - ($this->current_recurrence ?? 0))
             : null;
 
+        if ($remainingRecurrences === 0) {
+            return [];
+        }
+
+        $dates = [];
+        $from = $dueAt && $dueAt->greaterThan(now()) ? $dueAt : now();
+
         if ($dueAt && $dueAt->greaterThan(now())) {
             if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
                 $dates[] = $dueAt->toDateTimeString();
             }
         }
 
-        if ($from->lessThan(now())) {
-            $from = now();
-        }
-
         $maxDates = $remainingRecurrences !== null
-            ? min($count, $remainingRecurrences)
+            ? min($count, $remainingRecurrences - count($dates))
             : $count;
 
         if ($maxDates <= 0) {
@@ -210,14 +211,14 @@ class ScheduleForm extends FluxForm
         try {
             if ($method === FrequenciesEnum::LastDayOfMonth->value) {
                 $parts = explode(' ', $event->expression);
-                $current = $from->copy();
+                $current = $from;
 
                 for ($i = 0; $i < $maxDates; $i++) {
-                    $next = $current->copy()->endOfMonth()
+                    $next = $current->endOfMonth()
                         ->setTime((int) $parts[1], (int) $parts[0]);
 
                     if ($next->lessThanOrEqualTo($current)) {
-                        $next = $current->copy()->addMonthNoOverflow()->endOfMonth()
+                        $next = $current->addMonthNoOverflow()->endOfMonth()
                             ->setTime((int) $parts[1], (int) $parts[0]);
                     }
 
@@ -226,7 +227,7 @@ class ScheduleForm extends FluxForm
                     }
 
                     $dates[] = $next->toDateTimeString();
-                    $current = $next->copy()->addDay();
+                    $current = $next->addDay();
                 }
             } else {
                 $cron = new CronExpression($event->expression);
@@ -244,7 +245,7 @@ class ScheduleForm extends FluxForm
                 }
             }
         } catch (Throwable) {
-            return [];
+            return $dates;
         }
 
         return $dates;
