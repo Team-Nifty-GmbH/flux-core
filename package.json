@@ -28,7 +28,7 @@
         "@tiptap/extension-table": "^3.10.7",
         "@tiptap/extension-text-align": "^3.10.7",
         "@tiptap/extension-text-style": "^3.10.5",
-        "@tiptap/extension-underline": "^3.10.5",
+        "@tiptap/extension-underline": "^3.22.3",
         "@tiptap/pm": "^3.10.5",
         "@tiptap/starter-kit": "^3.10.5",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
