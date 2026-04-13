@@ -8,6 +8,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\Support\Widgets\Charts\Chart;
 use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
@@ -15,6 +16,7 @@ use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
@@ -60,11 +62,16 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
             $this->getEnd()->toDateTimeString(),
         ];
 
-        $topCustomers = resolve_static(Ticket::class, 'query')
-            ->where('authenticatable_type', morph_alias(Address::class))
-            ->whereBetween('created_at', $dateRange)
-            ->groupBy('authenticatable_type', 'authenticatable_id')
-            ->selectRaw('authenticatable_type, authenticatable_id, COUNT(*) as total')
+        $topCustomers = resolve_static(Address::class, 'query')
+            ->join('tickets', function (JoinClause $join): void {
+                $join->on('addresses.id', '=', 'tickets.authenticatable_id')
+                    ->where('tickets.authenticatable_type', morph_alias(Address::class));
+            })
+            ->whereBetween('tickets.created_at', $dateRange)
+            ->whereNull('tickets.deleted_at')
+            ->groupBy('addresses.contact_id')
+            ->selectRaw('addresses.contact_id, COUNT(*) as total')
+            ->with('contact')
             ->orderBy('total', 'desc')
             ->limit(10)
             ->get();
@@ -76,57 +83,39 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
             return;
         }
 
-        $names = collect();
-        $topCustomers
-            ->groupBy('authenticatable_type')
-            ->each(function (Collection $rows, string $type) use ($names): void {
-                $modelClass = morphed_model($type);
-
-                if (is_null($modelClass)) {
-                    return;
-                }
-
-                resolve_static($modelClass, 'query')
-                    ->whereKey($rows->pluck('authenticatable_id')->toArray())
-                    ->pluck('name', 'id')
-                    ->each(fn (string $name, int $id) => $names->put($type . ':' . $id, $name));
-            });
-
-        $customerKeys = $topCustomers
-            ->map(fn (Ticket $ticket) => $ticket->authenticatable_type . ':' . $ticket->authenticatable_id)
+        $this->labels = $topCustomers
+            ->pluck('contact')
+            ->map(fn (Contact $contact) => $contact->getLabel() ?? __('Unknown'))
+            ->values()
             ->toArray();
 
-        $this->labels = array_map(
-            fn (string $key) => $names->get($key) ?? __('Unknown'),
-            $customerKeys
-        );
-
         $this->optionData = $topCustomers
-            ->map(fn (Ticket $ticket) => [
-                'label' => $names->get(
-                    $ticket->authenticatable_type . ':' . $ticket->authenticatable_id
-                ) ?? __('Unknown'),
-                'authenticatable_type' => $ticket->authenticatable_type,
-                'authenticatable_id' => $ticket->authenticatable_id,
+            ->mapWithKeys(fn (Address $address) => [
+                $address->contact_id => [
+                    'label' => $address->contact?->getLabel() ?? __('Unknown'),
+                    'authenticatable_type' => $address->getMorphClass(),
+                    'authenticatable_ids' => $address->contact?->addresses()->pluck('addresses.id')->toArray() ?? [],
+                ],
             ])
             ->toArray();
 
+        $order = array_flip(array_keys($this->optionData));
         $ticketsByCustomer = resolve_static(Ticket::class, 'query')
             ->where('authenticatable_type', morph_alias(Address::class))
             ->whereBetween('created_at', $dateRange)
-            ->where(function (Builder $query) use ($topCustomers): void {
-                foreach ($topCustomers as $customer) {
-                    $query->orWhere(
-                        fn (Builder $subQuery) => $subQuery
-                            ->where('authenticatable_type', $customer->authenticatable_type)
-                            ->where('authenticatable_id', $customer->authenticatable_id)
-                    );
+            ->where(function (Builder $query): void {
+                foreach ($this->optionData as $option) {
+                    $query->orWhereIntegerInRaw('authenticatable_id', data_get($option, 'authenticatable_ids'));
                 }
             })
-            ->groupBy('authenticatable_type', 'authenticatable_id', 'ticket_type_id')
-            ->selectRaw('authenticatable_type, authenticatable_id, ticket_type_id, COUNT(*) as total')
+            ->selectRaw('ticket_type_id, authenticatable_id')
             ->get()
-            ->groupBy(fn (Ticket $ticket) => $ticket->authenticatable_type . ':' . $ticket->authenticatable_id);
+            ->groupBy(fn (Ticket $ticket) => array_find_key(
+                $this->optionData,
+                fn ($option) => in_array($ticket->authenticatable_id, data_get($option, 'authenticatable_ids'))
+            ))
+            ->sortKeysUsing(fn ($a, $b) => $order[$a] <=> $order[$b])
+            ->map(fn (Collection $tickets) => $tickets->countBy('ticket_type_id')->toArray());
 
         $ticketTypes = resolve_static(TicketType::class, 'query')
             ->get(['id', 'name']);
@@ -134,14 +123,10 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
         $this->series = [];
 
         foreach ($ticketTypes as $ticketType) {
-            $data = array_map(
-                function (string $key) use ($ticketsByCustomer, $ticketType): int {
-                    return (int) ($ticketsByCustomer->get($key, collect())
-                        ->firstWhere('ticket_type_id', $ticketType->getKey())
-                        ?->total ?? 0);
-                },
-                $customerKeys
-            );
+            $data = $ticketsByCustomer
+                ->map(fn (array $item) => array_key_exists($ticketType->id, $item) ? $item[$ticketType->id] : 0)
+                ->values()
+                ->toArray();
 
             if (array_sum($data) > 0) {
                 $this->series[] = [
@@ -159,14 +144,10 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
             $colorIndex++;
         }
 
-        $noTypeData = array_map(
-            function (string $key) use ($ticketsByCustomer): int {
-                return (int) ($ticketsByCustomer->get($key, collect())
-                    ->firstWhere('ticket_type_id', null)
-                    ?->total ?? 0);
-            },
-            $customerKeys
-        );
+        $noTypeData = $ticketsByCustomer
+            ->map(fn (array $item) => array_key_exists('', $item) ? $item[''] : 0)
+            ->values()
+            ->toArray();
 
         if (array_sum($noTypeData) > 0) {
             $this->series[] = [
@@ -197,7 +178,7 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
                 'method' => 'show',
                 'params' => [
                     'authenticatable_type' => data_get($data, 'authenticatable_type'),
-                    'authenticatable_id' => data_get($data, 'authenticatable_id'),
+                    'authenticatable_ids' => data_get($data, 'authenticatable_ids'),
                     'name' => data_get($data, 'label'),
                 ],
             ],
@@ -209,7 +190,7 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
     public function show(array $params): void
     {
         $authenticatableType = data_get($params, 'authenticatable_type');
-        $authenticatableId = data_get($params, 'authenticatable_id');
+        $authenticatableIds = data_get($params, 'authenticatable_ids');
         $name = data_get($params, 'name');
 
         $start = $this->getStart()->toDateTimeString();
@@ -219,7 +200,7 @@ class TicketsByTopCustomers extends Chart implements HasWidgetOptions
             Livewire::new(resolve_static(TicketList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('authenticatable_type', $authenticatableType)
-                ->where('authenticatable_id', $authenticatableId)
+                ->whereIntegerInRaw('authenticatable_id', $authenticatableIds)
                 ->whereBetween('created_at', [$start, $end]),
             __('Tickets by :customer', ['customer' => $name]),
         )
