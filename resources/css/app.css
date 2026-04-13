@@ -99,7 +99,8 @@
     --color-dark-950: #020617;
 
     --animate-progress: progress 2s linear forwards;
-    --animate-indeterminate: indeterminate 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    --animate-indeterminate: indeterminate 1.5s cubic-bezier(0.4, 0, 0.2, 1)
+        infinite;
 
     @keyframes progress {
         0% {
