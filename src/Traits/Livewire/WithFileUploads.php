@@ -107,7 +107,7 @@ trait WithFileUploads
 
         $collection = $this->collection ?: 'default';
 
-        $keys = data_get($this->filesArray, '*.key') ?? [];
+        $keys = array_column($this->filesArray, 'key');
         foreach ($files as $file) {
             if (! in_array($file->getFilename(), $keys)) {
                 /** @var TemporaryUploadedFile $file */
