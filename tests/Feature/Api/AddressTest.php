@@ -230,7 +230,7 @@ test('get address', function (): void {
     expect($jsonAddress->contact_id)->toEqual($this->addresses[0]->contact_id);
     expect($jsonAddress->company)->toEqual($this->addresses[0]->company);
     expect($jsonAddress->title)->toEqual($this->addresses[0]->title);
-    expect($jsonAddress->salutation)->toEqual($this->addresses[0]->salutation->value);
+    expect($jsonAddress->salutation)->toEqual($this->addresses[0]->salutation?->value);
     expect($jsonAddress->firstname)->toEqual($this->addresses[0]->firstname);
     expect($jsonAddress->lastname)->toEqual($this->addresses[0]->lastname);
     expect($jsonAddress->addition)->toEqual($this->addresses[0]->addition);
