@@ -113,7 +113,7 @@
 
                             if (multipleFileUpload) {
                                 lastUploads.forEach((file) => {
-                                    this.selectionProxy.children.push(file)
+                                    this.selectionProxy.children.push(JSON.parse(JSON.stringify(file)))
                                     this.selection = JSON.parse(JSON.stringify(this.selectionProxy))
                                 }, this)
                             } else {
