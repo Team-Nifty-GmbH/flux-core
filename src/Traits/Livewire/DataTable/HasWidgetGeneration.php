@@ -70,9 +70,12 @@ trait HasWidgetGeneration
             ->map(function (Attribute $attribute) use ($numericTypes, $dateTypes) {
                 $dbType = strtolower($attribute->type ?? '');
 
-                if (in_array($dbType, $numericTypes)) {
+                $isNumeric = collect($numericTypes)->contains(fn ($t) => str_starts_with($dbType, $t));
+                $isDate = collect($dateTypes)->contains(fn ($t) => str_starts_with($dbType, $t));
+
+                if ($isNumeric) {
                     $type = 'numeric';
-                } elseif (in_array($dbType, $dateTypes)) {
+                } elseif ($isDate) {
                     $type = 'date';
                 } else {
                     $type = 'string';

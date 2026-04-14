@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-3xl py-6">
+<div class="py-6">
     <div class="mb-6">
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             {{ __('Generate Widget') }}
