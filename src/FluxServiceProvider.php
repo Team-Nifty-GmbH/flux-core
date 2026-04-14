@@ -73,6 +73,8 @@ class FluxServiceProvider extends ServiceProvider
                 }
             } catch (Throwable) {
             }
+
+            $this->applyMailSettings();
         });
         Number::useLocale(app()->getLocale());
 
@@ -312,5 +314,43 @@ class FluxServiceProvider extends ServiceProvider
                 'auth.providers.users',
                 $usersProvider
             );
+    }
+
+    protected function applyMailSettings(): void
+    {
+        try {
+            $settings = app(Settings\MailSettings::class);
+            $previousConfig = [];
+
+            if (! is_null($settings->mailer)) {
+                $previousConfig['mail.default'] = config('mail.default');
+                config()->set('mail.default', $settings->mailer);
+            }
+
+            $defaultMailer = config('mail.default');
+
+            $configMap = [
+                'host' => "mail.mailers.{$defaultMailer}.host",
+                'port' => "mail.mailers.{$defaultMailer}.port",
+                'username' => "mail.mailers.{$defaultMailer}.username",
+                'password' => "mail.mailers.{$defaultMailer}.password",
+                'encryption' => "mail.mailers.{$defaultMailer}.encryption",
+                'from_address' => 'mail.from.address',
+                'from_name' => 'mail.from.name',
+            ];
+
+            foreach ($configMap as $property => $configKey) {
+                if (! is_null($settings->{$property})) {
+                    $previousConfig[$configKey] = config($configKey);
+                    config()->set($configKey, $settings->{$property});
+                }
+            }
+        } catch (Throwable $e) {
+            foreach ($previousConfig ?? [] as $configKey => $value) {
+                config()->set($configKey, $value);
+            }
+
+            report($e);
+        }
     }
 }
