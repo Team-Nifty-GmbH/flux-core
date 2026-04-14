@@ -135,7 +135,7 @@ trait HasGeneratedWidgetConfig
             $datatable = Livewire::new($datatableClass);
             $registry = app(FormatterRegistry::class);
             $customFormatters = $datatable->getFormatters();
-            $model = app($datatable->getModel());
+            $model = app(\Livewire\invade($datatable)->getModel());
             $modelCasts = $model->getCasts();
 
             $baseCol = str_contains($column, '.') ? last(explode('.', $column)) : $column;
