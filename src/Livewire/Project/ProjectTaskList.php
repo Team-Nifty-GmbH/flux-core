@@ -86,15 +86,15 @@ class ProjectTaskList extends BaseTaskList
 
     public function kanbanMoveItem(int|string $id, string $targetLane): void
     {
+        $task = resolve_static(Task::class, 'query')
+            ->whereKey($id)
+            ->first(['id', 'state', 'start_date', 'due_date']);
+
+        if (is_null($task) || $targetLane === $task->state::$name) {
+            return;
+        }
+
         try {
-            $task = resolve_static(Task::class, 'query')
-                ->whereKey($id)
-                ->first(['id', 'state', 'start_date', 'due_date']);
-
-            if (is_null($task) || $targetLane === $task->state::$name) {
-                return;
-            }
-
             resolve_static(UpdateTask::class, 'make', [[
                 'id' => $task->getKey(),
                 'state' => $targetLane,
