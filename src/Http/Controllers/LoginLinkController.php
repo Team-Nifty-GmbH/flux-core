@@ -21,7 +21,13 @@ class LoginLinkController extends Controller
         }
 
         try {
-            Auth::guard($login['guard'])->login($login['user']);
+            $user = isset($login['user_type'], $login['user_id'])
+                ? morphed_model($login['user_type'])::query()->whereKey($login['user_id'])->first()
+                : ($login['user'] ?? null);
+
+            if ($user) {
+                Auth::guard($login['guard'])->login($user);
+            }
         } catch (Exception) {
         }
 

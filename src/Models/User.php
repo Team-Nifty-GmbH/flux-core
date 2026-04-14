@@ -275,7 +275,8 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         $expires = now()->addMinutes(15);
         Cache::put('login_token_' . $plaintextToken,
             [
-                'user' => $this,
+                'user_type' => $this->getMorphClass(),
+                'user_id' => $this->getKey(),
                 'guard' => 'web',
                 'intended_url' => Session::get('url.intended', route('dashboard')),
             ],
