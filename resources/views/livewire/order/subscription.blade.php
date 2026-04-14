@@ -192,7 +192,10 @@
             />
             <div
                 x-cloak
-                x-show="$wire.schedule.due_at && new Date($wire.schedule.due_at) <= new Date()"
+                x-show="
+                    $wire.schedule.due_at &&
+                    new Date($wire.schedule.due_at) <= new Date()
+                "
             >
                 <x-alert color="amber">
                     {{ __('The schedule will be executed immediately on the next run.') }}

@@ -149,6 +149,35 @@ class ScheduleForm extends FluxForm
             return [];
         }
 
+        $remainingRecurrences = $this->end_radio === 'recurrences' && $this->recurrences
+            ? max(0, $this->recurrences - ($this->current_recurrence ?? 0))
+            : null;
+
+        if ($remainingRecurrences === 0) {
+            return [];
+        }
+
+        $dueAt = $this->due_at ? Carbon::parse($this->due_at) : null;
+        $endsAt = $this->end_radio === 'ends_at' && $this->ends_at
+            ? Carbon::parse($this->ends_at)
+            : null;
+
+        $dates = [];
+
+        if ($dueAt && $dueAt->isFuture()) {
+            if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
+                $dates[] = $dueAt->toDateTimeString();
+            }
+        }
+
+        $maxDates = $remainingRecurrences !== null
+            ? min($count, $remainingRecurrences - count($dates))
+            : $count;
+
+        if ($maxDates <= 0) {
+            return $dates;
+        }
+
         $basicParams = data_get($this->cron, 'parameters.basic', []);
 
         $parameters = match ($method) {
@@ -179,34 +208,7 @@ class ScheduleForm extends FluxForm
             $event = $event->{$method}();
         }
 
-        $dueAt = $this->due_at ? Carbon::parse($this->due_at) : null;
-        $endsAt = $this->end_radio === 'ends_at' && $this->ends_at
-            ? Carbon::parse($this->ends_at)
-            : null;
-        $remainingRecurrences = $this->end_radio === 'recurrences' && $this->recurrences
-            ? max(0, $this->recurrences - ($this->current_recurrence ?? 0))
-            : null;
-
-        if ($remainingRecurrences === 0) {
-            return [];
-        }
-
-        $dates = [];
-        $from = $dueAt && $dueAt->greaterThan(now()) ? $dueAt : now();
-
-        if ($dueAt && $dueAt->greaterThan(now())) {
-            if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
-                $dates[] = $dueAt->toDateTimeString();
-            }
-        }
-
-        $maxDates = $remainingRecurrences !== null
-            ? min($count, $remainingRecurrences - count($dates))
-            : $count;
-
-        if ($maxDates <= 0) {
-            return $dates;
-        }
+        $from = $dueAt && $dueAt->isFuture() ? $dueAt : now();
 
         try {
             if ($method === FrequenciesEnum::LastDayOfMonth->value) {
