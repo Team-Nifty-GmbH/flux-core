@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class CategoryList extends BaseDataTable
 {
@@ -40,24 +41,11 @@ class CategoryList extends BaseDataTable
 
         $tree = to_flat_tree($categories->toArray());
 
-        // Collect ALL models recursively (parents + all nested children)
-        $allModels = collect();
-        $collectRecursive = function ($items) use (&$collectRecursive, &$allModels): void {
-            foreach ($items as $item) {
-                $allModels->push($item);
-
-                if ($item->relationLoaded('children')) {
-                    $collectRecursive($item->children);
-                }
-            }
-        };
-
-        $collectRecursive($categories);
-        $modelsById = $allModels->keyBy(fn ($m) => $m->getKey());
+        $modelsById = $this->collectModelsById($categories);
 
         $data = [];
         foreach ($tree as $item) {
-            $model = $modelsById->get($item['id']);
+            $model = $modelsById[$item['id']] ?? null;
 
             if ($model) {
                 $row = $this->itemToArray($model);
@@ -80,5 +68,18 @@ class CategoryList extends BaseDataTable
             'data' => $data,
             'total' => count($data),
         ];
+    }
+
+    protected function collectModelsById(Collection $items, array &$result = []): array
+    {
+        foreach ($items as $item) {
+            $result[$item->getKey()] = $item;
+
+            if ($item->relationLoaded('children')) {
+                $this->collectModelsById($item->children, $result);
+            }
+        }
+
+        return $result;
     }
 }
