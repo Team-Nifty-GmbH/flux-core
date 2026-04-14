@@ -13,9 +13,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Livewire;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 use Throwable;
@@ -37,6 +37,17 @@ class GenerateWidgetWizard extends Component
     public array $availableColumns = [];
 
     public ?string $widgetType = null;
+
+    // Step 2: Type configuration
+    public bool $showTotals = true;
+
+    public bool $horizontalBars = false;
+
+    public string $curveStyle = 'smooth';
+
+    public string $timeGrouping = 'month';
+
+    public string $pieStyle = 'pie';
 
     public ?string $valueColumn = null;
 
@@ -64,15 +75,21 @@ class GenerateWidgetWizard extends Component
 
     public bool $isShared = false;
 
+    public array $previewData = [];
+
     public function mount(): void
     {
         if (! $this->datatable || ! class_exists($this->datatable)) {
+            session()->forget('widget-wizard-state');
+
             $this->redirectRoute('dashboard', navigate: true);
 
             return;
         }
 
         if (! in_array(HasWidgetGeneration::class, class_uses_recursive($this->datatable))) {
+            session()->forget('widget-wizard-state');
+
             $this->redirectRoute('dashboard', navigate: true);
 
             return;
@@ -81,8 +98,25 @@ class GenerateWidgetWizard extends Component
         $datatable = app()->make($this->datatable);
         $this->availableColumns = $datatable->buildAvailableColumns();
 
-        $filters = session()->pull('widget-wizard-filters', []);
-        $this->userFilters = $filters;
+        // Fresh filters from DataTable → new wizard start
+        $freshFilters = session()->pull('widget-wizard-filters');
+
+        if ($freshFilters !== null) {
+            // Coming from DataTable: start fresh
+            $this->userFilters = $freshFilters;
+            session()->forget('widget-wizard-state');
+        } else {
+            // Page reload: restore saved state
+            $saved = session()->get('widget-wizard-state', []);
+
+            if (data_get($saved, 'datatable') === $this->datatable) {
+                foreach ($saved as $key => $value) {
+                    if (property_exists($this, $key) && $key !== 'datatable' && $key !== 'availableColumns') {
+                        $this->{$key} = $value;
+                    }
+                }
+            }
+        }
     }
 
     public function render(): View
@@ -90,56 +124,125 @@ class GenerateWidgetWizard extends Component
         return view('flux::livewire.datatables.generate-widget-wizard');
     }
 
-    public function nextStep(): void
+    public function generatePreview(): void
     {
-        match ($this->step) {
-            2 => $this->validate(['widgetType' => 'required|in:value_box,bar_chart,line_chart,value_list']),
-            3 => $this->validateStepThree(),
+        $config = $this->getPreviewConfig();
+        $className = match ($this->widgetType) {
+            'value_box' => GeneratedValueBox::class,
+            'bar_chart', 'pie_chart' => GeneratedBarChart::class,
+            'line_chart', 'area_chart' => GeneratedLineChart::class,
+            'value_list' => GeneratedValueList::class,
             default => null,
         };
 
-        $this->step = min($this->step + 1, 4);
+        if (is_null($className)) {
+            return;
+        }
+
+        try {
+            $widget = Livewire::new($className, ['config' => $config]);
+
+            $this->previewData = match ($this->widgetType) {
+                'value_box' => [
+                    'type' => 'value_box',
+                    'sum' => $widget->sum,
+                    'previousSum' => $widget->previousSum,
+                    'growthRate' => $widget->growthRate,
+                ],
+                'bar_chart', 'pie_chart', 'line_chart', 'area_chart' => [
+                    'type' => $this->widgetType,
+                    'series' => $widget->series ?? [],
+                    'categories' => data_get($widget->xaxis, 'categories', []),
+                ],
+                'value_list' => [
+                    'type' => 'value_list',
+                    'items' => $widget->items ?? [],
+                ],
+                default => [],
+            };
+        } catch (Throwable $e) {
+            $this->previewData = ['type' => 'error', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function nextStep(): void
+    {
+        match ($this->step) {
+            2 => $this->validate(['widgetType' => 'required|in:value_box,bar_chart,line_chart,area_chart,pie_chart,value_list']),
+            3 => $this->validateStepThree(),
+            4 => $this->validate([
+                'name' => 'required|string|max:255',
+                'targetDashboard' => 'required|string',
+            ]),
+            default => null,
+        };
+
+        $this->step = min($this->step + 1, 5);
+
+        if ($this->step === 5) {
+            session()->put('widget-preview-config', [
+                'component' => $this->resolveComponentName(),
+                'config' => $this->getPreviewConfig(),
+            ]);
+        }
+
+        $this->persistWizardState();
     }
 
     public function previousStep(): void
     {
         $this->step = max($this->step - 1, 1);
+        $this->persistWizardState();
+    }
+
+    public function getPreviewConfig(): array
+    {
+        return array_filter([
+            'type' => $this->widgetType,
+            'datatable' => $this->datatable,
+            'name' => $this->name,
+            'filters' => $this->userFilters,
+            'value_column' => $this->valueColumn,
+            'aggregate' => $this->aggregate,
+            'group_column' => $this->groupColumn,
+            'date_column' => in_array($this->widgetType, ['line_chart', 'area_chart'])
+                ? $this->dateColumn
+                : ($this->timeframeAware ? $this->timeframeDateColumn : null),
+            'timeframe_aware' => $this->timeframeAware,
+            'show_totals' => $this->showTotals,
+            'horizontal_bars' => $this->horizontalBars,
+            'curve_style' => $this->curveStyle,
+            'time_grouping' => $this->timeGrouping,
+            'pie_style' => $this->pieStyle,
+            'columns' => $this->selectedColumns ?: null,
+            'sort_column' => $this->sortColumn,
+            'sort_direction' => $this->sortDirection,
+            'limit' => $this->widgetType === 'value_list' ? $this->limit : null,
+            'is_shared' => $this->isShared,
+        ], fn ($v) => ! is_null($v));
+    }
+
+    public function cancel(): void
+    {
+        session()->forget('widget-wizard-state');
+
+        $this->redirectRoute('dashboard', navigate: true);
     }
 
     public function save(): void
     {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'targetDashboard' => 'required|string',
-        ]);
-
         auth()->user()->widgets()->create([
             'component_name' => $this->resolveComponentName(),
             'dashboard_component' => $this->targetDashboard,
             'name' => $this->name,
-            'config' => array_filter([
-                'type' => $this->widgetType,
-                'datatable' => $this->datatable,
-                'name' => $this->name,
-                'filters' => $this->userFilters,
-                'value_column' => $this->valueColumn,
-                'aggregate' => $this->aggregate,
-                'group_column' => $this->groupColumn,
-                'date_column' => $this->widgetType === 'line_chart'
-                    ? $this->dateColumn
-                    : ($this->timeframeAware ? $this->timeframeDateColumn : null),
-                'timeframe_aware' => $this->timeframeAware,
-                'columns' => $this->selectedColumns ?: null,
-                'sort_column' => $this->sortColumn,
-                'sort_direction' => $this->sortDirection,
-                'limit' => $this->widgetType === 'value_list' ? $this->limit : null,
-                'is_shared' => $this->isShared,
-            ], fn ($v) => ! is_null($v)),
+            'config' => $this->getPreviewConfig(),
             'width' => 2,
             'height' => 2,
             'order_column' => 0,
             'order_row' => 0,
         ]);
+
+        session()->forget('widget-wizard-state');
 
         $this->toast()
             ->success(__('Widget created successfully.'))
@@ -211,18 +314,34 @@ class GenerateWidgetWizard extends Component
         return $dashboards;
     }
 
-    protected function resolveComponentName(): string
+    public function resolveComponentName(): string
     {
         $classMap = [
             'value_box' => GeneratedValueBox::class,
             'bar_chart' => GeneratedBarChart::class,
             'line_chart' => GeneratedLineChart::class,
+            'area_chart' => GeneratedLineChart::class,
+            'pie_chart' => GeneratedBarChart::class,
             'value_list' => GeneratedValueList::class,
         ];
 
         $class = $classMap[$this->widgetType] ?? GeneratedValueBox::class;
 
         return app('livewire.finder')->normalizeName($class);
+    }
+
+    protected function persistWizardState(): void
+    {
+        session()->put('widget-wizard-state', collect(get_object_vars($this))
+            ->only([
+                'datatable', 'step', 'userFilters', 'widgetType', 'showTotals',
+                'horizontalBars', 'curveStyle', 'timeGrouping', 'pieStyle', 'valueColumn',
+                'aggregate', 'groupColumn', 'dateColumn', 'selectedColumns',
+                'sortColumn', 'sortDirection', 'limit', 'name', 'targetDashboard',
+                'timeframeAware', 'timeframeDateColumn', 'isShared',
+            ])
+            ->toArray()
+        );
     }
 
     protected function validateStepThree(): void
@@ -232,13 +351,8 @@ class GenerateWidgetWizard extends Component
                 'valueColumn' => 'required_unless:aggregate,count',
                 'aggregate' => 'required|in:sum,avg,min,max,count',
             ],
-            'bar_chart' => [
+            'bar_chart', 'line_chart', 'area_chart', 'pie_chart' => [
                 'groupColumn' => 'required|string',
-                'valueColumn' => 'required_unless:aggregate,count',
-                'aggregate' => 'required|in:sum,avg,min,max,count',
-            ],
-            'line_chart' => [
-                'dateColumn' => 'required|string',
                 'valueColumn' => 'required_unless:aggregate,count',
                 'aggregate' => 'required|in:sum,avg,min,max,count',
             ],

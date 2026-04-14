@@ -14,14 +14,46 @@ function apexCharts($wire) {
         async loadWidgetOptions() {
             this.widgetOptions = await $wire.getWidgetOptions();
         },
+        _formatByType(val, fmtType) {
+            const fmt = window.$nuxbe?.format;
+            if (!fmt) return val;
+            switch (fmtType) {
+                case 'money': return fmt.money(val);
+                case 'percentage': return fmt.percentage(val);
+                case 'date': return fmt.date(val);
+                case 'datetime': return fmt.datetime(val);
+                case 'int': return fmt.int(val);
+                case 'float': return typeof val === 'number' ? fmt.float(val) : val;
+                default: return val;
+            }
+        },
+        _makeValueFormatter() {
+            const fmtType = $wire?.valueFormatterType;
+            const self = this;
+            return function (val) {
+                if (typeof val !== 'number') return val;
+                return self._formatByType(val, fmtType || 'float');
+            };
+        },
+        _makePieTotalFormatter() {
+            const self = this;
+            return function (w) {
+                const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                return self._formatByType(total, $wire?.valueFormatterType || 'float');
+            };
+        },
+        _makeXAxisFormatter() {
+            const fmtType = $wire?.xAxisFormatterType;
+            const self = this;
+            return function (val) {
+                return self._formatByType(val, fmtType || 'string');
+            };
+        },
         init() {
             this.$el.setAttribute('apex_chart', '');
 
-            if (this.$el.querySelector('.chart').clientHeight === 0) {
-                return;
-            }
-
-            this.height = this.$el.querySelector('.chart').clientHeight;
+            const chartHeight = this.$el.querySelector('.chart').clientHeight;
+            this.height = chartHeight > 0 ? chartHeight : 300;
             document.addEventListener('livewire:navigating', () => {
                 this.chart.destroy();
             });
@@ -382,9 +414,7 @@ function apexCharts($wire) {
                 dataLabels: {
                     formatter:
                         this.dataLabelsFormatter ??
-                        function (val) {
-                            return val;
-                        },
+                        this._makeValueFormatter(),
                 },
                 xaxis: {
                     labels: {
@@ -394,9 +424,7 @@ function apexCharts($wire) {
                         },
                         formatter:
                             this.xAxisFormatter ??
-                            function (val) {
-                                return val;
-                            },
+                            this._makeXAxisFormatter(),
                     },
                     axisBorder: {
                         show: false,
@@ -411,21 +439,13 @@ function apexCharts($wire) {
                             colors: isDark ? '#9ca3af' : '#6b7280',
                             fontSize: '12px',
                         },
-                        formatter:
-                            this.yAxisFormatter ??
-                            function (val) {
-                                return val;
-                            },
+                        formatter: this.yAxisFormatter ?? this._makeValueFormatter(),
                     },
                 },
                 tooltip: {
                     theme: isDark ? 'dark' : 'light',
                     y: {
-                        formatter:
-                            this.toolTipFormatter ??
-                            function (val) {
-                                return val;
-                            },
+                        formatter: this.toolTipFormatter ?? this._makeValueFormatter(),
                     },
                 },
                 plotOptions: {
@@ -441,22 +461,13 @@ function apexCharts($wire) {
                                 value: {
                                     formatter:
                                         this.dataLabelsFormatter ??
-                                        function (val) {
-                                            return val;
-                                        },
+                                        this._makeValueFormatter(),
                                 },
                                 total: {
                                     show: true,
                                     formatter:
                                         this.plotOptionsTotalFormatter ??
-                                        function (w) {
-                                            return w.globals.seriesTotals.reduce(
-                                                (a, b) => {
-                                                    return a + b;
-                                                },
-                                                0,
-                                            );
-                                        },
+                                        this._makePieTotalFormatter(),
                                 },
                             },
                         },

@@ -53,7 +53,8 @@ class GeneratedValueList extends ValueList implements HasWidgetOptions
 
         $query->select($selectColumns);
 
-        if ($sortColumn) {
+        $sortColumn = $this->validateColumnName($sortColumn);
+        if ($sortColumn && in_array($sortDirection, ['asc', 'desc'])) {
             $query->orderBy($sortColumn, $sortDirection);
         }
 

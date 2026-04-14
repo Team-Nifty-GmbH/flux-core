@@ -4,7 +4,7 @@
             {{ __('Generate Widget') }}
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {{ __('Step :current of :total', ['current' => $step, 'total' => 4]) }}
+            {{ __('Step :current of :total', ['current' => $step, 'total' => 5]) }}
         </p>
     </div>
 
@@ -43,12 +43,14 @@
             <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
                 {{ __('Select Widget Type') }}
             </h3>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
                 @php
                     $types = [
                         ['key' => 'value_box', 'icon' => 'calculator', 'label' => __('Value Box'), 'description' => __('Single aggregate value')],
                         ['key' => 'bar_chart', 'icon' => 'chart-bar', 'label' => __('Bar Chart'), 'description' => __('Grouped by column')],
-                        ['key' => 'line_chart', 'icon' => 'chart-bar-square', 'label' => __('Line Chart'), 'description' => __('Over time')],
+                        ['key' => 'line_chart', 'icon' => 'presentation-chart-line', 'label' => __('Line Chart'), 'description' => __('Over time')],
+                        ['key' => 'area_chart', 'icon' => 'chart-bar-square', 'label' => __('Area Chart'), 'description' => __('Filled line chart')],
+                        ['key' => 'pie_chart', 'icon' => 'chart-pie', 'label' => __('Pie Chart'), 'description' => __('Proportions')],
                         ['key' => 'value_list', 'icon' => 'list-bullet', 'label' => __('List'), 'description' => __('Top N entries')],
                     ];
                 @endphp
@@ -65,6 +67,50 @@
                         </div>
                     </div>
                 @endforeach
+            </div>
+
+            {{-- Type-specific options --}}
+            <div class="mt-4 space-y-3" x-show="$wire.widgetType" x-cloak>
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ __('Options') }}
+                </h4>
+                <div x-show="$wire.widgetType === 'bar_chart'" x-cloak>
+                    <x-toggle
+                        wire:model="horizontalBars"
+                        :label="__('Horizontal bars')"
+                    />
+                </div>
+                <div x-show="['bar_chart', 'line_chart', 'area_chart', 'pie_chart'].includes($wire.widgetType)" x-cloak>
+                    <x-toggle
+                        wire:model="showTotals"
+                        :label="__('Show totals')"
+                    />
+                </div>
+                <div x-show="$wire.widgetType === 'pie_chart'" x-cloak>
+                    <x-select.styled
+                        searchable
+                        wire:model="pieStyle"
+                        :label="__('Pie style')"
+                        :options="[
+                            ['value' => 'pie', 'label' => __('Pie')],
+                            ['value' => 'donut', 'label' => __('Donut')],
+                        ]"
+                        select="label:label|value:value"
+                    />
+                </div>
+                <div x-show="['line_chart', 'area_chart'].includes($wire.widgetType)" x-cloak>
+                    <x-select.styled
+                        searchable
+                        wire:model="curveStyle"
+                        :label="__('Curve style')"
+                        :options="[
+                            ['value' => 'smooth', 'label' => __('Smooth')],
+                            ['value' => 'straight', 'label' => __('Straight')],
+                            ['value' => 'stepline', 'label' => __('Stepline')],
+                        ]"
+                        select="label:label|value:value"
+                    />
+                </div>
             </div>
         </div>
 
@@ -102,51 +148,35 @@
                     </div>
                 </div>
 
-                {{-- Bar Chart --}}
-                <div x-show="$wire.widgetType === 'bar_chart'" x-cloak>
+                {{-- Charts (Bar, Line, Area) --}}
+                <div x-show="['bar_chart', 'line_chart', 'area_chart', 'pie_chart'].includes($wire.widgetType)" x-cloak>
                     <div class="flex flex-col gap-4">
                         <x-select.styled
                             searchable
-                            wire:model="groupColumn"
-                            :label="__('Group By Column')"
+                            wire:model.live="groupColumn"
+                            :label="__('X-Axis')"
                             :options="$availableColumns"
                             select="label:label|value:name"
                         />
-                        <x-select.styled
-                            searchable
-                            wire:model="aggregate"
-                            :label="__('Aggregate Function')"
-                            :options="[
-                                ['value' => 'sum', 'label' => __('Sum')],
-                                ['value' => 'avg', 'label' => __('Average')],
-                                ['value' => 'min', 'label' => __('Minimum')],
-                                ['value' => 'max', 'label' => __('Maximum')],
-                                ['value' => 'count', 'label' => __('Count')],
-                            ]"
-                            select="label:label|value:value"
-                        />
-                        <div x-show="$wire.aggregate !== 'count'" x-cloak>
+                        @php
+                            $selectedXColumn = collect($availableColumns)->firstWhere('name', $groupColumn);
+                            $isDateColumn = data_get($selectedXColumn, 'type') === 'date';
+                        @endphp
+                        @if ($isDateColumn)
                             <x-select.styled
                                 searchable
-                                wire:model="valueColumn"
-                                :label="__('Value Column')"
-                                :options="$this->getNumericColumns()"
-                                select="label:label|value:name"
+                                wire:model="timeGrouping"
+                                :label="__('Group by')"
+                                :options="[
+                                    ['value' => 'day', 'label' => __('Day')],
+                                    ['value' => 'week', 'label' => __('Week')],
+                                    ['value' => 'month', 'label' => __('Month')],
+                                    ['value' => 'quarter', 'label' => __('Quarter')],
+                                    ['value' => 'year', 'label' => __('Year')],
+                                ]"
+                                select="label:label|value:value"
                             />
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Line Chart --}}
-                <div x-show="$wire.widgetType === 'line_chart'" x-cloak>
-                    <div class="flex flex-col gap-4">
-                        <x-select.styled
-                            searchable
-                            wire:model="dateColumn"
-                            :label="__('Date Column')"
-                            :options="$this->getDateColumns()"
-                            select="label:label|value:name"
-                        />
+                        @endif
                         <x-select.styled
                             searchable
                             wire:model="aggregate"
@@ -164,7 +194,7 @@
                             <x-select.styled
                                 searchable
                                 wire:model="valueColumn"
-                                :label="__('Value Column')"
+                                :label="__('Y-Axis')"
                                 :options="$this->getNumericColumns()"
                                 select="label:label|value:name"
                             />
@@ -175,20 +205,14 @@
                 {{-- Value List --}}
                 <div x-show="$wire.widgetType === 'value_list'" x-cloak>
                     <div class="flex flex-col gap-4">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ __('Select Columns') }}
-                            </label>
-                            <div class="flex flex-wrap gap-3">
-                                @foreach ($availableColumns as $column)
-                                    <x-toggle
-                                        wire:model="selectedColumns"
-                                        :value="data_get($column, 'name')"
-                                        :label="data_get($column, 'label')"
-                                    />
-                                @endforeach
-                            </div>
-                        </div>
+                        <x-select.styled
+                            searchable
+                            multiple
+                            wire:model="selectedColumns"
+                            :label="__('Select Columns')"
+                            :options="$availableColumns"
+                            select="label:label|value:name"
+                        />
                         <x-select.styled
                             searchable
                             wire:model="sortColumn"
@@ -258,6 +282,21 @@
             </div>
         </div>
 
+        {{-- Step 5: Preview --}}
+        @if ($step === 5)
+            <div>
+                <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
+                    {{ __('Preview') }}
+                </h3>
+                <div>
+                    <livewire:dynamic-component
+                        :is="$this->resolveComponentName()"
+                        :config="$this->getPreviewConfig()"
+                    />
+                </div>
+            </div>
+        @endif
+
         <x-slot:footer>
             <div class="flex w-full items-center justify-between">
                 <div>
@@ -266,6 +305,7 @@
                             :text="__('Back')"
                             color="secondary"
                             flat
+                            loading
                             wire:click="previousStep"
                         />
                     @endif
@@ -275,19 +315,21 @@
                         :text="__('Cancel')"
                         color="secondary"
                         flat
-                        href="{{ url()->previous() }}"
-                        wire:navigate
+                        loading
+                        wire:click="cancel"
                     />
-                    @if ($step < 4)
+                    @if ($step < 5)
                         <x-button
                             :text="__('Next')"
                             color="primary"
+                            loading
                             wire:click="nextStep"
                         />
                     @else
                         <x-button
                             :text="__('Create Widget')"
                             color="primary"
+                            loading
                             wire:click="save"
                         />
                     @endif

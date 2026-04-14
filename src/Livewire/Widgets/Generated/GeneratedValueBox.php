@@ -44,7 +44,7 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
             : $query->{$aggregate}($column);
 
         $this->sum = $column && $aggregate !== 'count'
-            ? $this->formatColumnValue($column, $rawSum)
+            ? strip_tags($this->formatColumnValue($column, $rawSum))
             : $rawSum;
 
         if ($this->isTimeframeAware() && $dateColumn) {
@@ -61,7 +61,7 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
                 : $previousQuery->{$aggregate}($column);
 
             $this->previousSum = $column && $aggregate !== 'count'
-                ? $this->formatColumnValue($column, $rawPrevious)
+                ? strip_tags($this->formatColumnValue($column, $rawPrevious))
                 : $rawPrevious;
 
             $this->growthRate = $rawPrevious != 0

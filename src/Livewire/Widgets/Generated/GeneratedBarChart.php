@@ -19,9 +19,19 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
         HasGeneratedWidgetConfig::getLabel insteadof IsTimeFrameAwareWidget;
     }
 
+    public string $valueFormatterType = 'float';
+
+    public string $xAxisFormatterType = 'float';
+
     public function render(): View|Factory
     {
         return $this->renderWithErrorCheck(parent::render());
+    }
+
+    public function boot(): void
+    {
+        // Don't skip render — parent Chart::boot() skips when series is set,
+        // but we need the initial render for the ApexCharts JS to initialize
     }
 
     #[Renderless]
@@ -52,7 +62,7 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
 
         $aggregateExpression = $aggregate === 'count'
             ? DB::raw('COUNT(*) as aggregate_value')
-            : DB::raw("{$aggregate}({$valueColumn}) as aggregate_value");
+            : DB::raw("{$aggregate}(`{$valueColumn}`) as aggregate_value");
 
         $results = $query
             ->reorder()
@@ -61,16 +71,44 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
             ->orderByDesc('aggregate_value')
             ->get();
 
-        $this->series = [
-            [
-                'name' => $this->title() ?? static::getLabel(),
-                'data' => $results->pluck('aggregate_value')->toArray(),
-            ],
-        ];
+        $type = $this->getConfigValue('type', 'bar_chart');
+        $isPie = $type === 'pie_chart';
 
-        $this->xaxis = [
-            'categories' => $results->pluck($groupColumn)->toArray(),
-        ];
+        if ($isPie) {
+            $pieStyle = $this->getConfigValue('pie_style', 'pie');
+            $this->chart = ['type' => $pieStyle];
+            $this->series = $results->pluck('aggregate_value')->map(fn ($v) => round((float) $v, 2))->toArray();
+            $this->labels = $results->pluck($groupColumn)
+                ->map(fn ($v) => strip_tags($this->formatColumnValue($groupColumn, $v)))
+                ->toArray();
+            $this->showTotals = false;
+        } else {
+            $this->series = [
+                [
+                    'name' => $this->title() ?? static::getLabel(),
+                    'data' => $results->pluck('aggregate_value')->map(fn ($v) => round((float) $v, 2))->toArray(),
+                ],
+            ];
+
+            $this->xaxis = [
+                'categories' => $results->pluck($groupColumn)->toArray(),
+            ];
+
+            $this->showTotals = (bool) $this->getConfigValue('show_totals', true);
+
+            if ($this->getConfigValue('horizontal_bars', false)) {
+                $this->plotOptions = [
+                    'bar' => [
+                        'horizontal' => true,
+                        'endingShape' => 'rounded',
+                        'columnWidth' => '75%',
+                    ],
+                ];
+            }
+        }
+
+        $this->valueFormatterType = $this->resolveJsFormatterName($valueColumn);
+        $this->xAxisFormatterType = $this->resolveJsFormatterName($groupColumn);
     }
 
     #[Renderless]

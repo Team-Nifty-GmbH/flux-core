@@ -6,7 +6,6 @@ use FluxErp\Traits\Livewire\DataTable\HasWidgetGeneration;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Locked;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Formatters\FormatterRegistry;
 use Throwable;
@@ -15,7 +14,10 @@ trait HasGeneratedWidgetConfig
 {
     use Widgetable;
 
-    #[Locked]
+    // Not #[Locked] because $config is passed as a mount parameter from both the
+    // dashboard grid (DB-stored widget config) and the wizard preview. Locking
+    // would prevent Livewire from hydrating it via mount().
+    // Server-side validation of the datatable class happens in buildFilteredQuery().
     public ?array $config = null;
 
     public bool $configError = false;
@@ -48,9 +50,31 @@ trait HasGeneratedWidgetConfig
 
     protected function buildFilteredQuery(): ?Builder
     {
+        $datatable = $this->getDataTableInstance();
+
+        if (is_null($datatable)) {
+            return null;
+        }
+
+        try {
+            $userFilters = data_get($this->config, 'filters', []);
+
+            return $datatable->buildWidgetQuery($userFilters);
+        } catch (Throwable) {
+            $this->configError = true;
+            $this->configErrorMessage = __('Widget query could not be executed.');
+
+            return null;
+        }
+    }
+
+    protected function getDataTableInstance(): mixed
+    {
+        static $instances = [];
+
         $datatableClass = data_get($this->config, 'datatable');
 
-        if (! $datatableClass || ! class_exists($datatableClass)) {
+        if (! $datatableClass || ! is_string($datatableClass) || ! class_exists($datatableClass)) {
             $this->configError = true;
             $this->configErrorMessage = __('Invalid DataTable configuration.');
 
@@ -64,17 +88,18 @@ trait HasGeneratedWidgetConfig
             return null;
         }
 
-        try {
-            $datatable = Livewire::new($datatableClass);
-            $userFilters = data_get($this->config, 'filters', []);
+        if (! isset($instances[$datatableClass])) {
+            try {
+                $instances[$datatableClass] = Livewire::new($datatableClass);
+            } catch (Throwable) {
+                $this->configError = true;
+                $this->configErrorMessage = __('Widget could not be initialized.');
 
-            return $datatable->buildWidgetQuery($userFilters);
-        } catch (Throwable $e) {
-            $this->configError = true;
-            $this->configErrorMessage = $e->getMessage();
-
-            return null;
+                return null;
+            }
         }
+
+        return $instances[$datatableClass];
     }
 
     protected function getConfigValue(string $key, mixed $default = null): mixed
@@ -125,17 +150,17 @@ trait HasGeneratedWidgetConfig
 
     protected function formatColumnValue(string $column, mixed $value): string
     {
+        $datatable = $this->getDataTableInstance();
         $datatableClass = data_get($this->config, 'datatable');
 
-        if (! $datatableClass || ! class_exists($datatableClass)) {
+        if (! $datatable || ! $datatableClass) {
             return (string) $value;
         }
 
         try {
-            $datatable = Livewire::new($datatableClass);
             $registry = app(FormatterRegistry::class);
             $customFormatters = $datatable->getFormatters();
-            $model = app(\Livewire\invade($datatable)->getModel());
+            $model = app($datatableClass::getWidgetModel());
             $modelCasts = $model->getCasts();
 
             $baseCol = str_contains($column, '.') ? last(explode('.', $column)) : $column;
@@ -152,6 +177,55 @@ trait HasGeneratedWidgetConfig
             return $formatter->format($value, []);
         } catch (Throwable) {
             return (string) $value;
+        }
+    }
+
+    protected function resolveJsFormatterName(?string $column): string
+    {
+        if (! $column) {
+            return 'float';
+        }
+
+        $datatable = $this->getDataTableInstance();
+        $datatableClass = data_get($this->config, 'datatable');
+
+        if (! $datatable || ! $datatableClass) {
+            return 'float';
+        }
+
+        try {
+            $registry = app(FormatterRegistry::class);
+            $customFormatters = $datatable->getFormatters();
+            $model = app($datatableClass::getWidgetModel());
+            $modelCasts = $model->getCasts();
+            $baseCol = str_contains($column, '.') ? last(explode('.', $column)) : $column;
+
+            // Resolve the formatter the same way the DataTable does
+            if (isset($customFormatters[$column]) && is_string($customFormatters[$column])) {
+                $formatter = $registry->resolve($customFormatters[$column]);
+            } elseif (isset($customFormatters[$column]) && is_array($customFormatters[$column])) {
+                $formatter = $registry->resolveWithOptions($customFormatters[$column][0] ?? 'string', $customFormatters[$column][1] ?? []);
+            } else {
+                $stringCasts = array_filter($modelCasts, 'is_string');
+                $formatter = $registry->resolveForColumn($baseCol, $stringCasts);
+            }
+
+            // Map PHP formatter class to JS $nuxbe.format.* function name
+            return match (true) {
+                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\MoneyFormatter => 'money',
+                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\PercentageFormatter => 'percentage',
+                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\DateFormatter => match ($formatter->mode ?? 'date') {
+                    'datetime' => 'datetime',
+                    'relative' => 'relativeTime',
+                    'time' => 'datetime',
+                    default => 'date',
+                },
+                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\FloatFormatter => 'float',
+                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\BooleanFormatter => 'boolean',
+                default => 'string',
+            };
+        } catch (Throwable) {
+            return 'float';
         }
     }
 

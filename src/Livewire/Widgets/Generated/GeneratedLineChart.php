@@ -19,9 +19,19 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
         HasGeneratedWidgetConfig::getLabel insteadof IsTimeFrameAwareWidget;
     }
 
+    public string $valueFormatterType = 'float';
+
+    public string $xAxisFormatterType = 'date';
+
     public function render(): View|Factory
     {
         return $this->renderWithErrorCheck(parent::render());
+    }
+
+    public function boot(): void
+    {
+        // Don't skip render — parent Chart::boot() skips when series is set,
+        // but we need the initial render for the ApexCharts JS to initialize
     }
 
     #[Renderless]
@@ -66,16 +76,16 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
         };
 
         $aggregateExpression = match ($aggregate) {
-            'sum' => "SUM({$valueColumn})",
-            'avg' => "AVG({$valueColumn})",
-            'min' => "MIN({$valueColumn})",
-            'max' => "MAX({$valueColumn})",
+            'sum' => "SUM(`{$valueColumn}`)",
+            'avg' => "AVG(`{$valueColumn}`)",
+            'min' => "MIN(`{$valueColumn}`)",
+            'max' => "MAX(`{$valueColumn}`)",
             default => 'COUNT(*)',
         };
 
         $results = $query
             ->reorder()
-            ->select(DB::raw("DATE_FORMAT({$dateColumn}, '{$dateFormat}') as period, {$aggregateExpression} as aggregate_value"))
+            ->select(DB::raw("DATE_FORMAT(`{$dateColumn}`, '{$dateFormat}') as period, {$aggregateExpression} as aggregate_value"))
             ->groupBy('period')
             ->orderBy('period')
             ->get();
@@ -89,6 +99,19 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
 
         $this->xaxis = [
             'categories' => $results->pluck('period')->toArray(),
+        ];
+
+        $this->valueFormatterType = $this->resolveJsFormatterName($valueColumn);
+        $this->showTotals = (bool) $this->getConfigValue('show_totals', true);
+
+        $type = $this->getConfigValue('type', 'line_chart');
+        $this->chart = ['type' => $type === 'area_chart' ? 'area' : 'line'];
+
+        $curveStyle = $this->getConfigValue('curve_style', 'smooth');
+        $this->stroke = [
+            'show' => true,
+            'width' => 4,
+            'curve' => $curveStyle,
         ];
     }
 
