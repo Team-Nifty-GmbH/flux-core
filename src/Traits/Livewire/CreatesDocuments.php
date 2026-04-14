@@ -278,8 +278,16 @@ trait CreatesDocuments
             ->unique()
             ->all();
 
+        $forceLayouts = data_get($this->selectedPrintLayouts, 'force') ?? [];
+
         $mailAttachments = [];
         foreach ($emailDocuments as $createDocument) {
+            if (in_array($createDocument, $forceLayouts)) {
+                $mailAttachments[] = $this->getCreateAttachmentArray($item, $createDocument);
+
+                continue;
+            }
+
             $media = $item instanceof HasMedia ? $item->getMedia($createDocument)->last() : null;
 
             if ($media && ! $media->isTemporary) {
