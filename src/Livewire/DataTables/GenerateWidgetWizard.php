@@ -27,6 +27,7 @@ class GenerateWidgetWizard extends Component
     public int $step = 1;
 
     #[Url]
+    #[Locked]
     public ?string $datatable = null;
 
     #[Locked]
