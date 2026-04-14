@@ -6,14 +6,16 @@ return new class() extends SettingsMigration
 {
     public function up(): void
     {
-        $this->migrator->add('mail.mailer', null);
-        $this->migrator->add('mail.host', null);
-        $this->migrator->add('mail.port', null);
-        $this->migrator->add('mail.username', null);
-        $this->migrator->add('mail.password', null);
-        $this->migrator->add('mail.encryption', null);
-        $this->migrator->add('mail.from_address', null);
-        $this->migrator->add('mail.from_name', null);
+        $default = config('mail.default');
+
+        $this->migrator->add('mail.mailer', $default);
+        $this->migrator->add('mail.host', config("mail.mailers.{$default}.host"));
+        $this->migrator->add('mail.port', config("mail.mailers.{$default}.port"));
+        $this->migrator->add('mail.username', config("mail.mailers.{$default}.username"));
+        $this->migrator->add('mail.password', config("mail.mailers.{$default}.password"));
+        $this->migrator->add('mail.encryption', config("mail.mailers.{$default}.encryption"));
+        $this->migrator->add('mail.from_address', config('mail.from.address'));
+        $this->migrator->add('mail.from_name', config('mail.from.name'));
     }
 
     public function down(): void

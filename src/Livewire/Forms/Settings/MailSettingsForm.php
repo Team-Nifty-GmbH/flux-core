@@ -8,6 +8,7 @@ use FluxErp\Support\Livewire\Attributes\SeparatorAfter;
 
 class MailSettingsForm extends SettingsForm
 {
+    #[RenderAs(type: RenderAs::SELECT_NATIVE, options: [':options' => "\\Illuminate\\Support\\Arr::except(array_keys(config('mail.mailers')), ['log', 'array', 'failover'])"])]
     public ?string $mailer = null;
 
     public ?string $host = null;
