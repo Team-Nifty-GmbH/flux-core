@@ -18,8 +18,7 @@ class CategoryList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return resolve_static(Category::class, 'familyTree')
-            ->whereNull('parent_id');
+        return $builder->whereNull('parent_id');
     }
 
     protected function getLeftAppends(): array
@@ -31,23 +30,55 @@ class CategoryList extends BaseDataTable
 
     protected function getResultFromQuery(Builder $query): array
     {
-        $tree = to_flat_tree($query->get()->toArray());
+        // Get filtered root IDs from the query (respects user filters),
+        // then load the tree with recursive children via familyTree()
+        $rootIds = $query->pluck($this->modelTable . '.' . $this->modelKeyName);
 
-        $returnKeys = array_merge($this->getReturnKeys(), ['depth']);
+        $categories = resolve_static(Category::class, 'familyTree')
+            ->whereKey($rootIds)
+            ->get();
 
-        foreach ($tree as &$item) {
-            $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['indentation'] = '';
+        $tree = to_flat_tree($categories->toArray());
+
+        // Collect ALL models recursively (parents + all nested children)
+        $allModels = collect();
+        $collectRecursive = function ($items) use (&$collectRecursive, &$allModels): void {
+            foreach ($items as $item) {
+                $allModels->push($item);
+
+                if ($item->relationLoaded('children')) {
+                    $collectRecursive($item->children);
+                }
+            }
+        };
+
+        $collectRecursive($categories);
+        $modelsById = $allModels->keyBy(fn ($m) => $m->getKey());
+
+        $data = [];
+        foreach ($tree as $item) {
+            $model = $modelsById[$item['id']] ?? null;
+
+            if ($model) {
+                $row = $this->itemToArray($model);
+            } else {
+                $row = Arr::only(Arr::dot($item), $this->getReturnKeys());
+            }
+
+            $row['depth'] = $item['depth'];
+            $row['indentation'] = '';
 
             if ($item['depth'] > 0) {
                 $indent = $item['depth'] * 20;
-                $item['indentation'] = <<<HTML
-                    <div class="text-right indent-icon" style="width:{$indent}px;">
-                    </div>
-                    HTML;
+                $row['indentation'] = '<div class="shrink-0" style="min-width:' . $indent . 'px"></div>';
             }
+
+            $data[] = $row;
         }
 
-        return $tree;
+        return [
+            'data' => $data,
+            'total' => count($data),
+        ];
     }
 }
