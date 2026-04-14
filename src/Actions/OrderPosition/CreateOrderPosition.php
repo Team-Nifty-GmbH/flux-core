@@ -89,7 +89,7 @@ class CreateOrderPosition extends FluxAction
             data_set($this->data, 'ean_code', $product->ean, false);
             data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
 
-            if ($product->bundle_type_enum === BundleTypeEnum::Group) {
+            if (! $this->getData('origin_position_id') && $product->bundle_type_enum === BundleTypeEnum::Group) {
                 $this->data['is_free_text'] = true;
             }
         }
@@ -207,9 +207,7 @@ class CreateOrderPosition extends FluxAction
                     $errors += [
                         'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
                     ];
-                }
-
-                if (! resolve_static(OrderPosition::class, 'query')
+                } elseif (! resolve_static(OrderPosition::class, 'query')
                     ->whereKey($originPositionId)
                     ->where('order_id', $order->parent_id)
                     ->exists()
@@ -217,35 +215,38 @@ class CreateOrderPosition extends FluxAction
                     $errors += [
                         'origin_position_id' => ['Order position does not exists in parent order.'],
                     ];
-                }
-
-                $maxAmount = data_get(
-                    array_find(
-                        $this->calculateMaxAmounts(
-                            DB::select(
-                                'WITH RECURSIVE siblings AS (
+                } else {
+                    $maxAmount = data_get(
+                        array_find(
+                            $this->calculateMaxAmounts(
+                                DB::select(
+                                    'WITH RECURSIVE siblings AS (
                                     SELECT id, origin_position_id, signed_amount
                                     FROM order_positions
                                     WHERE id = ' . $originPositionId
-                                . ' AND order_id = ' . $order->parent_id
-                                . ' UNION ALL
+                                    . ' AND order_id = ' . $order->parent_id
+                                    . ' AND deleted_at IS NULL'
+                                    . ' UNION ALL
                                     SELECT op.id, op.origin_position_id, op.signed_amount
                                     FROM order_positions op
                                     INNER JOIN siblings s ON s.id = op.origin_position_id
                                     WHERE op.deleted_at IS NULL
                                 )
                                 SELECT * FROM siblings'
-                            )
+                                )
+                            ),
+                            fn (array $value) => $value['id'] === $originPositionId
                         ),
-                        fn (array $value) => $value['id'] === $originPositionId
-                    ),
-                    'signed_amount'
-                );
+                        'signed_amount'
+                    );
 
-                if (bccomp($this->getData('amount') ?? 1, $maxAmount ?? 0) === 1) {
-                    $errors += [
-                        'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
-                    ];
+                    if (bccomp($this->getData('amount') ?? 1, $maxAmount ?? 0) === 1) {
+                        $errors += [
+                            'amount' => [
+                                __('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount]),
+                            ],
+                        ];
+                    }
                 }
             }
         }
