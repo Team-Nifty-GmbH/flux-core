@@ -496,19 +496,19 @@ const calendar = () => {
                         const startWeek = start.isoWeek();
                         const endWeek = end.isoWeek();
 
-                        const cw = this.config.calendarWeekAbbreviation || 'CW';
+                        const cw = calendarWeekAbbreviation || 'CW';
                         const cwText =
                             startWeek === endWeek
                                 ? `(${cw} ${startWeek})`
                                 : `(${cw} ${startWeek}\u2013${endWeek})`;
 
-                        titleEl.textContent =
-                            titleEl.textContent.replace(
-                                new RegExp(`\\s*\\(${cw}.*?\\)`),
-                                '',
-                            ) +
-                            ' ' +
-                            cwText;
+                        let cwSpan = titleEl.querySelector('.fc-cw-suffix');
+                        if (!cwSpan) {
+                            cwSpan = document.createElement('span');
+                            cwSpan.className = 'fc-cw-suffix';
+                            titleEl.appendChild(cwSpan);
+                        }
+                        cwSpan.textContent = ' ' + cwText;
                     }
 
                     this.dispatchCalendarEvents('datesSet', info);
@@ -594,8 +594,12 @@ const calendar = () => {
                 },
             };
 
-            const { activeCalendars, showCalendars, ...filteredConfig } =
-                this.config;
+            const {
+                activeCalendars,
+                showCalendars,
+                calendarWeekAbbreviation,
+                ...filteredConfig
+            } = this.config;
 
             this.calendar = new Calendar(calendarEl, {
                 ...defaultConfig,
