@@ -177,6 +177,16 @@ class InitPermissions extends Command
             );
             unset($this->currentPermissions[$permission->id]);
         }
+
+        $sharePermission = resolve_static(
+            Permission::class,
+            'findOrCreate',
+            [
+                'name' => 'widget.generate-share',
+                'guardName' => 'web',
+            ]
+        );
+        unset($this->currentPermissions[$sharePermission->id]);
     }
 
     protected function registerTabPermissions(): void
