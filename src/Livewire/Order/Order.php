@@ -806,6 +806,24 @@ class Order extends Component
         return true;
     }
 
+    #[Renderless]
+    public function previewSchedule(): void
+    {
+        $this->schedule->nextExecutionDates = $this->schedule->getNextExecutionDates();
+    }
+
+    #[Renderless]
+    public function updatedScheduleDueAt(): void
+    {
+        $this->previewSchedule();
+    }
+
+    #[Renderless]
+    public function updatedScheduleEndsAt(): void
+    {
+        $this->previewSchedule();
+    }
+
     public function cancelSubscription(
         string $type,
         bool $generateDocument = false,

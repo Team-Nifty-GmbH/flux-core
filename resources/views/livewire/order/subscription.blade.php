@@ -39,7 +39,9 @@
                 :label="__('Repeat')"
                 autocomplete="off"
                 required
+                searchable
                 wire:model="schedule.cron.methods.basic"
+                x-on:select="$wire.previewSchedule()"
                 :options="$frequencies"
             />
             <div
@@ -54,6 +56,7 @@
                     type="time"
                     :label="__('Time')"
                     wire:model="schedule.cron.parameters.basic.0"
+                    x-on:change="$wire.previewSchedule()"
                 />
             </div>
             <div
@@ -64,6 +67,7 @@
                 <x-select.styled
                     :label="__('Weekday')"
                     wire:model="schedule.cron.parameters.basic.0"
+                    x-on:select="$wire.previewSchedule()"
                     select="label:name|value:id"
                     :options="[
                         ['id' => 1, 'name' => __('Mondays')],
@@ -79,6 +83,7 @@
                     type="time"
                     :label="__('Time')"
                     wire:model="schedule.cron.parameters.basic.1"
+                    x-on:change="$wire.previewSchedule()"
                 />
             </div>
             <div
@@ -94,12 +99,14 @@
                     :max="31"
                     :min="0"
                     wire:model="schedule.cron.parameters.basic.0"
+                    x-on:change="$wire.previewSchedule()"
                     :label="__('Day')"
                 />
                 <x-input
                     type="time"
                     :label="__('Time')"
                     wire:model="schedule.cron.parameters.basic.1"
+                    x-on:change="$wire.previewSchedule()"
                 />
             </div>
             <div
@@ -111,6 +118,7 @@
                     :max="31"
                     :min="0"
                     wire:model="schedule.cron.parameters.basic.0"
+                    x-on:change="$wire.previewSchedule()"
                     :label="__('Day')"
                 />
                 <div class="mt-4">
@@ -118,6 +126,7 @@
                         :max="31"
                         :min="0"
                         wire:model="schedule.cron.parameters.basic.1"
+                        x-on:change="$wire.previewSchedule()"
                         :label="__('Day')"
                     />
                 </div>
@@ -125,6 +134,7 @@
                     type="time"
                     :label="__('Time')"
                     wire:model="schedule.cron.parameters.basic.2"
+                    x-on:change="$wire.previewSchedule()"
                 />
             </div>
             <div
@@ -142,6 +152,7 @@
                             $wire.schedule.cron.parameters.basic[1],
                             $event.detail.select.days,
                         );
+                        $wire.previewSchedule();
                     "
                     select="label:name|value:id"
                     :options="[
@@ -164,19 +175,32 @@
                     :max="31"
                     :min="0"
                     wire:model.blur="schedule.cron.parameters.basic.1"
+                    x-on:change="$wire.previewSchedule()"
                     :label="__('Day')"
                 />
                 <x-input
                     type="time"
                     :label="__('Time')"
                     wire:model="schedule.cron.parameters.basic.2"
+                    x-on:change="$wire.previewSchedule()"
                 />
             </div>
             <x-date
-                wire:model="schedule.due_at"
-                :label="__('Due At')"
+                wire:model.live="schedule.due_at"
+                :label="__('Next Execution')"
                 timezone="UTC"
             />
+            <div
+                x-cloak
+                x-show="
+                    $wire.schedule.due_at &&
+                    new Date($wire.schedule.due_at) <= new Date()
+                "
+            >
+                <x-alert color="amber">
+                    {{ __('The schedule will be executed immediately on the next run.') }}
+                </x-alert>
+            </div>
             <div
                 x-data="{
                     get latestCancellationDate() {
@@ -243,6 +267,7 @@
                 :label="__('Never')"
                 value="never"
                 wire:model="schedule.end_radio"
+                x-on:change="$wire.previewSchedule()"
             />
             <div class="grid grid-cols-2 items-center gap-1.5">
                 <x-radio
@@ -251,9 +276,10 @@
                     :label="__('Ends At')"
                     value="ends_at"
                     wire:model="schedule.end_radio"
+                    x-on:change="$wire.previewSchedule()"
                 />
                 <x-date
-                    wire:model="schedule.ends_at"
+                    wire:model.live="schedule.ends_at"
                     timezone="UTC"
                     x-bind:disabled="$wire.schedule.end_radio !== 'ends_at'"
                 />
@@ -263,11 +289,13 @@
                     :label="__('After number of recurrences')"
                     value="recurrences"
                     wire:model="schedule.end_radio"
+                    x-on:change="$wire.previewSchedule()"
                 />
                 <x-number
                     wire:model="schedule.recurrences"
                     :min="1"
                     x-bind:disabled="$wire.schedule.end_radio !== 'recurrences'"
+                    x-on:change="$wire.previewSchedule()"
                 />
             </div>
             <div
@@ -399,6 +427,36 @@
                         ]"
                     />
                 </div>
+            </div>
+            <div
+                x-cloak
+                x-show="$wire.schedule.nextExecutionDates.length > 0"
+                class="border-t pt-4"
+            >
+                <x-label :label="__('Preview next executions')" />
+                <ul class="mt-1 space-y-1">
+                    <template
+                        x-for="date in $wire.schedule.nextExecutionDates"
+                        x-bind:key="date"
+                    >
+                        <li
+                            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+                        >
+                            <x-icon name="chevron-right" class="h-3 w-3" />
+                            <span
+                                x-text="
+                                    new Date(date + 'Z').toLocaleString('{{ app()->getLocale() }}', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })
+                                "
+                            ></span>
+                        </li>
+                    </template>
+                </ul>
             </div>
         </div>
         <x-slot:footer>
