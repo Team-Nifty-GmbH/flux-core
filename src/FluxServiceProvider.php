@@ -324,18 +324,26 @@ class FluxServiceProvider extends ServiceProvider
             return;
         }
 
-        $map = [
-            'mailer' => 'mail.default',
-            'host' => 'mail.mailers.smtp.host',
-            'port' => 'mail.mailers.smtp.port',
-            'username' => 'mail.mailers.smtp.username',
-            'password' => 'mail.mailers.smtp.password',
-            'encryption' => 'mail.mailers.smtp.encryption',
+        if (! is_null($settings->mailer)) {
+            config()->set('mail.default', $settings->mailer);
+        }
+
+        $defaultMailer = config('mail.default');
+
+        $mailerMap = [
+            'host' => "mail.mailers.{$defaultMailer}.host",
+            'port' => "mail.mailers.{$defaultMailer}.port",
+            'username' => "mail.mailers.{$defaultMailer}.username",
+            'password' => "mail.mailers.{$defaultMailer}.password",
+            'encryption' => "mail.mailers.{$defaultMailer}.encryption",
+        ];
+
+        $globalMap = [
             'from_address' => 'mail.from.address',
             'from_name' => 'mail.from.name',
         ];
 
-        foreach ($map as $property => $configKey) {
+        foreach (array_merge($mailerMap, $globalMap) as $property => $configKey) {
             if (! is_null($settings->{$property})) {
                 config()->set($configKey, $settings->{$property});
             }
