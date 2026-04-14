@@ -24,4 +24,11 @@ class MailSettings extends FluxSettings
     {
         return 'mail';
     }
+
+    public static function encrypted(): array
+    {
+        return [
+            'password',
+        ];
+    }
 }
