@@ -189,7 +189,13 @@ class GenerateWidgetWizard extends Component
                     $reflection = new ReflectionClass($class);
 
                     if (! $reflection->isAbstract() && $reflection->isSubclassOf(Dashboard::class)) {
-                        $dashboards[$class] = __(class_basename($class));
+                        $dashboards[$class] = __(
+                            Str::of($class)
+                                ->after('FluxErp\\Livewire\\')
+                                ->replace('\\', ' → ')
+                                ->headline()
+                                ->toString()
+                        );
                     }
                 }
             }
