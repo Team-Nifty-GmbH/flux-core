@@ -151,6 +151,7 @@ Route::middleware('web')
 
         Route::middleware(['auth:web', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
+            Route::get('/widgets/create', \FluxErp\Livewire\DataTables\GenerateWidgetWizard::class)->name('widgets.create');
 
             Route::get('/private-storage/{path}', function (string $path) {
                 return response()
