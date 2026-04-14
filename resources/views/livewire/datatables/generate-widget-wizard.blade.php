@@ -77,7 +77,8 @@
                 {{-- Value Box --}}
                 <div x-show="$wire.widgetType === 'value_box'" x-cloak>
                     <div class="flex flex-col gap-4">
-                        <x-select.native
+                        <x-select.styled
+                            searchable
                             wire:model="aggregate"
                             :label="__('Aggregate Function')"
                             :options="[
@@ -90,7 +91,8 @@
                             select="label:label|value:value"
                         />
                         <div x-show="$wire.aggregate !== 'count'" x-cloak>
-                            <x-select.native
+                            <x-select.styled
+                                searchable
                                 wire:model="valueColumn"
                                 :label="__('Value Column')"
                                 :options="$this->getNumericColumns()"
@@ -103,13 +105,15 @@
                 {{-- Bar Chart --}}
                 <div x-show="$wire.widgetType === 'bar_chart'" x-cloak>
                     <div class="flex flex-col gap-4">
-                        <x-select.native
+                        <x-select.styled
+                            searchable
                             wire:model="groupColumn"
                             :label="__('Group By Column')"
                             :options="$availableColumns"
                             select="label:label|value:name"
                         />
-                        <x-select.native
+                        <x-select.styled
+                            searchable
                             wire:model="aggregate"
                             :label="__('Aggregate Function')"
                             :options="[
@@ -122,7 +126,8 @@
                             select="label:label|value:value"
                         />
                         <div x-show="$wire.aggregate !== 'count'" x-cloak>
-                            <x-select.native
+                            <x-select.styled
+                                searchable
                                 wire:model="valueColumn"
                                 :label="__('Value Column')"
                                 :options="$this->getNumericColumns()"
@@ -135,13 +140,15 @@
                 {{-- Line Chart --}}
                 <div x-show="$wire.widgetType === 'line_chart'" x-cloak>
                     <div class="flex flex-col gap-4">
-                        <x-select.native
+                        <x-select.styled
+                            searchable
                             wire:model="dateColumn"
                             :label="__('Date Column')"
                             :options="$this->getDateColumns()"
                             select="label:label|value:name"
                         />
-                        <x-select.native
+                        <x-select.styled
+                            searchable
                             wire:model="aggregate"
                             :label="__('Aggregate Function')"
                             :options="[
@@ -154,7 +161,8 @@
                             select="label:label|value:value"
                         />
                         <div x-show="$wire.aggregate !== 'count'" x-cloak>
-                            <x-select.native
+                            <x-select.styled
+                                searchable
                                 wire:model="valueColumn"
                                 :label="__('Value Column')"
                                 :options="$this->getNumericColumns()"
@@ -181,13 +189,15 @@
                                 @endforeach
                             </div>
                         </div>
-                        <x-select.native
+                        <x-select.styled
+                            searchable
                             wire:model="sortColumn"
                             :label="__('Sort Column')"
                             :options="$availableColumns"
                             select="label:label|value:name"
                         />
-                        <x-select.native
+                        <x-select.styled
+                            searchable
                             wire:model="sortDirection"
                             :label="__('Sort Direction')"
                             :options="[
@@ -218,8 +228,9 @@
                     :label="__('Name')"
                     required
                 />
-                <x-select.native
-                    wire:model="targetDashboard"
+                <x-select.styled
+                    searchable
+                                wire:model="targetDashboard"
                     :label="__('Target Dashboard')"
                     :options="collect($this->getAvailableDashboards)->map(fn ($label, $value) => ['value' => $value, 'label' => $label])->values()->toArray()"
                     select="label:label|value:value"
@@ -230,8 +241,9 @@
                     :label="__('Bind to Dashboard Timeframe')"
                 />
                 <div x-show="$wire.timeframeAware" x-cloak>
-                    <x-select.native
-                        wire:model="timeframeDateColumn"
+                    <x-select.styled
+                        searchable
+                                wire:model="timeframeDateColumn"
                         :label="__('Date Column for Timeframe')"
                         :options="$this->getDateColumns()"
                         select="label:label|value:name"
