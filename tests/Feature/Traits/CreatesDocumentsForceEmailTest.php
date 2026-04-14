@@ -5,7 +5,7 @@ use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use Livewire\Component;
 
-it('regenerates email attachment when force is active instead of using cached media', function (): void {
+test('regenerates email attachment when force is active instead of using cached media', function (): void {
     $contact = Contact::factory()->create();
 
     // Attach an old "cached" balance-statement media to the contact
