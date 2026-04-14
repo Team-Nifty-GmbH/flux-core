@@ -320,33 +320,32 @@ class FluxServiceProvider extends ServiceProvider
     {
         try {
             $settings = app(Settings\MailSettings::class);
-        } catch (Throwable) {
-            return;
-        }
 
-        if (! is_null($settings->mailer)) {
-            config()->set('mail.default', $settings->mailer);
-        }
-
-        $defaultMailer = config('mail.default');
-
-        $mailerMap = [
-            'host' => "mail.mailers.{$defaultMailer}.host",
-            'port' => "mail.mailers.{$defaultMailer}.port",
-            'username' => "mail.mailers.{$defaultMailer}.username",
-            'password' => "mail.mailers.{$defaultMailer}.password",
-            'encryption' => "mail.mailers.{$defaultMailer}.encryption",
-        ];
-
-        $globalMap = [
-            'from_address' => 'mail.from.address',
-            'from_name' => 'mail.from.name',
-        ];
-
-        foreach (array_merge($mailerMap, $globalMap) as $property => $configKey) {
-            if (! is_null($settings->{$property})) {
-                config()->set($configKey, $settings->{$property});
+            if (! is_null($settings->mailer)) {
+                config()->set('mail.default', $settings->mailer);
             }
+
+            $defaultMailer = config('mail.default');
+
+            $mailerMap = [
+                'host' => "mail.mailers.{$defaultMailer}.host",
+                'port' => "mail.mailers.{$defaultMailer}.port",
+                'username' => "mail.mailers.{$defaultMailer}.username",
+                'password' => "mail.mailers.{$defaultMailer}.password",
+                'encryption' => "mail.mailers.{$defaultMailer}.encryption",
+            ];
+
+            $globalMap = [
+                'from_address' => 'mail.from.address',
+                'from_name' => 'mail.from.name',
+            ];
+
+            foreach (array_merge($mailerMap, $globalMap) as $property => $configKey) {
+                if (! is_null($settings->{$property})) {
+                    config()->set($configKey, $settings->{$property});
+                }
+            }
+        } catch (Throwable) {
         }
     }
 }
