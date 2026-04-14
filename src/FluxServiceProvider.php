@@ -73,6 +73,8 @@ class FluxServiceProvider extends ServiceProvider
                 }
             } catch (Throwable) {
             }
+
+            $this->applyMailSettings();
         });
         Number::useLocale(app()->getLocale());
 
@@ -312,5 +314,31 @@ class FluxServiceProvider extends ServiceProvider
                 'auth.providers.users',
                 $usersProvider
             );
+    }
+
+    protected function applyMailSettings(): void
+    {
+        try {
+            $settings = app(Settings\MailSettings::class);
+        } catch (Throwable) {
+            return;
+        }
+
+        $map = [
+            'mailer' => 'mail.default',
+            'host' => 'mail.mailers.smtp.host',
+            'port' => 'mail.mailers.smtp.port',
+            'username' => 'mail.mailers.smtp.username',
+            'password' => 'mail.mailers.smtp.password',
+            'encryption' => 'mail.mailers.smtp.encryption',
+            'from_address' => 'mail.from.address',
+            'from_name' => 'mail.from.name',
+        ];
+
+        foreach ($map as $property => $configKey) {
+            if (! is_null($settings->{$property})) {
+                config()->set($configKey, $settings->{$property});
+            }
+        }
     }
 }

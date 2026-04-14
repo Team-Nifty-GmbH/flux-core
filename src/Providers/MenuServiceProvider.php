@@ -135,6 +135,7 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.country-regions', path: 'settings.children.general.children.country-regions');
                 Menu::register(route: 'settings.currencies', path: 'settings.children.general.children.currencies');
                 Menu::register(route: 'settings.languages', path: 'settings.children.general.children.languages');
+                Menu::register(route: 'settings.mail-settings', path: 'settings.children.general.children.mail-settings');
                 Menu::register(route: 'settings.record-origins', path: 'settings.children.general.children.record-origins');
                 Menu::register(route: 'settings.serial-number-ranges', path: 'settings.children.general.children.serial-number-ranges');
                 Menu::register(route: 'settings.tags', path: 'settings.children.general.children.tags');

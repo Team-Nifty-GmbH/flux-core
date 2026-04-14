@@ -78,6 +78,7 @@ use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Locations;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
+use FluxErp\Livewire\Settings\MailSettings;
 use FluxErp\Livewire\Settings\Notifications;
 use FluxErp\Livewire\Settings\OrderTypes;
 use FluxErp\Livewire\Settings\PaymentReminderTexts;
@@ -293,6 +294,7 @@ Route::middleware('web')
                         Route::get('/locations', Locations::class)->name('locations');
                         Route::get('/logs', Logs::class)->name('logs');
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
+                        Route::get('/mail-settings', MailSettings::class)->name('mail-settings');
                         Route::get('/notifications', Notifications::class)->name('notifications');
                         Route::get('/order-types', OrderTypes::class)->name('order-types');
                         Route::get('/payment-reminder-texts', PaymentReminderTexts::class)->name('payment-reminder-texts');
