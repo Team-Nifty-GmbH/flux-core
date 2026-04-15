@@ -30,7 +30,7 @@ jobs:
       - name: Find locale JSON files
         id: find
         run: |
-          locales=$(ls lang/*.json 2>/dev/null | xargs -I{} basename {} .json | jq -R . | jq -s -c .)
+          locales=$(php -r 'echo json_encode(array_map(fn($f) => basename($f, ".json"), glob("lang/*.json")));')
           echo "locales=$locales" >> $GITHUB_OUTPUT
           echo "Found locales: $locales"
 
