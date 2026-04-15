@@ -113,6 +113,7 @@ jobs:
           ./vendor/bin/testbench schema:dump
 
       - name: Static analysis - scan code for literal keys
+        shell: bash
         run: |
           php -r '
           $locale = getenv("TRANSLATION_AUDIT_LOCALE");
@@ -168,6 +169,7 @@ jobs:
           '
 
       - name: Static analysis - cross-locale comparison
+        shell: bash
         run: |
           php -r '
           $locale = getenv("TRANSLATION_AUDIT_LOCALE");
@@ -224,6 +226,7 @@ jobs:
         continue-on-error: true
 
       - name: Generate summary
+        shell: bash
         run: |
           php -r '
           $locale = getenv("TRANSLATION_AUDIT_LOCALE");
