@@ -14,7 +14,6 @@ use FluxErp\Models\Holiday;
 use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\EmployeeDay\CloseEmployeeDayRuleset;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class CloseEmployeeDay extends FluxAction
@@ -95,7 +94,6 @@ class CloseEmployeeDay extends FluxAction
             'sick_days_used' => 0,
             'vacation_hours_used' => 0,
             'vacation_days_used' => 0,
-            'overtime_used' => 0,
             'plus_minus_absence_hours' => 0,
         ];
 
@@ -138,12 +136,10 @@ class CloseEmployeeDay extends FluxAction
                     $data['vacation_hours_used'] = bcadd($data['vacation_hours_used'], $hours);
                 }
             } elseif (data_get($absenceRequest, 'absenceType.affects_overtime')) {
-                $hours = $absenceRequest->calculateWorkHoursAffected($date);
+                // Overtime absences (e.g. Überstundenabbau) are not added to the total
+                // like sick/vacation hours. The deficit from not working (actual - target)
+                // already represents the overtime deduction.
                 $usedAbsenceRequests->push($absenceRequest);
-
-                if (bccomp($hours, 0) === 1) {
-                    $data['overtime_used'] = bcadd($data['overtime_used'], $hours);
-                }
             } else {
                 $hours = $absenceRequest->calculateWorkHoursAffected($date);
                 $usedAbsenceRequests->push($absenceRequest);
@@ -174,7 +170,6 @@ class CloseEmployeeDay extends FluxAction
             $data
         );
 
-        Arr::pull($data, 'overtime_used');
         $plusMinusOvertimeHours = $totalOvertime;
 
         return collect(array_merge(
