@@ -37,27 +37,28 @@ if (! function_exists('exception_to_notifications')) {
                 []
             ):
                 foreach ($errors as $field => $messages) {
-                    $formPrefix = null;
+                    $matchedForms = [];
                     $baseField = Illuminate\Support\Str::before($field, '.');
 
                     foreach ($formProperties as $name => $props) {
                         if (in_array($baseField, $props)) {
-                            $formPrefix = $name;
-                            break;
+                            $matchedForms[] = $name;
                         }
                     }
 
-                    $title = array_map(
-                        fn ($segment) => is_numeric($segment)
-                            ? $segment + 1
-                            : __(Illuminate\Support\Str::headline($segment)),
-                        explode('.', $field)
-                    );
-
                     foreach (Illuminate\Support\Arr::flatten($messages) as $message) {
-                        if ($formPrefix) {
-                            $component->addError($formPrefix . '.' . $field, __($message));
+                        if ($matchedForms) {
+                            foreach ($matchedForms as $formName) {
+                                $component->addError($formName . '.' . $field, __($message));
+                            }
                         } else {
+                            $title = array_map(
+                                fn ($segment) => is_numeric($segment)
+                                    ? $segment + 1
+                                    : __(Illuminate\Support\Str::headline($segment)),
+                                explode('.', $field)
+                            );
+
                             $component->toast()
                                 ->error(implode(' -> ', $title), __($message), $description)
                                 ->send();
