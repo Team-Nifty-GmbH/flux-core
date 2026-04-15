@@ -125,6 +125,8 @@ use FluxErp\Models\PushSubscription;
 use FluxErp\Models\QueueMonitor;
 use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
+use FluxErp\Models\Rule;
+use FluxErp\Models\RuleCondition;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
@@ -235,6 +237,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'queue_monitor' => QueueMonitor::class,
             'record_origin' => RecordOrigin::class,
             'role' => Role::class,
+            'rule' => Rule::class,
+            'rule_condition' => RuleCondition::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,
             'serial_number' => SerialNumber::class,
