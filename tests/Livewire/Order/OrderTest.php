@@ -197,7 +197,7 @@ test('create documents with delivery lock fails', function (): void {
         ->call('createDocuments')
         ->assertOk()
         ->assertReturned(null)
-        ->assertHasErrors(['order.has_contact_delivery_lock', 'order.balance'])
+        ->assertHasErrors(['has_contact_delivery_lock', 'order.balance'])
         ->assertSet('order.invoice_number', null);
 
     expect($this->order->refresh()->invoice_number)->toBeNull();

@@ -30,7 +30,7 @@ test('can save user', function (): void {
         ->set('userForm.password', 'invalid')
         ->call('save')
         ->assertHasErrors(['userForm.password']);
-    expect(count(data_get($component->errors()->messages(), 'userForm.password', [])))->toEqual(4);
+    expect(count($component->errors()->messages()['userForm.password'] ?? []))->toEqual(4);
 
     $component
         ->set('userForm.password', 'Password123!')
