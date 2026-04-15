@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Price;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Rule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -27,6 +28,11 @@ class CreatePriceRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'price' => 'required|numeric',
+            'rule_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Rule::class]),
+            ],
         ];
     }
 }

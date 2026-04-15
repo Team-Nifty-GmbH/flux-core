@@ -3,6 +3,8 @@
 namespace FluxErp\Rulesets\Discount;
 
 use FluxErp\Models\Discount;
+use FluxErp\Models\Rule;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -32,6 +34,12 @@ class CreateDiscountRuleset extends FluxRuleset
             'till' => 'nullable|date_format:Y-m-d H:i:s',
             'order_column' => 'nullable|integer|min:1',
             'is_percentage' => 'required|boolean',
+            'rule_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Rule::class]),
+            ],
+            'is_stackable' => 'nullable|boolean',
         ];
     }
 }

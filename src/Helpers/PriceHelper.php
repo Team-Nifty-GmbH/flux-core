@@ -10,6 +10,8 @@ use FluxErp\Models\Discount;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\RuleEngine\RuleEvaluator;
+use FluxErp\RuleEngine\Scopes\PriceScope;
 use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -31,6 +33,8 @@ class PriceHelper
     private Product $product;
 
     private string $timestamp;
+
+    private ?int $quantity = null;
 
     private bool $useDefault = true;
 
@@ -80,9 +84,11 @@ class PriceHelper
     {
         $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
 
-        $this->price = $this->priceList?->prices()
-            ->where('product_id', $this->product->getKey())
-            ->first();
+        $this->price = $this->resolveConditionalPrice(
+            $this->priceList?->prices()
+                ->where('product_id', $this->product->getKey())
+                ->get()
+        );
 
         if (! $this->price && $this->priceList?->parent) {
             $this->price = $this->calculatePriceFromPriceList($this->priceList, []);
@@ -94,17 +100,21 @@ class PriceHelper
         }
 
         if (! $this->price) {
-            $this->price = $this->contact?->priceList?->prices()
-                ->where('product_id', $this->product->getKey())
-                ->first();
+            $this->price = $this->resolveConditionalPrice(
+                $this->contact?->priceList?->prices()
+                    ->where('product_id', $this->product->getKey())
+                    ->get()
+            );
         }
 
         if (! $this->price && $this->useDefault) {
             $this->priceList = resolve_static(PriceList::class, 'default');
-            $this->price = resolve_static(Price::class, 'query')
-                ->where('product_id', $this->product->getKey())
-                ->whereRelation('priceList', 'is_default', true)
-                ->first();
+            $this->price = $this->resolveConditionalPrice(
+                resolve_static(Price::class, 'query')
+                    ->where('product_id', $this->product->getKey())
+                    ->whereRelation('priceList', 'is_default', true)
+                    ->get()
+            );
 
             if ($this->price) {
                 $this->price->isInherited = true;
@@ -301,6 +311,13 @@ class PriceHelper
         return $this;
     }
 
+    public function setQuantity(int $quantity): static
+    {
+        $this->quantity = $quantity;
+
+        return $this;
+    }
+
     public function setTimestamp(string $timestamp): static
     {
         $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
@@ -313,6 +330,40 @@ class PriceHelper
         $this->useDefault = $useDefault;
 
         return $this;
+    }
+
+    protected function resolveConditionalPrice(?Collection $prices): ?Price
+    {
+        if (! $prices || $prices->isEmpty()) {
+            return null;
+        }
+
+        $unconditionalPrice = $prices->whereNull('rule_id')->first();
+        $conditionalPrices = $prices->whereNotNull('rule_id');
+
+        if ($conditionalPrices->isEmpty()) {
+            return $unconditionalPrice;
+        }
+
+        $conditionalPrices->load('rule.conditions.children');
+
+        $scope = new PriceScope(
+            product: $this->product,
+            contact: $this->contact,
+            priceList: $this->priceList,
+            quantity: $this->quantity,
+            now: Carbon::parse($this->timestamp),
+        );
+
+        $matchingPrice = $conditionalPrices
+            ->filter(fn (Price $price) => $price->rule
+                && $price->rule->is_active
+                && RuleEvaluator::evaluate($price->rule, $scope)
+            )
+            ->sortByDesc(fn (Price $price) => $price->rule->priority)
+            ->first();
+
+        return $matchingPrice ?? $unconditionalPrice;
     }
 
     protected function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
