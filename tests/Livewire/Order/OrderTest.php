@@ -197,7 +197,7 @@ test('create documents with delivery lock fails', function (): void {
         ->call('createDocuments')
         ->assertOk()
         ->assertReturned(null)
-        ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
+        ->assertHasErrors(['order.has_contact_delivery_lock', 'order.balance'])
         ->assertSet('order.invoice_number', null);
 
     expect($this->order->refresh()->invoice_number)->toBeNull();
@@ -210,7 +210,7 @@ test('delete locked order fails', function (): void {
         ->call('delete')
         ->assertOk()
         ->assertNoRedirect()
-        ->assertHasErrors(['is_locked']);
+        ->assertHasErrors(['order.is_locked']);
 });
 
 test('delete order successful', function (): void {
