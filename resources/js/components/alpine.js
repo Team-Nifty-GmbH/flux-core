@@ -16,6 +16,7 @@ import wireNavigation from './wire-navigation.js';
 import comments from './comments.js';
 import familyTree from './family-tree.js';
 import documentScanner from './document-scanner.js';
+import validationErrors from './validation-errors.js';
 import selectComponent from './tallstackui/select.js';
 import toastComponent from './tallstackui/toast.js';
 import nuxbe from '../nuxbe.js';
@@ -77,6 +78,7 @@ document.addEventListener('livewire:navigated', wireNavigation, { once: true });
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();
+    validationErrors();
 
     Livewire.hook('request', ({ fail }) => {
         fail(({ status, preventDefault }) => {
