@@ -167,7 +167,7 @@ class TeamAbsenceCalendar extends Component
 
         $absences = resolve_static(AbsenceRequest::class, 'query')
             ->whereIn('employee_id', $employeeIds)
-            ->where('state', AbsenceRequestStateEnum::Approved)
+            ->whereIn('state', [AbsenceRequestStateEnum::Approved, AbsenceRequestStateEnum::Pending])
             ->where(fn (Builder $query) => $query
                 ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
                 ->orWhereBetween('end_date', [$startOfMonth, $endOfMonth])
@@ -177,7 +177,7 @@ class TeamAbsenceCalendar extends Component
                 )
             )
             ->with('absenceType:id,name,code,color')
-            ->get(['id', 'employee_id', 'absence_type_id', 'start_date', 'end_date', 'day_part'])
+            ->get(['id', 'employee_id', 'absence_type_id', 'start_date', 'end_date', 'day_part', 'state'])
             ->groupBy('employee_id');
 
         $employeeHolidays = resolve_static(EmployeeDay::class, 'query')
@@ -218,12 +218,22 @@ class TeamAbsenceCalendar extends Component
 
                             while ($start->lte($end)) {
                                 $dateKey = $start->format('Y-m-d');
+                                $isPending = $absence->state === AbsenceRequestStateEnum::Pending;
+
+                                if ($isPending && isset($days[$dateKey]) && ! ($days[$dateKey]['pending'] ?? false)) {
+                                    $start->addDay();
+
+                                    continue;
+                                }
+
                                 $days[$dateKey] = [
                                     'type' => 'absence',
                                     'color' => $absence->absenceType?->color,
-                                    'name' => $absence->absenceType?->name,
+                                    'name' => $absence->absenceType?->name
+                                        . ($isPending ? ' (' . __('pending') . ')' : ''),
                                     'is_half_day' => $absence->day_part
                                         && $absence->day_part->value !== 'full_day',
+                                    'pending' => $isPending,
                                 ];
                                 $start->addDay();
                             }
