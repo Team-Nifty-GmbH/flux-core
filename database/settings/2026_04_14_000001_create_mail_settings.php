@@ -12,7 +12,7 @@ return new class() extends SettingsMigration
         $this->migrator->add('mail.host', config("mail.mailers.{$default}.host"));
         $this->migrator->add('mail.port', config("mail.mailers.{$default}.port"));
         $this->migrator->add('mail.username', config("mail.mailers.{$default}.username"));
-        $this->migrator->add('mail.password', config("mail.mailers.{$default}.password"));
+        $this->migrator->addEncrypted('mail.password', config("mail.mailers.{$default}.password"));
         $this->migrator->add('mail.encryption', config("mail.mailers.{$default}.encryption"));
         $this->migrator->add('mail.from_address', config('mail.from.address'));
         $this->migrator->add('mail.from_name', config('mail.from.name'));
