@@ -6,9 +6,7 @@ use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Traits\Livewire\Widget\HasGeneratedWidgetConfig;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Renderless;
 
 class GeneratedBarChart extends BarChart implements HasWidgetOptions
@@ -23,15 +21,9 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
 
     public string $xAxisFormatterType = 'float';
 
-    public function render(): View|Factory
+    public function render(): View
     {
         return $this->renderWithErrorCheck(parent::render());
-    }
-
-    public function boot(): void
-    {
-        // Don't skip render — parent Chart::boot() skips when series is set,
-        // but we need the initial render for the ApexCharts JS to initialize
     }
 
     #[Renderless]
@@ -60,13 +52,18 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
             $query->whereBetween($dateColumn, [$this->getStart(), $this->getEnd()]);
         }
 
-        $aggregateExpression = $aggregate === 'count'
-            ? DB::raw('COUNT(*) as aggregate_value')
-            : DB::raw("{$aggregate}(`{$valueColumn}`) as aggregate_value");
+        $aggregateExpression = match ($aggregate) {
+            'sum' => "SUM(`{$valueColumn}`) as aggregate_value",
+            'avg' => "AVG(`{$valueColumn}`) as aggregate_value",
+            'min' => "MIN(`{$valueColumn}`) as aggregate_value",
+            'max' => "MAX(`{$valueColumn}`) as aggregate_value",
+            default => 'COUNT(*) as aggregate_value',
+        };
 
         $results = $query
             ->reorder()
-            ->select([$groupColumn, $aggregateExpression])
+            ->select($groupColumn)
+            ->selectRaw($aggregateExpression)
             ->groupBy($groupColumn)
             ->orderByDesc('aggregate_value')
             ->get();

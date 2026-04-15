@@ -38,7 +38,6 @@ class GenerateWidgetWizard extends Component
 
     public ?string $widgetType = null;
 
-    // Step 2: Type configuration
     public bool $showTotals = true;
 
     public bool $horizontalBars = false;
@@ -95,18 +94,15 @@ class GenerateWidgetWizard extends Component
             return;
         }
 
-        $datatable = app()->make($this->datatable);
+        $datatable = app($this->datatable);
         $this->availableColumns = $datatable->buildAvailableColumns();
 
-        // Fresh filters from DataTable → new wizard start
         $freshFilters = session()->pull('widget-wizard-filters');
 
-        if ($freshFilters !== null) {
-            // Coming from DataTable: start fresh
+        if (! is_null($freshFilters)) {
             $this->userFilters = $freshFilters;
             session()->forget('widget-wizard-state');
         } else {
-            // Page reload: restore saved state
             $saved = session()->get('widget-wizard-state', []);
 
             if (data_get($saved, 'datatable') === $this->datatable) {
@@ -172,7 +168,7 @@ class GenerateWidgetWizard extends Component
             3 => $this->validateStepThree(),
             4 => $this->validate([
                 'name' => 'required|string|max:255',
-                'targetDashboard' => 'required|string',
+                'targetDashboard' => ['required', 'string', 'in:' . implode(',', array_keys($this->getAvailableDashboards()))],
             ]),
             default => null,
         };
@@ -231,6 +227,12 @@ class GenerateWidgetWizard extends Component
 
     public function save(): void
     {
+        $this->validate([
+            'widgetType' => 'required|in:value_box,bar_chart,line_chart,area_chart,pie_chart,value_list',
+            'name' => 'required|string|max:255',
+            'targetDashboard' => ['required', 'string', 'in:' . implode(',', array_keys($this->getAvailableDashboards()))],
+        ]);
+
         auth()->user()->widgets()->create([
             'component_name' => $this->resolveComponentName(),
             'dashboard_component' => $this->targetDashboard,
@@ -271,11 +273,18 @@ class GenerateWidgetWizard extends Component
     public function getAvailableDashboards(): array
     {
         $dashboards = [];
-        $livewireNamespace = 'FluxErp\\Livewire\\';
-        $directoryPath = flux_path('src/Livewire');
 
-        try {
-            if (is_dir($directoryPath)) {
+        $scanPaths = [
+            'FluxErp\\Livewire\\' => flux_path('src/Livewire'),
+            config('livewire.class_namespace', 'App\\Livewire') . '\\' => app_path('Livewire'),
+        ];
+
+        foreach ($scanPaths as $namespace => $directoryPath) {
+            try {
+                if (! is_dir($directoryPath)) {
+                    continue;
+                }
+
                 $iterator = Finder::create()
                     ->in($directoryPath)
                     ->files()
@@ -284,7 +293,7 @@ class GenerateWidgetWizard extends Component
 
                 foreach ($iterator as $file) {
                     $relativePath = ltrim(Str::replace($directoryPath, '', $file->getRealPath()), '/');
-                    $class = $livewireNamespace . str_replace(['/', '.php'], ['\\', ''], $relativePath);
+                    $class = $namespace . str_replace(['/', '.php'], ['\\', ''], $relativePath);
 
                     if (! class_exists($class)) {
                         continue;
@@ -295,16 +304,16 @@ class GenerateWidgetWizard extends Component
                     if (! $reflection->isAbstract() && $reflection->isSubclassOf(Dashboard::class)) {
                         $dashboards[$class] = __(
                             Str::of($class)
-                                ->after('FluxErp\\Livewire\\')
+                                ->afterLast('\\Livewire\\')
                                 ->replace('\\', ' → ')
                                 ->headline()
                                 ->toString()
                         );
                     }
                 }
+            } catch (Throwable) {
+                // Fallback
             }
-        } catch (Throwable) {
-            // Fallback
         }
 
         if (empty($dashboards)) {
@@ -325,7 +334,7 @@ class GenerateWidgetWizard extends Component
             'value_list' => GeneratedValueList::class,
         ];
 
-        $class = $classMap[$this->widgetType] ?? GeneratedValueBox::class;
+        $class = $classMap[$this->widgetType] ?? throw new \InvalidArgumentException("Unknown widget type: {$this->widgetType}");
 
         return app('livewire.finder')->normalizeName($class);
     }

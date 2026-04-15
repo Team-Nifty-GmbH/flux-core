@@ -4,11 +4,9 @@ namespace FluxErp\Traits\Livewire\DataTable;
 
 use Illuminate\Database\Eloquent\Builder;
 use InvalidArgumentException;
-
 use Spatie\ModelInfo\Attributes\Attribute;
 use Spatie\ModelInfo\ModelInfo;
 use TeamNiftyGmbH\DataTable\DataTable;
-
 
 trait HasWidgetGeneration
 {

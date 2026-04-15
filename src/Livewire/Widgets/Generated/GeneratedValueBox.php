@@ -34,8 +34,10 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
         $aggregate = $this->getAggregate();
         $column = $this->getValueColumn();
         $dateColumn = $this->getDateColumn();
+        $isTimeframeAware = $this->isTimeframeAware() && $dateColumn;
 
-        if ($this->isTimeframeAware() && $dateColumn) {
+        if ($isTimeframeAware) {
+            $previousQuery = $query->clone();
             $query->whereBetween($dateColumn, [$this->getStart(), $this->getEnd()]);
         }
 
@@ -47,13 +49,7 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
             ? strip_tags($this->formatColumnValue($column, $rawSum))
             : $rawSum;
 
-        if ($this->isTimeframeAware() && $dateColumn) {
-            $previousQuery = $this->buildFilteredQuery();
-
-            if (is_null($previousQuery)) {
-                return;
-            }
-
+        if ($isTimeframeAware) {
             $previousQuery->whereBetween($dateColumn, [$this->getStartPrevious(), $this->getEndPrevious()]);
 
             $rawPrevious = $aggregate === 'count'
@@ -64,7 +60,7 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
                 ? strip_tags($this->formatColumnValue($column, $rawPrevious))
                 : $rawPrevious;
 
-            $this->growthRate = $rawPrevious != 0
+            $this->growthRate = $rawPrevious !== 0
                 ? round((($rawSum - $rawPrevious) / abs($rawPrevious)) * 100, 2)
                 : null;
         }

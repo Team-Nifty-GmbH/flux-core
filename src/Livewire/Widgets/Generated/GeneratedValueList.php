@@ -60,21 +60,19 @@ class GeneratedValueList extends ValueList implements HasWidgetOptions
 
         $results = $query->limit($limit)->get();
 
-        $this->items = $results->map(function ($item) use ($columns) {
-            $label = count($columns) > 0 ? (string) $item->{$columns[0]} : '';
-            $value = count($columns) > 0 ? (string) $item->{$columns[count($columns) - 1]} : '';
-            $subLabel = count($columns) > 2 ? (string) $item->{$columns[1]} : null;
+        $hasColumns = count($columns) > 0;
+        $lastColumn = last($columns);
 
+        $this->items = $results->map(function ($item) use ($columns, $hasColumns, $lastColumn) {
             return [
-                'label' => $label,
-                'subLabel' => $subLabel,
-                'value' => $value,
+                'label' => $hasColumns ? strip_tags($this->formatColumnValue($columns[0], $item->{$columns[0]})) : '',
+                'subLabel' => count($columns) > 2 ? strip_tags($this->formatColumnValue($columns[1], $item->{$columns[1]})) : null,
+                'value' => $hasColumns ? strip_tags($this->formatColumnValue($lastColumn, $item->{$lastColumn})) : '',
                 'growthRate' => null,
             ];
         })->toArray();
     }
 
-    #[Renderless]
     public function options(): array
     {
         return [];

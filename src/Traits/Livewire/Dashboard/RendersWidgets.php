@@ -245,7 +245,7 @@ trait RendersWidgets
                 })->orWhere('config->is_shared', true);
             })
             ->get()
-            ->unique('component_name')
+            ->unique(fn (WidgetModel $widget) => $widget->component_name . ':' . data_get($widget->config, 'name'))
             ->map(fn (WidgetModel $widget) => [
                 'id' => 'widget-generated-' . $widget->getKey(),
                 'label' => data_get($widget->config, 'name', $widget->name ?? $widget->component_name),
@@ -260,7 +260,7 @@ trait RendersWidgets
             function (array $widget) {
                 $name = $widget['component_name'];
 
-                if (str_starts_with($name, 'widgets.generated.') || str_contains($name, '.generated.')) {
+                if (str_contains($name, '.generated.')) {
                     try {
                         $permissionExists = ! is_null(
                             resolve_static(Permission::class, 'findByName', ['name' => 'widget.' . $name])

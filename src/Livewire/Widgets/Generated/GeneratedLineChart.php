@@ -6,9 +6,7 @@ use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Livewire\Widget\HasGeneratedWidgetConfig;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Renderless;
 
 class GeneratedLineChart extends LineChart implements HasWidgetOptions
@@ -23,15 +21,9 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
 
     public string $xAxisFormatterType = 'date';
 
-    public function render(): View|Factory
+    public function render(): View
     {
         return $this->renderWithErrorCheck(parent::render());
-    }
-
-    public function boot(): void
-    {
-        // Don't skip render — parent Chart::boot() skips when series is set,
-        // but we need the initial render for the ApexCharts JS to initialize
     }
 
     #[Renderless]
@@ -53,7 +45,14 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
 
         $aggregate = $this->getAggregate();
         $valueColumn = $this->validateColumnName($this->getValueColumn());
-        $dateColumn = $this->validateColumnName($this->getDateColumn() ?? 'created_at');
+        $configuredDateColumn = $this->getDateColumn();
+
+        if (is_null($configuredDateColumn)) {
+            $model = $query->getModel();
+            $configuredDateColumn = $model->usesTimestamps() ? $model->getCreatedAtColumn() : null;
+        }
+
+        $dateColumn = $this->validateColumnName($configuredDateColumn);
 
         if (is_null($dateColumn)) {
             return;
@@ -76,16 +75,16 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
         };
 
         $aggregateExpression = match ($aggregate) {
-            'sum' => "SUM(`{$valueColumn}`)",
-            'avg' => "AVG(`{$valueColumn}`)",
-            'min' => "MIN(`{$valueColumn}`)",
-            'max' => "MAX(`{$valueColumn}`)",
-            default => 'COUNT(*)',
+            'sum' => "SUM(`{$valueColumn}`) as aggregate_value",
+            'avg' => "AVG(`{$valueColumn}`) as aggregate_value",
+            'min' => "MIN(`{$valueColumn}`) as aggregate_value",
+            'max' => "MAX(`{$valueColumn}`) as aggregate_value",
+            default => 'COUNT(*) as aggregate_value',
         };
 
         $results = $query
             ->reorder()
-            ->select(DB::raw("DATE_FORMAT(`{$dateColumn}`, '{$dateFormat}') as period, {$aggregateExpression} as aggregate_value"))
+            ->selectRaw("DATE_FORMAT(`{$dateColumn}`, '{$dateFormat}') as period, {$aggregateExpression}")
             ->groupBy('period')
             ->orderBy('period')
             ->get();

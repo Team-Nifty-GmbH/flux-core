@@ -7,7 +7,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Formatters\BooleanFormatter;
+use TeamNiftyGmbH\DataTable\Formatters\DateFormatter;
+use TeamNiftyGmbH\DataTable\Formatters\FloatFormatter;
 use TeamNiftyGmbH\DataTable\Formatters\FormatterRegistry;
+use TeamNiftyGmbH\DataTable\Formatters\MoneyFormatter;
+use TeamNiftyGmbH\DataTable\Formatters\PercentageFormatter;
 use Throwable;
 
 trait HasGeneratedWidgetConfig
@@ -23,6 +28,8 @@ trait HasGeneratedWidgetConfig
     public bool $configError = false;
 
     public ?string $configErrorMessage = null;
+
+    protected mixed $resolvedDataTable = null;
 
     public static function dashboardComponent(): array
     {
@@ -70,8 +77,6 @@ trait HasGeneratedWidgetConfig
 
     protected function getDataTableInstance(): mixed
     {
-        static $instances = [];
-
         $datatableClass = data_get($this->config, 'datatable');
 
         if (! $datatableClass || ! is_string($datatableClass) || ! class_exists($datatableClass)) {
@@ -88,9 +93,9 @@ trait HasGeneratedWidgetConfig
             return null;
         }
 
-        if (! isset($instances[$datatableClass])) {
+        if (! isset($this->resolvedDataTable)) {
             try {
-                $instances[$datatableClass] = Livewire::new($datatableClass);
+                $this->resolvedDataTable = Livewire::new($datatableClass);
             } catch (Throwable) {
                 $this->configError = true;
                 $this->configErrorMessage = __('Widget could not be initialized.');
@@ -99,7 +104,7 @@ trait HasGeneratedWidgetConfig
             }
         }
 
-        return $instances[$datatableClass];
+        return $this->resolvedDataTable;
     }
 
     protected function getConfigValue(string $key, mixed $default = null): mixed
@@ -138,7 +143,7 @@ trait HasGeneratedWidgetConfig
             return null;
         }
 
-        if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $column)) {
+        if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/', $column)) {
             $this->configError = true;
             $this->configErrorMessage = __('Invalid column name in configuration.');
 
@@ -150,30 +155,13 @@ trait HasGeneratedWidgetConfig
 
     protected function formatColumnValue(string $column, mixed $value): string
     {
-        $datatable = $this->getDataTableInstance();
-        $datatableClass = data_get($this->config, 'datatable');
+        $formatter = $this->resolveFormatter($column);
 
-        if (! $datatable || ! $datatableClass) {
+        if (is_null($formatter)) {
             return (string) $value;
         }
 
         try {
-            $registry = app(FormatterRegistry::class);
-            $customFormatters = $datatable->getFormatters();
-            $model = app($datatableClass::getWidgetModel());
-            $modelCasts = $model->getCasts();
-
-            $baseCol = str_contains($column, '.') ? last(explode('.', $column)) : $column;
-
-            if (isset($customFormatters[$column]) && is_string($customFormatters[$column])) {
-                $formatter = $registry->resolve($customFormatters[$column]);
-            } elseif (isset($customFormatters[$column]) && is_array($customFormatters[$column])) {
-                $formatter = $registry->resolveWithOptions($customFormatters[$column][0] ?? 'string', $customFormatters[$column][1] ?? []);
-            } else {
-                $stringCasts = array_filter($modelCasts, 'is_string');
-                $formatter = $registry->resolveForColumn($baseCol, $stringCasts);
-            }
-
             return $formatter->format($value, []);
         } catch (Throwable) {
             return (string) $value;
@@ -186,11 +174,34 @@ trait HasGeneratedWidgetConfig
             return 'float';
         }
 
+        $formatter = $this->resolveFormatter($column);
+
+        if (is_null($formatter)) {
+            return 'float';
+        }
+
+        return match (true) {
+            $formatter instanceof MoneyFormatter => 'money',
+            $formatter instanceof PercentageFormatter => 'percentage',
+            $formatter instanceof DateFormatter => match ($formatter->mode ?? 'date') {
+                'datetime' => 'datetime',
+                'relative' => 'relativeTime',
+                'time' => 'datetime',
+                default => 'date',
+            },
+            $formatter instanceof FloatFormatter => 'float',
+            $formatter instanceof BooleanFormatter => 'boolean',
+            default => 'string',
+        };
+    }
+
+    protected function resolveFormatter(string $column): mixed
+    {
         $datatable = $this->getDataTableInstance();
         $datatableClass = data_get($this->config, 'datatable');
 
         if (! $datatable || ! $datatableClass) {
-            return 'float';
+            return null;
         }
 
         try {
@@ -200,32 +211,22 @@ trait HasGeneratedWidgetConfig
             $modelCasts = $model->getCasts();
             $baseCol = str_contains($column, '.') ? last(explode('.', $column)) : $column;
 
-            // Resolve the formatter the same way the DataTable does
             if (isset($customFormatters[$column]) && is_string($customFormatters[$column])) {
-                $formatter = $registry->resolve($customFormatters[$column]);
-            } elseif (isset($customFormatters[$column]) && is_array($customFormatters[$column])) {
-                $formatter = $registry->resolveWithOptions($customFormatters[$column][0] ?? 'string', $customFormatters[$column][1] ?? []);
-            } else {
-                $stringCasts = array_filter($modelCasts, 'is_string');
-                $formatter = $registry->resolveForColumn($baseCol, $stringCasts);
+                return $registry->resolve($customFormatters[$column]);
             }
 
-            // Map PHP formatter class to JS $nuxbe.format.* function name
-            return match (true) {
-                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\MoneyFormatter => 'money',
-                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\PercentageFormatter => 'percentage',
-                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\DateFormatter => match ($formatter->mode ?? 'date') {
-                    'datetime' => 'datetime',
-                    'relative' => 'relativeTime',
-                    'time' => 'datetime',
-                    default => 'date',
-                },
-                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\FloatFormatter => 'float',
-                $formatter instanceof \TeamNiftyGmbH\DataTable\Formatters\BooleanFormatter => 'boolean',
-                default => 'string',
-            };
+            if (isset($customFormatters[$column]) && is_array($customFormatters[$column])) {
+                return $registry->resolveWithOptions(
+                    $customFormatters[$column][0] ?? 'string',
+                    $customFormatters[$column][1] ?? []
+                );
+            }
+
+            $stringCasts = array_filter($modelCasts, 'is_string');
+
+            return $registry->resolveForColumn($baseCol, $stringCasts);
         } catch (Throwable) {
-            return 'float';
+            return null;
         }
     }
 
