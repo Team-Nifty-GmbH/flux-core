@@ -8,7 +8,6 @@ use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
-use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -93,6 +92,9 @@ class TeamAbsenceCalendar extends Component
 
     protected function loadData(): void
     {
+        $this->month = max(1, min(12, $this->month));
+        $this->year = max(1970, min(2100, $this->year));
+
         $this->monthName = Carbon::create($this->year, $this->month)
             ->locale(app()->getLocale())
             ->monthName;
@@ -100,6 +102,16 @@ class TeamAbsenceCalendar extends Component
         $this->prepareCalendarDays();
         $this->loadAbsenceTypes();
         $this->loadDepartments();
+    }
+
+    protected function holidayAbsenceType(): array
+    {
+        return [
+            'id' => 'holiday',
+            'name' => __('Holiday'),
+            'code' => '🎉',
+            'color' => '#fee685',
+        ];
     }
 
     protected function prepareCalendarDays(): void
@@ -113,7 +125,7 @@ class TeamAbsenceCalendar extends Component
             $this->calendarDays[$date->format('Y-m-d')] = [
                 'day' => $day,
                 'date' => $date->format('Y-m-d'),
-                'weekDay' => substr(__($date->format('D')), 0, 2),
+                'weekDay' => $date->locale(app()->getLocale())->shortDayName,
                 'isWeekend' => $date->isWeekend(),
                 'isToday' => $date->isToday(),
             ];
@@ -122,16 +134,13 @@ class TeamAbsenceCalendar extends Component
 
     protected function loadAbsenceTypes(): void
     {
+        $holiday = $this->holidayAbsenceType();
+
         $this->absenceTypes = resolve_static(AbsenceType::class, 'query')
             ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name', 'code', 'color'])
-            ->prepend(new AbsenceType([
-                'id' => 'holiday',
-                'name' => __('Holiday'),
-                'code' => '🎉',
-                'color' => '#fee685',
-            ]))
+            ->prepend(new AbsenceType($holiday))
             ->map(fn (AbsenceType $type) => [
                 'id' => $type->id,
                 'name' => $type->name,
@@ -149,6 +158,7 @@ class TeamAbsenceCalendar extends Component
 
         $employees = resolve_static(Employee::class, 'query')
             ->select(['id', 'employee_department_id', 'name'])
+            ->with('employeeDepartment:id,name')
             ->employed($endOfMonth)
             ->orderBy('name')
             ->get();
@@ -178,17 +188,16 @@ class TeamAbsenceCalendar extends Component
             ->groupBy('employee_id')
             ->map(fn ($days) => $days->pluck('date')->map(fn ($date) => Carbon::parse($date)->format('Y-m-d'))->toArray());
 
-        $departmentIds = $employees->pluck('employee_department_id')->unique()->filter();
-        $departmentNames = resolve_static(EmployeeDepartment::class, 'query')
-            ->whereIn('id', $departmentIds)
-            ->pluck('name', 'id');
+        $holiday = $this->holidayAbsenceType();
 
         $this->departments = $employees
             ->groupBy('employee_department_id')
-            ->map(function ($deptEmployees, $departmentId) use ($absences, $employeeHolidays, $departmentNames) {
+            ->map(function ($deptEmployees) use ($absences, $employeeHolidays, $holiday, $startOfMonth, $endOfMonth) {
+                $department = $deptEmployees->first()->employeeDepartment;
+
                 return [
-                    'name' => $departmentNames[$departmentId] ?? __('Unknown Department'),
-                    'employees' => $deptEmployees->map(function (Employee $employee) use ($absences, $employeeHolidays) {
+                    'name' => $department?->name ?? __('Unknown Department'),
+                    'employees' => $deptEmployees->map(function (Employee $employee) use ($absences, $employeeHolidays, $holiday, $startOfMonth, $endOfMonth) {
                         $employeeAbsences = $absences->get($employee->getKey(), collect());
                         $holidays = $employeeHolidays->get($employee->getKey(), []);
 
@@ -196,20 +205,16 @@ class TeamAbsenceCalendar extends Component
 
                         foreach ($holidays as $dateKey) {
                             $days[$dateKey] = [
-                                'type' => 'holiday',
-                                'color' => '#fee685',
-                                'name' => __('Holiday'),
+                                'type' => $holiday['id'],
+                                'color' => $holiday['color'],
+                                'name' => $holiday['name'],
                                 'is_half_day' => false,
                             ];
                         }
 
                         foreach ($employeeAbsences as $absence) {
-                            $start = $absence->start_date->copy()->max(
-                                Carbon::create($this->year, $this->month)->startOfMonth()
-                            );
-                            $end = $absence->end_date->copy()->min(
-                                Carbon::create($this->year, $this->month)->endOfMonth()
-                            );
+                            $start = $absence->start_date->copy()->max($startOfMonth);
+                            $end = $absence->end_date->copy()->min($endOfMonth);
 
                             while ($start->lte($end)) {
                                 $dateKey = $start->format('Y-m-d');
