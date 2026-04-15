@@ -122,7 +122,19 @@
                                                 'mx-auto size-5 rounded',
                                                 'opacity-70' => $dayData['is_half_day'],
                                             ])
-                                            style="background-color: {{ $dayData['color'] }}"
+                                            style="
+                                                @if($dayData['pending'] ?? false)
+                                                    background: repeating-linear-gradient(
+                                                        -45deg,
+                                                        {{ $dayData['color'] }},
+                                                        {{ $dayData['color'] }} 2px,
+                                                        transparent 2px,
+                                                        transparent 5px
+                                                    );
+                                                @else
+                                                    background-color: {{ $dayData['color'] }};
+                                                @endif
+                                            "
                                         ></div>
                                     @endif
                                 </td>
