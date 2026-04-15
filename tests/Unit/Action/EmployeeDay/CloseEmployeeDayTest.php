@@ -76,13 +76,12 @@ test('overtime used is added to total overtime when affects_overtime is true', f
 
     // With 8 target hours and 0 actual hours:
     // totalOvertime = (0 + 0 + 0 - 8) + 0 = -8
-    // overtime_used = 8 (from the absence request)
-    // plusMinusOvertimeHours should be -8 + 8 = 0 (NOT -8 - 8 = -16)
+    // overtime_used is NOT added back — the deficit IS the overtime deduction
+    // plusMinusOvertimeHours = -8 (overtime balance decreases by 8h)
 
     expect($dayData->get('target_hours'))->toBe('8.00');
     expect($dayData->get('actual_hours'))->toBe('0.00');
-    // The key assertion: plus_minus_overtime_hours should be 0, not -16
-    expect($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('-8.00');
 });
 
 test('overtime is negative when no absence compensates for missing work', function (): void {
@@ -263,9 +262,9 @@ test('percentage deduction is applied when calculating overtime used', function 
     $dayData = CloseEmployeeDay::calculateDayData($this->employee, $testDate);
 
     // 8h target, 0h actual, percentage_deduction=0.50
-    // overtime_used = 8h * 0.50 = 4h
+    // overtime_used = 8h * 0.50 = 4h (not used in overtime calculation)
     // totalOvertime = (0 + 0 + 0 - 8) + 0 = -8
-    // plusMinusOvertimeHours = -8 + 4 = -4
+    // plusMinusOvertimeHours = -8 (full day absent = full deficit)
     expect($dayData->get('target_hours'))->toBe('8.00');
-    expect($dayData->get('plus_minus_overtime_hours'))->toBe('-4.00');
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('-8.00');
 });

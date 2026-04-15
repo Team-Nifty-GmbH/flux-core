@@ -174,7 +174,8 @@ class CloseEmployeeDay extends FluxAction
             $data
         );
 
-        $plusMinusOvertimeHours = bcadd($totalOvertime, Arr::pull($data, 'overtime_used'));
+        Arr::pull($data, 'overtime_used');
+        $plusMinusOvertimeHours = $totalOvertime;
 
         return collect(array_merge(
             [
