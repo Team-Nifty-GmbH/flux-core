@@ -120,6 +120,8 @@ class UserEdit extends Component
 
     public function save(): void
     {
+        $this->resetValidation();
+
         try {
             if (
                 in_array(
