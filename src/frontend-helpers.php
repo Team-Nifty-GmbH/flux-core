@@ -39,20 +39,20 @@ if (! function_exists('exception_to_notifications')) {
                         ? $formPrefix . '.' . $field
                         : $field;
 
-                    foreach (Illuminate\Support\Arr::flatten($messages) as $message) {
-                        if ($formPrefix && $field !== '') {
-                            $component->addError($errorKey, __($message));
-                        } else {
-                            $title = array_map(
-                                fn ($segment) => is_numeric($segment)
-                                    ? $segment + 1
-                                    : __(Illuminate\Support\Str::headline($segment)),
-                                explode('.', $field)
-                            );
+                    $title = array_map(
+                        fn ($segment) => is_numeric($segment)
+                            ? $segment + 1
+                            : __(Illuminate\Support\Str::headline($segment)),
+                        explode('.', $field)
+                    );
 
-                            $component->toast()
-                                ->error(implode(' -> ', $title), __($message), $description)
-                                ->send();
+                    foreach (Illuminate\Support\Arr::flatten($messages) as $message) {
+                        $component->toast()
+                            ->error(implode(' -> ', $title), __($message), $description)
+                            ->send();
+                        $component->addError($field, __($message));
+
+                        if ($formPrefix && $field !== '') {
                             $component->addError($errorKey, __($message));
                         }
                     }
