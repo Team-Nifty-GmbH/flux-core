@@ -17,6 +17,15 @@ if (! function_exists('exception_to_notifications')) {
             throw new InvalidArgumentException('Component does not have a toast method.');
         }
 
+        $formPrefix = null;
+        foreach ((new ReflectionClass($component))->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
+            $type = $prop->getType();
+            if ($type instanceof ReflectionNamedType && is_subclass_of($type->getName(), Livewire\Form::class)) {
+                $formPrefix = $prop->getName();
+                break;
+            }
+        }
+
         switch (true) {
             case method_exists($exception, 'errors') && $errors = $exception->errors():
             case method_exists($exception, 'getResponse')
@@ -26,18 +35,26 @@ if (! function_exists('exception_to_notifications')) {
                 []
             ):
                 foreach ($errors as $field => $messages) {
-                    $title = array_map(
-                        fn ($segment) => is_numeric($segment)
-                            ? $segment + 1
-                            : __(Illuminate\Support\Str::headline($segment)),
-                        explode('.', $field)
-                    );
+                    $errorKey = $formPrefix && $field !== ''
+                        ? $formPrefix . '.' . $field
+                        : $field;
 
                     foreach (Illuminate\Support\Arr::flatten($messages) as $message) {
-                        $component->toast()
-                            ->error(implode(' -> ', $title), __($message), $description)
-                            ->send();
-                        $component->addError($field, __($message));
+                        if ($formPrefix && $field !== '') {
+                            $component->addError($errorKey, __($message));
+                        } else {
+                            $title = array_map(
+                                fn ($segment) => is_numeric($segment)
+                                    ? $segment + 1
+                                    : __(Illuminate\Support\Str::headline($segment)),
+                                explode('.', $field)
+                            );
+
+                            $component->toast()
+                                ->error(implode(' -> ', $title), __($message), $description)
+                                ->send();
+                            $component->addError($errorKey, __($message));
+                        }
                     }
                 }
 
