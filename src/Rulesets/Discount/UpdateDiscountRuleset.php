@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Discount;
 
 use FluxErp\Models\Discount;
+use FluxErp\Models\Rule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -24,6 +25,12 @@ class UpdateDiscountRuleset extends FluxRuleset
             'till' => 'nullable|date_format:Y-m-d H:i:s',
             'order_column' => 'sometimes|integer|min:1',
             'is_percentage' => 'sometimes|boolean',
+            'rule_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Rule::class]),
+            ],
+            'is_stackable' => 'nullable|boolean',
         ];
     }
 }
