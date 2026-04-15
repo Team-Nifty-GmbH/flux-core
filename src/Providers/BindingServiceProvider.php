@@ -13,6 +13,7 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
+use FluxErp\RuleEngine\ConditionRegistry;
 use FluxErp\Support\MediaLibrary\UrlGenerator;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Support\DeferrableProvider;
@@ -29,6 +30,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
             'datatype.registry',
             DefaultUrlGenerator::class,
             StatefulGuard::class,
+            ConditionRegistry::class,
         ];
     }
 
@@ -60,5 +62,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
         });
 
         $this->app->alias(Registry::class, 'datatype.registry');
+
+        $this->app->singleton(ConditionRegistry::class);
     }
 }
