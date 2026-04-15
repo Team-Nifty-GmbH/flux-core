@@ -161,6 +161,11 @@ class Price extends FluxModel
         );
     }
 
+    public function rule(): BelongsTo
+    {
+        return $this->belongsTo(Rule::class);
+    }
+
     protected function rootDiscountFlat(): Attribute
     {
         return Attribute::get(
