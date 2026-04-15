@@ -11,6 +11,7 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\EloquentSortable\Sortable;
@@ -29,6 +30,7 @@ class Discount extends FluxModel implements Sortable
             'discount_percentage' => Percentage::class,
             'discount_flat' => Money::class,
             'is_percentage' => 'boolean',
+            'is_stackable' => 'boolean',
         ];
     }
 
@@ -42,6 +44,11 @@ class Discount extends FluxModel implements Sortable
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_discount');
+    }
+
+    public function rule(): BelongsTo
+    {
+        return $this->belongsTo(Rule::class);
     }
 
     public function model(): MorphTo
