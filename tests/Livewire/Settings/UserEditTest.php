@@ -29,13 +29,13 @@ test('can save user', function (): void {
     $component->set('userForm.firstname', $newFirstName = Str::uuid()->toString())
         ->set('userForm.password', 'invalid')
         ->call('save')
-        ->assertHasErrors(['password']);
-    expect(count(data_get($component->errors()->messages(), 'password', [])))->toEqual(4);
+        ->assertHasErrors(['userForm.password']);
+    expect(count(data_get($component->errors()->messages(), 'userForm.password', [])))->toEqual(4);
 
     $component
         ->set('userForm.password', 'Password123!')
         ->call('save')
-        ->assertHasErrors(['password'])
+        ->assertHasErrors(['userForm.password'])
         ->set('userForm.password_confirmation', 'Password123!')
         ->call('save')
         ->assertHasNoErrors()

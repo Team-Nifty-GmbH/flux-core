@@ -17,12 +17,14 @@ if (! function_exists('exception_to_notifications')) {
             throw new InvalidArgumentException('Component does not have a toast method.');
         }
 
-        $formPrefix = null;
+        $formProperties = [];
         foreach ((new ReflectionClass($component))->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
             $type = $prop->getType();
             if ($type instanceof ReflectionNamedType && is_subclass_of($type->getName(), Livewire\Form::class)) {
-                $formPrefix = $prop->getName();
-                break;
+                $formName = $prop->getName();
+                $formProperties[$formName] = array_keys(
+                    Livewire\Drawer\Utils::getPublicProperties($component->{$formName})
+                );
             }
         }
 
@@ -35,9 +37,15 @@ if (! function_exists('exception_to_notifications')) {
                 []
             ):
                 foreach ($errors as $field => $messages) {
-                    $errorKey = $formPrefix && $field !== ''
-                        ? $formPrefix . '.' . $field
-                        : $field;
+                    $formPrefix = null;
+                    $baseField = Illuminate\Support\Str::before($field, '.');
+
+                    foreach ($formProperties as $name => $props) {
+                        if (in_array($baseField, $props)) {
+                            $formPrefix = $name;
+                            break;
+                        }
+                    }
 
                     $title = array_map(
                         fn ($segment) => is_numeric($segment)
@@ -47,13 +55,13 @@ if (! function_exists('exception_to_notifications')) {
                     );
 
                     foreach (Illuminate\Support\Arr::flatten($messages) as $message) {
-                        $component->toast()
-                            ->error(implode(' -> ', $title), __($message), $description)
-                            ->send();
-                        $component->addError($field, __($message));
-
-                        if ($formPrefix && $field !== '') {
-                            $component->addError($errorKey, __($message));
+                        if ($formPrefix) {
+                            $component->addError($formPrefix . '.' . $field, __($message));
+                        } else {
+                            $component->toast()
+                                ->error(implode(' -> ', $title), __($message), $description)
+                                ->send();
+                            $component->addError($field, __($message));
                         }
                     }
                 }

@@ -52,7 +52,7 @@ test('cant create billable task time without contact', function (): void {
         ->set('workTime.name', Str::uuid())
         ->call('save')
         ->assertOk()
-        ->assertHasErrors(['contact_id'])
+        ->assertHasErrors(['workTime.contact_id'])
         ->assertCount('activeWorkTimes', 0);
 });
 
