@@ -48,10 +48,7 @@ function findWrapper(input) {
 
 function getWireModel(el) {
     for (const attr of el.attributes) {
-        if (
-            attr.name === 'wire:model' ||
-            attr.name.startsWith('wire:model.')
-        ) {
+        if (attr.name === 'wire:model' || attr.name.startsWith('wire:model.')) {
             return attr.value;
         }
     }
@@ -96,7 +93,9 @@ function processComponent(component) {
     });
 
     el.querySelectorAll('[x-data*="tallstackui_select"]').forEach((select) => {
-        const button = select.querySelector('[dusk="tallstackui_select_open_close"]');
+        const button = select.querySelector(
+            '[dusk="tallstackui_select_open_close"]',
+        );
         toggleRing(findWrapper(button || select), false);
     });
 
