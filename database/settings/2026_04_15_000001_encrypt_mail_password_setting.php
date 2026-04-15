@@ -27,7 +27,7 @@ return new class() extends SettingsMigration
             Crypt::decryptString($payload);
 
             return;
-        } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+        } catch (Illuminate\Contracts\Encryption\DecryptException) {
             // Not encrypted yet, proceed
         }
 
