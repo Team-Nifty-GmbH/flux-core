@@ -16,6 +16,18 @@ test('cast returns null for null value', function (): void {
     expect($address->salutation)->toBeNull();
 });
 
+test('salutation method works with cast enum value', function (): void {
+    $address = Address::factory()->make(['salutation' => 'mr', 'firstname' => 'John', 'lastname' => 'Doe']);
+
+    expect($address->salutation())->toBeString();
+});
+
+test('salutation method works with null value', function (): void {
+    $address = Address::factory()->make(['salutation' => null]);
+
+    expect($address->salutation())->toBeString();
+});
+
 test('cast returns fallback object for unknown value', function (): void {
     $address = Address::factory()->make();
     $address->setRawAttributes(array_merge($address->getAttributes(), ['salutation' => 'custom_value']));
