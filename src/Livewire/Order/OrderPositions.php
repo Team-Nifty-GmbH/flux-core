@@ -579,8 +579,14 @@ class OrderPositions extends OrderPositionList
             $this->data = [];
         }
 
-        $this->initialized = $view !== 'table';
         $this->orderPositionsView = $view;
+
+        if ($view === 'table') {
+            $this->loadData();
+            $this->forceRender();
+        } else {
+            $this->initialized = true;
+        }
 
         $this->cacheState();
     }
