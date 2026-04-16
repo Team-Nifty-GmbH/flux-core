@@ -5,77 +5,10 @@ use FluxErp\Models\RuleCondition;
 use FluxErp\RuleEngine\ConditionRegistry;
 use FluxErp\RuleEngine\Conditions\AndContainerCondition;
 use FluxErp\RuleEngine\Conditions\OrContainerCondition;
-use FluxErp\RuleEngine\Contracts\ConditionInterface;
 use FluxErp\RuleEngine\RuleEvaluator;
 use FluxErp\RuleEngine\Scopes\PriceScope;
-use FluxErp\RuleEngine\Scopes\RuleScope;
-
-// Test helper conditions — define these INSIDE the test file, before the tests
-class AlwaysTrueCondition implements ConditionInterface
-{
-    public static function type(): string
-    {
-        return 'always_true';
-    }
-
-    public static function label(): string
-    {
-        return 'Always True';
-    }
-
-    public static function group(): string
-    {
-        return 'test';
-    }
-
-    public static function schema(): array
-    {
-        return [];
-    }
-
-    public static function supportedScopes(): array
-    {
-        return [];
-    }
-
-    public function match(RuleScope $scope): bool
-    {
-        return true;
-    }
-}
-
-class AlwaysFalseCondition implements ConditionInterface
-{
-    public static function type(): string
-    {
-        return 'always_false';
-    }
-
-    public static function label(): string
-    {
-        return 'Always False';
-    }
-
-    public static function group(): string
-    {
-        return 'test';
-    }
-
-    public static function schema(): array
-    {
-        return [];
-    }
-
-    public static function supportedScopes(): array
-    {
-        return [];
-    }
-
-    public function match(RuleScope $scope): bool
-    {
-        return false;
-    }
-}
+use FluxErp\Tests\Support\RuleEngine\AlwaysFalseCondition;
+use FluxErp\Tests\Support\RuleEngine\AlwaysTrueCondition;
 
 beforeEach(function (): void {
     $registry = app(ConditionRegistry::class);

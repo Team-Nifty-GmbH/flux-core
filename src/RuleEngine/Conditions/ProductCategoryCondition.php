@@ -60,7 +60,8 @@ class ProductCategoryCondition implements ConditionInterface
             return false;
         }
 
-        $productCategoryIds = $scope->product->categories()->pluck('categories.id')->toArray();
+        $scope->product->loadMissing('categories:id');
+        $productCategoryIds = $scope->product->categories->pluck('id')->toArray();
         $intersection = array_intersect($productCategoryIds, $this->category_ids);
 
         if ($this->operator === 'not_in') {

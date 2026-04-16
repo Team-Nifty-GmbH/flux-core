@@ -41,15 +41,16 @@
                                             {{ $conditionClass ? $conditionClass::label() : $condition['type'] }}
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
-                                            @foreach($schema as $fieldName => $fieldDef)
+                                            @foreach($schema as $fieldDef)
+                                                @php($fieldName = data_get($fieldDef, 'name'))
                                                 @if(data_get($fieldDef, 'type') === 'select')
                                                     <x-select.native
                                                         x-model="value.{{ $fieldName }}"
                                                         :label="data_get($fieldDef, 'label', $fieldName)"
                                                         x-on:change="$wire.updateConditionValue({{ $condition['id'] }}, value)"
                                                     >
-                                                        @foreach(data_get($fieldDef, 'options', []) as $optValue => $optLabel)
-                                                            <option value="{{ $optValue }}">{{ $optLabel }}</option>
+                                                        @foreach(data_get($fieldDef, 'options', []) as $option)
+                                                            <option value="{{ data_get($option, 'value') }}">{{ data_get($option, 'label') }}</option>
                                                         @endforeach
                                                     </x-select.native>
                                                 @elseif(data_get($fieldDef, 'type') === 'date')

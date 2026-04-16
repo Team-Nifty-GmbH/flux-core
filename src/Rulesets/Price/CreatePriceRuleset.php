@@ -22,17 +22,17 @@ class CreatePriceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Product::class]),
             ],
+            'rule_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Rule::class]),
+            ],
             'price_list_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'price' => 'required|numeric',
-            'rule_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Rule::class]),
-            ],
         ];
     }
 }

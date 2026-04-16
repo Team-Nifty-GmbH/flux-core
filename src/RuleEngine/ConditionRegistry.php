@@ -8,7 +8,7 @@ use InvalidArgumentException;
 class ConditionRegistry
 {
     /** @var array<string, class-string<ConditionInterface>> */
-    private array $conditions = [];
+    protected array $conditions = [];
 
     /** @param array<class-string<ConditionInterface>>|class-string<ConditionInterface> $conditions */
     public function register(array|string $conditions): void

@@ -60,7 +60,8 @@ class ContactDiscountGroupCondition implements ConditionInterface
             return false;
         }
 
-        $contactGroupIds = $scope->contact->discountGroups()->pluck('discount_groups.id')->toArray();
+        $scope->contact->loadMissing('discountGroups');
+        $contactGroupIds = $scope->contact->discountGroups->pluck('id')->toArray();
         $intersection = array_intersect($contactGroupIds, $this->group_ids);
 
         if ($this->operator === 'not_in') {

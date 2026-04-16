@@ -24,12 +24,12 @@ class UpdateDiscountRuleset extends FluxRuleset
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',
             'order_column' => 'sometimes|integer|min:1',
-            'is_percentage' => 'sometimes|boolean',
             'rule_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Rule::class]),
             ],
+            'is_percentage' => 'sometimes|boolean',
             'is_stackable' => 'nullable|boolean',
         ];
     }

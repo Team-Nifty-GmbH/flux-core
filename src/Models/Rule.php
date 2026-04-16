@@ -26,9 +26,9 @@ class Rule extends FluxModel
         return $this->hasMany(RuleCondition::class)->orderBy('position');
     }
 
-    public function rootConditions(): HasMany
+    public function discounts(): HasMany
     {
-        return $this->hasMany(RuleCondition::class)->whereNull('parent_id')->orderBy('position');
+        return $this->hasMany(Discount::class);
     }
 
     public function prices(): HasMany
@@ -36,8 +36,8 @@ class Rule extends FluxModel
         return $this->hasMany(Price::class);
     }
 
-    public function discounts(): HasMany
+    public function rootConditions(): HasMany
     {
-        return $this->hasMany(Discount::class);
+        return $this->hasMany(RuleCondition::class)->whereNull('parent_id')->orderBy('position');
     }
 }

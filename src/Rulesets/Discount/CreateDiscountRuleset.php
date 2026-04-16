@@ -33,12 +33,12 @@ class CreateDiscountRuleset extends FluxRuleset
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',
             'order_column' => 'nullable|integer|min:1',
-            'is_percentage' => 'required|boolean',
             'rule_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Rule::class]),
             ],
+            'is_percentage' => 'required|boolean',
             'is_stackable' => 'nullable|boolean',
         ];
     }
