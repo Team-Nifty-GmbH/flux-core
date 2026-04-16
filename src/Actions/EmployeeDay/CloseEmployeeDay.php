@@ -170,7 +170,6 @@ class CloseEmployeeDay extends FluxAction
             $data
         );
 
-
         return collect(array_merge(
             [
                 'holiday_id' => $holiday?->id,
