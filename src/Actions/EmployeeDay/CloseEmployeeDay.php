@@ -151,7 +151,7 @@ class CloseEmployeeDay extends FluxAction
         }
 
         // ((sick hours + vacation hours + absence hours) - target hours) + actual hours = overtime
-        $totalOvertime = bcadd(
+        $plusMinusOvertimeHours = bcadd(
             bcsub(
                 bcadd(
                     $data['sick_hours_used'],
@@ -170,7 +170,6 @@ class CloseEmployeeDay extends FluxAction
             $data
         );
 
-        $plusMinusOvertimeHours = $totalOvertime;
 
         return collect(array_merge(
             [
