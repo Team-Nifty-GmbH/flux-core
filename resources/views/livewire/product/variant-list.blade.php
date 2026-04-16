@@ -17,43 +17,41 @@
                 <div class="grow">
                     <livewire:product.product-option-group-list />
                 </div>
-                <div
-                    x-collapse
-                    x-show="Object.values($wire.productOptions).length > 0"
-                    class="w-1/2"
-                >
-                    <x-card>
-                        <x-slot:header>
-                            <span x-text="productOptionGroup?.name"></span>
-                        </x-slot:header>
-                        <template
-                            x-for="productOption in $wire.productOptions"
-                            :key="productOption.id"
-                        >
-                            <div class="flex gap-1.5">
-                                <x-checkbox
-                                    x-bind:id="
-                                        'product-option' + productOption.id
-                                    "
-                                    x-bind:value="productOption.id"
-                                    x-model.number="
-                                        $wire.selectedOptions[
-                                            productOption
-                                                .product_option_group_id
-                                        ]
-                                    "
-                                />
-                                <label
-                                    x-text="productOption.name"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-50"
-                                    x-bind:for="
-                                        'product-option' + productOption.id
-                                    "
-                                ></label>
-                            </div>
-                        </template>
-                    </x-card>
-                </div>
+                <template x-if="$wire.productOptions.length > 0">
+                    <div class="w-1/2">
+                        <x-card>
+                            <x-slot:header>
+                                <span x-text="productOptionGroup?.name"></span>
+                            </x-slot:header>
+                            <template
+                                x-for="productOption in $wire.productOptions"
+                                x-bind:key="productOption.id"
+                            >
+                                <div class="flex items-center gap-1.5">
+                                    <x-checkbox
+                                        x-bind:id="
+                                            'product-option' + productOption.id
+                                        "
+                                        x-bind:value="productOption.id"
+                                        x-model.number="
+                                            $wire.selectedOptions[
+                                                productOption
+                                                    .product_option_group_id
+                                            ]
+                                        "
+                                    />
+                                    <label
+                                        x-text="productOption.name"
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-50"
+                                        x-bind:for="
+                                            'product-option' + productOption.id
+                                        "
+                                    ></label>
+                                </div>
+                            </template>
+                        </x-card>
+                    </div>
+                </template>
             </div>
         </div>
         <div
@@ -115,12 +113,12 @@
                         >
                             <x-toggle
                                 x-bind:checked="
-                                    $wire.variants.restore.every(
+                                    $wire.variants?.restore?.every(
                                         (v) => v.selected,
                                     )
                                 "
                                 x-on:change="
-                                    $wire.variants.restore.forEach(
+                                    $wire.variants?.restore?.forEach(
                                         (v, i) =>
                                             ($wire.variants.restore[
                                                 i
