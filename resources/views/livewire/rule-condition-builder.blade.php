@@ -4,16 +4,21 @@
             <div class="space-y-4">
                 @foreach($root['children'] as $groupIndex => $andGroup)
                     @if($groupIndex > 0)
-                        <div class="flex items-center gap-2 text-sm font-medium text-gray-500">
+                        <div
+                            class="flex items-center gap-2 text-sm font-medium text-gray-500"
+                        >
                             <div class="flex-1 border-t"></div>
                             {{ __('OR') }}
                             <div class="flex-1 border-t"></div>
                         </div>
                     @endif
-
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                    <div
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800"
+                    >
                         <div class="mb-2 flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            <span
+                                class="text-sm font-medium text-gray-600 dark:text-gray-400"
+                            >
                                 {{ __('AND Group') }}
                             </span>
                             <button
@@ -50,7 +55,11 @@
                                                         x-on:change="$wire.updateConditionValue({{ $condition['id'] }}, value)"
                                                     >
                                                         @foreach(data_get($fieldDef, 'options', []) as $option)
-                                                            <option value="{{ data_get($option, 'value') }}">{{ data_get($option, 'label') }}</option>
+                                                            <option
+                                                                value="{{ data_get($option, 'value') }}"
+                                                            >
+                                                                {{ data_get($option, 'label') }}
+                                                            </option>
                                                         @endforeach
                                                     </x-select.native>
                                                 @elseif(data_get($fieldDef, 'type') === 'date')
@@ -108,7 +117,9 @@
                                     class="absolute left-0 z-10 mt-1 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
                                 >
                                     @foreach($conditionTypes as $groupName => $types)
-                                        <div class="border-b px-3 py-1 text-xs font-semibold uppercase text-gray-400 dark:border-gray-600">
+                                        <div
+                                            class="border-b px-3 py-1 text-xs font-semibold text-gray-400 uppercase dark:border-gray-600"
+                                        >
                                             {{ __($groupName) }}
                                         </div>
                                         @foreach($types as $type => $class)
