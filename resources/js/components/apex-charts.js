@@ -277,7 +277,9 @@ function apexCharts($wire) {
                         Array.isArray(targetValue) &&
                         Array.isArray(sourceValue)
                     ) {
-                        target[key] = targetValue.concat(sourceValue);
+                        // Currently only colors is an array on default options (which is the target most of the time)
+                        // Therefore sourceValue should be priority and only filled with remaining default options colors
+                        target[key] = sourceValue.concat(targetValue.filter(v => !sourceValue.includes(v)));
                     } else if (isObject(targetValue) && isObject(sourceValue)) {
                         target[key] = this.mergeDeep(
                             Object.assign({}, targetValue),

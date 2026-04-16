@@ -57,13 +57,16 @@ class TicketsByState extends CircleChart implements HasWidgetOptions
         $this->labels = $data
             ->map(fn (Ticket $ticket) => __(Str::headline((string) $ticket->state)))
             ->toArray();
+
         $this->series = $data->pluck('total')->toArray();
+
         $this->optionData = $data
             ->map(fn (Ticket $ticket) => [
                 'label' => __(Str::headline((string) $ticket->state)),
                 'state' => (string) $ticket->state,
             ])
             ->toArray();
+
         $this->colors = $data->map(function (Ticket $ticket) use ($allStates) {
             $stateClass = $allStates->get((string) $ticket->state);
 
