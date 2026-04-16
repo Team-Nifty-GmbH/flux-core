@@ -17,15 +17,8 @@
                                   'name',
                                 ],
                                 'with' => 'contact.media',
-                                'whereRelation' => [
-                                    'tenants',
-                                    'tenant_id',
-                                    '=',
-                                    $tenantId,
-                                ],
-                                'doesntHave' => [
-                                    'tenants',
-                                    'or',
+                                'scopes' => [
+                                    'whereHasTenant' => [$tenantId],
                                 ],
                             ],
                         ]"
