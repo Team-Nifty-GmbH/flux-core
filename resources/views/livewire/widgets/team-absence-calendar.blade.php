@@ -113,7 +113,7 @@
                                         'bg-white dark:bg-gray-900' => ! $calDay['isWeekend'] && ! $calDay['isToday'],
                                     ])
                                     @if($dayData)
-                                        title="{{ $dayData['name'] }}"
+                                        title="{{ $dayData['name'] }}{{ ($dayData['is_holiday'] ?? false) && $dayData['type'] !== 'holiday' ? ' — ' . $dayData['holiday_name'] : '' }}"
                                     @endif
                                 >
                                     @if($dayData)
@@ -123,7 +123,15 @@
                                                 'opacity-70' => $dayData['is_half_day'],
                                             ])
                                             style="
-                                                @if($dayData['pending'] ?? false)
+                                                @if(($dayData['type'] ?? null) === 'split')
+                                                    background: repeating-linear-gradient(
+                                                        -45deg,
+                                                        {{ $dayData['color'] }},
+                                                        {{ $dayData['color'] }} 3px,
+                                                        {{ $dayData['holiday_color'] }} 3px,
+                                                        {{ $dayData['holiday_color'] }} 6px
+                                                    );
+                                                @elseif($dayData['pending'] ?? false)
                                                     background: repeating-linear-gradient(
                                                         -45deg,
                                                         {{ $dayData['color'] }},
