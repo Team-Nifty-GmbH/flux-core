@@ -15,7 +15,7 @@ class Authenticate extends BaseAuthenticate
     public function handle($request, Closure $next, ...$guards): mixed
     {
         // if a token is set in get parameters, set it as the bearer token
-        if ($request->get('token')) {
+        if ($request->input('token')) {
             request()->headers->add(['Authorization' => 'Bearer ' . $request->token]);
             $guards = ['token'];
         }
