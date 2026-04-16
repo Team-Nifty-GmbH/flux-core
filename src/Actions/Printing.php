@@ -31,18 +31,26 @@ class Printing extends FluxAction
 
     public function performAction(): HtmlString|PrintableView
     {
-        $this->model = morphed_model($this->data['model_type'])::query()
-            ->whereKey($this->data['model_id'])
-            ->first();
+        $previousMemoryLimit = ini_set('memory_limit', '512M');
 
-        $this->printable = $this->model
-            ->print()
-            ->preview($this->getData('preview') && ! $this->getData('html'));
-        $printClass = $this->printable->getViewClass($this->getData('view'));
-        $params = $this->getData('params') ?? [];
+        try {
+            $this->model = morphed_model($this->data['model_type'])::query()
+                ->whereKey($this->data['model_id'])
+                ->first();
 
-        return $this->getData('html')
-            ? $this->printable->renderView($printClass, ...$params)
-            : $this->printable->printView($printClass, ...$params);
+            $this->printable = $this->model
+                ->print()
+                ->preview($this->getData('preview') && ! $this->getData('html'));
+            $printClass = $this->printable->getViewClass($this->getData('view'));
+            $params = $this->getData('params') ?? [];
+
+            return $this->getData('html')
+                ? $this->printable->renderView($printClass, ...$params)
+                : $this->printable->printView($printClass, ...$params);
+        } finally {
+            if ($previousMemoryLimit !== false) {
+                ini_set('memory_limit', $previousMemoryLimit);
+            }
+        }
     }
 }
