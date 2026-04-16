@@ -30,7 +30,7 @@ class RuleConditionBuilder extends Component
         $this->loadConditions();
     }
 
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View
     {
         return view('flux::livewire.rule-condition-builder', [
             'conditionTypes' => app(ConditionRegistry::class)->grouped(),
@@ -39,7 +39,11 @@ class RuleConditionBuilder extends Component
 
     public function loadConditions(): void
     {
-        $rule = Rule::query()->with('conditions.children.children')->find($this->ruleId);
+        $rule = Rule::query()
+            ->with('rootConditions.children.children')
+            ->whereKey($this->ruleId)
+            ->first();
+
         $this->conditionTree = $this->buildTree($rule?->rootConditions ?? collect());
     }
 
@@ -156,7 +160,7 @@ class RuleConditionBuilder extends Component
         return $root;
     }
 
-    protected function buildTree($conditions): array
+    protected function buildTree(\Illuminate\Support\Collection $conditions): array
     {
         return $conditions->map(function (RuleCondition $condition) {
             return [

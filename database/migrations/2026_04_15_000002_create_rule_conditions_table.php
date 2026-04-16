@@ -10,9 +10,9 @@ return new class() extends Migration
     {
         Schema::create('rule_conditions', function (Blueprint $table): void {
             $table->id();
-            $table->char('uuid', 36);
-            $table->foreignId('rule_id')->constrained('rules')->cascadeOnDelete();
+            $table->char('uuid', 36)->unique();
             $table->foreignId('parent_id')->nullable()->constrained('rule_conditions')->cascadeOnDelete();
+            $table->foreignId('rule_id')->constrained('rules')->cascadeOnDelete();
             $table->string('type');
             $table->json('value')->nullable();
             $table->integer('position')->default(0);
@@ -21,7 +21,7 @@ return new class() extends Migration
             $table->timestamp('updated_at')->nullable();
             $table->string('updated_by')->nullable();
 
-            $table->index('type');
+            $table->index(['rule_id', 'type']);
         });
     }
 

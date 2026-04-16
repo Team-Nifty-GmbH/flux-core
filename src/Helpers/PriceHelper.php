@@ -24,6 +24,8 @@ class PriceHelper
 
     public ?Price $price = null;
 
+    protected ?int $quantity = null;
+
     private ?Contact $contact = null;
 
     private ?Discount $discount = null;
@@ -33,8 +35,6 @@ class PriceHelper
     private Product $product;
 
     private string $timestamp;
-
-    private ?int $quantity = null;
 
     private bool $useDefault = true;
 
@@ -345,7 +345,7 @@ class PriceHelper
             return $unconditionalPrice;
         }
 
-        $conditionalPrices->load('rule.conditions.children');
+        $conditionalPrices->load('rule.conditions.children.children');
 
         $scope = new PriceScope(
             product: $this->product,
@@ -357,7 +357,6 @@ class PriceHelper
 
         $matchingPrice = $conditionalPrices
             ->filter(fn (Price $price) => $price->rule
-                && $price->rule->is_active
                 && RuleEvaluator::evaluate($price->rule, $scope)
             )
             ->sortByDesc(fn (Price $price) => $price->rule->priority)

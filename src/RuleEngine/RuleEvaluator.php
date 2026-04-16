@@ -83,7 +83,7 @@ class RuleEvaluator
         }
 
         $supportedScopes = $conditionInstance::supportedScopes();
-        if (! empty($supportedScopes) && ! in_array(get_class($scope), $supportedScopes)) {
+        if (! empty($supportedScopes) && ! in_array($scope::class, $supportedScopes)) {
             return true; // Unsupported scope = not applicable = pass
         }
 

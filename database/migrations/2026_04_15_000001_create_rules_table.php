@@ -10,7 +10,7 @@ return new class() extends Migration
     {
         Schema::create('rules', function (Blueprint $table): void {
             $table->id();
-            $table->char('uuid', 36);
+            $table->char('uuid', 36)->unique();
             $table->string('name');
             $table->text('description')->nullable();
             $table->integer('priority')->default(0);

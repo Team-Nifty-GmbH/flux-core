@@ -20,9 +20,9 @@ class RuleCondition extends FluxModel
         ];
     }
 
-    public function rule(): BelongsTo
+    public function children(): HasMany
     {
-        return $this->belongsTo(Rule::class);
+        return $this->hasMany(RuleCondition::class, 'parent_id')->orderBy('position');
     }
 
     public function parent(): BelongsTo
@@ -30,8 +30,8 @@ class RuleCondition extends FluxModel
         return $this->belongsTo(RuleCondition::class, 'parent_id');
     }
 
-    public function children(): HasMany
+    public function rule(): BelongsTo
     {
-        return $this->hasMany(RuleCondition::class, 'parent_id')->orderBy('position');
+        return $this->belongsTo(Rule::class);
     }
 }
