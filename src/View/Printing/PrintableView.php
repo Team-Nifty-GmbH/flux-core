@@ -250,20 +250,20 @@ abstract class PrintableView extends Component
     {
         $model = $this->getModel();
 
-        $tenant = $model?->tenant ?? Tenant::query()->first();
+        $tenant = $model?->tenant
+            ?? resolve_static(Tenant::class, 'default')
+            ?? resolve_static(Tenant::class, 'query')->first();
 
-        if ($tenant) {
-            if (($logo = $tenant->getFirstMedia('logo')) && file_exists($logo->getPath())) {
-                $tenant->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
-                    ? $logo->getUrl('png')
-                    : $logo->getUrl();
-            }
+        if (($logo = $tenant?->getFirstMedia('logo')) && file_exists($logo->getPath())) {
+            $tenant->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
+                ? $logo->getUrl('png')
+                : $logo->getUrl();
+        }
 
-            if (($logoSmall = $tenant->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
-                $tenant->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
-                    ? $logoSmall->getUrl('png')
-                    : $logoSmall->getUrl();
-            }
+        if (($logoSmall = $tenant?->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
+            $tenant->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
+                ? $logoSmall->getUrl('png')
+                : $logoSmall->getUrl();
         }
 
         $signaturePath = null;
