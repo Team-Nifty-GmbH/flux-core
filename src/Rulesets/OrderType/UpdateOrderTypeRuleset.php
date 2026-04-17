@@ -38,6 +38,7 @@ class UpdateOrderTypeRuleset extends FluxRuleset
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
             'is_visible_in_sidebar' => 'boolean',
+            'order_column' => 'sometimes|integer|min:1',
 
             'tenants' => 'array|nullable',
             'tenants.*' => [

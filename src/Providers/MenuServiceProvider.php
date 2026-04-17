@@ -43,6 +43,7 @@ class MenuServiceProvider extends ServiceProvider
                 foreach (resolve_static(OrderType::class, 'query')
                     ->where('is_visible_in_sidebar', true)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name']) as $orderType
                 ) {
                     Menu::register(

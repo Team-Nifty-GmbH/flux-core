@@ -130,6 +130,19 @@ class Discounts extends DiscountList
         return true;
     }
 
+    public function sortRows(int|string $recordId, int $newPosition): void
+    {
+        try {
+            UpdateDiscount::make([
+                'id' => $recordId,
+                'order_column' => $newPosition + 1,
+            ])
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
     protected function getBuilder(Builder $builder): Builder
     {
         return parent::getBuilder($builder)
@@ -137,6 +150,12 @@ class Discounts extends DiscountList
                 'contacts',
                 'contacts.id',
                 $this->contactId
-            );
+            )
+            ->ordered();
+    }
+
+    protected function isSortable(): bool
+    {
+        return true;
     }
 }
