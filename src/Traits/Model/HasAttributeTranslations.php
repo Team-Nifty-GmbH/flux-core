@@ -25,33 +25,6 @@ trait HasAttributeTranslations
         return app(static::class)->translatableAttributes();
     }
 
-    protected static function resolveLanguageId(): ?int
-    {
-        $languageId = Session::get('selectedLanguageId');
-        $default = resolve_static(Language::class, 'default');
-
-        if (is_null($languageId)) {
-            $locale = app()->getLocale();
-
-            if ($locale === $default?->language_code) {
-                return null;
-            }
-
-            $languageId = Cache::memo()->rememberForever(
-                'language_id_' . $locale,
-                fn () => resolve_static(Language::class, 'query')
-                    ->where('language_code', $locale)
-                    ->value('id')
-            );
-        }
-
-        if ($languageId === $default?->getKey()) {
-            return null;
-        }
-
-        return $languageId;
-    }
-
     protected static function bootHasAttributeTranslations(): void
     {
         static::retrieved(function (Model $model): void {
@@ -134,6 +107,33 @@ trait HasAttributeTranslations
                 }
             }
         });
+    }
+
+    protected static function resolveLanguageId(): ?int
+    {
+        $languageId = Session::get('selectedLanguageId');
+        $default = resolve_static(Language::class, 'default');
+
+        if (is_null($languageId)) {
+            $locale = app()->getLocale();
+
+            if ($locale === $default?->language_code) {
+                return null;
+            }
+
+            $languageId = Cache::memo()->rememberForever(
+                'language_id_' . $locale,
+                fn () => resolve_static(Language::class, 'query')
+                    ->where('language_code', $locale)
+                    ->value('id')
+            );
+        }
+
+        if ($languageId === $default?->getKey()) {
+            return null;
+        }
+
+        return $languageId;
     }
 
     public function attributeTranslationRules(): array
