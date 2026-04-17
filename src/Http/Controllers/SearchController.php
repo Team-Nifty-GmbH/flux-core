@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
@@ -203,7 +204,7 @@ class SearchController extends Controller
         return $this->formatAndDispatch($result, $model, $request);
     }
 
-    protected function formatAndDispatch($result, string $model, Request $request)
+    protected function formatAndDispatch(Collection $result, string $model, Request $request)
     {
         if (is_a(app($model), InteractsWithDataTables::class)) {
             $result = $result->map(fn ($item) => array_merge(
