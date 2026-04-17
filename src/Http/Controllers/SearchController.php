@@ -38,7 +38,7 @@ class SearchController extends Controller
             $optionValue = $request->input('option-value') ?: (app($model))->getKeyName();
 
             $query = resolve_static($model, 'query')
-                ->withoutGlobalScopes();
+                ->withoutGlobalScopes([SoftDeletingScope::class]);
 
             is_array($selected)
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
