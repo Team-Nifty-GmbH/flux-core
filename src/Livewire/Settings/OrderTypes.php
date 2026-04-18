@@ -32,8 +32,10 @@ class OrderTypes extends OrderTypeList
         try {
             UpdateOrderType::make([
                 'id' => $recordId,
-                'order_column' => $newPosition + 1,
+                'order_column' => max(0, $newPosition) + 1,
             ])
+                ->validate()
+                ->checkPermission()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);

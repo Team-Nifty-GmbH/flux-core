@@ -10,16 +10,13 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('order_types', function (Blueprint $table): void {
-            $table->unsignedInteger('order_column')->nullable()->after('is_visible_in_sidebar');
+            $table->unsignedInteger('order_column')->nullable()->after('order_type_enum');
         });
 
+        DB::statement('SET @rownum := 0');
         DB::table('order_types')
             ->orderBy('id')
-            ->get(['id'])
-            ->each(fn (object $row, int $index) => DB::table('order_types')
-                ->where('id', $row->id)
-                ->update(['order_column' => $index + 1])
-            );
+            ->update(['order_column' => DB::raw('(@rownum := @rownum + 1)')]);
     }
 
     public function down(): void
