@@ -14,6 +14,8 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
+use FluxErp\Traits\Livewire\DataTable\DataTableHasInlineEdit;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -23,7 +25,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductList extends BaseProductList
 {
-    use SupportsLocalization;
+    use DataTableHasInlineEdit, SupportsLocalization;
 
     public ?string $cacheKey = 'product.product-list';
 
@@ -31,6 +33,7 @@ class ProductList extends BaseProductList
 
     public array $priceLists = [];
 
+    #[DataTableForm]
     public ProductForm $product;
 
     public ProductPricesUpdateForm $productPricesUpdate;
@@ -194,6 +197,11 @@ class ProductList extends BaseProductList
         $this->loadData();
 
         return true;
+    }
+
+    protected function inlineFormAttributeName(): string
+    {
+        return 'product';
     }
 
     protected function getViewData(): array
