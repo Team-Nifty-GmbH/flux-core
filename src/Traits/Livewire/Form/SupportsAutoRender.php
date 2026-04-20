@@ -83,24 +83,6 @@ trait SupportsAutoRender
         return Blade::render($element);
     }
 
-    protected function addInlineSaveTrigger(string $element, ReflectionProperty $property): string
-    {
-        $renderAs = $this->getAutoRenderAsAttribute($property);
-        $type = $renderAs?->type ?? $this->getPropertyTypeName($property);
-
-        $immediateTypes = [
-            RenderAs::TOGGLE, RenderAs::CHECKBOX, RenderAs::RADIO,
-            RenderAs::SELECT, RenderAs::SELECT_NATIVE,
-            'bool',
-        ];
-
-        if (in_array($type, $immediateTypes)) {
-            return preg_replace('/\s*\/>$/', ' wire:change="saveInline" />', $element);
-        }
-
-        return preg_replace('/\s*\/>$/', ' x-on:blur="$wire.saveInline()" />', $element);
-    }
-
     public function getInlineEditableFields(): array
     {
         $reflection = new ReflectionClass($this);
@@ -129,6 +111,24 @@ trait SupportsAutoRender
             ->js(<<<JS
                 \$tsui.open.modal('$modalName');
             JS);
+    }
+
+    protected function addInlineSaveTrigger(string $element, ReflectionProperty $property): string
+    {
+        $renderAs = $this->getAutoRenderAsAttribute($property);
+        $type = $renderAs?->type ?? $this->getPropertyTypeName($property);
+
+        $immediateTypes = [
+            RenderAs::TOGGLE, RenderAs::CHECKBOX, RenderAs::RADIO,
+            RenderAs::SELECT, RenderAs::SELECT_NATIVE,
+            'bool',
+        ];
+
+        if (in_array($type, $immediateTypes)) {
+            return preg_replace('/\s*\/>$/', ' wire:change="saveInline" />', $element);
+        }
+
+        return preg_replace('/\s*\/>$/', ' x-on:blur="$wire.saveInline()" />', $element);
     }
 
     protected function buildFormElements(array $properties): array
