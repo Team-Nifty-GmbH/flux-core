@@ -130,6 +130,66 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->belongsToMany(Discount::class, 'contact_discount')->using(ContactDiscount::class);
     }
 
+    public function industries(): BelongsToMany
+    {
+        return $this->belongsToMany(Industry::class, 'contact_industry')->using(ContactIndustry::class);
+    }
+
+    public function invoiceAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'invoice_address_id');
+    }
+
+    public function ledgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class);
+    }
+
+    public function mainAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'main_address_id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function paymentType(): BelongsTo
+    {
+        return $this->belongsTo(PaymentType::class);
+    }
+
+    public function priceList(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_supplier');
+    }
+
+    public function sepaMandates(): HasMany
+    {
+        return $this->hasMany(SepaMandate::class);
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'contact_tenant')->using(ContactTenant::class);
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
+    }
+
+    public function workTimes(): HasMany
+    {
+        return $this->hasMany(WorkTime::class);
+    }
+
     public function getAllDiscounts(): Collection
     {
         return $this->getAllDiscountsQuery()
@@ -207,46 +267,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->detailRoute();
     }
 
-    public function industries(): BelongsToMany
-    {
-        return $this->belongsToMany(Industry::class, 'contact_industry')->using(ContactIndustry::class);
-    }
-
-    public function invoiceAddress(): BelongsTo
-    {
-        return $this->belongsTo(Address::class, 'invoice_address_id');
-    }
-
-    public function ledgerAccount(): BelongsTo
-    {
-        return $this->belongsTo(LedgerAccount::class);
-    }
-
-    public function mainAddress(): BelongsTo
-    {
-        return $this->belongsTo(Address::class, 'main_address_id');
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
-    }
-
-    public function paymentType(): BelongsTo
-    {
-        return $this->belongsTo(PaymentType::class);
-    }
-
-    public function priceList(): BelongsTo
-    {
-        return $this->belongsTo(PriceList::class);
-    }
-
-    public function products(): BelongsToMany
-    {
-        return $this->belongsToMany(Product::class, 'product_supplier');
-    }
-
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
@@ -257,30 +277,10 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             ->singleFile();
     }
 
-    public function sepaMandates(): HasMany
-    {
-        return $this->hasMany(SepaMandate::class);
-    }
-
-    public function tenants(): BelongsToMany
-    {
-        return $this->belongsToMany(Tenant::class, 'contact_tenant')->using(ContactTenant::class);
-    }
-
     public function toSearchableArray(): array
     {
         return ScoutCustomize::make($this)
             ->with('mainAddress')
             ->toSearchableArray();
-    }
-
-    public function vatRate(): BelongsTo
-    {
-        return $this->belongsTo(VatRate::class);
-    }
-
-    public function workTimes(): HasMany
-    {
-        return $this->hasMany(WorkTime::class);
     }
 }

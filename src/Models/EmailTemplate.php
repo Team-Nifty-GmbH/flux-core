@@ -36,6 +36,11 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
         ];
     }
 
+    public function orderTypes(): HasMany
+    {
+        return $this->hasMany(OrderType::class);
+    }
+
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -67,11 +72,6 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
     public function getUrl(): ?string
     {
         return null;
-    }
-
-    public function orderTypes(): HasMany
-    {
-        return $this->hasMany(OrderType::class);
     }
 
     protected function translatableAttributes(): array

@@ -41,6 +41,16 @@ class ContactBankConnection extends FluxModel implements InteractsWithDataTables
         return $this->belongsTo(Contact::class);
     }
 
+    public function sepaMandates(): HasMany
+    {
+        return $this->hasMany(SepaMandate::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getAvatarUrl();
@@ -59,15 +69,5 @@ class ContactBankConnection extends FluxModel implements InteractsWithDataTables
     public function getUrl(): ?string
     {
         return null;
-    }
-
-    public function sepaMandates(): HasMany
-    {
-        return $this->hasMany(SepaMandate::class);
-    }
-
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class);
     }
 }

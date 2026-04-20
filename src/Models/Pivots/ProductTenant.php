@@ -16,13 +16,13 @@ class ProductTenant extends FluxPivot
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class, 'tenant_id');
-    }
-
     public function siblings(): HasMany
     {
         return $this->hasMany(ProductTenant::class, 'product_id', 'product_id');
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 }

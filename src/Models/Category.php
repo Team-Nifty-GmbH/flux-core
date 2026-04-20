@@ -78,16 +78,26 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         ];
     }
 
-    public function assigned(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $this->model()?->count(),
-        );
-    }
-
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list');
+    }
+
+    public function model(): MorphToMany
+    {
+        return $this->model_type
+            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable', 'categorizable')
+                ->using(Pivots\Categorizable::class)
+            : new MorphToMany(
+                static::query(),
+                $this,
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            );
     }
 
     public function getAvatarUrl(): ?string
@@ -118,21 +128,11 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return null;
     }
 
-    public function model(): MorphToMany
+    protected function assigned(): Attribute
     {
-        return $this->model_type
-            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable', 'categorizable')
-                ->using(Pivots\Categorizable::class)
-            : new MorphToMany(
-                static::query(),
-                $this,
-                '',
-                '',
-                '',
-                '',
-                '',
-                ''
-            );
+        return Attribute::make(
+            get: fn ($value) => $this->model()?->count(),
+        );
     }
 
     protected function translatableAttributes(): array

@@ -68,6 +68,11 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         ];
     }
 
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
     public function broadcastChannel(): string
     {
         return $this->model_type . '.' . $this->model_id;
@@ -81,12 +86,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         return ['model' => $data];
     }
 
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
-    }
-
-    public function user(): Attribute
+    protected function user(): Attribute
     {
         $user = $this->getCreatedBy();
 

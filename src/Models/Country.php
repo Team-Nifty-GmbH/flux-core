@@ -31,11 +31,6 @@ class Country extends FluxModel
         return $this->hasMany(Address::class);
     }
 
-    public function tenants(): HasMany
-    {
-        return $this->hasMany(Tenant::class);
-    }
-
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -49,5 +44,10 @@ class Country extends FluxModel
     public function regions(): HasMany
     {
         return $this->hasMany(CountryRegion::class);
+    }
+
+    public function tenants(): HasMany
+    {
+        return $this->hasMany(Tenant::class);
     }
 }

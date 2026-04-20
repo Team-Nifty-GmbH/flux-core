@@ -28,6 +28,21 @@ class JobBatch extends FluxModel
         ];
     }
 
+    public function jobBatchables(): HasMany
+    {
+        return $this->hasMany(JobBatchable::class);
+    }
+
+    public function queueMonitors(): HasMany
+    {
+        return $this->hasMany(QueueMonitor::class);
+    }
+
+    public function users(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'job_batchable', 'job_batchables');
+    }
+
     public function getBatch(): ?Batch
     {
         return Bus::findBatch($this->id);
@@ -79,20 +94,5 @@ class JobBatch extends FluxModel
     public function isFinished(): bool
     {
         return ! is_null($this->finished_at);
-    }
-
-    public function jobBatchables(): HasMany
-    {
-        return $this->hasMany(JobBatchable::class);
-    }
-
-    public function queueMonitors(): HasMany
-    {
-        return $this->hasMany(QueueMonitor::class);
-    }
-
-    public function users(): MorphToMany
-    {
-        return $this->morphedByMany(User::class, 'job_batchable', 'job_batchables');
     }
 }

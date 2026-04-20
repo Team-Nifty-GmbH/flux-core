@@ -27,16 +27,6 @@ class EmployeeDepartment extends FluxModel
         return $this->hasMany(Employee::class, 'employee_department_id');
     }
 
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
-
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
@@ -51,5 +41,15 @@ class EmployeeDepartment extends FluxModel
     {
         return $this->belongsToMany(VacationBlackout::class, 'employee_department_vacation_blackout')
             ->using(EmployeeDepartmentVacationBlackout::class);
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
     }
 }

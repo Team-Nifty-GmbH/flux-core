@@ -45,6 +45,22 @@ class MailAccount extends FluxModel
         ];
     }
 
+    public function mailFolders(): HasMany
+    {
+        return $this->hasMany(MailFolder::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'mail_account_user')
+            ->withPivot('is_default');
+    }
+
+    public function mailMessages(): HasMany
+    {
+        return $this->hasMany(Communication::class);
+    }
+
     /**
      * @throws ImapBadRequestException
      * @throws RuntimeException
@@ -138,22 +154,6 @@ class MailAccount extends FluxModel
         }
 
         return $mailer;
-    }
-
-    public function mailFolders(): HasMany
-    {
-        return $this->hasMany(MailFolder::class);
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'mail_account_user')
-            ->withPivot('is_default');
-    }
-
-    public function mailMessages(): HasMany
-    {
-        return $this->hasMany(Communication::class);
     }
 
     protected function syncFolder(Folder $folder, ?int $parentId = null): array

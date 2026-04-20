@@ -32,13 +32,6 @@ class Discount extends FluxModel implements Sortable
         ];
     }
 
-    public function buildSortQuery(): Builder
-    {
-        return static::query()
-            ->where('model_type', $this->model_type)
-            ->where('model_id', $this->model_id);
-    }
-
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_discount');
@@ -47,5 +40,12 @@ class Discount extends FluxModel implements Sortable
     public function model(): MorphTo
     {
         return $this->morphTo('model');
+    }
+
+    public function buildSortQuery(): Builder
+    {
+        return static::query()
+            ->where('model_type', $this->model_type)
+            ->where('model_id', $this->model_id);
     }
 }

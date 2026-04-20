@@ -31,6 +31,11 @@ class LeadState extends FluxModel
         ];
     }
 
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function getImageAttribute(): string
     {
         return route('avatar', [
@@ -41,10 +46,5 @@ class LeadState extends FluxModel
                 ->toString(),
             'color' => Str::after($this->color, '#'),
         ]);
-    }
-
-    public function leads(): HasMany
-    {
-        return $this->hasMany(Lead::class);
     }
 }

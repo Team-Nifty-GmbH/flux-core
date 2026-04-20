@@ -37,11 +37,6 @@ class CartItem extends FluxModel implements Sortable
         });
     }
 
-    public function buildSortQuery(): Builder
-    {
-        return static::query()->where('cart_id', $this->cart_id);
-    }
-
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
@@ -55,5 +50,10 @@ class CartItem extends FluxModel implements Sortable
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
+    }
+
+    public function buildSortQuery(): Builder
+    {
+        return static::query()->where('cart_id', $this->cart_id);
     }
 }

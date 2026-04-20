@@ -86,6 +86,11 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         return $this->belongsTo(Calendar::class);
     }
 
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
     public function fromCalendarEventObject(array $calendarEvent): static
     {
         $mappedArray = [];
@@ -140,11 +145,6 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         $this->fill($mappedArray);
 
         return $this;
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
     }
 
     public function toCalendarEventObject(array $attributes = []): array

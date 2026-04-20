@@ -159,13 +159,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         ];
     }
 
-    public function buildSortQuery(): Builder
-    {
-        return static::query()
-            ->where('order_id', $this->order_id)
-            ->where('parent_id', $this->parent_id);
-    }
-
     public function commission(): HasOne
     {
         return $this->hasOne(Commission::class);
@@ -206,36 +199,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function discounts(): MorphMany
     {
         return $this->morphMany(Discount::class, 'model');
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return $this->product?->getAvatarUrl();
-    }
-
-    public function getChildrenAttribute(): Collection
-    {
-        return $this->children()->get()->append('children');
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
-
-    public function getTagsAttribute(): Collection
-    {
-        return $this->tags()->get();
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->order?->getUrl();
     }
 
     public function ledgerAccount(): BelongsTo
@@ -316,6 +279,43 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->hasOne(WorkTime::class);
     }
 
+    public function buildSortQuery(): Builder
+    {
+        return static::query()
+            ->where('order_id', $this->order_id)
+            ->where('parent_id', $this->parent_id);
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->product?->getAvatarUrl();
+    }
+
+    public function getChildrenAttribute(): Collection
+    {
+        return $this->children()->get()->append('children');
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getTagsAttribute(): Collection
+    {
+        return $this->tags()->get();
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->order?->getUrl();
+    }
+
     protected function slugPosition(): Attribute
     {
         return Attribute::make(
@@ -327,6 +327,33 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
                 explode('.', $value ?? ''),
                 fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . Str::padLeft($item, 8, '0')
             ),
+        );
+    }
+
+    protected function totalGrossPrice(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->is_free_text
+                ? $this->subTotalGross() ?: null
+                : $value
+        );
+    }
+
+    protected function totalNetPrice(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->is_free_text
+                ? $this->subTotalNet() ?: null
+                : $value
+        );
+    }
+
+    protected function unitPrice(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->is_net
+                ? $this->unit_net_price
+                : $this->unit_gross_price
         );
     }
 
@@ -374,32 +401,5 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         ', [$this->getKey(), $this->getKey()]);
 
         return (string) data_get($result, '0.total', 0);
-    }
-
-    protected function totalGrossPrice(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $this->is_free_text
-                ? $this->subTotalGross() ?: null
-                : $value
-        );
-    }
-
-    protected function totalNetPrice(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $this->is_free_text
-                ? $this->subTotalNet() ?: null
-                : $value
-        );
-    }
-
-    protected function unitPrice(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $this->is_net
-                ? $this->unit_net_price
-                : $this->unit_gross_price
-        );
     }
 }

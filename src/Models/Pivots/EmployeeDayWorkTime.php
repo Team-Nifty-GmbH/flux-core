@@ -11,6 +11,8 @@ class EmployeeDayWorkTime extends FluxPivot
 {
     use HasPackageFactory;
 
+    protected $table = 'employee_day_work_time';
+
     public function employeeDay(): BelongsTo
     {
         return $this->belongsTo(EmployeeDay::class);

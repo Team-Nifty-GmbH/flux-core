@@ -41,7 +41,7 @@ class Holiday extends FluxModel
             ->using(HolidayLocation::class);
     }
 
-    public function scopeIsHoliday(Builder $query, Carbon $date, ?int $locationId = null): void
+    protected function scopeIsHoliday(Builder $query, Carbon $date, ?int $locationId = null): void
     {
         $query
             ->where(fn (Builder $query) => $query

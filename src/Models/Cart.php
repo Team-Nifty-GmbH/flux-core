@@ -33,6 +33,33 @@ class Cart extends FluxModel
         ];
     }
 
+    public function authenticatable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function priceList(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class);
+    }
+
+    public function products(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Product::class,
+            CartItem::class,
+            'cart_id',
+            'id',
+            'id',
+            'product_id'
+        );
+    }
+
     public function addItems(array|int $products): static
     {
         $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);
@@ -73,16 +100,6 @@ class Cart extends FluxModel
         }
 
         return $this;
-    }
-
-    public function authenticatable(): MorphTo
-    {
-        return $this->morphTo();
-    }
-
-    public function cartItems(): HasMany
-    {
-        return $this->hasMany(CartItem::class);
     }
 
     public function createOrder(
@@ -134,28 +151,6 @@ class Cart extends FluxModel
         return $order;
     }
 
-    public function priceList(): BelongsTo
-    {
-        return $this->belongsTo(PriceList::class);
-    }
-
-    public function products(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            Product::class,
-            CartItem::class,
-            'cart_id',
-            'id',
-            'id',
-            'product_id'
-        );
-    }
-
-    public function scopeCurrent(Builder $query): void
-    {
-        $query->where('is_watchlist', false)->latest();
-    }
-
     public function vatRates(): Collection
     {
         return $this->cartItems()
@@ -175,5 +170,10 @@ class Cart extends FluxModel
                     ]
                 );
             });
+    }
+
+    protected function scopeCurrent(Builder $query): void
+    {
+        $query->where('is_watchlist', false)->latest();
     }
 }

@@ -70,6 +70,7 @@ use Illuminate\Support\Number;
 use Illuminate\Support\Traits\Conditionable;
 use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -447,19 +448,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
-    public function mappableDeliveryAddress(): array|object|null
-    {
-        if (data_get($this->address_delivery, 'latitude') && data_get($this->address_delivery, 'longitude')) {
-            return $this->address_delivery;
-        }
-
-        if ($this->addressDelivery?->latitude && $this->addressDelivery?->longitude) {
-            return $this->addressDelivery;
-        }
-
-        return $this->address_delivery ?? $this->addressDelivery;
-    }
-
     public function addressDelivery(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'address_delivery_id');
@@ -491,6 +479,156 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function approvalUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approval_user_id');
+    }
+
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
+    public function contactBankConnection(): BelongsTo
+    {
+        return $this->belongsTo(ContactBankConnection::class);
+    }
+
+    public function createdFrom(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'created_from_id');
+    }
+
+    public function createdOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'created_from_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function discounts(): MorphMany
+    {
+        return $this->morphMany(Discount::class, 'model');
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
+    }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class);
+    }
+
+    public function orderPositions(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class);
+    }
+
+    public function orderTransactions(): HasMany
+    {
+        return $this->hasMany(OrderTransaction::class);
+    }
+
+    public function orderType(): BelongsTo
+    {
+        return $this->belongsTo(OrderType::class);
+    }
+
+    public function paymentReminders(): HasMany
+    {
+        return $this->hasMany(PaymentReminder::class);
+    }
+
+    public function paymentRuns(): BelongsToMany
+    {
+        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
+    }
+
+    public function paymentType(): BelongsTo
+    {
+        return $this->belongsTo(PaymentType::class);
+    }
+
+    public function priceList(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class);
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function purchaseInvoice(): HasOne
+    {
+        return $this->hasOne(PurchaseInvoice::class);
+    }
+
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function schedules(): BelongsToMany
+    {
+        return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
+    }
+
+    public function tasks(): HasManyThrough
+    {
+        return $this->hasManyThrough(Task::class, Project::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function transactions(): BelongsToMany
+    {
+        return $this->belongsToMany(Transaction::class)->using(OrderTransaction::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'order_user');
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
+    }
+
+    public function vatRates(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            VatRate::class,
+            OrderPosition::class,
+            'order_id',
+            'id',
+            'id',
+            'vat_rate_id'
+        );
+    }
+
+    public function mappableDeliveryAddress(): array|object|null
+    {
+        if (data_get($this->address_delivery, 'latitude') && data_get($this->address_delivery, 'longitude')) {
+            return $this->address_delivery;
+        }
+
+        if ($this->addressDelivery?->latitude && $this->addressDelivery?->longitude) {
+            return $this->addressDelivery;
+        }
+
+        return $this->address_delivery ?? $this->addressDelivery;
     }
 
     public function calculateBalance(): static
@@ -780,47 +918,12 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this;
     }
 
-    public function commissions(): HasMany
-    {
-        return $this->hasMany(Commission::class);
-    }
-
-    public function contact(): BelongsTo
-    {
-        return $this->belongsTo(Contact::class);
-    }
-
-    public function contactBankConnection(): BelongsTo
-    {
-        return $this->belongsTo(ContactBankConnection::class);
-    }
-
     public function costColumn(): ?string
     {
         return 'total_cost';
     }
 
-    public function createdFrom(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'created_from_id');
-    }
-
-    public function createdOrders(): HasMany
-    {
-        return $this->hasMany(Order::class, 'created_from_id');
-    }
-
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
-    }
-
-    public function discounts(): MorphMany
-    {
-        return $this->morphMany(Discount::class, 'model');
-    }
-
-    public function finalInvoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    public function finalInvoice(): ?Media
     {
         return $this->getFirstMedia('final-invoice');
     }
@@ -915,71 +1018,16 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this->detailRoute();
     }
 
-    public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    public function invoice(): ?Media
     {
         return $this->getFirstMedia('invoice')
             ?? $this->getFirstMedia('final-invoice')
             ?? $this->getFirstMedia('refund');
     }
 
-    public function language(): BelongsTo
-    {
-        return $this->belongsTo(Language::class);
-    }
-
-    public function lead(): BelongsTo
-    {
-        return $this->belongsTo(Lead::class);
-    }
-
     public function newCollection(array $models = []): Collection
     {
         return app(OrderCollection::class, ['items' => $models]);
-    }
-
-    public function orderPositions(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class);
-    }
-
-    public function orderTransactions(): HasMany
-    {
-        return $this->hasMany(OrderTransaction::class);
-    }
-
-    public function orderType(): BelongsTo
-    {
-        return $this->belongsTo(OrderType::class);
-    }
-
-    public function paymentReminders(): HasMany
-    {
-        return $this->hasMany(PaymentReminder::class);
-    }
-
-    public function paymentRuns(): BelongsToMany
-    {
-        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
-    }
-
-    public function paymentType(): BelongsTo
-    {
-        return $this->belongsTo(PaymentType::class);
-    }
-
-    public function priceList(): BelongsTo
-    {
-        return $this->belongsTo(PriceList::class);
-    }
-
-    public function projects(): HasMany
-    {
-        return $this->hasMany(Project::class);
-    }
-
-    public function purchaseInvoice(): HasOne
-    {
-        return $this->hasOne(PurchaseInvoice::class);
     }
 
     public function recalculateOrderPositionSlugPositions(): static
@@ -1037,7 +1085,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this;
     }
 
-    public function refund(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    public function refund(): ?Media
     {
         return $this->getFirstMedia('refund');
     }
@@ -1137,16 +1185,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
     }
 
-    public function responsibleUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
-
-    public function schedules(): BelongsToMany
-    {
-        return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
-    }
-
     public function calculateSubscriptionEndDate(): Carbon
     {
         $schedule = $this->schedules()->first();
@@ -1182,56 +1220,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $endFromNotice;
     }
 
-    public function scopePaid(Builder $query): Builder
-    {
-        return $query
-            ->whereNotNull('invoice_number')
-            ->whereNotState('payment_state', Open::class);
-    }
-
-    public function scopePurchase(Builder $query): Builder
-    {
-        return $query->whereHas(
-            'orderType',
-            fn (Builder $query) => $query->whereIn(
-                'order_type_enum',
-                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => $enum->isPurchase())
-            )
-        );
-    }
-
-    public function scopeRevenue(Builder $query): Builder
-    {
-        return $query->whereHas(
-            'orderType',
-            fn (Builder $query) => $query->whereIn(
-                'order_type_enum',
-                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => ! $enum->isPurchase())
-            )
-        );
-    }
-
-    public function scopeUnpaid(Builder $query): Builder
-    {
-        return $query
-            ->whereNotNull('invoice_number')
-            ->whereNotState('payment_state', Paid::class)
-            ->whereNot('balance', 0);
-    }
-
-    public function scopeWhereHasMailableInvoiceAddress(Builder $query): Builder
-    {
-        return $query
-            ->with(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress'])
-            ->where(fn (Builder $query) => $query
-                ->whereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
-                ->orWhereHas('contact', fn (Builder $query) => $query
-                    ->whereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
-                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
-                )
-            );
-    }
-
     public function resolveMailableInvoiceAddress(): ?Address
     {
         return match (true) {
@@ -1239,16 +1227,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             filled($this->contact?->invoiceAddress?->email_primary) => $this->contact->invoiceAddress,
             default => $this->contact?->mainAddress,
         };
-    }
-
-    public function tasks(): HasManyThrough
-    {
-        return $this->hasManyThrough(Task::class, Project::class);
-    }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
     }
 
     public function totalPaid(): string|float|int
@@ -1264,54 +1242,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 ),
                 '0'
             );
-    }
-
-    public function transactions(): BelongsToMany
-    {
-        return $this->belongsToMany(Transaction::class)->using(OrderTransaction::class);
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'order_user');
-    }
-
-    public function vatRate(): BelongsTo
-    {
-        return $this->belongsTo(VatRate::class);
-    }
-
-    public function vatRates(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            VatRate::class,
-            OrderPosition::class,
-            'order_id',
-            'id',
-            'id',
-            'vat_rate_id'
-        );
-    }
-
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string $start,
-        Carbon|string $end,
-        ?array $info = null
-    ): void {
-        $builder->where(function (Builder $query) use ($start, $end): void {
-            $query
-                ->whereBetween('system_delivery_date', [$start, $end])
-                ->orWhereBetween('system_delivery_date_end', [$start, $end])
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->where('system_delivery_date', '<=', $end)
-                        ->where('system_delivery_date_end', '>=', $start);
-                });
-        });
-
-        if ($orderTypeId = data_get($info, 'order_type_id')) {
-            $builder->where('order_type_id', $orderTypeId);
-        }
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -1341,6 +1271,27 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('system_delivery_date', [$start, $end])
+                ->orWhereBetween('system_delivery_date_end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('system_delivery_date', '<=', $end)
+                        ->where('system_delivery_date_end', '>=', $start);
+                });
+        });
+
+        if ($orderTypeId = data_get($info, 'order_type_id')) {
+            $builder->where('order_type_id', $orderTypeId);
+        }
+    }
+
     protected function discountPercentage(): Attribute
     {
         return Attribute::get(
@@ -1349,6 +1300,56 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 data_get($attributes, 'total_net_price') ?? '0'
             )
         );
+    }
+
+    protected function scopePaid(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Open::class);
+    }
+
+    protected function scopePurchase(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'orderType',
+            fn (Builder $query) => $query->whereIn(
+                'order_type_enum',
+                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => $enum->isPurchase())
+            )
+        );
+    }
+
+    protected function scopeRevenue(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'orderType',
+            fn (Builder $query) => $query->whereIn(
+                'order_type_enum',
+                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => ! $enum->isPurchase())
+            )
+        );
+    }
+
+    protected function scopeUnpaid(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Paid::class)
+            ->whereNot('balance', 0);
+    }
+
+    protected function scopeWhereHasMailableInvoiceAddress(Builder $query): Builder
+    {
+        return $query
+            ->with(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                ->orWhereHas('contact', fn (Builder $query) => $query
+                    ->whereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                )
+            );
     }
 
     protected function makeAllSearchableUsing(Builder $query): Builder

@@ -368,19 +368,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->belongsToMany(AddressType::class);
     }
 
-    /**
-     * Get the channels that model events should broadcast on.
-     *
-     * @param  string  $event
-     */
-    public function broadcastOn($event): array
-    {
-        return [
-            new PrivateChannel($this->broadcastChannel()),
-            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
-        ];
-    }
-
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -407,6 +394,96 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function industries(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Industry::class,
+            'contact_industry',
+            'contact_id',
+            'industry_id',
+            'contact_id',
+            'id'
+        );
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
+    }
+
+    public function leadRecommendations(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'recommended_by_address_id');
+    }
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'address_address_type_order')
+            ->withPivot('address_type_id');
+    }
+
+    public function ordersDeliveryAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_delivery_id');
+    }
+
+    public function ordersInvoiceAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_invoice_id');
+    }
+
+    public function priceList(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            PriceList::class,
+            Contact::class,
+            'id',
+            'id',
+            'contact_id',
+            'price_list_id'
+        );
+    }
+
+    public function serialNumbers(): BelongsToMany
+    {
+        return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Tenant::class,
+            'contact_tenant',
+            'contact_id',
+            'tenant_id',
+            'contact_id',
+            'id'
+        );
+    }
+
+    public function tickets(): MorphMany
+    {
+        return $this->morphMany(Ticket::class, 'authenticatable');
+    }
+
+    /**
+     * Get the channels that model events should broadcast on.
+     *
+     * @param  string  $event
+     */
+    public function broadcastOn($event): array
+    {
+        return [
+            new PrivateChannel($this->broadcastChannel()),
+            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
+        ];
     }
 
     public function detailRouteParams(): array
@@ -452,52 +529,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->detailRoute();
     }
 
-    public function industries(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Industry::class,
-            'contact_industry',
-            'contact_id',
-            'industry_id',
-            'contact_id',
-            'id'
-        );
-    }
-
-    public function language(): BelongsTo
-    {
-        return $this->belongsTo(Language::class);
-    }
-
-    public function leadRecommendations(): HasMany
-    {
-        return $this->hasMany(Lead::class, 'recommended_by_address_id');
-    }
-
-    public function leads(): HasMany
-    {
-        return $this->hasMany(Lead::class);
-    }
-
     public function newCollection(array $models = []): Collection
     {
         return app(AddressCollection::class, ['items' => $models]);
-    }
-
-    public function orders(): BelongsToMany
-    {
-        return $this->belongsToMany(Order::class, 'address_address_type_order')
-            ->withPivot('address_type_id');
-    }
-
-    public function ordersDeliveryAddress(): HasMany
-    {
-        return $this->hasMany(Order::class, 'address_delivery_id');
-    }
-
-    public function ordersInvoiceAddress(): HasMany
-    {
-        return $this->hasMany(Order::class, 'address_invoice_id');
     }
 
     /**
@@ -506,18 +540,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function preferredLocale(): ?string
     {
         return $this->language?->language_code;
-    }
-
-    public function priceList(): HasOneThrough
-    {
-        return $this->hasOneThrough(
-            PriceList::class,
-            Contact::class,
-            'id',
-            'id',
-            'contact_id',
-            'price_list_id'
-        );
     }
 
     public function routeNotificationForMail(): ?string
@@ -535,6 +557,50 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 'address' => $this,
             ]
         );
+    }
+
+    public function toCalendarEvent(?array $info = null): array
+    {
+        $currentBirthday = null;
+        $start = Carbon::parse(data_get($info, 'start'));
+        $end = Carbon::parse(data_get($info, 'end'));
+        $birthday = $this->date_of_birth->format('m-d');
+
+        while ($start->lessThanOrEqualTo($end)) {
+            if ($start->format('m-d') === $birthday) {
+                $currentBirthday = $start;
+                break;
+            }
+
+            $start->addDay();
+        }
+
+        if ($start->gt($end)) {
+            $currentBirthday = null;
+        }
+
+        if (is_null($currentBirthday)) {
+            return [];
+        }
+
+        $age = $currentBirthday->year - $this->date_of_birth->year;
+
+        $name = <<<HTML
+            <i class="ph ph-gift"></i>
+            <span>$this->name ($age)</span>
+        HTML;
+
+        return [
+            'id' => $this->id,
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $name,
+            'start' => $currentBirthday->toDateString(),
+            'end' => $currentBirthday->toDateString(),
+            'editable' => false,
+            'allDay' => true,
+            'is_editable' => false,
+            'is_public' => false,
+        ];
     }
 
     public function scopeInTimeframe(
@@ -594,72 +660,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     $end->format('md'),
                 ]);
             });
-    }
-
-    public function serialNumbers(): BelongsToMany
-    {
-        return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
-    }
-
-    public function tenants(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Tenant::class,
-            'contact_tenant',
-            'contact_id',
-            'tenant_id',
-            'contact_id',
-            'id'
-        );
-    }
-
-    public function tickets(): MorphMany
-    {
-        return $this->morphMany(Ticket::class, 'authenticatable');
-    }
-
-    public function toCalendarEvent(?array $info = null): array
-    {
-        $currentBirthday = null;
-        $start = Carbon::parse(data_get($info, 'start'));
-        $end = Carbon::parse(data_get($info, 'end'));
-        $birthday = $this->date_of_birth->format('m-d');
-
-        while ($start->lessThanOrEqualTo($end)) {
-            if ($start->format('m-d') === $birthday) {
-                $currentBirthday = $start;
-                break;
-            }
-
-            $start->addDay();
-        }
-
-        if ($start->gt($end)) {
-            $currentBirthday = null;
-        }
-
-        if (is_null($currentBirthday)) {
-            return [];
-        }
-
-        $age = $currentBirthday->year - $this->date_of_birth->year;
-
-        $name = <<<HTML
-            <i class="ph ph-gift"></i>
-            <span>$this->name ($age)</span>
-        HTML;
-
-        return [
-            'id' => $this->id,
-            'calendar_type' => $this->getMorphClass(),
-            'title' => $name,
-            'start' => $currentBirthday->toDateString(),
-            'end' => $currentBirthday->toDateString(),
-            'editable' => false,
-            'allDay' => true,
-            'is_editable' => false,
-            'is_public' => false,
-        ];
     }
 
     protected function mailAddresses(): Attribute

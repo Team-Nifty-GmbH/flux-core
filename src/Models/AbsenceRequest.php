@@ -121,6 +121,27 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         return $this->belongsTo(User::class, 'approved_by_id');
     }
 
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function employeeDays(): BelongsToMany
+    {
+        return $this->belongsToMany(EmployeeDay::class)
+            ->using(AbsenceRequestEmployeeDay::class);
+    }
+
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_id');
+    }
+
+    public function substitutes(): BelongsToMany
+    {
+        return $this->belongsToMany(Employee::class, 'absence_request_substitute');
+    }
+
     public function calculateWorkDaysAffected(?Carbon $date = null): string|float
     {
         $deductionRate = $this->absenceType->percentage_deduction ?? 1;
@@ -179,17 +200,6 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         }
 
         return $totalHours;
-    }
-
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class);
-    }
-
-    public function employeeDays(): BelongsToMany
-    {
-        return $this->belongsToMany(EmployeeDay::class)
-            ->using(AbsenceRequestEmployeeDay::class);
     }
 
     public function failsAbsencePolicies(): ?array
@@ -275,16 +285,6 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
                     );
             })
             ->exists();
-    }
-
-    public function rejectedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'rejected_by_id');
-    }
-
-    public function substitutes(): BelongsToMany
-    {
-        return $this->belongsToMany(Employee::class, 'absence_request_substitute');
     }
 
     protected function getDayPartFractionByTime(Carbon $date): ?string

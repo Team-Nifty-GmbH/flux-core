@@ -16,13 +16,13 @@ class PaymentTypeTenant extends FluxPivot
         return $this->belongsTo(PaymentType::class, 'payment_type_id');
     }
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class, 'tenant_id');
-    }
-
     public function siblings(): HasMany
     {
         return $this->hasMany(PaymentTypeTenant::class, 'payment_type_id', 'payment_type_id');
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 }

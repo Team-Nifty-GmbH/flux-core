@@ -187,6 +187,26 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->hasOneThrough(Contact::class, Address::class);
     }
 
+    public function leadLossReason(): BelongsTo
+    {
+        return $this->belongsTo(LeadLossReason::class);
+    }
+
+    public function leadState(): BelongsTo
+    {
+        return $this->belongsTo(LeadState::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -207,21 +227,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return route('sales.lead.id', $this->getKey());
     }
 
-    public function leadLossReason(): BelongsTo
-    {
-        return $this->belongsTo(LeadLossReason::class);
-    }
-
-    public function leadState(): BelongsTo
-    {
-        return $this->belongsTo(LeadState::class);
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
-    }
-
     public function recalculateWeightedGrossProfit(): void
     {
         if (! is_null($this->probability_percentage) && ! is_null($this->expected_gross_profit)) {
@@ -240,28 +245,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 $this->expected_revenue
             );
         }
-    }
-
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string $start,
-        Carbon|string $end,
-        ?array $info = null
-    ): void {
-        $builder->where(function (Builder $query) use ($start, $end): void {
-            $query
-                ->whereBetween('start', [$start, $end])
-                ->orWhereBetween('end', [$start, $end])
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->where('start', '<=', $end)
-                        ->where('end', '>=', $start);
-                })
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->whereNull('start')
-                        ->whereNull('end')
-                        ->whereBetween('created_at', [$start, $end]);
-                });
-        });
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -285,8 +268,25 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('start', [$start, $end])
+                ->orWhereBetween('end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start', '<=', $end)
+                        ->where('end', '>=', $start);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start')
+                        ->whereNull('end')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
+        });
     }
 }
