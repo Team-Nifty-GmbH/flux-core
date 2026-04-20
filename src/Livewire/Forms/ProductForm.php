@@ -15,6 +15,7 @@ use Livewire\Attributes\Locked;
 class ProductForm extends FluxForm
 {
     use SupportsAutoRender;
+
     public ?string $avatar_url = null;
 
     public ?float $basic_unit = null;
