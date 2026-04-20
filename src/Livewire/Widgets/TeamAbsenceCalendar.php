@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
-use FluxErp\Enums\DayPartEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\HumanResources\Dashboard as HumanResourcesDashboard;
 use FluxErp\Models\AbsenceRequest;
@@ -158,7 +158,7 @@ class TeamAbsenceCalendar extends Component
         $endOfMonth = Carbon::create($this->year, $this->month)->endOfMonth();
 
         $employees = resolve_static(Employee::class, 'query')
-            ->select(['id', 'employee_department_id', 'name'])
+            ->select(['id', 'employee_department_id', 'location_id', 'name'])
             ->with('employeeDepartment:id,name')
             ->employed($endOfMonth)
             ->orderBy('name')
@@ -173,8 +173,13 @@ class TeamAbsenceCalendar extends Component
             ->where('end_date', '>=', $startOfMonth)
             ->with('absenceType:id,name,code,color')
             ->get([
-                'id', 'employee_id', 'absence_type_id',
-                'start_date', 'end_date', 'day_part', 'state',
+                'id',
+                'employee_id',
+                'absence_type_id',
+                'start_date',
+                'end_date',
+                'day_part',
+                'state',
             ])
             ->groupBy('employee_id');
 
@@ -202,6 +207,7 @@ class TeamAbsenceCalendar extends Component
                     ->where('month', $startOfMonth->month)
                 )
             )
+            ->with('locations:id')
             ->get(['id', 'name', 'date', 'month', 'day', 'is_half_day'])
             ->keyBy(fn (Holiday $holiday) => $holiday->date
                 ? $holiday->date->format('Y-m-d')
@@ -223,6 +229,12 @@ class TeamAbsenceCalendar extends Component
                             $days = [];
 
                             foreach ($holidays as $dateKey => $holiday) {
+                                if ($holiday->locations->isNotEmpty()
+                                    && ! $holiday->locations->contains('id', $employee->location_id)
+                                ) {
+                                    continue;
+                                }
+
                                 $days[$dateKey] = [
                                     'type' => $holidayType['id'],
                                     'color' => $holidayType['color'],
@@ -249,7 +261,7 @@ class TeamAbsenceCalendar extends Component
 
                                     $existingDay = $days[$dateKey] ?? null;
                                     $isAbsenceHalfDay = $absence->day_part
-                                        && $absence->day_part->value !== DayPartEnum::FullDay;
+                                        && $absence->day_part->value !== AbsenceRequestDayPartEnum::FullDay;
                                     $holidayName = $existingDay['holiday_name'] ?? null;
                                     $isOnHoliday = ($existingDay['type'] ?? null) === $holidayType['id'];
 
@@ -274,7 +286,9 @@ class TeamAbsenceCalendar extends Component
                                 'days' => $days,
                             ];
                         }
-                    )->values()->toArray(),
+                    )
+                        ->values()
+                        ->toArray(),
                 ];
             })
             ->sortBy('name')
