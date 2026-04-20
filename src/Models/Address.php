@@ -12,6 +12,7 @@ use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Support\Collection\AddressCollection;
+use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\Calendar\HasCalendars;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Communicatable;
@@ -46,7 +47,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
