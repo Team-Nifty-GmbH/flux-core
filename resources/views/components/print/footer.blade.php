@@ -1,18 +1,43 @@
-<footer class="fixed h-auto w-full bg-white text-center">
-    <div class="footer-content text-2xs leading-3">
+<footer
+    style="
+        position: fixed;
+        height: auto;
+        width: 100%;
+        background: white;
+        text-align: center;
+    "
+>
+    <div class="footer-content" style="font-size: 10px; line-height: 12px">
         @section('footer.logo')
-            <div class="absolute right-0 left-0 m-auto max-h-32 px-6">
+            <div
+                style="
+                    position: absolute;
+                    right: 0;
+                    left: 0;
+                    margin: auto;
+                    max-height: 128px;
+                    padding-left: 24px;
+                    padding-right: 24px;
+                "
+            >
                 <img
-                    class="logo-small footer-logo m-auto"
+                    class="logo-small footer-logo"
+                    style="margin: auto"
                     src="{{ $tenant->logo_small }}"
                 />
             </div>
         @show
-        <div class="w-full">
-            <div class="border-semi-black border-t">
+        <div style="width: 100%">
+            <div style="border-top: 1px solid #6b7280">
                 @section('footer.tenant-address')
-                    <address class="float-left text-left not-italic">
-                        <div class="font-semibold">
+                    <address
+                        style="
+                            float: left;
+                            text-align: left;
+                            font-style: normal;
+                        "
+                    >
+                        <div style="font-weight: 600">
                             {{ $tenant->name ?? '' }}
                         </div>
                         <div>{{ $tenant->ceo ?? '' }}</div>
@@ -28,8 +53,14 @@
                 @show
                 @section('footer.bank-connections')
                     @foreach($tenant->bankConnections as $bankConnection)
-                        <div class="float-right pl-3 text-left">
-                            <div class="font-semibold">
+                        <div
+                            style="
+                                float: right;
+                                padding-left: 12px;
+                                text-align: left;
+                            "
+                        >
+                            <div style="font-weight: 600">
                                 {{ $bankConnection->bank_name ?? '' }}
                             </div>
                             <div>{{ $bankConnection->iban ?? '' }}</div>
@@ -41,7 +72,7 @@
                     @endforeach
 
                 @show
-                <div class="clear-both"></div>
+                <div style="clear: both"></div>
             </div>
         </div>
     </div>

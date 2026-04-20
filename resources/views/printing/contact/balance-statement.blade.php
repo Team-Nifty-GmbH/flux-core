@@ -3,17 +3,23 @@
     :address="$model->invoiceAddress ?? $model->mainAddress"
 >
     <x-slot:right-block>
-        <div class="inline-block">
+        <div style="display: inline-block">
             @section('first-page-right-block')
-                <div class="inline-block">
+                <div style="display: inline-block">
                     @section('first-page-right-block.labels')
-                        <div class="font-semibold">
+                        <div style="font-weight: 600">
                             {{ __('Customer no.') }}:
                         </div>
-                        <div class="font-semibold">{{ __('Date') }}:</div>
+                        <div style="font-weight: 600">{{ __('Date') }}:</div>
                     @show
                 </div>
-                <div class="inline-block pl-6 text-right">
+                <div
+                    style="
+                        display: inline-block;
+                        padding-left: 24px;
+                        text-align: right;
+                    "
+                >
                     @section('first-page-right-block.values')
                         <div>{{ $model->customer_number }}</div>
                         <div>
@@ -26,29 +32,77 @@
     </x-slot:right-block>
 </x-flux::print.first-page-header>
 <main>
-    <div class="prose-xs pt-10 pb-4">{!! $model->header !!}</div>
-    <div class="pb-6">
+    <div
+        style="
+            font-size: 12px;
+            line-height: 16px;
+            padding-top: 40px;
+            padding-bottom: 16px;
+        "
+    >
+        {!! $model->header !!}
+    </div>
+    <div style="padding-bottom: 24px">
         @section('positions')
-            <table class="w-full table-auto text-xs">
-                <thead class="border-b-2 border-black">
+            <table style="width: 100%; table-layout: auto; font-size: 12px">
+                <thead>
                     @section('positions.header')
                         <tr>
-                            <th class="text-left font-normal">
+                            <th
+                                style="
+                                    text-align: left;
+                                    font-weight: 400;
+                                    border-bottom: 2px solid black;
+                                "
+                            >
                                 {{ __('Order no.') }}
                             </th>
-                            <th class="text-left font-normal">
+                            <th
+                                style="
+                                    text-align: left;
+                                    font-weight: 400;
+                                    border-bottom: 2px solid black;
+                                "
+                            >
                                 {{ __('Date') }}
                             </th>
-                            <th class="text-left font-normal">
+                            <th
+                                style="
+                                    text-align: left;
+                                    font-weight: 400;
+                                    border-bottom: 2px solid black;
+                                "
+                            >
                                 {{ __('Invoice no.') }}
                             </th>
-                            <th class="text-right font-normal uppercase">
+                            <th
+                                style="
+                                    text-align: right;
+                                    font-weight: 400;
+                                    text-transform: uppercase;
+                                    border-bottom: 2px solid black;
+                                "
+                            >
                                 {{ __('Total Gross') }}
                             </th>
-                            <th class="text-right font-normal uppercase">
+                            <th
+                                style="
+                                    text-align: right;
+                                    font-weight: 400;
+                                    text-transform: uppercase;
+                                    border-bottom: 2px solid black;
+                                "
+                            >
                                 {{ __('Payments') }}
                             </th>
-                            <th class="text-right font-semibold uppercase">
+                            <th
+                                style="
+                                    text-align: right;
+                                    font-weight: 600;
+                                    text-transform: uppercase;
+                                    border-bottom: 2px solid black;
+                                "
+                            >
                                 {{ __('Balance') }}
                             </th>
                         </tr>
@@ -63,19 +117,27 @@
             </table>
         @show
     </div>
-    <div class="pb-6">
+    <div style="padding-bottom: 24px">
         @section('total')
-            <table class="w-full">
-                <tbody class="break-inside-avoid">
+            <table style="width: 100%">
+                <tbody style="break-inside: avoid">
                     <tr>
                         <td
                             colspan="3"
-                            class="border-b border-black font-semibold"
+                            style="
+                                border-bottom: 1px solid black;
+                                font-weight: 600;
+                            "
                         >
                             {{ __('Total') }}
                         </td>
                         <td
-                            class="float-right border-b border-black text-right font-semibold"
+                            style="
+                                float: right;
+                                border-bottom: 1px solid black;
+                                text-align: right;
+                                font-weight: 600;
+                            "
                         >
                             {{ Number::currency($model->orders()->unpaid()->sum('balance'),) }}
                         </td>

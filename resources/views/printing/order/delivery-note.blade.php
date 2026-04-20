@@ -2,9 +2,15 @@
 
 @section('positions.header')
     <tr>
-        <th class="pr-8 text-left font-normal">{{ __('Pos.') }}</th>
-        <th class="pr-8 text-left font-normal">{{ __('Name') }}</th>
-        <th class="pr-8 text-center font-normal">{{ __('Amount') }}</th>
+        <th style="padding-right: 32px; text-align: left; font-weight: 400">
+            {{ __('Pos.') }}
+        </th>
+        <th style="padding-right: 32px; text-align: left; font-weight: 400">
+            {{ __('Name') }}
+        </th>
+        <th style="padding-right: 32px; text-align: center; font-weight: 400">
+            {{ __('Amount') }}
+        </th>
     </tr>
 @endsection
 
@@ -12,28 +18,43 @@
     @foreach($model->orderPositions as $position)
         <tbody class="bg-uneven">
             <tr>
-                <td class="pos py-4 pr-8 align-top">
+                <td
+                    class="pos"
+                    style="
+                        padding-top: 16px;
+                        padding-bottom: 16px;
+                        padding-right: 32px;
+                        vertical-align: top;
+                    "
+                >
                     {{ $position->total_net_price ? $position->slug_position : '' }}
                 </td>
                 <td
-                    class="py-4 pr-8 align-top"
-                    style="padding-left: {{ $position->depth * 15 }}px"
+                    style="padding-top: 16px; padding-bottom: 16px; padding-right: 32px; vertical-align: top; padding-left: {{ $position->depth * 15 }}px"
                 >
                     @if($position->is_alternative)
                         <x-badge
                             color="amber"
-                            class="mb-2"
+                            style="margin-bottom: 8px"
                             :text="__('Alternative')"
                             position="right"
                         />
                     @endif
 
-                    <p class="font-italic text-xs">
+                    <p style="font-style: italic; font-size: 12px">
                         {{ $position->product_number }}
                     </p>
-                    <p class="font-semibold">{{ $position->name }}</p>
+                    <p style="font-weight: 600">{{ $position->name }}</p>
                 </td>
-                <td class="py-4 pr-8 text-center align-top">
+                <td
+                    style="
+                        padding-top: 16px;
+                        padding-bottom: 16px;
+                        padding-right: 32px;
+                        text-align: center;
+                        vertical-align: top;
+                    "
+                >
                     {{ Number::format($position->amount) }} {{ data_get($position, 'product.unit.abbreviation') }}
                 </td>
             </tr>
