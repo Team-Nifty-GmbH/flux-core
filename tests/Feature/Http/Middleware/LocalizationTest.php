@@ -86,6 +86,23 @@ test('falls back to default language', function (): void {
     expect(app()->getLocale())->toBe('pt');
 });
 
+test('caches language codes as array not collection', function (): void {
+    Language::factory()->create(['language_code' => 'ja']);
+
+    auth()->logout();
+    Cache::forget('available_language_codes');
+    Cache::memo()->flush();
+
+    $request = Request::create('/test', 'GET');
+    $request->headers->set('Accept-Language', 'ja');
+    app(Localization::class)->handle($request, function (): void {});
+
+    $cached = Cache::get('available_language_codes');
+
+    expect($cached)->toBeArray()
+        ->and($cached)->toContain('ja');
+});
+
 test('passes request to next middleware', function (): void {
     $called = false;
     $request = Request::create('/test', 'GET');
