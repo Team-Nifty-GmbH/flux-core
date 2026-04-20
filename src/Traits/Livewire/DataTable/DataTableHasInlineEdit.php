@@ -77,7 +77,7 @@ trait DataTableHasInlineEdit
 
     protected function augmentItemArrayDataTableHasInlineEdit(array &$itemArray, Model $item): void
     {
-        if (is_null($this->inlineEditingId) || $item->getKey() != $this->inlineEditingId) {
+        if (is_null($this->inlineEditingId) || $item->getKey() !== $this->inlineEditingId) {
             return;
         }
 
@@ -95,7 +95,7 @@ trait DataTableHasInlineEdit
             $rendered = $form->renderInlineField($field, $saveOnChange);
 
             if ($rendered !== '') {
-                $itemArray[$field] = ['raw' => $itemArray[$field] ?? '', 'display' => $rendered];
+                $itemArray[$field] = ['raw' => $itemArray[$field], 'display' => $rendered];
             }
         }
     }
@@ -147,8 +147,13 @@ trait DataTableHasInlineEdit
             return $this->formAttributeName();
         }
 
-        return $this->getAttributes()
-            ->first(fn ($attribute) => $attribute instanceof DataTableForm)
-            ->getName();
+        $attribute = $this->getAttributes()
+            ->first(fn ($attribute) => $attribute instanceof DataTableForm);
+
+        if (is_null($attribute)) {
+            throw new InvalidArgumentException('No #[DataTableForm] attribute found on ' . static::class);
+        }
+
+        return $attribute->getName();
     }
 }

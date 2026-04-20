@@ -116,11 +116,11 @@ trait SupportsAutoRender
     protected function addInlineSaveTrigger(string $element, ReflectionProperty $property): string
     {
         $renderAs = $this->getAutoRenderAsAttribute($property);
-        $type = $renderAs?->type ?? $this->getPropertyTypeName($property);
+        $type = strtolower($renderAs?->type ?? $this->getPropertyTypeName($property));
 
         $immediateTypes = [
-            RenderAs::TOGGLE, RenderAs::CHECKBOX, RenderAs::RADIO,
-            RenderAs::SELECT, RenderAs::SELECT_NATIVE,
+            strtolower(RenderAs::TOGGLE), strtolower(RenderAs::CHECKBOX), strtolower(RenderAs::RADIO),
+            strtolower(RenderAs::SELECT), strtolower(RenderAs::SELECT_NATIVE),
             'bool',
         ];
 
