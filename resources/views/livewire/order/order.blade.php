@@ -1003,10 +1003,10 @@
                                                             $nuxbe.format.money(
                                                                 ($wire.order
                                                                     .total_position_discount_flat ??
-                                                                    0,
+                                                                    0) * -1,
                                                                 {
                                                                     colored: true,
-                                                                }) * -1,
+                                                                },
                                                             )
                                                         "
                                                     ></span>
@@ -1098,10 +1098,10 @@
                                                                 x-html="
                                                                     $nuxbe.format.money(
                                                                         (discount.discount_flat ??
-                                                                            0,
+                                                                            0) * -1,
                                                                         {
                                                                             colored: true,
-                                                                        }) * -1,
+                                                                        },
                                                                     )
                                                                 "
                                                             ></span>
@@ -1150,9 +1150,8 @@
                                                         $nuxbe.format.money(
                                                             ($wire.order
                                                                 .total_discount_flat ??
-                                                                0,
-                                                            { colored: true }) *
-                                                                -1,
+                                                                0) * -1,
+                                                            { colored: true },
                                                         )
                                                     "
                                                 ></span>
