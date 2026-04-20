@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
@@ -37,10 +38,14 @@ class SearchController extends Controller
             $selected = $request->input('selected');
             $optionValue = $request->input('option-value') ?: (app($model))->getKeyName();
 
-            $query = resolve_static($model, 'query');
+            $query = resolve_static($model, 'query')
+                ->withoutGlobalScopes([SoftDeletingScope::class]);
+
             is_array($selected)
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
+
+            return $this->formatAndDispatch($query->get(), $model, $request);
         } elseif ($request->has('search') && $isSearchable && ! $request->input('searchFields')) {
             /** @var Builder $perPageSearch */
             $perPageSearch = count(Arr::except(
@@ -196,19 +201,22 @@ class SearchController extends Controller
             });
         }
 
+        return $this->formatAndDispatch($result, $model, $request);
+    }
+
+    protected function formatAndDispatch(Collection $result, string $model, Request $request)
+    {
         if (is_a(app($model), InteractsWithDataTables::class)) {
-            $result = $result->map(function ($item) use ($request) {
-                return array_merge(
-                    [
-                        'id' => $item->getKey(),
-                        'label' => $item->getLabel() ?? '-',
-                        'description' => $item->getDescription(),
-                        'image' => $item->getAvatarUrl(),
-                    ],
-                    $item->only($request->input('fields', [])),
-                    $item->only($request->input('appends', [])),
-                );
-            });
+            $result = $result->map(fn ($item) => array_merge(
+                [
+                    'id' => $item->getKey(),
+                    'label' => $item->getLabel() ?? '-',
+                    'description' => $item->getDescription(),
+                    'image' => $item->getAvatarUrl(),
+                ],
+                $item->only($request->input('fields', [])),
+                $item->only($request->input('appends', [])),
+            ));
         }
 
         Event::dispatch('tall-datatables-searched', [$request, $result]);
