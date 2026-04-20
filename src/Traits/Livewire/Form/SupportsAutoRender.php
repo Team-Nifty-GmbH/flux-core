@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Livewire\Form;
 
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
+use FluxErp\Support\Livewire\Attributes\InlineEditable;
 use FluxErp\Support\Livewire\Attributes\RenderAs;
 use FluxErp\Support\Livewire\Attributes\SeparatorAfter;
 use Illuminate\Support\Facades\Blade;
@@ -49,6 +50,70 @@ trait SupportsAutoRender
         }
 
         return new HtmlString(Blade::render($blade, $data));
+    }
+
+    public function renderInlineField(string $property, bool $saveOnChange = false): string
+    {
+        $reflection = new ReflectionClass($this);
+
+        if (! $reflection->hasProperty($property)) {
+            return '';
+        }
+
+        $reflectionProperty = $reflection->getProperty($property);
+
+        if (! $reflectionProperty->isPublic()) {
+            return '';
+        }
+
+        $type = $this->getPropertyTypeName($reflectionProperty);
+        $propertyName = $this->getPropertyName() . '.' . $reflectionProperty->getName();
+        $propertyLabel = __(Str::of($reflectionProperty->getName())->headline()->toString());
+
+        $element = $this->createFormElement($type, $propertyName, $propertyLabel, $reflectionProperty);
+
+        if ($element === '') {
+            return '';
+        }
+
+        if ($saveOnChange) {
+            $element = $this->addInlineSaveTrigger($element, $reflectionProperty);
+        }
+
+        return Blade::render($element);
+    }
+
+    protected function addInlineSaveTrigger(string $element, ReflectionProperty $property): string
+    {
+        $renderAs = $this->getAutoRenderAsAttribute($property);
+        $type = $renderAs?->type ?? $this->getPropertyTypeName($property);
+
+        $immediateTypes = [
+            RenderAs::TOGGLE, RenderAs::CHECKBOX, RenderAs::RADIO,
+            RenderAs::SELECT, RenderAs::SELECT_NATIVE,
+            'bool',
+        ];
+
+        if (in_array($type, $immediateTypes)) {
+            return preg_replace('/\s*\/>$/', ' wire:change="saveInline" />', $element);
+        }
+
+        return preg_replace('/\s*\/>$/', ' x-on:blur="$wire.saveInline()" />', $element);
+    }
+
+    public function getInlineEditableFields(): array
+    {
+        $reflection = new ReflectionClass($this);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        $fields = [];
+
+        foreach ($properties as $property) {
+            if ($property->getAttributes(InlineEditable::class)) {
+                $fields[] = $property->getName();
+            }
+        }
+
+        return $fields;
     }
 
     public function modalName(): ?string
