@@ -3,16 +3,16 @@
 @section('first-page-right-block.rows')
     @parent
     <tr>
-        <td class="py-0 text-left font-semibold">{{ __('Invoice Date') }}:</td>
-        <td class="p-0 text-right">
+        <td style="padding-top: 0; padding-bottom: 0; text-align: left; font-weight: 600;">{{ __('Invoice Date') }}:</td>
+        <td style="padding: 0; text-align: right;">
             {{ ($model->invoice_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
         </td>
     </tr>
     <tr>
-        <td class="py-0 text-left font-semibold">
+        <td style="padding-top: 0; padding-bottom: 0; text-align: left; font-weight: 600;">
             {{ __('Performance Date') }}:
         </td>
-        <td class="p-0 text-right">
+        <td style="padding: 0; text-align: right;">
             @if ($model->system_delivery_date_end && $model->system_delivery_date_end->format('Y-m-d') !== $model->system_delivery_date->format('Y-m-d'))
                 {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
                 -
@@ -25,19 +25,19 @@
 @endsection
 
 @section('total')
-    <table class="w-full pb-16 text-xs break-inside-avoid" style="page-break-inside: avoid;">
+    <table style="width: 100%; padding-bottom: 64px; font-size: 12px; break-inside: avoid; page-break-inside: avoid;">
         <tbody style="page-break-inside: avoid;">
         <tr>
-            <td colspan="2" class="border-b-2 border-black font-semibold">
+            <td colspan="2" style="border-bottom: 2px solid black; font-weight: 600;">
                 {{ __('Total') }}
             </td>
         </tr>
         @section('total.subtotal')
             <tr>
-                <td class="text-right">
+                <td style="text-align: right;">
                     {{ __('Subtotal net') }}
                 </td>
-                <td class="w-0 whitespace-nowrap pl-12 text-right">
+                <td style="width: 0; white-space: nowrap; padding-left: 48px; text-align: right;">
                     {{ Number::currency($model->subtotal_net_price) }}
                 </td>
             </tr>
@@ -45,7 +45,7 @@
         @section('total.subtotal.vats')
             @foreach ($model->subtotal_vats ?? [] as $subTotalVat)
                 <tr>
-                    <td class="text-right">
+                    <td style="text-align: right;">
                         {{
                             __('Plus :percentage VAT from :total_net', [
                                 'percentage' => Number::percentage(bcmul($subTotalVat['vat_rate_percentage'], 100)),
@@ -53,27 +53,27 @@
                             ])
                         }}
                     </td>
-                    <td class="w-0 whitespace-nowrap pl-12 text-right">
+                    <td style="width: 0; white-space: nowrap; padding-left: 48px; text-align: right;">
                         {{ Number::currency($subTotalVat['total_vat_price']) }}
                     </td>
                 </tr>
-                <tr class="border-b"></tr>
+                <tr><td colspan="2" style="border-bottom: 1px solid black;"></td></tr>
             @endforeach
         @show
         @section('total.children')
             @if ($model->children->isNotEmpty())
                 @foreach ($model->children as $child)
                     <tr>
-                        <td class="text-right font-semibold">
+                        <td style="text-align: right; font-weight: 600;">
                             {{ $child->getLabel() }}
                         </td>
-                        <td class="w-0 whitespace-nowrap pl-12 text-right">
+                        <td style="width: 0; white-space: nowrap; padding-left: 48px; text-align: right;">
                             {{ Number::currency(bcmul($child->total_net_price, '-1')) }}
                         </td>
                     </tr>
                     @foreach ($child->total_vats ?? [] as $childVat)
                         <tr>
-                            <td class="text-right">
+                            <td style="text-align: right;">
                                 {{
                                     __('Plus :percentage VAT from :total_net', [
                                         'percentage' => Number::percentage(bcmul($childVat['vat_rate_percentage'], 100)),
@@ -81,22 +81,22 @@
                                     ])
                                 }}
                             </td>
-                            <td class="w-0 whitespace-nowrap pl-12 text-right">
+                            <td style="width: 0; white-space: nowrap; padding-left: 48px; text-align: right;">
                                 {{ Number::currency(bcmul($childVat['total_vat_price'], '-1')) }}
                             </td>
                         </tr>
                     @endforeach
                 @endforeach
 
-                <tr class="border-b"></tr>
+                <tr><td colspan="2" style="border-bottom: 1px solid black;"></td></tr>
             @endif
         @show
         @section('total.net')
             <tr>
-                <td class="text-right">
+                <td style="text-align: right;">
                     {{ __('Sum net') }}
                 </td>
-                <td class="w-0 whitespace-nowrap pl-12 text-right">
+                <td style="width: 0; white-space: nowrap; padding-left: 48px; text-align: right;">
                     {{ Number::currency($model->total_net_price) }}
                 </td>
             </tr>
@@ -104,7 +104,7 @@
         @section('total.net.vats')
             @foreach ($model->total_vats ?? [] as $totalVat)
                 <tr>
-                    <td class="text-right">
+                    <td style="text-align: right;">
                         {{
                             __('Plus :percentage VAT from :total_net', [
                                 'percentage' => Number::percentage(bcmul($totalVat['vat_rate_percentage'], 100)),
@@ -112,20 +112,20 @@
                             ])
                         }}
                     </td>
-                    <td class="w-0 whitespace-nowrap pl-12 text-right">
+                    <td style="width: 0; white-space: nowrap; padding-left: 48px; text-align: right;">
                         {{ Number::currency($totalVat['total_vat_price']) }}
                     </td>
                 </tr>
             @endforeach
 
-            <tr class="border-b"></tr>
+            <tr><td colspan="2" style="border-bottom: 1px solid black;"></td></tr>
         @show
         @section('total.gross')
-            <tr class="font-bold">
-                <td class="text-right">
+            <tr style="font-weight: 700;">
+                <td style="text-align: right;">
                     {{ __('Total Gross') }}
                 </td>
-                <td class="w-0 whitespace-nowrap pl-12 text-right">
+                <td style="width: 0; white-space: nowrap; padding-left: 48px; text-align: right;">
                     {{ Number::currency($model->total_gross_price) }}
                 </td>
             </tr>

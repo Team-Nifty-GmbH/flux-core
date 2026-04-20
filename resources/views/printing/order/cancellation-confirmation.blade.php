@@ -6,27 +6,74 @@
     :$model
 >
     <x-slot:right-block>
-        <table class="border-separate border-spacing-x-2">
-            <tbody class="align-text-top text-xs leading-none">
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
+        <table style="border-collapse: separate; border-spacing: 8px 0">
+            <tbody
+                style="
+                    vertical-align: text-top;
+                    font-size: 12px;
+                    line-height: 1;
+                "
+            >
+                <tr style="line-height: 1">
+                    <td
+                        style="
+                            padding-top: 0;
+                            padding-bottom: 0;
+                            text-align: left;
+                            font-weight: 600;
+                        "
+                    >
                         {{ __('Order no.') }}
                     </td>
-                    <td class="py-0 text-right">{{ $model->order_number }}</td>
+                    <td
+                        style="
+                            padding-top: 0;
+                            padding-bottom: 0;
+                            text-align: right;
+                        "
+                    >
+                        {{ $model->order_number }}
+                    </td>
                 </tr>
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
+                <tr style="line-height: 1">
+                    <td
+                        style="
+                            padding-top: 0;
+                            padding-bottom: 0;
+                            text-align: left;
+                            font-weight: 600;
+                        "
+                    >
                         {{ __('Customer no.') }}
                     </td>
-                    <td class="py-0 text-right">
+                    <td
+                        style="
+                            padding-top: 0;
+                            padding-bottom: 0;
+                            text-align: right;
+                        "
+                    >
                         {{ $model->contact()->withTrashed()->value('customer_number') }}
                     </td>
                 </tr>
-                <tr class="leading-none">
-                    <td class="py-0 text-left font-semibold">
+                <tr style="line-height: 1">
+                    <td
+                        style="
+                            padding-top: 0;
+                            padding-bottom: 0;
+                            text-align: left;
+                            font-weight: 600;
+                        "
+                    >
                         {{ __('Date') }}
                     </td>
-                    <td class="py-0 text-right">
+                    <td
+                        style="
+                            padding-top: 0;
+                            padding-bottom: 0;
+                            text-align: right;
+                        "
+                    >
                         {{ now()->locale(app()->getLocale())->isoFormat('L') }}
                     </td>
                 </tr>
@@ -34,8 +81,8 @@
         </table>
     </x-slot:right-block>
 </x-flux::print.first-page-header>
-<main class="pt-6">
-    <div class="prose-sm">
+<main style="padding-top: 24px">
+    <div style="font-size: 14px; line-height: 20px">
         {{ render_editor_blade(app(SubscriptionSettings::class)->cancellation_text, ['order' => $model]) }}
     </div>
 </main>
