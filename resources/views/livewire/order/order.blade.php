@@ -1098,7 +1098,8 @@
                                                                 x-html="
                                                                     $nuxbe.format.money(
                                                                         (discount.discount_flat ??
-                                                                            0) * -1,
+                                                                            0) *
+                                                                            -1,
                                                                         {
                                                                             colored: true,
                                                                         },
