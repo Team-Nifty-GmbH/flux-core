@@ -13,10 +13,12 @@ return new class() extends Migration
             $table->unsignedInteger('order_column')->nullable()->after('order_type_enum');
         });
 
-        DB::statement('SET @rownum := 0');
         DB::table('order_types')
+            ->whereRaw('0 = (@rownum := 0)')
             ->orderBy('id')
-            ->update(['order_column' => DB::raw('(@rownum := @rownum + 1)')]);
+            ->update([
+                'order_column' => DB::raw('@rownum := @rownum + 1'),
+            ]);
     }
 
     public function down(): void
