@@ -45,7 +45,8 @@ test('save inline validates', function (): void {
     Livewire::test(WorkTimeTypes::class)
         ->call('inlineEdit', $this->workTimeType->getKey())
         ->set('workTimeTypeForm.name', '')
-        ->call('saveInline');
+        ->call('saveInline')
+        ->assertReturned(false);
 
     $this->workTimeType->refresh();
     expect($this->workTimeType->name)->toBe('Test Type');

@@ -13,7 +13,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 trait DataTableHasInlineEdit
 {
-    public ?int $inlineEditingId = null;
+    public string|int|null $inlineEditingId = null;
 
     abstract public function loadData(bool $forceRender = false): void;
 
