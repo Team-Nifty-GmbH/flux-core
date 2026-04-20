@@ -6,6 +6,7 @@ use FluxErp\Models\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
@@ -63,13 +64,20 @@ abstract class Activities extends Component
                 $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
                 $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
                 $itemArray['event'] = __($item->event);
+                $changes = auth()->user() instanceof User
+                    ? ($item->attribute_changes->toArray() ?? [])
+                    : ['old' => [], 'attributes' => []];
 
-                if (! auth()->user() instanceof User) {
-                    $itemArray['properties'] = [
-                        'old' => [],
-                        'attributes' => [],
-                    ];
+                // Translate attribute names to human-readable labels
+                foreach (['old', 'attributes'] as $changeKey) {
+                    if (isset($changes[$changeKey])) {
+                        $changes[$changeKey] = collect($changes[$changeKey])
+                            ->mapWithKeys(fn ($value, $key) => [__(Str::headline($key)) => $value])
+                            ->toArray();
+                    }
                 }
+
+                $itemArray['properties'] = $changes;
 
                 return $itemArray;
             })
