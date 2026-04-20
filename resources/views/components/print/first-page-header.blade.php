@@ -1,38 +1,61 @@
-<div class="cover-page z-10 h-auto overflow-auto bg-white">
+<div
+    class="cover-page"
+    style="z-index: 10; height: auto; overflow: auto; background: white"
+>
     @section('first-page-logo')
-        <div class="grid h-32 content-center">
-            <div class="m-auto max-h-72 text-center">
+        <div style="display: grid; height: 128px; align-content: center">
+            <div style="margin: auto; max-height: 288px; text-align: center">
                 @if($tenant->logo)
-                    <img class="logo m-auto" src="{{ $tenant->logo }}" />
+                    <img
+                        class="logo"
+                        style="margin: auto"
+                        src="{{ $tenant->logo }}"
+                    />
                 @else
-                    <div class="text-5xl font-semibold">
+                    <div
+                        style="
+                            font-size: 48px;
+                            line-height: 1;
+                            font-weight: 600;
+                        "
+                    >
                         {{ $tenant->name }}
                     </div>
                 @endif
             </div>
         </div>
     @show
-    <table class="w-full">
+    <table style="width: 100%">
         <tr>
-            <td colspan="2" class="text-2xs w-full pt-6 pb-1">
+            <td
+                colspan="2"
+                style="
+                    font-size: 10px;
+                    width: 100%;
+                    padding-top: 24px;
+                    padding-bottom: 4px;
+                "
+            >
                 @section('tenant-address')
                     <div>{{ $tenant->postal_address_one_line }}</div>
                     <div class="black-bar"></div>
                 @show
             </td>
         </tr>
-        <tr class="h-4">
+        <tr style="height: 16px">
             <td colspan="2"></td>
         </tr>
         @section('recipient-address')
             <tr>
-                <td class="w-1/2 align-top">
+                <td style="width: 50%; vertical-align: top">
                     @section('recipient-address.left-block')
                         @if($slot->isNotEmpty())
                             {!! $slot !!}
                         @else
-                            <address class="text-xs not-italic">
-                                <div class="font-semibold">
+                            <address
+                                style="font-size: 12px; font-style: normal"
+                            >
+                                <div style="font-weight: 600">
                                     {{ $address->company ?? '' }}
                                 </div>
                                 <div>
@@ -50,10 +73,15 @@
                         @endif
                     @show
                 </td>
-                <td class="w-1/2 align-top">
+                <td style="width: 50%; vertical-align: top">
                     @section('recipient-address.right-block')
                         <div
-                            class="float-right inline-block max-w-full text-xs"
+                            style="
+                                float: right;
+                                display: inline-block;
+                                max-width: 100%;
+                                font-size: 12px;
+                            "
                         >
                             {{ $rightBlock ?? '' }}
                         </div>
@@ -63,6 +91,15 @@
         @show
     </table>
     @section('first-page-subject')
-        <h1 class="pt-20 text-xl font-semibold">{{ $subject ?? '' }}</h1>
+        <h1
+            style="
+                padding-top: 80px;
+                font-size: 20px;
+                line-height: 28px;
+                font-weight: 600;
+            "
+        >
+            {{ $subject ?? '' }}
+        </h1>
     @show
 </div>
