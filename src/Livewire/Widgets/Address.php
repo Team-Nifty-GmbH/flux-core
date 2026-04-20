@@ -71,6 +71,7 @@ class Address extends Component
             ->withCount([
                 'orders' => fn (Builder $query) => $query->where('contact_id', data_get($this->address, 'contact_id')),
             ])
+            ->ordered()
             ->get()
             ->toArray();
     }
