@@ -1,9 +1,11 @@
 @use(Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
 <tbody>
     <tr
-        @if($loop ?? false) @if($loop->odd) style="
-            background: #f2f4f7;
-        " @endif @endif
+        @if($loop ?? false)
+            @if($loop->odd)
+                style="background: #f2f4f7"
+            @endif
+        @endif
     >
         <td
             class="pos"
@@ -28,10 +30,9 @@
                 />
             @endif
 
-            <p style="
-                    font-style: italic;
-                    font-size: 12px;
-                ">{{ $position->product_number }}</p>
+            <p
+                style="font-style: italic; font-size: 12px"
+            >{{ $position->product_number }}</p>
             <p style="font-weight: 600">
                 {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>
