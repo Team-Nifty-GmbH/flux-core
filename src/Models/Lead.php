@@ -8,6 +8,7 @@ use FluxErp\Actions\Lead\UpdateLead;
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\Targetable;
+use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\Calendar\HasCalendarEvents;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
@@ -28,7 +29,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
