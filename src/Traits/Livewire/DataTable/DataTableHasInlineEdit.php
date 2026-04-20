@@ -4,9 +4,9 @@ namespace FluxErp\Traits\Livewire\DataTable;
 
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
-use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -24,7 +24,6 @@ trait DataTableHasInlineEdit
         }
     }
 
-    #[Renderless]
     public function inlineEdit(string|int $id): void
     {
         $this->{$this->inlineFormAttributeName()}->reset();
@@ -35,9 +34,10 @@ trait DataTableHasInlineEdit
 
         $this->{$this->inlineFormAttributeName()}->fill($model);
         $this->inlineEditingId = $model->getKey();
+        $this->islandsHaveMounted = false;
+        $this->loadData(true);
     }
 
-    #[Renderless]
     public function saveInline(): bool
     {
         try {
@@ -48,7 +48,12 @@ trait DataTableHasInlineEdit
             return false;
         }
 
-        $this->loadData();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __(Str::headline(morph_alias($this->getModel())))]))
+            ->send();
+
+        $this->islandsHaveMounted = false;
+        $this->loadData(true);
 
         if ($this->hasInlineSaveButton()) {
             $this->inlineEditingId = null;
@@ -57,11 +62,12 @@ trait DataTableHasInlineEdit
         return true;
     }
 
-    #[Renderless]
     public function cancelInline(): void
     {
         $this->{$this->inlineFormAttributeName()}->reset();
         $this->inlineEditingId = null;
+        $this->islandsHaveMounted = false;
+        $this->loadData(true);
     }
 
     public function hasInlineSaveButton(): bool
@@ -74,6 +80,9 @@ trait DataTableHasInlineEdit
         if (is_null($this->inlineEditingId) || $item->getKey() != $this->inlineEditingId) {
             return;
         }
+
+        // Disable row link for the edited row so inputs are clickable
+        $itemArray['href'] = null;
 
         $form = $this->{$this->inlineFormAttributeName()};
         $saveOnChange = ! $this->hasInlineSaveButton();
