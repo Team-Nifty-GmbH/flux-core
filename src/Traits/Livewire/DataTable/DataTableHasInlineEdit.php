@@ -94,11 +94,6 @@ trait DataTableHasInlineEdit
     protected function getRowActionsDataTableHasInlineEdit(): array
     {
         $form = $this->{$this->inlineFormAttributeName()};
-
-        if (! $form->canAction('update')) {
-            return [];
-        }
-
         $keyName = $this->modelKeyName ?? 'id';
 
         return array_filter([
@@ -106,15 +101,18 @@ trait DataTableHasInlineEdit
                 ->text(__('Inline Edit'))
                 ->icon('pencil-square')
                 ->color('emerald')
+                ->when($form->canAction('update'))
                 ->attributes([
                     'x-on:click' => '$wire.inlineEdit(record.' . $keyName . ')',
                     'x-show' => '$wire.inlineEditingId !== record.' . $keyName,
+                    'x-cloak' => '',
                 ]),
             $this->hasInlineSaveButton()
                 ? DataTableButton::make()
                     ->text(__('Save'))
                     ->icon('check')
                     ->color('indigo')
+                    ->when($form->canAction('update'))
                     ->attributes([
                         'x-on:click' => '$wire.saveInline()',
                         'x-show' => '$wire.inlineEditingId === record.' . $keyName,
@@ -125,6 +123,7 @@ trait DataTableHasInlineEdit
                 ->text(__('Cancel'))
                 ->icon('x-mark')
                 ->color('secondary')
+                ->when($form->canAction('update'))
                 ->attributes([
                     'x-on:click' => '$wire.cancelInline()',
                     'x-show' => '$wire.inlineEditingId === record.' . $keyName,
