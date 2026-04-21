@@ -170,10 +170,7 @@
     </x-modal>
     <x-modal id="create-orders-modal">
         <div class="flex flex-col gap-1.5">
-            <div
-                x-cloak
-                x-show="! $wire.createOrdersFromWorkTimes.order_id"
-            >
+            <div x-cloak x-show="!$wire.createOrdersFromWorkTimes.order_id">
                 @if(count($tenants) > 1)
                     <x-select.styled
                         :label="__('Tenant')"
