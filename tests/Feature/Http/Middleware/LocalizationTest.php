@@ -31,7 +31,7 @@ test('sets locale from accept-language header', function (): void {
 });
 
 test('matches base language from accept-language header', function (): void {
-    Language::factory()->create(['language_code' => 'de']);
+    Language::query()->firstOrCreate(['language_code' => 'de'], Language::factory()->make(['language_code' => 'de'])->toArray());
 
     auth()->logout();
 
