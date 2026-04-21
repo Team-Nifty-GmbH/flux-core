@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Spatie\Activitylog\Models\Activity;
 use function Livewire\invade;
 
 test('can export data', function (): void {
@@ -42,4 +43,28 @@ test('can export data', function (): void {
             return true;
         }
     );
+});
+
+test('export logs activity', function (): void {
+    Storage::fake(config('filesystems.default'));
+
+    $job = new ExportDataTableJob(
+        serialize(Livewire::test(ExportTestDataTable::class)->instance()),
+        \FluxErp\Models\Tenant::class,
+        [],
+        $this->user->getMorphClass() . ':' . $this->user->getKey()
+    );
+
+    $job->handle();
+
+    $activity = Activity::query()->where('event', 'export_started')->latest()->first();
+
+    expect($activity)
+        ->not->toBeNull()
+        ->causer_id->toBe($this->user->getKey())
+        ->log_name->toBe('export')
+        ->and($activity->properties->toArray())->toMatchArray([
+            'model' => \FluxErp\Models\Tenant::class,
+            'columns' => [],
+        ]);
 });
