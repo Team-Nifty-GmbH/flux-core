@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Jobs\ExportDataTableJob;
+use FluxErp\Models\Tenant;
 use FluxErp\Notifications\ExportReady;
 use FluxErp\Tests\Unit\Livewire\DataTable\ExportTestDataTable;
 use Illuminate\Support\Facades\Notification;
@@ -50,7 +51,7 @@ test('export logs activity', function (): void {
 
     $job = new ExportDataTableJob(
         serialize(Livewire::test(ExportTestDataTable::class)->instance()),
-        \FluxErp\Models\Tenant::class,
+        Tenant::class,
         [],
         $this->user->getMorphClass() . ':' . $this->user->getKey()
     );
@@ -64,7 +65,7 @@ test('export logs activity', function (): void {
         ->causer_id->toBe($this->user->getKey())
         ->log_name->toBe('export')
         ->and($activity->properties->toArray())->toMatchArray([
-            'model' => \FluxErp\Models\Tenant::class,
+            'model' => Tenant::class,
             'columns' => [],
         ]);
 });
