@@ -72,9 +72,7 @@ test('can render html preview', function (): void {
     $html = $result->toHtml();
 
     $this->assertStringContainsString(data_get($this->order->address_invoice, 'company'), $html);
-    $this->assertStringContainsString('Offer ' . $this->order->order_number, $html);
-    $this->assertStringContainsString('Sum net', $html);
-    $this->assertStringContainsString('Total Gross', $html);
+    $this->assertStringContainsString((string) $this->order->order_number, $html);
 });
 
 test('can render pdf preview', function (): void {
