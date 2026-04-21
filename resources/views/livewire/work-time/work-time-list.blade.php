@@ -111,6 +111,7 @@
                 />
                 <div
                     id="trackable-id-edit"
+                    x-cloak
                     x-show="$wire.workTime.trackable_type"
                 >
                     <x-select.styled
