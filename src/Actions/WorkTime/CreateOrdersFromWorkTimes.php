@@ -189,11 +189,11 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
             }
 
             if (is_null($earliestStartedAt) || $workTime->started_at->lt($earliestStartedAt)) {
-                $earliestStartedAt = $workTime->started_at->startOfDay();
+                $earliestStartedAt = $workTime->started_at->copy()->startOfDay();
             }
 
-            if (is_null($latestEndedAt) || $workTime->ended_at->gt($latestEndedAt)) {
-                $latestEndedAt = $workTime->ended_at->startOfDay();
+            if (! is_null($workTime->ended_at) && (is_null($latestEndedAt) || $workTime->ended_at->gt($latestEndedAt))) {
+                $latestEndedAt = $workTime->ended_at->copy()->startOfDay();
             }
         }
 

@@ -22,7 +22,7 @@ beforeEach(function (): void {
     $contact = Contact::factory()->create();
 
     $address = Address::factory()->create([
-        'contact_id' => $contact->id,
+        'contact_id' => $contact->getKey(),
     ]);
 
     $priceList = PriceList::factory()->create();
@@ -45,19 +45,19 @@ beforeEach(function (): void {
 
     $order = Order::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'language_id' => $language->id,
-        'order_type_id' => $orderType->id,
-        'payment_type_id' => $paymentType->id,
-        'price_list_id' => $priceList->id,
-        'currency_id' => $currency->id,
-        'address_invoice_id' => $address->id,
-        'address_delivery_id' => $address->id,
+        'language_id' => $language->getKey(),
+        'order_type_id' => $orderType->getKey(),
+        'payment_type_id' => $paymentType->getKey(),
+        'price_list_id' => $priceList->getKey(),
+        'currency_id' => $currency->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'address_delivery_id' => $address->getKey(),
         'is_locked' => false,
     ]);
 
     $orderPosition = OrderPosition::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'order_id' => $order->id,
+        'order_id' => $order->getKey(),
         'is_free_text' => false,
         'is_alternative' => false,
     ]);
@@ -99,7 +99,7 @@ beforeEach(function (): void {
     WorkTime::factory()
         ->for($this->user)
         ->create([
-            'order_position_id' => $orderPosition->id,
+            'order_position_id' => $orderPosition->getKey(),
             'is_daily_work_time' => false,
             'is_billable' => false,
             'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
