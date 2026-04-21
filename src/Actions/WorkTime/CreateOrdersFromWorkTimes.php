@@ -17,6 +17,8 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\WorkTime\CreateOrdersFromWorkTimesRuleset;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 
 class CreateOrdersFromWorkTimes extends DispatchableFluxAction
@@ -55,6 +57,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
             ->first();
 
         $workTimes = resolve_static(WorkTime::class, 'query')
+            ->with(['user', 'workTimeType'])
             ->whereKey($selectedIds)
             ->where('is_locked', true)
             ->where('is_daily_work_time', false)
@@ -62,7 +65,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
             ->whereNull('order_position_id')
             ->when(
                 ! $this->getData('add_non_billable_work_times'),
-                fn ($query) => $query->where('is_billable', true)
+                fn (Builder $query) => $query->where('is_billable', true)
             )
             ->orderBy('is_billable', 'desc')
             ->orderBy('started_at', 'desc')
@@ -83,8 +86,9 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
         $createdOrderIds = [];
 
         $contacts = resolve_static(Contact::class, 'query')
-            ->withWhereHas('workTimes', function ($query) use ($selectedIds): void {
+            ->withWhereHas('workTimes', function (Builder $query) use ($selectedIds): void {
                 $query->whereKey($selectedIds)
+                    ->with(['user', 'workTimeType'])
                     ->where('is_locked', true)
                     ->where('is_daily_work_time', false)
                     ->where('total_time_ms', '>', 0)
@@ -93,7 +97,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     ->orderBy('started_at', 'desc')
                     ->when(
                         ! $this->getData('add_non_billable_work_times'),
-                        fn ($query) => $query->where('is_billable', true)
+                        fn (Builder $query) => $query->where('is_billable', true)
                     );
             })
             ->with('invoiceAddress.language:id,language_code')
@@ -113,7 +117,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                 ->execute();
             $createdOrderIds[] = $order->getKey();
 
-            $languageCode = $contact->invoiceAddress->language?->language_code
+            $languageCode = $contact->invoiceAddress?->language?->language_code
                 ?? resolve_static(Language::class, 'default')?->language_code;
 
             $this->createPositionsForOrder($order, $contact->workTimes, $product, $roundMs, $languageCode);
@@ -126,7 +130,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
 
     protected function createPositionsForOrder(
         Order $order,
-        $workTimes,
+        Collection $workTimes,
         Product $product,
         string $roundMs,
         ?string $languageCode
@@ -198,7 +202,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                 UpdateOrder::make([
                     'id' => $order->getKey(),
                     'system_delivery_date' => $earliestStartedAt,
-                    'system_delivery_date_end' => ($latestEndedAt ?? now())->format('Y-m-d'),
+                    'system_delivery_date_end' => $latestEndedAt->format('Y-m-d'),
                 ])
                     ->validate()
                     ->execute();
