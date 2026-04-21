@@ -16,6 +16,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\WorkTime;
 use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
@@ -141,10 +142,12 @@ test('show method filters correct work times', function (): void {
     $component->call('show');
 
     $workTimeListCacheKey = Livewire::new(WorkTimes::class)->getCacheKey();
-    /** @var TeamNiftyGmbH\DataTable\Helpers\SessionFilter $sessionFilter */
-    $sessionFilter = session($workTimeListCacheKey . '_query');
 
-    expect($sessionFilter)->toBeInstanceOf(TeamNiftyGmbH\DataTable\Helpers\SessionFilter::class);
+    expect(session($workTimeListCacheKey . '_query'))->toBeTrue();
+
+    $sessionFilter = SessionFilter::retrieve($workTimeListCacheKey);
+
+    expect($sessionFilter)->toBeInstanceOf(SessionFilter::class);
 
     $query = WorkTime::query();
     $closure = $sessionFilter->getClosure();
