@@ -50,6 +50,7 @@ beforeEach(function (): void {
         'is_locked' => true,
         'is_daily_work_time' => false,
         'is_billable' => true,
+        'is_pause' => false,
         'started_at' => now()->subHours(2),
         'ended_at' => now(),
     ]);
