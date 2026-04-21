@@ -41,10 +41,19 @@
                         />
                     @endif
 
-                    <p style="font-style: italic; font-size: 12px">
+                    <p
+                        style="
+                            font-style: italic;
+                            font-size: 12px;
+                            margin: 0;
+                            padding: 0;
+                        "
+                    >
                         {{ $position->product_number }}
                     </p>
-                    <p style="font-weight: 600">{{ $position->name }}</p>
+                    <p
+                        style="font-weight: 600; margin: 0; padding: 0"
+                    >{{ $position->name }}</p>
                 </td>
                 <td
                     style="

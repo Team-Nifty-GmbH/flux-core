@@ -134,7 +134,14 @@
     @show
     <div style="padding-bottom: 24px">
         @section('positions')
-            <table style="width: 100%; table-layout: auto; font-size: 12px">
+            <table
+                style="
+                    width: 100%;
+                    table-layout: auto;
+                    font-size: 12px;
+                    border-collapse: collapse;
+                "
+            >
                 <thead>
                     @section('positions.header')
                         <tr style="padding-top: 8px; padding-bottom: 8px">
@@ -205,7 +212,13 @@
     @if($summary)
         @section('summary')
             <div style="padding-bottom: 24px">
-                <table style="width: 100%; font-size: 12px">
+                <table
+                    style="
+                        width: 100%;
+                        font-size: 12px;
+                        border-collapse: collapse;
+                    "
+                >
                     <tbody style="break-inside: avoid">
                         <tr>
                             <td
@@ -239,6 +252,7 @@
         <table
             style="
                 width: 100%;
+                border-collapse: collapse;
                 break-inside: avoid;
                 padding-bottom: 64px;
                 font-size: 12px;

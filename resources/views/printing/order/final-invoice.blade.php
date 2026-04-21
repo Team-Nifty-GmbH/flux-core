@@ -25,7 +25,7 @@
 @endsection
 
 @section('total')
-    <table style="width: 100%; padding-bottom: 64px; font-size: 12px; break-inside: avoid; page-break-inside: avoid;">
+    <table style="width: 100%; padding-bottom: 64px; font-size: 12px; border-collapse: collapse; break-inside: avoid; page-break-inside: avoid;">
         <tbody style="page-break-inside: avoid;">
         <tr>
             <td colspan="2" style="border-bottom: 2px solid black; font-weight: 600;">
