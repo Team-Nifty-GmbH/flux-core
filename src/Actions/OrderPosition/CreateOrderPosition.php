@@ -216,23 +216,40 @@ class CreateOrderPosition extends FluxAction
                         'origin_position_id' => ['Order position does not exists in parent order.'],
                     ];
                 } else {
+                    $only = [];
+                    if ($order->orderType->order_type_enum === OrderTypeEnum::Retoure
+                        && $order->parent->invoice_number
+                        && $order->parent->orderType->order_type_enum === OrderTypeEnum::Order
+                    ) {
+                        $only = array_merge(
+                            [$order->getKey()],
+                            resolve_static(Order::class, 'query')
+                                ->join('order_types AS ot', 'ot.id', '=', 'orders.order_type_id')
+                                ->where('orders.parent_id', $order->getKey())
+                                ->where('ot.order_type_enum', OrderTypeEnum::Retoure->value)
+                                ->pluck('orders.id')
+                                ->toArray()
+                        );
+                    }
+
                     $maxAmount = data_get(
                         array_find(
                             $this->calculateMaxAmounts(
                                 DB::select(
                                     'WITH RECURSIVE siblings AS (
-                                    SELECT id, origin_position_id, signed_amount
-                                    FROM order_positions
-                                    WHERE id = ' . $originPositionId
-                                    . ' AND order_id = ' . $order->parent_id
-                                    . ' AND deleted_at IS NULL'
-                                    . ' UNION ALL
-                                    SELECT op.id, op.origin_position_id, op.signed_amount
-                                    FROM order_positions op
-                                    INNER JOIN siblings s ON s.id = op.origin_position_id
-                                    WHERE op.deleted_at IS NULL
-                                )
-                                SELECT * FROM siblings'
+                                        SELECT id, origin_position_id, signed_amount
+                                        FROM order_positions
+                                        WHERE id = ' . $originPositionId
+                                        . ' AND order_id = ' . $order->parent_id
+                                        . ' AND deleted_at IS NULL'
+                                        . ' UNION ALL
+                                        SELECT op.id, op.origin_position_id, op.signed_amount
+                                        FROM order_positions op
+                                        INNER JOIN siblings s ON s.id = op.origin_position_id
+                                        WHERE op.deleted_at IS NULL'
+                                    . ($only ? ' AND op.order_id IN (' . implode(',', $only) . ')' : '')
+                                    . ')
+                                    SELECT * FROM siblings'
                                 )
                             ),
                             fn (array $value) => $value['id'] === $originPositionId

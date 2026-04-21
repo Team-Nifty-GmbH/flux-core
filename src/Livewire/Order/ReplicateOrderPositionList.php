@@ -48,6 +48,9 @@ class ReplicateOrderPositionList extends OrderPositionList
 
     public bool $orderAsc = true;
 
+    #[Locked]
+    public array $countOnly = [];
+
     protected function getSelectedActions(): array
     {
         return [];
@@ -118,8 +121,9 @@ class ReplicateOrderPositionList extends OrderPositionList
                         SELECT op.id, op.origin_position_id, op.signed_amount
                         FROM order_positions op
                         INNER JOIN siblings s ON s.id = op.origin_position_id
-                        WHERE op.deleted_at IS NULL
-                    )
+                        WHERE op.deleted_at IS NULL'
+                    . ($this->countOnly ? ' AND op.order_id IN (' . implode(',', $this->countOnly) . ')' : '')
+                    . ')
                     SELECT * FROM siblings'
                 )
             )
@@ -137,7 +141,10 @@ class ReplicateOrderPositionList extends OrderPositionList
             // Real positions also checked by signed_amount
             if (! data_get($item, 'is_free_text') && ! data_get($item, 'is_bundle_position')) {
                 $totalAmount = data_get(
-                    array_find($maxAmounts, fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')),
+                    array_find(
+                        $maxAmounts,
+                        fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')
+                    ),
                     'signed_amount'
                 );
 
@@ -187,7 +194,10 @@ class ReplicateOrderPositionList extends OrderPositionList
 
             if (! data_get($item, 'is_free_text') && ! data_get($item, 'is_bundle_position')) {
                 $totalAmount = data_get(
-                    array_find($maxAmounts, fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')),
+                    array_find(
+                        $maxAmounts,
+                        fn (array $value): bool => data_get($value, 'id') === data_get($item, 'id')
+                    ),
                     'signed_amount'
                 );
             }

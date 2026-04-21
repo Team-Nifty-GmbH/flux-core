@@ -105,6 +105,7 @@
                             :order-id="$orderId"
                             :already-taken-positions="array_column($replicateOrder->order_positions, 'id')"
                             :type="$type"
+                            :count-only="$countOnly"
                             wire:model="selectedPositions"
                             lazy
                         />

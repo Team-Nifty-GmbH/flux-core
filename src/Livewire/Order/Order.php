@@ -469,7 +469,14 @@ class Order extends Component
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
                             ->whereHasTenant($this->order->tenant_id)
-                            ->exists();
+                            ->exists()
+                        && (
+                            ! $this->order->parent_id
+                            || resolve_static(OrderModel::class, 'query')
+                                ->whereKey($this->order->parent_id)
+                                ->whereNull('invoice_number')
+                                ->exists()
+                        );
                 })
                 ->attributes([
                     'class' => 'w-full',

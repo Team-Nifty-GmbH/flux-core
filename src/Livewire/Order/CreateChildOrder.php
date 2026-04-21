@@ -41,6 +41,9 @@ class CreateChildOrder extends Component
     #[Url]
     public ?string $type = null;
 
+    #[Locked]
+    public array $countOnly = [];
+
     public function mount(): void
     {
         $parentOrder = resolve_static(Order::class, 'query')
@@ -87,6 +90,21 @@ class CreateChildOrder extends Component
 
         if (count($this->availableOrderTypes) === 1) {
             $this->replicateOrder->order_type_id = data_get($this->availableOrderTypes, '0.id');
+        }
+
+        if (
+            $parentOrder->orderType->order_type_enum === OrderTypeEnum::Order
+            && $parentOrder->invoice_number
+        ) {
+            $this->countOnly = array_merge(
+                [$this->orderId],
+                resolve_static(Order::class, 'query')
+                    ->join('order_types AS ot', 'ot.id', '=', 'orders.order_type_id')
+                    ->where('orders.parent_id', $this->orderId)
+                    ->where('ot.order_type_enum', OrderTypeEnum::Retoure->value)
+                    ->pluck('orders.id')
+                    ->toArray()
+            );
         }
     }
 
@@ -214,8 +232,9 @@ class CreateChildOrder extends Component
                     SELECT op.id, op.origin_position_id, op.signed_amount
                     FROM order_positions op
                     INNER JOIN siblings s ON s.id = op.origin_position_id
-                    WHERE op.deleted_at IS NULL
-                )
+                    WHERE op.deleted_at IS NULL'
+                . ($this->countOnly ? ' AND op.order_id IN (' . implode(',', $this->countOnly) . ')' : '')
+                . ')
                 SELECT * FROM siblings'
             )
         );
