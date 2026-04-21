@@ -12,19 +12,23 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Warehouse;
 use FluxErp\Models\WorkTime;
 
 beforeEach(function (): void {
     $this->contact = Contact::factory()->create();
 
-    Address::factory()->create([
+    $address = Address::factory()->create([
         'contact_id' => $this->contact->getKey(),
         'is_main_address' => true,
     ]);
 
-    $language = Language::factory()->create();
-    $currency = Currency::factory()->create(['is_default' => true]);
+    $this->contact->update(['invoice_address_id' => $address->getKey()]);
+
+    Language::factory()->create();
+    Currency::factory()->create(['is_default' => true]);
     PriceList::factory()->create();
+    Warehouse::factory()->create(['is_default' => true]);
 
     $this->orderType = OrderType::factory()->create([
         'order_type_enum' => OrderTypeEnum::Order,
@@ -69,19 +73,15 @@ test('creates new orders from work times', function (): void {
 });
 
 test('adds positions to existing order when order_id provided', function (): void {
-    $language = Language::query()->first();
-    $currency = Currency::query()->where('is_default', true)->first();
-    $priceList = PriceList::query()->first();
-
     $order = Order::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'language_id' => $language->getKey(),
+        'language_id' => Language::query()->first()->getKey(),
         'order_type_id' => $this->orderType->getKey(),
         'payment_type_id' => $this->paymentType->getKey(),
-        'price_list_id' => $priceList->getKey(),
-        'currency_id' => $currency->getKey(),
-        'address_invoice_id' => $this->contact->addresses->first()->getKey(),
-        'address_delivery_id' => $this->contact->addresses->first()->getKey(),
+        'price_list_id' => PriceList::query()->first()->getKey(),
+        'currency_id' => Currency::query()->where('is_default', true)->first()->getKey(),
+        'address_invoice_id' => $this->contact->invoice_address_id,
+        'address_delivery_id' => $this->contact->invoice_address_id,
         'is_locked' => false,
     ]);
 
@@ -105,19 +105,15 @@ test('adds positions to existing order when order_id provided', function (): voi
 });
 
 test('order_type_id and tenant_id not required when order_id provided', function (): void {
-    $language = Language::query()->first();
-    $currency = Currency::query()->where('is_default', true)->first();
-    $priceList = PriceList::query()->first();
-
     $order = Order::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
-        'language_id' => $language->getKey(),
+        'language_id' => Language::query()->first()->getKey(),
         'order_type_id' => $this->orderType->getKey(),
         'payment_type_id' => $this->paymentType->getKey(),
-        'price_list_id' => $priceList->getKey(),
-        'currency_id' => $currency->getKey(),
-        'address_invoice_id' => $this->contact->addresses->first()->getKey(),
-        'address_delivery_id' => $this->contact->addresses->first()->getKey(),
+        'price_list_id' => PriceList::query()->first()->getKey(),
+        'currency_id' => Currency::query()->where('is_default', true)->first()->getKey(),
+        'address_invoice_id' => $this->contact->invoice_address_id,
+        'address_delivery_id' => $this->contact->invoice_address_id,
         'is_locked' => false,
     ]);
 
