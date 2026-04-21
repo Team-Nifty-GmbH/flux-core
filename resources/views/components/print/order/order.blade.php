@@ -1,6 +1,10 @@
 @use(Illuminate\Support\Number)
-<tbody class="bg-uneven">
-    <tr>
+<tbody>
+    <tr
+        @if($loop ?? false) @if($loop->odd) style="
+            background: #f2f4f7;
+        " @endif @endif
+    >
         <td
             class="pos"
             style="padding-top: 16px; padding-bottom: 16px; vertical-align: top"

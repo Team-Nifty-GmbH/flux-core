@@ -16,8 +16,8 @@
 
 @section('positions.positions')
     @foreach($model->orderPositions as $position)
-        <tbody class="bg-uneven">
-            <tr>
+        <tbody>
+            <tr @if($loop->odd) style="background: #f2f4f7" @endif>
                 <td
                     class="pos"
                     style="
