@@ -19,6 +19,7 @@ use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\ValidationException;
 
 class CreateOrdersFromWorkTimes extends DispatchableFluxAction
@@ -86,7 +87,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
         $createdOrderIds = [];
 
         $contacts = resolve_static(Contact::class, 'query')
-            ->withWhereHas('workTimes', function (Builder $query) use ($selectedIds): void {
+            ->withWhereHas('workTimes', function (HasMany|Builder $query) use ($selectedIds): void {
                 $query->whereKey($selectedIds)
                     ->with(['user', 'workTimeType'])
                     ->where('is_locked', true)
@@ -97,7 +98,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     ->orderBy('started_at', 'desc')
                     ->when(
                         ! $this->getData('add_non_billable_work_times'),
-                        fn (Builder $query) => $query->where('is_billable', true)
+                        fn (HasMany|Builder $query) => $query->where('is_billable', true)
                     );
             })
             ->with('invoiceAddress.language:id,language_code')
