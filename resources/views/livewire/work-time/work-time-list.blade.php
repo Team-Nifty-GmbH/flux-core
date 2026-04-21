@@ -170,21 +170,26 @@
     </x-modal>
     <x-modal id="create-orders-modal">
         <div class="flex flex-col gap-1.5">
-            @if(count($tenants) > 1)
-                <x-select.styled
-                    :label="__('Tenant')"
-                    wire:model="createOrdersFromWorkTimes.tenant_id"
-                    select="label:name|value:id"
-                    :options="$tenants"
-                />
-            @endif
+            <div
+                x-cloak
+                x-show="! $wire.createOrdersFromWorkTimes.order_id"
+            >
+                @if(count($tenants) > 1)
+                    <x-select.styled
+                        :label="__('Tenant')"
+                        wire:model="createOrdersFromWorkTimes.tenant_id"
+                        select="label:name|value:id"
+                        :options="$tenants"
+                    />
+                @endif
 
-            <x-select.styled
-                :label="__('Order Type')"
-                wire:model="createOrdersFromWorkTimes.order_type_id"
-                select="label:name|value:id"
-                :options="$orderTypes"
-            />
+                <x-select.styled
+                    :label="__('Order Type')"
+                    wire:model="createOrdersFromWorkTimes.order_type_id"
+                    select="label:name|value:id"
+                    :options="$orderTypes"
+                />
+            </div>
             <x-select.styled
                 :label="__('Product')"
                 wire:model="createOrdersFromWorkTimes.product_id"
