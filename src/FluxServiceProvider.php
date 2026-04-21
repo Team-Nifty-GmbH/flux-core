@@ -227,14 +227,14 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerConfig(): void
     {
-        $tsComponents = config('ts-ui.components');
-        data_set($tsComponents, 'toast.1.z-index', 'z-50');
-        data_set($tsComponents, 'toast.1.timeout', 5);
-        data_set($tsComponents, 'dialog.1.z-index', 'z-40');
-        data_set($tsComponents, 'dialog.1.blur', 'md');
-        data_set($tsComponents, 'modal.1.z-index', 'z-30');
-        data_set($tsComponents, 'slide.1.z-index', 'z-30');
-        config(['ts-ui.components' => $tsComponents]);
+        config([
+            'ts-ui.components.toast.1.z-index' => 'z-50',
+            'ts-ui.components.toast.1.timeout' => 5,
+            'ts-ui.components.dialog.1.z-index' => 'z-40',
+            'ts-ui.components.dialog.1.blur' => 'md',
+            'ts-ui.components.modal.1.z-index' => 'z-30',
+            'ts-ui.components.slide.1.z-index' => 'z-30',
+        ]);
 
         $this->booted(function (): void {
             config(['permission.models.role' => resolve_static(Role::class, 'class')]);
