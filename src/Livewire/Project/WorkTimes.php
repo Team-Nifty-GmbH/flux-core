@@ -14,6 +14,17 @@ class WorkTimes extends HumanResourcesWorkTimes
     #[Modelable]
     public int $projectId;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        $project = resolve_static(Project::class, 'query')
+            ->whereKey($this->projectId)
+            ->first(['id', 'order_id']);
+
+        $this->createOrdersFromWorkTimes->order_id = $project?->order_id;
+    }
+
     #[Renderless]
     public function getCacheKey(): string
     {
