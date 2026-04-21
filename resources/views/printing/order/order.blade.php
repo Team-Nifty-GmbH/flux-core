@@ -194,6 +194,7 @@
                         <x-flux::print.order.order-position
                             :position="$position"
                             :is-net="$isNet"
+                            :loop="$loop"
                         />
                     @endforeach
 
