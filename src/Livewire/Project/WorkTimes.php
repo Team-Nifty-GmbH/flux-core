@@ -2,14 +2,14 @@
 
 namespace FluxErp\Livewire\Project;
 
-use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\HumanResources\WorkTimes as HumanResourcesWorkTimes;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 
-class WorkTimes extends WorkTimeList
+class WorkTimes extends HumanResourcesWorkTimes
 {
     #[Modelable]
     public int $projectId;
