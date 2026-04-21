@@ -31,9 +31,14 @@
             @endif
 
             <p
-                style="font-style: italic; font-size: 12px"
+                style="
+                    font-style: italic;
+                    font-size: 12px;
+                    margin: 0;
+                    padding: 0;
+                "
             >{{ $position->product_number }}</p>
-            <p style="font-weight: 600">
+            <p style="font-weight: 600; margin: 0; padding: 0">
                 {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>
             <div style="font-size: 12px; line-height: 16px">

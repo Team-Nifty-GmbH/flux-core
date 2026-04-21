@@ -44,7 +44,14 @@
     </div>
     <div style="padding-bottom: 24px">
         @section('positions')
-            <table style="width: 100%; table-layout: auto; font-size: 12px">
+            <table
+                style="
+                    width: 100%;
+                    table-layout: auto;
+                    font-size: 12px;
+                    border-collapse: collapse;
+                "
+            >
                 <thead>
                     @section('positions.header')
                         <tr>
@@ -122,7 +129,7 @@
     </div>
     <div style="padding-bottom: 24px">
         @section('total')
-            <table style="width: 100%">
+            <table style="width: 100%; border-collapse: collapse">
                 <tbody style="break-inside: avoid">
                     <tr>
                         <td
