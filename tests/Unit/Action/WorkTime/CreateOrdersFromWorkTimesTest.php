@@ -37,7 +37,7 @@ beforeEach(function (): void {
 
     $this->product = Product::factory()->create([
         'is_service' => true,
-        'time_unit_enum' => TimeUnitEnum::Hours,
+        'time_unit_enum' => TimeUnitEnum::Hour,
     ]);
 
     $this->workTime = WorkTime::factory()->create([
