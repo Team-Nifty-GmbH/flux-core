@@ -1,2 +1,0 @@
-[    2140ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://flux.team-nifty.com/flux/favicon.svg:0
-[    2243ms] [WARNING] Error while trying to use the following icon from the Manifest: https://flux.team-nifty.com/flux/favicon.svg (Download error or resource isn't a valid image) @ https://flux.team-nifty.com/orders/11390:0
