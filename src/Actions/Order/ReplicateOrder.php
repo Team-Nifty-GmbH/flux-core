@@ -300,9 +300,14 @@ class ReplicateOrder extends FluxAction
                 ];
             }
 
-            // Disallow creation of retoures on split-orders if parent order has an invoice_number
-            if ($parentOrder->orderType->order_type_enum === OrderTypeEnum::SplitOrder
-                && $parentOrder->parent->invoice_number
+            // Disallow creation of retoures if order doesn't have an invoice number
+            // or on split-orders if parent order has an invoice_number
+            if (
+                (
+                    ! $parentOrder->invoice_number
+                    || $parentOrder->orderType->order_type_enum === OrderTypeEnum::SplitOrder
+                    && $parentOrder->parent->invoice_number
+                )
                 && resolve_static(OrderType::class, 'query')
                     ->whereKey($this->getData('order_type_id'))
                     ->where('order_type_enum', OrderTypeEnum::Retoure->value)
@@ -310,7 +315,7 @@ class ReplicateOrder extends FluxAction
             ) {
                 $errors += [
                     'order_type_id' => [
-                        'Unable to create a retoure on given split-order, parent order has an invoice number.',
+                        'Unable to create a retoure on given order.',
                     ],
                 ];
             }
