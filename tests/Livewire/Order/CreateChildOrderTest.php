@@ -15,6 +15,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -119,7 +120,7 @@ test('can render retoure creation', function (): void {
 
 test('can render split order creation', function (): void {
     // Split orders can only be created from non-invoiced orders
-    $this->parentOrder->update(['invoice_date' => null]);
+    $this->parentOrder->update(['invoice_number' => null]);
 
     $component = Livewire::test(CreateChildOrder::class, [
         'orderId' => $this->parentOrder->id,
@@ -135,6 +136,7 @@ test('can render split order creation', function (): void {
 });
 
 test('can save retoure', function (): void {
+    $this->parentOrder->update(['invoice_number' => Str::random()]);
     $orderPosition = $this->parentOrder->orderPositions()->first();
 
     $component = Livewire::test(CreateChildOrder::class, [
@@ -159,7 +161,7 @@ test('can save retoure', function (): void {
 
 test('can save split order', function (): void {
     // Split orders can only be created from non-invoiced orders
-    $this->parentOrder->update(['invoice_date' => null]);
+    $this->parentOrder->update(['invoice_number' => null]);
 
     $orderPosition = $this->parentOrder->orderPositions()->first();
 

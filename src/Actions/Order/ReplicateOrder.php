@@ -278,12 +278,47 @@ class ReplicateOrder extends FluxAction
         }
 
         if ($parentId = $this->getData('parent_id')) {
-            if (resolve_static(Order::class, 'query')
+            $parentOrder = resolve_static(Order::class, 'query')
                 ->whereKey($parentId)
-                ->value('tenant_id') !== $tenantId
-            ) {
+                ->with([
+                    'orderType:id,order_type_enum',
+                ])
+                ->first(['id', 'order_type_id', 'parent_id', 'tenant_id', 'invoice_number']);
+
+            if ($parentOrder->tenant_id !== $tenantId) {
                 $errors += [
                     'parent_id' => ['Parent order not found on given tenant.'],
+                ];
+            }
+
+            $orderType = resolve_static(OrderType::class, 'query')
+                ->whereKey($this->getData('order_type_id'))
+                ->first(['id', 'order_type_enum']);
+
+            // Disallow creation of split-orders if order has an invoice_number
+            if ($orderType->order_type_enum === OrderTypeEnum::SplitOrder
+                && (
+                    $parentOrder->orderType->order_type_enum !== OrderTypeEnum::Order
+                    || $parentOrder->invoice_number
+                )
+            ) {
+                $errors += [
+                    'order_type_id' => ['Unable to create split-order on given parent order.'],
+                ];
+            }
+
+            // Disallow creation of retoures/refunds if order doesn't have an invoice number
+            if (in_array($orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
+                && (
+                    ! in_array(
+                        $parentOrder->orderType->order_type_enum,
+                        [OrderTypeEnum::Order, OrderTypeEnum::SplitOrder]
+                    )
+                    || ! $parentOrder->invoice_number
+                )
+            ) {
+                $errors += [
+                    'order_type_id' => ['Unable to create a retoure or refund on given parent order.'],
                 ];
             }
         }
