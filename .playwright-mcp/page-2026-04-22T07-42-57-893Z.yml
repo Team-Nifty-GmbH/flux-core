@@ -1,0 +1,18 @@
+- main [ref=e5]:
+  - generic [ref=e6]:
+    - img [ref=e9]
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: Email
+        - textbox "Email" [active] [ref=e19]
+      - generic [ref=e21]:
+        - generic [ref=e22]: Password
+        - generic [ref=e24]:
+          - textbox "Password" [ref=e25]
+          - button [ref=e28]:
+            - img [ref=e29] [cursor=pointer]
+      - generic [ref=e32]:
+        - generic [ref=e36] [cursor=pointer]:
+          - checkbox "Remember me" [ref=e38]
+          - generic [ref=e40]: Remember me
+        - generic [ref=e41]: Reset password

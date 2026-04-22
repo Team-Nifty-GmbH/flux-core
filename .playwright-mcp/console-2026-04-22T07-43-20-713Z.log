@@ -1,0 +1,7 @@
+[    2206ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://flux.team-nifty.com/flux/favicon.svg:0
+[    2207ms] [WARNING] Error while trying to use the following icon from the Manifest: https://flux.team-nifty.com/flux/favicon.svg (Download error or resource isn't a valid image) @ https://flux.team-nifty.com/orders/11341:0
+[ 2914492ms] [ERROR] WebSocket connection to 'wss://ws.flux.team-nifty.com/app/659403c0c2805?protocol=7&client=js&version=8.5.0&flash=false' failed: Error during WebSocket handshake: Unexpected response code: 502 @ https://flux.team-nifty.com/flux/assets/app-BgPSter6.js:10
+[ 3022513ms] [ERROR] WebSocket connection to 'wss://ws.flux.team-nifty.com/app/659403c0c2805?protocol=7&client=js&version=8.5.0&flash=false' failed: Error during WebSocket handshake: Unexpected response code: 502 @ https://flux.team-nifty.com/flux/assets/app-BgPSter6.js:10
+[ 3022601ms] [ERROR] WebSocket connection to 'wss://ws.flux.team-nifty.com/app/659403c0c2805?protocol=7&client=js&version=8.5.0&flash=false' failed: Error during WebSocket handshake: Unexpected response code: 502 @ https://flux.team-nifty.com/flux/assets/app-BgPSter6.js:10
+[ 4657502ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://flux.team-nifty.com/flux/favicon.svg:0
+[ 4657513ms] [WARNING] Error while trying to use the following icon from the Manifest: https://flux.team-nifty.com/flux/favicon.svg (Download error or resource isn't a valid image) @ https://flux.team-nifty.com/orders/11341:0
