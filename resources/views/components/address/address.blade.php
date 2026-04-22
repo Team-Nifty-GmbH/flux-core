@@ -388,7 +388,7 @@
                                         sm
                                         icon="plus"
                                         color="emerald"
-                                        wire:click="addTag($promptValue())"
+                                        wire:click="addTag($nuxbe.promptValue())"
                                         wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                                     />
                                 @endcanAction

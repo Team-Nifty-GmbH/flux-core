@@ -336,7 +336,7 @@
                                 <x-button
                                     color="emerald"
                                     :text="__('Install')"
-                                    wire:click="install(key, $promptValue('delete-data'))"
+                                    wire:click="install(key, $nuxbe.promptValue('delete-data'))"
                                 />
                             </div>
                         @endif
@@ -346,7 +346,7 @@
                                 <x-button
                                     color="red"
                                     :text="__('Uninstall')"
-                                    wire:click="uninstall(key, $promptValue('delete-data'))"
+                                    wire:click="uninstall(key, $nuxbe.promptValue('delete-data'))"
                                     wire:flux-confirm.type.error.id.uninstall="{{ __('wire:confirm.uninstall-plugin') }}"
                                 />
                             </div>
