@@ -121,7 +121,11 @@ class CreateDocumentsJob implements ShouldQueue
                             $media = $file->attachToModel($item);
                         }
 
-                        if (! $media && $isDownload) {
+                        if (is_null($media) && $item instanceof HasMedia) {
+                            $media = $item->getMedia($layout)->last();
+                        }
+
+                        if (! $media && $isDownload && $file->pdf) {
                             $previewFiles[] = [
                                 'output' => $file->pdf->output(),
                                 'file_name' => Str::finish($file->getFileName(), '.pdf'),
