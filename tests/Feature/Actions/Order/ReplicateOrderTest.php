@@ -15,6 +15,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Str;
 
 test('copies position discounts when creating retoure', function (): void {
     // Arrange: Create an order with a position that has a discount
@@ -51,6 +52,7 @@ test('copies position discounts when creating retoure', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -125,6 +127,7 @@ test('copies order-level discounts when creating retoure', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -210,6 +213,7 @@ test('preserves implicit discounts when position has zero total but no discount_
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -299,6 +303,7 @@ test('retoure total equals negative of original total', function (): void {
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -395,6 +400,7 @@ test('handles vat rate mix correctly when creating retoure', function (): void {
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -512,6 +518,7 @@ test('preserves discounts when creating split order', function (): void {
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => null,
         'is_locked' => true,
     ]);
 
@@ -671,6 +678,7 @@ test('returned split order makes amount available again for original', function 
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => null,
         'is_locked' => true,
     ]);
 
@@ -711,6 +719,9 @@ test('returned split order makes amount available again for original', function 
         ->execute();
 
     $splitOrder->refresh();
+    $splitOrder
+        ->getSerialNumber('invoice_number')
+        ->save();
     $splitPosition = $splitOrder->orderPositions->first();
 
     // Verify split order has correct origin_position_id and amounts
@@ -840,6 +851,7 @@ test('partially returned split order reduces available amount proportionally', f
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => null,
         'is_locked' => true,
     ]);
 
@@ -880,6 +892,9 @@ test('partially returned split order reduces available amount proportionally', f
         ->execute();
 
     $splitOrder->refresh();
+    $splitOrder
+        ->getSerialNumber('invoice_number')
+        ->save();
     $splitPosition = $splitOrder->orderPositions->first();
 
     // Step 3: Create partial retoure of the split order (return only 3 items)
@@ -999,6 +1014,7 @@ test('direct retoure still reduces available amount to zero', function (): void 
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -1194,6 +1210,7 @@ test('does not set parent_id when creating refund', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
