@@ -719,7 +719,9 @@ test('returned split order makes amount available again for original', function 
         ->execute();
 
     $splitOrder->refresh();
-    $splitOrder->update(['invoice_number' => $splitOrder->getSerialNumber('invoice_number')]);
+    $splitOrder
+        ->getSerialNumber('invoice_number')
+        ->save();
     $splitPosition = $splitOrder->orderPositions->first();
 
     // Verify split order has correct origin_position_id and amounts
@@ -890,7 +892,9 @@ test('partially returned split order reduces available amount proportionally', f
         ->execute();
 
     $splitOrder->refresh();
-    $splitOrder->update(['invoice_number' => $this->getSerialNumber('invoice_number')]);
+    $splitOrder
+        ->getSerialNumber('invoice_number')
+        ->save();
     $splitPosition = $splitOrder->orderPositions->first();
 
     // Step 3: Create partial retoure of the split order (return only 3 items)
