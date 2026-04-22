@@ -138,7 +138,7 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
     };
 });
 
-window.$promptValue = (id) => {
+window.$nuxbe.promptValue = (id) => {
     const el = document.getElementById(id ? id : 'prompt-value');
 
     if (el.type === 'checkbox') {
