@@ -242,9 +242,10 @@ class ReplicateOrder extends FluxAction
         parent::validateData();
 
         $errors = [];
-        $tenantId = resolve_static(Order::class, 'query')
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($this->getData('id'))
-            ->value('tenant_id');
+            ->first(['id', 'contact_id', 'tenant_id']);
+        $tenantId = $order->tenant_id;
         $hasTenants = [
             'contact_id' => Contact::class,
             'address_invoice_id' => Address::class,
@@ -277,7 +278,20 @@ class ReplicateOrder extends FluxAction
             }
         }
 
-        if ($parentId = $this->getData('parent_id')) {
+        $parentId = $this->getData('parent_id');
+        $orderTypeEnum = resolve_static(OrderType::class, 'query')
+            ->whereKey($this->getData('order_type_id'))
+            ->value('order_type_enum');
+
+        if (
+            ! $parentId
+            && $order->contact_id === ($this->getData('contact_id') ?? $order->contact_id)
+            && in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])
+        ) {
+            $parentId = $order->getKey();
+        }
+
+        if ($parentId) {
             $parentOrder = resolve_static(Order::class, 'query')
                 ->whereKey($parentId)
                 ->with([
@@ -291,12 +305,8 @@ class ReplicateOrder extends FluxAction
                 ];
             }
 
-            $orderType = resolve_static(OrderType::class, 'query')
-                ->whereKey($this->getData('order_type_id'))
-                ->first(['id', 'order_type_enum']);
-
             // Disallow creation of split-orders if order has an invoice_number
-            if ($orderType->order_type_enum === OrderTypeEnum::SplitOrder
+            if ($orderTypeEnum === OrderTypeEnum::SplitOrder
                 && (
                     $parentOrder->orderType->order_type_enum !== OrderTypeEnum::Order
                     || $parentOrder->invoice_number
@@ -308,7 +318,7 @@ class ReplicateOrder extends FluxAction
             }
 
             // Disallow creation of retoures/refunds if order doesn't have an invoice number
-            if (in_array($orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
+            if (in_array($orderTypeEnum, [OrderTypeEnum::Retoure, OrderTypeEnum::Refund])
                 && (
                     ! in_array(
                         $parentOrder->orderType->order_type_enum,
