@@ -278,12 +278,40 @@ class ReplicateOrder extends FluxAction
         }
 
         if ($parentId = $this->getData('parent_id')) {
-            if (resolve_static(Order::class, 'query')
+            $parentOrder = resolve_static(Order::class, 'query')
                 ->whereKey($parentId)
-                ->value('tenant_id') !== $tenantId
-            ) {
+                ->first(['id', 'order_type_id', 'parent_id', 'tenant_id', 'invoice_number']);
+
+            if ($parentOrder->tenant_id !== $tenantId) {
                 $errors += [
                     'parent_id' => ['Parent order not found on given tenant.'],
+                ];
+            }
+
+            // Disallow creation of split-orders if parent order has an invoice_number
+            if ($parentOrder->invoice_number
+                && resolve_static(OrderType::class, 'query')
+                    ->whereKey($this->getData('order_type_id'))
+                    ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
+                    ->exists()
+            ) {
+                $errors += [
+                    'order_type_id' => ['Unable to create split-order, order has an invoice number.'],
+                ];
+            }
+
+            // Disallow creation of retoures on split-orders if parent order has an invoice_number
+            if ($parentOrder->orderType->order_type_enum === OrderTypeEnum::SplitOrder
+                && $parentOrder->parent->invoice_number
+                && resolve_static(OrderType::class, 'query')
+                    ->whereKey($this->getData('order_type_id'))
+                    ->where('order_type_enum', OrderTypeEnum::Retoure->value)
+                    ->exists()
+            ) {
+                $errors += [
+                    'order_type_id' => [
+                        'Unable to create a retoure on given split-order, parent order has an invoice number.',
+                    ],
                 ];
             }
         }
