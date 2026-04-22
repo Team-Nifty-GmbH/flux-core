@@ -582,8 +582,10 @@ class OrderPositions extends OrderPositionList
         $this->orderPositionsView = $view;
 
         if ($view === 'table') {
-            $this->loadData();
-            $this->forceRender();
+            $this->loadData(forceRender: true);
+            $this->renderIsland('body');
+            $this->renderIsland('footer');
+            $this->renderIsland('badges');
         } else {
             $this->initialized = true;
         }
