@@ -288,7 +288,7 @@ class ReplicateOrder extends FluxAction
                 ];
             }
 
-            // Disallow creation of split-orders if parent order has an invoice_number
+            // Disallow creation of split-orders if order has an invoice_number
             if ($parentOrder->invoice_number
                 && resolve_static(OrderType::class, 'query')
                     ->whereKey($this->getData('order_type_id'))
