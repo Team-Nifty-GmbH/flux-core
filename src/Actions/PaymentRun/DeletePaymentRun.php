@@ -3,8 +3,10 @@
 namespace FluxErp\Actions\PaymentRun;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Rulesets\PaymentRun\DeletePaymentRunRuleset;
+use FluxErp\States\Order\PaymentState\Open;
 
 class DeletePaymentRun extends FluxAction
 {
@@ -20,9 +22,17 @@ class DeletePaymentRun extends FluxAction
 
     public function performAction(): ?bool
     {
-        return resolve_static(PaymentRun::class, 'query')
+        $paymentRun = resolve_static(PaymentRun::class, 'query')
             ->whereKey($this->data['id'])
-            ->first()
-            ->delete();
+            ->first();
+
+        $paymentRun->orders()
+            ->each(function (Order $order): void {
+                if ($order->payment_state->canTransitionTo(Open::class)) {
+                    $order->payment_state->transitionTo(Open::class);
+                }
+            });
+
+        return $paymentRun->delete();
     }
 }
