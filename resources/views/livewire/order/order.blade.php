@@ -871,7 +871,9 @@
                                                 name="banknotes"
                                                 class="size-4 text-sky-600 dark:text-sky-400"
                                             />
-                                            <span class="text-sky-700 dark:text-sky-300">
+                                            <span
+                                                class="text-sky-700 dark:text-sky-300"
+                                            >
                                                 {{ __($activePaymentRun['payment_run_type_enum'] === \FluxErp\Enums\PaymentRunTypeEnum::MoneyTransfer->value ? 'Money Transfer' : 'Direct Debit') }}
                                             </span>
                                             <x-badge
