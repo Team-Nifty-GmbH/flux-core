@@ -19,6 +19,8 @@ abstract class PaymentState extends EndableState implements HasFrontendFormatter
                     [
                         Open::class,
                         PartialPaid::class,
+                        InOpenPaymentRun::class,
+                        InPayment::class,
                     ],
                     Paid::class,
                 ],
@@ -26,6 +28,8 @@ abstract class PaymentState extends EndableState implements HasFrontendFormatter
                     [
                         Paid::class,
                         PartialPaid::class,
+                        InOpenPaymentRun::class,
+                        InPayment::class,
                     ],
                     Open::class,
                 ],
@@ -33,6 +37,8 @@ abstract class PaymentState extends EndableState implements HasFrontendFormatter
                     [
                         Paid::class,
                         Open::class,
+                        InOpenPaymentRun::class,
+                        InPayment::class,
                     ],
                     PartialPaid::class,
                 ],
@@ -42,23 +48,7 @@ abstract class PaymentState extends EndableState implements HasFrontendFormatter
                 ],
                 [
                     InOpenPaymentRun::class,
-                    Open::class,
-                ],
-                [
-                    InOpenPaymentRun::class,
                     InPayment::class,
-                ],
-                [
-                    InPayment::class,
-                    Open::class,
-                ],
-                [
-                    InPayment::class,
-                    Paid::class,
-                ],
-                [
-                    InPayment::class,
-                    PartialPaid::class,
                 ],
             ]);
     }
