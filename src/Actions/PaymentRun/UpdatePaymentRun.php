@@ -8,6 +8,10 @@ use FluxErp\Models\PaymentRun;
 use FluxErp\Rulesets\PaymentRun\UpdatePaymentRunRuleset;
 use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
+use FluxErp\States\PaymentRun\Discarded;
+use FluxErp\States\PaymentRun\NotSuccessful;
+use FluxErp\States\PaymentRun\Pending;
+use FluxErp\States\PaymentRun\Successful;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdatePaymentRun extends FluxAction
@@ -45,8 +49,8 @@ class UpdatePaymentRun extends FluxAction
     protected function propagateStateToOrders(PaymentRun $paymentRun, string $newState): void
     {
         $targetState = match (true) {
-            in_array($newState, ['pending', 'successful']) => InPayment::class,
-            in_array($newState, ['not_successful', 'discarded']) => Open::class,
+            in_array($newState, [Pending::$name, Successful::$name]) => InPayment::class,
+            in_array($newState, [NotSuccessful::$name, Discarded::$name]) => Open::class,
             default => null,
         };
 
@@ -55,6 +59,7 @@ class UpdatePaymentRun extends FluxAction
         }
 
         $paymentRun->orders()
+            ->select(['orders.id', 'orders.payment_state'])
             ->each(function (Order $order) use ($targetState): void {
                 if ($order->payment_state->canTransitionTo($targetState)) {
                     $order->payment_state->transitionTo($targetState);

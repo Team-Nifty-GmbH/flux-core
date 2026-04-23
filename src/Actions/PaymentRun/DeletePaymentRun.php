@@ -27,6 +27,7 @@ class DeletePaymentRun extends FluxAction
             ->first();
 
         $paymentRun->orders()
+            ->select(['orders.id', 'orders.payment_state'])
             ->each(function (Order $order): void {
                 if ($order->payment_state->canTransitionTo(Open::class)) {
                     $order->payment_state->transitionTo(Open::class);

@@ -94,10 +94,14 @@ class PaymentRunList extends BaseDataTable
         $paymentRun = resolve_static(PaymentRun::class, 'query')
             ->whereKey($this->paymentRunForm->id)
             ->first();
+        $order = resolve_static(Order::class, 'query')
+            ->select(['id', 'payment_state'])
+            ->whereKey($id)
+            ->first();
+
         $paymentRun->orders()->detach($id);
 
-        $order = resolve_static(Order::class, 'query')->whereKey($id)->first();
-        if ($order && $order->payment_state->canTransitionTo(Open::class)) {
+        if ($order?->payment_state->canTransitionTo(Open::class)) {
             $order->payment_state->transitionTo(Open::class);
         }
 
