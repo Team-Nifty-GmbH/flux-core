@@ -140,17 +140,19 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('execute-payment-run')"
                 />
-                <x-button
-                    color="indigo"
-                    :text="__('Execute Payment Run')"
-                    loading="executePaymentRun"
-                    x-on:click="
-                        $wire.executePaymentRun().then((success) => {
-                            if (success)
-                                $tsui.close.modal('execute-payment-run');
-                        })
-                    "
-                />
+                @section('execute-actions')
+                    <x-button
+                        color="indigo"
+                        :text="__('Execute Payment Run')"
+                        loading="executePaymentRun"
+                        x-on:click="
+                            $wire.executePaymentRun().then((success) => {
+                                if (success)
+                                    $tsui.close.modal('execute-payment-run');
+                            })
+                        "
+                    />
+                @show
             </div>
         </div>
     </x-slot:footer>
