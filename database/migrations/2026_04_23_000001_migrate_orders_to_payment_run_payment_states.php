@@ -9,12 +9,18 @@ return new class() extends Migration
     public function up(): void
     {
         // Orders in open payment runs -> in_open_payment_run
-        $openPaymentRunOrderIds = resolve_static(PaymentRun::class, 'query')
+        $openPaymentRunOrderIds = collect();
+
+        resolve_static(PaymentRun::class, 'query')
             ->where('state', 'open')
             ->with('orders:id')
-            ->get()
-            ->flatMap(fn (PaymentRun $pr) => $pr->orders->pluck('id'))
-            ->unique();
+            ->chunkById(100, function ($paymentRuns) use (&$openPaymentRunOrderIds): void {
+                $openPaymentRunOrderIds = $openPaymentRunOrderIds->merge(
+                    $paymentRuns->flatMap(fn (PaymentRun $pr) => $pr->orders->pluck('id'))
+                );
+            });
+
+        $openPaymentRunOrderIds = $openPaymentRunOrderIds->unique();
 
         if ($openPaymentRunOrderIds->isNotEmpty()) {
             resolve_static(Order::class, 'query')
@@ -24,12 +30,18 @@ return new class() extends Migration
         }
 
         // Orders in executed payment runs (pending/successful) -> in_payment
-        $executedPaymentRunOrderIds = resolve_static(PaymentRun::class, 'query')
+        $executedPaymentRunOrderIds = collect();
+
+        resolve_static(PaymentRun::class, 'query')
             ->whereIn('state', ['pending', 'successful'])
             ->with('orders:id')
-            ->get()
-            ->flatMap(fn (PaymentRun $pr) => $pr->orders->pluck('id'))
-            ->unique();
+            ->chunkById(100, function ($paymentRuns) use (&$executedPaymentRunOrderIds): void {
+                $executedPaymentRunOrderIds = $executedPaymentRunOrderIds->merge(
+                    $paymentRuns->flatMap(fn (PaymentRun $pr) => $pr->orders->pluck('id'))
+                );
+            });
+
+        $executedPaymentRunOrderIds = $executedPaymentRunOrderIds->unique();
 
         if ($executedPaymentRunOrderIds->isNotEmpty()) {
             resolve_static(Order::class, 'query')
