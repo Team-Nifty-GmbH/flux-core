@@ -1,0 +1,21 @@
+[    2355ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://flux.team-nifty.com/flux/favicon.svg:0
+[    2515ms] [WARNING] Error while trying to use the following icon from the Manifest: https://flux.team-nifty.com/flux/favicon.svg (Download error or resource isn't a valid image) @ https://flux.team-nifty.com/orders/list:0
+[   21125ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://flux.team-nifty.com/flux/favicon.svg:0
+[   21126ms] [WARNING] Error while trying to use the following icon from the Manifest: https://flux.team-nifty.com/flux/favicon.svg (Download error or resource isn't a valid image) @ https://flux.team-nifty.com/orders/11381:0
+[   25216ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://flux.team-nifty.com/flux/favicon.svg:0
+[   25265ms] [WARNING] Error while trying to use the following icon from the Manifest: https://flux.team-nifty.com/flux/favicon.svg (Download error or resource isn't a valid image) @ https://flux.team-nifty.com/contacts/contacts:0
+[   28550ms] TypeError: L.MarkerClusterGroup is not a constructor
+    at L.markerClusterGroup (https://flux.team-nifty.com/flux/assets/leaflet.markercluster-src-BmwTfPhq.js:1:19615)
+    at Proxy._initMap (https://flux.team-nifty.com/flux/assets/app-BDY1COIw.js:165:210352)
+    at async Proxy.addMarkers (https://flux.team-nifty.com/flux/assets/app-BDY1COIw.js:165:210929)
+[   28758ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://flux.team-nifty.com/flux/favicon.svg:0
+[   28769ms] [WARNING] Error while trying to use the following icon from the Manifest: https://flux.team-nifty.com/flux/favicon.svg (Download error or resource isn't a valid image) @ https://flux.team-nifty.com/contacts/contacts/982:0
+[   28871ms] TypeError: Cannot read properties of undefined (reading 'querySelectorAll')
+    at eval (eval at <anonymous> (https://flux.team-nifty.com/livewire-c4a5e563/livewire.min.js?id=6b3709b1:5:749), <anonymous>:19:26)
+    at https://flux.team-nifty.com/livewire-c4a5e563/livewire.min.js?id=6b3709b1:5:56701
+    at Array.forEach (<anonymous>)
+    at Ir.onRender (https://flux.team-nifty.com/livewire-c4a5e563/livewire.min.js?id=6b3709b1:5:56690)
+    at https://flux.team-nifty.com/livewire-c4a5e563/livewire.min.js?id=6b3709b1:5:52376
+    at Array.forEach (<anonymous>)
+    at Dr.invokeOnRender (https://flux.team-nifty.com/livewire-c4a5e563/livewire.min.js?id=6b3709b1:5:52363)
+    at https://flux.team-nifty.com/livewire-c4a5e563/livewire.min.js?id=6b3709b1:6:1017
