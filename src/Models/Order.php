@@ -22,6 +22,8 @@ use FluxErp\Rules\Numeric;
 use FluxErp\Settings\SubscriptionSettings;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
+use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
+use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
@@ -588,7 +590,13 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function calculatePaymentState(): static
     {
         if (! $this->transactions()->exists()) {
-            if ($this->payment_state->canTransitionTo(Open::class)) {
+            // Don't reset to Open if order is in a payment run state
+            // Payment run lifecycle manages InOpenPaymentRun and InPayment
+            if (
+                ! $this->payment_state instanceof InOpenPaymentRun
+                && ! $this->payment_state instanceof InPayment
+                && $this->payment_state->canTransitionTo(Open::class)
+            ) {
                 $this->payment_state->transitionTo(Open::class);
             }
         } else {
