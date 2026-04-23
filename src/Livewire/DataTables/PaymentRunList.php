@@ -4,7 +4,9 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Livewire\Forms\PaymentRunForm;
 use FluxErp\Models\BankConnection;
+use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
+use FluxErp\States\Order\PaymentState\Open;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -93,6 +95,11 @@ class PaymentRunList extends BaseDataTable
             ->whereKey($this->paymentRunForm->id)
             ->first();
         $paymentRun->orders()->detach($id);
+
+        $order = resolve_static(Order::class, 'query')->whereKey($id)->first();
+        if ($order && $order->payment_state->canTransitionTo(Open::class)) {
+            $order->payment_state->transitionTo(Open::class);
+        }
 
         $this->loadPaymentRun($paymentRun);
 
