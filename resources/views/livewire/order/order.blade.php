@@ -861,6 +861,31 @@
                                         formatters="formatter.payment_state"
                                         available="availableStates.payment_state"
                                     />
+                                    @if($activePaymentRun)
+                                        <a
+                                            href="{{ route('accounting.payment-runs') }}"
+                                            wire:navigate
+                                            class="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 p-2 text-sm dark:border-sky-800 dark:bg-sky-900/30"
+                                        >
+                                            <x-icon
+                                                name="banknotes"
+                                                class="size-4 text-sky-600 dark:text-sky-400"
+                                            />
+                                            <span class="text-sky-700 dark:text-sky-300">
+                                                {{ __($activePaymentRun['payment_run_type_enum'] === \FluxErp\Enums\PaymentRunTypeEnum::MoneyTransfer->value ? 'Money Transfer' : 'Direct Debit') }}
+                                            </span>
+                                            <x-badge
+                                                :text="__(Str::of($activePaymentRun['state'])->replace('_', ' ')->headline()->toString())"
+                                                :color="match($activePaymentRun['state']) {
+                                                    'open' => 'red',
+                                                    'pending' => 'amber',
+                                                    'successful' => 'emerald',
+                                                    default => 'neutral',
+                                                }"
+                                                sm
+                                            />
+                                        </a>
+                                    @endif
                                     <x-flux::state
                                         align="bottom-start"
                                         :label="__('Delivery state')"
