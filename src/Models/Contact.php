@@ -228,14 +228,15 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->belongsTo(Address::class, 'main_address_id');
     }
 
-    public function paymentReminderAddress(): HasOne
-    {
-        return $this->hasOne(Address::class)->where('is_payment_reminder_address', true);
-    }
-
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function paymentReminderAddress(): HasOne
+    {
+        return $this->hasOne(Address::class)
+            ->where('is_payment_reminder_address', true);
     }
 
     public function paymentType(): BelongsTo

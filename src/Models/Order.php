@@ -1235,7 +1235,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
     {
         return $query
-            ->with(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress', 'contact.paymentReminderAddress'])
+            ->with(['contact.paymentReminderAddress'])
             ->where(fn (Builder $query) => $query
                 ->whereHas('contact', fn (Builder $query) => $query
                     ->whereHas('paymentReminderAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
