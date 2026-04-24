@@ -38,6 +38,8 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
+use FluxErp\States\PaymentRun\Discarded;
+use FluxErp\States\PaymentRun\NotSuccessful;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -58,6 +60,9 @@ use Throwable;
 class Order extends Component
 {
     use Actions, CreatesDocuments, WithTabs;
+
+    #[Locked]
+    public ?array $activePaymentRun = null;
 
     public array $availableStates = [];
 
@@ -1022,6 +1027,24 @@ class Order extends Component
         }
 
         $this->hasFinalInvoice = (bool) $order->getFirstMedia('final-invoice');
+
+        $activePaymentRun = $order->paymentRuns()
+            ->select([
+                'payment_runs.id',
+                'payment_runs.state',
+                'payment_runs.payment_run_type_enum',
+                'payment_runs.created_at',
+            ])
+            ->whereNotIn('state', [NotSuccessful::$name, Discarded::$name])
+            ->latest()
+            ->first();
+
+        $this->activePaymentRun = $activePaymentRun ? [
+            'id' => $activePaymentRun->getKey(),
+            'state' => $activePaymentRun->state->getValue(),
+            'payment_run_type_enum' => $activePaymentRun->payment_run_type_enum?->value,
+            'created_at' => $activePaymentRun->created_at?->locale(app()->getLocale())->isoFormat('L'),
+        ] : null;
     }
 
     protected function getAvailableStates(array|string $fieldNames): void
