@@ -54,6 +54,7 @@ use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -1232,20 +1233,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             );
     }
 
-    public function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
-    {
-        return $query
-            ->with(['contact.paymentReminderAddress'])
-            ->where(fn (Builder $query) => $query
-                ->whereHas('contact', fn (Builder $query) => $query
-                    ->whereHas('paymentReminderAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
-                    ->orWhereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
-                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
-                )
-                ->orWhereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
-            );
-    }
-
     public function resolveMailableInvoiceAddress(): ?Address
     {
         return match (true) {
@@ -1364,6 +1351,21 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'is_public' => false,
             'is_repeatable' => false,
         ];
+    }
+
+    #[Scope]
+    protected function whereHasMailablePaymentReminderAddress(Builder $query): void
+    {
+        $query
+            ->with(['contact.paymentReminderAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('contact', fn (Builder $query) => $query
+                    ->whereHas('paymentReminderAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                )
+                ->orWhereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+            );
     }
 
     protected function discountPercentage(): Attribute
