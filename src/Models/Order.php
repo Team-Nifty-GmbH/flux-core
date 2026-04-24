@@ -1352,7 +1352,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
-    public function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
+    protected function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
     {
         return $query
             ->with(['contact.paymentReminderAddress'])
