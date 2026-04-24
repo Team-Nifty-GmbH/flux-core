@@ -1029,7 +1029,12 @@ class Order extends Component
         $this->hasFinalInvoice = (bool) $order->getFirstMedia('final-invoice');
 
         $activePaymentRun = $order->paymentRuns()
-            ->select(['payment_runs.id', 'payment_runs.state', 'payment_runs.payment_run_type_enum', 'payment_runs.created_at'])
+            ->select([
+                'payment_runs.id',
+                'payment_runs.state',
+                'payment_runs.payment_run_type_enum',
+                'payment_runs.created_at',
+            ])
             ->whereNotIn('state', [NotSuccessful::$name, Discarded::$name])
             ->latest()
             ->first();

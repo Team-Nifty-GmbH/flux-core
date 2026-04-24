@@ -23,7 +23,7 @@ class DeletePaymentRun extends FluxAction
     public function performAction(): ?bool
     {
         $paymentRun = resolve_static(PaymentRun::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $paymentRun->orders()

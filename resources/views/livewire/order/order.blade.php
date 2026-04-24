@@ -877,7 +877,7 @@
                                                 {{ __($activePaymentRun['payment_run_type_enum'] === \FluxErp\Enums\PaymentRunTypeEnum::MoneyTransfer->value ? 'Money Transfer' : 'Direct Debit') }}
                                             </span>
                                             <x-badge
-                                                :text="__(Str::of($activePaymentRun['state'])->replace('_', ' ')->headline()->toString())"
+                                                :text="__($activePaymentRun['state'])"
                                                 :color="match($activePaymentRun['state']) {
                                                     'open' => 'red',
                                                     'pending' => 'amber',

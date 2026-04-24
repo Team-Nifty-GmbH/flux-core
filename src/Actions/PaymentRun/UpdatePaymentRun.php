@@ -29,7 +29,7 @@ class UpdatePaymentRun extends FluxAction
     public function performAction(): Model
     {
         $payment = resolve_static(PaymentRun::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $oldState = $payment->state?->getValue();

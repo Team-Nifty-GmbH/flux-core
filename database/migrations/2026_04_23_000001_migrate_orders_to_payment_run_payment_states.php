@@ -1,51 +1,38 @@
 <?php
 
-use FluxErp\Models\Order;
-use FluxErp\Models\PaymentRun;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 return new class() extends Migration
 {
     public function up(): void
     {
         // Orders in open payment runs -> in_open_payment_run
-        $openPaymentRunOrderIds = collect();
+        $openOrderIds = DB::table('order_payment_run')
+            ->join('payment_runs', 'order_payment_run.payment_run_id', '=', 'payment_runs.id')
+            ->where('payment_runs.state', 'open')
+            ->whereNull('payment_runs.deleted_at')
+            ->pluck('order_payment_run.order_id')
+            ->unique();
 
-        resolve_static(PaymentRun::class, 'query')
-            ->where('state', 'open')
-            ->with('orders:id')
-            ->chunkById(100, function ($paymentRuns) use (&$openPaymentRunOrderIds): void {
-                $openPaymentRunOrderIds = $openPaymentRunOrderIds->merge(
-                    $paymentRuns->flatMap(fn (PaymentRun $pr) => $pr->orders->pluck('id'))
-                );
-            });
-
-        $openPaymentRunOrderIds = $openPaymentRunOrderIds->unique();
-
-        if ($openPaymentRunOrderIds->isNotEmpty()) {
-            resolve_static(Order::class, 'query')
-                ->whereIntegerInRaw('id', $openPaymentRunOrderIds)
+        if ($openOrderIds->isNotEmpty()) {
+            DB::table('orders')
+                ->whereIn('id', $openOrderIds)
                 ->where('payment_state', 'open')
                 ->update(['payment_state' => 'in_open_payment_run']);
         }
 
         // Orders in executed payment runs (pending/successful) -> in_payment
-        $executedPaymentRunOrderIds = collect();
+        $executedOrderIds = DB::table('order_payment_run')
+            ->join('payment_runs', 'order_payment_run.payment_run_id', '=', 'payment_runs.id')
+            ->whereIn('payment_runs.state', ['pending', 'successful'])
+            ->whereNull('payment_runs.deleted_at')
+            ->pluck('order_payment_run.order_id')
+            ->unique();
 
-        resolve_static(PaymentRun::class, 'query')
-            ->whereIn('state', ['pending', 'successful'])
-            ->with('orders:id')
-            ->chunkById(100, function ($paymentRuns) use (&$executedPaymentRunOrderIds): void {
-                $executedPaymentRunOrderIds = $executedPaymentRunOrderIds->merge(
-                    $paymentRuns->flatMap(fn (PaymentRun $pr) => $pr->orders->pluck('id'))
-                );
-            });
-
-        $executedPaymentRunOrderIds = $executedPaymentRunOrderIds->unique();
-
-        if ($executedPaymentRunOrderIds->isNotEmpty()) {
-            resolve_static(Order::class, 'query')
-                ->whereIntegerInRaw('id', $executedPaymentRunOrderIds)
+        if ($executedOrderIds->isNotEmpty()) {
+            DB::table('orders')
+                ->whereIn('id', $executedOrderIds)
                 ->where('payment_state', 'open')
                 ->update(['payment_state' => 'in_payment']);
         }
@@ -53,7 +40,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        resolve_static(Order::class, 'query')
+        DB::table('orders')
             ->whereIn('payment_state', ['in_open_payment_run', 'in_payment'])
             ->update(['payment_state' => 'open']);
     }
