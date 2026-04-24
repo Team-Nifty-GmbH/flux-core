@@ -11,7 +11,6 @@ return new class() extends Migration
         $openOrderIds = DB::table('order_payment_run')
             ->join('payment_runs', 'order_payment_run.payment_run_id', '=', 'payment_runs.id')
             ->where('payment_runs.state', 'open')
-            ->whereNull('payment_runs.deleted_at')
             ->pluck('order_payment_run.order_id')
             ->unique();
 
@@ -26,7 +25,6 @@ return new class() extends Migration
         $executedOrderIds = DB::table('order_payment_run')
             ->join('payment_runs', 'order_payment_run.payment_run_id', '=', 'payment_runs.id')
             ->whereIn('payment_runs.state', ['pending', 'successful'])
-            ->whereNull('payment_runs.deleted_at')
             ->pluck('order_payment_run.order_id')
             ->unique();
 
