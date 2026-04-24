@@ -54,7 +54,6 @@ use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -1353,10 +1352,9 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
-    #[Scope]
-    protected function whereHasMailablePaymentReminderAddress(Builder $query): void
+    public function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
     {
-        $query
+        return $query
             ->with(['contact.paymentReminderAddress'])
             ->where(fn (Builder $query) => $query
                 ->whereHas('contact', fn (Builder $query) => $query
