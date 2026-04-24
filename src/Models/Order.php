@@ -1249,6 +1249,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         };
     }
 
+    public function resolveMailablePaymentReminderAddress(): ?Address
+    {
+        $paymentReminderAddress = $this->contact?->paymentReminderAddress;
+
+        if (filled($paymentReminderAddress?->email_primary)) {
+            return $paymentReminderAddress;
+        }
+
+        return $this->resolveMailableInvoiceAddress();
+    }
+
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
@@ -1347,6 +1358,20 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'is_public' => false,
             'is_repeatable' => false,
         ];
+    }
+
+    protected function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
+    {
+        return $query
+            ->with(['contact.paymentReminderAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('contact', fn (Builder $query) => $query
+                    ->whereHas('paymentReminderAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                )
+                ->orWhereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+            );
     }
 
     protected function discountPercentage(): Attribute

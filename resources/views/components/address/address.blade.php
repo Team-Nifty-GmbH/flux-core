@@ -456,6 +456,11 @@
                     "
                     wire:model="address.is_invoice_address"
                 />
+                <x-toggle
+                    :label="__('Payment Reminder Address')"
+                    x-bind:disabled="!$wire.edit"
+                    wire:model="address.is_payment_reminder_address"
+                />
             @show
         </div>
         <h3

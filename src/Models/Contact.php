@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
@@ -230,6 +231,12 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function paymentReminderAddress(): HasOne
+    {
+        return $this->hasOne(Address::class)
+            ->where('is_payment_reminder_address', true);
     }
 
     public function paymentType(): BelongsTo
