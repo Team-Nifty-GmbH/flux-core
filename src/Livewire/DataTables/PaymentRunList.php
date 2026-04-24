@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Livewire\Forms\PaymentRunForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Order;
@@ -102,7 +103,12 @@ class PaymentRunList extends BaseDataTable
         $paymentRun->orders()->detach($id);
 
         if ($order?->payment_state->canTransitionTo(Open::class)) {
-            $order->payment_state->transitionTo(Open::class);
+            UpdateOrder::make([
+                'id' => $order->getKey(),
+                'payment_state' => Open::$name,
+            ])
+                ->validate()
+                ->execute();
         }
 
         $this->loadPaymentRun($paymentRun);
