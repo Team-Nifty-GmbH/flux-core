@@ -264,6 +264,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ];
             }
 
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_payment_reminder_address'))
+                && $address->is_payment_reminder_address
+            ) {
+                resolve_static(Address::class, 'query')
+                    ->whereKeyNot($address->getKey())
+                    ->where('contact_id', $address->contact_id)
+                    ->where('is_payment_reminder_address', true)
+                    ->update(['is_payment_reminder_address' => false]);
+            }
+
             if ($contactUpdates) {
                 resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
@@ -351,6 +361,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',
+            'is_payment_reminder_address' => 'boolean',
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];

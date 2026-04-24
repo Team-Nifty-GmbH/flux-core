@@ -81,7 +81,7 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
             ->where('is_locked', true)
             ->where('balance', '!=', 0)
             ->whereDate('payment_reminder_next_date', '<=', now()->toDateString())
-            ->whereHasMailableInvoiceAddress()
+            ->whereHasMailablePaymentReminderAddress()
             ->cursor()
             ->each(function (Order $order): void {
                 if ($order->orderType->order_type_enum->isPurchase()
@@ -146,7 +146,7 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 
         $invoicePdf = $order->invoice();
 
-        $address = $order->resolveMailableInvoiceAddress();
+        $address = $order->resolveMailablePaymentReminderAddress();
 
         $to = $paymentReminderText->mail_to ?? [];
 

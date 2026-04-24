@@ -1232,6 +1232,20 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             );
     }
 
+    public function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
+    {
+        return $query
+            ->with(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress', 'contact.paymentReminderAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('contact', fn (Builder $query) => $query
+                    ->whereHas('paymentReminderAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                )
+                ->orWhereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+            );
+    }
+
     public function resolveMailableInvoiceAddress(): ?Address
     {
         return match (true) {
@@ -1239,6 +1253,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             filled($this->contact?->invoiceAddress?->email_primary) => $this->contact->invoiceAddress,
             default => $this->contact?->mainAddress,
         };
+    }
+
+    public function resolveMailablePaymentReminderAddress(): ?Address
+    {
+        $paymentReminderAddress = $this->contact?->paymentReminderAddress;
+
+        if (filled($paymentReminderAddress?->email_primary)) {
+            return $paymentReminderAddress;
+        }
+
+        return $this->resolveMailableInvoiceAddress();
     }
 
     public function tasks(): HasManyThrough
