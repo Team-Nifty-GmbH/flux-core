@@ -16,7 +16,7 @@ return new class() extends Migration
 
         if ($openOrderIds->isNotEmpty()) {
             DB::table('orders')
-                ->whereIn('id', $openOrderIds)
+                ->whereIntegerInRaw('id', $openOrderIds)
                 ->where('payment_state', 'open')
                 ->update(['payment_state' => 'in_open_payment_run']);
         }
@@ -30,7 +30,7 @@ return new class() extends Migration
 
         if ($executedOrderIds->isNotEmpty()) {
             DB::table('orders')
-                ->whereIn('id', $executedOrderIds)
+                ->whereIntegerInRaw('id', $executedOrderIds)
                 ->where('payment_state', 'open')
                 ->update(['payment_state' => 'in_payment']);
         }
