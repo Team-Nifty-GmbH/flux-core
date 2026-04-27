@@ -19,7 +19,8 @@ beforeEach(function (): void {
 });
 
 test('renders successfully', function (): void {
-    Livewire::test(UpcomingBirthdaysWidget::class)
+    Livewire::withoutLazyLoading()
+        ->test(UpcomingBirthdaysWidget::class)
         ->assertOk();
 });
 
@@ -43,7 +44,8 @@ test('shows employees with birthdays within next 30 days', function (): void {
         'valid_until' => null,
     ]);
 
-    $component = Livewire::test(UpcomingBirthdaysWidget::class)
+    $component = Livewire::withoutLazyLoading()
+        ->test(UpcomingBirthdaysWidget::class)
         ->assertOk();
 
     $birthdays = $component->get('birthdays');
@@ -73,7 +75,8 @@ test('excludes employees with birthdays beyond 30 days', function (): void {
         'valid_until' => null,
     ]);
 
-    $component = Livewire::test(UpcomingBirthdaysWidget::class)
+    $component = Livewire::withoutLazyLoading()
+        ->test(UpcomingBirthdaysWidget::class)
         ->assertOk();
 
     expect($component->get('birthdays'))->toBeEmpty();

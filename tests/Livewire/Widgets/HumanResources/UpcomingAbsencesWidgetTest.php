@@ -51,7 +51,8 @@ beforeEach(function (): void {
 });
 
 test('renders successfully', function (): void {
-    Livewire::test(UpcomingAbsencesWidget::class)
+    Livewire::withoutLazyLoading()
+        ->test(UpcomingAbsencesWidget::class)
         ->assertOk();
 });
 
@@ -67,7 +68,8 @@ test('shows upcoming approved absence within 14 days', function (): void {
         'work_days_affected' => 3,
     ]);
 
-    $component = Livewire::test(UpcomingAbsencesWidget::class)
+    $component = Livewire::withoutLazyLoading()
+        ->test(UpcomingAbsencesWidget::class)
         ->assertOk();
 
     $absences = $component->get('absences');
@@ -90,7 +92,8 @@ test('excludes absences beyond 14 days', function (): void {
         'work_days_affected' => 3,
     ]);
 
-    $component = Livewire::test(UpcomingAbsencesWidget::class)
+    $component = Livewire::withoutLazyLoading()
+        ->test(UpcomingAbsencesWidget::class)
         ->assertOk();
 
     expect($component->get('absences'))->toBeEmpty();
