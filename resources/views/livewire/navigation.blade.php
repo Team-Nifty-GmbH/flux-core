@@ -253,7 +253,7 @@
                                 class="w-full"
                                 icon="plus"
                                 :text="__('Add')"
-                                wire:click="addFavorite(window.location.pathname + window.location.search, $promptValue())"
+                                wire:click="addFavorite(window.location.pathname + window.location.search, $nuxbe.promptValue())"
                                 wire:flux-confirm.prompt="{{  __('New Favorite') }}||{{  __('Cancel') }}|{{  __('Save') }}"
                             />
                         </div>

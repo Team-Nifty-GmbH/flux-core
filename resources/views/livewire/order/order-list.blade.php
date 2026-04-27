@@ -182,6 +182,7 @@
                 :options="resolve_static(\FluxErp\Models\OrderType::class, 'query')
                     ->where('order_type_enum', \FluxErp\Enums\OrderTypeEnum::CollectiveOrder->value)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name'])
                     ->toArray()
                 "
@@ -194,6 +195,7 @@
                 :options="resolve_static(\FluxErp\Models\OrderType::class, 'query')
                     ->where('order_type_enum', \FluxErp\Enums\OrderTypeEnum::SplitOrder->value)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name'])
                     ->toArray()
                 "

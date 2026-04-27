@@ -140,6 +140,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('execute-payment-run')"
                 />
+                @stack('payment-run-execute-actions')
                 <x-button
                     color="indigo"
                     :text="__('Execute Payment Run')"

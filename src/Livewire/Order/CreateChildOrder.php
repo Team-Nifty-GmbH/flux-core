@@ -81,6 +81,7 @@ class CreateChildOrder extends Component
                 $this->type === OrderTypeEnum::SplitOrder->value,
                 fn (Builder $query) => $query->where('is_hidden', false)
             )
+            ->ordered()
             ->get(['id', 'name'])
             ->toArray();
 

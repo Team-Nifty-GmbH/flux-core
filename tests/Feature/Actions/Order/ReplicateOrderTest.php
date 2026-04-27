@@ -15,10 +15,11 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
+use Illuminate\Support\Str;
 
 test('copies position discounts when creating retoure', function (): void {
     // Arrange: Create an order with a position that has a discount
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -51,6 +52,7 @@ test('copies position discounts when creating retoure', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -92,7 +94,7 @@ test('copies position discounts when creating retoure', function (): void {
 
 test('copies order-level discounts when creating retoure', function (): void {
     // Arrange: Create an order with an order-level discount
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -125,6 +127,7 @@ test('copies order-level discounts when creating retoure', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -176,7 +179,7 @@ test('preserves implicit discounts when position has zero total but no discount_
     // Arrange: Create an order with a position that has 100% discount applied directly
     // This simulates positions where the discount was set via total_net_price = 0
     // without setting discount_percentage (legacy data scenario)
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -210,6 +213,7 @@ test('preserves implicit discounts when position has zero total but no discount_
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -256,7 +260,7 @@ test('preserves implicit discounts when position has zero total but no discount_
 
 test('retoure total equals negative of original total', function (): void {
     // A4: Simplified - just verify total sums to zero
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -299,6 +303,7 @@ test('retoure total equals negative of original total', function (): void {
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -346,7 +351,7 @@ test('retoure total equals negative of original total', function (): void {
 
 test('handles vat rate mix correctly when creating retoure', function (): void {
     // A5: Retoure von Order mit MwSt-Mix (7%/19%)
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -395,6 +400,7 @@ test('handles vat rate mix correctly when creating retoure', function (): void {
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -472,7 +478,7 @@ test('handles vat rate mix correctly when creating retoure', function (): void {
 
 test('preserves discounts when creating split order', function (): void {
     // B3: Teilauftrag mit Rabatten
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -512,6 +518,7 @@ test('preserves discounts when creating split order', function (): void {
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => null,
         'is_locked' => true,
     ]);
 
@@ -564,7 +571,7 @@ test('preserves discounts when creating split order', function (): void {
 
 test('calculates order with 100 percent position discount correctly', function (): void {
     // C1: Order mit 100% Positions-Rabatt
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -625,7 +632,7 @@ test('calculates order with 100 percent position discount correctly', function (
 
 test('returned split order makes amount available again for original', function (): void {
     // Scenario: Original (10) → Split Order (5) → Retoure of Split (5) = 10 available again
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -671,6 +678,7 @@ test('returned split order makes amount available again for original', function 
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => null,
         'is_locked' => true,
     ]);
 
@@ -711,6 +719,9 @@ test('returned split order makes amount available again for original', function 
         ->execute();
 
     $splitOrder->refresh();
+    $splitOrder
+        ->getSerialNumber('invoice_number')
+        ->save();
     $splitPosition = $splitOrder->orderPositions->first();
 
     // Verify split order has correct origin_position_id and amounts
@@ -794,7 +805,7 @@ test('returned split order makes amount available again for original', function 
 
 test('partially returned split order reduces available amount proportionally', function (): void {
     // Scenario: Original (10) → Split Order (5) → Partial Retoure (3) = 8 available
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -840,6 +851,7 @@ test('partially returned split order reduces available amount proportionally', f
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => null,
         'is_locked' => true,
     ]);
 
@@ -880,6 +892,9 @@ test('partially returned split order reduces available amount proportionally', f
         ->execute();
 
     $splitOrder->refresh();
+    $splitOrder
+        ->getSerialNumber('invoice_number')
+        ->save();
     $splitPosition = $splitOrder->orderPositions->first();
 
     // Step 3: Create partial retoure of the split order (return only 3 items)
@@ -958,7 +973,7 @@ test('partially returned split order reduces available amount proportionally', f
 
 test('direct retoure still reduces available amount to zero', function (): void {
     // Scenario: Original (10) → Direct Retoure (10) = 0 available
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -999,6 +1014,7 @@ test('direct retoure still reduces available amount to zero', function (): void 
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
         'shipping_costs_net_price' => 0,
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -1099,7 +1115,7 @@ test('direct retoure still reduces available amount to zero', function (): void 
 
 test('calculates order lock recalculation correctly', function (): void {
     // C3: Order Lock → Recalculation
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -1164,7 +1180,7 @@ test('calculates order lock recalculation correctly', function (): void {
 });
 
 test('does not set parent_id when creating refund', function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
 
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -1194,6 +1210,7 @@ test('does not set parent_id when creating refund', function (): void {
         'payment_type_id' => $paymentType->getKey(),
         'price_list_id' => $priceList->getKey(),
         'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => Str::random(),
         'is_locked' => true,
     ]);
 
@@ -1222,7 +1239,7 @@ test('does not set parent_id when creating refund', function (): void {
 });
 
 test('replicate order preserves free text block parent-child structure', function (): void {
-    $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create(['has_delivery_lock' => false, 'credit_line' => null]);
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
         'is_main_address' => true,

@@ -65,7 +65,7 @@ class PaymentReminder extends OrderList
         $baseQuery = $this->getSelectedModelsQuery();
 
         $ordersWithEmail = (clone $baseQuery)
-            ->whereHasMailableInvoiceAddress()
+            ->whereHasMailablePaymentReminderAddress()
             ->get();
 
         $skippedCount = (clone $baseQuery)->count() - $ordersWithEmail->count();
@@ -210,6 +210,6 @@ class PaymentReminder extends OrderList
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        return array_filter(Arr::wrap($item->order->resolveMailableInvoiceAddress()?->email_primary));
+        return array_filter(Arr::wrap($item->order->resolveMailablePaymentReminderAddress()?->email_primary));
     }
 }

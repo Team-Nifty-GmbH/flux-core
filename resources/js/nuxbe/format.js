@@ -36,10 +36,10 @@ function getLocale() {
 
 function getCurrencyCode() {
     return (
+        document.body?.dataset?.currencyCode ||
         document
             .querySelector('meta[name="currency-code"]')
             ?.getAttribute('content') ||
-        document.body?.dataset?.currencyCode ||
         'EUR'
     );
 }

@@ -194,7 +194,7 @@
                     spinner
                     :text="__('Send test mail')"
                     wire:flux-confirm.prompt="{{  __('Send test mail to') }}||{{  __('Cancel') }}|{{  __('Send') }}"
-                    wire:click="sendTestMail($promptValue())"
+                    wire:click="sendTestMail($nuxbe.promptValue())"
                 />
             </x-slot>
         </x-card>

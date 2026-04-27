@@ -163,11 +163,11 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
                 'method' => 'show',
                 'params' => [
                     'authenticatable_type' => data_get($data, 'authenticatable_type'),
-                    'authenticatable_id' => data_get($data, 'authenticatable_id'),
+                    'authenticatable_ids' => data_get($data, 'authenticatable_ids'),
                     'name' => data_get($data, 'label'),
                 ],
             ],
-            $this->optionData
+            array_values($this->optionData)
         );
     }
 
@@ -175,14 +175,14 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
     public function show(array $params): void
     {
         $authenticatableType = data_get($params, 'authenticatable_type');
-        $authenticatableId = data_get($params, 'authenticatable_id');
+        $authenticatableIds = data_get($params, 'authenticatable_ids');
         $name = data_get($params, 'name');
 
         SessionFilter::make(
             Livewire::new(resolve_static(TicketList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('authenticatable_type', $authenticatableType)
-                ->where('authenticatable_id', $authenticatableId)
+                ->whereIntegerInRaw('authenticatable_id', $authenticatableIds)
                 ->whereNotIn('state', $this->getEndStates()),
             __('Tickets by :customer', ['customer' => $name]),
         )

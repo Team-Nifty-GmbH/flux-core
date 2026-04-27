@@ -116,9 +116,7 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
     let message = directive.expression.replaceAll('\\n', '\n').split('|');
     let title = message.shift();
     let description =
-        '<div>' +
-        message[0] +
-        '</div>' +
+        (message[0] ? '<div>' + message[0] + '</div>' : '') +
         (promptAppend ? '<div>' + promptAppend + '</div>' : '');
     let cancelLabel = message[1] ?? 'Cancel';
     let confirmLabel = message[2] ?? 'Confirm';
@@ -137,13 +135,3 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
             .send();
     };
 });
-
-window.$promptValue = (id) => {
-    const el = document.getElementById(id ? id : 'prompt-value');
-
-    if (el.type === 'checkbox') {
-        return el.checked;
-    }
-
-    return el.value;
-};

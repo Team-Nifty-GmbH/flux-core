@@ -9,6 +9,7 @@ use FluxErp\Livewire\DataTables\IndustryList;
 use FluxErp\Livewire\Forms\IndustryForm;
 use FluxErp\Models\Industry;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -96,6 +97,31 @@ class Industries extends IndustryList
 
         $this->loadData();
 
+        return true;
+    }
+
+    public function sortRows(int|string $recordId, int $newPosition): void
+    {
+        try {
+            UpdateIndustry::make([
+                'id' => $recordId,
+                'order_column' => max(1, $newPosition + 1),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return parent::getBuilder($builder)->ordered();
+    }
+
+    protected function isSortable(): bool
+    {
         return true;
     }
 }

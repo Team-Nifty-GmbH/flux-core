@@ -6,6 +6,8 @@ class CreateOrdersFromWorkTimesForm extends FluxForm
 {
     public bool $add_non_billable_work_times = true;
 
+    public ?int $order_id = null;
+
     public ?int $order_type_id = null;
 
     public ?int $product_id = null;

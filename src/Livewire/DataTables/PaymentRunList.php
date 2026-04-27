@@ -2,9 +2,12 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Livewire\Forms\PaymentRunForm;
 use FluxErp\Models\BankConnection;
+use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
+use FluxErp\States\Order\PaymentState\Open;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -92,7 +95,21 @@ class PaymentRunList extends BaseDataTable
         $paymentRun = resolve_static(PaymentRun::class, 'query')
             ->whereKey($this->paymentRunForm->id)
             ->first();
+        $order = resolve_static(Order::class, 'query')
+            ->select(['id', 'payment_state'])
+            ->whereKey($id)
+            ->first();
+
         $paymentRun->orders()->detach($id);
+
+        if ($order?->payment_state->canTransitionTo(Open::class)) {
+            UpdateOrder::make([
+                'id' => $order->getKey(),
+                'payment_state' => Open::$name,
+            ])
+                ->validate()
+                ->execute();
+        }
 
         $this->loadPaymentRun($paymentRun);
 

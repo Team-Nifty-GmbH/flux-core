@@ -9,14 +9,10 @@
             <form
                 class="flex flex-col gap-4"
                 x-on:submit.prevent="
-                    $wire
-                        .quickAdd()
-                        .then(
-                            () =>
-                                (Alpine.$data(
-                                    $el.querySelector('[x-data]'),
-                                ).show = true),
-                        )
+                    $wire.quickAdd().then(() => {
+                        Alpine.$data($el.querySelector('[x-data]')).show = true;
+                        $wire.$refresh();
+                    })
                 "
             >
                 <div class="flex flex-col gap-4">

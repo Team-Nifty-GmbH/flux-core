@@ -497,6 +497,22 @@ test('augmentItemArray injects order currency for money formatter', function ():
         ->and($itemArray['currency']['iso'])->toBe('USD');
 });
 
+test('money columns are formatted with order currency not default EUR', function (): void {
+    $usdCurrency = Currency::factory()->create(['iso' => 'USD', 'name' => 'US Dollar']);
+    $this->order->update(['currency_id' => $usdCurrency->getKey()]);
+    $this->order->orderPositions()->update(['unit_net_price' => 10, 'total_net_price' => 10]);
+    $this->orderForm->fill($this->order->fresh(['currency']));
+
+    $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm]);
+    $data = $component->instance()->getDataForTesting();
+
+    $unitNetPrice = $data['data'][0]['unit_net_price'];
+    $formatted = is_array($unitNetPrice) ? $unitNetPrice['display'] : $unitNetPrice;
+
+    expect($formatted)->not->toContain('€')
+        ->and($formatted)->toContain('$');
+});
+
 test('listeners configuration', function (): void {
     $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm]);
     $listeners = $component->instance()->getListeners();

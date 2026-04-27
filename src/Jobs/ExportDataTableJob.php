@@ -26,6 +26,18 @@ class ExportDataTableJob implements ShouldQueue
 
     public function handle(): void
     {
+        $user = morph_to($this->userMorph);
+
+        activity()
+            ->causedBy($user)
+            ->withProperties([
+                'model' => $this->modelClass,
+                'columns' => $this->columns,
+            ])
+            ->useLog('export')
+            ->event('export_started')
+            ->log(morph_alias($this->modelClass) . ' export started');
+
         $query = invade(unserialize($this->component))->buildSearch();
 
         $fileName = morph_alias($this->modelClass) . '_' . now()->toDateTimeLocalString('minute') . '.xlsx';
@@ -43,7 +55,6 @@ class ExportDataTableJob implements ShouldQueue
             $filePath
         );
 
-        $user = morph_to($this->userMorph);
         $user->notify(ExportReady::make($filePath, morph_alias($this->modelClass)));
     }
 }

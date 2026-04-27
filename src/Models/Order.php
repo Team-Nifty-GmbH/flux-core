@@ -22,12 +22,15 @@ use FluxErp\Rules\Numeric;
 use FluxErp\Settings\SubscriptionSettings;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
+use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
+use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
+use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Communicatable;
@@ -70,7 +73,6 @@ use Illuminate\Support\Number;
 use Illuminate\Support\Traits\Conditionable;
 use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
@@ -588,7 +590,13 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function calculatePaymentState(): static
     {
         if (! $this->transactions()->exists()) {
-            if ($this->payment_state->canTransitionTo(Open::class)) {
+            // Don't reset to Open if order is in a payment run state
+            // Payment run lifecycle manages InOpenPaymentRun and InPayment
+            if (
+                ! $this->payment_state instanceof InOpenPaymentRun
+                && ! $this->payment_state instanceof InPayment
+                && $this->payment_state->canTransitionTo(Open::class)
+            ) {
                 $this->payment_state->transitionTo(Open::class);
             }
         } else {
@@ -1241,6 +1249,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         };
     }
 
+    public function resolveMailablePaymentReminderAddress(): ?Address
+    {
+        $paymentReminderAddress = $this->contact?->paymentReminderAddress;
+
+        if (filled($paymentReminderAddress?->email_primary)) {
+            return $paymentReminderAddress;
+        }
+
+        return $this->resolveMailableInvoiceAddress();
+    }
+
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
@@ -1339,6 +1358,20 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'is_public' => false,
             'is_repeatable' => false,
         ];
+    }
+
+    protected function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
+    {
+        return $query
+            ->with(['contact.paymentReminderAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('contact', fn (Builder $query) => $query
+                    ->whereHas('paymentReminderAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                )
+                ->orWhereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+            );
     }
 
     protected function discountPercentage(): Attribute

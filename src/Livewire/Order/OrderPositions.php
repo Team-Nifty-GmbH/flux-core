@@ -370,7 +370,7 @@ class OrderPositions extends OrderPositionList
 
     public function getBuilder(Builder $builder): Builder
     {
-        return $builder->where('order_id', $this->order->id)->reorder('slug_position');
+        return $builder->where('order_id', $this->order->id)->with('currency')->reorder('slug_position');
     }
 
     public function getFormatters(): array
@@ -579,8 +579,16 @@ class OrderPositions extends OrderPositionList
             $this->data = [];
         }
 
-        $this->initialized = $view !== 'table';
         $this->orderPositionsView = $view;
+
+        if ($view === 'table') {
+            $this->loadData(forceRender: true);
+            $this->renderIsland('body');
+            $this->renderIsland('footer');
+            $this->renderIsland('badges');
+        } else {
+            $this->initialized = true;
+        }
 
         $this->cacheState();
     }

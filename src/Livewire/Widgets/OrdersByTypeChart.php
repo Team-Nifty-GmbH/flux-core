@@ -45,6 +45,7 @@ class OrdersByTypeChart extends LineChart implements HasWidgetOptions
     {
         $orderTypes = resolve_static(OrderType::class, 'query')
             ->where('is_active', true)
+            ->ordered()
             ->get([
                 'id',
                 'name',

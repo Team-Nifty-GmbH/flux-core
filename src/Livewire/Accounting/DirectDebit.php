@@ -6,7 +6,7 @@ use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList;
 use FluxErp\Models\OrderType;
-use FluxErp\States\Order\PaymentState\Paid;
+use FluxErp\States\Order\PaymentState\Open;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -70,16 +70,8 @@ class DirectDebit extends OrderList
             ->pluck('id');
 
         return $builder->whereRelation('paymentType', 'is_direct_debit', true)
-            ->where(function (Builder $query): void {
-                $query
-                    ->whereHas(
-                        'paymentRuns',
-                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
-                    )
-                    ->orWhereDoesntHave('paymentRuns');
-            })
+            ->whereState('payment_state', Open::class)
             ->where('balance', '>', 0)
-            ->whereNotState('payment_state', Paid::class)
             ->whereNotNull('invoice_number')
             ->whereIntegerInRaw('order_type_id', $orderTypes);
     }

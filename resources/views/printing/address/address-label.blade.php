@@ -1,5 +1,5 @@
-<table class="text-2xs w-full" style="page-break-inside: avoid">
-    <tr colspan="100%" class="text-3xs">
+<table style="font-size: 10px; width: 100%; page-break-inside: avoid">
+    <tr colspan="100%" style="font-size: 8px">
         <td>
             @section('tenant_address')
                 {{ $tenant->postal_address_one_line }}
@@ -16,7 +16,14 @@
         </td>
         <td style="text-align: right; vertical-align: top">
             @section('logo')
-                <div class="float-right inline-block max-h-72 text-right">
+                <div
+                    style="
+                        float: right;
+                        display: inline-block;
+                        max-height: 288px;
+                        text-align: right;
+                    "
+                >
                     <img
                         class="logo-small"
                         src="{{ $tenant->logo_small }}"
