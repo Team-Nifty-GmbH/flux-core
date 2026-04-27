@@ -123,6 +123,10 @@ export default function (
                     parent.setIsClickListenerSet(false);
                 };
 
+                const customExtensions = Array.isArray(window.fluxEditorExtensions)
+                    ? window.fluxEditorExtensions
+                    : [];
+
                 _editor = new Editor({
                     element: element,
                     extensions: [
@@ -144,6 +148,7 @@ export default function (
                         Table,
                         MentionConfig(searchModel, element),
                         BladeVariableConfig(),
+                        ...customExtensions,
                     ],
                     timeout: null,
                     content: this.content,
