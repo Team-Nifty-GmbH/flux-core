@@ -7,12 +7,14 @@ use FluxErp\Models\Employee;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class TopOvertimeWidget extends Component
 {
     use Widgetable;
 
+    #[Locked]
     public array $employees = [];
 
     public static function dashboardComponent(): array|string

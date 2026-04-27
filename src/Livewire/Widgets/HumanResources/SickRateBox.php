@@ -7,6 +7,7 @@ use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\EmployeeDay;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Renderless;
 
 class SickRateBox extends ValueBox
 {
@@ -46,8 +47,8 @@ class SickRateBox extends ValueBox
         $end = $this->getEnd();
 
         $currentQuery = resolve_static(EmployeeDay::class, 'query')
-            ->where('is_work_day', true)
-            ->whereBetween('date', [$start, $end]);
+            ->whereBetween('date', [$start, $end])
+            ->where('is_work_day', true);
 
         $totalWorkDays = $currentQuery->clone()->count();
         $sickDaysSum = $currentQuery->clone()->sum('sick_days_used');
@@ -65,8 +66,8 @@ class SickRateBox extends ValueBox
         $previousEnd = $this->getEndPrevious();
 
         $previousQuery = resolve_static(EmployeeDay::class, 'query')
-            ->where('is_work_day', true)
-            ->whereBetween('date', [$previousStart, $previousEnd]);
+            ->whereBetween('date', [$previousStart, $previousEnd])
+            ->where('is_work_day', true);
 
         $previousTotalWorkDays = $previousQuery->clone()->count();
         $previousSickDaysSum = $previousQuery->clone()->sum('sick_days_used');

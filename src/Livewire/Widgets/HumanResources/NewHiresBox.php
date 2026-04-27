@@ -7,6 +7,7 @@ use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Renderless;
 
 class NewHiresBox extends ValueBox
 {
@@ -47,12 +48,7 @@ class NewHiresBox extends ValueBox
             ->whereBetween('employment_date', [$start, $end])
             ->count();
 
-        $departures = resolve_static(Employee::class, 'query')
-            ->whereBetween('termination_date', [$start, $end])
-            ->count();
-
         $this->sum = Number::format($newHires);
-        $this->subValue = __(':count departures', ['count' => $departures]);
 
         $previousStart = $this->getStartPrevious();
         $previousEnd = $this->getEndPrevious();

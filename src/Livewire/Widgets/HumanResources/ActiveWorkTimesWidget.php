@@ -44,7 +44,7 @@ class ActiveWorkTimesWidget extends ValueList
             ->where('is_daily_work_time', true)
             ->where('is_locked', false)
             ->where('is_pause', false)
-            ->with('user:id,name')
+            ->with(['user:id,name', 'employee:id,name'])
             ->get();
 
         $usersWithPause = resolve_static(WorkTime::class, 'query')
@@ -69,14 +69,15 @@ class ActiveWorkTimesWidget extends ValueList
                               <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                            </span>'
                     )
-                    . '<div>' . $item->user?->name . '</div>
+                    . '<div>' . ($item->user?->name ?? $item->employee?->name) . '</div>
                 </div>',
             'value' => $item->started_at
                 ->locale(app()->getLocale())
                 ->timezone(auth()->user()?->timezone ?? config('app.timezone'))
                 ->isoFormat('L LT'),
             'growthRate' => null,
-        ])->toArray();
+        ])
+            ->toArray();
     }
 
     protected function getListeners(): array

@@ -33,17 +33,16 @@ class AbsencesTodayBox extends ValueBox
 
     public function calculateSum(): void
     {
-        $today = now()->toDateString();
+        $today = today();
 
         $absentCount = resolve_static(AbsenceRequest::class, 'query')
             ->where('state', AbsenceRequestStateEnum::Approved)
-            ->where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
+            ->whereValueBetween($today, ['start_date', 'end_date'])
             ->distinct('employee_id')
             ->count('employee_id');
 
         $totalActive = resolve_static(Employee::class, 'query')
-            ->employed(now())
+            ->employed($today)
             ->count();
 
         $this->sum = Number::format($absentCount);

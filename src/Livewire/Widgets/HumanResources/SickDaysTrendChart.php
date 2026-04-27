@@ -57,7 +57,8 @@ class SickDaysTrendChart extends LineChart
         $endDate = $this->getEnd();
 
         $employeeDayQuery = resolve_static(EmployeeDay::class, 'query')
-            ->whereBetween('date', [$startDate, $endDate]);
+            ->whereBetween('date', [$startDate, $endDate])
+            ->where('is_work_day', true);
 
         $sickData = Line::make($employeeDayQuery)
             ->setDateColumn('date')

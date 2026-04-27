@@ -62,7 +62,7 @@ class AbsenceTypeDistributionChart extends CircleChart
         foreach ($absenceRequests as $absenceRequest) {
             $absenceTypeId = $absenceRequest->absence_type_id;
 
-            if (! isset($absenceByType[$absenceTypeId])) {
+            if (! array_key_exists($absenceTypeId, $absenceByType)) {
                 $absenceByType[$absenceTypeId] = [
                     'name' => $absenceRequest->absenceType->name,
                     'color' => $absenceRequest->absenceType->color ?? ChartColorEnum::Slate,
@@ -82,7 +82,7 @@ class AbsenceTypeDistributionChart extends CircleChart
         $colors = [];
 
         foreach ($absenceByType as $typeData) {
-            if (bccomp($typeData['days'], 0, 2) > 0) {
+            if (bccomp($typeData['days'], 0, 2) === 1) {
                 $labels[] = $typeData['name'];
                 $series[] = (float) bcround($typeData['days'], 2);
                 $colors[] = $typeData['color'];

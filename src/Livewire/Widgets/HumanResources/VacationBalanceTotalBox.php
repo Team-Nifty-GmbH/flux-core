@@ -32,8 +32,8 @@ class VacationBalanceTotalBox extends ValueBox
     public function calculateSum(): void
     {
         $employees = resolve_static(Employee::class, 'query')
-            ->employed(now())
-            ->select(['id', 'employment_date', 'termination_date', 'is_active', 'vacation_carryover_rule_id'])
+            ->employed(today())
+            ->select(['id', 'vacation_carryover_rule_id', 'employment_date', 'termination_date', 'is_active'])
             ->get();
 
         $totalBalance = '0';

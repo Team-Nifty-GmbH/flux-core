@@ -6,12 +6,17 @@ use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Models\Employee;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+#[Lazy]
 class UpcomingBirthdaysWidget extends Component
 {
     use Widgetable;
 
+    #[Locked]
     public array $birthdays = [];
 
     public static function dashboardComponent(): array|string
@@ -46,7 +51,7 @@ class UpcomingBirthdaysWidget extends Component
 
     public function mount(): void
     {
-        $this->loadBirthdays();
+        $this->loadData();
     }
 
     public function render(): View
@@ -54,38 +59,45 @@ class UpcomingBirthdaysWidget extends Component
         return view('flux::livewire.widgets.human-resources.upcoming-birthdays');
     }
 
-    public function loadBirthdays(): void
+    public function loadData(): void
     {
-        $today = now()->startOfDay();
+        $today = today();
         $endDate = $today->copy()->addDays(30);
 
+        $startMonthDay = $today->format('md');
+        $endMonthDay = $endDate->format('md');
+
         $this->birthdays = resolve_static(Employee::class, 'query')
-            ->employed(now())
+            ->employed($today)
             ->whereNotNull('date_of_birth')
+            ->where(function (Builder $query) use ($startMonthDay, $endMonthDay): void {
+                if ($startMonthDay <= $endMonthDay) {
+                    $query->whereRaw(
+                        "REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?",
+                        [$startMonthDay, $endMonthDay]
+                    );
+                } else {
+                    $query
+                        ->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') >= ?", [$startMonthDay])
+                        ->orWhereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') <= ?", [$endMonthDay]);
+                }
+            })
             ->get(['id', 'name', 'date_of_birth'])
-            ->map(function (Employee $employee) use ($today, $endDate) {
+            ->map(function (Employee $employee) use ($today): array {
                 $birthday = $employee->date_of_birth->copy()->year($today->year);
 
                 if ($birthday->lt($today)) {
                     $birthday->addYear();
                 }
 
-                if ($birthday->gt($endDate)) {
-                    return null;
-                }
-
-                $age = $employee->date_of_birth->diffInYears($birthday);
-
                 return [
                     'name' => $employee->name,
                     'date' => $birthday->locale(app()->getLocale())->isoFormat('D. MMM'),
                     'date_sort' => $birthday->toDateString(),
-                    'age' => $age,
+                    'age' => $employee->date_of_birth->diffInYears($birthday),
                 ];
             })
-            ->filter()
             ->sortBy('date_sort')
-            ->take(10)
             ->values()
             ->toArray();
     }

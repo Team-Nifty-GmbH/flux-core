@@ -65,27 +65,3 @@ test('counts new hires in current month', function (): void {
 
     expect($component->get('sum'))->toBe(Number::format(2));
 });
-
-test('sub value shows departures count', function (): void {
-    $departure = app(Employee::class)->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'user_id' => $this->user->getKey(),
-        'firstname' => 'Leaving',
-        'lastname' => 'Employee',
-        'is_active' => true,
-        'employment_date' => now()->subYear(),
-        'termination_date' => now()->startOfMonth()->addDays(3),
-    ]);
-
-    app(EmployeeWorkTimeModel::class)->create([
-        'employee_id' => $departure->getKey(),
-        'work_time_model_id' => $this->workTimeModel->getKey(),
-        'valid_from' => now()->subYear(),
-        'valid_until' => now()->startOfMonth()->addDays(3),
-    ]);
-
-    $component = Livewire::test(NewHiresBox::class)
-        ->assertOk();
-
-    expect($component->get('subValue'))->toContain('1');
-});

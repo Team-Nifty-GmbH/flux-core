@@ -5,15 +5,18 @@ namespace FluxErp\Livewire\Widgets\HumanResources;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Models\AbsenceRequest;
+use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Employee;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class VacationHeatmapWidget extends Component
 {
     use Widgetable;
 
+    #[Locked]
     public array $weeks = [];
 
     public static function dashboardComponent(): array|string
@@ -48,7 +51,7 @@ class VacationHeatmapWidget extends Component
 
     public function mount(): void
     {
-        $this->loadHeatmap();
+        $this->loadData();
     }
 
     public function render(): View
@@ -56,36 +59,41 @@ class VacationHeatmapWidget extends Component
         return view('flux::livewire.widgets.human-resources.vacation-heatmap');
     }
 
-    public function loadHeatmap(): void
+    public function loadData(): void
     {
-        $today = now()->startOfDay();
+        $today = today();
         $endDate = $today->copy()->addWeeks(6)->endOfWeek();
 
         $totalActive = resolve_static(Employee::class, 'query')
-            ->employed(now())
+            ->employed($today)
             ->count();
 
-        $absences = resolve_static(AbsenceRequest::class, 'query')
-            ->where('state', AbsenceRequestStateEnum::Approved)
-            ->where('end_date', '>=', $today->toDateString())
-            ->where('start_date', '<=', $endDate->toDateString())
-            ->get(['id', 'employee_id', 'start_date', 'end_date']);
+        $vacationTypeIds = resolve_static(AbsenceType::class, 'query')
+            ->where('affects_vacation', true)
+            ->where('is_active', true)
+            ->pluck('id');
 
-        $absentCountByDate = [];
+        $absences = resolve_static(AbsenceRequest::class, 'query')
+            ->whereIntegerInRaw('absence_type_id', $vacationTypeIds)
+            ->where('state', AbsenceRequestStateEnum::Approved)
+            ->where('start_date', '<=', $endDate->toDateString())
+            ->where('end_date', '>=', $today->toDateString())
+            ->get(['absence_type_id', 'employee_id', 'start_date', 'end_date']);
+
+        $absentEmployeesByDate = [];
         foreach ($absences as $absence) {
             $current = $absence->start_date->copy()->max($today);
             $end = $absence->end_date->copy()->min($endDate);
 
             while ($current->lte($end)) {
                 $dateKey = $current->toDateString();
-                $absentCountByDate[$dateKey] = ($absentCountByDate[$dateKey] ?? collect())->push($absence->employee_id);
+                $absentEmployeesByDate[$dateKey] ??= [];
+                $absentEmployeesByDate[$dateKey][$absence->employee_id] = true;
                 $current->addDay();
             }
         }
 
-        foreach ($absentCountByDate as $dateKey => $employeeIds) {
-            $absentCountByDate[$dateKey] = $employeeIds->unique()->count();
-        }
+        $absentCountByDate = array_map('count', $absentEmployeesByDate);
 
         $startOfWeek = $today->copy()->startOfWeek();
         $this->weeks = [];

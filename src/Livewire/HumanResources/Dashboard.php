@@ -15,6 +15,7 @@ use FluxErp\Livewire\Widgets\HumanResources\SickDaysTrendChart;
 use FluxErp\Livewire\Widgets\HumanResources\SickRateBox;
 use FluxErp\Livewire\Widgets\HumanResources\VacationBalanceTotalBox;
 use FluxErp\Livewire\Widgets\HumanResources\WorkTimeComparisonChart;
+use FluxErp\Livewire\Widgets\TeamAbsenceCalendar;
 
 class Dashboard extends BaseDashboard
 {
@@ -30,6 +31,7 @@ class Dashboard extends BaseDashboard
                 Widget::get(VacationBalanceTotalBox::class),
                 Widget::get(SickRateBox::class),
                 Widget::get(NewHiresBox::class),
+                Widget::get(TeamAbsenceCalendar::class),
                 Widget::get(WorkTimeComparisonChart::class),
                 Widget::get(AbsenceTypeDistributionChart::class),
                 Widget::get(SickDaysTrendChart::class),

@@ -3,16 +3,21 @@
 namespace FluxErp\Livewire\Widgets\HumanResources;
 
 use FluxErp\Enums\AbsenceRequestStateEnum;
+use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\HumanResources\Dashboard;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+#[Lazy]
 class UpcomingAbsencesWidget extends Component
 {
     use Widgetable;
 
+    #[Locked]
     public array $absences = [];
 
     public static function dashboardComponent(): array|string
@@ -47,7 +52,7 @@ class UpcomingAbsencesWidget extends Component
 
     public function mount(): void
     {
-        $this->loadAbsences();
+        $this->loadData();
     }
 
     public function render(): View
@@ -55,23 +60,22 @@ class UpcomingAbsencesWidget extends Component
         return view('flux::livewire.widgets.human-resources.upcoming-absences');
     }
 
-    public function loadAbsences(): void
+    public function loadData(): void
     {
-        $today = now()->toDateString();
-        $twoWeeksFromNow = now()->addDays(14)->toDateString();
+        $today = today();
+        $twoWeeksFromNow = $today->copy()->addDays(14);
 
         $this->absences = resolve_static(AbsenceRequest::class, 'query')
             ->where('state', AbsenceRequestStateEnum::Approved)
-            ->where('end_date', '>=', $today)
             ->where('start_date', '<=', $twoWeeksFromNow)
+            ->where('end_date', '>=', $today)
             ->with(['employee:id,name', 'absenceType:id,name,color'])
             ->orderBy('start_date')
-            ->limit(15)
             ->get()
             ->map(fn (AbsenceRequest $absence) => [
                 'employee_name' => $absence->employee?->name,
                 'absence_type' => $absence->absenceType?->name,
-                'color' => $absence->absenceType?->color ?? '#6b7280',
+                'color' => $absence->absenceType?->color ?? ChartColorEnum::Slate,
                 'start_date' => $absence->start_date
                     ->locale(app()->getLocale())
                     ->isoFormat('L'),
