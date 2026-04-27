@@ -123,7 +123,9 @@ export default function (
                     parent.setIsClickListenerSet(false);
                 };
 
-                const customExtensions = Array.isArray(window.fluxEditorExtensions)
+                const customExtensions = Array.isArray(
+                    window.fluxEditorExtensions,
+                )
                     ? window.fluxEditorExtensions
                     : [];
 
