@@ -12,6 +12,7 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -74,6 +75,7 @@ class BankConnections extends BaseContactBankConnectionList
         $this->loadData();
     }
 
+    #[Renderless]
     public function edit(?ContactBankConnection $contactBankConnection = null): void
     {
         $this->contactBankConnection->reset();
@@ -81,9 +83,7 @@ class BankConnections extends BaseContactBankConnectionList
             $this->contactBankConnection->fill($contactBankConnection);
         }
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-contact-bank-connection');
-        JS);
+        $this->modalOpen('edit-contact-bank-connection');
     }
 
     public function save(): bool

@@ -119,6 +119,7 @@ class SepaMandates extends SepaMandateList
         $this->loadData();
     }
 
+    #[Renderless]
     public function edit(?SepaMandate $sepaMandate = null): void
     {
         $this->sepaMandate->reset();
@@ -126,9 +127,7 @@ class SepaMandates extends SepaMandateList
             $this->sepaMandate->fill($sepaMandate);
         }
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-sepa-mandate-modal');
-        JS);
+        $this->modalOpen('edit-sepa-mandate-modal');
     }
 
     public function save(): bool

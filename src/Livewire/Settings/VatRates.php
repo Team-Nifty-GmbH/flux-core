@@ -11,6 +11,7 @@ use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -77,14 +78,13 @@ class VatRates extends VatRateList
         return true;
     }
 
+    #[Renderless]
     public function edit(VatRate $vatRate): void
     {
         $this->vatRate->reset();
         $this->vatRate->fill($vatRate);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-vat-rate-modal');
-        JS);
+        $this->modalOpen('edit-vat-rate-modal');
     }
 
     public function save(): bool
