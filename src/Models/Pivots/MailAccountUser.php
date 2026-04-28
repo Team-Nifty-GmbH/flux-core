@@ -17,6 +17,7 @@ class MailAccountUser extends FluxPivot
         ];
     }
 
+    // Relations
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class);

@@ -10,6 +10,7 @@ class OrderPaymentRun extends FluxPivot
 {
     protected $table = 'order_payment_run';
 
+    // Relations
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

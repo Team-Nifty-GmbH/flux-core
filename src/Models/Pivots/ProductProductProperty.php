@@ -10,6 +10,7 @@ class ProductProductProperty extends FluxPivot
 {
     protected $table = 'product_product_property';
 
+    // Relations
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

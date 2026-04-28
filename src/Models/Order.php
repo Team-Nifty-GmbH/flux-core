@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Exception;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
@@ -16,8 +17,10 @@ use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
+use FluxErp\Models\Pivots\OrderUser;
 use FluxErp\Rules\Numeric;
 use FluxErp\Settings\SubscriptionSettings;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
@@ -99,134 +102,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     protected $with = [
         'currency',
     ];
-
-    public static function aggregateColumns(string $type): array
-    {
-        return match ($type) {
-            'count' => ['id'],
-            'sum', 'avg' => [
-                'total_base_net_price',
-                'total_base_gross_price',
-                'total_base_discounted_net_price',
-                'total_base_discounted_gross_price',
-                'gross_profit',
-                'total_purchase_price',
-                'total_cost',
-                'margin',
-                'total_net_price',
-                'total_gross_price',
-                'balance',
-            ],
-            default => [],
-        };
-    }
-
-    public static function aggregateTypes(): array
-    {
-        return [
-            'avg',
-            'count',
-            'sum',
-        ];
-    }
-
-    public static function getGenericChannelEvents(): array
-    {
-        return array_merge(
-            parent::getGenericChannelEvents(),
-            [
-                'locked',
-            ]
-        );
-    }
-
-    public static function ownerColumns(): array
-    {
-        return [
-            'approval_user_id',
-            'agent_id',
-            'responsible_user_id',
-            'created_by',
-            'updated_by',
-        ];
-    }
-
-    public static function scoutIndexSettings(): ?array
-    {
-        return static::baseScoutIndexSettings() ?? [
-            'filterableAttributes' => [
-                'parent_id',
-                'contact_id',
-                'is_locked',
-            ],
-        ];
-    }
-
-    public static function timeframeColumns(): array
-    {
-        return [
-            'order_date',
-            'invoice_date',
-            'system_delivery_date',
-            'system_delivery_date_end',
-            'customer_delivery_date',
-            'date_of_approval',
-            'created_at',
-            'updated_at',
-        ];
-    }
-
-    public static function fromCalendarEvent(array $event, string $action): UpdateOrder
-    {
-        return UpdateOrder::make([
-            'id' => data_get($event, 'id'),
-            'system_delivery_date' => data_get($event, 'start'),
-            'system_delivery_date_end' => data_get($event, 'end'),
-        ]);
-    }
-
-    public static function toCalendar(): array
-    {
-        $bluePrint = [
-            'resourceEditable' => false,
-            'hasRepeatableEvents' => false,
-            'isPublic' => false,
-            'isShared' => false,
-            'permission' => 'owner',
-            'group' => 'other',
-            'isVirtual' => true,
-            'color' => '#3b82f6',
-        ];
-
-        return [
-            array_merge(
-                $bluePrint,
-                [
-                    'id' => base64_encode(morph_alias(static::class)),
-                    'modelType' => morph_alias(static::class),
-                    'name' => __('Orders'),
-                    'hasNoEvents' => true,
-                    'children' => resolve_static(OrderType::class, 'query')
-                        ->where('is_active', true)
-                        ->get([
-                            'id',
-                            'name',
-                        ])
-                        ->map(fn (OrderType $orderType) => array_merge(
-                            $bluePrint,
-                            [
-                                'id' => base64_encode(morph_alias(static::class) . ':' . $orderType->getKey()),
-                                'modelType' => morph_alias(static::class),
-                                'name' => $orderType->name,
-                                'order_type_id' => $orderType->getKey(),
-                            ]
-                        ))
-                        ->values()
-                        ->toArray(),
-                ]
-            ),
-        ];
-    }
 
     protected static function booted(): void
     {
@@ -401,6 +276,135 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         });
     }
 
+    // Public static methods
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'sum', 'avg' => [
+                'total_base_net_price',
+                'total_base_gross_price',
+                'total_base_discounted_net_price',
+                'total_base_discounted_gross_price',
+                'gross_profit',
+                'total_purchase_price',
+                'total_cost',
+                'margin',
+                'total_net_price',
+                'total_gross_price',
+                'balance',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
+
+    public static function fromCalendarEvent(array $event, string $action): UpdateOrder
+    {
+        return UpdateOrder::make([
+            'id' => data_get($event, 'id'),
+            'system_delivery_date' => data_get($event, 'start'),
+            'system_delivery_date_end' => data_get($event, 'end'),
+        ]);
+    }
+
+    public static function getGenericChannelEvents(): array
+    {
+        return array_merge(
+            parent::getGenericChannelEvents(),
+            [
+                'locked',
+            ]
+        );
+    }
+
+    public static function ownerColumns(): array
+    {
+        return [
+            'approval_user_id',
+            'agent_id',
+            'responsible_user_id',
+            'created_by',
+            'updated_by',
+        ];
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'parent_id',
+                'contact_id',
+                'is_locked',
+            ],
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'order_date',
+            'invoice_date',
+            'system_delivery_date',
+            'system_delivery_date_end',
+            'customer_delivery_date',
+            'date_of_approval',
+            'created_at',
+            'updated_at',
+        ];
+    }
+
+    public static function toCalendar(): array
+    {
+        $bluePrint = [
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'other',
+            'isVirtual' => true,
+            'color' => '#3b82f6',
+        ];
+
+        return [
+            array_merge(
+                $bluePrint,
+                [
+                    'id' => base64_encode(morph_alias(static::class)),
+                    'modelType' => morph_alias(static::class),
+                    'name' => __('Orders'),
+                    'hasNoEvents' => true,
+                    'children' => resolve_static(OrderType::class, 'query')
+                        ->where('is_active', true)
+                        ->get([
+                            'id',
+                            'name',
+                        ])
+                        ->map(fn (OrderType $orderType) => array_merge(
+                            $bluePrint,
+                            [
+                                'id' => base64_encode(morph_alias(static::class) . ':' . $orderType->getKey()),
+                                'modelType' => morph_alias(static::class),
+                                'name' => $orderType->name,
+                                'order_type_id' => $orderType->getKey(),
+                            ]
+                        ))
+                        ->values()
+                        ->toArray(),
+                ]
+            ),
+        ];
+    }
+
     protected function casts(): array
     {
         return [
@@ -448,6 +452,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
+    // Relations
     public function addressDelivery(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'address_delivery_id');
@@ -468,6 +473,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function addressTypes(): BelongsToMany
     {
         return $this->belongstoMany(AddressType::class, 'address_address_type_order')
+            ->using(AddressAddressTypeOrder::class)
             ->withPivot('address_id');
     }
 
@@ -548,7 +554,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function paymentRuns(): BelongsToMany
     {
-        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
+        return $this->belongsToMany(PaymentRun::class, 'order_payment_run')
+            ->using(OrderPaymentRun::class);
     }
 
     public function paymentType(): BelongsTo
@@ -578,7 +585,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function schedules(): BelongsToMany
     {
-        return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
+        return $this->belongsToMany(Schedule::class, 'order_schedule')
+            ->using(OrderSchedule::class);
     }
 
     public function tasks(): HasManyThrough
@@ -593,12 +601,14 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function transactions(): BelongsToMany
     {
-        return $this->belongsToMany(Transaction::class)->using(OrderTransaction::class);
+        return $this->belongsToMany(Transaction::class, 'order_transaction')
+            ->using(OrderTransaction::class);
     }
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'order_user');
+        return $this->belongsToMany(User::class, 'order_user')
+            ->using(OrderUser::class);
     }
 
     public function vatRate(): BelongsTo
@@ -618,19 +628,25 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         );
     }
 
-    public function mappableDeliveryAddress(): array|object|null
+    // Media
+    public function finalInvoice(): ?Media
     {
-        if (data_get($this->address_delivery, 'latitude') && data_get($this->address_delivery, 'longitude')) {
-            return $this->address_delivery;
-        }
-
-        if ($this->addressDelivery?->latitude && $this->addressDelivery?->longitude) {
-            return $this->addressDelivery;
-        }
-
-        return $this->address_delivery ?? $this->addressDelivery;
+        return $this->getFirstMedia('final-invoice');
     }
 
+    public function invoice(): ?Media
+    {
+        return $this->getFirstMedia('invoice')
+            ?? $this->getFirstMedia('final-invoice')
+            ?? $this->getFirstMedia('refund');
+    }
+
+    public function refund(): ?Media
+    {
+        return $this->getFirstMedia('refund');
+    }
+
+    // Public methods
     public function calculateBalance(): static
     {
         $this->balance = bcround(
@@ -761,6 +777,41 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->calculateTotalGrossPrice()
             ->calculateMargin()
             ->when(! is_null($this->invoice_number), fn (Order $order) => $order->calculateBalance());
+    }
+
+    public function calculateSubscriptionEndDate(): Carbon|CarbonInterface
+    {
+        $schedule = $this->schedules()->first();
+
+        if (! $schedule) {
+            return now();
+        }
+
+        $settings = app(SubscriptionSettings::class);
+        $parameters = $schedule->parameters ?? [];
+
+        $noticeValue = $parameters['cancellationNoticeValue'] ?? $settings->default_cancellation_notice_value;
+        $noticeUnit = $parameters['cancellationNoticeUnit'] ?? $settings->default_cancellation_notice_unit;
+
+        $minDurationValue = $parameters['minimumDurationValue'] ?? $settings->default_minimum_duration_value;
+        $minDurationUnit = $parameters['minimumDurationUnit'] ?? $settings->default_minimum_duration_unit;
+
+        $now = now();
+        $nextRenewal = $schedule->due_at ?? $now;
+        $cancellationDeadline = $nextRenewal->copy()->sub($noticeUnit, $noticeValue);
+
+        $endFromNotice = $now->gt($cancellationDeadline)
+            ? ($schedule->ends_at ?? $nextRenewal)
+            : $nextRenewal;
+
+        if ($minDurationValue > 0) {
+            $endFromMinDuration = Carbon::parse($this->order_date)
+                ->add($minDurationUnit, $minDurationValue);
+
+            return $endFromNotice->gt($endFromMinDuration) ? $endFromNotice : $endFromMinDuration;
+        }
+
+        return $endFromNotice;
     }
 
     public function calculateTotalGrossPrice(): static
@@ -923,11 +974,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return 'total_cost';
     }
 
-    public function finalInvoice(): ?Media
-    {
-        return $this->getFirstMedia('final-invoice');
-    }
-
     /**
      * @throws Exception
      */
@@ -1018,11 +1064,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this->detailRoute();
     }
 
-    public function invoice(): ?Media
+    public function mappableDeliveryAddress(): array|object|null
     {
-        return $this->getFirstMedia('invoice')
-            ?? $this->getFirstMedia('final-invoice')
-            ?? $this->getFirstMedia('refund');
+        if (data_get($this->address_delivery, 'latitude') && data_get($this->address_delivery, 'longitude')) {
+            return $this->address_delivery;
+        }
+
+        if ($this->addressDelivery?->latitude && $this->addressDelivery?->longitude) {
+            return $this->addressDelivery;
+        }
+
+        return $this->address_delivery ?? $this->addressDelivery;
     }
 
     public function newCollection(array $models = []): Collection
@@ -1083,11 +1135,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ]);
 
         return $this;
-    }
-
-    public function refund(): ?Media
-    {
-        return $this->getFirstMedia('refund');
     }
 
     public function registerMediaCollections(): void
@@ -1185,41 +1232,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
     }
 
-    public function calculateSubscriptionEndDate(): Carbon
-    {
-        $schedule = $this->schedules()->first();
-
-        if (! $schedule) {
-            return now();
-        }
-
-        $settings = app(SubscriptionSettings::class);
-        $parameters = $schedule->parameters ?? [];
-
-        $noticeValue = $parameters['cancellationNoticeValue'] ?? $settings->default_cancellation_notice_value;
-        $noticeUnit = $parameters['cancellationNoticeUnit'] ?? $settings->default_cancellation_notice_unit;
-
-        $minDurationValue = $parameters['minimumDurationValue'] ?? $settings->default_minimum_duration_value;
-        $minDurationUnit = $parameters['minimumDurationUnit'] ?? $settings->default_minimum_duration_unit;
-
-        $now = now();
-        $nextRenewal = $schedule->due_at ?? $now;
-        $cancellationDeadline = $nextRenewal->copy()->sub($noticeUnit, $noticeValue);
-
-        $endFromNotice = $now->gt($cancellationDeadline)
-            ? ($schedule->ends_at ?? $nextRenewal)
-            : $nextRenewal;
-
-        if ($minDurationValue > 0) {
-            $endFromMinDuration = Carbon::parse($this->order_date)
-                ->add($minDurationUnit, $minDurationValue);
-
-            return $endFromNotice->gt($endFromMinDuration) ? $endFromNotice : $endFromMinDuration;
-        }
-
-        return $endFromNotice;
-    }
-
     public function resolveMailableInvoiceAddress(): ?Address
     {
         return match (true) {
@@ -1271,6 +1283,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         ];
     }
 
+    // Scope (this specific method needs to be public because of implemented interface)
     public function scopeInTimeframe(
         Builder $builder,
         Carbon|string $start,
@@ -1292,6 +1305,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         }
     }
 
+    // Attributes
     protected function discountPercentage(): Attribute
     {
         return Attribute::get(
@@ -1302,6 +1316,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         );
     }
 
+    // Scopes
     protected function scopePaid(Builder $query): Builder
     {
         return $query
@@ -1344,14 +1359,24 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $query
             ->with(['addressInvoice', 'contact.mainAddress', 'contact.invoiceAddress'])
             ->where(fn (Builder $query) => $query
-                ->whereHas('addressInvoice', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                ->whereHas(
+                    'addressInvoice',
+                    fn (Builder $query) => $query->whereNotNull('email_primary')
+                )
                 ->orWhereHas('contact', fn (Builder $query) => $query
-                    ->whereHas('invoiceAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
-                    ->orWhereHas('mainAddress', fn (Builder $query) => $query->whereNotNull('email_primary'))
+                    ->whereHas(
+                        'invoiceAddress',
+                        fn (Builder $query) => $query->whereNotNull('email_primary')
+                    )
+                    ->orWhereHas(
+                        'mainAddress',
+                        fn (Builder $query) => $query->whereNotNull('email_primary')
+                    )
                 )
             );
     }
 
+    // Protected methods
     protected function makeAllSearchableUsing(Builder $query): Builder
     {
         return $query->with(

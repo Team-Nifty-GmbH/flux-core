@@ -21,6 +21,7 @@ class Commission extends FluxModel implements InteractsWithDataTables
         ];
     }
 
+    // Relations
     public function creditNoteOrderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class, 'credit_note_order_position_id');
@@ -41,6 +42,7 @@ class Commission extends FluxModel implements InteractsWithDataTables
         return $this->belongsTo(User::class);
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;

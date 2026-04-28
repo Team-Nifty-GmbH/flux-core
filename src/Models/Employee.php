@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use DateTime;
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
 use FluxErp\Contracts\OffersPrinting;
@@ -78,6 +79,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         ];
     }
 
+    // Relations
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);
@@ -145,6 +147,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         return $this->hasMany(WorkTime::class);
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return $this->getFirstMediaUrl('avatar', 'thumb')
@@ -260,7 +263,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             ->reduce(fn (?string $carry, $item) => bcadd($carry, $item), 0);
     }
 
-    public function getVacationDaysBalance(Carbon $date): string
+    public function getVacationDaysBalance(Carbon|CarbonInterface $date): string
     {
         return bcsub(
             $this->getTotalVacationDays(
@@ -446,6 +449,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             ->useDisk('private');
     }
 
+    // Scopes
     protected function scopeEmployed(Builder $query, DateTime $untilDate): void
     {
         $query->whereHas('workTimeModelHistory')

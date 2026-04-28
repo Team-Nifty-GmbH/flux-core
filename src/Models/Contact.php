@@ -9,6 +9,7 @@ use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
 use FluxErp\Models\Pivots\ContactTenant;
+use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\Categorizable;
@@ -35,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Collection as SupportCollection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -77,6 +79,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         ];
     }
 
+    // Relations
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
@@ -127,12 +130,14 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function discounts(): BelongsToMany
     {
-        return $this->belongsToMany(Discount::class, 'contact_discount')->using(ContactDiscount::class);
+        return $this->belongsToMany(Discount::class, 'contact_discount')
+            ->using(ContactDiscount::class);
     }
 
     public function industries(): BelongsToMany
     {
-        return $this->belongsToMany(Industry::class, 'contact_industry')->using(ContactIndustry::class);
+        return $this->belongsToMany(Industry::class, 'contact_industry')
+            ->using(ContactIndustry::class);
     }
 
     public function invoiceAddress(): BelongsTo
@@ -167,7 +172,8 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_supplier');
+        return $this->belongsToMany(Product::class, 'product_supplier')
+            ->using(ProductSupplier::class);
     }
 
     public function sepaMandates(): HasMany
@@ -177,7 +183,8 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'contact_tenant')->using(ContactTenant::class);
+        return $this->belongsToMany(Tenant::class, 'contact_tenant')
+            ->using(ContactTenant::class);
     }
 
     public function vatRate(): BelongsTo
@@ -190,7 +197,8 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->hasMany(WorkTime::class);
     }
 
-    public function getAllDiscounts(): Collection
+    // Public methods
+    public function getAllDiscounts(): SupportCollection
     {
         return $this->getAllDiscountsQuery()
             ->get()

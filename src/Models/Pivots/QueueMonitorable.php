@@ -17,6 +17,7 @@ class QueueMonitorable extends FluxPivot
         ];
     }
 
+    // Relations
     public function queueMonitor(): BelongsTo
     {
         return $this->belongsTo(QueueMonitor::class);

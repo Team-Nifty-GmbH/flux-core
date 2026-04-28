@@ -11,6 +11,7 @@ class AttributeTranslation extends FluxModel
 {
     use HasUserModification, SoftDeletes;
 
+    // Relations
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);

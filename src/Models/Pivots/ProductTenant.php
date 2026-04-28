@@ -11,6 +11,7 @@ class ProductTenant extends FluxPivot
 {
     protected $table = 'product_tenant';
 
+    // Relations
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');

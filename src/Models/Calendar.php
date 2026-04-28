@@ -44,6 +44,7 @@ class Calendar extends FluxModel
         ];
     }
 
+    // Relations
     public function calendarables(): HasMany
     {
         return $this->hasMany(Calendarable::class);
@@ -59,6 +60,7 @@ class Calendar extends FluxModel
         return $this->morphedByMany(User::class, 'calendarable', 'calendarable');
     }
 
+    // Public methods
     public function fromCalendarObject(array $calendar): static
     {
         $mappedArray = [];

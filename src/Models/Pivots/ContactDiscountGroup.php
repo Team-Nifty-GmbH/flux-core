@@ -10,6 +10,7 @@ class ContactDiscountGroup extends FluxPivot
 {
     protected $table = 'contact_discount_group';
 
+    // Relations
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);

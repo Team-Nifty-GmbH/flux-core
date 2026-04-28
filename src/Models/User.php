@@ -6,6 +6,9 @@ use Exception;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
+use FluxErp\Models\Pivots\TaskUser;
+use FluxErp\Models\Pivots\TenantUser;
+use FluxErp\Models\Pivots\TicketUser;
 use FluxErp\Traits\Model\Calendar\HasCalendars;
 use FluxErp\Traits\Model\Calendar\HasCalendarUserSettings;
 use FluxErp\Traits\Model\Filterable;
@@ -60,6 +63,24 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         'password',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (User $user): void {
+            if ($user->isDirty('lastname') || $user->isDirty('firstname')) {
+                $user->name = trim($user->firstname . ' ' . $user->lastname);
+            }
+
+            if ($user->isDirty('iban')) {
+                $user->iban = str_replace(' ', '', strtoupper($user->iban));
+            }
+        });
+
+        static::saved(function (User $user): void {
+            Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id);
+        });
+    }
+
+    // Public static methods
     public static function guardNames(): array
     {
         return [
@@ -82,23 +103,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::saving(function (User $user): void {
-            if ($user->isDirty('lastname') || $user->isDirty('firstname')) {
-                $user->name = trim($user->firstname . ' ' . $user->lastname);
-            }
-
-            if ($user->isDirty('iban')) {
-                $user->iban = str_replace(' ', '', strtoupper($user->iban));
-            }
-        });
-
-        static::saved(function (User $user): void {
-            Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id);
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -106,6 +110,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         ];
     }
 
+    // Relations
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);
@@ -114,11 +119,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');
-    }
-
-    public function tenants(): BelongsToMany
-    {
-        return $this->belongsToMany(Tenant::class, 'tenant_user');
     }
 
     public function commissionRates(): HasMany
@@ -141,13 +141,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->belongsTo(Currency::class);
     }
 
-    public function defaultMailAccount(): ?MailAccount
-    {
-        return $this->mailAccounts()
-            ->wherePivot('is_default', true)
-            ->first();
-    }
-
     public function employee(): HasOne
     {
         return $this->hasOne(Employee::class);
@@ -156,6 +149,75 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function favorites(): MorphMany
     {
         return $this->morphMany(Favorite::class, 'authenticatable');
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
+    }
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
+    public function mailAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(MailAccount::class, 'mail_account_user')
+            ->withPivot('is_default');
+    }
+
+    public function printers(): BelongsToMany
+    {
+        return $this->belongsToMany(Printer::class, 'printer_user')
+            ->using(PrinterUser::class);
+    }
+
+    public function printerUsers(): HasMany
+    {
+        return $this->hasMany(PrinterUser::class);
+    }
+
+    public function targets(): BelongsToMany
+    {
+        return $this->belongsToMany(Target::class, 'target_user')
+            ->using(TargetUser::class);
+    }
+
+    public function tasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class, 'task_user')
+            ->using(TaskUser::class);
+    }
+
+    public function tasksResponsible(): HasMany
+    {
+        return $this->hasMany(Task::class, 'responsible_user_id');
+    }
+
+    public function tickets(): BelongsToMany
+    {
+        return $this->belongsToMany(Ticket::class, 'ticket_user')
+            ->using(TicketUser::class);
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'tenant_user')
+            ->using(TenantUser::class);
+    }
+
+    public function workTimes(): HasMany
+    {
+        return $this->hasMany(WorkTime::class);
+    }
+
+    // Public methods
+    public function defaultMailAccount(): ?MailAccount
+    {
+        return $this->mailAccounts()
+            ->wherePivot('is_default', true)
+            ->first();
     }
 
     /**
@@ -186,39 +248,12 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return static::guardNames();
     }
 
-    public function language(): BelongsTo
-    {
-        return $this->belongsTo(Language::class);
-    }
-
-    public function leads(): HasMany
-    {
-        return $this->hasMany(Lead::class);
-    }
-
-    public function mailAccounts(): BelongsToMany
-    {
-        return $this->belongsToMany(MailAccount::class, 'mail_account_user')
-            ->withPivot('is_default');
-    }
-
     /**
      * Get the preferred locale of the entity.
      */
     public function preferredLocale(): ?string
     {
         return $this->language?->language_code;
-    }
-
-    public function printers(): BelongsToMany
-    {
-        return $this->belongsToMany(Printer::class, 'printer_user')
-            ->using(PrinterUser::class);
-    }
-
-    public function printerUsers(): HasMany
-    {
-        return $this->hasMany(PrinterUser::class);
     }
 
     public function registerMediaCollections(): void
@@ -237,31 +272,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         Mail::to($this->email)->queue(MagicLoginLink::make($this->generateLoginLink()));
     }
 
-    public function targets(): BelongsToMany
-    {
-        return $this->belongsToMany(Target::class, 'target_user')->using(TargetUser::class);
-    }
-
-    public function tasks(): BelongsToMany
-    {
-        return $this->belongsToMany(Task::class, 'task_user');
-    }
-
-    public function tasksResponsible(): HasMany
-    {
-        return $this->hasMany(Task::class, 'responsible_user_id');
-    }
-
-    public function tickets(): BelongsToMany
-    {
-        return $this->belongsToMany(Ticket::class, 'ticket_user');
-    }
-
-    public function workTimes(): HasMany
-    {
-        return $this->hasMany(WorkTime::class);
-    }
-
+    // Attributes
     protected function password(): Attribute
     {
         return Attribute::set(
@@ -269,6 +280,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         );
     }
 
+    // Protected methods
     protected function generateLoginLink(): string
     {
         $plaintextToken = Str::uuid()->toString();

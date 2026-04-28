@@ -10,6 +10,7 @@ class ProductSupplier extends FluxPivot
 {
     protected $table = 'product_supplier';
 
+    // Relations
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);

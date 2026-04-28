@@ -13,6 +13,7 @@ class ProductPropertyGroup extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
+    // Relations
     public function productProperties(): HasMany
     {
         return $this->hasMany(ProductProperty::class, 'product_property_group_id');

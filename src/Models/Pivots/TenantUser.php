@@ -10,6 +10,7 @@ class TenantUser extends FluxPivot
 {
     protected $table = 'tenant_user';
 
+    // Relations
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

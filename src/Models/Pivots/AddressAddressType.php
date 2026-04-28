@@ -10,6 +10,7 @@ class AddressAddressType extends FluxPivot
 {
     protected $table = 'address_address_type';
 
+    // Relations
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);

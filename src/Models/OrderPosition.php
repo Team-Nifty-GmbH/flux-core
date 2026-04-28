@@ -7,6 +7,7 @@ use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\CreditAccountPostingEnum;
+use FluxErp\Models\Pivots\OrderPositionStockPosting;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\HasFrontendAttributes;
@@ -53,6 +54,38 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         'commission',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleted(function (OrderPosition $orderPosition): void {
+            $orderPosition->workTime()->update(['order_position_id' => null]);
+            $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
+            $orderPosition->order->recalculateOrderPositionSlugPositions();
+        });
+
+        static::saved(function (OrderPosition $orderPosition): void {
+            if (
+                $orderPosition->wasRecentlyCreated
+                || $orderPosition->wasChanged('sort_number')
+                || $orderPosition->wasChanged('parent_id')
+            ) {
+                if ($orderPosition->wasChanged('parent_id')) {
+                    DB::statement('SET @row_number = 0');
+
+                    resolve_static(OrderPosition::class, 'query')
+                        ->where('order_id', $orderPosition->order_id)
+                        ->where('parent_id', $orderPosition->getOriginal('parent_id'))
+                        ->orderBy('sort_number')
+                        ->update([
+                            'sort_number' => DB::raw('(@row_number:=@row_number+1)'),
+                        ]);
+                }
+
+                $orderPosition->order->recalculateOrderPositionSlugPositions();
+            }
+        });
+    }
+
+    // Public static methods
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {
@@ -101,37 +134,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::deleted(function (OrderPosition $orderPosition): void {
-            $orderPosition->workTime()->update(['order_position_id' => null]);
-            $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
-            $orderPosition->order->recalculateOrderPositionSlugPositions();
-        });
-
-        static::saved(function (OrderPosition $orderPosition): void {
-            if (
-                $orderPosition->wasRecentlyCreated
-                || $orderPosition->wasChanged('sort_number')
-                || $orderPosition->wasChanged('parent_id')
-            ) {
-                if ($orderPosition->wasChanged('parent_id')) {
-                    DB::statement('SET @row_number = 0');
-
-                    resolve_static(OrderPosition::class, 'query')
-                        ->where('order_id', $orderPosition->order_id)
-                        ->where('parent_id', $orderPosition->getOriginal('parent_id'))
-                        ->orderBy('sort_number')
-                        ->update([
-                            'sort_number' => DB::raw('(@row_number:=@row_number+1)'),
-                        ]);
-                }
-
-                $orderPosition->order->recalculateOrderPositionSlugPositions();
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -159,6 +161,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         ];
     }
 
+    // Relations
     public function commission(): HasOne
     {
         return $this->hasOne(Commission::class);
@@ -229,6 +232,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function reservedStock(): BelongsToMany
     {
         return $this->belongsToMany(StockPosting::class, 'order_position_stock_posting')
+            ->using(OrderPositionStockPosting::class)
             ->withPivot('reserved_amount');
     }
 
@@ -279,6 +283,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->hasOne(WorkTime::class);
     }
 
+    // Public methods
     public function buildSortQuery(): Builder
     {
         return static::query()
@@ -291,11 +296,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->product?->getAvatarUrl();
     }
 
-    public function getChildrenAttribute(): Collection
-    {
-        return $this->children()->get()->append('children');
-    }
-
     public function getDescription(): ?string
     {
         return $this->description;
@@ -306,14 +306,20 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->name;
     }
 
-    public function getTagsAttribute(): Collection
-    {
-        return $this->tags()->get();
-    }
-
     public function getUrl(): ?string
     {
         return $this->order?->getUrl();
+    }
+
+    // Attributes
+    public function getChildrenAttribute(): Collection
+    {
+        return $this->children()->get()->append('children');
+    }
+
+    public function getTagsAttribute(): Collection
+    {
+        return $this->tags()->get();
     }
 
     protected function slugPosition(): Attribute
@@ -357,6 +363,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         );
     }
 
+    // Protected methods
     protected function subTotalGross(): string|float|null
     {
         $result = DB::select('

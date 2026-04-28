@@ -16,6 +16,7 @@ class Log extends FluxModel
         ];
     }
 
+    // Public methods
     public function prunable(): Builder
     {
         return static::query()

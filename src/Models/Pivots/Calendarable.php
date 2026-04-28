@@ -20,6 +20,7 @@ class Calendarable extends MorphPivot
 
     protected $guarded = ['pivot_id'];
 
+    // Relations
     public function calendar(): BelongsTo
     {
         return $this->belongsTo(Calendar::class);

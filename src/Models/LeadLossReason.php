@@ -20,6 +20,7 @@ class LeadLossReason extends FluxModel
         ];
     }
 
+    // Relations
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);

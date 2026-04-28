@@ -48,11 +48,29 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         ];
     }
 
+    // Relations
     public function bankConnection(): BelongsTo
     {
         return $this->belongsTo(BankConnection::class);
     }
 
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class)
+            ->using(OrderTransaction::class);
+    }
+
+    public function orderTransactions(): HasMany
+    {
+        return $this->hasMany(OrderTransaction::class);
+    }
+
+    // Public methods
     public function calculateBalance(): static
     {
         if ($this->contact_bank_connection_id) {
@@ -69,11 +87,6 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         }
 
         return $this;
-    }
-
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
     }
 
     public function getAvatarUrl(): ?string
@@ -94,15 +107,5 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
     public function getUrl(): ?string
     {
         return null;
-    }
-
-    public function orders(): BelongsToMany
-    {
-        return $this->belongsToMany(Order::class)->using(OrderTransaction::class);
-    }
-
-    public function orderTransactions(): HasMany
-    {
-        return $this->hasMany(OrderTransaction::class);
     }
 }

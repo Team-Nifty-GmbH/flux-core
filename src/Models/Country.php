@@ -26,6 +26,7 @@ class Country extends FluxModel
         ];
     }
 
+    // Relations
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);

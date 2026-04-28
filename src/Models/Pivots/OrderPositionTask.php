@@ -10,6 +10,7 @@ class OrderPositionTask extends FluxPivot
 {
     protected $table = 'order_position_stock_posting';
 
+    // Relations
     public function orderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class);

@@ -26,6 +26,7 @@ class EmployeeDay extends FluxModel implements InteractsWithDataTables
         ];
     }
 
+    // Relations
     public function absenceRequests(): BelongsToMany
     {
         return $this->belongsToMany(AbsenceRequest::class, 'absence_request_employee_day')
@@ -48,6 +49,7 @@ class EmployeeDay extends FluxModel implements InteractsWithDataTables
             ->using(EmployeeDayWorkTime::class);
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return $this->employee->getAvatarUrl();

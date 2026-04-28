@@ -10,6 +10,7 @@ class AddressProduct extends FluxPivot
 {
     protected $table = 'address_product';
 
+    // Relations
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);

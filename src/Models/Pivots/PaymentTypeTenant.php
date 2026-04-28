@@ -11,6 +11,7 @@ class PaymentTypeTenant extends FluxPivot
 {
     protected $table = 'payment_type_tenant';
 
+    // Relations
     public function paymentType(): BelongsTo
     {
         return $this->belongsTo(PaymentType::class, 'payment_type_id');

@@ -18,6 +18,7 @@ class EventSubscription extends FluxModel
         ];
     }
 
+    // Relations
     public function subscribable(): MorphTo
     {
         return $this->morphTo();

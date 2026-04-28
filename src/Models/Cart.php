@@ -33,6 +33,7 @@ class Cart extends FluxModel
         ];
     }
 
+    // Relations
     public function authenticatable(): MorphTo
     {
         return $this->morphTo();
@@ -60,6 +61,7 @@ class Cart extends FluxModel
         );
     }
 
+    // Public methods
     public function addItems(array|int $products): static
     {
         $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);
@@ -172,8 +174,10 @@ class Cart extends FluxModel
             });
     }
 
+    // Scopes
     protected function scopeCurrent(Builder $query): void
     {
-        $query->where('is_watchlist', false)->latest();
+        $query->where('is_watchlist', false)
+            ->latest();
     }
 }

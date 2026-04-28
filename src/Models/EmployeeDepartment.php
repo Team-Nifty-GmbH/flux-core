@@ -22,6 +22,7 @@ class EmployeeDepartment extends FluxModel
         ];
     }
 
+    // Relations
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class, 'employee_department_id');
@@ -43,6 +44,7 @@ class EmployeeDepartment extends FluxModel
             ->using(EmployeeDepartmentVacationBlackout::class);
     }
 
+    // Public methods
     public function getDescription(): ?string
     {
         return $this->description;

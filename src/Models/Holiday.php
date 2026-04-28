@@ -35,12 +35,14 @@ class Holiday extends FluxModel
         ];
     }
 
+    // Relations
     public function locations(): BelongsToMany
     {
         return $this->belongsToMany(Location::class, 'holiday_location')
             ->using(HolidayLocation::class);
     }
 
+    // Scopes
     protected function scopeIsHoliday(Builder $query, Carbon $date, ?int $locationId = null): void
     {
         $query

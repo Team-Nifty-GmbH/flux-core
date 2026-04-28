@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\RepeatableTypeEnum;
+use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
@@ -27,8 +28,10 @@ class Schedule extends FluxModel
         ];
     }
 
+    // Relations
     public function orders(): BelongsToMany
     {
-        return $this->belongsToMany(Order::class);
+        return $this->belongsToMany(Order::class, 'order_schedule')
+            ->using(OrderSchedule::class);
     }
 }

@@ -23,6 +23,7 @@ class Currency extends FluxModel
         ];
     }
 
+    // Relations
     public function countries(): HasMany
     {
         return $this->hasMany(Country::class);

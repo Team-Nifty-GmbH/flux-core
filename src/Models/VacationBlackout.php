@@ -23,6 +23,7 @@ class VacationBlackout extends FluxModel
         ];
     }
 
+    // Relations
     public function employeeDepartments(): BelongsToMany
     {
         return $this->belongsToMany(EmployeeDepartment::class, 'employee_department_vacation_blackout')

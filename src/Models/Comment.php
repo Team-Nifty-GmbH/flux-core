@@ -29,16 +29,6 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         'model_type',
     ];
 
-    public static function getGenericChannelEvents(): array
-    {
-        return [];
-    }
-
-    public static function restoring($callback): void
-    {
-        static::registerModelEvent('restoring', $callback);
-    }
-
     protected static function booted(): void
     {
         static::saving(function (Comment $comment): void {
@@ -60,6 +50,17 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         });
     }
 
+    // Public static methods
+    public static function getGenericChannelEvents(): array
+    {
+        return [];
+    }
+
+    public static function restoring($callback): void
+    {
+        static::registerModelEvent('restoring', $callback);
+    }
+
     protected function casts(): array
     {
         return [
@@ -68,11 +69,13 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         ];
     }
 
+    // Relations
     public function model(): MorphTo
     {
         return $this->morphTo('model');
     }
 
+    // Public methods
     public function broadcastChannel(): string
     {
         return $this->model_type . '.' . $this->model_id;
@@ -86,6 +89,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         return ['model' => $data];
     }
 
+    // Attributes
     protected function user(): Attribute
     {
         $user = $this->getCreatedBy();

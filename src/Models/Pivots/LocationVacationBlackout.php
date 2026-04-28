@@ -10,6 +10,7 @@ class LocationVacationBlackout extends FluxPivot
 {
     protected $table = 'location_vacation_blackout';
 
+    // Relations
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);

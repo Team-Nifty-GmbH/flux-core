@@ -21,6 +21,7 @@ class Permission extends SpatiePermission
 
     protected $hidden = ['pivot'];
 
+    // Public static methods
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -33,6 +34,7 @@ class Permission extends SpatiePermission
         ];
     }
 
+    // Relations
     public function users(): BelongsToMany
     {
         return $this->morphedByMany(

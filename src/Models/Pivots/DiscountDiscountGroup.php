@@ -10,6 +10,7 @@ class DiscountDiscountGroup extends FluxPivot
 {
     protected $table = 'discount_discount_group';
 
+    // Relations
     public function discount(): BelongsTo
     {
         return $this->belongsTo(Discount::class);

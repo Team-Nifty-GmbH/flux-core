@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\EloquentSortable\SortableTrait as BaseSortableTrait;
 
 trait SortableTrait
@@ -49,7 +50,7 @@ trait SortableTrait
                 ->decrement($orderColumn);
         });
 
-        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(static::class))) {
+        if (in_array(SoftDeletes::class, class_uses_recursive(static::class))) {
             static::restored(function (Model $model): void {
                 $orderColumn = $model->determineOrderColumnName();
                 $orderValue = $model->$orderColumn;

@@ -17,6 +17,7 @@ class TargetUser extends FluxPivot
         ];
     }
 
+    // Relations
     public function target(): BelongsTo
     {
         return $this->belongsTo(Target::class);

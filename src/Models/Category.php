@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\CategoryPriceList;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasAttributeTranslations;
@@ -37,15 +38,6 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         'pivot',
     ];
 
-    public static function scoutIndexSettings(): ?array
-    {
-        return static::baseScoutIndexSettings() ?? [
-            'filterableAttributes' => [
-                'model_type',
-            ],
-        ];
-    }
-
     protected static function booted(): void
     {
         collect(Relation::morphMap())
@@ -71,6 +63,16 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
             });
     }
 
+    // Public static methods
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'model_type',
+            ],
+        ];
+    }
+
     protected function casts(): array
     {
         return [
@@ -78,9 +80,11 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         ];
     }
 
+    // Relations
     public function discounts(): BelongsToMany
     {
-        return $this->belongsToMany(Discount::class, 'category_price_list');
+        return $this->belongsToMany(Discount::class, 'category_price_list')
+            ->using(CategoryPriceList::class);
     }
 
     public function model(): MorphToMany
@@ -100,6 +104,7 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
             );
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -128,6 +133,7 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return null;
     }
 
+    // Attributes
     protected function assigned(): Attribute
     {
         return Attribute::make(
@@ -135,6 +141,7 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         );
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

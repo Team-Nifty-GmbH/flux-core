@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Exception;
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Models\Pivots\TicketUser;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Model\Commentable;
@@ -40,17 +41,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
 
     protected ?string $detailRouteName = 'tickets.id';
 
-    public static function scoutIndexSettings(): ?array
-    {
-        return static::baseScoutIndexSettings() ?? [
-            'filterableAttributes' => [
-                'authenticatable_type',
-                'authenticatable_id',
-                'state',
-            ],
-        ];
-    }
-
     protected static function booted(): void
     {
         static::saving(function (Ticket $ticket): void {
@@ -73,6 +63,18 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
         });
     }
 
+    // Public static methods
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'authenticatable_type',
+                'authenticatable_id',
+                'state',
+            ],
+        ];
+    }
+
     protected function casts(): array
     {
         return [
@@ -82,11 +84,29 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
         ];
     }
 
+    // Relations
     public function authenticatable(): MorphTo
     {
         return $this->morphTo('authenticatable');
     }
 
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
+    public function ticketType(): BelongsTo
+    {
+        return $this->belongsTo(TicketType::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'ticket_user')
+            ->using(TicketUser::class);
+    }
+
+    // Public methods
     public function costColumn(): string
     {
         return 'total_cost';
@@ -131,25 +151,10 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
         return $this->detailRoute();
     }
 
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
-    }
-
-    public function ticketType(): BelongsTo
-    {
-        return $this->belongsTo(TicketType::class);
-    }
-
     public function toSearchableArray(): array
     {
         return ScoutCustomize::make($this)
             ->with(['authenticatable', 'ticketType:id,name'])
             ->toSearchableArray();
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'ticket_user');
     }
 }

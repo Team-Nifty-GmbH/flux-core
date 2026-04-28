@@ -21,13 +21,6 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
     use Commentable, Communicatable, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
         LogsActivity, SoftDeletes;
 
-    public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
-    {
-        static::query()
-            ->where('media_id', $oldMediaId)
-            ->update(['media_id' => $newMediaId]);
-    }
-
     protected static function booted(): void
     {
         static::creating(function (PurchaseInvoice $model): void {
@@ -41,6 +34,14 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
         });
     }
 
+    // Public static methods
+    public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
+    {
+        static::query()
+            ->where('media_id', $oldMediaId)
+            ->update(['media_id' => $newMediaId]);
+    }
+
     protected function casts(): array
     {
         return [
@@ -52,34 +53,7 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
         ];
     }
 
-    public function calculateTotalGrossPrice(): ?string
-    {
-        $vatRates = resolve_static(VatRate::class, 'query')
-            ->pluck('rate_percentage', 'id')
-            ->toArray();
-
-        return $this->purchaseInvoicePositions?->reduce(
-            function (string $carry, PurchaseInvoicePosition $position) use ($vatRates) {
-                if ($this->is_net) {
-                    $positionGross = net_to_gross(
-                        $position->total_price,
-                        data_get($vatRates, $position->vat_rate_id) ?? 0
-                    );
-                } else {
-                    $positionGross = $position->total_price;
-                }
-
-                return bcadd($carry, $positionGross);
-            },
-            '0'
-        );
-    }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
+    // Relations
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -118,6 +92,35 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
     public function purchaseInvoicePositions(): HasMany
     {
         return $this->hasMany(PurchaseInvoicePosition::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    // Public methods
+    public function calculateTotalGrossPrice(): ?string
+    {
+        $vatRates = resolve_static(VatRate::class, 'query')
+            ->pluck('rate_percentage', 'id')
+            ->toArray();
+
+        return $this->purchaseInvoicePositions?->reduce(
+            function (string $carry, PurchaseInvoicePosition $position) use ($vatRates) {
+                if ($this->is_net) {
+                    $positionGross = net_to_gross(
+                        $position->total_price,
+                        data_get($vatRates, $position->vat_rate_id) ?? 0
+                    );
+                } else {
+                    $positionGross = $position->total_price;
+                }
+
+                return bcadd($carry, $positionGross);
+            },
+            '0'
+        );
     }
 
     public function registerMediaCollections(): void

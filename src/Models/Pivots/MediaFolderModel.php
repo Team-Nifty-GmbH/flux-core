@@ -10,6 +10,7 @@ class MediaFolderModel extends FluxPivot
 {
     protected $table = 'media_folder_model';
 
+    // Relations
     public function mediaFolder(): BelongsTo
     {
         return $this->belongsTo(MediaFolder::class, 'media_folder_id');

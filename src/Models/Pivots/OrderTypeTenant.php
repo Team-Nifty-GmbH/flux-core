@@ -10,6 +10,7 @@ class OrderTypeTenant extends FluxPivot
 {
     protected $table = 'order_type_tenant';
 
+    // Relations
     public function orderType(): BelongsTo
     {
         return $this->belongsTo(OrderType::class, 'order_type_id');

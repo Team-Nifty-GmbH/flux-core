@@ -20,6 +20,7 @@ class Communicatable extends MorphPivot
 
     protected $guarded = ['pivot_id'];
 
+    // Relations
     public function communicatable(): MorphTo
     {
         return $this->morphTo('communicatable');

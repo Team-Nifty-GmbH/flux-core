@@ -23,12 +23,19 @@ class WorkTimeModel extends FluxModel
         ];
     }
 
+    // Relations
     public function employees(): BelongsToMany
     {
         return $this->belongsToMany(Employee::class, 'employee_work_time_model')
             ->using(EmployeeWorkTimeModel::class);
     }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(WorkTimeModelSchedule::class);
+    }
+
+    // Public methods
     public function getDailyWorkHours(?Carbon $date = null): string
     {
         $weekday = $date?->dayOfWeekIso;
@@ -53,10 +60,5 @@ class WorkTimeModel extends FluxModel
         }
 
         return 0;
-    }
-
-    public function schedules(): HasMany
-    {
-        return $this->hasMany(WorkTimeModelSchedule::class);
     }
 }

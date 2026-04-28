@@ -22,6 +22,7 @@ class CalendarUserSetting extends FluxModel
         ];
     }
 
+    // Relations
     public function authenticatable(): MorphTo
     {
         return $this->morphTo();

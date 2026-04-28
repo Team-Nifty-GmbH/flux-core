@@ -9,7 +9,9 @@ use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\SalutationEnum;
+use FluxErp\Models\Pivots\AddressAddressType;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\AddressSerialNumber;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Support\Collection\AddressCollection;
 use FluxErp\Traits\Model\Calendar\HasCalendars;
@@ -71,74 +73,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     protected $guarded = [
         'id',
     ];
-
-    public static function findAddressByEmail(string $email): ?Address
-    {
-        $address = null;
-        if ($email) {
-            $address = resolve_static(Address::class, 'query')
-                ->with('contact')
-                ->where('email_primary', $email)
-                ->first();
-
-            if (! $address) {
-                $address = resolve_static(ContactOption::class, 'query')
-                    ->with(['contact', 'address'])
-                    ->where('value', $email)
-                    ->first()
-                    ?->address;
-            }
-
-            if (! $address) {
-                $address = resolve_static(Address::class, 'query')
-                    ->with('contact')
-                    ->where('url', 'like', '%' . Str::after($email, '@'))
-                    ->first();
-            }
-        }
-
-        return $address;
-    }
-
-    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateAddress
-    {
-        $currentAddress = static::query()
-            ->whereKey(data_get($event, 'id'))
-            ->first();
-
-        return UpdateAddress::make([
-            'id' => data_get($event, 'id'),
-            'date_of_birth' => Carbon::parse(data_get($event, 'start'))
-                ->setYear($currentAddress->date_of_birth->year),
-        ]);
-    }
-
-    public static function scoutIndexSettings(): ?array
-    {
-        return static::baseScoutIndexSettings() ?? [
-            'filterableAttributes' => [
-                'is_main_address',
-                'contact_id',
-            ],
-        ];
-    }
-
-    public static function toCalendar(): array
-    {
-        return [
-            'id' => Str::of(static::class)->replace('\\', '.')->toString(),
-            'modelType' => morph_alias(static::class),
-            'name' => __('Birthdays'),
-            'color' => '#dd2c2c',
-            'resourceEditable' => false,
-            'hasRepeatableEvents' => false,
-            'isPublic' => false,
-            'isShared' => false,
-            'permission' => 'owner',
-            'group' => 'other',
-            'isVirtual' => true,
-        ];
-    }
 
     protected static function booted(): void
     {
@@ -339,6 +273,75 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         });
     }
 
+    // Public static methods
+    public static function findAddressByEmail(string $email): ?Address
+    {
+        $address = null;
+        if ($email) {
+            $address = resolve_static(Address::class, 'query')
+                ->with('contact')
+                ->where('email_primary', $email)
+                ->first();
+
+            if (! $address) {
+                $address = resolve_static(ContactOption::class, 'query')
+                    ->with(['contact', 'address'])
+                    ->where('value', $email)
+                    ->first()
+                    ?->address;
+            }
+
+            if (! $address) {
+                $address = resolve_static(Address::class, 'query')
+                    ->with('contact')
+                    ->where('url', 'like', '%' . Str::after($email, '@'))
+                    ->first();
+            }
+        }
+
+        return $address;
+    }
+
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateAddress
+    {
+        $currentAddress = static::query()
+            ->whereKey(data_get($event, 'id'))
+            ->first();
+
+        return UpdateAddress::make([
+            'id' => data_get($event, 'id'),
+            'date_of_birth' => Carbon::parse(data_get($event, 'start'))
+                ->setYear($currentAddress->date_of_birth->year),
+        ]);
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'is_main_address',
+                'contact_id',
+            ],
+        ];
+    }
+
+    public static function toCalendar(): array
+    {
+        return [
+            'id' => Str::of(static::class)->replace('\\', '.')->toString(),
+            'modelType' => morph_alias(static::class),
+            'name' => __('Birthdays'),
+            'color' => '#dd2c2c',
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'other',
+            'isVirtual' => true,
+        ];
+    }
+
     protected function casts(): array
     {
         return [
@@ -356,6 +359,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
+    // Relations
     public function addressTypeOrders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
@@ -365,7 +369,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function addressTypes(): BelongsToMany
     {
-        return $this->belongsToMany(AddressType::class);
+        return $this->belongsToMany(AddressType::class, 'address_address_type')
+            ->using(AddressAddressType::class);
     }
 
     public function categories(): BelongsToMany
@@ -426,6 +431,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
+            ->using(AddressAddressTypeOrder::class)
             ->withPivot('address_type_id');
     }
 
@@ -453,7 +459,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function serialNumbers(): BelongsToMany
     {
-        return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
+        return $this->belongsToMany(SerialNumber::class, 'address_serial_number')
+            ->using(AddressSerialNumber::class);
     }
 
     public function tenants(): BelongsToMany
@@ -473,6 +480,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->morphMany(Ticket::class, 'authenticatable');
     }
 
+    // Public methods
     /**
      * Get the channels that model events should broadcast on.
      *
@@ -603,6 +611,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
+    // Scope (this specific method needs to be public because of implemented interface)
     public function scopeInTimeframe(
         Builder $builder,
         Carbon|string $start,
@@ -662,6 +671,14 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             });
     }
 
+    // Attributes
+    protected function countryName(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->country?->is_default ? null : $this->country?->name
+        );
+    }
+
     protected function mailAddresses(): Attribute
     {
         return Attribute::get(
@@ -679,23 +696,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         );
     }
 
-    protected function countryName(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->country?->is_default ? null : $this->country?->name
-        );
-    }
-
     protected function postalAddress(): Attribute
     {
         return Attribute::get(
-            fn () => array_values(
+            fn (mixed $value, array $attributes) => array_values(
                 array_filter([
-                    $this->company,
-                    trim($this->firstname . ' ' . $this->lastname),
-                    $this->addition,
-                    $this->street,
-                    trim($this->zip . ' ' . $this->city),
+                    $attributes['company'],
+                    trim($attributes['firstname'] . ' ' . $attributes['lastname']),
+                    $attributes['addition'],
+                    $attributes['street'],
+                    trim($attributes['zip'] . ' ' . $attributes['city']),
                     $this->country_name,
                 ])
             )

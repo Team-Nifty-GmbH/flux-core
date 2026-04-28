@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\BankConnectionTenant;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
@@ -32,6 +33,7 @@ class BankConnection extends FluxModel
         ];
     }
 
+    // Relations
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -44,6 +46,7 @@ class BankConnection extends FluxModel
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'bank_connection_tenant');
+        return $this->belongsToMany(Tenant::class, 'bank_connection_tenant')
+            ->using(BankConnectionTenant::class);
     }
 }

@@ -25,6 +25,7 @@ class EmployeeWorkTimeModel extends FluxPivot
         ];
     }
 
+    // Relations
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -32,9 +33,11 @@ class EmployeeWorkTimeModel extends FluxPivot
 
     public function workTimeModel(): BelongsTo
     {
-        return $this->belongsTo(WorkTimeModel::class)->withTrashed();
+        return $this->belongsTo(WorkTimeModel::class)
+            ->withTrashed();
     }
 
+    // Public methods
     public function getTotalVacationDays(?Carbon $start = null, ?Carbon $end = null): string
     {
         $annualVacationDays = $this->annual_vacation_days ?? $this->workTimeModel->annual_vacation_days ?? 0;

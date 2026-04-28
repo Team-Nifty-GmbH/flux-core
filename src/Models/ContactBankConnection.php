@@ -36,6 +36,7 @@ class ContactBankConnection extends FluxModel implements InteractsWithDataTables
         ];
     }
 
+    // Relations
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -51,6 +52,7 @@ class ContactBankConnection extends FluxModel implements InteractsWithDataTables
         return $this->hasMany(Transaction::class);
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getAvatarUrl();

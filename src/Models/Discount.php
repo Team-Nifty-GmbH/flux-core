@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
@@ -32,9 +33,11 @@ class Discount extends FluxModel implements Sortable
         ];
     }
 
+    // Relations
     public function contacts(): BelongsToMany
     {
-        return $this->belongsToMany(Contact::class, 'contact_discount');
+        return $this->belongsToMany(Contact::class, 'contact_discount')
+            ->using(ContactDiscount::class);
     }
 
     public function model(): MorphTo
@@ -42,6 +45,7 @@ class Discount extends FluxModel implements Sortable
         return $this->morphTo('model');
     }
 
+    // Public methods
     public function buildSortQuery(): Builder
     {
         return static::query()

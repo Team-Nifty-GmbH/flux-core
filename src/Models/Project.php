@@ -44,6 +44,16 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 
     protected ?string $detailRouteName = 'projects.id';
 
+    protected static function booted(): void
+    {
+        static::creating(function (Project $project): void {
+            if (! $project->project_number) {
+                $project->getSerialNumber('project_number');
+            }
+        });
+    }
+
+    // Public static methods
     public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateProject
     {
         return UpdateProject::make([
@@ -82,15 +92,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::creating(function (Project $project): void {
-            if (! $project->project_number) {
-                $project->getSerialNumber('project_number');
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -101,6 +102,33 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         ];
     }
 
+    // Relations
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class, 'contact_id');
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    // Public methods
     public function calculateProgress(): void
     {
         $this->progress = bcdiv(
@@ -116,16 +144,11 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         }
     }
 
-    public function contact(): BelongsTo
-    {
-        return $this->belongsTo(Contact::class, 'contact_id');
-    }
-
     public function getAvatarUrl(): ?string
     {
         return $this->getFirstMediaUrl('avatar', 'thumb')
             ?: $this->contact?->getFirstMediaUrl('avatar', 'thumb')
-            ?: static::icon()->getUrl();
+                ?: static::icon()->getUrl();
     }
 
     public function getDescription(): ?string
@@ -141,48 +164,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
     public function getUrl(): ?string
     {
         return $this->detailRoute();
-    }
-
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'order_id');
-    }
-
-    public function responsibleUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
-
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string $start,
-        Carbon|string $end,
-        ?array $info = null
-    ): void {
-        $builder->where(function (Builder $query) use ($start, $end): void {
-            $query
-                ->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('end_date', [$start, $end])
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->where('start_date', '<=', $end)
-                        ->where('end_date', '>=', $start);
-                })
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->whereNull('start_date')
-                        ->whereNull('end_date')
-                        ->whereBetween('created_at', [$start, $end]);
-                });
-        });
-    }
-
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
-    }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -205,5 +186,28 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'is_public' => false,
             'is_repeatable' => false,
         ];
+    }
+
+    // Scopes
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('end_date', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start_date', '<=', $end)
+                        ->where('end_date', '>=', $start);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start_date')
+                        ->whereNull('end_date')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
+        });
     }
 }

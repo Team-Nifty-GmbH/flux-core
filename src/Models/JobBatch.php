@@ -28,6 +28,7 @@ class JobBatch extends FluxModel
         ];
     }
 
+    // Relations
     public function jobBatchables(): HasMany
     {
         return $this->hasMany(JobBatchable::class);
@@ -43,6 +44,7 @@ class JobBatch extends FluxModel
         return $this->morphedByMany(User::class, 'job_batchable', 'job_batchables');
     }
 
+    // Public methods
     public function getBatch(): ?Batch
     {
         return Bus::findBatch($this->id);

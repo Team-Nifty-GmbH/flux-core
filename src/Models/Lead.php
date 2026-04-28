@@ -42,6 +42,48 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         'id',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Lead $lead): void {
+            $lead->expected_gross_profit_percentage = $lead->expected_revenue && $lead->expected_gross_profit
+                ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
+                : 0;
+
+            if ($lead->isDirty('lead_state_id')) {
+                if (! is_null(($probability = $lead->leadState()->value('probability_percentage')))) {
+                    $lead->probability_percentage = $probability;
+                }
+
+                $isClosed = $lead->leadState()
+                    ->where(
+                        fn (Builder $query) => $query
+                            ->where('is_won', true)
+                            ->orWhere('is_lost', true)
+                    )
+                    ->exists();
+
+                if ($isClosed && is_null($lead->closed_at)) {
+                    $lead->closed_at = now();
+                    $lead->closed_by = auth()->user()
+                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
+                        : null;
+                } elseif (! $isClosed) {
+                    $lead->closed_at = null;
+                    $lead->closed_by = null;
+                }
+            }
+
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_gross_profit')) {
+                $lead->recalculateWeightedGrossProfit();
+            }
+
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
+                $lead->recalculateWeightedRevenue();
+            }
+        });
+    }
+
+    // Public static methods
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {
@@ -120,47 +162,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::saving(function (Lead $lead): void {
-            $lead->expected_gross_profit_percentage = $lead->expected_revenue && $lead->expected_gross_profit
-                ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
-                : 0;
-
-            if ($lead->isDirty('lead_state_id')) {
-                if (! is_null(($probability = $lead->leadState()->value('probability_percentage')))) {
-                    $lead->probability_percentage = $probability;
-                }
-
-                $isClosed = $lead->leadState()
-                    ->where(
-                        fn (Builder $query) => $query
-                            ->where('is_won', true)
-                            ->orWhere('is_lost', true)
-                    )
-                    ->exists();
-
-                if ($isClosed && is_null($lead->closed_at)) {
-                    $lead->closed_at = now();
-                    $lead->closed_by = auth()->user()
-                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
-                        : null;
-                } elseif (! $isClosed) {
-                    $lead->closed_at = null;
-                    $lead->closed_by = null;
-                }
-            }
-
-            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_gross_profit')) {
-                $lead->recalculateWeightedGrossProfit();
-            }
-
-            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
-                $lead->recalculateWeightedRevenue();
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -172,6 +173,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
+    // Relations
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
@@ -207,6 +209,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->belongsTo(User::class);
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -268,6 +271,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
+    // Scopes
     public function scopeInTimeframe(
         Builder $builder,
         Carbon|string $start,

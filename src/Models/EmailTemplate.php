@@ -10,9 +10,9 @@ use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Casts\AsHtmlString;
 use Illuminate\Database\Eloquent\Casts\AsStringable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use Illuminate\Support\Stringable;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -32,15 +32,16 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
             'bcc' => 'array',
             'subject' => AsStringable::class,
             'html_body' => AsHtmlString::class,
-            'text_body' => AsStringable::class,
         ];
     }
 
+    // Relations
     public function orderTypes(): HasMany
     {
         return $this->hasMany(OrderType::class);
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -62,18 +63,23 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
         return $this->name;
     }
 
-    public function getTextBodyAttribute($value): ?Stringable
-    {
-        return $value
-            ? Str::of($value)
-            : Str::of($this->html_body?->toHtml() ?? '')->stripTags();
-    }
-
     public function getUrl(): ?string
     {
         return null;
     }
 
+    // Attributes
+    protected function textBody(): Attribute
+    {
+        return Attribute::get(
+            fn (?string $value) => $value
+                ? Str::of($value)
+                : Str::of($this->html_body?->toHtml() ?? '')
+                    ->stripTags()
+        );
+    }
+
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

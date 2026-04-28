@@ -10,6 +10,7 @@ class BankConnectionTenant extends FluxPivot
 {
     protected $table = 'bank_connection_tenant';
 
+    // Relations
     public function bankConnection(): BelongsTo
     {
         return $this->belongsTo(BankConnection::class);

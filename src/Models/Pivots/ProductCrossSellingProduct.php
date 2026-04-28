@@ -10,6 +10,7 @@ class ProductCrossSellingProduct extends FluxPivot
 {
     protected $table = 'product_cross_selling_product';
 
+    // Relations
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

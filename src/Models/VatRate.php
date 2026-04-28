@@ -26,11 +26,13 @@ class VatRate extends FluxModel
         ];
     }
 
+    // Relations
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

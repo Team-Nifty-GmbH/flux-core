@@ -20,6 +20,7 @@ class ContactOption extends FluxModel
         ];
     }
 
+    // Relations
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);

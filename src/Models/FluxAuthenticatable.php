@@ -15,11 +15,13 @@ abstract class FluxAuthenticatable extends User
 {
     use BroadcastsEvents, CausesActivity, HasApiTokens, HasModelPermission, ResolvesRelationsThroughContainer;
 
+    // Relations
     public function deviceTokens(): MorphMany
     {
         return $this->morphMany(DeviceToken::class, 'authenticatable');
     }
 
+    // Public methods
     public function resolveCollectionFromAttribute(): ?string
     {
         $parent = get_parent_class(static::class);

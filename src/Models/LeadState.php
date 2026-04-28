@@ -7,6 +7,7 @@ use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -31,20 +32,24 @@ class LeadState extends FluxModel
         ];
     }
 
+    // Relations
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);
     }
 
-    public function getImageAttribute(): string
+    // Attributes
+    protected function image(): Attribute
     {
-        return route('avatar', [
-            'text' => Str::of($this->name)
-                ->replaceMatches('/[^A-Z]/', '')
-                ->trim()
-                ->limit(2, '')
-                ->toString(),
-            'color' => Str::after($this->color, '#'),
-        ]);
+        return Attribute::get(
+            fn () => route('avatar', [
+                'text' => Str::of($this->name)
+                    ->replaceMatches('/[^A-Z]/', '')
+                    ->trim()
+                    ->limit(2, '')
+                    ->toString(),
+                'color' => Str::after($this->color, '#'),
+            ])
+        );
     }
 }

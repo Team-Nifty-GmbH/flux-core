@@ -23,6 +23,7 @@ class AbsencePolicy extends FluxModel
         ];
     }
 
+    // Relations
     public function absenceTypes(): BelongsToMany
     {
         return $this->belongsToMany(AbsenceType::class, 'absence_policy_absence_type')
@@ -30,6 +31,7 @@ class AbsencePolicy extends FluxModel
             ->withPivot('pivot_id');
     }
 
+    // Public methods
     public function validateRequest(AbsenceRequest $request): array
     {
         $errors = [];

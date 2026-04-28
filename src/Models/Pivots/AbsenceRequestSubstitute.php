@@ -10,6 +10,7 @@ class AbsenceRequestSubstitute extends FluxPivot
 {
     protected $table = 'absence_request_substitute';
 
+    // Relations
     public function absenceRequest(): BelongsTo
     {
         return $this->belongsTo(AbsenceRequest::class);

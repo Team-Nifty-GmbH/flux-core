@@ -21,11 +21,7 @@ class Printer extends FluxModel
         ];
     }
 
-    public function scopeVisible(Builder $query): Builder
-    {
-        return $query->where('is_visible', true);
-    }
-
+    // Relations
     public function printerUsers(): HasMany
     {
         return $this->hasMany(PrinterUser::class);
@@ -40,5 +36,11 @@ class Printer extends FluxModel
     {
         return $this->belongsToMany(User::class, 'printer_user')
             ->using(PrinterUser::class);
+    }
+
+    // Scopes
+    protected function scopeVisible(Builder $query): Builder
+    {
+        return $query->where('is_visible', true);
     }
 }
