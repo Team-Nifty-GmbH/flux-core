@@ -9,10 +9,11 @@ use FluxErp\Models\Tenant;
 it('uses the address language for the salutation translation', function (): void {
     app()->setLocale('de');
 
-    $english = Language::query()->firstOrCreate(
-        ['language_code' => 'en'],
-        ['name' => 'English', 'iso_name' => 'en']
-    );
+    $english = Language::factory()->create([
+        'language_code' => 'en',
+        'iso_name' => 'en',
+        'name' => 'English',
+    ]);
 
     $tenant = Tenant::factory()->create();
     $contact = Contact::factory()

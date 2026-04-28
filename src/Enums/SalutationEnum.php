@@ -29,7 +29,7 @@ class SalutationEnum extends FluxEnum
         };
     }
 
-    public static function salutation(string $case, object|array $address): string
+    public static function salutation(string $case, object|array $address, ?string $locale = null): string
     {
         $parameter = [
             'firstname' => data_get($address, 'firstname'),
@@ -37,25 +37,16 @@ class SalutationEnum extends FluxEnum
             'company' => data_get($address, 'company'),
         ];
 
-        $locale = data_get($address, 'language.language_code');
+        $form = data_get($address, 'has_formal_salutation') ? 'formal' : 'informal';
+        $suffix = match ($case) {
+            SalutationEnum::Mrs => 'mrs',
+            SalutationEnum::Mr => 'mr',
+            SalutationEnum::Company => 'company',
+            SalutationEnum::Family => 'family',
+            default => 'no_salutation',
+        };
 
-        if (data_get($address, 'has_formal_salutation')) {
-            return match ($case) {
-                SalutationEnum::Mrs => __('salutation.formal.mrs', $parameter, $locale),
-                SalutationEnum::Mr => __('salutation.formal.mr', $parameter, $locale),
-                SalutationEnum::Company => __('salutation.formal.company', $parameter, $locale),
-                SalutationEnum::Family => __('salutation.formal.family', $parameter, $locale),
-                default => __('salutation.formal.no_salutation', $parameter, $locale),
-            };
-        } else {
-            return match ($case) {
-                SalutationEnum::Mrs => __('salutation.informal.mrs', $parameter, $locale),
-                SalutationEnum::Mr => __('salutation.informal.mr', $parameter, $locale),
-                SalutationEnum::Company => __('salutation.informal.company', $parameter, $locale),
-                SalutationEnum::Family => __('salutation.informal.family', $parameter, $locale),
-                default => __('salutation.informal.no_salutation', $parameter, $locale),
-            };
-        }
+        return __("salutation.{$form}.{$suffix}", $parameter, $locale);
     }
 
     public function get(Model $model, string $key, mixed $value, array $attributes): ?object

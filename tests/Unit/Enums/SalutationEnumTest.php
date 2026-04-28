@@ -15,7 +15,7 @@ test('values include mr and mrs', function (): void {
     expect(SalutationEnum::values())->toContain('mr', 'mrs');
 });
 
-test('salutation uses the address language', function (): void {
+test('salutation honours the explicit locale argument', function (): void {
     app()->setLocale('de');
 
     $address = [
@@ -27,8 +27,6 @@ test('salutation uses the address language', function (): void {
     expect(SalutationEnum::salutation(SalutationEnum::Mrs, $address))
         ->toBe('Sehr geehrte Frau Lopez');
 
-    $address['language'] = ['language_code' => 'en'];
-
-    expect(SalutationEnum::salutation(SalutationEnum::Mrs, $address))
+    expect(SalutationEnum::salutation(SalutationEnum::Mrs, $address, 'en'))
         ->toBe('Dear Mrs. Lopez');
 });
