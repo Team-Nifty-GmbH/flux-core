@@ -210,7 +210,16 @@ abstract class FluxAction
             }
         }
 
-        DB::transaction(fn () => $this->result = $this->performAction(), 5);
+        // Only wrap in a transaction if not already inside one. Nested actions
+        // (e.g. CreateOrder calling CreateOrderPosition) would otherwise create
+        // deeply nested savepoints whose retry logic can desynchronize Laravel's
+        // transaction counter — breaking RefreshDatabase rollback in tests and
+        // risking inconsistent state on deadlock retry in production.
+        if (DB::transactionLevel() === 0) {
+            DB::transaction(fn () => $this->result = $this->performAction(), 5);
+        } else {
+            $this->result = $this->performAction();
+        }
 
         if ($current) {
             if (method_exists(auth(), 'login')) {

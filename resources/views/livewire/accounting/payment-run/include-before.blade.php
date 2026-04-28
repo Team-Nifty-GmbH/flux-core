@@ -41,7 +41,10 @@
                                     $wire
                                         .removeOrder(order.id)
                                         .then((closeModal) => {
-                                            if (closeModal) close();
+                                            if (closeModal)
+                                                $tsui.close.modal(
+                                                    'execute-payment-run',
+                                                );
                                         })
                                 "
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
@@ -140,6 +143,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('execute-payment-run')"
                 />
+                @stack('payment-run-execute-actions')
                 <x-button
                     color="indigo"
                     :text="__('Execute Payment Run')"

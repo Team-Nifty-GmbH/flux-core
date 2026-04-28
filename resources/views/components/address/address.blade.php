@@ -388,7 +388,7 @@
                                         sm
                                         icon="plus"
                                         color="emerald"
-                                        wire:click="addTag($promptValue())"
+                                        wire:click="addTag($nuxbe.promptValue())"
                                         wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                                     />
                                 @endcanAction
@@ -455,6 +455,11 @@
                         !$wire.edit || $wire.address.is_invoice_address
                     "
                     wire:model="address.is_invoice_address"
+                />
+                <x-toggle
+                    :label="__('Payment Reminder Address')"
+                    x-bind:disabled="!$wire.edit"
+                    wire:model="address.is_payment_reminder_address"
                 />
             @show
         </div>

@@ -14,6 +14,7 @@ use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\AddressSerialNumber;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Support\Collection\AddressCollection;
+use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\Calendar\HasCalendars;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Communicatable;
@@ -48,7 +49,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -196,6 +196,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 $addressesUpdates += [
                     'is_delivery_address' => false,
                 ];
+            }
+
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_payment_reminder_address'))
+                && $address->is_payment_reminder_address
+            ) {
+                resolve_static(Address::class, 'query')
+                    ->whereKeyNot($address->getKey())
+                    ->where('contact_id', $address->contact_id)
+                    ->where('is_payment_reminder_address', true)
+                    ->update(['is_payment_reminder_address' => false]);
             }
 
             if ($contactUpdates) {
@@ -351,9 +361,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'search_aliases' => 'array',
             'advertising_state' => AdvertisingState::class,
             'has_formal_salutation' => 'boolean',
-            'is_main_address' => 'boolean',
-            'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',
+            'is_invoice_address' => 'boolean',
+            'is_main_address' => 'boolean',
+            'is_payment_reminder_address' => 'boolean',
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];
@@ -557,12 +568,15 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function salutation(): ?string
     {
+        $this->loadMissing('language');
+
         return resolve_static(
             SalutationEnum::class,
             'salutation',
             [
                 'case' => $this->salutation?->value ?? SalutationEnum::NoSalutation,
                 'address' => $this,
+                'locale' => $this->preferredLocale(),
             ]
         );
     }

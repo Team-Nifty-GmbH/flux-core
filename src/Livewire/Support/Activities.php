@@ -6,11 +6,13 @@ use FluxErp\Models\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Activitylog\Models\Activity;
 use TeamNiftyGmbH\DataTable\Helpers\Icon;
 
 abstract class Activities extends Component
@@ -58,18 +60,25 @@ abstract class Activities extends Component
         $this->total = $activities->total();
 
         $this->activities = $activities
-            ->map(function ($item) {
+            ->map(function (Activity $item) {
                 $itemArray = $item->toArray();
                 $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
                 $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
                 $itemArray['event'] = __($item->event);
+                $changes = auth()->user() instanceof User
+                    ? ($item->attribute_changes?->toArray() ?? [])
+                    : ['old' => [], 'attributes' => []];
 
-                if (! auth()->user() instanceof User) {
-                    $itemArray['properties'] = [
-                        'old' => [],
-                        'attributes' => [],
-                    ];
+                // Translate attribute names to human-readable labels
+                foreach (['old', 'attributes'] as $changeKey) {
+                    if (isset($changes[$changeKey])) {
+                        $changes[$changeKey] = collect($changes[$changeKey])
+                            ->mapWithKeys(fn (mixed $value, string $key) => [__(Str::headline($key)) => $value])
+                            ->toArray();
+                    }
                 }
+
+                $itemArray['properties'] = $changes;
 
                 return $itemArray;
             })

@@ -12,6 +12,7 @@ use FluxErp\Notifications\QueueMonitor\Job\JobStartedNotification;
 use FluxErp\States\QueueMonitor\Failed;
 use FluxErp\States\QueueMonitor\QueueMonitorState;
 use FluxErp\States\QueueMonitor\Succeeded;
+use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\MonitorsQueue;
@@ -23,7 +24,6 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
-use Spatie\ModelStates\HasStates;
 use Throwable;
 
 class QueueMonitor extends FluxModel

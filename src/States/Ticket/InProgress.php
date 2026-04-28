@@ -8,6 +8,6 @@ class InProgress extends TicketState
 
     public function color(): string
     {
-        return static::$color ?? 'amber';
+        return static::$color ?? 'violet';
     }
 }

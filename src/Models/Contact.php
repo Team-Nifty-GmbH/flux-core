@@ -31,12 +31,12 @@ use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\View\Printing\Contact\BalanceStatement;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -160,6 +160,12 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->hasMany(Order::class);
     }
 
+    public function paymentReminderAddress(): HasOne
+    {
+        return $this->hasOne(Address::class)
+            ->where('is_payment_reminder_address', true);
+    }
+
     public function paymentType(): BelongsTo
     {
         return $this->belongsTo(PaymentType::class);
@@ -198,7 +204,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     }
 
     // Public methods
-    public function getAllDiscounts(): SupportCollection
+    public function getAllDiscounts(): Collection
     {
         return $this->getAllDiscountsQuery()
             ->get()
@@ -222,7 +228,12 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             ->getQuery();
 
         $discountsThroughGroupsQuery = $this->discountGroups()
-            ->join('discount_discount_group', 'discount_groups.id', '=', 'discount_discount_group.discount_group_id')
+            ->join(
+                'discount_discount_group',
+                'discount_groups.id',
+                '=',
+                'discount_discount_group.discount_group_id'
+            )
             ->join('discounts', 'discounts.id', '=', 'discount_discount_group.discount_id')
             ->select('discounts.*')
             ->where('discount_groups.is_active', true)

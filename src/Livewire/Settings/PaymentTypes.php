@@ -12,6 +12,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -78,14 +79,13 @@ class PaymentTypes extends PaymentTypeList
         return true;
     }
 
+    #[Renderless]
     public function edit(PaymentType $paymentType): void
     {
         $this->paymentType->reset();
         $this->paymentType->fill($paymentType);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-payment-type-modal');
-        JS);
+        $this->modalOpen('edit-payment-type-modal');
     }
 
     public function save(): bool

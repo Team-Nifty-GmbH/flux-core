@@ -19,8 +19,8 @@ class WorkTimeList extends BaseDataTable
     ];
 
     public array $formatters = [
-        'total_time_ms' => 'time',
-        'paused_time_ms' => 'time',
+        'total_time_ms' => 'duration',
+        'paused_time_ms' => 'duration',
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
     ];

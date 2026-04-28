@@ -16,14 +16,17 @@
             this.tabSelected = this.tab = tabButton.dataset.tabName
         },
         init() {
-            Livewire.hook('commit', ({ succeed }) => {
+            this._unhookCommit = Livewire.hook('commit', ({ succeed }) => {
                 succeed(() => {
                     this.$refs.tabButtons
-                        .querySelectorAll('.animate-pulse')
+                        ?.querySelectorAll('.animate-pulse')
                         .forEach(btn => btn.classList.remove('animate-pulse'))
                     this.loadingTab = null
                 })
             })
+        },
+        destroy() {
+            this._unhookCommit?.()
         },
     }"
     wire:ignore

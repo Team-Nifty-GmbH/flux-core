@@ -25,12 +25,15 @@ use FluxErp\Rules\Numeric;
 use FluxErp\Settings\SubscriptionSettings;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
+use FluxErp\States\Order\PaymentState\InOpenPaymentRun;
+use FluxErp\States\Order\PaymentState\InPayment;
 use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
+use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\CascadeSoftDeletes;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Communicatable;
@@ -74,7 +77,6 @@ use Illuminate\Support\Traits\Conditionable;
 use RoundingMode;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
@@ -157,7 +159,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             }
 
             if ($order->isDirty('invoice_date') || $order->isDirty('payment_discount_target')) {
-                $order->payment_discount_target_date = ($order->invoice_date && ! is_null($order->payment_discount_target))
+                $order->payment_discount_target_date =
+                    ($order->invoice_date && ! is_null($order->payment_discount_target))
                     ? $order->invoice_date->copy()->addDays($order->payment_discount_target)
                     : null;
             }
@@ -245,7 +248,13 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 $order->broadcastEvent('locked');
             }
 
-            if (($order->wasChanged('approval_user_id') || $order->wasRecentlyCreated) && $order->approval_user_id) {
+            if (
+                (
+                    $order->wasChanged('approval_user_id')
+                    || $order->wasRecentlyCreated
+                )
+                && $order->approval_user_id
+            ) {
                 $order->approvalUser?->subscribeNotificationChannel($order->broadcastChannel());
 
                 event(OrderApprovalRequestEvent::make($order));
@@ -263,7 +272,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             $purchaseInvoice = $order->purchaseInvoice;
 
             if ($purchaseInvoice) {
-                $movedMedia = $order->getFirstMedia('invoice')?->move($purchaseInvoice, 'purchase_invoice');
+                $movedMedia = $order->getFirstMedia('invoice')
+                    ?->move($purchaseInvoice, 'purchase_invoice');
 
                 $update = ['order_id' => null];
 
@@ -392,7 +402,9 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                         ->map(fn (OrderType $orderType) => array_merge(
                             $bluePrint,
                             [
-                                'id' => base64_encode(morph_alias(static::class) . ':' . $orderType->getKey()),
+                                'id' => base64_encode(
+                                    morph_alias(static::class) . ':' . $orderType->getKey()
+                                ),
                                 'modelType' => morph_alias(static::class),
                                 'name' => $orderType->name,
                                 'order_type_id' => $orderType->getKey(),
@@ -742,7 +754,13 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     public function calculatePaymentState(): static
     {
         if (! $this->transactions()->exists()) {
-            if ($this->payment_state->canTransitionTo(Open::class)) {
+            // Don't reset to Open if order is in a payment run state
+            // Payment run lifecycle manages InOpenPaymentRun and InPayment
+            if (
+                ! $this->payment_state instanceof InOpenPaymentRun
+                && ! $this->payment_state instanceof InPayment
+                && $this->payment_state->canTransitionTo(Open::class)
+            ) {
                 $this->payment_state->transitionTo(Open::class);
             }
         } else {
@@ -951,12 +969,18 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                         'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
                         'total_vat_price' => bcadd(
                             $this->shipping_costs_vat_price,
-                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_vat_price') ?? 0,
+                            data_get(
+                                $vats->get($this->shipping_costs_vat_rate_percentage),
+                                'total_vat_price'
+                            ) ?? 0,
                             9
                         ),
                         'total_net_price' => bcadd(
                             $this->shipping_costs_net_price,
-                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_net_price') ?? 0,
+                            data_get(
+                                $vats->get($this->shipping_costs_vat_rate_percentage),
+                                'total_net_price'
+                            ) ?? 0,
                             9
                         ),
                     ]
@@ -1050,7 +1074,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             if (! is_null($creditLine = $this->contact->credit_line)) {
                 $rules['balance'] = app(Numeric::class, ['max' => $creditLine]);
                 $data['balance'] = bcadd($this->contact->orders()->unpaid()->sum('balance'), $this->total_gross_price);
-                $messages['balance'][get_class($rules['balance'])] = __('The credit line of the contact is exceeded');
+                $messages['balance'][get_class($rules['balance'])] =
+                    __('The credit line of the contact is exceeded');
             }
 
             Validator::make($data, $rules, $messages)->validate();
@@ -1241,6 +1266,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         };
     }
 
+    public function resolveMailablePaymentReminderAddress(): ?Address
+    {
+        $paymentReminderAddress = $this->contact?->paymentReminderAddress;
+
+        if (filled($paymentReminderAddress?->email_primary)) {
+            return $paymentReminderAddress;
+        }
+
+        return $this->resolveMailableInvoiceAddress();
+    }
+
     public function totalPaid(): string|float|int
     {
         return $this->transactions()
@@ -1372,6 +1408,32 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                         'mainAddress',
                         fn (Builder $query) => $query->whereNotNull('email_primary')
                     )
+                )
+            );
+    }
+
+    protected function scopeWhereHasMailablePaymentReminderAddress(Builder $query): Builder
+    {
+        return $query
+            ->with(['contact.paymentReminderAddress'])
+            ->where(fn (Builder $query) => $query
+                ->whereHas('contact', fn (Builder $query) => $query
+                    ->whereHas(
+                        'paymentReminderAddress',
+                        fn (Builder $query) => $query->whereNotNull('email_primary')
+                    )
+                    ->orWhereHas(
+                        'invoiceAddress',
+                        fn (Builder $query) => $query->whereNotNull('email_primary')
+                    )
+                    ->orWhereHas(
+                        'mainAddress',
+                        fn (Builder $query) => $query->whereNotNull('email_primary')
+                    )
+                )
+                ->orWhereHas(
+                    'addressInvoice',
+                    fn (Builder $query) => $query->whereNotNull('email_primary')
                 )
             );
     }

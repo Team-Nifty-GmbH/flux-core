@@ -40,9 +40,9 @@
     @show
     @persist('notifications')
         @if(auth()->check() && auth()->id())
-            <x-toast z-index="z-50" />
+            <x-toast />
         @endif
-        <x-dialog z-index="z-40" blur="md" align="center" />
+        <x-dialog />
     @endpersist
 
     @auth('web')

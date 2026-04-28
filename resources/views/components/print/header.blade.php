@@ -1,14 +1,41 @@
-<header class="fixed h-auto w-full bg-white text-center font-light">
+<header
+    style="
+        position: fixed;
+        height: auto;
+        width: 100%;
+        background: white;
+        text-align: center;
+        font-weight: 300;
+    "
+>
     <div class="header-content">
         <div>
             @section('subject')
-                <div class="float-left inline-block text-left">
-                    <h2 class="text-xl font-semibold">{{ $subject ?? '' }}</h2>
-                    <div class="page-count text-xs"></div>
+                <div
+                    style="float: left; display: inline-block; text-align: left"
+                >
+                    <h2
+                        style="
+                            font-size: 20px;
+                            line-height: 28px;
+                            font-weight: 600;
+                        "
+                    >
+                        {{ $subject ?? '' }}
+                    </h2>
+                    <div class="page-count" style="font-size: 12px"></div>
                 </div>
             @show
             @section('logo')
-                <div class="float-right inline-block max-h-72 w-44 text-right">
+                <div
+                    style="
+                        float: right;
+                        display: inline-block;
+                        max-height: 288px;
+                        width: 176px;
+                        text-align: right;
+                    "
+                >
                     <img
                         class="logo-small"
                         src="{{ $tenant->logo_small }}"
@@ -16,7 +43,7 @@
                     />
                 </div>
             @show
-            <div class="clear-both"></div>
+            <div style="clear: both"></div>
         </div>
     </div>
 </header>
