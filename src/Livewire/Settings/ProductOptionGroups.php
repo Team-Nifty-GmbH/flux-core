@@ -8,7 +8,6 @@ use FluxErp\Actions\ProductOptionGroup\UpdateProductOptionGroup;
 use FluxErp\Livewire\DataTables\ProductOptionGroupList;
 use FluxErp\Livewire\Forms\ProductOptionGroupForm;
 use FluxErp\Models\ProductOptionGroup;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -17,7 +16,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductOptionGroups extends ProductOptionGroupList
 {
-    use Actions, SupportsLocalization;
+    use SupportsLocalization;
 
     public ProductOptionGroupForm $productOptionGroupForm;
 

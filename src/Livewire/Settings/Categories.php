@@ -8,7 +8,6 @@ use FluxErp\Actions\Category\UpdateCategory;
 use FluxErp\Livewire\DataTables\CategoryList;
 use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Models\Category;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use FluxErp\Traits\Model\Categorizable;
@@ -19,7 +18,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Categories extends CategoryList
 {
-    use Actions, AllowRecordMerging, SupportsLocalization;
+    use AllowRecordMerging, SupportsLocalization;
 
     public CategoryForm $category;
 

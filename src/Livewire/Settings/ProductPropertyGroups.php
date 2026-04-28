@@ -9,7 +9,6 @@ use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Livewire\DataTables\ProductPropertyGroupList;
 use FluxErp\Livewire\Forms\ProductPropertyGroupForm;
 use FluxErp\Models\ProductPropertyGroup;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +18,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductPropertyGroups extends ProductPropertyGroupList
 {
-    use Actions, SupportsLocalization;
+    use SupportsLocalization;
 
     public ProductPropertyGroupForm $productPropertyGroup;
 

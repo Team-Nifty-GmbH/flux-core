@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -17,8 +16,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class MediaList extends BaseDataTable
 {
-    use Actions;
-
     public array $enabledCols = [
         'file_name',
         'collection_name',

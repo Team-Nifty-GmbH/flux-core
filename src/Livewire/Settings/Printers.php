@@ -9,7 +9,6 @@ use FluxErp\Livewire\Forms\PrinterBridgeConfigForm;
 use FluxErp\Livewire\Forms\PrinterForm;
 use FluxErp\Models\Printer;
 use FluxErp\Models\Token;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -17,8 +16,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Printers extends PrinterList
 {
-    use Actions;
-
     public PrinterBridgeConfigForm $configForm;
 
     public PrinterForm $printerForm;

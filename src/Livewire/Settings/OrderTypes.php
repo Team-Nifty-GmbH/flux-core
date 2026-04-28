@@ -8,7 +8,6 @@ use FluxErp\Livewire\Forms\OrderTypeForm;
 use FluxErp\Models\Order;
 use FluxErp\Models\Tenant;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
@@ -18,7 +17,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class OrderTypes extends OrderTypeList
 {
-    use Actions, AllowRecordMerging, DataTableHasFormEdit, SupportsLocalization;
+    use AllowRecordMerging, DataTableHasFormEdit, SupportsLocalization;
 
     #[DataTableForm]
     public OrderTypeForm $orderType;
