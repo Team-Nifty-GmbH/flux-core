@@ -40,7 +40,7 @@
         "filepond": "^4.31.3",
         "filepond-plugin-image-preview": "^4.6.12",
         "gridstack": "^12.6.0",
-        "laravel-echo": "^2.0.0",
+        "laravel-echo": "^2.3.4",
         "laravel-vite-plugin": "^3.0.0",
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
