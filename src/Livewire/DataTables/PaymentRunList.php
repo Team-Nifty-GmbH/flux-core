@@ -106,12 +106,16 @@ class PaymentRunList extends BaseDataTable
         $paymentRun->orders()->detach($id);
 
         if ($order?->payment_state->canTransitionTo(Open::class)) {
-            UpdateOrder::make([
-                'id' => $order->getKey(),
-                'payment_state' => Open::$name,
-            ])
-                ->validate()
-                ->execute();
+            try {
+                UpdateOrder::make([
+                    'id' => $order->getKey(),
+                    'payment_state' => Open::$name,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $paymentRun = resolve_static(PaymentRun::class, 'query')
@@ -125,7 +129,6 @@ class PaymentRunList extends BaseDataTable
         }
 
         $this->loadPaymentRun($paymentRun);
-        $this->loadData();
 
         return false;
     }
