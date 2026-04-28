@@ -14,3 +14,21 @@ test('toArray returns all values', function (): void {
 test('values include mr and mrs', function (): void {
     expect(SalutationEnum::values())->toContain('mr', 'mrs');
 });
+
+test('salutation uses the address language', function (): void {
+    app()->setLocale('de');
+
+    $address = [
+        'firstname' => 'Cristina',
+        'lastname' => 'Lopez',
+        'has_formal_salutation' => true,
+    ];
+
+    expect(SalutationEnum::salutation(SalutationEnum::Mrs, $address))
+        ->toBe('Sehr geehrte Frau Lopez');
+
+    $address['language'] = ['language_code' => 'en'];
+
+    expect(SalutationEnum::salutation(SalutationEnum::Mrs, $address))
+        ->toBe('Dear Mrs. Lopez');
+});

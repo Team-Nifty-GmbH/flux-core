@@ -37,21 +37,23 @@ class SalutationEnum extends FluxEnum
             'company' => data_get($address, 'company'),
         ];
 
+        $locale = data_get($address, 'language.language_code');
+
         if (data_get($address, 'has_formal_salutation')) {
             return match ($case) {
-                SalutationEnum::Mrs => __('salutation.formal.mrs', $parameter),
-                SalutationEnum::Mr => __('salutation.formal.mr', $parameter),
-                SalutationEnum::Company => __('salutation.formal.company', $parameter),
-                SalutationEnum::Family => __('salutation.formal.family', $parameter),
-                default => __('salutation.formal.no_salutation', $parameter),
+                SalutationEnum::Mrs => __('salutation.formal.mrs', $parameter, $locale),
+                SalutationEnum::Mr => __('salutation.formal.mr', $parameter, $locale),
+                SalutationEnum::Company => __('salutation.formal.company', $parameter, $locale),
+                SalutationEnum::Family => __('salutation.formal.family', $parameter, $locale),
+                default => __('salutation.formal.no_salutation', $parameter, $locale),
             };
         } else {
             return match ($case) {
-                SalutationEnum::Mrs => __('salutation.informal.mrs', $parameter),
-                SalutationEnum::Mr => __('salutation.informal.mr', $parameter),
-                SalutationEnum::Company => __('salutation.informal.company', $parameter),
-                SalutationEnum::Family => __('salutation.informal.family', $parameter),
-                default => __('salutation.informal.no_salutation', $parameter),
+                SalutationEnum::Mrs => __('salutation.informal.mrs', $parameter, $locale),
+                SalutationEnum::Mr => __('salutation.informal.mr', $parameter, $locale),
+                SalutationEnum::Company => __('salutation.informal.company', $parameter, $locale),
+                SalutationEnum::Family => __('salutation.informal.family', $parameter, $locale),
+                default => __('salutation.informal.no_salutation', $parameter, $locale),
             };
         }
     }
