@@ -46,7 +46,7 @@ class SalutationEnum extends FluxEnum
             default => 'no_salutation',
         };
 
-        return __("salutation.{$form}.{$suffix}", $parameter, $locale);
+        return __('salutation.' . $form . '.' . $suffix, $parameter, $locale);
     }
 
     public function get(Model $model, string $key, mixed $value, array $attributes): ?object
