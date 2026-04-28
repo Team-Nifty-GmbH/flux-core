@@ -112,9 +112,9 @@ class Tenant extends FluxModel implements HasMedia
             fn (mixed $value, array $attributes) => implode(
                 ' | ',
                 array_filter([
-                    $attributes['name'],
-                    $attributes['street'],
-                    $attributes['postcode'] . ' ' . $attributes['city'],
+                    $attributes['name'] ?? null,
+                    $attributes['street'] ?? null,
+                    trim($attributes['postcode'] ?? null . ' ' . $attributes['city'] ?? null),
                 ])
             )
         );

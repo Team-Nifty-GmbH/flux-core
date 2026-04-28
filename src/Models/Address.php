@@ -715,11 +715,11 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return Attribute::get(
             fn (mixed $value, array $attributes) => array_values(
                 array_filter([
-                    $attributes['company'],
-                    trim($attributes['firstname'] . ' ' . $attributes['lastname']),
-                    $attributes['addition'],
-                    $attributes['street'],
-                    trim($attributes['zip'] . ' ' . $attributes['city']),
+                    $attributes['company'] ?? null,
+                    trim($attributes['firstname'] ?? null . ' ' . $attributes['lastname'] ?? null),
+                    $attributes['addition'] ?? null,
+                    $attributes['street'] ?? null,
+                    trim($attributes['zip'] ?? null . ' ' . $attributes['city'] ?? null),
                     $this->country_name,
                 ])
             )
