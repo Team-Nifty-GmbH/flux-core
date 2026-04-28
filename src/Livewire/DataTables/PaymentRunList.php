@@ -8,7 +8,7 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -134,7 +134,7 @@ class PaymentRunList extends BaseDataTable
     {
         $paymentRun
             ->load([
-                'orders' => fn (Builder $query) => $query
+                'orders' => fn (BelongsToMany $query) => $query
                     ->select([
                         'orders.id',
                         'orders.invoice_number',
