@@ -11,6 +11,7 @@ use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -77,6 +78,7 @@ class ProductOptionGroups extends ProductOptionGroupList
         $this->loadData();
     }
 
+    #[Renderless]
     public function edit(?ProductOptionGroup $productOptionGroup = null): void
     {
         $this->productOptionGroupForm->reset();
@@ -85,9 +87,7 @@ class ProductOptionGroups extends ProductOptionGroupList
             $this->productOptionGroupForm->fill($productOptionGroup);
         }
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-product-option-group-modal');
-        JS);
+        $this->modalOpen('edit-product-option-group-modal');
     }
 
     public function save(): bool

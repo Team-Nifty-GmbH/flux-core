@@ -12,6 +12,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -74,14 +75,13 @@ class Countries extends CountryList
         return true;
     }
 
+    #[Renderless]
     public function edit(Country $country): void
     {
         $this->country->reset();
         $this->country->fill($country);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-country-modal');
-        JS);
+        $this->modalOpen('edit-country-modal');
     }
 
     public function save(): bool

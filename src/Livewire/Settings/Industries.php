@@ -11,6 +11,7 @@ use FluxErp\Models\Industry;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -75,14 +76,13 @@ class Industries extends IndustryList
         return true;
     }
 
+    #[Renderless]
     public function edit(Industry $industry): void
     {
         $this->industryForm->reset();
         $this->industryForm->fill($industry);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-industry-modal');
-        JS);
+        $this->modalOpen('edit-industry-modal');
     }
 
     public function save(): bool

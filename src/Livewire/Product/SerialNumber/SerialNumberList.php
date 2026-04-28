@@ -7,6 +7,7 @@ use FluxErp\Livewire\DataTables\SerialNumberList as BaseSerialNumberList;
 use FluxErp\Livewire\Forms\StockPostingForm;
 use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -38,6 +39,7 @@ class SerialNumberList extends BaseSerialNumberList
         ];
     }
 
+    #[Renderless]
     public function edit(): void
     {
         $this->stockPosting->reset();
@@ -46,9 +48,7 @@ class SerialNumberList extends BaseSerialNumberList
             'quantity' => 1,
         ];
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('create-serial-number-modal');
-        JS);
+        $this->modalOpen('create-serial-number-modal');
     }
 
     public function save(): bool

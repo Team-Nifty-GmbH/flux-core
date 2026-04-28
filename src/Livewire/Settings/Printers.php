@@ -56,6 +56,7 @@ class Printers extends PrinterList
         ];
     }
 
+    #[Renderless]
     public function edit(Printer $printer): void
     {
         $this->printerForm->reset();

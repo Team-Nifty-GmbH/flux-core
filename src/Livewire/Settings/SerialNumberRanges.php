@@ -12,6 +12,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -78,14 +79,13 @@ class SerialNumberRanges extends SerialNumberRangeList
         return true;
     }
 
+    #[Renderless]
     public function edit(SerialNumberRange $serialNumberRange): void
     {
         $this->serialNumberRange->reset();
         $this->serialNumberRange->fill($serialNumberRange);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-serial-number-range-modal');
-        JS);
+        $this->modalOpen('edit-serial-number-range-modal');
     }
 
     public function save(): bool

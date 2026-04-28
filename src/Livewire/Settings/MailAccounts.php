@@ -25,7 +25,6 @@ use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
-#[Renderless]
 class MailAccounts extends MailAccountList
 {
     public array $folders = [];
@@ -99,16 +98,16 @@ class MailAccounts extends MailAccountList
         return true;
     }
 
+    #[Renderless]
     public function edit(MailAccount $mailAccount): void
     {
         $this->mailAccount->reset();
         $this->mailAccount->fill($mailAccount);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-mail-account');
-        JS);
+        $this->modalOpen('edit-mail-account');
     }
 
+    #[Renderless]
     public function editFolders(MailAccount $mailAccount): void
     {
         $this->mailAccount->reset();
@@ -116,11 +115,10 @@ class MailAccounts extends MailAccountList
 
         $this->loadFolders();
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-mail-folders');
-        JS);
+        $this->modalOpen('edit-mail-folders');
     }
 
+    #[Renderless]
     public function editMailFolder(MailFolder $mailFolder): void
     {
         $this->mailFolder->reset();

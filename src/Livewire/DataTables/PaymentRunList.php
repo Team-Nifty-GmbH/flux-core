@@ -8,6 +8,7 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\States\Order\PaymentState\Open;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -92,8 +93,10 @@ class PaymentRunList extends BaseDataTable
 
     public function removeOrder(int $id): bool
     {
+        $paymentRunId = $this->paymentRunForm->id;
+
         $paymentRun = resolve_static(PaymentRun::class, 'query')
-            ->whereKey($this->paymentRunForm->id)
+            ->whereKey($paymentRunId)
             ->first();
         $order = resolve_static(Order::class, 'query')
             ->select(['id', 'payment_state'])
@@ -111,13 +114,18 @@ class PaymentRunList extends BaseDataTable
                 ->execute();
         }
 
-        $this->loadPaymentRun($paymentRun);
+        $paymentRun = resolve_static(PaymentRun::class, 'query')
+            ->whereKey($paymentRunId)
+            ->first();
 
-        if (! $this->paymentRunForm->orders) {
+        if ($paymentRun->orders()->doesntExist()) {
             $this->delete();
 
             return true;
         }
+
+        $this->loadPaymentRun($paymentRun);
+        $this->loadData();
 
         return false;
     }
@@ -125,8 +133,8 @@ class PaymentRunList extends BaseDataTable
     protected function loadPaymentRun(PaymentRun $paymentRun): void
     {
         $paymentRun
-            ->loadMissing([
-                'orders' => fn ($query) => $query
+            ->load([
+                'orders' => fn (Builder $query) => $query
                     ->select([
                         'orders.id',
                         'orders.invoice_number',
@@ -140,5 +148,6 @@ class PaymentRunList extends BaseDataTable
             ->loadSum('orders AS total_amount', 'order_payment_run.amount');
 
         $this->paymentRunForm->fill($paymentRun);
+        $this->paymentRunForm->orders = $paymentRun->orders->toArray();
     }
 }
