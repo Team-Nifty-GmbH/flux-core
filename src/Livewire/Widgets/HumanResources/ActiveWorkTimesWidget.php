@@ -48,10 +48,10 @@ class ActiveWorkTimesWidget extends ValueList
             ->get();
 
         $usersWithPause = resolve_static(WorkTime::class, 'query')
+            ->whereIntegerInRaw('user_id', $workTimes->pluck('user_id'))
             ->where('is_daily_work_time', true)
             ->where('is_locked', false)
             ->where('is_pause', true)
-            ->whereIn('user_id', $workTimes->pluck('user_id'))
             ->pluck('user_id')
             ->flip();
 

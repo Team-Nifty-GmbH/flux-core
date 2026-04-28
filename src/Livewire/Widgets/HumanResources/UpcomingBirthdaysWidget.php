@@ -98,7 +98,6 @@ class UpcomingBirthdaysWidget extends Component
                 ];
             })
             ->sortBy('date_sort')
-            ->values()
             ->toArray();
     }
 }

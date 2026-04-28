@@ -3,7 +3,7 @@
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
         >
-            {{ __('Absence Heatmap') }}
+            {{ __('Vacation Heatmap') }}
         </h2>
         <hr class="mt-2" />
     </div>

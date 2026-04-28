@@ -44,7 +44,6 @@ class WorkTimeModelDistributionChart extends CircleChart
 
         $employedIds = resolve_static(Employee::class, 'query')
             ->employed($now)
-            ->select('id')
             ->pluck('id');
 
         if ($employedIds->isEmpty()) {
@@ -54,16 +53,20 @@ class WorkTimeModelDistributionChart extends CircleChart
             return;
         }
 
-        $workTimeModelTable = resolve_static(WorkTimeModel::class, 'query')->getModel()->getTable();
-        $pivotTable = resolve_static(EmployeeWorkTimeModel::class, 'query')->getModel()->getTable();
+        $workTimeModelTable = app(WorkTimeModel::class)->getTable();
+        $pivotTable = app(EmployeeWorkTimeModel::class)->getTable();
 
         $distribution = resolve_static(EmployeeWorkTimeModel::class, 'query')
-            ->whereIn($pivotTable . '.employee_id', $employedIds)
+            ->join($workTimeModelTable, $pivotTable . '.work_time_model_id', '=', $workTimeModelTable . '.id')
+            ->whereIntegerInRaw($pivotTable . '.employee_id', $employedIds)
             ->where($pivotTable . '.valid_from', '<=', $now)
             ->where(fn ($query) => $query->whereNull($pivotTable . '.valid_until')
                 ->orWhere($pivotTable . '.valid_until', '>=', $now))
-            ->join($workTimeModelTable, $pivotTable . '.work_time_model_id', '=', $workTimeModelTable . '.id')
-            ->selectRaw($workTimeModelTable . '.name, ' . $workTimeModelTable . '.id, count(' . $pivotTable . '.employee_id) as employee_count')
+            ->selectRaw(
+                $workTimeModelTable . '.name, '
+                . $workTimeModelTable . '.id, '
+                . 'count(' . $pivotTable . '.employee_id) as employee_count'
+            )
             ->groupBy($workTimeModelTable . '.id', $workTimeModelTable . '.name')
             ->get();
 
@@ -78,7 +81,8 @@ class WorkTimeModelDistributionChart extends CircleChart
                 ChartColorEnum::class,
                 'forIndex',
                 ['index' => $index]
-            )->value;
+            )
+                ->value;
         }
 
         $this->labels = $labels;
