@@ -41,7 +41,10 @@
                                     $wire
                                         .removeOrder(order.id)
                                         .then((closeModal) => {
-                                            if (closeModal) $tsui.close.modal('execute-payment-run');
+                                            if (closeModal)
+                                                $tsui.close.modal(
+                                                    'execute-payment-run',
+                                                );
                                         })
                                 "
                                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
