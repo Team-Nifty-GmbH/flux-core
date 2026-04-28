@@ -34,7 +34,6 @@
         "@wireui/alpinejs-hold-directive": "^1.0.1",
         "alpinejs": "^3.13.2",
         "apexcharts": "^5.10.6",
-        "autoprefixer": "^10.4.16",
         "axios": "^1.15.1",
         "dayjs": "^1.11.11",
         "filepond": "^4.31.3",
