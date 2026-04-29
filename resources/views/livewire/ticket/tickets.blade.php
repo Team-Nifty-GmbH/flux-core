@@ -56,6 +56,7 @@
             :text="__('Cancel')"
             x-on:click="$tsui.close.modal('new-ticket-modal')"
         />
+        @stack('ticket-new-modal-footer')
         <x-button color="indigo" :text="__('Save')" wire:click="save()" />
     </x-slot:footer>
 </x-modal>

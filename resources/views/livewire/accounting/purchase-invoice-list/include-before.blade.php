@@ -743,6 +743,7 @@
                                     )
                                 "
                             />
+                            @stack('purchase-invoice-edit-modal-footer-actions')
                             <x-button
                                 color="indigo"
                                 x-cloak
@@ -778,7 +779,6 @@
                                     "
                                 />
                             @endcanAction
-
                         @show
                     </div>
                 </div>
@@ -1170,6 +1170,7 @@
                 :text="__('Close')"
                 x-on:click="$tsui.close.modal('bulk-pdf-upload-modal')"
             />
+            @stack('purchase-invoice-bulk-pdf-upload-modal-footer')
         </x-slot:footer>
     </x-modal>
 

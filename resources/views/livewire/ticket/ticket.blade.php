@@ -66,6 +66,7 @@
                 />
             @endcanAction
             <x-button color="indigo" :text="__('Save')" wire:click="save()" />
+            @stack('ticket-detail-header-actions')
         @show
     </div>
     <div class="w-full pt-6 lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
@@ -121,6 +122,7 @@
                                     wire:ignore
                                 />
                             </x-card>
+                            @stack('ticket-detail-content-after')
                         </div>
                     </div>
                 </div>
@@ -271,6 +273,7 @@
                         </div>
                     </x-card>
                 @show
+                @stack('ticket-detail-sidebar')
             </div>
         </section>
     </div>

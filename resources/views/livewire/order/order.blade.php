@@ -201,6 +201,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('replicate-order')"
                 />
+                @stack('order-replicate-modal-footer')
                 <x-button
                     loading="saveReplicate"
                     color="indigo"
@@ -256,6 +257,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('edit-discount')"
                 />
+                @stack('order-edit-discount-modal-footer')
                 <x-button
                     color="indigo"
                     :text="__('Save')"
@@ -401,6 +403,7 @@
                     :text="__('Save')"
                 />
             @endif
+            @stack('order-detail-header-actions')
         </div>
     </div>
     <x-flux::tabs
@@ -1480,4 +1483,5 @@
             @show
         </x-slot:append>
     </x-flux::tabs>
+    @stack('order-detail-after-tabs')
 </div>

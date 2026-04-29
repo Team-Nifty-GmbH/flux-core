@@ -26,6 +26,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('preview-{{ strtolower($this->getId()) }}')"
                 />
+                @stack('create-documents-preview-modal-footer')
                 <x-button
                     loading
                     color="indigo"
@@ -260,6 +261,7 @@
             :text="__('Cancel')"
             x-on:click="$tsui.close.modal('create-documents-{{ strtolower($this->getId()) }}')"
         />
+        @stack('create-documents-modal-footer')
         <x-button
             color="indigo"
             :text="__('Continue')"
