@@ -14,11 +14,13 @@ return new class() extends Migration
         });
 
         DB::table('order_types')
-            ->whereRaw('0 = (@rownum := 0)')
             ->orderBy('id')
-            ->update([
-                'order_column' => DB::raw('@rownum := @rownum + 1'),
-            ]);
+            ->pluck('id')
+            ->each(function ($id, $index): void {
+                DB::table('order_types')
+                    ->where('id', $id)
+                    ->update(['order_column' => $index + 1]);
+            });
     }
 
     public function down(): void
