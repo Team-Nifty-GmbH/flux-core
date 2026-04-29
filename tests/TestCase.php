@@ -11,7 +11,6 @@ use Illuminate\Foundation\Testing\WithCachedRoutes;
 use Illuminate\Support\Facades\File;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
-use Maatwebsite\Excel\ExcelServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
@@ -47,7 +46,6 @@ abstract class TestCase extends BaseTestCase
             FluxServiceProvider::class,
             WebPushServiceProvider::class,
             ServiceProvider::class,
-            ExcelServiceProvider::class,
         ];
     }
 
