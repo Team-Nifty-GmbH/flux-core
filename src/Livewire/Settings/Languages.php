@@ -6,15 +6,12 @@ use FluxErp\Actions\Language\DeleteLanguage;
 use FluxErp\Livewire\DataTables\LanguageList;
 use FluxErp\Livewire\Forms\LanguageForm;
 use FluxErp\Models\Language;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Languages extends LanguageList
 {
-    use Actions;
-
     public bool $editModal = false;
 
     public LanguageForm $selectedLanguage;

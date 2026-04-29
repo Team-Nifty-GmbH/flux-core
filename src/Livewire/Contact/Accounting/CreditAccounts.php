@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Contact\Accounting;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Livewire\Forms\ContactBankConnectionForm;
 use FluxErp\Livewire\Forms\TransactionForm;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
@@ -15,8 +14,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class CreditAccounts extends BankConnections
 {
-    use Actions;
-
     public array $columnLabels = [
         'bank_name' => 'Name',
     ];

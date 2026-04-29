@@ -9,7 +9,6 @@ use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +19,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class ProjectTaskList extends BaseTaskList
 {
-    use Actions, DataTableHasFormEdit, WithTabs {
+    use DataTableHasFormEdit, WithTabs {
         DataTableHasFormEdit::edit as editForm;
     }
 

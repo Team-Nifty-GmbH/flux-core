@@ -6,12 +6,11 @@ use FluxErp\Livewire\DataTables\BankConnectionList;
 use FluxErp\Livewire\Forms\BankConnectionForm;
 use FluxErp\Models\Currency;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 
 class BankConnections extends BankConnectionList
 {
-    use Actions, DataTableHasFormEdit;
+    use DataTableHasFormEdit;
 
     #[DataTableForm('bank-connection-modal')]
     public BankConnectionForm $bankConnection;

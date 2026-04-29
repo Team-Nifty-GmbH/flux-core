@@ -10,7 +10,6 @@ use FluxErp\Livewire\Forms\CountryForm;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -18,8 +17,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Countries extends CountryList
 {
-    use Actions;
-
     public CountryForm $country;
 
     protected ?string $includeBefore = 'flux::livewire.settings.countries';

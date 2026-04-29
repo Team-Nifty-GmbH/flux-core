@@ -8,7 +8,6 @@ use FluxErp\Actions\Warehouse\UpdateWarehouse;
 use FluxErp\Livewire\DataTables\WarehouseList;
 use FluxErp\Livewire\Forms\WarehouseForm;
 use FluxErp\Models\Warehouse;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -16,8 +15,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Warehouses extends WarehouseList
 {
-    use Actions;
-
     public ?string $includeBefore = 'flux::livewire.settings.warehouses';
 
     public WarehouseForm $warehouse;

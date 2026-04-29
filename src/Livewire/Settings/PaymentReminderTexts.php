@@ -8,7 +8,6 @@ use FluxErp\Actions\PaymentReminderText\UpdatePaymentReminderText;
 use FluxErp\Livewire\DataTables\PaymentReminderTextList;
 use FluxErp\Livewire\Forms\PaymentReminderTextForm;
 use FluxErp\Models\PaymentReminderText;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -17,7 +16,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentReminderTexts extends PaymentReminderTextList
 {
-    use Actions, SupportsLocalization;
+    use SupportsLocalization;
 
     public PaymentReminderTextForm $paymentReminderTextForm;
 

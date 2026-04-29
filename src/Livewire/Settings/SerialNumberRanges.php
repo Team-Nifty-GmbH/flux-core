@@ -9,7 +9,6 @@ use FluxErp\Livewire\DataTables\SerialNumberRangeList;
 use FluxErp\Livewire\Forms\SerialNumberRangeForm;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\Tenant;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Model\HasSerialNumberRange;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -18,8 +17,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class SerialNumberRanges extends SerialNumberRangeList
 {
-    use Actions;
-
     public ?string $includeBefore = 'flux::livewire.settings.serial-number-ranges';
 
     public SerialNumberRangeForm $serialNumberRange;
