@@ -218,7 +218,15 @@ class MergeRecords extends FluxAction
                             );
                         break;
                 }
-            } catch (ReflectionException|QueryException) {
+            } catch (ReflectionException) {
+                continue;
+            } catch (QueryException $e) {
+                logger()->warning('MergeRecords: skipping relation due to query exception', [
+                    'relation' => $relationItem->name,
+                    'model' => $mainRecord::class,
+                    'message' => $e->getMessage(),
+                ]);
+
                 continue;
             }
         }
