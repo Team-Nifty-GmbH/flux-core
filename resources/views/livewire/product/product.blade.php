@@ -94,7 +94,9 @@
                     :text="__('Cancel')"
                 />
             @endcanAction
+            @stack('product-detail-header-actions')
         </div>
     </div>
     <x-flux::tabs wire:model.live="tab" wire:loading="tab" :$tabs wire:ignore />
+    @stack('product-detail-after-tabs')
 </div>

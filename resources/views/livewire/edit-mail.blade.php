@@ -266,6 +266,7 @@
                 class="ml-auto"
                 :text="__('Send')"
             />
+            @stack('edit-mail-modal-footer')
         </x-slot>
     </x-modal>
 </div>

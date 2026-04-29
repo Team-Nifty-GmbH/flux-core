@@ -47,6 +47,7 @@
                 :text="__('Cancel')"
                 x-on:click="$tsui.close.modal('edit-position-discount')"
             />
+            @stack('order-edit-position-discount-modal-footer')
             <x-button
                 color="indigo"
                 :text="__('Save')"
@@ -555,6 +556,7 @@
                         :text="__('Cancel')"
                         x-on:click="$tsui.close.modal('edit-order-position')"
                     />
+                    @stack('order-edit-position-modal-footer')
                     <x-button
                         color="indigo"
                         x-on:click="

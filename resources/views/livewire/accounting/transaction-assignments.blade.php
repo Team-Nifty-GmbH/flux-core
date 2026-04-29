@@ -49,6 +49,7 @@
                         $tsui.close.modal('transaction-assign-orders-modal')
                     "
                 />
+                @stack('transaction-assign-orders-modal-footer')
                 <x-button :text="__('Assign')" wire:click="assignOrders" />
             </x-slot:footer>
         </x-modal>
@@ -99,6 +100,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('transaction-comments-modal')"
                 />
+                @stack('transaction-comments-modal-footer')
             </x-slot:footer>
         </x-modal>
     @endteleport
@@ -153,6 +155,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('order-transaction-modal')"
                 />
+                @stack('order-transaction-modal-footer')
                 <x-button
                     :text="__('Save')"
                     x-on:click="$wire.saveOrderTransaction()"

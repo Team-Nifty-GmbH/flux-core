@@ -71,10 +71,11 @@
                             wire:click="delete()"
                         />
                     @endcanAction
-
+                    @stack('contact-detail-header-actions')
                 @show
             </div>
         </div>
         <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
+        @stack('contact-detail-after-tabs')
     </main>
 </div>

@@ -118,6 +118,7 @@
                 light
                 x-on:click="$tsui.close.modal('{{ $leadForm->modalName() }}')"
             />
+            @stack('lead-edit-modal-footer')
             <x-button
                 :text="__('Save')"
                 color="indigo"

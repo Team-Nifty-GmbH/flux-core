@@ -116,7 +116,9 @@
                     $wire.resetForm();
                 "
             />
+            @stack('project-detail-header-actions')
         </div>
     </div>
     <x-flux::tabs wire:model.live="tab" :$tabs />
+    @stack('project-detail-after-tabs')
 </div>

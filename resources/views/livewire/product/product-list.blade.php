@@ -54,6 +54,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('create-product-modal')"
                 />
+                @stack('product-create-modal-footer')
                 <x-button
                     loading="save"
                     color="indigo"
@@ -169,6 +170,7 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('update-prices-modal')"
                 />
+                @stack('product-update-prices-modal-footer')
                 <x-button
                     loading="updatePrices"
                     color="indigo"
