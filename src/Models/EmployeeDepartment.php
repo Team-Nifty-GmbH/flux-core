@@ -22,19 +22,10 @@ class EmployeeDepartment extends FluxModel
         ];
     }
 
+    // Relations
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class, 'employee_department_id');
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name;
     }
 
     public function location(): BelongsTo
@@ -51,5 +42,16 @@ class EmployeeDepartment extends FluxModel
     {
         return $this->belongsToMany(VacationBlackout::class, 'employee_department_vacation_blackout')
             ->using(EmployeeDepartmentVacationBlackout::class);
+    }
+
+    // Public methods
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
     }
 }

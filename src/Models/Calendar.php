@@ -44,6 +44,7 @@ class Calendar extends FluxModel
         ];
     }
 
+    // Relations
     public function calendarables(): HasMany
     {
         return $this->hasMany(Calendarable::class);
@@ -54,6 +55,12 @@ class Calendar extends FluxModel
         return $this->hasMany(CalendarEvent::class);
     }
 
+    public function users(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'calendarable', 'calendarable');
+    }
+
+    // Public methods
     public function fromCalendarObject(array $calendar): static
     {
         $mappedArray = [];
@@ -65,18 +72,6 @@ class Calendar extends FluxModel
         $this->fill($mappedArray);
 
         return $this;
-    }
-
-    public function getLabel(): string
-    {
-        $parent = $this->parent?->getLabel();
-
-        return ($parent ? $parent . ' -> ' : '') . $this->name;
-    }
-
-    public function newCollection(array $models = []): Collection
-    {
-        return app(CalendarCollection::class, ['items' => $models]);
     }
 
     public function toCalendarObject(array $attributes = []): array
@@ -100,8 +95,15 @@ class Calendar extends FluxModel
         );
     }
 
-    public function users(): MorphToMany
+    public function getLabel(): string
     {
-        return $this->morphedByMany(User::class, 'calendarable', 'calendarable');
+        $parent = $this->parent?->getLabel();
+
+        return ($parent ? $parent . ' -> ' : '') . $this->name;
+    }
+
+    public function newCollection(array $models = []): Collection
+    {
+        return app(CalendarCollection::class, ['items' => $models]);
     }
 }

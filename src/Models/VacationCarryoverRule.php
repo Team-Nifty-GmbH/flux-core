@@ -20,6 +20,7 @@ class VacationCarryoverRule extends FluxModel
         ];
     }
 
+    // Relations
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);

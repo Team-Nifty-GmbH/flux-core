@@ -14,6 +14,7 @@ class Notification extends DatabaseNotification
 {
     use MassPrunable, ResolvesRelationsThroughContainer;
 
+    // Public methods
     public function prunable(): Builder
     {
         return static::query()

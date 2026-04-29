@@ -9,6 +9,7 @@ use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\Targetable;
+use FluxErp\Models\Pivots\OrderPositionTask;
 use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Support\Scout\ScoutCustomize;
@@ -45,6 +46,52 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     protected ?string $detailRouteName = 'tasks.id';
 
+    protected static function booted(): void
+    {
+        static::saving(function (Task $task): void {
+            if ($task->state && $task->state::$isEndState) {
+                $task->progress = 1;
+            }
+
+            if ($task->start_date) {
+                $newStartDatetime = $task->start_time
+                    ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
+                    : $task->start_date->copy()->startOfDay();
+
+                if ($task->start_datetime?->timestamp !== $newStartDatetime->timestamp) {
+                    $task->start_reminder_sent_at = null;
+                }
+
+                $task->start_datetime = $newStartDatetime;
+            } else {
+                $task->start_time = null;
+                $task->start_datetime = null;
+                $task->start_reminder_sent_at = null;
+            }
+
+            if ($task->due_date) {
+                $newDueDatetime = $task->due_time
+                    ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
+                    : $task->due_date->copy()->endOfDay();
+
+                if ($task->due_datetime?->timestamp !== $newDueDatetime->timestamp) {
+                    $task->due_reminder_sent_at = null;
+                }
+
+                $task->due_datetime = $newDueDatetime;
+            } else {
+                $task->due_time = null;
+                $task->due_datetime = null;
+                $task->due_reminder_sent_at = null;
+            }
+        });
+
+        static::saved(function (Task $task): void {
+            $task->project?->calculateProgress();
+        });
+    }
+
+    // Public static methods
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {
@@ -124,51 +171,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::saving(function (Task $task): void {
-            if ($task->state && $task->state::$isEndState) {
-                $task->progress = 1;
-            }
-
-            if ($task->start_date) {
-                $newStartDatetime = $task->start_time
-                    ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
-                    : $task->start_date->copy()->startOfDay();
-
-                if ($task->start_datetime?->timestamp !== $newStartDatetime->timestamp) {
-                    $task->start_reminder_sent_at = null;
-                }
-
-                $task->start_datetime = $newStartDatetime;
-            } else {
-                $task->start_time = null;
-                $task->start_datetime = null;
-                $task->start_reminder_sent_at = null;
-            }
-
-            if ($task->due_date) {
-                $newDueDatetime = $task->due_time
-                    ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
-                    : $task->due_date->copy()->endOfDay();
-
-                if ($task->due_datetime?->timestamp !== $newDueDatetime->timestamp) {
-                    $task->due_reminder_sent_at = null;
-                }
-
-                $task->due_datetime = $newDueDatetime;
-            } else {
-                $task->due_time = null;
-                $task->due_datetime = null;
-                $task->due_reminder_sent_at = null;
-            }
-        });
-
-        static::saved(function (Task $task): void {
-            $task->project?->calculateProgress();
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -186,6 +188,41 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
+    // Relations
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
+    public function orderPosition(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class);
+    }
+
+    public function orderPositions(): BelongsToMany
+    {
+        return $this->belongsToMany(OrderPosition::class, 'order_position_task')
+            ->using(OrderPositionTask::class)
+            ->withPivot('amount');
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'task_user')
+            ->using(TaskUser::class);
+    }
+
+    // Public methods
     public function costColumn(): string
     {
         return 'total_cost';
@@ -211,27 +248,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->detailRoute();
     }
 
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
-    }
-
-    public function orderPosition(): BelongsTo
-    {
-        return $this->belongsTo(OrderPosition::class);
-    }
-
-    public function orderPositions(): BelongsToMany
-    {
-        return $this->belongsToMany(OrderPosition::class, 'order_position_task')
-            ->withPivot('amount');
-    }
-
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
-    }
-
     /**
      * @throws \Spatie\Image\Exceptions\InvalidManipulation
      */
@@ -243,33 +259,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ->optimize()
             ->nonQueued()
             ->performOnCollections('files');
-    }
-
-    public function responsibleUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
-
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string $start,
-        Carbon|string $end,
-        ?array $info = null
-    ): void {
-        $builder->where(function (Builder $query) use ($start, $end): void {
-            $query
-                ->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('due_date', [$start, $end])
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->where('start_date', '<=', $end)
-                        ->where('due_date', '>=', $start);
-                })
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->whereNull('start_date')
-                        ->whereNull('due_date')
-                        ->whereBetween('created_at', [$start, $end]);
-                });
-        });
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -301,8 +290,26 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ->toSearchableArray();
     }
 
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'task_user')->using(TaskUser::class);
+    // Scopes
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('due_date', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start_date', '<=', $end)
+                        ->where('due_date', '>=', $start);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start_date')
+                        ->whereNull('due_date')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
+        });
     }
 }

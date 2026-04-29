@@ -28,6 +28,7 @@ class OrderType extends FluxModel implements Sortable
         'sort_when_creating' => true,
     ];
 
+    // Public static methods
     public static function hasPermission(): bool
     {
         return false;
@@ -46,6 +47,7 @@ class OrderType extends FluxModel implements Sortable
         ];
     }
 
+    // Relations
     public function emailTemplate(): BelongsTo
     {
         return $this->belongsTo(EmailTemplate::class);
@@ -58,9 +60,11 @@ class OrderType extends FluxModel implements Sortable
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'order_type_tenant')->using(OrderTypeTenant::class);
+        return $this->belongsToMany(Tenant::class, 'order_type_tenant')
+            ->using(OrderTypeTenant::class);
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

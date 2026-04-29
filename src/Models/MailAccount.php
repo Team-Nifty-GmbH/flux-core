@@ -6,6 +6,7 @@ use FluxErp\Actions\MailFolder\CreateMailFolder;
 use FluxErp\Actions\MailFolder\DeleteMailFolder;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Events\MailAccount\Connecting;
+use FluxErp\Models\Pivots\MailAccountUser;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
@@ -45,6 +46,25 @@ class MailAccount extends FluxModel
         ];
     }
 
+    // Relations
+    public function mailFolders(): HasMany
+    {
+        return $this->hasMany(MailFolder::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'mail_account_user')
+            ->using(MailAccountUser::class)
+            ->withPivot('is_default');
+    }
+
+    public function mailMessages(): HasMany
+    {
+        return $this->hasMany(Communication::class);
+    }
+
+    // Public methods
     /**
      * @throws ImapBadRequestException
      * @throws RuntimeException
@@ -140,22 +160,7 @@ class MailAccount extends FluxModel
         return $mailer;
     }
 
-    public function mailFolders(): HasMany
-    {
-        return $this->hasMany(MailFolder::class);
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'mail_account_user')
-            ->withPivot('is_default');
-    }
-
-    public function mailMessages(): HasMany
-    {
-        return $this->hasMany(Communication::class);
-    }
-
+    // Protected methods
     protected function syncFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];

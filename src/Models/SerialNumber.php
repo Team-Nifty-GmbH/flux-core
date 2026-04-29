@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Models\Pivots\AddressSerialNumber;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasFrontendAttributes;
@@ -30,6 +31,7 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
 
     protected ?string $detailRouteName = 'products.serial-numbers.id?';
 
+    // Public static methods
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -39,11 +41,32 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
         ];
     }
 
+    // Relations
     public function addresses(): BelongsToMany
     {
-        return $this->belongsToMany(Address::class, 'address_serial_number')->withPivot('quantity');
+        return $this->belongsToMany(Address::class, 'address_serial_number')
+            ->using(AddressSerialNumber::class)
+            ->withPivot('quantity');
     }
 
+    public function product(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Product::class,
+            StockPosting::class,
+            'serial_number_id',
+            'id',
+            'id',
+            'product_id'
+        );
+    }
+
+    public function stockPostings(): HasMany
+    {
+        return $this->hasMany(StockPosting::class);
+    }
+
+    // Public methods
     /**
      * @throws Exception
      */
@@ -65,15 +88,5 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
     public function getUrl(): ?string
     {
         return $this->detailRoute();
-    }
-
-    public function product(): HasOneThrough
-    {
-        return $this->hasOneThrough(Product::class, StockPosting::class, 'serial_number_id', 'id', 'id', 'product_id');
-    }
-
-    public function stockPostings(): HasMany
-    {
-        return $this->hasMany(StockPosting::class);
     }
 }

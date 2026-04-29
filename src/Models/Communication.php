@@ -34,17 +34,6 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
     use HasDefaultTargetableColumns, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
         LogsActivity, Printable, Searchable, SoftDeletes;
 
-    public static function timeframeColumns(): array
-    {
-        return [
-            'date',
-            'started_at',
-            'ended_at',
-            'created_at',
-            'updated_at',
-        ];
-    }
-
     protected static function booted(): void
     {
         static::saving(function (Communication $message): void {
@@ -62,6 +51,18 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         });
     }
 
+    // Public static methods
+    public static function timeframeColumns(): array
+    {
+        return [
+            'date',
+            'started_at',
+            'ended_at',
+            'created_at',
+            'updated_at',
+        ];
+    }
+
     protected function casts(): array
     {
         return [
@@ -77,11 +78,38 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         ];
     }
 
+    // Relations
     public function addresses(): MorphToMany
     {
         return $this->morphedByMany(Address::class, 'communicatable', 'communicatable');
     }
 
+    public function communicatables(): HasMany
+    {
+        return $this->hasMany(Communicatable::class);
+    }
+
+    public function contacts(): MorphToMany
+    {
+        return $this->morphedByMany(Contact::class, 'communicatable', 'communicatable');
+    }
+
+    public function mailAccount(): BelongsTo
+    {
+        return $this->belongsTo(MailAccount::class);
+    }
+
+    public function mailFolder(): BelongsTo
+    {
+        return $this->belongsTo(MailFolder::class);
+    }
+
+    public function orders(): MorphToMany
+    {
+        return $this->morphedByMany(Order::class, 'communicatable', 'communicatable');
+    }
+
+    // Public methods
     public function autoAssign(string $type, array|string $matchAgainst): void
     {
         $matchAgainst = Arr::wrap($matchAgainst);
@@ -138,16 +166,6 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         }
     }
 
-    public function communicatables(): HasMany
-    {
-        return $this->hasMany(Communicatable::class);
-    }
-
-    public function contacts(): MorphToMany
-    {
-        return $this->morphedByMany(Contact::class, 'communicatable', 'communicatable');
-    }
-
     public function getEmailTemplateModelType(): ?string
     {
         return morph_alias(static::class);
@@ -158,21 +176,6 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         return [
             'communication' => CommunicationView::class,
         ];
-    }
-
-    public function mailAccount(): BelongsTo
-    {
-        return $this->belongsTo(MailAccount::class);
-    }
-
-    public function mailFolder(): BelongsTo
-    {
-        return $this->belongsTo(MailFolder::class);
-    }
-
-    public function orders(): MorphToMany
-    {
-        return $this->morphedByMany(Order::class, 'communicatable', 'communicatable');
     }
 
     public function registerMediaCollections(): void
@@ -193,40 +196,32 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
             ->toSearchableArray();
     }
 
+    // Attributes
     protected function bccMail(): Attribute
     {
         return Attribute::get(
-            fn ($value) => array_column($this->bcc ?? [], 'mail') ?: $this->bcc ?: []
+            fn () => array_column($this->bcc ?? [], 'mail') ?: $this->bcc ?: []
         );
-    }
-
-    protected function broadcastWithout(): array
-    {
-        // exclude the body from broadcasting as the payload might be too large
-        return [
-            'text_body',
-            'html_body',
-        ];
     }
 
     protected function ccMail(): Attribute
     {
         return Attribute::get(
-            fn ($value) => array_column($this->cc ?? [], 'mail') ?: $this->cc ?: []
+            fn () => array_column($this->cc ?? [], 'mail') ?: $this->cc ?: []
         );
     }
 
     protected function fromMail(): Attribute
     {
         return Attribute::get(
-            fn ($value) => Str::between($this->from ?? '', '<', '>') ?: $this->from ?: null
+            fn () => Str::between($this->from ?? '', '<', '>') ?: $this->from ?: null
         );
     }
 
     protected function mailAddresses(): Attribute
     {
         return Attribute::get(
-            fn ($value) => array_unique(
+            fn () => array_unique(
                 array_merge(
                     [$this->from_mail],
                     $this->to_mail ?? [],
@@ -240,7 +235,17 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
     protected function toMail(): Attribute
     {
         return Attribute::get(
-            fn ($value) => array_column($this->to ?? [], 'mail') ?: $this->to ?: []
+            fn () => array_column($this->to ?? [], 'mail') ?: $this->to ?: []
         );
+    }
+
+    // Protected methods
+    protected function broadcastWithout(): array
+    {
+        // exclude the body from broadcasting as the payload might be too large
+        return [
+            'text_body',
+            'html_body',
+        ];
     }
 }

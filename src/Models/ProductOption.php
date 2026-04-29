@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasAttributeTranslations;
@@ -19,11 +20,7 @@ class ProductOption extends FluxModel
     use Filterable, HasAttributeTranslations, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;
 
-    public function newCollection(array $models = []): Collection
-    {
-        return app(ProductOptionCollection::class, ['items' => $models]);
-    }
-
+    // Relations
     public function productOptionGroup(): BelongsTo
     {
         return $this->belongsTo(ProductOptionGroup::class);
@@ -31,9 +28,17 @@ class ProductOption extends FluxModel
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_product_option');
+        return $this->belongsToMany(Product::class, 'product_product_option')
+            ->using(ProductProductOption::class);
     }
 
+    // Public methods
+    public function newCollection(array $models = []): Collection
+    {
+        return app(ProductOptionCollection::class, ['items' => $models]);
+    }
+
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

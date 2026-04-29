@@ -20,11 +20,6 @@ class SerialNumberRange extends FluxModel
 {
     use Filterable, HasPackageFactory, HasTenantAssignment, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
-    public static function hasPermission(): bool
-    {
-        return false;
-    }
-
     protected static function booted(): void
     {
         static::creating(function (SerialNumberRange $serialNumberRange): void {
@@ -37,6 +32,12 @@ class SerialNumberRange extends FluxModel
         });
     }
 
+    // Public static methods
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
+
     protected function casts(): array
     {
         return [
@@ -44,16 +45,18 @@ class SerialNumberRange extends FluxModel
         ];
     }
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
+    // Relations
     public function model(): MorphTo
     {
         return $this->morphTo('model');
     }
 
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    // Public methods
     public function getCurrentStyled(): array|string|Translator|Application|null
     {
         return __(
@@ -64,7 +67,8 @@ class SerialNumberRange extends FluxModel
         );
     }
 
-    private function variables(): array
+    // Protected methods
+    protected function variables(): array
     {
         $defaultAttributes = [
             'current_day' => date('d'),

@@ -18,6 +18,7 @@ class LedgerAccount extends FluxModel
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
 
+    // Public static methods
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -36,6 +37,7 @@ class LedgerAccount extends FluxModel
         ];
     }
 
+    // Relations
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);

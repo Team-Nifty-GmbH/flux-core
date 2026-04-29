@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use DateTime;
 use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
 use FluxErp\Contracts\OffersPrinting;
@@ -78,6 +79,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         ];
     }
 
+    // Relations
     public function absenceRequests(): HasMany
     {
         return $this->hasMany(AbsenceRequest::class);
@@ -98,6 +100,54 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         return $this->belongsTo(EmployeeDepartment::class);
     }
 
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function subordinates(): HasMany
+    {
+        return $this->hasMany(Employee::class, 'supervisor_id');
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'supervisor_id');
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function vacationBlackouts(): BelongsToMany
+    {
+        return $this->belongsToMany(VacationBlackout::class, 'employee_vacation_blackout')
+            ->using(EmployeeVacationBlackout::class);
+    }
+
+    public function vacationCarryOverRule(): BelongsTo
+    {
+        return $this->belongsto(VacationCarryoverRule::class);
+    }
+
+    public function workTimeModelHistory(): HasMany
+    {
+        return $this->hasMany(EmployeeWorkTimeModel::class)
+            ->orderBy('valid_from', 'desc');
+    }
+
+    public function workTimes(): HasMany
+    {
+        return $this->hasMany(WorkTime::class);
+    }
+
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return $this->getFirstMediaUrl('avatar', 'thumb')
@@ -213,7 +263,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             ->reduce(fn (?string $carry, $item) => bcadd($carry, $item), 0);
     }
 
-    public function getVacationDaysBalance(Carbon $date): string
+    public function getVacationDaysBalance(Carbon|CarbonInterface $date): string
     {
         return bcsub(
             $this->getTotalVacationDays(
@@ -380,11 +430,6 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
         return $isWorkDay;
     }
 
-    public function location(): BelongsTo
-    {
-        return $this->belongsTo(Location::class);
-    }
-
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
@@ -404,7 +449,8 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             ->useDisk('private');
     }
 
-    public function scopeEmployed(Builder $query, DateTime $untilDate): void
+    // Scopes
+    protected function scopeEmployed(Builder $query, DateTime $untilDate): void
     {
         $query->whereHas('workTimeModelHistory')
             ->where('is_active', true)
@@ -413,47 +459,5 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
                     ->whereNull('termination_date')
                     ->orWhereValueBetween($untilDate->startOfDay(), ['employment_date', 'termination_date']);
             });
-    }
-
-    public function subordinates(): HasMany
-    {
-        return $this->hasMany(Employee::class, 'supervisor_id');
-    }
-
-    public function supervisor(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'supervisor_id');
-    }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function vacationBlackouts(): BelongsToMany
-    {
-        return $this->belongsToMany(VacationBlackout::class, 'employee_vacation_blackout')
-            ->using(EmployeeVacationBlackout::class);
-    }
-
-    public function vacationCarryOverRule(): BelongsTo
-    {
-        return $this->belongsto(VacationCarryoverRule::class);
-    }
-
-    public function workTimeModelHistory(): HasMany
-    {
-        return $this->hasMany(EmployeeWorkTimeModel::class)
-            ->orderBy('valid_from', 'desc');
-    }
-
-    public function workTimes(): HasMany
-    {
-        return $this->hasMany(WorkTime::class);
     }
 }

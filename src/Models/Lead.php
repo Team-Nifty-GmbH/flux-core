@@ -42,6 +42,48 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         'id',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Lead $lead): void {
+            $lead->expected_gross_profit_percentage = $lead->expected_revenue && $lead->expected_gross_profit
+                ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
+                : 0;
+
+            if ($lead->isDirty('lead_state_id')) {
+                if (! is_null(($probability = $lead->leadState()->value('probability_percentage')))) {
+                    $lead->probability_percentage = $probability;
+                }
+
+                $isClosed = $lead->leadState()
+                    ->where(
+                        fn (Builder $query) => $query
+                            ->where('is_won', true)
+                            ->orWhere('is_lost', true)
+                    )
+                    ->exists();
+
+                if ($isClosed && is_null($lead->closed_at)) {
+                    $lead->closed_at = now();
+                    $lead->closed_by = auth()->user()
+                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
+                        : null;
+                } elseif (! $isClosed) {
+                    $lead->closed_at = null;
+                    $lead->closed_by = null;
+                }
+            }
+
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_gross_profit')) {
+                $lead->recalculateWeightedGrossProfit();
+            }
+
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
+                $lead->recalculateWeightedRevenue();
+            }
+        });
+    }
+
+    // Public static methods
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {
@@ -120,47 +162,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::saving(function (Lead $lead): void {
-            $lead->expected_gross_profit_percentage = $lead->expected_revenue && $lead->expected_gross_profit
-                ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
-                : 0;
-
-            if ($lead->isDirty('lead_state_id')) {
-                if (! is_null(($probability = $lead->leadState()->value('probability_percentage')))) {
-                    $lead->probability_percentage = $probability;
-                }
-
-                $isClosed = $lead->leadState()
-                    ->where(
-                        fn (Builder $query) => $query
-                            ->where('is_won', true)
-                            ->orWhere('is_lost', true)
-                    )
-                    ->exists();
-
-                if ($isClosed && is_null($lead->closed_at)) {
-                    $lead->closed_at = now();
-                    $lead->closed_by = auth()->user()
-                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
-                        : null;
-                } elseif (! $isClosed) {
-                    $lead->closed_at = null;
-                    $lead->closed_by = null;
-                }
-            }
-
-            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_gross_profit')) {
-                $lead->recalculateWeightedGrossProfit();
-            }
-
-            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
-                $lead->recalculateWeightedRevenue();
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -172,6 +173,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
+    // Relations
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
@@ -187,6 +189,27 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->hasOneThrough(Contact::class, Address::class);
     }
 
+    public function leadLossReason(): BelongsTo
+    {
+        return $this->belongsTo(LeadLossReason::class);
+    }
+
+    public function leadState(): BelongsTo
+    {
+        return $this->belongsTo(LeadState::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -207,21 +230,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return route('sales.lead.id', $this->getKey());
     }
 
-    public function leadLossReason(): BelongsTo
-    {
-        return $this->belongsTo(LeadLossReason::class);
-    }
-
-    public function leadState(): BelongsTo
-    {
-        return $this->belongsTo(LeadState::class);
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
-    }
-
     public function recalculateWeightedGrossProfit(): void
     {
         if (! is_null($this->probability_percentage) && ! is_null($this->expected_gross_profit)) {
@@ -240,28 +248,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 $this->expected_revenue
             );
         }
-    }
-
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string $start,
-        Carbon|string $end,
-        ?array $info = null
-    ): void {
-        $builder->where(function (Builder $query) use ($start, $end): void {
-            $query
-                ->whereBetween('start', [$start, $end])
-                ->orWhereBetween('end', [$start, $end])
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->where('start', '<=', $end)
-                        ->where('end', '>=', $start);
-                })
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->whereNull('start')
-                        ->whereNull('end')
-                        ->whereBetween('created_at', [$start, $end]);
-                });
-        });
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -285,8 +271,26 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
+    // Scopes
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('start', [$start, $end])
+                ->orWhereBetween('end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start', '<=', $end)
+                        ->where('end', '>=', $start);
+                })
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->whereNull('start')
+                        ->whereNull('end')
+                        ->whereBetween('created_at', [$start, $end]);
+                });
+        });
     }
 }

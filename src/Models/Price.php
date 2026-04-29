@@ -67,41 +67,18 @@ class Price extends FluxModel
         ];
     }
 
-    public function appliedDiscounts(): Attribute
+    // Relations
+    public function priceList(): BelongsTo
     {
-        return Attribute::get(
-            fn () => $this->appliedDiscounts
-        );
+        return $this->belongsTo(PriceList::class);
     }
 
-    public function basePrice(): Attribute
+    public function product(): BelongsTo
     {
-        return Attribute::get(
-            fn () => $this->basePrice
-        );
+        return $this->belongsTo(Product::class);
     }
 
-    public function basePriceFlat(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->basePrice?->price
-        );
-    }
-
-    public function discountFlat(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->discountFlat
-        );
-    }
-
-    public function discountPercentage(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->discountPercentage
-        );
-    }
-
+    // Public methods
     public function getGross($vat): ?string
     {
         if (is_null($this->price)) {
@@ -120,66 +97,92 @@ class Price extends FluxModel
         return $this->is_net ? $this->price : gross_to_net($this->price, $vat);
     }
 
-    public function gross(): Attribute
+    // Attributes
+    protected function appliedDiscounts(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->appliedDiscounts
+        );
+    }
+
+    protected function basePrice(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->basePrice
+        );
+    }
+
+    protected function basePriceFlat(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->basePrice?->price
+        );
+    }
+
+    protected function discountFlat(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->discountFlat
+        );
+    }
+
+    protected function discountPercentage(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->discountPercentage
+        );
+    }
+
+    protected function gross(): Attribute
     {
         return Attribute::get(
             fn () => $this->getGross(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
         );
     }
 
-    public function isInherited(): Attribute
+    protected function isInherited(): Attribute
     {
         return Attribute::get(
             fn () => $this->isInherited
         );
     }
 
-    public function isNet(): Attribute
+    protected function isNet(): Attribute
     {
         return Attribute::get(
             fn () => $this->priceList?->is_net
         );
     }
 
-    public function net(): Attribute
+    protected function net(): Attribute
     {
         return Attribute::get(
             fn () => $this->getNet(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
         );
     }
 
-    public function priceList(): BelongsTo
-    {
-        return $this->belongsTo(PriceList::class);
-    }
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function rootDiscountFlat(): Attribute
+    protected function rootDiscountFlat(): Attribute
     {
         return Attribute::get(
             fn () => $this->rootDiscountFlat
         );
     }
 
-    public function rootDiscountPercentage(): Attribute
+    protected function rootDiscountPercentage(): Attribute
     {
         return Attribute::get(
             fn () => $this->rootDiscountPercentage
         );
     }
 
-    public function rootPrice(): Attribute
+    protected function rootPrice(): Attribute
     {
         return Attribute::get(
             fn () => $this->rootPrice
         );
     }
 
-    public function rootPriceFlat(): Attribute
+    protected function rootPriceFlat(): Attribute
     {
         return Attribute::get(
             fn () => $this->rootPrice?->price

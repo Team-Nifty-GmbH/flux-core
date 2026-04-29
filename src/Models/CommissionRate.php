@@ -12,6 +12,7 @@ class CommissionRate extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
+    // Relations
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

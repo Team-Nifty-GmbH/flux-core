@@ -13,6 +13,7 @@ class TicketType extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
+    // Relations
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class);

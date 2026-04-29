@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AbsenceRequestEmployeeDay extends FluxPivot
 {
+    protected $table = 'absence_request_employee_day';
+
+    // Relations
     public function absenceRequest(): BelongsTo
     {
         return $this->belongsTo(AbsenceRequest::class);

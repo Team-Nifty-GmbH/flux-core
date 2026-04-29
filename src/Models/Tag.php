@@ -17,6 +17,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
 
     public array $translatable = [];
 
+    // Public static methods
     public static function bootHasSlug(): void
     {
         static::saving(function (Tag $model): void {
@@ -64,6 +65,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
         return $tag;
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -84,6 +86,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
         return null;
     }
 
+    // Scopes
     public function scopeContaining(Builder $query, string $name, $locale = null): Builder
     {
         return $query->whereRaw(

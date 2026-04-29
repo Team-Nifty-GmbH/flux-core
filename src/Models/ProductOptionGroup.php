@@ -14,6 +14,7 @@ class ProductOptionGroup extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
+    // Relations
     public function productOptions(): HasMany
     {
         return $this->hasMany(ProductOption::class, 'product_option_group_id');

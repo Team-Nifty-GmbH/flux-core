@@ -28,6 +28,7 @@ class AddressAddressTypeOrder extends FluxPivot
         ];
     }
 
+    // Relations
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
@@ -38,6 +39,12 @@ class AddressAddressTypeOrder extends FluxPivot
         return $this->belongsTo(AddressType::class);
     }
 
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    // Attributes
     public function getAddressAttribute(): ?Model
     {
         $address = $this->fromJson($this->attributes['address'] ?? null);
@@ -48,10 +55,5 @@ class AddressAddressTypeOrder extends FluxPivot
                 ->firstOrNew()
                 ->fill($address)
             : $this->address()->first();
-    }
-
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'order_id');
     }
 }

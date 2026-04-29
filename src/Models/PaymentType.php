@@ -33,12 +33,14 @@ class PaymentType extends FluxModel
         ];
     }
 
+    // Relations
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'payment_type_tenant')
             ->using(PaymentTypeTenant::class);
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

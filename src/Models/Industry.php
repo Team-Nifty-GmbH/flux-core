@@ -17,6 +17,7 @@ class Industry extends FluxModel
         'sort_when_creating' => true,
     ];
 
+    // Relations
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_industry')

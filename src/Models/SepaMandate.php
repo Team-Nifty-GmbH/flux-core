@@ -46,6 +46,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         ];
     }
 
+    // Relations
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -61,6 +62,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         return $this->belongsTo(Tenant::class);
     }
 
+    // Public methods
     public function getEmailTemplateModelType(): ?string
     {
         return morph_alias(static::class);

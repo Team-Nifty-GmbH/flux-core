@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\BankConnectionTenant;
 use FluxErp\Models\Pivots\PaymentTypeTenant;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Traits\Model\Filterable;
@@ -46,45 +47,16 @@ class Tenant extends FluxModel implements HasMedia
         ];
     }
 
+    // Relations
     public function bankConnections(): BelongsToMany
     {
-        return $this->belongsToMany(BankConnection::class, 'bank_connection_tenant');
+        return $this->belongsToMany(BankConnection::class, 'bank_connection_tenant')
+            ->using(BankConnectionTenant::class);
     }
 
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
-    }
-
-    public function getAvatarUrlAttribute(): string
-    {
-        return $this->logo_small_url;
-    }
-
-    public function getPostalAddressOneLineAttribute(): string
-    {
-        return implode(
-            ' | ',
-            array_filter([
-                $this->name,
-                $this->street,
-                $this->postcode . ' ' . $this->city,
-            ])
-        );
-    }
-
-    public function logoSmallUrl(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getFirstMediaUrl('logo_small')
-        );
-    }
-
-    public function logoUrl(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getFirstMediaUrl('logo')
-        );
     }
 
     public function paymentTypes(): BelongsToMany
@@ -95,7 +67,8 @@ class Tenant extends FluxModel implements HasMedia
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_tenant')->using(ProductTenant::class);
+        return $this->belongsToMany(Product::class, 'product_tenant')
+            ->using(ProductTenant::class);
     }
 
     public function projects(): HasMany
@@ -103,6 +76,7 @@ class Tenant extends FluxModel implements HasMedia
         return $this->hasMany(Project::class);
     }
 
+    // Public methods
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('logo')
@@ -126,6 +100,41 @@ class Tenant extends FluxModel implements HasMedia
         return app(EngineManager::class)->engine('collection');
     }
 
+    // Attributes
+    protected function avatarUrl(): Attribute
+    {
+        return $this->logoSmallUrl();
+    }
+
+    protected function postalAddressOneLine(): Attribute
+    {
+        return Attribute::get(
+            fn (mixed $value, array $attributes) => implode(
+                ' | ',
+                array_filter([
+                    $attributes['name'] ?? null,
+                    $attributes['street'] ?? null,
+                    trim($attributes['postcode'] ?? null . ' ' . $attributes['city'] ?? null),
+                ])
+            )
+        );
+    }
+
+    protected function logoSmallUrl(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->getFirstMediaUrl('logo_small')
+        );
+    }
+
+    protected function logoUrl(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->getFirstMediaUrl('logo')
+        );
+    }
+
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [
