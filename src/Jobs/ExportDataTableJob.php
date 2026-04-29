@@ -43,13 +43,12 @@ class ExportDataTableJob implements ShouldQueue
         $folder = 'exports/' . str_replace(':', '_', $this->userMorph) . '/';
         $filePath = $folder . str_replace(['<', '>', ':', '"', '/', '\\', '|', '?', '*'], '_', $fileName);
 
-        app(
-            DataTableExport::class,
-            [
-                'builder' => $query,
-                'exportColumns' => $this->columns,
-            ]
-        )->store($filePath);
+        $export = app(DataTableExport::class, [
+            'builder' => $query,
+            'exportColumns' => $this->columns,
+        ]);
+
+        $export->store($filePath);
 
         $user->notify(ExportReady::make($filePath, morph_alias($this->modelClass)));
     }
