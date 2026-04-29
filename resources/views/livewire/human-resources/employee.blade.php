@@ -50,11 +50,6 @@
                 @show
             @show
         </div>
-        <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
-        >
-            @stack('employee-detail-header-actions')
-        </div>
     </div>
     <x-flux::tabs wire:model.live="tab" :$tabs />
     @stack('employee-detail-after-tabs')

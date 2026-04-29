@@ -257,6 +257,7 @@
                 class="ml-auto"
                 :text="__('Continue')"
             />
+            @stack('edit-mail-modal-footer')
             <x-button
                 x-cloak
                 x-show="! isMultiGroup || isLastGroup"
@@ -266,7 +267,6 @@
                 class="ml-auto"
                 :text="__('Send')"
             />
-            @stack('edit-mail-modal-footer')
         </x-slot>
     </x-modal>
 </div>

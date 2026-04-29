@@ -743,6 +743,7 @@
                                     )
                                 "
                             />
+                            @stack('purchase-invoice-edit-modal-footer-actions')
                             <x-button
                                 color="indigo"
                                 x-cloak
@@ -778,7 +779,6 @@
                                     "
                                 />
                             @endcanAction
-                            @stack('purchase-invoice-edit-modal-footer-actions')
                         @show
                     </div>
                 </div>
