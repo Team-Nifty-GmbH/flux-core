@@ -291,7 +291,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
       - name: Run Browser Tests
-        run: ./vendor/bin/testbench package:test --parallel --testsuite Browser --shard=${{ matrix.shard }}
+        run: ./vendor/bin/testbench package:test --testsuite Browser --shard=${{ matrix.shard }}
         env:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
