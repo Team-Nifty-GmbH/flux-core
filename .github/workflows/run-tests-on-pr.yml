@@ -209,9 +209,13 @@ jobs:
         run: composer test-livewire
 
   browser:
-    name: Browser Tests
+    name: Browser Tests (shard ${{ matrix.shard }})
     needs: lint
     runs-on: [self-hosted, Linux]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ['1/3', '2/3', '3/3']
     container:
       image: ghcr.io/team-nifty-gmbh/flux-ci:php8.5
       credentials:
@@ -287,7 +291,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
       - name: Run Browser Tests
-        run: composer test-browser
+        run: ./vendor/bin/testbench package:test --parallel --testsuite Browser --shard=${{ matrix.shard }}
         env:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
 
@@ -295,7 +299,7 @@ jobs:
         uses: actions/upload-artifact@v5
         if: failure()
         with:
-          name: browser-test-artifacts
+          name: browser-test-artifacts-shard-${{ strategy.job-index }}
           path: |
             tests/Browser/Screenshots/
             vendor/orchestra/testbench-core/laravel/storage/logs/
