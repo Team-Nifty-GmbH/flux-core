@@ -22,9 +22,11 @@ return new class() extends Migration
         });
 
         Schema::table('communications', function (Blueprint $table): void {
+            $table->index('communication_type_enum');
+            $table->index('date');
             $table->index('deleted_at');
-            $table->index(['mail_account_id', 'communication_type_enum']);
-            $table->index(['mail_folder_id', 'date']);
+            $table->index('mail_account_id');
+            $table->index('mail_folder_id');
         });
 
         Schema::table('contacts', function (Blueprint $table): void {
@@ -47,6 +49,7 @@ return new class() extends Migration
         });
 
         Schema::table('notifications', function (Blueprint $table): void {
+            $table->index('read_at');
             $table->index(['notifiable_type', 'notifiable_id', 'read_at']);
         });
 
@@ -60,7 +63,8 @@ return new class() extends Migration
             $table->index('invoice_date');
             $table->index('order_date');
             $table->index('payment_reminder_next_date');
-            $table->index(['payment_state', 'state']);
+            $table->index('payment_state');
+            $table->index('state');
             $table->index(['system_delivery_date', 'system_delivery_date_end']);
         });
 
@@ -131,7 +135,8 @@ return new class() extends Migration
 
         Schema::table('orders', function (Blueprint $table): void {
             $table->dropIndex(['system_delivery_date', 'system_delivery_date_end']);
-            $table->dropIndex(['payment_state', 'state']);
+            $table->dropIndex(['state']);
+            $table->dropIndex(['payment_state']);
             $table->dropIndex(['payment_reminder_next_date']);
             $table->dropIndex(['order_date']);
             $table->dropIndex(['invoice_date']);
@@ -145,6 +150,7 @@ return new class() extends Migration
 
         Schema::table('notifications', function (Blueprint $table): void {
             $table->dropIndex(['notifiable_type', 'notifiable_id', 'read_at']);
+            $table->dropIndex(['read_at']);
         });
 
         Schema::table('leads', function (Blueprint $table): void {
@@ -164,9 +170,11 @@ return new class() extends Migration
         });
 
         Schema::table('communications', function (Blueprint $table): void {
-            $table->dropIndex(['mail_folder_id', 'date']);
-            $table->dropIndex(['mail_account_id', 'communication_type_enum']);
+            $table->dropIndex(['mail_folder_id']);
+            $table->dropIndex(['mail_account_id']);
             $table->dropIndex(['deleted_at']);
+            $table->dropIndex(['date']);
+            $table->dropIndex(['communication_type_enum']);
         });
 
         Schema::table('comments', function (Blueprint $table): void {
