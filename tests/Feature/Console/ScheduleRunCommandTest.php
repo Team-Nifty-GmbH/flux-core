@@ -4,6 +4,7 @@ use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Facades\Repeatable as RepeatableFacade;
 use FluxErp\Models\Schedule;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestDefaultCronInvokable;
+use FluxErp\Tests\Feature\Console\ScheduleRunTestFailingInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestInvokable;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestJob;
 use FluxErp\Tests\Feature\Console\ScheduleRunTestSuccessJob;
@@ -244,4 +245,39 @@ test('uses db entry over defaultCron when both exist', function (): void {
     // The defaultCron (everyMinute) should NOT have been used,
     // the DB entry (yearly, not due) takes precedence
     expect(ScheduleRunTestDefaultCronInvokable::$wasInvoked)->toBeFalse();
+});
+
+test('advances due_at when an invokable schedule fails', function (): void {
+    ScheduleRunTestFailingInvokable::$invocationCount = 0;
+
+    $this->travelTo(Carbon::create(2025, 6, 15, 10, 0, 0));
+
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'Failing Invokable Schedule',
+        'class' => ScheduleRunTestFailingInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'everyMinute',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => now()->subMinute(),
+    ]);
+
+    $this->artisan('schedule:run');
+
+    $schedule->refresh();
+
+    expect(ScheduleRunTestFailingInvokable::$invocationCount)->toBe(1)
+        ->and($schedule->last_run)->not->toBeNull()
+        ->and($schedule->last_success)->toBeNull()
+        ->and($schedule->due_at->greaterThan(now()))->toBeTrue();
 });
