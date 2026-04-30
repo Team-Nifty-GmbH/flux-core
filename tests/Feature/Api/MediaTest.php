@@ -651,7 +651,15 @@ function createMedia(array $attributes, Task $task, Illuminate\Http\Testing\File
             )
         );
 
-    Storage::disk($disk)->put($media->getPathRelativeToRoot(), $file->getContent());
+    $relativePath = $media->getPathRelativeToRoot();
+    $directory = dirname($relativePath);
+    $directory = $directory === '.' ? '' : $directory;
+
+    Storage::disk($disk)->putFileAs(
+        $directory,
+        $file,
+        basename($relativePath)
+    );
 
     return $media;
 }
