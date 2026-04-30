@@ -16,6 +16,7 @@ env:
   PHP_VERSION: '8.5'
   LARAVEL_VERSION: '13.*'
   TESTBENCH_VERSION: '11.*'
+  COMPOSER_PROCESS_TIMEOUT: '600'
 
 jobs:
   lint:
