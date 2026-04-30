@@ -8,7 +8,7 @@
 >
     <x-timeline>
         @island(name: 'activities')
-            @foreach ($activities as $activity)
+            @foreach($activities as $activity)
                 <x-timeline.items
                     wire:key="activity-{{ data_get($activity, 'id') }}"
                     :date="data_get($activity, 'created_at_formatted')"
@@ -21,7 +21,7 @@
                             :image="data_get($activity, 'causer.avatar_url')"
                         />
                     </x-slot:marker>
-                    @if (! empty(data_get($activity, 'properties.attributes', [])))
+                    @if(! empty(data_get($activity, 'properties.attributes', [])))
                         <button
                             type="button"
                             x-on:click="showProperties({{ data_get($activity, 'id') }})"
@@ -44,13 +44,13 @@
                             x-cloak
                             class="mt-1 text-xs text-gray-600 dark:text-gray-300"
                         >
-                            @foreach (data_get($activity, 'properties.attributes', []) as $name => $value)
+                            @foreach(data_get($activity, 'properties.attributes', []) as $name => $value)
                                 <div>
                                     <span class="font-semibold"
                                         >{{ $name }}:</span
                                     >
                                     @php($old = data_get($activity, 'properties.old.' . $name))
-                                    @if (! is_null($old))
+                                    @if(! is_null($old))
                                         <span
                                             >{{ is_scalar($old) ? $old : json_encode($old) }}</span
                                         >
