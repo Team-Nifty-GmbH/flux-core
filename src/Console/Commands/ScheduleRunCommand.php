@@ -112,20 +112,20 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $repeatable->save();
             });
 
-            $event->onSuccess(function () use ($repeatable): void {
-                if ($repeatable->type === RepeatableTypeEnum::Job) {
-                    return;
+            $event->onSuccess(function () use ($repeatable, $nextRunDate): void {
+                if ($repeatable->type !== RepeatableTypeEnum::Job) {
+                    if ($repeatable->recurrences) {
+                        $repeatable->current_recurrence++;
+                    }
+
+                    $repeatable->last_success = now();
                 }
 
-                if ($repeatable->recurrences) {
-                    $repeatable->current_recurrence++;
-                }
-
-                $repeatable->last_success = now();
+                $repeatable->due_at = $nextRunDate;
                 $repeatable->save();
             });
 
-            $event->after(function () use ($repeatable, $nextRunDate): void {
+            $event->onFailure(function () use ($repeatable, $nextRunDate): void {
                 $repeatable->due_at = $nextRunDate;
                 $repeatable->save();
             });
