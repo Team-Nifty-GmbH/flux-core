@@ -113,6 +113,9 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             });
 
             $event->onSuccess(function () use ($repeatable, $nextRunDate): void {
+                // Jobs track recurrence/last_success async via the JobProcessed listener
+                // in EventServiceProvider, since schedule "success" for a Job means it was
+                // dispatched, not completed.
                 if ($repeatable->type !== RepeatableTypeEnum::Job) {
                     if ($repeatable->recurrences) {
                         $repeatable->current_recurrence++;
