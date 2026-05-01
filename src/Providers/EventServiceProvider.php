@@ -19,6 +19,7 @@ use FluxErp\Models\Schedule;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Notifications\Order\DocumentSignedNotification;
 use FluxErp\Notifications\Order\OrderApprovalRequestNotification;
+use FluxErp\Notifications\Order\SubscriptionOrderFailedNotification;
 use FluxErp\Notifications\Task\TaskAssignedNotification;
 use FluxErp\Notifications\Task\TaskCreatedNotification;
 use FluxErp\Notifications\Task\TaskUpdatedNotification;
@@ -68,6 +69,7 @@ class EventServiceProvider extends ServiceProvider
         CommentCreatedNotification::class,
         DocumentSignedNotification::class,
         OrderApprovalRequestNotification::class,
+        SubscriptionOrderFailedNotification::class,
         TaskAssignedNotification::class,
         TaskCreatedNotification::class,
         TaskUpdatedNotification::class,

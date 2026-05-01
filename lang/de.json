@@ -2500,6 +2500,7 @@
     "Subscription End Date": "Abonnement-Enddatum",
     "Subscription Settings": "Abonnement-Einstellungen",
     "Subscription Start Date": "Abonnement-Startdatum",
+    "Subscription processing failed for :order_number": "⚠️ Verarbeitung des Abo-Auftrags :order_number ist fehlgeschlagen",
     "Substitute": "Vertretung",
     "Substitute Absence Requests": "Vertretungs-Abwesenheitsanträge",
     "Substitute Note": "Vertretungsnotiz",
