@@ -9,6 +9,7 @@ use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Printing;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Events\Order\SubscriptionOrderFailedEvent;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use Illuminate\Validation\ValidationException;
@@ -92,6 +93,11 @@ class ProcessSubscriptionOrder implements Repeatable
             }
 
             $activity->log(class_basename($e));
+
+            event(
+                SubscriptionOrderFailedEvent::make($order, $e)
+                    ->subscribeChannel(array_filter([$order->getCreatedBy()]))
+            );
 
             throw $e;
         }
