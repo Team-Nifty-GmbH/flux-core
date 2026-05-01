@@ -76,6 +76,7 @@ beforeEach(function (): void {
 });
 
 test('subscription order failure notifies the order creator', function (): void {
+    config(['queue.default' => 'sync']);
     Notification::fake();
 
     $otherTenant = Tenant::factory()->create();
@@ -108,6 +109,7 @@ test('subscription order failure notifies the order creator', function (): void 
 });
 
 test('subscription order failure does not notify when order has no creator', function (): void {
+    config(['queue.default' => 'sync']);
     Notification::fake();
 
     DB::table('orders')
