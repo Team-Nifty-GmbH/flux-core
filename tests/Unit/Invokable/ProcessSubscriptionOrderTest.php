@@ -461,7 +461,9 @@ test('process subscription order dispatches SubscriptionOrderFailedEvent on fail
         FluxErp\Events\Order\SubscriptionOrderFailedEvent::class,
         function (FluxErp\Events\Order\SubscriptionOrderFailedEvent $event): bool {
             return $event->order->is($this->subscriptionOrder)
-                && $event->exception instanceof Illuminate\Validation\ValidationException;
+                && $event->exceptionClass === Illuminate\Validation\ValidationException::class
+                && $event->exceptionMessage !== ''
+                && $event->validationErrors !== [];
         }
     );
 });

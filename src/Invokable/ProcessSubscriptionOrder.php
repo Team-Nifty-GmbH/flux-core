@@ -95,8 +95,12 @@ class ProcessSubscriptionOrder implements Repeatable
             $activity->log(class_basename($e));
 
             event(
-                SubscriptionOrderFailedEvent::make($order, $e)
-                    ->subscribeChannel(array_filter([$order->getCreatedBy()]))
+                SubscriptionOrderFailedEvent::make(
+                    $order,
+                    $e::class,
+                    $e->getMessage(),
+                    $e instanceof ValidationException ? $e->errors() : [],
+                )->subscribeChannel(array_filter([$order->getCreatedBy()]))
             );
 
             throw $e;
