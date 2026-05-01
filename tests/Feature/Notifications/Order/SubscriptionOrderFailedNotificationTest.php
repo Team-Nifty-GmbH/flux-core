@@ -98,7 +98,13 @@ test('subscription order failure notifies the order creator', function (): void 
         // expected
     }
 
-    Notification::assertSentTo($this->creator, SubscriptionOrderFailedNotification::class);
+    Notification::assertSentTo(
+        $this->creator,
+        SubscriptionOrderFailedNotification::class,
+        fn (SubscriptionOrderFailedNotification $notification): bool => $notification->event->order->is($this->subscriptionOrder)
+            && $notification->event->exceptionClass === ValidationException::class,
+    );
+    Notification::assertSentToTimes($this->creator, SubscriptionOrderFailedNotification::class, 1);
 });
 
 test('subscription order failure does not notify when order has no creator', function (): void {
