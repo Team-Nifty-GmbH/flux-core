@@ -21,7 +21,7 @@ class SubscriptionOrderFailedNotification extends SubscribableNotification imple
 
     protected function getDescription(): ?string
     {
-        return data_get($this->event, 'exceptionMessage');
+        return $this->event->exceptionMessage;
     }
 
     protected function getModelFromEvent(object $event): ?Model
@@ -38,7 +38,7 @@ class SubscriptionOrderFailedNotification extends SubscribableNotification imple
     {
         return __(
             'Subscription processing failed for :order_number',
-            ['order_number' => data_get($this->model, 'order_number') ?? ''],
+            ['order_number' => data_get($this->model, 'order_number', '')],
         );
     }
 }
