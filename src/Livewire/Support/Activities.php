@@ -9,16 +9,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Spatie\Activitylog\Models\Activity;
 use TeamNiftyGmbH\DataTable\Helpers\Icon;
 
 abstract class Activities extends Component
 {
-    use WithPagination;
-
     #[Locked]
     public array $activities = [];
 
@@ -36,59 +32,67 @@ abstract class Activities extends Component
     public function render(): View|Factory|Application
     {
         if (! $this->activities && $this->modelId) {
-            $this->loadData();
+            $this->loadPage(page: 1, perPage: $this->perPage * $this->page);
         }
 
         return view('flux::livewire.support.activities');
     }
 
-    public function loadData(bool $forceRender = false): void
+    public function loadMore(): void
+    {
+        if ($this->page * $this->perPage >= $this->total) {
+            return;
+        }
+
+        $this->page++;
+        $this->loadPage(page: $this->page, perPage: $this->perPage);
+    }
+
+    protected function loadPage(int $page, int $perPage): void
     {
         if (! $this->modelType || ! $this->modelId) {
             return;
         }
 
-        $activities = resolve_static($this->modelType, 'query')
+        $paginator = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
             ->firstOrFail()
             ->activitiesAsSubject()
             ->with('causer:id,name')
             ->latest('id')
-            ->paginate(perPage: $this->perPage * $this->page);
+            ->paginate(perPage: $perPage, page: $page);
 
-        $this->perPage = $activities->perPage();
-        $this->total = $activities->total();
+        $this->total = $paginator->total();
 
-        $this->activities = $activities
-            ->map(function (Activity $item) {
-                $itemArray = $item->toArray();
-                $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
-                $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
-                $itemArray['event'] = __($item->event);
-                $changes = auth()->user() instanceof User
-                    ? ($item->attribute_changes?->toArray() ?? [])
-                    : ['old' => [], 'attributes' => []];
-
-                // Translate attribute names to human-readable labels
-                foreach (['old', 'attributes'] as $changeKey) {
-                    if (isset($changes[$changeKey])) {
-                        $changes[$changeKey] = collect($changes[$changeKey])
-                            ->mapWithKeys(fn (mixed $value, string $key) => [__(Str::headline($key)) => $value])
-                            ->toArray();
-                    }
-                }
-
-                $itemArray['properties'] = $changes;
-
-                return $itemArray;
-            })
-            ->toArray();
+        $this->activities = $paginator->getCollection()
+            ->map(fn (Activity $item) => $this->mapActivity($item))
+            ->all();
     }
 
-    #[Renderless]
-    public function loadMore(): void
+    protected function mapActivity(Activity $item): array
     {
-        $this->page++;
-        $this->loadData();
+        $itemArray = $item->toArray();
+        $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
+        $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
+        $itemArray['event'] = __($item->event);
+        $itemArray['created_at_formatted'] = $item->created_at?->locale(app()->getLocale())->isoFormat('L LT');
+
+        $changes = auth()->user() instanceof User
+            ? ($item->attribute_changes?->toArray() ?? [])
+            : ['old' => [], 'attributes' => []];
+
+        foreach (['old', 'attributes'] as $changeKey) {
+            if (! array_key_exists($changeKey, $changes)) {
+                continue;
+            }
+
+            $changes[$changeKey] = collect($changes[$changeKey])
+                ->mapWithKeys(fn (mixed $value, string $key) => [__(Str::headline($key)) => $value])
+                ->toArray();
+        }
+
+        $itemArray['properties'] = $changes;
+
+        return $itemArray;
     }
 }

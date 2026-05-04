@@ -1,5 +1,4 @@
 <div
-    class="flow-root"
     x-data="{
         activeActivity: null,
         showProperties(id) {
@@ -7,132 +6,77 @@
         },
     }"
 >
-    <ul role="list" class="-mb-1">
-        <template
-            x-for="(activity, index) in $wire.activities"
-            :key="activity.id"
-        >
-            <li class="p-2">
-                <div class="relative pb-1">
-                    <div
-                        x-bind:class="
-                            activity.id === activeActivity &&
-                            'border-gray-200 dark:border-secondary-500 rounded-md border'
-                        "
-                    >
-                        <div class="relative flex space-x-3 p-1.5">
-                            <div>
-                                <div
-                                    x-init="
-                                        $nextTick(() => {
-                                            $el.querySelector('img').src =
-                                                activity.causer.avatar_url;
-                                        })
-                                    "
-                                >
-                                    <x-avatar
-                                        sm
-                                        image="{{ route('icons', ['name' => 'user']) }}"
-                                        xl
-                                    />
-                                </div>
-                            </div>
-                            <div
-                                class="flex min-w-0 flex-1 justify-between space-x-4"
+    <x-timeline>
+        @island(name: 'activities')
+            @foreach($activities as $activity)
+                <x-timeline.items
+                    wire:key="activity-{{ data_get($activity, 'id') }}"
+                    :date="data_get($activity, 'created_at_formatted')"
+                    :title="trim(data_get($activity, 'causer.name') . ' ' . data_get($activity, 'event'))"
+                    :description="data_get($activity, 'description') !== data_get($activity, 'event') ? data_get($activity, 'description') : null"
+                >
+                    <x-slot:marker>
+                        <x-avatar
+                            xs
+                            :image="data_get($activity, 'causer.avatar_url')"
+                        />
+                    </x-slot:marker>
+                    @if(! empty(data_get($activity, 'properties.attributes', [])))
+                        <button
+                            type="button"
+                            x-on:click="showProperties({{ data_get($activity, 'id') }})"
+                            class="text-primary-600 dark:text-primary-400 mt-1 cursor-pointer appearance-none border-0 bg-transparent p-0 text-xs hover:underline"
+                        >
+                            <span
+                                x-show="activeActivity !== {{ data_get($activity, 'id') }}"
+                                x-cloak
+                                >{{ __('Show changes') }}</span
                             >
+                            <span
+                                x-show="activeActivity === {{ data_get($activity, 'id') }}"
+                                x-cloak
+                                >{{ __('Hide changes') }}</span
+                            >
+                        </button>
+                        <div
+                            x-show="activeActivity === {{ data_get($activity, 'id') }}"
+                            x-collapse
+                            x-cloak
+                            class="mt-1 text-xs text-gray-600 dark:text-gray-300"
+                        >
+                            @foreach(data_get($activity, 'properties.attributes', []) as $name => $value)
                                 <div>
-                                    <div class="text-sm text-gray-500">
+                                    <span class="font-semibold"
+                                        >{{ $name }}:</span
+                                    >
+                                    @php($old = data_get($activity, 'properties.old.' . $name))
+                                    @if(! is_null($old))
                                         <span
-                                            x-text="activity.causer.name"
-                                        ></span>
-                                        <span
-                                            x-on:click="
-                                                showProperties(activity.id)
-                                            "
-                                            href="#"
-                                            class="cursor-pointer font-medium text-gray-900 dark:text-white"
-                                            x-text="activity.event"
-                                        ></span>
-                                        <div
-                                            x-show="
-                                                activity.id === activeActivity
-                                            "
-                                            x-collapse
-                                            x-cloak
+                                            >{{ is_scalar($old) ? $old : json_encode($old) }}</span
                                         >
-                                            <div
-                                                x-text="activity.description"
-                                            ></div>
-                                            <template
-                                                x-for="
-                                                    (value, name) in
-                                                    Object.fromEntries(
-                                                        Object.entries(
-                                                            activity.properties
-                                                                .attributes ??
-                                                                {},
-                                                        ),
-                                                    )
-                                                "
-                                            >
-                                                <div>
-                                                    <span
-                                                        class="font-semibold"
-                                                        x-text="name + ':'"
-                                                    ></span>
-                                                    <span
-                                                        x-html="
-                                                            activity.properties
-                                                                .old &&
-                                                            activity.properties
-                                                                .old[name]
-                                                                ? activity
-                                                                      .properties
-                                                                      .old[
-                                                                      name
-                                                                  ] +
-                                                                  '<span> -></span>'
-                                                                : ''
-                                                        "
-                                                    ></span>
-                                                    <span
-                                                        x-text="
-                                                            typeof value ===
-                                                            'undefined'
-                                                                ? ''
-                                                                : value
-                                                        "
-                                                    ></span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
+                                        <span> -&gt; </span>
+                                    @endif
+                                    <span
+                                        >{{ is_scalar($value) ? $value : json_encode($value) }}</span
+                                    >
                                 </div>
-                                <div
-                                    class="text-right text-sm whitespace-nowrap text-gray-500"
-                                >
-                                    <time
-                                        x-text="
-                                            $nuxbe.format.datetime(
-                                                activity.created_at,
-                                            )
-                                        "
-                                    ></time>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
-                    </div>
-                </div>
-            </li>
-        </template>
-        <template x-if="$wire.perPage < $wire.total">
-            <x-button
-                wire:click="loadMore()"
-                color="indigo"
-                class="w-full"
-                :text="__('Show more')"
-                loading
-            />
-        </template>
-    </ul>
+                    @endif
+                </x-timeline.items>
+            @endforeach
+        @endisland
+    </x-timeline>
+
+    <div x-show="$wire.page * $wire.perPage < $wire.total" x-cloak class="pt-2">
+        <x-button
+            type="button"
+            wire:click="loadMore()"
+            wire:intersect="loadMore()"
+            wire:island.append="activities"
+            class="w-full"
+            :text="__('Show more')"
+            loading="loadMore"
+        />
+    </div>
 </div>
