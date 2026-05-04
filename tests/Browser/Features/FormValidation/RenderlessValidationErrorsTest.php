@@ -133,7 +133,12 @@ function triggerSave($page): void
         }
     JS);
 
-    $page->wait(3);
+    waitForCondition($page, <<<'JS'
+        () => {
+            const comp = Livewire.all().find(c => c.name === 'validation-test');
+            return Object.keys(comp?.snapshot?.memo?.errors || {}).length > 0;
+        }
+    JS);
 }
 
 /*
@@ -365,7 +370,12 @@ test('toast fallback for errors without matching visible input', function (): vo
         }
     JS);
 
-    $page->wait(1);
+    waitForCondition($page, <<<'JS'
+        () => {
+            const container = document.querySelector('[x-data*="tallstackui_toastBase"]');
+            return container && container.querySelectorAll('[x-show]').length > 0;
+        }
+    JS);
 
     $page->assertScript(<<<'JS'
         (() => {
@@ -390,7 +400,7 @@ test('inline errors render inside teleported x-modal contents', function (): voi
         () => $tsui.open.modal('modal-validation-test')
     JS);
 
-    $page->wait(1);
+    waitForElement($page, '[id="modal-validation-test"][data-teleport-target]');
 
     // Click the save button inside the teleported modal.
     $page->script(<<<'JS'
@@ -400,7 +410,20 @@ test('inline errors render inside teleported x-modal contents', function (): voi
         }
     JS);
 
-    $page->wait(3);
+    // Wait for both the snapshot to carry the validation errors AND the
+    // teleported modal to receive the rendered error span injected by the
+    // validation-errors helper.
+    waitForCondition($page, <<<'JS'
+        () => {
+            const comp = Livewire.all().find(c => c.name === 'modal-validation-test');
+            const errors = comp?.snapshot?.memo?.errors || {};
+            if (Object.keys(errors).length === 0) return false;
+
+            const teleported = document.querySelector('[id="modal-validation-test"]');
+            const span = teleported?.querySelector('[data-validation-error="form.related_id"]');
+            return span && span.style.display !== 'none';
+        }
+    JS, 10000);
 
     $page->assertScript(<<<'JS'
         (() => {
