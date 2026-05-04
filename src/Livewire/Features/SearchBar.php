@@ -50,6 +50,8 @@ class SearchBar extends Component
                 ->toArray();
         }
 
+        $this->searchModel = $this->filterByDetailRoutePermission((array) $this->searchModel);
+
         foreach ((array) $this->searchModel as $searchModel) {
             $this->modelLabels[$searchModel] = [
                 'label' => __(Str::of(morph_alias($searchModel))->plural()->headline()->toString()),
@@ -71,6 +73,14 @@ class SearchBar extends Component
     #[Renderless]
     public function showDetail(string $model, int $id): void
     {
+        if (! user_can_view_model_detail($model)) {
+            $this->toast()
+                ->error(__('Record not found'))
+                ->send();
+
+            return;
+        }
+
         /** @var Model $model */
         $modelInstance = resolve_static($model, 'query')->whereKey($id)->first();
 
@@ -96,9 +106,11 @@ class SearchBar extends Component
     public function updatedSearch(): void
     {
         if ($this->search) {
+            $permittedModels = $this->filterByDetailRoutePermission((array) $this->searchModel);
+
             if (is_array($this->searchModel)) {
                 $return = [];
-                foreach ($this->searchModel as $model) {
+                foreach ($permittedModels as $model) {
                     try {
                         $result = resolve_static($model, 'search', ['query' => $this->search])
                             ->toEloquentBuilder()
@@ -125,7 +137,7 @@ class SearchBar extends Component
                 }
 
                 $this->return = $return;
-            } else {
+            } elseif (in_array($this->searchModel, $permittedModels, true)) {
                 $result = resolve_static($this->searchModel, 'search', ['query' => $this->search])
                     ->paginate();
 
@@ -135,11 +147,21 @@ class SearchBar extends Component
 
                 $this->return = count($result->items()) ? $result->items() : null;
                 $this->show = true;
+            } else {
+                $this->return = [];
             }
         } else {
             $this->return = [];
         }
 
         $this->skipRender();
+    }
+
+    protected function filterByDetailRoutePermission(array $models): array
+    {
+        return array_values(array_filter(
+            $models,
+            fn (string $model): bool => user_can_view_model_detail($model)
+        ));
     }
 }

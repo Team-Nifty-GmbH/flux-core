@@ -86,6 +86,47 @@ if (! function_exists('user_can')) {
     }
 }
 
+if (! function_exists('user_can_route')) {
+    function user_can_route(?string $routeName): bool
+    {
+        if (blank($routeName)) {
+            return false;
+        }
+
+        $route = Illuminate\Support\Facades\Route::getRoutes()->getByName($routeName);
+
+        if (is_null($route)) {
+            return false;
+        }
+
+        $permission = route_to_permission($route, true);
+
+        if (is_null($permission)) {
+            return true;
+        }
+
+        return auth()->user()?->can($permission) ?? false;
+    }
+}
+
+if (! function_exists('user_can_view_model_detail')) {
+    function user_can_view_model_detail(?string $model): bool
+    {
+        if (blank($model) || ! class_exists($model) || ! method_exists($model, 'detailRoute')) {
+            return false;
+        }
+
+        $instance = app($model);
+        $routeName = Closure::bind(
+            fn (): ?string => $this->detailRouteName ?? null,
+            $instance,
+            $model
+        )();
+
+        return user_can_route($routeName);
+    }
+}
+
 if (! function_exists('get_subclasses_of')) {
     function get_subclasses_of(string $extendingClass, array|string $namespace): array
     {
