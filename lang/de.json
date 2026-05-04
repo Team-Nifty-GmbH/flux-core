@@ -1040,6 +1040,7 @@
     "Employee Department Id": "Mitarbeiter-Abteilungs-ID",
     "Employee Departments": "Mitarbeiter-Abteilungen",
     "Employee Id": "Mitarbeiter-ID",
+    "Employee is not employed during the given date.": "Mitarbeiter ist nicht angestellt während des gegebenen Datums",
     "Employee Number": "Mitarbeiternummer",
     "Employees": "Mitarbeiter",
     "Employment Date": "Eintrittsdatum",

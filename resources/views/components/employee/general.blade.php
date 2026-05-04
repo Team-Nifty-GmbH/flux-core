@@ -84,6 +84,11 @@
                 wire:model="employee.account_holder"
                 x-bind:disabled="!isEditing"
             />
+            <x-checkbox
+                :label="__('Is Active')"
+                wire:model="employee.is_active"
+                x-bind:disabled="!isEditing"
+            />
         </div>
     </x-card>
 

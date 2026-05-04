@@ -452,12 +452,16 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     // Scopes
     protected function scopeEmployed(Builder $query, DateTime $untilDate): void
     {
+        $date = $untilDate->format('Ymd');
         $query->whereHas('workTimeModelHistory')
             ->where('is_active', true)
-            ->where(function (Builder $query) use ($untilDate): void {
-                $query->where('employment_date', '<=', $untilDate)
-                    ->whereNull('termination_date')
-                    ->orWhereValueBetween($untilDate->startOfDay(), ['employment_date', 'termination_date']);
-            });
+            ->whereRaw(
+                'REPLACE(COALESCE(employment_date, 0), \'-\', \'\') <= ? '
+                . 'AND REPLACE(COALESCE(termination_date, 99999999), \'-\', \'\') >= ?',
+                [
+                    $date,
+                    $date,
+                ]
+            );
     }
 }
