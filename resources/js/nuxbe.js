@@ -11,12 +11,23 @@ function promptValue(id) {
     return el.value;
 }
 
+let appModeCache = null;
+
 function isAppMode() {
-    return (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true ||
-        (window.nuxbeAppBridge?.isNative?.() ?? false)
-    );
+    if (appModeCache !== null) {
+        return appModeCache;
+    }
+
+    if (typeof window === 'undefined') {
+        return false;
+    }
+
+    appModeCache =
+        window.matchMedia?.('(display-mode: standalone)')?.matches === true ||
+        window.navigator?.standalone === true ||
+        (window.nuxbeAppBridge?.isNative?.() ?? false);
+
+    return appModeCache;
 }
 
 const nuxbe = {
