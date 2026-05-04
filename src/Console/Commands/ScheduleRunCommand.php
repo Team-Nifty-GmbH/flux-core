@@ -18,6 +18,7 @@ use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class ScheduleRunCommand extends BaseScheduleRunCommand
 {
@@ -95,12 +96,19 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             ) {
                 $overdueEvents[] = $event;
 
-                if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
-                    $parts = explode(' ', $event->expression);
-                    $nextRunDate = $nextRunDate->copy()->addMonthNoOverflow()->endOfMonth()
-                        ->setTime((int) $parts[1], (int) $parts[0]);
-                } else {
-                    $nextRunDate = (new CronExpression($event->expression))->getNextRunDate($nextRunDate);
+                // Only skip past the natural next occurrence when it falls on the same
+                // day - otherwise the schedule would double-fire today (e.g. yearlyOn at
+                // 06:00 when due_at was midnight). For schedules whose next occurrence
+                // is on a different day (monthly, lastDayOfMonth, quarterly, ...), that
+                // occurrence belongs to the NEXT cycle and must not be skipped.
+                if (Carbon::instance($nextRunDate)->isSameDay(now())) {
+                    if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
+                        $parts = explode(' ', $event->expression);
+                        $nextRunDate = $nextRunDate->copy()->addMonthNoOverflow()->endOfMonth()
+                            ->setTime((int) $parts[1], (int) $parts[0]);
+                    } else {
+                        $nextRunDate = (new CronExpression($event->expression))->getNextRunDate($nextRunDate);
+                    }
                 }
             }
 

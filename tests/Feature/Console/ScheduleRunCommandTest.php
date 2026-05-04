@@ -193,6 +193,46 @@ test('does not double fire overdue schedule when cron matches later the same day
     expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
 });
 
+test('advances due_at by one cycle when monthly cron is delayed into the next minute', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+
+    // Production scenario: ~130 monthly subscription schedules at the 1st of the month
+    // take longer than 1 minute to process serially. Schedules processed after 00:00:59
+    // hit the "overdue" branch because the cron `0 0 1 * *` no longer matches at 00:01.
+    $this->travelTo(Carbon::create(2026, 4, 1, 0, 1, 5));
+
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'Monthly Subscription Schedule',
+        'class' => ScheduleRunTestInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => Carbon::create(2026, 4, 1, 0, 0, 0),
+    ]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
+
+    $schedule->refresh();
+
+    // Next run should be 2026-05-01 (one month from due_at), NOT 2026-06-01.
+    // The previous code incorrectly advanced $nextRunDate twice when overdue,
+    // skipping a whole month of subscription invoices.
+    expect($schedule->due_at->toDateTimeString())->toBe('2026-05-01 00:00:00');
+});
+
 test('runs a repeatable with defaultCron without a db entry', function (): void {
     ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
 
