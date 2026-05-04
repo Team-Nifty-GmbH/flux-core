@@ -18,16 +18,18 @@
             });
     "
 >
-    @teleport('body')
-        <x-modal id="edit-event-modal" scope="headless" persistent>
-            <div>
-                <livewire:dynamic-component
-                    wire:model="event"
-                    :is="$event->edit_component ?? 'features.calendar.calendar-event'"
-                />
-            </div>
-        </x-modal>
-    @endteleport
+    @php
+        $editComponent = $event->edit_component ?? 'features.calendar.calendar-event';
+    @endphp
+    <x-modal id="edit-event-modal" scope="headless" persistent>
+        <div>
+            <livewire:dynamic-component
+                :is="$editComponent"
+                :wire:key="$editComponent"
+                wire:model="event"
+            />
+        </div>
+    </x-modal>
 
     @teleport('body')
         <x-modal id="confirm-dialog" scope="headless" persistent center>
