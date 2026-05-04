@@ -100,7 +100,8 @@ class ProcessSubscriptionOrder implements Repeatable
                     $e::class,
                     $e->getMessage(),
                     $e instanceof ValidationException ? $e->errors() : [],
-                )->subscribeChannel(array_filter([$order->getCreatedBy()]))
+                )
+                    ->subscribeChannel(array_filter([$order->getCreatedBy()]))
             );
 
             throw $e;

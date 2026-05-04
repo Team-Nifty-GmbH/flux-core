@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Events\Order\SubscriptionOrderFailedEvent;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -13,10 +14,12 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Order\SubscriptionOrderFailedNotification;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
+use function Livewire\invade;
 
 uses(DatabaseTransactions::class);
 
@@ -106,6 +109,35 @@ test('subscription order failure notifies the order creator', function (): void 
             && $notification->event->exceptionClass === ValidationException::class,
     );
     Notification::assertSentToTimes($this->creator, SubscriptionOrderFailedNotification::class, 1);
+});
+
+test('description for ValidationException renders the validation error messages', function (): void {
+    $notification = new SubscriptionOrderFailedNotification();
+    $notification->event = new SubscriptionOrderFailedEvent(
+        $this->subscriptionOrder,
+        ValidationException::class,
+        'The given data was invalid.',
+        ['address_invoice_id' => ['The address is required.']],
+    );
+
+    $description = invade($notification)->getDescription();
+
+    expect($description)->toContain('The address is required.');
+});
+
+test('description for non-validation exceptions does not leak the raw exception message', function (): void {
+    $notification = new SubscriptionOrderFailedNotification();
+    $notification->event = new SubscriptionOrderFailedEvent(
+        $this->subscriptionOrder,
+        QueryException::class,
+        'SQLSTATE[42S22]: column secret.password does not exist',
+        [],
+    );
+
+    $description = invade($notification)->getDescription();
+
+    expect($description)->not->toContain('SQLSTATE')
+        ->and($description)->not->toContain('password');
 });
 
 test('subscription order failure does not notify when order has no creator', function (): void {

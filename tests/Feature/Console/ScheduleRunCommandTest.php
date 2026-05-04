@@ -290,6 +290,43 @@ test('does not execute the same schedule twice when due_at was advanced concurre
     expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
 });
 
+test('does not skip the next intra-day occurrence for multi-per-day cron when overdue', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+
+    // Hourly schedule, due_at = 06:00 was missed, now 06:30:10. The catch-up runs once
+    // and due_at must advance to the next hourly tick (07:00), NOT 08:00 - otherwise
+    // the legitimate 07:00 occurrence is silently dropped.
+    $this->travelTo(Carbon::create(2026, 4, 1, 6, 30, 10));
+
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'Hourly Overdue Schedule',
+        'class' => ScheduleRunTestInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'hourly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => Carbon::create(2026, 4, 1, 6, 0, 0),
+    ]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
+
+    $schedule->refresh();
+
+    expect($schedule->due_at->toDateTimeString())->toBe('2026-04-01 07:00:00');
+});
+
 test('runs a repeatable with defaultCron without a db entry', function (): void {
     ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
 

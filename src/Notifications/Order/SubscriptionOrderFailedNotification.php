@@ -7,6 +7,7 @@ use FluxErp\Support\Notification\SubscribableNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class SubscriptionOrderFailedNotification extends SubscribableNotification implements ShouldQueue
 {
@@ -21,7 +22,14 @@ class SubscriptionOrderFailedNotification extends SubscribableNotification imple
 
     protected function getDescription(): ?string
     {
-        return $this->event->exceptionMessage;
+        if ($this->event->exceptionClass === ValidationException::class) {
+            return collect($this->event->validationErrors)
+                ->flatten()
+                ->filter()
+                ->implode(' ');
+        }
+
+        return __('Subscription processing failed. Check the activity log for details.');
     }
 
     protected function getModelFromEvent(object $event): ?Model
