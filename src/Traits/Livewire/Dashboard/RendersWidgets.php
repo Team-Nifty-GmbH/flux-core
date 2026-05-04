@@ -6,8 +6,10 @@ use FluxErp\Enums\ComparisonTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Widget as WidgetModel;
 use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
@@ -171,16 +173,20 @@ trait RendersWidgets
 
     protected function availableWidgetsTree(): array
     {
+        $generatedPrefix = 'widgets.generated.';
+
         $toNode = fn (array $widget) => [
             'id' => 'widget-' . $widget['component_name'],
             'label' => __($widget['label']),
             'component_name' => $widget['component_name'],
         ];
 
-        $widgets = collect($this->availableWidgets);
+        $widgets = collect($this->availableWidgets)
+            ->filter(fn (array $widget) => ! str_starts_with($widget['component_name'], $generatedPrefix));
 
         $categorized = $widgets
             ->whereNotNull('category')
+            ->where('category', '!=', 'generated')
             ->groupBy('category')
             ->sortKeys()
             ->map(fn ($children, $category) => [
@@ -200,7 +206,51 @@ trait RendersWidgets
             ->sortBy('label', SORT_STRING | SORT_FLAG_CASE)
             ->values();
 
-        return $categorized->merge($uncategorized)->all();
+        $tree = $categorized->merge($uncategorized);
+
+        $generatedWidgets = $this->getGeneratedWidgetsForTree($generatedPrefix);
+
+        if ($generatedWidgets->isNotEmpty()) {
+            $tree->push([
+                'id' => 'category-generated-widgets',
+                'label' => __('Generated Widgets'),
+                'children' => $generatedWidgets
+                    ->sortBy('label', SORT_STRING | SORT_FLAG_CASE)
+                    ->values()
+                    ->all(),
+            ]);
+        }
+
+        return $tree->all();
+    }
+
+    protected function getGeneratedWidgetsForTree(string $generatedPrefix): Collection
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return collect();
+        }
+
+        $userMorphClass = $user->getMorphClass();
+        $userId = $user->getKey();
+
+        return resolve_static(WidgetModel::class, 'query')
+            ->where('component_name', 'like', $generatedPrefix . '%')
+            ->where('dashboard_component', static::class)
+            ->where(function ($query) use ($userMorphClass, $userId): void {
+                $query->where(function ($query) use ($userMorphClass, $userId): void {
+                    $query->where('widgetable_type', $userMorphClass)
+                        ->where('widgetable_id', $userId);
+                })->orWhere('config->is_shared', true);
+            })
+            ->get()
+            ->unique(fn (WidgetModel $widget) => $widget->component_name . ':' . data_get($widget->config, 'name'))
+            ->map(fn (WidgetModel $widget) => [
+                'id' => 'widget-generated-' . $widget->getKey(),
+                'label' => data_get($widget->config, 'name', $widget->name ?? $widget->component_name),
+                'component_name' => $widget->component_name,
+            ]);
     }
 
     protected function filterWidgets(array $widgets): array
@@ -209,6 +259,18 @@ trait RendersWidgets
             $widgets,
             function (array $widget) {
                 $name = $widget['component_name'];
+
+                if (str_contains($name, '.generated.')) {
+                    try {
+                        $permissionExists = ! is_null(
+                            resolve_static(Permission::class, 'findByName', ['name' => 'widget.' . $name])
+                        );
+                    } catch (PermissionDoesNotExist) {
+                        $permissionExists = false;
+                    }
+
+                    return ! $permissionExists || auth()->user()->can('widget.' . $name);
+                }
 
                 if (
                     collect(Arr::wrap(data_get($widget, 'dashboard_component')))
