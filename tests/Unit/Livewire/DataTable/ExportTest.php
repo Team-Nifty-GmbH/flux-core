@@ -34,12 +34,27 @@ function readJobOutput(ExportDataTableJob $job): array
     ];
 }
 
+function readXlsxRows(string $contents): array
+{
+    $tmp = tempnam(sys_get_temp_dir(), 'flux-export-test-');
+    file_put_contents($tmp, $contents);
+
+    try {
+        return IOFactory::createReaderForFile($tmp)
+            ->load($tmp)
+            ->getActiveSheet()
+            ->toArray();
+    } finally {
+        unlink($tmp);
+    }
+}
+
 test('can export data with explicit columns', function (): void {
     Queue::fake([ExportDataTableJob::class]);
     Notification::fake();
     Storage::fake(config('filesystems.default'));
 
-    app(Tenant::class)->create([
+    Tenant::factory()->create([
         'name' => 'Acme Inc',
         'tenant_code' => 'ACME',
         'is_active' => true,
@@ -58,27 +73,17 @@ test('can export data with explicit columns', function (): void {
 
     expect($output['path'])->toEndWith('.xlsx');
 
-    $tmp = tempnam(sys_get_temp_dir(), 'flux-export-test-');
-    file_put_contents($tmp, $output['contents']);
+    $rows = readXlsxRows($output['contents']);
 
-    try {
-        $rows = IOFactory::createReaderForFile($tmp)
-            ->load($tmp)
-            ->getActiveSheet()
-            ->toArray();
-
-        expect($rows[0])->toBe([__('Name'), __('Tenant Code')]);
-        expect(collect($rows)->skip(1)->pluck(0)->all())->toContain('Acme Inc');
-    } finally {
-        @unlink($tmp);
-    }
+    expect($rows[0])->toBe([__('Name'), __('Tenant Code')]);
+    expect(collect($rows)->skip(1)->pluck(0)->all())->toContain('Acme Inc');
 });
 
 test('export with empty columns falls back to enabledCols', function (): void {
     Queue::fake([ExportDataTableJob::class]);
     Storage::fake(config('filesystems.default'));
 
-    app(Tenant::class)->create([
+    Tenant::factory()->create([
         'name' => 'Globex Corp',
         'tenant_code' => 'GLOB',
         'is_active' => true,
@@ -91,27 +96,17 @@ test('export with empty columns falls back to enabledCols', function (): void {
     $job = data_get(Queue::pushedJobs(), ExportDataTableJob::class . '.0.job');
     $output = readJobOutput($job);
 
-    $tmp = tempnam(sys_get_temp_dir(), 'flux-export-test-');
-    file_put_contents($tmp, $output['contents']);
+    $rows = readXlsxRows($output['contents']);
 
-    try {
-        $rows = IOFactory::createReaderForFile($tmp)
-            ->load($tmp)
-            ->getActiveSheet()
-            ->toArray();
-
-        expect($rows[0])->toBe([__('Name'), __('Tenant Code')]);
-        expect(collect($rows)->skip(1)->pluck(0)->all())->toContain('Globex Corp');
-    } finally {
-        @unlink($tmp);
-    }
+    expect($rows[0])->toBe([__('Name'), __('Tenant Code')]);
+    expect(collect($rows)->skip(1)->pluck(0)->all())->toContain('Globex Corp');
 });
 
 test('csv format produces a csv file with semicolon-separated rows', function (): void {
     Queue::fake([ExportDataTableJob::class]);
     Storage::fake(config('filesystems.default'));
 
-    app(Tenant::class)->create([
+    Tenant::factory()->create([
         'name' => 'Sirius Cybernetics',
         'tenant_code' => 'SC',
         'is_active' => true,
@@ -141,7 +136,7 @@ test('json format produces a valid json file', function (): void {
     Queue::fake([ExportDataTableJob::class]);
     Storage::fake(config('filesystems.default'));
 
-    app(Tenant::class)->create([
+    Tenant::factory()->create([
         'name' => 'Stark Industries',
         'tenant_code' => 'STARK',
         'is_active' => true,

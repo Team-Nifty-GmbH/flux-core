@@ -1,3 +1,24 @@
+// TODO: revisit once https://github.com/tallstackui/tallstackui/pull/1254
+// ships in a TallStackUI release.
+//
+// That PR drops the @error gate from the form/error.blade.php and the
+// surrounding wrapper components, so the reactive span is in the DOM
+// from the first render. Combined with Livewire >= 4.3.0 (which made
+// $wire.$errors actually reactive — livewire/livewire#10229), most of
+// the work this file does becomes redundant: ring/text/visibility all
+// update through native reactive bindings.
+//
+// What can likely go after the upgrade:
+//   - the published flux-core overrides under
+//     resources/views/tallstackui/components/{form/error,wrapper/*}.blade.php
+//   - ring + error span management below (toggleRing, toggleError, the
+//     manual Alpine.evaluate fallback)
+//
+// What to keep:
+//   - the toast fallback for errors that don't have a visible matching
+//     input on the page (separate UX feature)
+//   - teleport-aware scoping (modals, slides) for whichever logic
+//     actually still has work to do at that point.
 const ERROR_RING = [
     'ring-red-300',
     'focus-within:ring-red-500',

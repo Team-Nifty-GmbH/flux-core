@@ -49,7 +49,7 @@ class ExportDataTableJob implements ShouldQueue
         [$exportClass, $extension] = match ($this->format) {
             'csv' => [CsvExport::class, '.csv'],
             'json' => [JsonExport::class, '.json'],
-            default => [DataTableExport::class, '.xlsx'],
+            'xlsx' => [DataTableExport::class, '.xlsx'],
         };
 
         $fileName = morph_alias($this->modelClass) . '_' . now()->toDateTimeLocalString('minute') . $extension;
