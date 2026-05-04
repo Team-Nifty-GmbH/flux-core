@@ -165,6 +165,10 @@ class CloseEmployeeDay extends FluxAction
             $actualHours
         );
 
+        if ($employee->salary_type === 'hourly' && bccomp($plusMinusOvertimeHours, 0) === -1) {
+            $plusMinusOvertimeHours = 0;
+        }
+
         $data = array_map(
             fn ($value) => bccomp($value, 0) === 1 ? bcround($value, 2) : 0,
             $data

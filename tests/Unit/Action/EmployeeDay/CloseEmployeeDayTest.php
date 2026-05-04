@@ -268,3 +268,189 @@ test('percentage deduction is applied when calculating overtime used', function 
     expect($dayData->get('target_hours'))->toBe('8.00');
     expect($dayData->get('plus_minus_overtime_hours'))->toBe('-8.00');
 });
+
+test('hourly salary type does not accumulate negative overtime when actual is below target', function (): void {
+    $this->employee->update(['salary_type' => 'hourly']);
+
+    $employee = resolve_static(Employee::class, 'query')
+        ->whereKey($this->employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('target_hours'))->toBe('8.00');
+    expect($dayData->get('actual_hours'))->toBe('0.00');
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+});
+
+test('hourly salary type still accumulates positive overtime above target', function (): void {
+    $this->employee->update(['salary_type' => 'hourly']);
+
+    $employee = resolve_static(Employee::class, 'query')
+        ->whereKey($this->employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(8, 0),
+        'ended_at' => $testDate->copy()->setTime(18, 0),
+        'total_time_ms' => 10 * 3600000,
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => true,
+    ]);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('target_hours'))->toBe('8.00');
+    expect($dayData->get('actual_hours'))->toBe('10.00');
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('2.00');
+});
+
+test('hourly salary type with full day vacation does not accumulate negative overtime', function (): void {
+    $this->employee->update(['salary_type' => 'hourly']);
+
+    $absenceType = app(AbsenceType::class)->create([
+        'name' => 'Urlaub',
+        'code' => 'URL',
+        'color' => '#22c55e',
+        'employee_can_create' => EmployeeCanCreateEnum::Yes,
+        'affects_overtime' => false,
+        'affects_sick_leave' => false,
+        'affects_vacation' => true,
+        'is_active' => true,
+    ]);
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    app(AbsenceRequest::class)->create([
+        'employee_id' => $this->employee->getKey(),
+        'absence_type_id' => $absenceType->getKey(),
+        'start_date' => $testDate,
+        'end_date' => $testDate,
+        'day_part' => AbsenceRequestDayPartEnum::FullDay,
+        'state' => AbsenceRequestStateEnum::Approved,
+    ]);
+
+    $employee = resolve_static(Employee::class, 'query')
+        ->whereKey($this->employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+});
+
+test('hourly salary type with full day sick leave does not accumulate negative overtime', function (): void {
+    $this->employee->update(['salary_type' => 'hourly']);
+
+    $absenceType = app(AbsenceType::class)->create([
+        'name' => 'Krank',
+        'code' => 'KRK',
+        'color' => '#ef4444',
+        'employee_can_create' => EmployeeCanCreateEnum::Yes,
+        'affects_overtime' => false,
+        'affects_sick_leave' => true,
+        'affects_vacation' => false,
+        'is_active' => true,
+    ]);
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    app(AbsenceRequest::class)->create([
+        'employee_id' => $this->employee->getKey(),
+        'absence_type_id' => $absenceType->getKey(),
+        'start_date' => $testDate,
+        'end_date' => $testDate,
+        'day_part' => AbsenceRequestDayPartEnum::FullDay,
+        'state' => AbsenceRequestStateEnum::Approved,
+    ]);
+
+    $employee = resolve_static(Employee::class, 'query')
+        ->whereKey($this->employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+});
+
+test('hourly salary type produces zero overtime when actual matches target', function (): void {
+    $this->employee->update(['salary_type' => 'hourly']);
+
+    $employee = resolve_static(Employee::class, 'query')
+        ->whereKey($this->employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(8, 0),
+        'ended_at' => $testDate->copy()->setTime(16, 0),
+        'total_time_ms' => 8 * 3600000,
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => true,
+    ]);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('target_hours'))->toBe('8.00');
+    expect($dayData->get('actual_hours'))->toBe('8.00');
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+});
+
+test('hourly salary type with half day sick leave plus matching work covers the day', function (): void {
+    $this->employee->update(['salary_type' => 'hourly']);
+
+    $absenceType = app(AbsenceType::class)->create([
+        'name' => 'Krank',
+        'code' => 'KRK',
+        'color' => '#ef4444',
+        'employee_can_create' => EmployeeCanCreateEnum::Yes,
+        'affects_overtime' => false,
+        'affects_sick_leave' => true,
+        'affects_vacation' => false,
+        'is_active' => true,
+    ]);
+
+    $testDate = Carbon::now()->next(Carbon::MONDAY);
+
+    app(AbsenceRequest::class)->create([
+        'employee_id' => $this->employee->getKey(),
+        'absence_type_id' => $absenceType->getKey(),
+        'start_date' => $testDate,
+        'end_date' => $testDate,
+        'day_part' => AbsenceRequestDayPartEnum::FirstHalf,
+        'state' => AbsenceRequestStateEnum::Approved,
+    ]);
+
+    $employee = resolve_static(Employee::class, 'query')
+        ->whereKey($this->employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+
+    $employee->workTimes()->create([
+        'started_at' => $testDate->copy()->setTime(12, 0),
+        'ended_at' => $testDate->copy()->setTime(16, 0),
+        'total_time_ms' => 4 * 3600000,
+        'paused_time_ms' => 0,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => true,
+    ]);
+
+    $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
+
+    expect($dayData->get('plus_minus_overtime_hours'))->toBe('0.00');
+});
