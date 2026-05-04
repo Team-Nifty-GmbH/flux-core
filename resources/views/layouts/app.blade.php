@@ -132,6 +132,16 @@
                             </div>
                         @endauth
 
+                        <x-button
+                            x-data
+                            x-show="$nuxbe.isAppMode()"
+                            x-cloak
+                            flat
+                            icon="arrow-path"
+                            :title="__('Refresh')"
+                            x-on:click="window.location.reload()"
+                        />
+
                         @if(resolve_static(\FluxErp\Models\PriceList::class, 'default'))
                             @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
