@@ -19,6 +19,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Throwable;
 
 class ScheduleRunCommand extends BaseScheduleRunCommand
 {
@@ -68,6 +69,31 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             ) {
                 $event->withoutOverlapping();
             }
+
+            // Guard against duplicate execution by an overlapping schedule:run process.
+            // withoutOverlapping only protects DURING execution; once the per-event
+            // mutex is released a second scheduler tick (whose in-memory $repeatable
+            // still has the past due_at) can pick the same row up and run it again.
+            // Re-fetch from the DB and skip when last_run already covers the cron's
+            // most recent past occurrence.
+            $event->skip(function () use ($repeatable): bool {
+                $fresh = $repeatable->fresh();
+
+                if (! $fresh || ! $fresh->last_run || ! $fresh->cron_expression) {
+                    return false;
+                }
+
+                try {
+                    $previousOccurrence = Carbon::instance(
+                        (new CronExpression($fresh->cron_expression))
+                            ->getPreviousRunDate(now()->toDateTime(), 0, true)
+                    );
+                } catch (Throwable) {
+                    return false;
+                }
+
+                return $fresh->last_run->greaterThanOrEqualTo($previousOccurrence);
+            });
 
             foreach ($repeatable->cron['methods'] as $key => $method) {
                 if (! $method) {

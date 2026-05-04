@@ -233,6 +233,63 @@ test('advances due_at by one cycle when monthly cron is delayed into the next mi
     expect($schedule->due_at->toDateTimeString())->toBe('2026-05-01 00:00:00');
 });
 
+test('does not execute the same schedule twice when due_at was advanced concurrently', function (): void {
+    ScheduleRunTestInvokable::$invocationCount = 0;
+
+    // Production scenario: process A runs schedule:run at 00:00, takes >1 minute to
+    // process all schedules. Process B starts at 00:01 (next cron tick) and queries
+    // the DB before A wrote the new due_at, so B's in-memory $repeatable still has
+    // the past due_at. Once A releases the per-event mutex, B can acquire it and
+    // would run the same schedule a second time, creating duplicate invoices.
+    //
+    // We simulate this by rolling the DB row's due_at back to a past value AFTER the
+    // first successful run. The fix must detect "this cycle already ran" via the
+    // schedule's last_run timestamp rather than relying on in-memory due_at alone.
+    $this->travelTo(Carbon::create(2026, 4, 1, 0, 1, 5));
+
+    $schedule = resolve_static(Schedule::class, 'query')->create([
+        'name' => 'Concurrent Run Schedule',
+        'class' => ScheduleRunTestInvokable::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'monthly',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [],
+                'dayConstraint' => [],
+                'timeConstraint' => [null, null],
+            ],
+        ],
+        'is_active' => true,
+        'due_at' => Carbon::create(2026, 4, 1, 0, 0, 0),
+    ]);
+
+    $this->artisan('schedule:run');
+
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
+
+    // Simulate a second scheduler instance whose cached view of $repeatable still has
+    // the original past due_at: the only way to bring the schedule back into the
+    // due-set is to roll due_at back. last_run stays at the value Process A wrote.
+    Illuminate\Support\Facades\DB::table('schedules')
+        ->where('id', $schedule->getKey())
+        ->update(['due_at' => Carbon::create(2026, 4, 1, 0, 0, 0)->toDateTimeString()]);
+
+    $this->app->forgetInstance(Illuminate\Console\Scheduling\Schedule::class);
+    $this->app->singleton(
+        Illuminate\Console\Scheduling\Schedule::class,
+        fn () => new Illuminate\Console\Scheduling\Schedule()
+    );
+
+    $this->artisan('schedule:run');
+
+    // The schedule must not run a second time for the same cron cycle.
+    expect(ScheduleRunTestInvokable::$invocationCount)->toBe(1);
+});
+
 test('runs a repeatable with defaultCron without a db entry', function (): void {
     ScheduleRunTestDefaultCronInvokable::$wasInvoked = false;
 
