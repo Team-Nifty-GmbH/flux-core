@@ -187,6 +187,7 @@
     "settings.translations.get": "View translation settings",
     "settings.users.get": "View user settings",
     "signature_added": "Signature added",
+    "Subscription processing failed for :order_number": "⚠️ Subscription processing failed for :order_number",
     "tickets.get": "View tickets",
     "tickets.{id}.get": "View ticket details",
     "time.hours_minutes": ":hours h :minutes min",
