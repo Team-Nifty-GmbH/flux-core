@@ -9,6 +9,7 @@ use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
+use FluxErp\Enums\SalaryTypeEnum;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
@@ -75,6 +76,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             'fixed_term_contract_until' => 'date:Y-m-d',
             'work_permit_until' => 'date:Y-m-d',
             'residence_permit_until' => 'date:Y-m-d',
+            'salary_type' => SalaryTypeEnum::class,
             'is_active' => 'boolean',
         ];
     }

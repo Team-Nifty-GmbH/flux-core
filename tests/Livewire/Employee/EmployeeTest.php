@@ -14,5 +14,7 @@ test('renders successfully', function (): void {
     ]);
 
     Livewire::test(Employee::class, ['id' => $employee->getKey()])
-        ->assertOk();
+        ->assertOk()
+        ->set('tab', 'employee.general')
+        ->assertSee(__('Salary Type'));
 });

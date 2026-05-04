@@ -254,6 +254,13 @@
                     ]
                 ]"
             />
+            <x-select.native
+                :label="__('Salary Type')"
+                wire:model="employee.salary_type"
+                :options="\FluxErp\Enums\SalaryTypeEnum::valuesLocalized()"
+                :hint="__('For hourly employees no negative balance is accumulated; positive overtime is still tracked.')"
+                x-bind:disabled="!isEditing"
+            />
         </div>
     </x-card>
 
