@@ -68,7 +68,6 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     protected function casts(): array
     {
         return [
-            'salary_type' => SalaryTypeEnum::class,
             'salutation' => SalutationEnum::class,
             'date_of_birth' => 'date:Y-m-d',
             'employment_date' => 'date:Y-m-d',
@@ -77,6 +76,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
             'fixed_term_contract_until' => 'date:Y-m-d',
             'work_permit_until' => 'date:Y-m-d',
             'residence_permit_until' => 'date:Y-m-d',
+            'salary_type' => SalaryTypeEnum::class,
             'is_active' => 'boolean',
         ];
     }

@@ -12,14 +12,19 @@ use FluxErp\Models\Employee;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\WorkTimeModel;
 
-function loadHourlyEmployee(Employee $employee): Employee
+function reloadEmployeeWithWorkTimeModel(Employee $employee): Employee
 {
-    $employee->update(['salary_type' => 'hourly']);
-
     return resolve_static(Employee::class, 'query')
         ->whereKey($employee->getKey())
         ->with('workTimeModelHistory.workTimeModel')
         ->first();
+}
+
+function loadHourlyEmployee(Employee $employee): Employee
+{
+    $employee->update(['salary_type' => 'hourly']);
+
+    return reloadEmployeeWithWorkTimeModel($employee);
 }
 
 beforeEach(function (): void {
@@ -95,11 +100,7 @@ test('overtime used is added to total overtime when affects_overtime is true', f
 });
 
 test('overtime is negative when no absence compensates for missing work', function (): void {
-    // Reload employee fresh to ensure relations are loaded
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = reloadEmployeeWithWorkTimeModel($this->employee);
 
     // Find the next Monday (a work day)
     $testDate = Carbon::now()->next(Carbon::MONDAY);
@@ -121,11 +122,7 @@ test('overtime is negative when no absence compensates for missing work', functi
 });
 
 test('pauses are not subtracted twice from actual hours', function (): void {
-    // Reload employee fresh to ensure relations are loaded
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = reloadEmployeeWithWorkTimeModel($this->employee);
 
     // Find the next Monday (a work day)
     $testDate = Carbon::now()->next(Carbon::MONDAY);
