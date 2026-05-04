@@ -7,162 +7,148 @@
         },
     }"
 >
-    @teleport('body')
-        <x-modal id="transaction-assign-orders-modal" size="7xl">
-            <x-slot:title>
-                <div class="flex w-full flex-col">
-                    <div class="flex flex-row gap-2">
-                        <span
-                            x-text="$wire.transactionForm.counterpart_name"
-                        ></span>
-                        <span
-                            class="text-red-600"
-                            x-html="
-                                $nuxbe.format.money(
-                                    $wire.transactionForm.amount,
-                                    { colored: true },
-                                )
-                            "
-                        ></span>
-                    </div>
-                    <div
-                        class="text-xs"
-                        x-text="
-                            $nuxbe.format.date(
-                                $wire.transactionForm.booking_date,
-                            )
+    <x-modal id="transaction-assign-orders-modal" size="7xl">
+        <x-slot:title>
+            <div class="flex w-full flex-col">
+                <div class="flex flex-row gap-2">
+                    <span
+                        x-text="$wire.transactionForm.counterpart_name"
+                    ></span>
+                    <span
+                        class="text-red-600"
+                        x-html="
+                            $nuxbe.format.money($wire.transactionForm.amount, {
+                                colored: true,
+                            })
                         "
-                    ></div>
-                    <div
-                        class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
-                    >
-                        <div x-text="$wire.transactionForm.purpose"></div>
-                    </div>
+                    ></span>
                 </div>
-            </x-slot:title>
-            <livewire:accounting.order-list wire:model="selectedOrders" lazy />
-            <x-slot:footer>
-                <x-button
-                    color="secondary"
-                    :text="__('Cancel')"
-                    x-on:click="
-                        $tsui.close.modal('transaction-assign-orders-modal')
-                    "
-                />
-                @stack('transaction-assign-orders-modal-footer')
-                <x-button :text="__('Assign')" wire:click="assignOrders" />
-            </x-slot:footer>
-        </x-modal>
-    @endteleport
-
-    @teleport('body')
-        <x-modal id="transaction-comments-modal">
-            <x-slot:title>
-                <div class="flex w-full flex-col">
-                    <div class="flex flex-row gap-2">
-                        <span
-                            x-text="$wire.transactionForm.counterpart_name"
-                        ></span>
-                        <span
-                            class="text-red-600"
-                            x-html="
-                                $nuxbe.format.money(
-                                    $wire.transactionForm.amount,
-                                    { colored: true },
-                                )
-                            "
-                        ></span>
-                    </div>
-                    <div
-                        class="text-xs"
-                        x-text="
-                            $nuxbe.format.date(
-                                $wire.transactionForm.booking_date,
-                            )
-                        "
-                    ></div>
-                    <div
-                        class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
-                    >
-                        <div x-text="$wire.transactionForm.purpose"></div>
-                    </div>
-                </div>
-            </x-slot:title>
-            <livewire:accounting.transactions.comments
-                :model-type="\FluxErp\Models\Transaction::class"
-                wire:model="transactionForm.id"
-                lazy
-                :is-public="false"
-            />
-            <x-slot:footer>
-                <x-button
-                    color="secondary"
-                    :text="__('Cancel')"
-                    x-on:click="$tsui.close.modal('transaction-comments-modal')"
-                />
-                @stack('transaction-comments-modal-footer')
-            </x-slot:footer>
-        </x-modal>
-    @endteleport
-
-    @teleport('body')
-        <x-modal
-            id="order-transaction-modal"
-            x-on:open="$tsui.focus('order-transaction-amount')"
-        >
-            <div class="flex flex-col gap-4">
-                <x-number
-                    id="order-transaction-amount"
-                    :label="__('Amount')"
-                    wire:model="orderTransactionForm.amount"
-                    step="0.01"
-                    :corner-hint="__('Amount')"
-                    placeholder="0.00"
-                />
                 <div
-                    x-cloak
-                    x-show="$wire.orderTransactionForm.orderCurrencyIso"
-                    class="flex flex-col gap-4"
+                    class="text-xs"
+                    x-text="
+                        $nuxbe.format.date($wire.transactionForm.booking_date)
+                    "
+                ></div>
+                <div
+                    class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
                 >
-                    <x-number
-                        :label="__('Exchange Rate')"
-                        wire:model="orderTransactionForm.exchange_rate"
-                        step="0.0001"
-                        placeholder="0.0000"
-                        x-on:change="$wire.calcOrderCurrencyAmount()"
-                    />
-                    <x-number
-                        wire:model="orderTransactionForm.order_currency_amount"
-                        step="0.01"
-                        placeholder="0.00"
-                        x-on:change="$wire.calcExchangeRate()"
-                    >
-                        <x-slot:label>
-                            {{ __('Order Currency Amount') }} (
-                            <span
-                                x-text="
-                                    $wire.orderTransactionForm.orderCurrencyIso
-                                "
-                            ></span>
-                            )
-                        </x-slot:label>
-                    </x-number>
+                    <div x-text="$wire.transactionForm.purpose"></div>
                 </div>
             </div>
-            <x-slot:footer>
-                <x-button
-                    color="secondary"
-                    :text="__('Cancel')"
-                    x-on:click="$tsui.close.modal('order-transaction-modal')"
+        </x-slot:title>
+        <livewire:accounting.order-list wire:model="selectedOrders" lazy />
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="
+                    $tsui.close.modal('transaction-assign-orders-modal')
+                "
+            />
+            @stack('transaction-assign-orders-modal-footer')
+            <x-button :text="__('Assign')" wire:click="assignOrders" />
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal id="transaction-comments-modal">
+        <x-slot:title>
+            <div class="flex w-full flex-col">
+                <div class="flex flex-row gap-2">
+                    <span
+                        x-text="$wire.transactionForm.counterpart_name"
+                    ></span>
+                    <span
+                        class="text-red-600"
+                        x-html="
+                            $nuxbe.format.money($wire.transactionForm.amount, {
+                                colored: true,
+                            })
+                        "
+                    ></span>
+                </div>
+                <div
+                    class="text-xs"
+                    x-text="
+                        $nuxbe.format.date($wire.transactionForm.booking_date)
+                    "
+                ></div>
+                <div
+                    class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
+                >
+                    <div x-text="$wire.transactionForm.purpose"></div>
+                </div>
+            </div>
+        </x-slot:title>
+        <livewire:accounting.transactions.comments
+            :model-type="\FluxErp\Models\Transaction::class"
+            wire:model="transactionForm.id"
+            lazy
+            :is-public="false"
+        />
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('transaction-comments-modal')"
+            />
+            @stack('transaction-comments-modal-footer')
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal
+        id="order-transaction-modal"
+        x-on:open="$tsui.focus('order-transaction-amount')"
+    >
+        <div class="flex flex-col gap-4">
+            <x-number
+                id="order-transaction-amount"
+                :label="__('Amount')"
+                wire:model="orderTransactionForm.amount"
+                step="0.01"
+                :corner-hint="__('Amount')"
+                placeholder="0.00"
+            />
+            <div
+                x-cloak
+                x-show="$wire.orderTransactionForm.orderCurrencyIso"
+                class="flex flex-col gap-4"
+            >
+                <x-number
+                    :label="__('Exchange Rate')"
+                    wire:model="orderTransactionForm.exchange_rate"
+                    step="0.0001"
+                    placeholder="0.0000"
+                    x-on:change="$wire.calcOrderCurrencyAmount()"
                 />
-                @stack('order-transaction-modal-footer')
-                <x-button
-                    :text="__('Save')"
-                    x-on:click="$wire.saveOrderTransaction()"
-                />
-            </x-slot:footer>
-        </x-modal>
-    @endteleport
+                <x-number
+                    wire:model="orderTransactionForm.order_currency_amount"
+                    step="0.01"
+                    placeholder="0.00"
+                    x-on:change="$wire.calcExchangeRate()"
+                >
+                    <x-slot:label>
+                        {{ __('Order Currency Amount') }} (
+                        <span
+                            x-text="$wire.orderTransactionForm.orderCurrencyIso"
+                        ></span>
+                        )
+                    </x-slot:label>
+                </x-number>
+            </div>
+        </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('order-transaction-modal')"
+            />
+            @stack('order-transaction-modal-footer')
+            <x-button
+                :text="__('Save')"
+                x-on:click="$wire.saveOrderTransaction()"
+            />
+        </x-slot:footer>
+    </x-modal>
 
     <div class="flex flex-col gap-4 text-sm">
         <div class="flex flex-col">

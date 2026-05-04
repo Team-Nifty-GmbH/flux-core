@@ -1,62 +1,54 @@
 <div class="flex flex-col gap-4">
-    <div wire:ignore>
-        @teleport('body')
-            <x-modal id="edit-address-assignment">
-                <div class="flex flex-col gap-4">
-                    <x-select.styled
-                        :label="__('Address')"
-                        wire:model="address_id"
-                        select="label:label|value:id"
-                        unfiltered
-                        :request="[
-                            'url' => route('search', \FluxErp\Models\Address::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'fields' => [
-                                  'contact_id',
-                                  'name',
-                                ],
-                                'with' => 'contact.media',
-                                'scopes' => [
-                                    'whereHasTenant' => [$tenantId],
-                                ],
-                            ],
-                        ]"
-                    />
-                    <x-select.styled
-                        :label="__('Type')"
-                        wire:model="address_type_id"
-                        select="label:name|value:id"
-                        :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->whereHasTenant($tenantId)->get(['id', 'name'])->toArray()"
-                    />
-                </div>
-                <x-slot:footer>
-                    <x-button
-                        color="secondary"
-                        light
-                        flat
-                        :text="__('Cancel')"
-                        x-on:click="
-                            $tsui.close.modal('edit-address-assignment')
-                        "
-                    />
-                    <x-button
-                        color="indigo"
-                        loading="save"
-                        x-on:click="
-                            $wire.save().then((success) => {
-                                if (success)
-                                    $tsui.close.modal(
-                                        'edit-address-assignment',
-                                    );
-                            })
-                        "
-                        :text="__('Save')"
-                    />
-                </x-slot:footer>
-            </x-modal>
-        @endteleport
-    </div>
+    <x-modal id="edit-address-assignment">
+        <div class="flex flex-col gap-4">
+            <x-select.styled
+                :label="__('Address')"
+                wire:model="address_id"
+                select="label:label|value:id"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Address::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'fields' => [
+                          'contact_id',
+                          'name',
+                        ],
+                        'with' => 'contact.media',
+                        'scopes' => [
+                            'whereHasTenant' => [$tenantId],
+                        ],
+                    ],
+                ]"
+            />
+            <x-select.styled
+                :label="__('Type')"
+                wire:model="address_type_id"
+                select="label:name|value:id"
+                :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->whereHasTenant($tenantId)->get(['id', 'name'])->toArray()"
+            />
+        </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('edit-address-assignment')"
+            />
+            <x-button
+                color="indigo"
+                loading="save"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        if (success)
+                            $tsui.close.modal('edit-address-assignment');
+                    })
+                "
+                :text="__('Save')"
+            />
+        </x-slot:footer>
+    </x-modal>
     @foreach($form->addresses as $address)
         <x-card :header="$address['address_type']">
             <div class="text-sm">
