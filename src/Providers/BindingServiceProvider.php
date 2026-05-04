@@ -13,6 +13,7 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
+use FluxErp\RuleEngine\ConditionRegistry;
 use FluxErp\Support\MediaLibrary\UrlGenerator;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Support\DeferrableProvider;
@@ -29,6 +30,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
             'datatype.registry',
             DefaultUrlGenerator::class,
             StatefulGuard::class,
+            ConditionRegistry::class,
         ];
     }
 
@@ -60,5 +62,29 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
         });
 
         $this->app->alias(Registry::class, 'datatype.registry');
+
+        $this->app->singleton(ConditionRegistry::class, function () {
+            $registry = new ConditionRegistry();
+            $registry->register([
+                \FluxErp\RuleEngine\Conditions\OrContainerCondition::class,
+                \FluxErp\RuleEngine\Conditions\AndContainerCondition::class,
+                \FluxErp\RuleEngine\Conditions\DateRangeCondition::class,
+                \FluxErp\RuleEngine\Conditions\DayOfWeekCondition::class,
+                \FluxErp\RuleEngine\Conditions\TimeRangeCondition::class,
+                \FluxErp\RuleEngine\Conditions\ContactCondition::class,
+                \FluxErp\RuleEngine\Conditions\ContactDiscountGroupCondition::class,
+                \FluxErp\RuleEngine\Conditions\ContactCustomFieldCondition::class,
+                \FluxErp\RuleEngine\Conditions\CartAmountCondition::class,
+                \FluxErp\RuleEngine\Conditions\CartLineItemCountCondition::class,
+                \FluxErp\RuleEngine\Conditions\CartHasProductCondition::class,
+                \FluxErp\RuleEngine\Conditions\CartHasCategoryCondition::class,
+                \FluxErp\RuleEngine\Conditions\LineItemQuantityCondition::class,
+                \FluxErp\RuleEngine\Conditions\ProductCategoryCondition::class,
+                \FluxErp\RuleEngine\Conditions\ProductCustomFieldCondition::class,
+                \FluxErp\RuleEngine\Conditions\PriceListCondition::class,
+            ]);
+
+            return $registry;
+        });
     }
 }
