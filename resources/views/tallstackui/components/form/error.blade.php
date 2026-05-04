@@ -5,9 +5,12 @@
 @if($property)
     <span
         x-cloak
-        x-show="$wire?.$errors?.has('{{ $property }}')"
-        x-text="$wire?.$errors?.first('{{ $property }}')"
+        x-show="typeof $wire?.$errors?.has === 'function'
+            ? $wire.$errors.has('{{ $property }}')
+            : false"
+        x-text="typeof $wire?.$errors?.first === 'function'
+            ? ($wire.$errors.first('{{ $property }}') ?? '')
+            : ''"
         class="{{ $customization['text'] }}"
-    >
-    </span>
+    ></span>
 @endif
