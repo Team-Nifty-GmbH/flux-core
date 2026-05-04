@@ -77,6 +77,7 @@ class Profile extends Component
             }
         }
 
+        asort($this->notifications);
         $notificationSettings = $this->notifications;
         $userNotificationSettings = auth()->user()
             ->notificationSettings()
