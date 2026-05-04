@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,6 +31,7 @@ class SearchBar extends Component
 
     public string $search = '';
 
+    #[Locked]
     public array|string $searchModel = '';
 
     public bool $show = false;
@@ -106,11 +108,9 @@ class SearchBar extends Component
     public function updatedSearch(): void
     {
         if ($this->search) {
-            $permittedModels = $this->filterByDetailRoutePermission((array) $this->searchModel);
-
             if (is_array($this->searchModel)) {
                 $return = [];
-                foreach ($permittedModels as $model) {
+                foreach ($this->searchModel as $model) {
                     try {
                         $result = resolve_static($model, 'search', ['query' => $this->search])
                             ->toEloquentBuilder()
@@ -137,7 +137,7 @@ class SearchBar extends Component
                 }
 
                 $this->return = $return;
-            } elseif (in_array($this->searchModel, $permittedModels, true)) {
+            } else {
                 $result = resolve_static($this->searchModel, 'search', ['query' => $this->search])
                     ->paginate();
 
@@ -147,8 +147,6 @@ class SearchBar extends Component
 
                 $this->return = count($result->items()) ? $result->items() : null;
                 $this->show = true;
-            } else {
-                $this->return = [];
             }
         } else {
             $this->return = [];

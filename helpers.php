@@ -112,7 +112,7 @@ if (! function_exists('user_can_route')) {
 if (! function_exists('user_can_view_model_detail')) {
     function user_can_view_model_detail(?string $model): bool
     {
-        if (blank($model) || ! class_exists($model) || ! method_exists($model, 'detailRoute')) {
+        if (blank($model) || ! class_exists($model) || ! property_exists($model, 'detailRouteName')) {
             return false;
         }
 
