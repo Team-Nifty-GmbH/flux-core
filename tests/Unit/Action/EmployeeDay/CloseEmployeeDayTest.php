@@ -12,6 +12,16 @@ use FluxErp\Models\Employee;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\WorkTimeModel;
 
+function loadHourlyEmployee(Employee $employee): Employee
+{
+    $employee->update(['salary_type' => 'hourly']);
+
+    return resolve_static(Employee::class, 'query')
+        ->whereKey($employee->getKey())
+        ->with('workTimeModelHistory.workTimeModel')
+        ->first();
+}
+
 beforeEach(function (): void {
     // Create a work time model with 8 hours per day, 5 days per week
     $this->workTimeModel = app(WorkTimeModel::class)->create([
@@ -270,12 +280,7 @@ test('percentage deduction is applied when calculating overtime used', function 
 });
 
 test('hourly salary type does not accumulate negative overtime when actual is below target', function (): void {
-    $this->employee->update(['salary_type' => 'hourly']);
-
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = loadHourlyEmployee($this->employee);
 
     $testDate = Carbon::now()->next(Carbon::MONDAY);
 
@@ -287,12 +292,7 @@ test('hourly salary type does not accumulate negative overtime when actual is be
 });
 
 test('hourly salary type still accumulates positive overtime above target', function (): void {
-    $this->employee->update(['salary_type' => 'hourly']);
-
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = loadHourlyEmployee($this->employee);
 
     $testDate = Carbon::now()->next(Carbon::MONDAY);
 
@@ -314,8 +314,6 @@ test('hourly salary type still accumulates positive overtime above target', func
 });
 
 test('hourly salary type with full day vacation does not accumulate negative overtime', function (): void {
-    $this->employee->update(['salary_type' => 'hourly']);
-
     $absenceType = app(AbsenceType::class)->create([
         'name' => 'Urlaub',
         'code' => 'URL',
@@ -338,10 +336,7 @@ test('hourly salary type with full day vacation does not accumulate negative ove
         'state' => AbsenceRequestStateEnum::Approved,
     ]);
 
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = loadHourlyEmployee($this->employee);
 
     $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
 
@@ -349,8 +344,6 @@ test('hourly salary type with full day vacation does not accumulate negative ove
 });
 
 test('hourly salary type with full day sick leave does not accumulate negative overtime', function (): void {
-    $this->employee->update(['salary_type' => 'hourly']);
-
     $absenceType = app(AbsenceType::class)->create([
         'name' => 'Krank',
         'code' => 'KRK',
@@ -373,10 +366,7 @@ test('hourly salary type with full day sick leave does not accumulate negative o
         'state' => AbsenceRequestStateEnum::Approved,
     ]);
 
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = loadHourlyEmployee($this->employee);
 
     $dayData = CloseEmployeeDay::calculateDayData($employee, $testDate);
 
@@ -384,12 +374,7 @@ test('hourly salary type with full day sick leave does not accumulate negative o
 });
 
 test('hourly salary type produces zero overtime when actual matches target', function (): void {
-    $this->employee->update(['salary_type' => 'hourly']);
-
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = loadHourlyEmployee($this->employee);
 
     $testDate = Carbon::now()->next(Carbon::MONDAY);
 
@@ -411,8 +396,6 @@ test('hourly salary type produces zero overtime when actual matches target', fun
 });
 
 test('hourly salary type with half day sick leave plus matching work covers the day', function (): void {
-    $this->employee->update(['salary_type' => 'hourly']);
-
     $absenceType = app(AbsenceType::class)->create([
         'name' => 'Krank',
         'code' => 'KRK',
@@ -435,10 +418,7 @@ test('hourly salary type with half day sick leave plus matching work covers the 
         'state' => AbsenceRequestStateEnum::Approved,
     ]);
 
-    $employee = resolve_static(Employee::class, 'query')
-        ->whereKey($this->employee->getKey())
-        ->with('workTimeModelHistory.workTimeModel')
-        ->first();
+    $employee = loadHourlyEmployee($this->employee);
 
     $employee->workTimes()->create([
         'started_at' => $testDate->copy()->setTime(12, 0),

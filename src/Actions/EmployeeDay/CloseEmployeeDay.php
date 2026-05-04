@@ -7,6 +7,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\DayPartEnum;
+use FluxErp\Enums\SalaryTypeEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
@@ -165,7 +166,7 @@ class CloseEmployeeDay extends FluxAction
             $actualHours
         );
 
-        if ($employee->salary_type === 'hourly' && bccomp($plusMinusOvertimeHours, 0) === -1) {
+        if ($employee->salary_type === SalaryTypeEnum::Hourly && bccomp($plusMinusOvertimeHours, 0) === -1) {
             $plusMinusOvertimeHours = 0;
         }
 

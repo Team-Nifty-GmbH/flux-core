@@ -9,6 +9,7 @@ use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\EmployeeBalanceAdjustmentTypeEnum;
+use FluxErp\Enums\SalaryTypeEnum;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
@@ -67,6 +68,7 @@ class Employee extends FluxModel implements HasMedia, InteractsWithDataTables, O
     protected function casts(): array
     {
         return [
+            'salary_type' => SalaryTypeEnum::class,
             'salutation' => SalutationEnum::class,
             'date_of_birth' => 'date:Y-m-d',
             'employment_date' => 'date:Y-m-d',
