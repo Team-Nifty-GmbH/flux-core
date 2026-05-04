@@ -71,6 +71,37 @@ function formatTitle(field) {
         .join(' → ');
 }
 
+function getScopeRoots(componentEl) {
+    // Component element plus any teleported descendants (e.g. TallStackUI
+    // modals that x-teleport their contents to <body>) whose origin lives
+    // inside the component. Without the teleported roots we'd miss inputs,
+    // selects, and published @error spans rendered through <x-modal>,
+    // <x-slide-over>, etc.
+    const roots = [componentEl];
+
+    document
+        .querySelectorAll('[data-teleport-target]')
+        .forEach((teleported) => {
+            const origin = teleported._x_teleportBack;
+
+            if (origin && componentEl.contains(origin)) {
+                roots.push(teleported);
+            }
+        });
+
+    return roots;
+}
+
+function queryAllScoped(roots, selector) {
+    const results = [];
+
+    roots.forEach((root) => {
+        results.push(...root.querySelectorAll(selector));
+    });
+
+    return results;
+}
+
 function processComponent(component) {
     const el = component.el;
 
@@ -80,27 +111,35 @@ function processComponent(component) {
     const keys = Object.keys(errors);
     const matched = new Set();
 
+    // Resolve teleported roots once so we don't scan the entire document
+    // for each selector below.
+    const roots = getScopeRoots(el);
+
     // Clear all previous error states first
-    el.querySelectorAll(`[${ERROR_ATTR}]`).forEach((span) => {
+    queryAllScoped(roots, `[${ERROR_ATTR}]`).forEach((span) => {
         span.style.display = 'none';
         span.textContent = '';
     });
 
-    el.querySelectorAll(
+    queryAllScoped(
+        roots,
         '[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.blur], [wire\\:model\\.defer]',
     ).forEach((input) => {
         toggleRing(findWrapper(input), false);
     });
 
-    el.querySelectorAll('[x-data*="tallstackui_select"]').forEach((select) => {
-        const button = select.querySelector(
-            '[dusk="tallstackui_select_open_close"]',
-        );
-        toggleRing(findWrapper(button || select), false);
-    });
+    queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach(
+        (select) => {
+            const button = select.querySelector(
+                '[dusk="tallstackui_select_open_close"]',
+            );
+            toggleRing(findWrapper(button || select), false);
+        },
+    );
 
     // Inputs with wire:model (x-input, x-number, x-textarea, x-select.native)
-    el.querySelectorAll(
+    queryAllScoped(
+        roots,
         '[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.blur], [wire\\:model\\.defer]',
     ).forEach((input) => {
         const prop = getWireModel(input);
@@ -117,26 +156,28 @@ function processComponent(component) {
     });
 
     // Styled selects (wire:model is consumed by Alpine, not in DOM)
-    el.querySelectorAll('[x-data*="tallstackui_select"]').forEach((select) => {
-        const prop = Alpine.$data(select)?.property;
+    queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach(
+        (select) => {
+            const prop = Alpine.$data(select)?.property;
 
-        if (!prop) return;
+            if (!prop) return;
 
-        const hasError = keys.includes(prop) && errors[prop]?.length > 0;
-        const button = select.querySelector(
-            '[dusk="tallstackui_select_open_close"]',
-        );
+            const hasError = keys.includes(prop) && errors[prop]?.length > 0;
+            const button = select.querySelector(
+                '[dusk="tallstackui_select_open_close"]',
+            );
 
-        toggleRing(findWrapper(button || select), hasError);
-        toggleError(select, prop, hasError ? errors[prop][0] : null);
+            toggleRing(findWrapper(button || select), hasError);
+            toggleError(select, prop, hasError ? errors[prop][0] : null);
 
-        if (hasError && isVisible(select)) {
-            matched.add(prop);
-        }
-    });
+            if (hasError && isVisible(select)) {
+                matched.add(prop);
+            }
+        },
+    );
 
     // Force Alpine to re-evaluate x-show/x-text for published error views
-    el.querySelectorAll('[x-show*="$errors"], [x-text*="$errors"]').forEach(
+    queryAllScoped(roots, '[x-show*="$errors"], [x-text*="$errors"]').forEach(
         (node) => {
             try {
                 const xshow = node.getAttribute('x-show');

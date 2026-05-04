@@ -47,8 +47,8 @@ test('renders successfully', function (): void {
 
 test('shows absence type distribution with data', function (): void {
     $sickType = app(AbsenceType::class)->create([
-        'name' => 'Krank',
-        'code' => 'KRK',
+        'name' => 'Sick',
+        'code' => 'SCK',
         'color' => '#ef4444',
         'employee_can_create' => EmployeeCanCreateEnum::Yes,
         'affects_overtime' => false,
@@ -57,9 +57,13 @@ test('shows absence type distribution with data', function (): void {
         'is_active' => true,
     ]);
 
+    $this->travelTo(now()->startOfMonth()->addDays(20));
+
+    // First weekday on or after the third of the month so calculateWorkDaysAffected
+    // counts a full day instead of skipping a weekend.
     $dateInMonth = now()->startOfMonth()->addDays(2);
-    if ($dateInMonth->isAfter(now())) {
-        $dateInMonth = now()->subDay();
+    while ($dateInMonth->isWeekend()) {
+        $dateInMonth->addDay();
     }
 
     $employeeDay = app(EmployeeDay::class)->create([
@@ -94,12 +98,12 @@ test('shows absence type distribution with data', function (): void {
         $absenceRequest->employeeDays()->attach($employeeDay->getKey());
     }
 
-    $component = Livewire::test(AbsenceTypeDistributionChart::class)
-        ->assertOk();
+    $component = Livewire::test(AbsenceTypeDistributionChart::class);
+    $component->call('calculateByTimeFrame');
 
     $series = $component->get('series');
     $labels = $component->get('labels');
 
-    expect($labels)->toContain('Krank')
+    expect($labels)->toContain('Sick')
         ->and($series)->not->toBeEmpty();
 });

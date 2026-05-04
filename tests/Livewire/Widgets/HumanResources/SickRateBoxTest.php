@@ -42,15 +42,15 @@ test('renders successfully', function (): void {
 });
 
 test('calculates sick rate from employee days in current month', function (): void {
+    // Travel mid-month so the four generated days fit in the [startOfMonth, now()] range.
+    $this->travelTo(now()->startOfMonth()->addDays(20));
+
     $dateInMonth = now()->startOfMonth()->addDays(2);
-    if ($dateInMonth->isAfter(now())) {
-        $dateInMonth = now()->subDay();
-    }
 
     // Create 4 work days, 1 of which is sick
     for ($i = 0; $i < 4; $i++) {
         $date = $dateInMonth->copy()->addDays($i);
-        if ($date->isAfter(now()->endOfMonth())) {
+        if ($date->isAfter(now())) {
             break;
         }
 
@@ -80,10 +80,9 @@ test('calculates sick rate from employee days in current month', function (): vo
 });
 
 test('sub value shows total sick days', function (): void {
+    $this->travelTo(now()->startOfMonth()->addDays(20));
+
     $dateInMonth = now()->startOfMonth()->addDay();
-    if ($dateInMonth->isAfter(now())) {
-        $dateInMonth = now()->subDay();
-    }
 
     app(EmployeeDay::class)->create([
         'employee_id' => $this->employee->getKey(),
