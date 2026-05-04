@@ -11,7 +11,32 @@ function promptValue(id) {
     return el.value;
 }
 
-const nuxbe = { format, parseNumber, openDetailModal, promptValue };
+let appModeCache = null;
+
+function isAppMode() {
+    if (appModeCache !== null) {
+        return appModeCache;
+    }
+
+    if (typeof window === 'undefined') {
+        return false;
+    }
+
+    appModeCache =
+        window.matchMedia?.('(display-mode: standalone)')?.matches === true ||
+        window.navigator?.standalone === true ||
+        (window.nuxbeAppBridge?.isNative?.() ?? false);
+
+    return appModeCache;
+}
+
+const nuxbe = {
+    format,
+    parseNumber,
+    openDetailModal,
+    promptValue,
+    isAppMode,
+};
 
 window.$nuxbe = nuxbe;
 
