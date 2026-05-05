@@ -16,6 +16,7 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\EmployeeDay\CloseEmployeeDayRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class CloseEmployeeDay extends FluxAction
 {
@@ -250,5 +251,21 @@ class CloseEmployeeDay extends FluxAction
         $employeeDay->absenceRequests()->sync($absenceRequests);
 
         return $employeeDay->withoutRelations()->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (resolve_static(Employee::class, 'query')
+            ->whereKey($this->getData('employee_id'))
+            ->employed(Carbon::parse($this->getData('date')))
+            ->doesntExist()
+        ) {
+            throw ValidationException::withMessages([
+                'date' => ['Employee is not employed during the given date.'],
+            ])
+                ->errorBag('closeEmployeeDay');
+        }
     }
 }
