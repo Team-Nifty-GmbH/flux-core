@@ -110,22 +110,24 @@ function processComponent(component) {
         }
     });
 
-    queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach((select) => {
-        const prop = Alpine.$data(select)?.property;
+    queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach(
+        (select) => {
+            const prop = Alpine.$data(select)?.property;
 
-        if (!prop) return;
+            if (!prop) return;
 
-        const hasError = keys.includes(prop) && errors[prop]?.length > 0;
-        const button = select.querySelector(
-            '[dusk="tallstackui_select_open_close"]',
-        );
+            const hasError = keys.includes(prop) && errors[prop]?.length > 0;
+            const button = select.querySelector(
+                '[dusk="tallstackui_select_open_close"]',
+            );
 
-        toggleRing(findWrapper(button || select), hasError);
+            toggleRing(findWrapper(button || select), hasError);
 
-        if (hasError && isVisible(select)) {
-            matched.add(prop);
-        }
-    });
+            if (hasError && isVisible(select)) {
+                matched.add(prop);
+            }
+        },
+    );
 
     // Force Alpine to re-evaluate x-show/x-text for vendor-rendered error
     // spans inside teleported subtrees, where reactive bindings on
