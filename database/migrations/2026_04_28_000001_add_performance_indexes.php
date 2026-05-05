@@ -22,8 +22,6 @@ return new class() extends Migration
         });
 
         Schema::table('communications', function (Blueprint $table): void {
-            $table->index('mail_account_id');
-            $table->index('mail_folder_id');
             $table->index('communication_type_enum');
             $table->index('date');
             $table->index('deleted_at');
@@ -55,6 +53,7 @@ return new class() extends Migration
             $table->index('payment_reminder_next_date');
             $table->index('order_date');
             $table->index('invoice_date');
+            $table->index('invoice_number');
             $table->index('system_delivery_date');
             $table->index('system_delivery_date_end');
             $table->index('deleted_at');
@@ -127,6 +126,7 @@ return new class() extends Migration
             $table->dropIndex(['deleted_at']);
             $table->dropIndex(['system_delivery_date_end']);
             $table->dropIndex(['system_delivery_date']);
+            $table->dropIndex(['invoice_number']);
             $table->dropIndex(['invoice_date']);
             $table->dropIndex(['order_date']);
             $table->dropIndex(['payment_reminder_next_date']);
@@ -158,8 +158,6 @@ return new class() extends Migration
             $table->dropIndex(['deleted_at']);
             $table->dropIndex(['date']);
             $table->dropIndex(['communication_type_enum']);
-            $table->dropIndex(['mail_folder_id']);
-            $table->dropIndex(['mail_account_id']);
         });
 
         Schema::table('comments', function (Blueprint $table): void {
