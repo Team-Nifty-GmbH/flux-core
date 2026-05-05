@@ -162,7 +162,7 @@ class Calendar extends Component
                     window.dispatchEvent(new CustomEvent('sync-calendar-event', {
                         detail: JSON.parse(JSON.stringify($wire.event))
                     }));
-                    window.dispatchEvent(new CustomEvent('set-confirm-dialog-type', { detail: 'save' }));
+                    window.dispatchEvent(new CustomEvent('calendar-event-set-confirm-dialog-type', { detail: 'save' }));
                     $tsui.open.modal('confirm-dialog');
                 JS);
 

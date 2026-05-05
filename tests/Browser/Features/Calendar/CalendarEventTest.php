@@ -436,3 +436,52 @@ test('dragging a recurring calendar event opens confirm dialog with save options
     expect($event->fresh()->start->toDateTimeString())
         ->toBe($start->toDateTimeString(), 'Event must not be saved before user confirms which occurrences to update');
 });
+
+test('dragging a non-recurring calendar event saves immediately without confirm dialog', function (): void {
+    $calendar = createCalendarWithOwner();
+
+    $start = Carbon::tomorrow()->setTime(10, 0);
+    $event = CalendarEvent::factory()->create([
+        'calendar_id' => $calendar->getKey(),
+        'title' => 'Single Event',
+        'start' => $start,
+        'end' => $start->copy()->addHour(),
+        'is_all_day' => false,
+    ]);
+
+    $page = visitCalendar();
+
+    $eventId = $event->getKey();
+    $calendarId = $calendar->getKey();
+    $newStart = $start->copy()->addDay();
+    $newEnd = $newStart->copy()->addHour();
+
+    $page->script(<<<JS
+        () => {
+            window.Livewire.dispatch('calendar-event-change', {
+                event: {
+                    id: '{$eventId}',
+                    title: 'Single Event',
+                    start: '{$newStart->toIso8601String()}',
+                    end: '{$newEnd->toIso8601String()}',
+                    allDay: false,
+                    extendedProps: {
+                        is_editable: true,
+                        is_repeatable: false,
+                        has_repeats: false,
+                        calendar_type: null,
+                        calendar_id: {$calendarId}
+                    }
+                },
+                trigger: 'event-change'
+            });
+        }
+    JS);
+
+    $page->wait(2);
+
+    expect($event->fresh()->start->toDateTimeString())
+        ->toBe($newStart->toDateTimeString(), 'Non-recurring drag-drop must still save immediately');
+
+    $page->assertNoJavascriptErrors();
+});

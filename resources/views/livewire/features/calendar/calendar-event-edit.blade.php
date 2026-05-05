@@ -17,7 +17,9 @@
                 }
             });
     "
-    x-on:set-confirm-dialog-type.window="dialogType = $event.detail"
+    x-on:calendar-event-set-confirm-dialog-type.window="
+        dialogType = $event.detail
+    "
 >
     @php
         $editComponent = $event->edit_component ?? 'features.calendar.calendar-event';
