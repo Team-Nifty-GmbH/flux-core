@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Contracts\HasPasskeys;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
@@ -21,9 +22,11 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\HasWidgets;
 use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\InteractsWithPasskeys;
 use FluxErp\Traits\Model\MonitorsQueue;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\SoftDeletes;
+use FluxErp\Traits\Model\TwoFactorAuthentication;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -39,9 +42,6 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Laragear\TwoFactor\Contracts\TwoFactorAuthenticatable;
-use Laragear\TwoFactor\TwoFactorAuthentication;
-use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
-use Spatie\LaravelPasskeys\Models\Concerns\InteractsWithPasskeys;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
@@ -252,11 +252,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function guardName(): array
     {
         return static::guardNames();
-    }
-
-    public function hasTwoFactorMethodConfigured(): bool
-    {
-        return $this->hasTwoFactorEnabled() || $this->passkeys()->exists();
     }
 
     /**

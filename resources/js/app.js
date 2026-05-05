@@ -2,6 +2,7 @@ import axios from 'axios';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import {
+    browserSupportsWebAuthn,
     startAuthentication,
     startRegistration,
 } from '@simplewebauthn/browser';
@@ -12,6 +13,7 @@ import './components/alpine.js';
 import './components/apex-charts.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
+window.browserSupportsWebAuthn = browserSupportsWebAuthn;
 window.startAuthentication = startAuthentication;
 window.startRegistration = startRegistration;
 

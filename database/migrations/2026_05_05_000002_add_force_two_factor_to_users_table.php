@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table): void {
-            $table->boolean('force_two_factor')->default(false)->after('cost_per_hour');
+            $table->boolean('force_two_factor')->default(false)->after('remember_token');
         });
     }
 

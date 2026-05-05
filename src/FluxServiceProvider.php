@@ -109,7 +109,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom([
             __DIR__ . '/../database/migrations',
             __DIR__ . '/../database/settings',
-            \Laragear\TwoFactor\TwoFactorServiceProvider::MIGRATIONS,
         ]);
 
         $this->loadTranslationsFrom(__DIR__ . '/../lang');
@@ -246,7 +245,6 @@ class FluxServiceProvider extends ServiceProvider
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
             config(['two-factor.recovery.enabled' => false]);
-            config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');

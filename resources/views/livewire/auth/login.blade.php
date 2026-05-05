@@ -146,7 +146,7 @@
                         </form>
                         @section('passkey-login')
                             @if(Route::hasMacro('passkeys'))
-                                <div class="mt-6">
+                                <div class="mt-6" x-show="browserSupportsWebAuthn" x-cloak>
                                     <div class="relative">
                                         <div
                                             class="absolute inset-0 flex items-center"

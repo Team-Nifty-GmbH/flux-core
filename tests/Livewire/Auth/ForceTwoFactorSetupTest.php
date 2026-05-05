@@ -1,6 +1,6 @@
 <?php
 
-use FluxErp\Enums\ForceTwoFactorMethodEnum;
+use FluxErp\Enums\TwoFactorMethodEnum;
 use FluxErp\Livewire\Auth\ForceTwoFactorSetup;
 use Livewire\Livewire;
 
@@ -32,7 +32,7 @@ test('selectTotp sets method and exposes the QR + secret', function (): void {
 
     Livewire::test(ForceTwoFactorSetup::class)
         ->call('selectTotp')
-        ->assertSet('method', ForceTwoFactorMethodEnum::Totp)
+        ->assertSet('method', TwoFactorMethodEnum::Totp)
         ->assertSet('qrCodeSvg', $this->user->fresh()->twoFactorAuth?->toQr())
         ->assertSet('secretKey', $this->user->fresh()->twoFactorAuth?->shared_secret);
 });
@@ -43,7 +43,7 @@ test('confirmTotp redirects to dashboard on valid code', function (): void {
     $code = $this->user->makeTwoFactorCode();
 
     Livewire::test(ForceTwoFactorSetup::class)
-        ->set('method', ForceTwoFactorMethodEnum::Totp)
+        ->set('method', TwoFactorMethodEnum::Totp)
         ->set('confirmCode', $code)
         ->call('confirmTotp')
         ->assertRedirect(route('dashboard'));
@@ -56,7 +56,7 @@ test('confirmTotp resets and toasts on invalid code', function (): void {
     $this->user->createTwoFactorAuth();
 
     Livewire::test(ForceTwoFactorSetup::class)
-        ->set('method', ForceTwoFactorMethodEnum::Totp)
+        ->set('method', TwoFactorMethodEnum::Totp)
         ->set('confirmCode', '000000')
         ->call('confirmTotp')
         ->assertNoRedirect()
@@ -70,7 +70,7 @@ test('passkeyStored toasts when user has no passkey yet', function (): void {
     $this->user->update(['force_two_factor' => true]);
 
     Livewire::test(ForceTwoFactorSetup::class)
-        ->set('method', ForceTwoFactorMethodEnum::Passkey)
+        ->set('method', TwoFactorMethodEnum::Passkey)
         ->call('passkeyStored')
         ->assertNoRedirect()
         ->assertDispatched('ts-ui:toast');
@@ -81,7 +81,7 @@ test('back rolls TOTP setup back to the choice screen', function (): void {
 
     Livewire::test(ForceTwoFactorSetup::class)
         ->call('selectTotp')
-        ->assertSet('method', ForceTwoFactorMethodEnum::Totp)
+        ->assertSet('method', TwoFactorMethodEnum::Totp)
         ->call('back')
         ->assertSet('method', null)
         ->assertSet('qrCodeSvg', null)

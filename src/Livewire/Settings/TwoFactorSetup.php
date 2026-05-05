@@ -16,6 +16,9 @@ class TwoFactorSetup extends Component
     public ?string $confirmCode = null;
 
     #[Locked]
+    public bool $showSetup = false;
+
+    #[Locked]
     public bool $isForced = false;
 
     #[Locked]
@@ -26,8 +29,6 @@ class TwoFactorSetup extends Component
 
     #[Locked]
     public ?string $secretKey = null;
-
-    public bool $showSetup = false;
 
     public function mount(): void
     {
@@ -44,29 +45,30 @@ class TwoFactorSetup extends Component
     #[Renderless]
     public function startSetup(): void
     {
-        auth()->user()->createTwoFactorAuth();
-        $this->qrCodeSvg = auth()->user()->twoFactorAuth?->toQr();
-        $this->secretKey = auth()->user()->twoFactorAuth?->shared_secret;
+        $twoFactorAuth = auth()->user()?->createTwoFactorAuth();
+
+        $this->qrCodeSvg = $twoFactorAuth?->toQr();
+        $this->secretKey = $twoFactorAuth?->toString();
         $this->showSetup = true;
     }
 
     #[Renderless]
     public function confirmSetup(): void
     {
-        if (auth()->user()->confirmTwoFactorAuth($this->confirmCode)) {
-            $this->showSetup = false;
-            $this->isTwoFactorEnabled = true;
-            $this->reset('confirmCode', 'qrCodeSvg', 'secretKey');
+        if (! auth()->user()?->confirmTwoFactorAuth($this->confirmCode)) {
+            $this->reset('confirmCode');
             $this->toast()
-                ->success(__('Two-factor authentication enabled'))
+                ->error(__('Invalid code'))
                 ->send();
 
             return;
         }
 
-        $this->reset('confirmCode');
+        $this->showSetup = false;
+        $this->isTwoFactorEnabled = true;
+        $this->reset('confirmCode', 'qrCodeSvg', 'secretKey');
         $this->toast()
-            ->error(__('Invalid code'))
+            ->success(__('Two-factor authentication enabled'))
             ->send();
     }
 
@@ -81,7 +83,7 @@ class TwoFactorSetup extends Component
             return;
         }
 
-        auth()->user()->disableTwoFactorAuth();
+        auth()->user()?->disableTwoFactorAuth();
         $this->showSetup = false;
         $this->reset('confirmCode', 'qrCodeSvg', 'secretKey');
     }
@@ -97,7 +99,7 @@ class TwoFactorSetup extends Component
             return;
         }
 
-        auth()->user()->disableTwoFactorAuth();
+        auth()->user()?->disableTwoFactorAuth();
         $this->isTwoFactorEnabled = false;
         $this->toast()
             ->success(__('Two-factor authentication disabled'))

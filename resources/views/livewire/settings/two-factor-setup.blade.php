@@ -116,22 +116,24 @@
     @show
 
     @section('passkey-management')
-    <x-card class="mt-6">
-        <div class="space-y-4">
-            <div
-                class="flex items-center justify-between border-b pb-4 dark:border-gray-700"
-            >
-                <div>
-                    <h3 class="text-lg font-semibold dark:text-white">
-                        {{ __('Passkeys') }}
-                    </h3>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {{ __('Use passkeys to sign in without a password') }}
-                    </p>
+    <div x-show="browserSupportsWebAuthn" x-cloak>
+        <x-card class="mt-6">
+            <div class="space-y-4">
+                <div
+                    class="flex items-center justify-between border-b pb-4 dark:border-gray-700"
+                >
+                    <div>
+                        <h3 class="text-lg font-semibold dark:text-white">
+                            {{ __('Passkeys') }}
+                        </h3>
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            {{ __('Use passkeys to sign in without a password') }}
+                        </p>
+                    </div>
                 </div>
+                <livewire:passkeys />
             </div>
-            <livewire:passkeys />
-        </div>
-    </x-card>
+        </x-card>
+    </div>
     @show
 </div>

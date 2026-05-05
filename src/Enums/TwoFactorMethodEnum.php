@@ -5,7 +5,7 @@ namespace FluxErp\Enums;
 use FluxErp\Enums\Traits\EnumTrait;
 use FluxErp\Support\Enums\FluxEnum;
 
-class ForceTwoFactorMethodEnum extends FluxEnum
+class TwoFactorMethodEnum extends FluxEnum
 {
     use EnumTrait;
 

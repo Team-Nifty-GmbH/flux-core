@@ -1,7 +1,7 @@
 <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <x-toast />
+    <x-toast/>
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <x-flux::logo fill="#0690FA" class="h-24" />
+        <x-flux::logo fill="#0690FA" class="h-24"/>
     </div>
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
@@ -63,7 +63,7 @@
                                 </button>
                             </div>
                         @show
-                    @elseif($method === \FluxErp\Enums\ForceTwoFactorMethodEnum::Totp)
+                    @elseif($method === \FluxErp\Enums\TwoFactorMethodEnum::Totp)
                         @section('force-two-factor-setup.totp')
                             <div class="space-y-4">
                                 <h3 class="text-lg font-semibold text-gray-900">
@@ -125,9 +125,9 @@
                                 </form>
                             </div>
                         @show
-                    @elseif($method === \FluxErp\Enums\ForceTwoFactorMethodEnum::Passkey)
+                    @elseif($method === \FluxErp\Enums\TwoFactorMethodEnum::Passkey)
                         @section('force-two-factor-setup.passkey')
-                            <div class="space-y-4">
+                            <div class="space-y-4" x-show="browserSupportsWebAuthn" x-cloak>
                                 <h3 class="text-lg font-semibold text-gray-900">
                                     {{ __('Register a passkey') }}
                                 </h3>
