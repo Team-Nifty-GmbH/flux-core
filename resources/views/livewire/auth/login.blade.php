@@ -60,9 +60,9 @@
                                     autofocus
                                 />
                                 @error('totpCode')
-                                <p class="text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
+                                    <p class="text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
                                 @enderror
                             </div>
                             <x-button
@@ -145,7 +145,11 @@
                         </form>
                         @section('passkey-login')
                             @if(Route::hasMacro('passkeys'))
-                                <div class="mt-6" x-show="browserSupportsWebAuthn" x-cloak>
+                                <div
+                                    class="mt-6"
+                                    x-show="browserSupportsWebAuthn"
+                                    x-cloak
+                                >
                                     <div class="relative">
                                         <div
                                             class="absolute inset-0 flex items-center"

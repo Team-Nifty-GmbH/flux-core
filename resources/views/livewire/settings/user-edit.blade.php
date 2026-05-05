@@ -98,7 +98,7 @@
                         :label="__('Force Two-Factor Authentication')"
                         wire:model="userForm.force_two_factor"
                     />
-                    @if ($userForm->id)
+                    @if($userForm->id)
                         <x-button
                             :text="__('Reset Two-Factor Authentication')"
                             color="red"
