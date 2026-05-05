@@ -39,11 +39,12 @@ test('selectTotp sets method and exposes the QR + secret', function (): void {
 
 test('confirmTotp redirects to dashboard on valid code', function (): void {
     $this->user->update(['force_two_factor' => true]);
-    $this->user->createTwoFactorAuth();
-    $code = $this->user->makeTwoFactorCode();
 
-    Livewire::test(ForceTwoFactorSetup::class)
-        ->set('method', TwoFactorMethodEnum::Totp)
+    $component = Livewire::test(ForceTwoFactorSetup::class)
+        ->call('selectTotp');
+
+    $code = $this->user->refresh()->makeTwoFactorAuth();
+    $component
         ->set('confirmCode', $code)
         ->call('confirmTotp')
         ->assertRedirect(route('dashboard'));
@@ -53,10 +54,9 @@ test('confirmTotp redirects to dashboard on valid code', function (): void {
 
 test('confirmTotp resets and toasts on invalid code', function (): void {
     $this->user->update(['force_two_factor' => true]);
-    $this->user->createTwoFactorAuth();
 
     Livewire::test(ForceTwoFactorSetup::class)
-        ->set('method', TwoFactorMethodEnum::Totp)
+        ->call('selectTotp')
         ->set('confirmCode', '000000')
         ->call('confirmTotp')
         ->assertNoRedirect()
@@ -70,7 +70,7 @@ test('passkeyStored toasts when user has no passkey yet', function (): void {
     $this->user->update(['force_two_factor' => true]);
 
     Livewire::test(ForceTwoFactorSetup::class)
-        ->set('method', TwoFactorMethodEnum::Passkey)
+        ->call('selectPasskey')
         ->call('passkeyStored')
         ->assertNoRedirect()
         ->assertDispatched('ts-ui:toast');
