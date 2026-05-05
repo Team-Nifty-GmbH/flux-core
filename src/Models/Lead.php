@@ -13,6 +13,7 @@ use FluxErp\Traits\Model\Calendar\HasCalendarEvents;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Communicatable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasRecordOrigin;
 use FluxErp\Traits\Model\HasTags;
@@ -30,7 +31,6 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
 {

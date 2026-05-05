@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,6 +31,7 @@ class SearchBar extends Component
 
     public string $search = '';
 
+    #[Locked]
     public array|string $searchModel = '';
 
     public bool $show = false;
@@ -49,6 +51,8 @@ class SearchBar extends Component
                 ->values()
                 ->toArray();
         }
+
+        $this->searchModel = $this->filterByDetailRoutePermission((array) $this->searchModel);
 
         foreach ((array) $this->searchModel as $searchModel) {
             $this->modelLabels[$searchModel] = [
@@ -71,6 +75,14 @@ class SearchBar extends Component
     #[Renderless]
     public function showDetail(string $model, int $id): void
     {
+        if (! user_can_view_model_detail($model)) {
+            $this->toast()
+                ->error(__('Record not found'))
+                ->send();
+
+            return;
+        }
+
         /** @var Model $model */
         $modelInstance = resolve_static($model, 'query')->whereKey($id)->first();
 
@@ -141,5 +153,13 @@ class SearchBar extends Component
         }
 
         $this->skipRender();
+    }
+
+    protected function filterByDetailRoutePermission(array $models): array
+    {
+        return array_values(array_filter(
+            $models,
+            fn (string $model): bool => user_can_view_model_detail($model)
+        ));
     }
 }

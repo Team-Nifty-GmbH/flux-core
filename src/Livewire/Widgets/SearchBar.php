@@ -33,6 +33,13 @@ class SearchBar extends Component
             return;
         }
 
+        if (! user_can_view_model_detail($model)) {
+            $this->skipRender();
+            $this->show = false;
+
+            return;
+        }
+
         $component = method_exists($model, 'getLivewireComponentWidget')
             ? livewire_component_exists(resolve_static($model, 'getLivewireComponentWidget'))
                 ? resolve_static($model, 'getLivewireComponentWidget')
