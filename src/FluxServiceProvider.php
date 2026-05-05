@@ -75,8 +75,6 @@ class FluxServiceProvider extends ServiceProvider
             }
 
             $this->applyMailSettings();
-
-            app('view')->prependNamespace('ts-ui', __DIR__ . '/../resources/views/tallstackui');
         });
         Number::useLocale(app()->getLocale());
 

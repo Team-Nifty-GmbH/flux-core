@@ -1,24 +1,7 @@
-// TODO: revisit once https://github.com/tallstackui/tallstackui/pull/1254
-// ships in a TallStackUI release.
-//
-// That PR drops the @error gate from the form/error.blade.php and the
-// surrounding wrapper components, so the reactive span is in the DOM
-// from the first render. Combined with Livewire >= 4.3.0 (which made
-// $wire.$errors actually reactive — livewire/livewire#10229), most of
-// the work this file does becomes redundant: ring/text/visibility all
-// update through native reactive bindings.
-//
-// What can likely go after the upgrade:
-//   - the published flux-core overrides under
-//     resources/views/tallstackui/components/{form/error,wrapper/*}.blade.php
-//   - ring + error span management below (toggleRing, toggleError, the
-//     manual Alpine.evaluate fallback)
-//
-// What to keep:
-//   - the toast fallback for errors that don't have a visible matching
-//     input on the page (separate UX feature)
-//   - teleport-aware scoping (modals, slides) for whichever logic
-//     actually still has work to do at that point.
+// Forces Alpine to re-evaluate vendor x-show/x-text bindings on
+// $wire.$errors inside teleported modal/slide-over subtrees, where
+// commit-driven reactivity doesn't propagate. Also drives the red ring
+// state and the toast fallback for errors with no visible input.
 const ERROR_RING = [
     'ring-red-300',
     'focus-within:ring-red-500',
@@ -26,36 +9,12 @@ const ERROR_RING = [
     'dark:focus-within:ring-red-500',
 ];
 
-const ERROR_TEXT = 'mt-1 block text-sm font-medium text-red-500';
-const ERROR_ATTR = 'data-validation-error';
-
 function toggleRing(wrapper, add) {
     if (!wrapper) return;
 
     ERROR_RING.forEach((cls) =>
         add ? wrapper.classList.add(cls) : wrapper.classList.remove(cls),
     );
-}
-
-function toggleError(container, property, message) {
-    if (!container) return;
-
-    let span = container.querySelector(`[${ERROR_ATTR}="${property}"]`);
-
-    if (message) {
-        if (!span) {
-            span = document.createElement('span');
-            span.setAttribute(ERROR_ATTR, property);
-            span.className = ERROR_TEXT;
-            container.appendChild(span);
-        }
-
-        span.textContent = message;
-        span.style.display = '';
-    } else if (span) {
-        span.style.display = 'none';
-        span.textContent = '';
-    }
 }
 
 function findWrapper(input) {
@@ -132,33 +91,8 @@ function processComponent(component) {
     const keys = Object.keys(errors);
     const matched = new Set();
 
-    // Resolve teleported roots once so we don't scan the entire document
-    // for each selector below.
     const roots = getScopeRoots(el);
 
-    // Clear all previous error states first
-    queryAllScoped(roots, `[${ERROR_ATTR}]`).forEach((span) => {
-        span.style.display = 'none';
-        span.textContent = '';
-    });
-
-    queryAllScoped(
-        roots,
-        '[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.blur], [wire\\:model\\.defer]',
-    ).forEach((input) => {
-        toggleRing(findWrapper(input), false);
-    });
-
-    queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach(
-        (select) => {
-            const button = select.querySelector(
-                '[dusk="tallstackui_select_open_close"]',
-            );
-            toggleRing(findWrapper(button || select), false);
-        },
-    );
-
-    // Inputs with wire:model (x-input, x-number, x-textarea, x-select.native)
     queryAllScoped(
         roots,
         '[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.blur], [wire\\:model\\.defer]',
@@ -176,7 +110,6 @@ function processComponent(component) {
         }
     });
 
-    // Styled selects (wire:model is consumed by Alpine, not in DOM)
     queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach(
         (select) => {
             const prop = Alpine.$data(select)?.property;
@@ -189,7 +122,6 @@ function processComponent(component) {
             );
 
             toggleRing(findWrapper(button || select), hasError);
-            toggleError(select, prop, hasError ? errors[prop][0] : null);
 
             if (hasError && isVisible(select)) {
                 matched.add(prop);
@@ -197,7 +129,9 @@ function processComponent(component) {
         },
     );
 
-    // Force Alpine to re-evaluate x-show/x-text for published error views
+    // Force Alpine to re-evaluate x-show/x-text for vendor-rendered error
+    // spans inside teleported subtrees, where reactive bindings on
+    // $wire.$errors don't trigger automatically.
     queryAllScoped(roots, '[x-show*="$errors"], [x-text*="$errors"]').forEach(
         (node) => {
             try {
@@ -224,7 +158,6 @@ function processComponent(component) {
         },
     );
 
-    // Toast fallback for errors without a visible matching input
     if (typeof $tsui !== 'undefined') {
         keys.forEach((key) => {
             if (!matched.has(key) && errors[key]?.length > 0) {
