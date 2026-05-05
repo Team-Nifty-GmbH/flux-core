@@ -42,15 +42,15 @@
                         ></code>
                     </div>
                     <form wire:submit="confirmSetup()" class="space-y-4">
-                        <x-input
-                            wire:model="confirmCode"
-                            :label="__('Verification Code')"
-                            type="text"
-                            inputmode="numeric"
-                            autocomplete="one-time-code"
-                            maxlength="6"
-                            autofocus
-                        />
+                        <div class="flex justify-center">
+                            <x-pin
+                                wire:model.live="confirmCode"
+                                :label="__('Verification Code')"
+                                :length="6"
+                                numbers
+                                smart
+                            />
+                        </div>
                         <div class="flex justify-end gap-2">
                             <x-button
                                 :text="__('Cancel')"
@@ -59,7 +59,7 @@
                                 wire:click="cancelSetup()"
                             />
                             <x-button
-                                :text="__('Verify & Enable')"
+                                :text="__('Verify')"
                                 color="primary"
                                 type="submit"
                             />

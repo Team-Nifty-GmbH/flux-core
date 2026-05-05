@@ -13,6 +13,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -28,6 +29,7 @@ class Login extends Component
 
     public bool $remember = false;
 
+    #[Locked]
     public bool $showTotpChallenge = false;
 
     public ?string $totpCode = null;

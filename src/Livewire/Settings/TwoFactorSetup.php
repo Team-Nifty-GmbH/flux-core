@@ -55,10 +55,10 @@ class TwoFactorSetup extends Component
     #[Renderless]
     public function confirmSetup(): void
     {
-        if (! auth()->user()?->confirmTwoFactorAuth($this->confirmCode)) {
+        if (is_null($this->confirmCode) || ! auth()->user()?->confirmTwoFactorAuth($this->confirmCode)) {
             $this->reset('confirmCode');
             $this->toast()
-                ->error(__('Invalid code'))
+                ->error(__('Invalid verification code'))
                 ->send();
 
             return;

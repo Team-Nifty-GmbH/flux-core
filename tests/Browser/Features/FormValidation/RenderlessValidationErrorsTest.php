@@ -248,8 +248,8 @@ test('x-select.styled shows error text and ring on validation failure', function
 
     $page->assertScript(<<<'JS'
         (() => {
-            const errors = document.querySelectorAll('[data-validation-error="form.related_id"]');
-            return errors.length > 0 && Array.from(errors).some(e => e.style.display !== 'none' && e.textContent.length > 0);
+            const spans = document.querySelectorAll('[x-show*="form.related_id"]');
+            return spans.length > 0 && Array.from(spans).some(s => s.style.display !== 'none' && s.textContent.length > 0);
         })()
     JS);
 
@@ -306,7 +306,7 @@ test('errors are not present on fresh page load after navigation', function (): 
 
     $page->assertScript(<<<'JS'
         (() => {
-            const spans = document.querySelectorAll('[data-validation-error]');
+            const spans = document.querySelectorAll('[x-show*="$errors"]');
             return Array.from(spans).every(s => s.style.display === 'none' || s.textContent === '');
         })()
     JS);
@@ -411,8 +411,9 @@ test('inline errors render inside teleported x-modal contents', function (): voi
     JS);
 
     // Wait for both the snapshot to carry the validation errors AND the
-    // teleported modal to receive the rendered error span injected by the
-    // validation-errors helper.
+    // teleported modal to receive the re-evaluated vendor error spans
+    // (the validation-errors helper forces Alpine to re-evaluate x-show
+    // inside teleported subtrees).
     waitForCondition($page, <<<'JS'
         () => {
             const comp = Livewire.all().find(c => c.name === 'modal-validation-test');
@@ -420,7 +421,7 @@ test('inline errors render inside teleported x-modal contents', function (): voi
             if (Object.keys(errors).length === 0) return false;
 
             const teleported = document.querySelector('[id="modal-validation-test"]');
-            const span = teleported?.querySelector('[data-validation-error="form.related_id"]');
+            const span = teleported?.querySelector('[x-show*="form.related_id"]');
             return span && span.style.display !== 'none';
         }
     JS, 10000);
@@ -440,20 +441,16 @@ test('inline errors render inside teleported x-modal contents', function (): voi
                 throw new Error('Modal is not teleported as expected.');
             }
 
-            // The styled select error span is injected as [data-validation-error]
-            // by validation-errors.js when it walks teleported descendants.
             const selectError = teleported.querySelector(
-                '[data-validation-error="form.related_id"]',
+                '[x-show*="form.related_id"]',
             );
 
             if (!selectError || selectError.style.display === 'none') {
                 throw new Error('Select error span missing or hidden inside teleported modal.');
             }
 
-            // The x-input error span is rendered through the published @error
-            // partial as [x-show*="$errors"]; the helper re-evaluates it.
             const inputError = Array.from(
-                teleported.querySelectorAll('[x-show*="$errors"]'),
+                teleported.querySelectorAll('[x-show*="form.name"]'),
             ).find((s) => s.style.display !== 'none');
 
             if (!inputError) {

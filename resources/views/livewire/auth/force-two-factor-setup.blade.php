@@ -28,7 +28,7 @@
                                 <button
                                     type="button"
                                     wire:click="selectTotp()"
-                                    class="flex flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md"
+                                    class="flex flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md cursor-pointer"
                                 >
                                     <x-icon
                                         name="device-phone-mobile"
@@ -46,7 +46,7 @@
                                 <button
                                     type="button"
                                     wire:click="selectPasskey()"
-                                    class="flex flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md"
+                                    class="flex flex-col items-start space-y-3 rounded-lg border border-gray-300 p-6 text-left transition hover:border-indigo-500 hover:shadow-md cursor-pointer"
                                 >
                                     <x-icon
                                         name="finger-print"
@@ -61,6 +61,13 @@
                                         {{ __('Use Touch ID, Face ID, Windows Hello or a hardware key. The passkey is bound to this device or your password manager and replaces typing a code.') }}
                                     </p>
                                 </button>
+                            </div>
+                            <div class="flex justify-center">
+                                <x-button
+                                    :text="__('Back to Login')"
+                                    color="secondary"
+                                    wire:click="backToLogin()"
+                                />
                             </div>
                         @show
                     @elseif($method === \FluxErp\Enums\TwoFactorMethodEnum::Totp)
@@ -100,13 +107,15 @@
                                     class="space-y-4"
                                     wire:submit="confirmTotp()"
                                 >
-                                    <x-pin
-                                        wire:model.live="confirmCode"
-                                        :label="__('Verification code')"
-                                        :length="6"
-                                        numbers
-                                        smart
-                                    />
+                                    <div class="flex justify-center">
+                                        <x-pin
+                                            wire:model.live="confirmCode"
+                                            :label="__('Verification Code')"
+                                            :length="6"
+                                            numbers
+                                            smart
+                                        />
+                                    </div>
                                     <div class="flex justify-between gap-2">
                                         <x-button
                                             :text="__('Back')"
@@ -117,7 +126,7 @@
                                         />
                                         <x-button
                                             loading
-                                            :text="__('Confirm and continue')"
+                                            :text="__('Verify')"
                                             color="primary"
                                             type="submit"
                                         />

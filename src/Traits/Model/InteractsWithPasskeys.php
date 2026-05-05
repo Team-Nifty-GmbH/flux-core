@@ -2,15 +2,16 @@
 
 namespace FluxErp\Traits\Model;
 
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\LaravelPasskeys\Models\Passkey;
 
 trait InteractsWithPasskeys
 {
     use \Spatie\LaravelPasskeys\Models\Concerns\InteractsWithPasskeys;
 
-    public function passkeys(): MorphMany
+    public function passkeys(): HasMany
     {
-        return $this->morphMany(Passkey::class, 'authenticatable');
+        return $this->hasMany(Passkey::class, 'authenticatable_id')
+            ->where('authenticatable_type', $this->getMorphClass());
     }
 }

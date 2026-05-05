@@ -2,8 +2,7 @@
 
 namespace FluxErp\Traits\Model;
 
-use FluxErp\Contracts\HasPasskeys;
-use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys as SpatieHasPasskeys;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
 
 trait TwoFactorAuthentication
 {
@@ -13,7 +12,7 @@ trait TwoFactorAuthentication
     {
         return $this->hasTwoFactorEnabled()
             || (
-                ($this instanceof HasPasskeys || $this instanceof SpatieHasPasskeys)
+                $this instanceof HasPasskeys
                 && $this->passkeys()->exists()
             );
     }

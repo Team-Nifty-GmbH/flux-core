@@ -50,22 +50,21 @@
                                     {{ __('Enter the code from your authenticator app') }}
                                 </p>
                             </div>
-                            <x-input
-                                id="totp-code"
-                                wire:model="totpCode"
-                                :label="__('Code')"
-                                name="totp-code"
-                                type="text"
-                                inputmode="numeric"
-                                autocomplete="one-time-code"
-                                autofocus
-                                maxlength="6"
-                            />
-                            @error('totpCode')
+                            <div class="flex justify-center">
+                                <x-pin
+                                    id="totp-code"
+                                    wire:model="totpCode"
+                                    :length="6"
+                                    numbers
+                                    smart
+                                    autofocus
+                                />
+                                @error('totpCode')
                                 <p class="text-sm text-red-600">
                                     {{ $message }}
                                 </p>
-                            @enderror
+                                @enderror
+                            </div>
                             <x-button
                                 loading
                                 color="indigo"

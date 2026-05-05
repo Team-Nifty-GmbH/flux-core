@@ -18,7 +18,6 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
-use FluxErp\Models\User;
 use FluxErp\Providers\ActionServiceProvider;
 use FluxErp\Providers\AuthServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
@@ -77,8 +76,6 @@ class FluxServiceProvider extends ServiceProvider
             }
 
             $this->applyMailSettings();
-
-            app('view')->prependNamespace('ts-ui', __DIR__ . '/../resources/views/tallstackui');
         });
         Number::useLocale(app()->getLocale());
 
