@@ -2,8 +2,10 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Settings\SecuritySettings;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -13,12 +15,16 @@ class TwoFactorSetup extends Component
 
     public ?string $confirmCode = null;
 
+    #[Locked]
     public bool $isForced = false;
 
+    #[Locked]
     public bool $isTwoFactorEnabled = false;
 
+    #[Locked]
     public ?string $qrCodeSvg = null;
 
+    #[Locked]
     public ?string $secretKey = null;
 
     public bool $showSetup = false;
@@ -26,7 +32,8 @@ class TwoFactorSetup extends Component
     public function mount(): void
     {
         $this->isTwoFactorEnabled = auth()->user()->hasTwoFactorEnabled();
-        $this->isForced = (bool) auth()->user()->force_two_factor;
+        $this->isForced = auth()->user()->force_two_factor
+            || app(SecuritySettings::class)->force_two_factor;
     }
 
     public function render(): View
@@ -66,6 +73,14 @@ class TwoFactorSetup extends Component
     #[Renderless]
     public function cancelSetup(): void
     {
+        if ($this->isForced && $this->isTwoFactorEnabled) {
+            $this->toast()
+                ->error(__('Two-factor authentication is required for this account'))
+                ->send();
+
+            return;
+        }
+
         auth()->user()->disableTwoFactorAuth();
         $this->showSetup = false;
         $this->reset('confirmCode', 'qrCodeSvg', 'secretKey');
@@ -74,6 +89,14 @@ class TwoFactorSetup extends Component
     #[Renderless]
     public function disableTwoFactor(): void
     {
+        if ($this->isForced) {
+            $this->toast()
+                ->error(__('Two-factor authentication is required for this account'))
+                ->send();
+
+            return;
+        }
+
         auth()->user()->disableTwoFactorAuth();
         $this->isTwoFactorEnabled = false;
         $this->toast()

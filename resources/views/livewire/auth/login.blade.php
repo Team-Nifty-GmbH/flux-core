@@ -84,11 +84,8 @@
                     </div>
                 @show
                 @section('login-form')
-                    <div x-show="! $wire.showTotpChallenge" x-cloak>
-                        <form
-                            class="flex flex-col gap-6"
-                            wire:submit="login()"
-                        >
+                    <div x-show="!$wire.showTotpChallenge" x-cloak>
+                        <form class="flex flex-col gap-6" wire:submit="login()">
                             <x-input
                                 id="email"
                                 wire:model="email"
@@ -134,19 +131,21 @@
                                     dusk="login-button"
                                 ></x-button>
                             </div>
-                            <div x-transition x-cloak x-show="$wire.email">
-                                <x-button
-                                    loading
-                                    color="indigo"
-                                    class="w-full"
-                                    :text="__('Send Login Link')"
-                                    type="submit"
-                                    dusk="magic-login-button"
-                                ></x-button>
-                            </div>
+                            @if(app(\FluxErp\Settings\SecuritySettings::class)->magic_login_links_enabled)
+                                <div x-transition x-cloak x-show="$wire.email">
+                                    <x-button
+                                        loading
+                                        color="indigo"
+                                        class="w-full"
+                                        :text="__('Send Login Link')"
+                                        type="submit"
+                                        dusk="magic-login-button"
+                                    ></x-button>
+                                </div>
+                            @endif
                         </form>
                         @section('passkey-login')
-                            @if (Route::hasMacro('passkeys'))
+                            @if(Route::hasMacro('passkeys'))
                                 <div class="mt-6">
                                     <div class="relative">
                                         <div

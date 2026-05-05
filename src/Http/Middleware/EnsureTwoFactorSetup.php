@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Middleware;
 
 use Closure;
+use FluxErp\Settings\SecuritySettings;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,15 +13,17 @@ class EnsureTwoFactorSetup
     {
         $user = $request->user();
 
+        $forced = $user
+            && method_exists($user, 'hasTwoFactorMethodConfigured')
+            && ($user->force_two_factor || app(SecuritySettings::class)->force_two_factor)
+            && ! $user->hasTwoFactorMethodConfigured();
+
         if (
-            $user
-            && $user->force_two_factor
-            && method_exists($user, 'hasTwoFactorEnabled')
-            && ! $user->hasTwoFactorEnabled()
-            && ! $request->routeIs('my-profile')
+            $forced
+            && ! $request->routeIs('two-factor.setup')
             && ! $request->routeIs('logout')
         ) {
-            return redirect()->route('my-profile');
+            return redirect()->route('two-factor.setup');
         }
 
         return $next($request);

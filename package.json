@@ -55,6 +55,7 @@
         "vite": "^8.0.10"
     },
     "dependencies": {
+        "@simplewebauthn/browser": "^13.3.0",
         "@techstark/opencv-js": "^4.12.0-release.1"
     }
 }

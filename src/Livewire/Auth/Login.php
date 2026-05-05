@@ -3,13 +3,14 @@
 namespace FluxErp\Livewire\Auth;
 
 use FluxErp\Models\User;
+use FluxErp\Settings\SecuritySettings;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Auth\PasswordBroker;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Rule;
@@ -57,16 +58,16 @@ class Login extends Component
         $this->validate();
 
         if ($this->password) {
-            $user = $this->resolveUser();
+            $guard = $this->guard();
 
-            if (! $user || ! Hash::check($this->password, $user->password) || ! $user->is_active) {
-                $this->reset('password');
-                $this->toast()
-                    ->error(__('Login failed'))
-                    ->send();
-                $this->js('$focus.focus(document.getElementById(\'password\'));');
+            if (! $guard->validate(['email' => $this->email, 'password' => $this->password])) {
+                return $this->failLogin();
+            }
 
-                return false;
+            $user = $guard->getLastAttempted();
+
+            if (! $user instanceof User || ! $user->is_active) {
+                return $this->failLogin();
             }
 
             if ($user->hasTwoFactorEnabled()) {
@@ -80,10 +81,18 @@ class Login extends Component
                 return true;
             }
 
-            Auth::guard($this->guard)->login($user, $this->remember);
+            $guard->login($user, $this->remember);
             $this->redirect($target);
 
             return true;
+        }
+
+        if (! app(SecuritySettings::class)->magic_login_links_enabled) {
+            $this->toast()
+                ->error(__('Login by email link is disabled'))
+                ->send();
+
+            return false;
         }
 
         $this->sendMagicLink();
@@ -98,7 +107,12 @@ class Login extends Component
     {
         $loginData = Session::get('two_factor_login');
 
-        if (! $loginData) {
+        if (
+            ! is_array($loginData)
+            || ! isset($loginData['user_id'], $loginData['remember'], $loginData['target'])
+        ) {
+            Session::forget('two_factor_login');
+            $this->reset('password', 'totpCode');
             $this->showTotpChallenge = false;
 
             return;
@@ -116,7 +130,7 @@ class Login extends Component
         }
 
         Session::forget('two_factor_login');
-        Auth::guard($this->guard)->login($user, $loginData['remember']);
+        $this->guard()->login($user, $loginData['remember']);
         $this->redirect($loginData['target']);
     }
 
@@ -138,7 +152,11 @@ class Login extends Component
 
     public function sendMagicLink(): void
     {
-        $user = Auth::guard($this->guard)
+        if (! app(SecuritySettings::class)->magic_login_links_enabled) {
+            return;
+        }
+
+        $user = $this->guard()
             ->getProvider()
             ->retrieveByCredentials(['email' => $this->email]);
 
@@ -147,9 +165,25 @@ class Login extends Component
         }
     }
 
+    protected function guard(): StatefulGuard
+    {
+        return Auth::guard($this->guard);
+    }
+
+    protected function failLogin(): bool
+    {
+        $this->reset('password');
+        $this->toast()
+            ->error(__('Login failed'))
+            ->send();
+        $this->js('$focus.focus(document.getElementById(\'password\'));');
+
+        return false;
+    }
+
     protected function getPasswordBroker(): PasswordBroker
     {
-        $provider = config('auth.guards.' . Auth::guard($this->guard)->name . '.provider');
+        $provider = config('auth.guards.' . $this->guard()->name . '.provider');
         $broker = collect(config('auth.passwords'))
             ->filter(function ($item) use ($provider) {
                 return $item['provider'] === $provider;
@@ -158,12 +192,5 @@ class Login extends Component
             ->first();
 
         return Password::broker($broker);
-    }
-
-    protected function resolveUser(): ?User
-    {
-        return resolve_static(User::class, 'query')
-            ->where('email', $this->email)
-            ->first();
     }
 }

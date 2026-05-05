@@ -254,6 +254,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return static::guardNames();
     }
 
+    public function hasTwoFactorMethodConfigured(): bool
+    {
+        return $this->hasTwoFactorEnabled() || $this->passkeys()->exists();
+    }
+
     /**
      * Get the preferred locale of the entity.
      */

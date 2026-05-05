@@ -14,6 +14,7 @@ use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
+use FluxErp\Livewire\Auth\ForceTwoFactorSetup;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Auth\ResetPassword;
@@ -95,6 +96,7 @@ use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\RecordOrigins;
 use FluxErp\Livewire\Settings\ReminderSettings;
 use FluxErp\Livewire\Settings\Scheduling;
+use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
 use FluxErp\Livewire\Settings\SubscriptionSettings;
@@ -149,6 +151,11 @@ Route::middleware('web')
         });
         Route::post('/logout', Logout::class)
             ->name('logout');
+
+        Route::middleware('auth:web')->group(function (): void {
+            Route::get('/two-factor/setup', ForceTwoFactorSetup::class)
+                ->name('two-factor.setup');
+        });
 
         Route::middleware(['auth:web', '2fa.setup', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
@@ -310,6 +317,7 @@ Route::middleware('web')
                         Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
+                        Route::get('/security-settings', SecuritySettings::class)->name('security-settings');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
                         Route::get('/system', System::class)->name('system');
