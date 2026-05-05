@@ -43,7 +43,7 @@ test('confirmTotp redirects to dashboard on valid code', function (): void {
     $component = Livewire::test(ForceTwoFactorSetup::class)
         ->call('selectTotp');
 
-    $code = $this->user->refresh()->makeTwoFactorAuth();
+    $code = $this->user->refresh()->makeTwoFactorCode();
     $component
         ->set('confirmCode', $code)
         ->call('confirmTotp')

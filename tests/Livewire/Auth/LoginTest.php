@@ -69,7 +69,6 @@ test('verifyTotpCode resets state when session payload is malformed', function (
     Session::put('two_factor_login', ['user_id' => $this->user->getKey()]);
 
     Livewire::test(Login::class)
-        ->set('showTotpChallenge', true)
         ->set('totpCode', '123456')
         ->call('verifyTotpCode')
         ->assertSet('showTotpChallenge', false)
