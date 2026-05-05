@@ -30,64 +30,151 @@
                         </x-slot:footer>
                     </x-modal>
                 @show
-                @section('login-form')
-                    <form class="flex flex-col gap-6" wire:submit="login()">
-                        <x-input
-                            id="email"
-                            wire:model="email"
-                            :label="__('Email')"
-                            name="email"
-                            type="email"
-                            required
-                            autofocus
-                        />
-                        <x-password
-                            wire:model="password"
-                            :label="__('Password')"
-                            id="password"
-                            name="password"
-                        />
-                        <div class="flex items-center justify-between">
-                            <x-toggle
-                                wire:model="remember"
-                                :label="__('Remember me')"
-                            />
-                            <div class="text-sm">
-                                <a
-                                    x-on:click="
-                                        $tsui.open.modal('password-reset')
-                                    "
-                                    class="cursor-pointer font-medium text-indigo-600 hover:text-indigo-500"
-                                >
-                                    {{ __('Reset password') }}
-                                </a>
-                            </div>
-                        </div>
-                        <div
-                            x-transition
-                            x-cloak
-                            x-show="$wire.email && $wire.password"
+                @section('totp-challenge')
+                    <div x-show="$wire.showTotpChallenge" x-cloak>
+                        <form
+                            class="flex flex-col gap-6"
+                            wire:submit="verifyTotpCode()"
                         >
+                            <div class="text-center">
+                                <x-icon
+                                    name="shield-check"
+                                    class="mx-auto size-12 text-indigo-600"
+                                />
+                                <h3
+                                    class="mt-2 text-lg font-semibold text-gray-900"
+                                >
+                                    {{ __('Two-Factor Authentication') }}
+                                </h3>
+                                <p class="mt-1 text-sm text-gray-600">
+                                    {{ __('Enter the code from your authenticator app') }}
+                                </p>
+                            </div>
+                            <div class="flex justify-center">
+                                <x-pin
+                                    id="totp-code"
+                                    wire:model="totpCode"
+                                    :length="6"
+                                    numbers
+                                    smart
+                                    autofocus
+                                />
+                                @error('totpCode')
+                                    <p class="text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
                             <x-button
                                 loading
                                 color="indigo"
                                 class="w-full"
-                                :text="__('Login')"
+                                :text="__('Verify')"
                                 type="submit"
-                                dusk="login-button"
-                            ></x-button>
-                        </div>
-                        <div x-transition x-cloak x-show="$wire.email">
+                            />
                             <x-button
-                                loading
-                                color="indigo"
+                                color="secondary"
+                                flat
                                 class="w-full"
-                                :text="__('Send Login Link')"
-                                type="submit"
-                                dusk="magic-login-button"
-                            ></x-button>
-                        </div>
-                    </form>
+                                :text="__('Cancel')"
+                                wire:click="cancelTotpChallenge()"
+                            />
+                        </form>
+                    </div>
+                @show
+                @section('login-form')
+                    <div x-show="!$wire.showTotpChallenge" x-cloak>
+                        <form class="flex flex-col gap-6" wire:submit="login()">
+                            <x-input
+                                id="email"
+                                wire:model="email"
+                                :label="__('Email')"
+                                name="email"
+                                type="email"
+                                required
+                                autofocus
+                            />
+                            <x-password
+                                wire:model="password"
+                                :label="__('Password')"
+                                id="password"
+                                name="password"
+                            />
+                            <div class="flex items-center justify-between">
+                                <x-toggle
+                                    wire:model="remember"
+                                    :label="__('Remember me')"
+                                />
+                                <div class="text-sm">
+                                    <a
+                                        x-on:click="
+                                            $tsui.open.modal('password-reset')
+                                        "
+                                        class="cursor-pointer font-medium text-indigo-600 hover:text-indigo-500"
+                                    >
+                                        {{ __('Reset password') }}
+                                    </a>
+                                </div>
+                            </div>
+                            <div
+                                x-transition
+                                x-cloak
+                                x-show="$wire.email && $wire.password"
+                            >
+                                <x-button
+                                    loading
+                                    color="indigo"
+                                    class="w-full"
+                                    :text="__('Login')"
+                                    type="submit"
+                                    dusk="login-button"
+                                ></x-button>
+                            </div>
+                            @if(app(\FluxErp\Settings\SecuritySettings::class)->magic_login_links_enabled)
+                                <div x-transition x-cloak x-show="$wire.email">
+                                    <x-button
+                                        loading
+                                        color="indigo"
+                                        class="w-full"
+                                        :text="__('Send Login Link')"
+                                        type="submit"
+                                        dusk="magic-login-button"
+                                    ></x-button>
+                                </div>
+                            @endif
+                        </form>
+                        @section('passkey-login')
+                            @if(Route::hasMacro('passkeys'))
+                                <div
+                                    class="mt-6"
+                                    x-show="browserSupportsWebAuthn"
+                                    x-cloak
+                                >
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-0 flex items-center"
+                                        >
+                                            <div
+                                                class="w-full border-t border-gray-300"
+                                            ></div>
+                                        </div>
+                                        <div
+                                            class="relative flex justify-center text-sm"
+                                        >
+                                            <span
+                                                class="bg-white px-2 text-gray-500"
+                                            >
+                                                {{ __('Or') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6">
+                                        <x-authenticate-passkey />
+                                    </div>
+                                </div>
+                            @endif
+                        @show
+                    </div>
                 @show
 
                 <div

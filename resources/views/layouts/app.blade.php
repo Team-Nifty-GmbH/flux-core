@@ -100,7 +100,13 @@
     @endauth
 
     <x-flux::layout>
-        @if(! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
+        @if(
+            ! $navigation
+            && auth()->check()
+            && auth()->id()
+            && ! request()->routeIs('logout')
+            && ! request()->routeIs('two-factor.setup')
+        )
             <x-slot:header>
                 <x-layout.header without-mobile-button>
                     <x-button
@@ -166,7 +172,14 @@
             </x-slot:header>
         @endif
 
-        @if(auth()->check() && auth()->id() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
+        @if(
+            ! $navigation
+            && auth()->check()
+            && auth()->id()
+            && ! request()->routeIs('logout')
+            && ! request()->routeIs('two-factor.setup')
+            && method_exists(auth()->guard(), 'getName')
+        )
             <x-slot:menu>
                 @php($navigation = true)
                 @persist('navigation')
