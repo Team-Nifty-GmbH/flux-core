@@ -157,6 +157,18 @@ class Calendar extends Component
             $this->skipRender();
             CalendarEventEdit::$skipNextRender = true;
 
+            if ($this->event->was_repeatable) {
+                $this->js(<<<'JS'
+                    window.dispatchEvent(new CustomEvent('sync-calendar-event', {
+                        detail: JSON.parse(JSON.stringify($wire.event))
+                    }));
+                    window.dispatchEvent(new CustomEvent('calendar-event-set-confirm-dialog-type', { detail: 'save' }));
+                    $tsui.open.modal('confirm-dialog');
+                JS);
+
+                return;
+            }
+
             try {
                 $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
                     ?? resolve_static(CalendarEvent::class, 'class');
