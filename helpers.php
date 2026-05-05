@@ -86,8 +86,8 @@ if (! function_exists('user_can')) {
     }
 }
 
-if (! function_exists('user_can_route')) {
-    function user_can_route(?string $routeName): bool
+if (! function_exists('user_can_access_route')) {
+    function user_can_access_route(?string $routeName): bool
     {
         if (blank($routeName)) {
             return false;
@@ -99,31 +99,32 @@ if (! function_exists('user_can_route')) {
             return false;
         }
 
-        $permission = route_to_permission($route, true);
+        $permission = route_to_permission($route, false);
 
         if (is_null($permission)) {
             return true;
         }
 
-        return auth()->user()?->can($permission) ?? false;
+        try {
+            return auth()->user()?->hasPermissionTo($permission) ?? false;
+        } catch (Spatie\Permission\Exceptions\PermissionDoesNotExist) {
+            return true;
+        }
     }
 }
 
 if (! function_exists('user_can_view_model_detail')) {
     function user_can_view_model_detail(?string $model): bool
     {
-        if (blank($model) || ! class_exists($model) || ! property_exists($model, 'detailRouteName')) {
+        if (
+            blank($model)
+            || ! class_exists($model)
+            || ! method_exists($model, 'getDetailRouteName')
+        ) {
             return false;
         }
 
-        $instance = app($model);
-        $routeName = Closure::bind(
-            fn (): ?string => $this->detailRouteName ?? null,
-            $instance,
-            $model
-        )();
-
-        return user_can_route($routeName);
+        return user_can_access_route(app($model)->getDetailRouteName());
     }
 }
 
