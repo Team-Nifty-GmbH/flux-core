@@ -4,6 +4,7 @@ use FluxErp\Livewire\Features\SearchBar;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 test('renders successfully', function (): void {
     Livewire::test(SearchBar::class)
@@ -23,6 +24,17 @@ test('searchable models exclude detail routes the user lacks permission for', fu
 test('searchable models include detail routes the user has permission for', function (): void {
     $permission = Permission::findOrCreate('orders.{id}.get', 'web');
     $this->user->givePermissionTo($permission);
+
+    $component = Livewire::test(SearchBar::class)
+        ->assertOk();
+
+    expect($component->get('searchModel'))->toContain(Order::class);
+    expect($component->get('modelLabels'))->toHaveKey(Order::class);
+});
+
+test('searchable models include all detail routes for super admin', function (): void {
+    Permission::findOrCreate('orders.{id}.get', 'web');
+    $this->user->assignRole(Role::findOrCreate('Super Admin'));
 
     $component = Livewire::test(SearchBar::class)
         ->assertOk();
