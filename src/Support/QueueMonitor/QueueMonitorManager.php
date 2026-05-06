@@ -45,6 +45,24 @@ class QueueMonitorManager
         return (string) static::getJobClass($event->job);
     }
 
+    public static function handle(JobQueued|JobProcessing|JobProcessed|JobFailed|JobExceptionOccurred $event): void
+    {
+        $method = lcfirst(class_basename($event));
+
+        if (method_exists(static::class, $method) && static::shouldBeMonitored($event->job)) {
+            static::$method($event);
+        }
+    }
+
+    public static function shouldBeMonitored(object $job): bool
+    {
+        return is_a(
+            static::getJobClass($job),
+            ShouldBeMonitored::class,
+            true
+        );
+    }
+
     protected static function resolveJobInstance(object $event): ?object
     {
         if ($event instanceof JobQueued && is_object($event->job)) {
@@ -68,24 +86,6 @@ class QueueMonitorManager
         }
 
         return is_object($instance) ? $instance : null;
-    }
-
-    public static function handle(JobQueued|JobProcessing|JobProcessed|JobFailed|JobExceptionOccurred $event): void
-    {
-        $method = lcfirst(class_basename($event));
-
-        if (method_exists(static::class, $method) && static::shouldBeMonitored($event->job)) {
-            static::$method($event);
-        }
-    }
-
-    public static function shouldBeMonitored(object $job): bool
-    {
-        return is_a(
-            static::getJobClass($job),
-            ShouldBeMonitored::class,
-            true
-        );
     }
 
     protected static function jobExceptionOccurred(JobExceptionOccurred $event): void
