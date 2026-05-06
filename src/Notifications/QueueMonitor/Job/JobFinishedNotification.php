@@ -17,10 +17,7 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
 {
     public function __construct(public QueueMonitor $model)
     {
-        $this->id = Uuid::uuid5(
-            Uuid::NAMESPACE_URL,
-            ($this->model->job_batch_id ?? $this->model->job_id) . '-' . $this->model->getKey()
-        );
+        $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $this->model->job_batch_id ?? $this->model->job_id);
     }
 
     public function toArray(object $notifiable): array
@@ -39,10 +36,7 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
             ->id($this->id)
             ->notifiable($notifiable)
             ->title(__(':job_name is finished', ['job_name' => __($this->model->getJobName())]))
-            ->description(
-                __(':time elapsed', ['time' => $this->model->getElapsedInterval()]) .
-                ($this->model->message ? '<br>' . $this->model->message : '')
-            )
+            ->description($this->model->message)
             ->persistent()
             ->accept(unserialize($this->model->accept) ?: null)
             ->reject(unserialize($this->model->reject) ?: null)
@@ -50,6 +44,7 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
             ->markAsRead()
             ->attributes([
                 'state' => $this->model->state,
+                'progressMeta' => __(':time elapsed', ['time' => $this->model->getElapsedInterval()]),
             ]);
     }
 

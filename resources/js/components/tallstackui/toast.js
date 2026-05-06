@@ -26,6 +26,9 @@ class TallstackToast {
         }
 
         Object.keys(event.detail).forEach((key) => {
+            if (key === 'id' || key === 'toastId') {
+                return;
+            }
             toast[key] = event.detail[key];
         });
     }
