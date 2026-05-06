@@ -108,12 +108,15 @@
                                     wire:submit="confirmTotp()"
                                 >
                                     <div class="flex justify-center">
-                                        <x-pin
+                                        <x-input
+                                            id="totp-confirm-code"
                                             wire:model.live="confirmCode"
                                             :label="__('Verification Code')"
-                                            :length="6"
-                                            numbers
-                                            smart
+                                            type="text"
+                                            inputmode="numeric"
+                                            autocomplete="one-time-code"
+                                            pattern="[0-9]*"
+                                            maxlength="6"
                                         />
                                     </div>
                                     <div class="flex justify-between gap-2">
