@@ -2,6 +2,7 @@
 
 namespace FluxErp;
 
+use FluxErp\Actions\Passkey\StorePasskeyAction;
 use FluxErp\Assets\AssetManager;
 use FluxErp\Facades\ProductType;
 use FluxErp\Helpers\Composer;
@@ -242,6 +243,7 @@ class FluxServiceProvider extends ServiceProvider
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
             config(['two-factor.recovery.enabled' => false]);
+            config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
