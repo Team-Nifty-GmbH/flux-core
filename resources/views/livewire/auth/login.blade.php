@@ -31,7 +31,13 @@
                     </x-modal>
                 @show
                 @section('totp-challenge')
-                    <div x-show="$wire.showTotpChallenge" x-cloak>
+                    <div
+                        x-show="$wire.showTotpChallenge"
+                        x-effect="
+                            $wire.showTotpChallenge && $tsui.focus('totp-code')
+                        "
+                        x-cloak
+                    >
                         <form
                             class="flex flex-col gap-6"
                             wire:submit="verifyTotpCode()"
@@ -51,13 +57,14 @@
                                 </p>
                             </div>
                             <div class="flex justify-center">
-                                <x-pin
+                                <x-input
                                     id="totp-code"
                                     wire:model="totpCode"
-                                    :length="6"
-                                    numbers
-                                    smart
-                                    autofocus
+                                    type="text"
+                                    inputmode="numeric"
+                                    autocomplete="one-time-code"
+                                    pattern="[0-9]*"
+                                    maxlength="6"
                                 />
                                 @error('totpCode')
                                     <p class="text-sm text-red-600">

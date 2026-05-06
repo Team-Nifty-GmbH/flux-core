@@ -1,4 +1,4 @@
-<div>
+<div class="space-y-6">
     @section('two-factor-setup')
         <x-card>
             <div class="space-y-4">
@@ -23,7 +23,13 @@
                     </div>
                 </div>
 
-                <div x-show="$wire.showSetup" x-cloak>
+                <div
+                    x-show="$wire.showSetup"
+                    x-effect="
+                        $wire.showSetup && $tsui.focus('totp-confirm-code')
+                    "
+                    x-cloak
+                >
                     <div class="space-y-4">
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             {{ __('Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.) and enter the verification code below.') }}
@@ -43,12 +49,15 @@
                         </div>
                         <form wire:submit="confirmSetup()" class="space-y-4">
                             <div class="flex justify-center">
-                                <x-pin
+                                <x-input
+                                    id="totp-confirm-code"
                                     wire:model.live="confirmCode"
                                     :label="__('Verification Code')"
-                                    :length="6"
-                                    numbers
-                                    smart
+                                    type="text"
+                                    inputmode="numeric"
+                                    autocomplete="one-time-code"
+                                    pattern="[0-9]*"
+                                    maxlength="6"
                                 />
                             </div>
                             <div class="flex justify-end gap-2">
@@ -117,7 +126,7 @@
 
     @section('passkey-management')
         <div x-show="browserSupportsWebAuthn" x-cloak>
-            <x-card class="mt-6">
+            <x-card>
                 <div class="space-y-4">
                     <div
                         class="flex items-center justify-between border-b pb-4 dark:border-gray-700"
