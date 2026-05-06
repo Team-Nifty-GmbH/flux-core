@@ -22,4 +22,12 @@ abstract class DispatchableFluxAction extends FluxAction implements ShouldBeMoni
     {
         return $this->validate()->execute();
     }
+
+    protected function nonSerializableProperties(): array
+    {
+        return array_merge(parent::nonSerializableProperties(), [
+            'fakeBatch',
+            'job',
+        ]);
+    }
 }

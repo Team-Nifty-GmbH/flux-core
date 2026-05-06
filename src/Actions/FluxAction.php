@@ -316,8 +316,6 @@ abstract class FluxAction
     {
         return [
             'dispatcher',
-            'fakeBatch',
-            'job',
         ];
     }
 
