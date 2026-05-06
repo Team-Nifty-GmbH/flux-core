@@ -52,7 +52,7 @@ class JobBatch extends FluxModel
 
     public function getProcessedJobs(): int
     {
-        return $this->total_jobs - $this->pending_jobs - $this->failed_jobs;
+        return $this->total_jobs - $this->pending_jobs + $this->failed_jobs;
     }
 
     public function getProgress(): float
@@ -66,6 +66,17 @@ class JobBatch extends FluxModel
         }
 
         return 0;
+    }
+
+    public function getElapsedInterval(?Carbon $end = null): CarbonInterval
+    {
+        if (is_null($this->created_at)) {
+            return CarbonInterval::seconds(0);
+        }
+
+        $end ??= $this->finished_at ?? Carbon::now();
+
+        return $this->created_at->diffAsCarbonInterval($end);
     }
 
     public function getRemainingInterval(?Carbon $now = null): CarbonInterval

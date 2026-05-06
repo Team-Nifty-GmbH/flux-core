@@ -28,7 +28,7 @@ class JobStartedNotification extends Notification implements HasToastNotificatio
             ->notifiable($notifiable)
             ->title(__(':job_name started', ['job_name' => __($this->model->getJobName())]))
             ->description($this->model->message)
-            ->timeout(0)
+            ->persistent()
             ->progress($this->model->jobBatch?->progress ?? $this->model->progress)
             ->markAsRead()
             ->attributes([

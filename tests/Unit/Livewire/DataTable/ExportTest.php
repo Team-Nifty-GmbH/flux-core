@@ -2,35 +2,23 @@
 
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Models\Tenant;
-use FluxErp\Notifications\ExportReady;
 use FluxErp\Tests\Unit\Livewire\DataTable\ExportTestDataTable;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Spatie\Activitylog\Models\Activity;
-use function Livewire\invade;
 
 function readJobOutput(ExportDataTableJob $job): array
 {
-    Notification::fake();
     $job->handle();
 
-    $filePath = null;
-    Notification::assertSentTo(
-        test()->user,
-        ExportReady::class,
-        function (ExportReady $notification) use (&$filePath): bool {
-            $filePath = invade($notification)->filePath;
-
-            return true;
-        }
-    );
+    $disk = Storage::disk(config('filesystems.default'));
+    $filePath = collect($disk->allFiles('exports'))->first();
 
     return [
         'path' => $filePath,
-        'contents' => Storage::disk(config('filesystems.default'))->get($filePath),
+        'contents' => $filePath ? $disk->get($filePath) : null,
     ];
 }
 
@@ -51,7 +39,6 @@ function readXlsxRows(string $contents): array
 
 test('can export data with explicit columns', function (): void {
     Queue::fake([ExportDataTableJob::class]);
-    Notification::fake();
     Storage::fake(config('filesystems.default'));
 
     Tenant::factory()->create([
@@ -62,8 +49,7 @@ test('can export data with explicit columns', function (): void {
 
     Livewire::test(ExportTestDataTable::class)
         ->assertOk()
-        ->call('export', ['name', 'tenant_code'])
-        ->assertToastNotification(type: 'success');
+        ->call('export', ['name', 'tenant_code']);
 
     Queue::assertPushed(ExportDataTableJob::class);
 

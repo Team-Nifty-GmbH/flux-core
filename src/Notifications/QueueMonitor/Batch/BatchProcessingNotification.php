@@ -27,11 +27,14 @@ class BatchProcessingNotification extends Notification implements HasToastNotifi
             ->id($this->id)
             ->notifiable($notifiable)
             ->title(__(':job_name is processing', ['job_name' => __($this->model->name)]))
-            ->description($this->model->getProcessedJobs() . ' / ' . $this->model->total_jobs . '<br>'
-                . __(':time remaining', ['time' => $this->model->getRemainingInterval()])
-            )
+            ->description($this->model->getProcessedJobs() . ' / ' . $this->model->total_jobs)
             ->persistent()
-            ->progress($this->model->getProgress());
+            ->progress($this->model->getProgress())
+            ->attributes([
+                'progressMeta' => __(':time remaining', [
+                    'time' => $this->model->getRemainingInterval(),
+                ]),
+            ]);
     }
 
     public function via(object $notifiable): array

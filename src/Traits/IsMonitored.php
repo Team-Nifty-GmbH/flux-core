@@ -20,7 +20,11 @@ trait IsMonitored
 
     public function accept(NotificationAction $action): void
     {
-        $this->getQueueMonitor()->update([
+        if (! $monitor = $this->getQueueMonitor()) {
+            return;
+        }
+
+        $monitor->update([
             'accept' => serialize($action),
         ]);
     }
@@ -32,7 +36,11 @@ trait IsMonitored
 
     public function message(HtmlString|string $message): void
     {
-        $this->getQueueMonitor()->update([
+        if (! $monitor = $this->getQueueMonitor()) {
+            return;
+        }
+
+        $monitor->update([
             'message' => is_a($message, HtmlString::class, true)
                 ? $message->toHtml()
                 : $message,
@@ -108,7 +116,11 @@ trait IsMonitored
 
     public function reject(NotificationAction $reject): void
     {
-        $this->getQueueMonitor()->update([
+        if (! $monitor = $this->getQueueMonitor()) {
+            return;
+        }
+
+        $monitor->update([
             'reject' => serialize($reject),
         ]);
     }
