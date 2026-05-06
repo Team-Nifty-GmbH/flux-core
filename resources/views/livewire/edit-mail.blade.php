@@ -57,7 +57,12 @@
                         <span x-text="$wire.currentGroupRecipientCount"></span> {{ __('recipient(s)') }}
                     </span>
                     <span class="text-gray-400">·</span>
-                    <span class="text-gray-500" x-text="'{{ __('Group') }} ' + (($wire.currentGroupIndex ?? 0) + 1) + '/' + ($wire.groupKeys?.length ?? 0)"></span>
+                    <span
+                        class="text-gray-500"
+                        x-text="$wire.groupKeys?.length > 0
+                            ? '{{ __('Group') }} ' + (($wire.currentGroupIndex ?? 0) + 1) + '/' + $wire.groupKeys.length
+                            : '-'"
+                    ></span>
                 </div>
             </div>
 
