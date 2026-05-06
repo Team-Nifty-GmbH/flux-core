@@ -105,8 +105,18 @@ if (! function_exists('user_can_access_route')) {
             return true;
         }
 
+        $user = auth()->user();
+
+        if (
+            $user
+            && in_array(Spatie\Permission\Traits\HasRoles::class, class_uses_recursive($user))
+            && $user->hasRole('Super Admin')
+        ) {
+            return true;
+        }
+
         try {
-            return auth()->user()?->hasPermissionTo($permission) ?? false;
+            return $user?->hasPermissionTo($permission) ?? false;
         } catch (Spatie\Permission\Exceptions\PermissionDoesNotExist) {
             return true;
         }
