@@ -23,7 +23,7 @@ export default function folders(
     searchAttributes = null,
 ) {
     return {
-        checked: checked,
+        checked: checked ?? [],
         selected: null,
         openFolders: [],
         tree: [],
