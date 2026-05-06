@@ -6,7 +6,6 @@ use Exception;
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\EmailTemplate;
-use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
@@ -20,7 +19,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 class EditMail extends Component
@@ -346,12 +344,6 @@ class EditMail extends Component
         $this->selectedTemplateId = null;
 
         $this->cleanupOldUploads();
-    }
-
-    #[Renderless]
-    public function downloadAttachment(Media $media): BinaryFileResponse
-    {
-        return response()->download($media->getPath());
     }
 
     #[Renderless]

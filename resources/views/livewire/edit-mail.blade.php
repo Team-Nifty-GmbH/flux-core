@@ -192,7 +192,7 @@
                                 </x-slot>
                                 <x-slot:text>
                                     <div
-                                        x-on:click.prevent="file.id && $wire.downloadAttachment(file.id)"
+                                        x-on:click.prevent="file.id && $wire.download(file.id)"
                                         x-bind:class="file.id ? 'cursor-pointer' : ''"
                                     >
                                         <span x-text="file.name"></span>

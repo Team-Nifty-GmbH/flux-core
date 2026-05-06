@@ -10,7 +10,6 @@ use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Media;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
@@ -27,7 +26,6 @@ use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PurchaseInvoiceList extends BaseDataTable
@@ -106,20 +104,6 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         return true;
-    }
-
-    #[Renderless]
-    public function downloadMedia(Media $media): false|BinaryFileResponse
-    {
-        if (! file_exists($media->getPath())) {
-            $this->toast()
-                ->error(__('The file does not exist anymore.'))
-                ->send();
-
-            return false;
-        }
-
-        return response()->download($media->getPath(), $media->file_name);
     }
 
     #[Renderless]
