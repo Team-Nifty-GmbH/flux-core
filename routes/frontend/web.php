@@ -390,6 +390,7 @@ Route::middleware('web')
                     Str::finish((string) data_get($payload, 'name', 'media'), '.zip'),
                     ['Content-Type' => 'application/zip'],
                 );
-            })->name('media-collection.download');
+            })
+                ->name('media-collection.download');
         });
     });
