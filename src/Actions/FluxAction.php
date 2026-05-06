@@ -53,9 +53,7 @@ abstract class FluxAction
 
     public function __serialize(): array
     {
-        $data = get_object_vars($this);
-
-        unset($data['dispatcher']);
+        $data = array_diff_key(get_object_vars($this), array_flip($this->nonSerializableProperties()));
 
         try {
             serialize($data['rules'] ?? null);
@@ -312,6 +310,15 @@ abstract class FluxAction
         }
 
         return $this;
+    }
+
+    protected function nonSerializableProperties(): array
+    {
+        return [
+            'dispatcher',
+            'fakeBatch',
+            'job',
+        ];
     }
 
     protected function convertEmptyStringToNull(array $data): array

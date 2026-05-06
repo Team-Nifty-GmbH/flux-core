@@ -63,31 +63,6 @@ class QueueMonitorManager
         );
     }
 
-    protected static function resolveJobInstance(object $event): ?object
-    {
-        if ($event instanceof JobQueued && is_object($event->job)) {
-            return $event->job;
-        }
-
-        if (! method_exists($event->job, 'payload')) {
-            return null;
-        }
-
-        $command = data_get($event->job->payload(), 'data.command');
-
-        if (! is_string($command)) {
-            return null;
-        }
-
-        try {
-            $instance = unserialize($command);
-        } catch (Throwable) {
-            return null;
-        }
-
-        return is_object($instance) ? $instance : null;
-    }
-
     protected static function jobExceptionOccurred(JobExceptionOccurred $event): void
     {
         static::jobFinished($event->job, Failed::class, $event->exception);
@@ -207,5 +182,30 @@ class QueueMonitorManager
                 'queued_at' => now(),
                 'data' => $data ?? null,
             ]);
+    }
+
+    protected static function resolveJobInstance(object $event): ?object
+    {
+        if ($event instanceof JobQueued && is_object($event->job)) {
+            return $event->job;
+        }
+
+        if (! method_exists($event->job, 'payload')) {
+            return null;
+        }
+
+        $command = data_get($event->job->payload(), 'data.command');
+
+        if (! is_string($command)) {
+            return null;
+        }
+
+        try {
+            $instance = unserialize($command);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return is_object($instance) ? $instance : null;
     }
 }
