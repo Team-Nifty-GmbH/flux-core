@@ -19,7 +19,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 class EditMail extends Component
@@ -348,9 +347,9 @@ class EditMail extends Component
     }
 
     #[Renderless]
-    public function downloadAttachment(Media $media): BinaryFileResponse
+    public function downloadAttachment(Media $media): void
     {
-        return response()->download($media->getPath());
+        $this->js('window.location.href = ' . json_encode($media->getUrl()));
     }
 
     #[Renderless]

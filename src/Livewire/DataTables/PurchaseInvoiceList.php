@@ -27,7 +27,6 @@ use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PurchaseInvoiceList extends BaseDataTable
@@ -109,7 +108,7 @@ class PurchaseInvoiceList extends BaseDataTable
     }
 
     #[Renderless]
-    public function downloadMedia(Media $media): false|BinaryFileResponse
+    public function downloadMedia(Media $media): bool
     {
         if (! file_exists($media->getPath())) {
             $this->toast()
@@ -119,7 +118,9 @@ class PurchaseInvoiceList extends BaseDataTable
             return false;
         }
 
-        return response()->download($media->getPath(), $media->file_name);
+        $this->js('window.location.href = ' . json_encode($media->getUrl()));
+
+        return true;
     }
 
     #[Renderless]

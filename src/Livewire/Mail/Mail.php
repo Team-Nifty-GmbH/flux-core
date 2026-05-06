@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Mail extends CommunicationList
 {
@@ -126,7 +125,7 @@ class Mail extends CommunicationList
         JS);
     }
 
-    public function download(Media $mediaItem): false|BinaryFileResponse
+    public function download(Media $mediaItem): bool
     {
         if (! file_exists($mediaItem->getPath())) {
             if (method_exists($this, 'notification')) {
@@ -138,7 +137,9 @@ class Mail extends CommunicationList
             return false;
         }
 
-        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+        $this->js('window.location.href = ' . json_encode($mediaItem->getUrl()));
+
+        return true;
     }
 
     public function getNewMessages(): void

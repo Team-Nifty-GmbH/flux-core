@@ -14,7 +14,6 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 trait WithFileUploads
@@ -27,20 +26,23 @@ trait WithFileUploads
 
     public bool $filesArrayDirty = false;
 
-    public function download(Media $media): ?BinaryFileResponse
+    public function download(Media $media): void
     {
         try {
-            return DownloadMedia::make([
+            $url = DownloadMedia::make([
                 'id' => $media->getKey(),
+                'as' => 'url',
             ])
                 ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
+
+            return;
         }
 
-        return null;
+        $this->js('window.location.href = ' . json_encode($url));
     }
 
     public function downloadCollection(int|string $id, array|string $collection): ?StreamedResponse

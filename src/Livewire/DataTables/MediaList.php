@@ -11,7 +11,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class MediaList extends BaseDataTable
@@ -64,7 +63,8 @@ class MediaList extends BaseDataTable
         ];
     }
 
-    public function downloadMedia(Media $media): false|BinaryFileResponse
+    #[Renderless]
+    public function downloadMedia(Media $media): bool
     {
         if (! file_exists($media->getPath())) {
             $this->toast()
@@ -74,7 +74,9 @@ class MediaList extends BaseDataTable
             return false;
         }
 
-        return response()->download($media->getPath(), $media->file_name);
+        $this->js('window.location.href = ' . json_encode($media->getUrl()));
+
+        return true;
     }
 
     #[Renderless]
