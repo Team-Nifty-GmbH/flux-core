@@ -1,12 +1,16 @@
+// leaflet's UMD exports itself on window.L; importing it first guarantees
+// the global is set before leaflet.markercluster's IIFE — which references
+// `L` as a free variable — evaluates. Keeping markercluster as a static
+// import eliminates the chunk-load race that broke L.markerClusterGroup()
+// in production.
 import leaflet from 'leaflet';
+import 'leaflet.markercluster';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// Set global L before anything else — markercluster and all map code
-// must use the same L instance to avoid instanceof failures.
 window.L = leaflet;
-const L = window.L;
+const L = leaflet;
 
 // remove default icon - take what vite generated
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,9 +20,6 @@ L.Icon.Default.mergeOptions({
     iconUrl: markerIcon,
     shadowUrl: markerShadow,
 });
-
-// leaflet.markercluster registers itself on window.L
-const markerClusterReady = import('leaflet.markercluster');
 
 export default function (
     $wire,
@@ -30,8 +31,6 @@ export default function (
     return {
         zoom: zoom,
         async init() {
-            await markerClusterReady;
-
             if (autoload) {
                 this.$nextTick(() => {
                     this.addMarkers();
@@ -49,13 +48,7 @@ export default function (
                 );
             }
         },
-        async _initMap() {
-            if (this.map) {
-                return;
-            }
-
-            await markerClusterReady;
-
+        _initMap() {
             if (this.map) {
                 return;
             }
