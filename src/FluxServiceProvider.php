@@ -8,6 +8,7 @@ use FluxErp\Facades\ProductType;
 use FluxErp\Helpers\Composer;
 use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
+use FluxErp\Http\Controllers\AuthenticateUsingPasskeyController;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
 use FluxErp\Http\Middleware\EnsureTwoFactorSetup;
 use FluxErp\Http\Middleware\Localization;
@@ -52,6 +53,7 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\Finder\Finder;
@@ -120,6 +122,7 @@ class FluxServiceProvider extends ServiceProvider
 
         app('livewire')->componentHook(SupportFormObjects::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);
+        $this->app->bind(BaseAuthenticateUsingPasskeyController::class, AuthenticateUsingPasskeyController::class);
 
         $this->app->singleton(AssetManager::class);
         $this->app->singleton(ProductTypeManager::class);
