@@ -45,7 +45,7 @@ class QueueMonitorManager
         return (string) static::getJobClass($event->job);
     }
 
-    public static function resolveJobInstance(object $event): ?object
+    protected static function resolveJobInstance(object $event): ?object
     {
         if ($event instanceof JobQueued && is_object($event->job)) {
             return $event->job;
