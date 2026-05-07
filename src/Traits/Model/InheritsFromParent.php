@@ -5,6 +5,7 @@ namespace FluxErp\Traits\Model;
 use FluxErp\Models\Tenant;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use InvalidArgumentException;
+use LogicException;
 
 /**
  * Adds parent → child field/relation inheritance to a model that also uses
@@ -137,6 +138,73 @@ trait InheritsFromParent
         });
 
         return $touched;
+    }
+
+    public function resetRelation(string $relation, mixed $key = null): static
+    {
+        if (! $this->isInheritableRelation($relation)) {
+            throw new InvalidArgumentException(
+                sprintf('Relation [%s] is not inheritable on %s.', $relation, static::class)
+            );
+        }
+
+        $ownMethod = 'own' . ucfirst($relation);
+        $rel = $this->{$ownMethod}();
+
+        if (method_exists($rel, 'detach')) {
+            // BelongsToMany / MorphToMany
+            if ($key !== null) {
+                $rel->detach($key);
+            } else {
+                $rel->detach();
+            }
+        } else {
+            // HasMany — needs a foreign key for per-row deletion
+            if ($key !== null) {
+                $foreignKey = $this->resolveForeignKeyForInheritableRelation($relation);
+                $rel->where($foreignKey, $key)->delete();
+            } else {
+                $rel->delete();
+            }
+        }
+
+        return $this;
+    }
+
+    public function resetRelationOnAllVariants(string $relation, mixed $key = null): int
+    {
+        if (! $this->isInheritableRelation($relation)) {
+            throw new InvalidArgumentException(
+                sprintf('Relation [%s] is not inheritable on %s.', $relation, static::class)
+            );
+        }
+
+        $touched = 0;
+        $ownMethod = 'own' . ucfirst($relation);
+
+        $this->children()->each(function (self $variant) use ($relation, $key, $ownMethod, &$touched): void {
+            $countBefore = $variant->{$ownMethod}()->count();
+            $variant->resetRelation($relation, $key);
+            $countAfter = $variant->{$ownMethod}()->count();
+
+            if ($countAfter < $countBefore) {
+                $touched++;
+            }
+        });
+
+        return $touched;
+    }
+
+    /**
+     * Map of inheritable HasMany relation name → foreign-key column on the related table.
+     * BelongsToMany relations don't need this because they use detach().
+     */
+    protected function resolveForeignKeyForInheritableRelation(string $relation): string
+    {
+        return match ($relation) {
+            'prices' => 'price_list_id',
+            default => throw new LogicException("No HasMany foreign-key mapping for [$relation]."),
+        };
     }
 
     /**

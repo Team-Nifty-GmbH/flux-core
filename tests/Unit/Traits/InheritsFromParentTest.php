@@ -461,3 +461,57 @@ it('media is intentionally NOT inherited (Spatie escape hatch)', function (): vo
     expect($variant->media)->toHaveCount(0);
     expect($variant->getInheritableRelations())->not->toContain('media');
 });
+
+it('resetRelation removes a single override (specific key) for HasMany prices', function (): void {
+    $listA = PriceList::factory()->create();
+    $listB = PriceList::factory()->create();
+
+    $parent = Product::factory()->create();
+    Price::factory()->create(['product_id' => $parent->getKey(), 'price_list_id' => $listA->getKey(), 'price' => 10]);
+    Price::factory()->create(['product_id' => $parent->getKey(), 'price_list_id' => $listB->getKey(), 'price' => 20]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    Price::factory()->create(['product_id' => $variant->getKey(), 'price_list_id' => $listA->getKey(), 'price' => 15]);
+    Price::factory()->create(['product_id' => $variant->getKey(), 'price_list_id' => $listB->getKey(), 'price' => 25]);
+
+    $variant->resetRelation('prices', $listA->getKey());
+
+    expect($variant->ownPrices()->count())->toBe(1);
+    expect($variant->prices->where('price_list_id', $listA->getKey())->first()->price)->toEqual(10);
+});
+
+it('resetRelation without key removes all variant pivot rows for BelongsToMany categories', function (): void {
+    $catA = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $catB = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $parent = Product::factory()->create();
+    $parent->ownCategories()->attach([$catA->getKey()]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variant->ownCategories()->attach([$catA->getKey(), $catB->getKey()]);
+
+    $variant->resetRelation('categories');
+
+    expect($variant->ownCategories()->count())->toBe(0);
+});
+
+it('resetRelationOnAllVariants removes pivot rows on every variant', function (): void {
+    $catA = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $parent = Product::factory()->create();
+    $variantA = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variantA->ownCategories()->attach([$catA->getKey()]);
+    $variantB = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variantB->ownCategories()->attach([$catA->getKey()]);
+
+    $touched = $parent->resetRelationOnAllVariants('categories', $catA->getKey());
+
+    expect($touched)->toBe(2);
+    expect($variantA->ownCategories()->count())->toBe(0);
+    expect($variantB->ownCategories()->count())->toBe(0);
+});
+
+it('resetRelation throws on non-inheritable relation', function (): void {
+    $parent = Product::factory()->create();
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+
+    $variant->resetRelation('orderPositions');
+})->throws(InvalidArgumentException::class, 'orderPositions');
