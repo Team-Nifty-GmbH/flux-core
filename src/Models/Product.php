@@ -182,7 +182,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->hasMany(OrderPosition::class);
     }
 
-    public function prices(): HasMany
+    public function ownPrices(): HasMany
     {
         return $this->hasMany(Price::class);
     }
@@ -304,6 +304,15 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     }
 
     // Attributes
+    public function getPricesAttribute(): Collection
+    {
+        return $this->resolveInheritedCollection(
+            ownRelationMethod: 'ownPrices',
+            resolvedRelation: 'prices',
+            foreignKeyOnRelated: 'price_list_id'
+        );
+    }
+
     protected function price(): Attribute
     {
         return Attribute::get(function () {

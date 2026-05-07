@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Tenant;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use InvalidArgumentException;
 
 /**
@@ -136,5 +137,40 @@ trait InheritsFromParent
         });
 
         return $touched;
+    }
+
+    /**
+     * Resolve an inheritable HasMany/BelongsToMany relation, merging the variant's
+     * own pivot/related rows with the parent's effective collection on the given key column.
+     *
+     * @param  string  $ownRelationMethod  Name of the "own" relation method (e.g. ownPrices)
+     * @param  string  $resolvedRelation  Name as it appears in $inheritableRelations (e.g. prices)
+     * @param  string  $foreignKeyOnRelated  Column that uniquely identifies the row within the
+     *                                       relation set (e.g. price_list_id, category_id)
+     */
+    protected function resolveInheritedCollection(
+        string $ownRelationMethod,
+        string $resolvedRelation,
+        string $foreignKeyOnRelated
+    ): EloquentCollection {
+        /** @var EloquentCollection $own */
+        $own = $this->{$ownRelationMethod};
+
+        if (! $this->isVariant() || ! $this->inheritanceEnabled()) {
+            return $own;
+        }
+
+        $parent = $this->relationLoaded('parent') ? $this->parent : $this->parent()->first();
+        if (! $parent) {
+            return $own;
+        }
+
+        /** @var EloquentCollection $parentEffective */
+        $parentEffective = $parent->{$resolvedRelation};
+
+        $ownKeys = $own->pluck($foreignKeyOnRelated);
+        $inherited = $parentEffective->whereNotIn($foreignKeyOnRelated, $ownKeys);
+
+        return $own->concat($inherited)->values();
     }
 }

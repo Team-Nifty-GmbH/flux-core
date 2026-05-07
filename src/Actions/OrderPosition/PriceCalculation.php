@@ -22,8 +22,8 @@ class PriceCalculation
         $this->orderPosition->loadMissing([
             'product:id,vat_rate_id',
             'product.vatRate:id,rate_percentage',
-            'product.prices:id,price_list_id,price',
-            'product.prices.priceList:id,is_net',
+            'product.ownPrices:id,product_id,price_list_id,price',
+            'product.ownPrices.priceList:id,is_net',
         ]);
     }
 
@@ -140,7 +140,7 @@ class PriceCalculation
         if ($stockPosting) {
             $purchasePrice = bcdiv($stockPosting->purchase_price, $stockPosting->posting);
         } else {
-            $purchasePrice = $this->orderPosition->product?->prices()
+            $purchasePrice = $this->orderPosition->product?->ownPrices()
                 ->whereRelation('priceList', 'is_purchase')
                 ->first()
                 ?->getNet($this->orderPosition->vat_rate_percentage);
@@ -173,7 +173,7 @@ class PriceCalculation
 
         // Collect & set missing data
         if ($this->orderPosition->product) {
-            $this->orderPosition->product_prices = $this->orderPosition->product->prices()
+            $this->orderPosition->product_prices = $this->orderPosition->product->ownPrices()
                 ->get([
                     'id',
                     'price_list_id',

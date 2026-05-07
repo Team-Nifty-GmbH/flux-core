@@ -53,7 +53,7 @@ class ProductPricesUpdate extends FluxAction
             $priceId = $price?->getKey();
 
             if ($basePriceList) {
-                $priceId = $product->prices()
+                $priceId = $product->ownPrices()
                     ->where('price_list_id', $priceList->getKey())
                     ->value('id');
             }

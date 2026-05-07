@@ -80,7 +80,7 @@ class UpdateProduct extends FluxAction
 
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');
-            $product->prices
+            $product->ownPrices
                 ?->each(function ($price) use ($priceCollection): void {
                     if ($priceCollection->has($price->price_list_id)) {
                         $price->update($priceCollection->get($price->price_list_id));
@@ -90,7 +90,7 @@ class UpdateProduct extends FluxAction
                     }
                 });
 
-            $priceCollection->each(fn ($item) => $product->prices()->create($item));
+            $priceCollection->each(fn ($item) => $product->ownPrices()->create($item));
         }
 
         if ($product->is_bundle && $bundleProducts) {
@@ -106,7 +106,7 @@ class UpdateProduct extends FluxAction
         if ($product->is_bundle && $product->bundle_type_enum === BundleTypeEnum::Group) {
             // when the bundle type is group we need to remove all prices form the product as the price
             // is calculated by the prices of the group items
-            foreach ($product->prices()->get('id') as $price) {
+            foreach ($product->ownPrices()->get('id') as $price) {
                 DeletePrice::make([
                     'id' => $price->getKey(),
                 ])

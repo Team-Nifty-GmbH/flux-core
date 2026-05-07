@@ -1,5 +1,7 @@
 <?php
 
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
 use Illuminate\Support\Facades\Cache;
@@ -276,4 +278,60 @@ it('resetFieldOnAllVariants returns 0 when no variants exist', function (): void
     $parent = Product::factory()->create();
 
     expect($parent->resetFieldOnAllVariants('name'))->toBe(0);
+});
+
+it('variant inherits parent prices for price lists where it has no own price', function (): void {
+    $listA = PriceList::factory()->create();
+    $listB = PriceList::factory()->create();
+
+    $parent = Product::factory()->create();
+    Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 10,
+    ]);
+    Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listB->getKey(),
+        'price' => 20,
+    ]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    Price::factory()->create([
+        'product_id' => $variant->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 15,
+    ]);
+
+    $effective = $variant->prices->keyBy('price_list_id');
+
+    expect($effective->get($listA->getKey())->price)->toEqual(15);
+    expect($effective->get($listB->getKey())->price)->toEqual(20);
+});
+
+it('variant inherits all parent prices when no own prices set', function (): void {
+    $listA = PriceList::factory()->create();
+    $parent = Product::factory()->create();
+    Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 10,
+    ]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+
+    expect($variant->prices)->toHaveCount(1);
+    expect($variant->prices->first()->price)->toEqual(10);
+});
+
+it('non-variant returns own prices unchanged', function (): void {
+    $listA = PriceList::factory()->create();
+    $product = Product::factory()->create();
+    Price::factory()->create([
+        'product_id' => $product->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 5,
+    ]);
+
+    expect($product->prices)->toHaveCount(1);
 });

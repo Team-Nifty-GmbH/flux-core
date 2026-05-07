@@ -25,7 +25,7 @@ class CreateVariants extends FluxAction
     {
         $parentProduct = resolve_static(Product::class, 'query')
             ->whereKey($this->data['parent_id'])
-            ->with(['tenants:id', 'categories:id', 'prices:id,price_list_id,price', 'tags:id'])
+            ->with(['tenants:id', 'categories:id', 'ownPrices:id,price_list_id,price', 'tags:id'])
             ->first();
 
         $product = array_merge($parentProduct->toArray(), $this->data);
@@ -38,11 +38,19 @@ class CreateVariants extends FluxAction
             $product['product_number'],
             $product['ean'],
             $product['is_bundle'],
+            $product['own_prices'],
         );
         $product['parent_id'] = $parentProduct->id;
         $product['tenants'] = $parentProduct->tenants->pluck('id')->toArray();
         $product['categories'] = $parentProduct->categories?->pluck('id')->toArray();
         $product['tags'] = $parentProduct->tags?->pluck('id')->toArray();
+        $product['prices'] = $parentProduct->ownPrices
+            ->map(fn ($price) => [
+                'id' => $price->getKey(),
+                'price_list_id' => $price->price_list_id,
+                'price' => $price->price,
+            ])
+            ->toArray();
 
         foreach (data_get($this->data, 'product_options') as $variantCreate) {
             if ($this->variantExists($variantCreate)) {
