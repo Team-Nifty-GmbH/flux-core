@@ -222,13 +222,55 @@ export default ($wire) => ({
             return;
         }
 
-        if (window.cv?.Mat) {
+        if (window.cv?.HEAPU8) {
             this.openCvReady = true;
 
             return;
         }
 
-        await import('@techstark/opencv-js');
+        // OpenCV ships as a ~10 MB UMD bundle. iOS WKWebView's ESM /
+        // dynamic-import pipeline hangs indefinitely on a chunk that size,
+        // so we load it via classic <script> tag — the HTML-parser path
+        // streams large scripts reliably across mobile WebViews. Cache the
+        // promise on window so a second mount of the modal reuses it.
+        if (!window.__fluxOpenCvLoading) {
+            window.__fluxOpenCvLoading = new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = '/flux/opencv.js';
+                script.onload = () => {
+                    if (!window.cv) {
+                        reject(
+                            new Error(
+                                'opencv.js executed but window.cv is missing',
+                            ),
+                        );
+
+                        return;
+                    }
+                    if (window.cv.HEAPU8) {
+                        resolve();
+
+                        return;
+                    }
+                    const previous = window.cv.onRuntimeInitialized;
+                    window.cv.onRuntimeInitialized = () => {
+                        if (typeof previous === 'function') {
+                            try {
+                                previous();
+                            } catch (e) {
+                                // never let a previous handler block readiness
+                            }
+                        }
+                        resolve();
+                    };
+                };
+                script.onerror = () =>
+                    reject(new Error('opencv.js script load failed'));
+                document.head.appendChild(script);
+            });
+        }
+
+        await window.__fluxOpenCvLoading;
         this.openCvReady = true;
     },
 
@@ -285,7 +327,7 @@ export default ($wire) => ({
             await this.loadOpenCv();
             openCvLoaded = true;
         } catch (error) {
-            // OpenCV is optional — scanner falls back to manual corner selection
+            // OpenCV is optional — scanner falls back to manual corner selection.
             console.error('OpenCV load failed:', error);
         }
 
@@ -294,23 +336,30 @@ export default ($wire) => ({
             let corners = null;
 
             if (openCvLoaded) {
-                const mat = cv.imread(img);
-                const contour = findPaperContour(mat);
+                let mat = null;
+                let contour = null;
+                try {
+                    mat = cv.imread(img);
+                    contour = findPaperContour(mat);
 
-                if (contour) {
-                    const detected = getCornerPoints(contour);
-                    if (
-                        detected.topLeftCorner &&
-                        detected.topRightCorner &&
-                        detected.bottomLeftCorner &&
-                        detected.bottomRightCorner
-                    ) {
-                        corners = detected;
+                    if (contour) {
+                        const detected = getCornerPoints(contour);
+                        if (
+                            detected.topLeftCorner &&
+                            detected.topRightCorner &&
+                            detected.bottomLeftCorner &&
+                            detected.bottomRightCorner
+                        ) {
+                            corners = detected;
+                        }
                     }
-                    contour.delete();
+                } catch (error) {
+                    // Detection failure must not freeze the spinner — fall back to manual corners.
+                    console.error('OpenCV detection failed:', error);
+                } finally {
+                    contour?.delete();
+                    mat?.delete();
                 }
-
-                mat.delete();
             }
 
             if (!corners) {
@@ -323,6 +372,7 @@ export default ($wire) => ({
             this.$nextTick(() => this.drawCorners());
         };
         img.onerror = () => {
+            this.isProcessing = false;
             this.closeEditor();
         };
         img.src = imageSrc;
