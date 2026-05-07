@@ -1,8 +1,11 @@
 <?php
 
+use FluxErp\Models\Category;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tenant;
 use Illuminate\Support\Facades\Cache;
 
@@ -75,8 +78,8 @@ it('getInheritableRelations returns the configured whitelist', function (): void
 
     expect($product->getInheritableRelations())
         ->toBeArray()
-        ->toContain('prices', 'categories', 'productProperties')
-        ->not->toContain('orderPositions');
+        ->toContain('prices', 'categories', 'productProperties', 'suppliers')
+        ->not->toContain('orderPositions', 'crossSellings', 'tags');
 });
 
 it('returns parent value for inheritable field when not overridden', function (): void {
@@ -334,4 +337,115 @@ it('non-variant returns own prices unchanged', function (): void {
     ]);
 
     expect($product->prices)->toHaveCount(1);
+});
+
+it('variant inherits parent categories not overridden', function (): void {
+    $a = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $b = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $c = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+
+    $parent = Product::factory()->create();
+    $parent->ownCategories()->attach([$a->getKey(), $b->getKey()]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variant->ownCategories()->attach([$c->getKey()]);
+
+    $ids = $variant->categories->pluck('id')->sort()->values()->all();
+    $expected = collect([$a->getKey(), $b->getKey(), $c->getKey()])->sort()->values()->all();
+
+    expect($ids)->toBe($expected);
+});
+
+it('variant inherits all parent categories when no own', function (): void {
+    $a = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $parent = Product::factory()->create();
+    $parent->ownCategories()->attach([$a->getKey()]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+
+    expect($variant->categories->pluck('id')->all())->toBe([$a->getKey()]);
+});
+
+it('non-variant returns own categories unchanged', function (): void {
+    $a = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
+    $product = Product::factory()->create();
+    $product->ownCategories()->attach([$a->getKey()]);
+
+    expect($product->categories->pluck('id')->all())->toBe([$a->getKey()]);
+});
+
+it('variant inherits parent productProperties not overridden', function (): void {
+    $propA = ProductProperty::factory()->create();
+    $propB = ProductProperty::factory()->create();
+    $propC = ProductProperty::factory()->create();
+
+    $parent = Product::factory()->create();
+    $parent->ownProductProperties()->attach([
+        $propA->getKey() => ['value' => 'red'],
+        $propB->getKey() => ['value' => '10kg'],
+    ]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variant->ownProductProperties()->attach([
+        $propC->getKey() => ['value' => 'fast'],
+    ]);
+
+    $ids = $variant->productProperties->pluck('id')->sort()->values()->all();
+    $expected = collect([$propA->getKey(), $propB->getKey(), $propC->getKey()])
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($ids)->toBe($expected);
+});
+
+it('variant inherits parent productProperties pivot value when not overridden', function (): void {
+    $propA = ProductProperty::factory()->create();
+    $propB = ProductProperty::factory()->create();
+
+    $parent = Product::factory()->create();
+    $parent->ownProductProperties()->attach([
+        $propA->getKey() => ['value' => 'red'],
+        $propB->getKey() => ['value' => '10kg'],
+    ]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variant->ownProductProperties()->attach([
+        $propA->getKey() => ['value' => 'blue'],
+    ]);
+
+    $effective = $variant->productProperties->keyBy('id');
+
+    expect($effective->get($propA->getKey())->pivot->value)->toBe('blue');
+    expect($effective->get($propB->getKey())->pivot->value)->toBe('10kg');
+});
+
+it('variant inherits parent suppliers not overridden', function (): void {
+    $a = Contact::factory()->create();
+    $b = Contact::factory()->create();
+    $c = Contact::factory()->create();
+
+    $parent = Product::factory()->create();
+    $parent->ownSuppliers()->attach([$a->getKey(), $b->getKey()]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+    $variant->ownSuppliers()->attach([$c->getKey()]);
+
+    $ids = $variant->suppliers->pluck('id')->sort()->values()->all();
+    $expected = collect([$a->getKey(), $b->getKey(), $c->getKey()])
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($ids)->toBe($expected);
+});
+
+it('variant inherits all parent suppliers when no own', function (): void {
+    $a = Contact::factory()->create();
+    $parent = Product::factory()->create();
+    $parent->ownSuppliers()->attach([$a->getKey()]);
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+
+    expect($variant->suppliers->pluck('id')->all())->toBe([$a->getKey()]);
 });

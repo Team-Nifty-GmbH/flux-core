@@ -143,6 +143,13 @@ trait InheritsFromParent
      * Resolve an inheritable HasMany/BelongsToMany relation, merging the variant's
      * own pivot/related rows with the parent's effective collection on the given key column.
      *
+     * Sharp edge: a paired `getXAttribute` accessor without a matching `setXAttribute`
+     * mutator means writes like `$model->x = [array]` fall through to setAttribute and
+     * land in the raw attributes bag — subsequent reads of `$model->x` then return the
+     * stored array instead of the resolved Collection. Today's Livewire write paths
+     * Arr::pull these values before save, so the bug isn't observable; if a future
+     * caller relies on round-trip read after assignment, add a setter.
+     *
      * @param  string  $ownRelationMethod  Name of the "own" relation method (e.g. ownPrices)
      * @param  string  $resolvedRelation  Name as it appears in $inheritableRelations (e.g. prices)
      * @param  string  $foreignKeyOnRelated  Column that uniquely identifies the row within the

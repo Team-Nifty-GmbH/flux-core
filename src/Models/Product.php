@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -87,8 +88,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         'categories',
         'productProperties',
         'suppliers',
-        'crossSellings',
-        'tags',
         'media',
     ];
 
@@ -182,6 +181,12 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->hasMany(OrderPosition::class);
     }
 
+    public function ownCategories(): MorphToMany
+    {
+        return $this->morphToMany(Category::class, 'categorizable', 'categorizable')
+            ->using(Pivots\Categorizable::class);
+    }
+
     public function ownPrices(): HasMany
     {
         return $this->hasMany(Price::class);
@@ -198,7 +203,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->using(ProductProductOption::class);
     }
 
-    public function productProperties(): BelongsToMany
+    public function ownProductProperties(): BelongsToMany
     {
         return $this->belongsToMany(
             ProductProperty::class,
@@ -206,7 +211,8 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'product_id',
             'product_property_id'
         )
-            ->using(ProductProductProperty::class);
+            ->using(ProductProductProperty::class)
+            ->withPivot('value');
     }
 
     public function stockPostings(): HasMany
@@ -214,7 +220,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->hasMany(StockPosting::class);
     }
 
-    public function suppliers(): BelongsToMany
+    public function ownSuppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier')
             ->using(ProductSupplier::class);
@@ -304,12 +310,39 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     }
 
     // Attributes
+    public function getCategoriesAttribute(): Collection
+    {
+        return $this->resolveInheritedCollection(
+            ownRelationMethod: 'ownCategories',
+            resolvedRelation: 'categories',
+            foreignKeyOnRelated: 'id'
+        );
+    }
+
     public function getPricesAttribute(): Collection
     {
         return $this->resolveInheritedCollection(
             ownRelationMethod: 'ownPrices',
             resolvedRelation: 'prices',
             foreignKeyOnRelated: 'price_list_id'
+        );
+    }
+
+    public function getProductPropertiesAttribute(): Collection
+    {
+        return $this->resolveInheritedCollection(
+            ownRelationMethod: 'ownProductProperties',
+            resolvedRelation: 'productProperties',
+            foreignKeyOnRelated: 'id'
+        );
+    }
+
+    public function getSuppliersAttribute(): Collection
+    {
+        return $this->resolveInheritedCollection(
+            ownRelationMethod: 'ownSuppliers',
+            resolvedRelation: 'suppliers',
+            foreignKeyOnRelated: 'id'
         );
     }
 

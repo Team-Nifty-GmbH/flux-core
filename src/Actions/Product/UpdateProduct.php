@@ -67,11 +67,11 @@ class UpdateProduct extends FluxAction
         }
 
         if (! is_null($productProperties)) {
-            $product->productProperties()->sync($productProperties);
+            $product->ownProductProperties()->sync($productProperties);
         }
 
         if (! is_null($suppliers)) {
-            $product->suppliers()->sync($suppliers);
+            $product->ownSuppliers()->sync($suppliers);
         }
 
         if ($tenants) {

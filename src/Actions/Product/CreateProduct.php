@@ -46,10 +46,10 @@ class CreateProduct extends FluxAction
         $product->save();
 
         $product->productOptions()->attach($productOptions);
-        $product->productProperties()->attach($productProperties);
+        $product->ownProductProperties()->attach($productProperties);
 
         if ($suppliers) {
-            $product->suppliers()->attach($suppliers);
+            $product->ownSuppliers()->attach($suppliers);
         }
 
         if ($tags) {
