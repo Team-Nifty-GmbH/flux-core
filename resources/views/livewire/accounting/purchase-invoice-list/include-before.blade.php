@@ -1,4 +1,16 @@
 <div>
+    <div
+        x-data
+        x-init="
+            if ($wire.autoOpenEditModal) {
+                $nextTick(() => {
+                    $tsui.open.modal('edit-purchase-invoice-modal');
+                    $wire.autoOpenEditModal = false;
+                });
+            }
+        "
+    ></div>
+
     <x-modal
         id="edit-purchase-invoice-modal"
         size="full"
