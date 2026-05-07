@@ -78,4 +78,22 @@ trait InheritsFromParent
 
         return parent::getAttribute($key);
     }
+
+    public function setAttribute($key, $value)
+    {
+        if (
+            $this->isInheritableField($key)
+            && $this->isVariant()
+            && $this->inheritanceEnabled()
+        ) {
+            $list = $this->overridden_fields ?? [];
+
+            if (! in_array($key, $list, strict: true)) {
+                $list[] = $key;
+                parent::setAttribute('overridden_fields', $list);
+            }
+        }
+
+        return parent::setAttribute($key, $value);
+    }
 }

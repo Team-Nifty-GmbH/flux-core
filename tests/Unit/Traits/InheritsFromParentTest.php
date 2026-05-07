@@ -132,3 +132,65 @@ it('falls back to own column when feature toggle is off', function (): void {
 
     expect($variant->name)->toBe('raw variant value');
 });
+
+it('setAttribute on inheritable field adds it to overridden_fields', function (): void {
+    $parent = Product::factory()->create(['name' => 'Parent Name']);
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $variant->name = 'New Name';
+    $variant->save();
+
+    expect($variant->fresh()->overridden_fields)->toBe(['name']);
+    expect($variant->fresh()->name)->toBe('New Name');
+});
+
+it('setAttribute is idempotent — does not duplicate field in overridden_fields', function (): void {
+    $parent = Product::factory()->create();
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+
+    $variant->name = 'Another Name';
+    $variant->save();
+
+    expect($variant->fresh()->overridden_fields)->toBe(['name']);
+});
+
+it('setAttribute on non-inheritable field does not touch overridden_fields', function (): void {
+    $parent = Product::factory()->create();
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $variant->product_number = 'NEW-NUM';
+    $variant->save();
+
+    expect($variant->fresh()->overridden_fields)->toBeNull();
+});
+
+it('setAttribute on non-variant does not touch overridden_fields', function (): void {
+    $product = Product::factory()->create(['parent_id' => null]);
+
+    $product->name = 'Updated';
+    $product->save();
+
+    expect($product->fresh()->overridden_fields)->toBeNull();
+});
+
+it('setting same value as parent does NOT auto-link — stays overridden', function (): void {
+    $parent = Product::factory()->create(['name' => 'Same']);
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $variant->name = 'Same';
+    $variant->save();
+
+    expect($variant->fresh()->overridden_fields)->toBe(['name']);
+});
