@@ -127,12 +127,10 @@ class CreateOrder extends FluxAction
             ->whereKey(data_get($this->data, 'payment_type_id'))
             ->first();
 
-        $contactAgentId = $contact->agent_id
+        $this->data['agent_id'] ??= $contact->agent_id
             && resolve_static(User::class, 'query')->whereKey($contact->agent_id)->exists()
                 ? $contact->agent_id
                 : null;
-
-        $this->data['agent_id'] ??= $contactAgentId;
         $this->data['approval_user_id'] ??= $contact->approval_user_id;
         $this->data['contact_bank_connection_id'] ??= $contact->contactBankConnections()->first()?->id;
         $this->data['payment_discount_target'] ??= $contact->discount_days
