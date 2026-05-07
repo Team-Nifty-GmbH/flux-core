@@ -38,12 +38,24 @@ class Tenant extends FluxModel implements HasMedia
         'media',
     ];
 
+    protected static function booted(): void
+    {
+        parent::booted();
+
+        static::creating(function (self $tenant): void {
+            if (! array_key_exists('product_variant_inheritance_enabled', $tenant->getAttributes())) {
+                $tenant->product_variant_inheritance_enabled = true;
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
             'opening_hours' => 'array',
             'is_default' => 'boolean',
+            'product_variant_inheritance_enabled' => 'boolean',
         ];
     }
 
