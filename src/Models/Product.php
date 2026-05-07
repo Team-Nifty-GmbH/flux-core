@@ -97,6 +97,14 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
                 $product->getSerialNumber('product_number');
             }
         });
+
+        static::created(function (Product $product): void {
+            if (! is_null($product->parent_id)) {
+                static::query()
+                    ->whereKey($product->parent_id)
+                    ->update(['was_parent' => true]);
+            }
+        });
     }
 
     // Public static methods
