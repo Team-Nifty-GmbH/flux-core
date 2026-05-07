@@ -88,7 +88,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         'categories',
         'productProperties',
         'suppliers',
-        'media',
     ];
 
     protected static function booted(): void

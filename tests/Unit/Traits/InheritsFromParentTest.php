@@ -7,6 +7,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tenant;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 
 beforeEach(function (): void {
@@ -79,7 +80,7 @@ it('getInheritableRelations returns the configured whitelist', function (): void
     expect($product->getInheritableRelations())
         ->toBeArray()
         ->toContain('prices', 'categories', 'productProperties', 'suppliers')
-        ->not->toContain('orderPositions', 'crossSellings', 'tags');
+        ->not->toContain('orderPositions', 'crossSellings', 'tags', 'media');
 });
 
 it('returns parent value for inheritable field when not overridden', function (): void {
@@ -448,4 +449,15 @@ it('variant inherits all parent suppliers when no own', function (): void {
     $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
 
     expect($variant->suppliers->pluck('id')->all())->toBe([$a->getKey()]);
+});
+
+it('media is intentionally NOT inherited (Spatie escape hatch)', function (): void {
+    $parent = Product::factory()->create();
+    $parent->addMedia(UploadedFile::fake()->image('p.jpg'))
+        ->toMediaCollection('images');
+
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+
+    expect($variant->media)->toHaveCount(0);
+    expect($variant->getInheritableRelations())->not->toContain('media');
 });
