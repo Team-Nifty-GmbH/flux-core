@@ -101,6 +101,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'bundle_type_enum' => BundleTypeEnum::class,
             'time_unit_enum' => TimeUnitEnum::class,
             'search_aliases' => 'array',
+            'overridden_fields' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
             'is_bundle' => 'boolean',
@@ -109,6 +110,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
+            'was_parent' => 'boolean',
         ];
     }
 
