@@ -58,3 +58,21 @@ it('overrides returns true when field is in overridden_fields', function (): voi
     expect($variant->overrides('name'))->toBeTrue();
     expect($variant->overrides('description'))->toBeFalse();
 });
+
+it('getInheritableFields returns the configured whitelist', function (): void {
+    $product = Product::factory()->create();
+
+    expect($product->getInheritableFields())
+        ->toBeArray()
+        ->toContain('name', 'unit_id', 'vat_rate_id')
+        ->not->toContain('parent_id', 'product_number', 'ean');
+});
+
+it('getInheritableRelations returns the configured whitelist', function (): void {
+    $product = Product::factory()->create();
+
+    expect($product->getInheritableRelations())
+        ->toBeArray()
+        ->toContain('prices', 'categories', 'productProperties')
+        ->not->toContain('orderPositions');
+});

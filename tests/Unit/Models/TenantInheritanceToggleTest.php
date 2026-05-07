@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Models\Tenant;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -34,4 +35,22 @@ it('persists product_variant_inheritance_enabled when set to true', function ():
 it('respects explicit product_variant_inheritance_enabled = false on creation', function (): void {
     $tenant = Tenant::factory()->create(['product_variant_inheritance_enabled' => false]);
     expect($tenant->fresh()->product_variant_inheritance_enabled)->toBeFalse();
+});
+
+it('evicts default-tenant cache when product_variant_inheritance_enabled is toggled', function (): void {
+    // Start from a known-false baseline so we can observe the toggle taking effect.
+    $tenant = Tenant::default();
+    $tenant->update(['product_variant_inheritance_enabled' => false]);
+    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+
+    expect(Tenant::default()->product_variant_inheritance_enabled)->toBeFalse();
+
+    // Memoize the default tenant via a read.
+    Tenant::default();
+
+    // Toggle the flag.
+    $tenant->update(['product_variant_inheritance_enabled' => true]);
+
+    // Tenant::default() should now reflect the change because the saving hook evicted the memo.
+    expect(Tenant::default()->product_variant_inheritance_enabled)->toBeTrue();
 });

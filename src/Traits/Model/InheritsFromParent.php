@@ -5,10 +5,17 @@ namespace FluxErp\Traits\Model;
 use FluxErp\Models\Tenant;
 
 /**
- * Provides whitelist-driven inheritance helpers for child models that resolve
- * fields and relations from a parent record.
+ * Adds parent → child field/relation inheritance to a model that also uses
+ * HasParentChildRelations (provides getParentKeyAttribute()).
  *
- * Consuming classes must declare:
+ * The consuming class must declare:
+ *   protected array $inheritableFields = [...];     // column names
+ *   protected array $inheritableRelations = [...];  // relation method names
+ *
+ * Inheritance is gated by the install's default tenant flag
+ * `product_variant_inheritance_enabled`. The check uses Tenant::default(),
+ * meaning the toggle applies install-wide rather than per-tenant-of-the-record.
+ * This matches the spec contract.
  *
  * @property-read array<int, string> $inheritableFields
  * @property-read array<int, string> $inheritableRelations
