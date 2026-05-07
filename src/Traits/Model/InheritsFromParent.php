@@ -60,4 +60,22 @@ trait InheritsFromParent
 
         return in_array($field, $list, strict: true);
     }
+
+    public function getAttribute($key)
+    {
+        if (
+            $this->isInheritableField($key)
+            && $this->isVariant()
+            && ! $this->overrides($key)
+            && $this->inheritanceEnabled()
+        ) {
+            $parent = $this->relationLoaded('parent') ? $this->parent : $this->parent()->first();
+
+            if ($parent) {
+                return $parent->getAttribute($key);
+            }
+        }
+
+        return parent::getAttribute($key);
+    }
 }
