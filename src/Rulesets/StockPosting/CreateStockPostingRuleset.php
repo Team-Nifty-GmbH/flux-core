@@ -9,6 +9,7 @@ use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
+use FluxErp\Rules\ProductIsOrderable;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateStockPostingRuleset extends FluxRuleset
@@ -37,6 +38,7 @@ class CreateStockPostingRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Product::class]),
+                app(ProductIsOrderable::class),
             ],
             'parent_id' => [
                 'nullable',

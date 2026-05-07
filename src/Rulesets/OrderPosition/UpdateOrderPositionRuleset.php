@@ -16,6 +16,7 @@ use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
+use FluxErp\Rules\ProductIsOrderable;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
@@ -77,6 +78,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Product::class]),
+                app(ProductIsOrderable::class),
             ],
             'supplier_contact_id' => [
                 'integer',
