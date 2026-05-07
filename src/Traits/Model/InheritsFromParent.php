@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Tenant;
+use InvalidArgumentException;
 
 /**
  * Adds parent → child field/relation inheritance to a model that also uses
@@ -95,5 +96,24 @@ trait InheritsFromParent
         }
 
         return parent::setAttribute($key, $value);
+    }
+
+    public function resetField(string $field): static
+    {
+        if (! $this->isInheritableField($field)) {
+            throw new InvalidArgumentException(
+                sprintf('Field [%s] is not inheritable on %s.', $field, static::class)
+            );
+        }
+
+        $list = $this->overridden_fields ?? [];
+        $filtered = array_values(array_filter(
+            $list,
+            fn (string $f): bool => $f !== $field
+        ));
+
+        parent::setAttribute('overridden_fields', $filtered ?: null);
+
+        return $this;
     }
 }

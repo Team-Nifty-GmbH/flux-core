@@ -194,3 +194,51 @@ it('setting same value as parent does NOT auto-link — stays overridden', funct
 
     expect($variant->fresh()->overridden_fields)->toBe(['name']);
 });
+
+it('resetField removes a field from overridden_fields', function (): void {
+    $parent = Product::factory()->create(['name' => 'Parent Name']);
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name', 'description'],
+        'name' => 'override',
+    ]);
+
+    $variant->resetField('name');
+    $variant->save();
+
+    expect($variant->fresh()->overridden_fields)->toBe(['description']);
+    expect($variant->fresh()->name)->toBe('Parent Name');
+});
+
+it('resetField on a field that is not overridden is a no-op', function (): void {
+    $parent = Product::factory()->create();
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['description'],
+    ]);
+
+    $variant->resetField('name');
+    $variant->save();
+
+    expect($variant->fresh()->overridden_fields)->toBe(['description']);
+});
+
+it('resetField sets overridden_fields to null when last entry is removed', function (): void {
+    $parent = Product::factory()->create();
+    $variant = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+
+    $variant->resetField('name');
+    $variant->save();
+
+    expect($variant->fresh()->overridden_fields)->toBeNull();
+});
+
+it('resetField on non-inheritable field throws InvalidArgumentException', function (): void {
+    $parent = Product::factory()->create();
+    $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
+
+    $variant->resetField('product_number');
+})->throws(InvalidArgumentException::class, 'product_number');
