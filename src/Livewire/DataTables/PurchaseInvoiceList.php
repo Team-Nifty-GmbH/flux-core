@@ -94,9 +94,6 @@ class PurchaseInvoiceList extends BaseDataTable
             return;
         }
 
-        // $this->js() / $this->dispatch() from mount don't reliably reach the
-        // client across wire:navigate, so we expose a flag that Alpine reads
-        // on init to open the modal then.
         $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
         $this->autoOpenEditModal = true;
     }
