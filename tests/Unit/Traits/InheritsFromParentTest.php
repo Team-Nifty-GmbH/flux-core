@@ -242,3 +242,38 @@ it('resetField on non-inheritable field throws InvalidArgumentException', functi
 
     $variant->resetField('product_number');
 })->throws(InvalidArgumentException::class, 'product_number');
+
+it('resetFieldOnAllVariants clears the field across every variant', function (): void {
+    $parent = Product::factory()->create(['name' => 'Parent']);
+    $variantA = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name', 'description'],
+    ]);
+    $variantB = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+    $variantC = Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $touched = $parent->resetFieldOnAllVariants('name');
+
+    expect($touched)->toBe(2);
+    expect($variantA->fresh()->overridden_fields)->toBe(['description']);
+    expect($variantB->fresh()->overridden_fields)->toBeNull();
+    expect($variantC->fresh()->overridden_fields)->toBeNull();
+});
+
+it('resetFieldOnAllVariants throws on non-inheritable field', function (): void {
+    $parent = Product::factory()->create();
+
+    $parent->resetFieldOnAllVariants('product_number');
+})->throws(InvalidArgumentException::class, 'product_number');
+
+it('resetFieldOnAllVariants returns 0 when no variants exist', function (): void {
+    $parent = Product::factory()->create();
+
+    expect($parent->resetFieldOnAllVariants('name'))->toBe(0);
+});

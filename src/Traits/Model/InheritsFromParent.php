@@ -116,4 +116,25 @@ trait InheritsFromParent
 
         return $this;
     }
+
+    public function resetFieldOnAllVariants(string $field): int
+    {
+        if (! $this->isInheritableField($field)) {
+            throw new InvalidArgumentException(
+                sprintf('Field [%s] is not inheritable on %s.', $field, static::class)
+            );
+        }
+
+        $touched = 0;
+
+        $this->children()->each(function (self $variant) use ($field, &$touched): void {
+            if ($variant->overrides($field)) {
+                $variant->resetField($field);
+                $variant->save();
+                $touched++;
+            }
+        });
+
+        return $touched;
+    }
 }
