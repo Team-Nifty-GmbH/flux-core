@@ -3,7 +3,12 @@
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tenant;
+use FluxErp\Models\VatRate;
+use Illuminate\Support\Facades\Cache;
 
 test('create product with defaults', function (): void {
     $product = CreateProduct::make([
@@ -57,4 +62,50 @@ test('delete product with children fails', function (): void {
     expect(fn () => DeleteProduct::make(['id' => $parent->getKey()])
         ->validate()->execute()
     )->toThrow(Illuminate\Validation\ValidationException::class);
+});
+
+it('does not copy parent prices into variant when inheritance is enabled', function (): void {
+    Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
+    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+
+    $listA = PriceList::factory()->create();
+    $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
+    $parent->tenants()->attach(Tenant::default()->getKey());
+    Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 100,
+    ]);
+
+    $variant = CreateProduct::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Variant',
+        'product_number' => 'V-INHERIT',
+        'vat_rate_id' => VatRate::default()?->getKey(),
+    ])->validate()->execute();
+
+    expect($variant->ownPrices()->count())->toBe(0);
+    expect($variant->prices->where('price_list_id', $listA->getKey())->first()->price)->toEqual(100);
+});
+
+it('still copies parent prices into variant when inheritance is disabled', function (): void {
+    Tenant::default()->update(['product_variant_inheritance_enabled' => false]);
+    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+
+    $listA = PriceList::factory()->create();
+    $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
+    $parent->tenants()->attach(Tenant::default()->getKey());
+    Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => 100,
+    ]);
+
+    $variant = CreateProduct::make([
+        'parent_id' => $parent->getKey(),
+        'name' => 'Variant',
+        'product_number' => 'V-LEGACY',
+    ])->validate()->execute();
+
+    expect($variant->ownPrices()->count())->toBe(1);
 });
