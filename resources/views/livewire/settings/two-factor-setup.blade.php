@@ -125,7 +125,7 @@
     @show
 
     @section('passkey-management')
-        <div x-show="browserSupportsWebAuthn" x-cloak>
+        <div x-show="browserSupportsWebAuthn()" x-cloak>
             <x-card>
                 <div class="space-y-4">
                     <div
@@ -142,7 +142,12 @@
                             </p>
                         </div>
                     </div>
-                    <livewire:passkeys />
+                    <div x-show="!window.nuxbeAppBridge?.isNative?.()" x-cloak>
+                        <livewire:passkeys />
+                    </div>
+                    <div x-show="window.nuxbeAppBridge?.isNative?.()" x-cloak>
+                        <x-flux::passkey-bridge-register />
+                    </div>
                 </div>
             </x-card>
         </div>

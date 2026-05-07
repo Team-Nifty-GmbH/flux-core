@@ -154,7 +154,7 @@
                             @if(Route::hasMacro('passkeys'))
                                 <div
                                     class="mt-6"
-                                    x-show="browserSupportsWebAuthn"
+                                    x-show="browserSupportsWebAuthn()"
                                     x-cloak
                                 >
                                     <div class="relative">
