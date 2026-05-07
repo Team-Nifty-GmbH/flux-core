@@ -10,6 +10,7 @@ use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ProductHierarchyDepth;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\ProductCrossSelling\CreateProductCrossSellingRuleset;
 use Illuminate\Support\Arr;
@@ -68,6 +69,7 @@ class UpdateProductRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Product::class]),
+                app(ProductHierarchyDepth::class),
             ],
             'vat_rate_id' => [
                 'sometimes',

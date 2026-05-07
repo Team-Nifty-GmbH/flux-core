@@ -160,6 +160,12 @@ class UpdateProduct extends FluxAction
                     'parent_id' => ['Cycle detected'],
                 ])->errorBag('updateProduct');
             }
+
+            if ($product?->children()->exists()) {
+                throw ValidationException::withMessages([
+                    'parent_id' => [__('A product with existing variants cannot itself become a variant.')],
+                ])->errorBag('updateProduct');
+            }
         }
     }
 }
