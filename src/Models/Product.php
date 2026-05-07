@@ -25,6 +25,7 @@ use FluxErp\Traits\Model\HasTags;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InheritsFromParent;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
@@ -43,7 +44,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 {
     use Categorizable, Commentable, Filterable, HasAttributeTranslations, HasFrontendAttributes, HasPackageFactory,
         HasParentChildRelations, HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, SoftDeletes;
+        InheritsFromParent, InteractsWithMedia, LogsActivity, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -51,6 +52,45 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     public static string $iconName = 'square-3-stack-3d';
 
     protected ?string $detailRouteName = 'products.id';
+
+    protected array $inheritableFields = [
+        'name',
+        'description',
+        'unit_id',
+        'vat_rate_id',
+        'weight_gram',
+        'dimension_length_mm',
+        'dimension_width_mm',
+        'dimension_height_mm',
+        'min_delivery_time',
+        'max_delivery_time',
+        'restock_time',
+        'customs_tariff_number',
+        'seo_keywords',
+        'posting_account',
+        'time_unit_enum',
+        'is_highlight',
+        'is_nos',
+        'is_service',
+        'is_shipping_free',
+        'has_serial_numbers',
+        'is_active_export_to_web_shop',
+        'selling_unit',
+        'basic_unit',
+        'purchase_unit_id',
+        'reference_unit_id',
+        'cover_media_id',
+    ];
+
+    protected array $inheritableRelations = [
+        'prices',
+        'categories',
+        'productProperties',
+        'suppliers',
+        'crossSellings',
+        'tags',
+        'media',
+    ];
 
     protected static function booted(): void
     {
