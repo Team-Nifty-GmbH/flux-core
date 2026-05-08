@@ -562,6 +562,27 @@ class Product extends Component
     }
 
     #[Computed]
+    public function inheritanceState(): ?array
+    {
+        $product = $this->product->getProductModel();
+        if (! $product?->isVariant()) {
+            return null;
+        }
+
+        $overriddenFields = count($product->overridden_fields ?? []);
+        $overriddenPrices = $product->ownPrices()->count();
+
+        if ($overriddenFields === 0 && $overriddenPrices === 0) {
+            return null;
+        }
+
+        return [
+            'fields' => $overriddenFields,
+            'prices' => $overriddenPrices,
+        ];
+    }
+
+    #[Computed]
     public function inheritanceCounters(): array
     {
         $product = $this->product->getProductModel();

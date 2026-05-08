@@ -97,6 +97,11 @@
             @stack('product-detail-header-actions')
         </div>
     </div>
+    @if($state = $this->inheritanceState)
+        <x-badge color="amber" sm>
+            {{ __(':fields Felder überschrieben, :prices Preise abweichend', $state) }}
+        </x-badge>
+    @endif
     <x-flux::product.variant-bulk-reset
         :counters="$this->inheritanceCounters"
     />

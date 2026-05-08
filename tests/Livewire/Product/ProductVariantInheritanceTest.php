@@ -244,3 +244,51 @@ test('variant bulk-reset panel does not render on non-parent products', function
     Livewire::test(Product::class, ['id' => $product->getKey()])
         ->assertDontSeeHtml('Auswirkung auf Varianten');
 });
+
+test('variant header shows consistency badge when there are field overrides', function (): void {
+    $parent = ProductModel::factory()->create();
+    $variant = ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name', 'description'],
+    ]);
+
+    Livewire::test(Product::class, ['id' => $variant->getKey()])
+        ->assertSeeHtml('2 Felder überschrieben');
+});
+
+test('variant header shows price-override count in consistency badge', function (): void {
+    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $parent = ProductModel::factory()->create();
+    $variant = ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+    FluxErp\Models\Price::factory()->create([
+        'product_id' => $variant->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => '15.0000',
+    ]);
+
+    Livewire::test(Product::class, ['id' => $variant->getKey()])
+        ->assertSeeHtml('1 Preise abweichend');
+});
+
+test('inheritanceState returns null on non-variant products', function (): void {
+    $product = ProductModel::factory()->create(['parent_id' => null]);
+
+    $component = Livewire::test(Product::class, ['id' => $product->getKey()]);
+
+    expect($component->instance()->inheritanceState)->toBeNull();
+});
+
+test('inheritanceState returns null on variants with no overrides', function (): void {
+    $parent = ProductModel::factory()->create();
+    $variant = ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $component = Livewire::test(Product::class, ['id' => $variant->getKey()]);
+
+    expect($component->instance()->inheritanceState)->toBeNull();
+});
