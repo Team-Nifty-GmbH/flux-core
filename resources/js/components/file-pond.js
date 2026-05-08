@@ -15,6 +15,85 @@ function loadLocale(lang) {
     return bundledLocales[lang] || bundledLocales['en'];
 }
 
+// Files larger than this use the chunked upload endpoint to bypass
+// PHP's post_max_size / Octane FrankenPHP request body limits.
+const CHUNK_THRESHOLD = 4 * 1024 * 1024;
+const CHUNK_SIZE = 4 * 1024 * 1024;
+
+function csrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
+async function readJsonSafe(response) {
+    try {
+        return await response.json();
+    } catch (e) {
+        return null;
+    }
+}
+
+async function chunkedUpload(file, progress) {
+    const initResponse = await fetch('/file-pond/chunk', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': csrfToken(),
+            'Upload-Length': String(file.size),
+            'Upload-Name': btoa(
+                String.fromCharCode(...new TextEncoder().encode(file.name)),
+            ),
+        },
+    });
+
+    const initBody = await readJsonSafe(initResponse);
+
+    if (!initResponse.ok) {
+        throw new Error(
+            initBody?.statusMessage || 'Chunked upload init failed',
+        );
+    }
+
+    const transferId = initBody?.data?.transfer_id;
+    if (!transferId) {
+        throw new Error('Chunked upload init returned no transfer id');
+    }
+
+    const patchUrl = '/file-pond/chunk?patch=' + encodeURIComponent(transferId);
+
+    let offset = 0;
+    while (offset < file.size) {
+        const end = Math.min(offset + CHUNK_SIZE, file.size);
+        const chunk = file.slice(offset, end);
+
+        const patchResponse = await fetch(patchUrl, {
+            method: 'PATCH',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken(),
+                'Content-Type': 'application/offset+octet-stream',
+                'Upload-Offset': String(offset),
+                'Upload-Length': String(file.size),
+                'Upload-Name': btoa(
+                    String.fromCharCode(...new TextEncoder().encode(file.name)),
+                ),
+            },
+            body: chunk,
+        });
+
+        const patchBody = await readJsonSafe(patchResponse);
+
+        if (!patchResponse.ok) {
+            throw new Error(patchBody?.statusMessage || 'Chunk upload failed');
+        }
+
+        offset = patchBody?.data?.offset ?? end;
+        progress?.(true, offset, file.size);
+    }
+
+    return transferId;
+}
+
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
 
 export default function (
@@ -134,6 +213,32 @@ export default function (
                         transfer,
                         options,
                     ) => {
+                        if (file.size > CHUNK_THRESHOLD) {
+                            try {
+                                const signedPath = await chunkedUpload(
+                                    file,
+                                    progress,
+                                );
+
+                                const tempFileId =
+                                    await $wire.acceptChunkedUpload(
+                                        signedPath,
+                                        this.selectedCollection,
+                                    );
+
+                                if (tempFileId) {
+                                    this.tempFilesId.push(tempFileId);
+                                    load(tempFileId);
+                                } else {
+                                    error('Chunked upload rejected');
+                                }
+                            } catch (e) {
+                                error(e?.message || 'Chunked upload failed');
+                            }
+
+                            return;
+                        }
+
                         const onSuccess = async (tempFileId) => {
                             if (
                                 await $wire.validateOnDemand(
