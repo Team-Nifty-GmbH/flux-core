@@ -21,7 +21,7 @@ class PromoteParentToStandalone extends FluxAction
     public function performAction(): Product
     {
         $product = resolve_static(Product::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->firstOrFail();
 
         $product->was_parent = false;

@@ -21,10 +21,10 @@ class ResetProductRelation extends FluxAction
     public function performAction(): Product
     {
         $variant = resolve_static(Product::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $variant->resetRelation($this->data['relation'], $this->data['key'] ?? null);
+        $variant->resetRelation($this->getData('relation'), $this->getData('key'));
 
         return $variant->refresh();
     }

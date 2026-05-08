@@ -1,6 +1,6 @@
 <?php
 
-use FluxErp\Jobs\MigrateProductVariantInheritance;
+use FluxErp\Jobs\MigrateProductVariantInheritanceJob;
 use FluxErp\Models\Category;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
@@ -37,7 +37,7 @@ it('marks variant fields as overridden when they differ from parent', function (
         'overridden_fields' => null,
     ]));
 
-    (new MigrateProductVariantInheritance($parent->getKey()))->handle();
+    (new MigrateProductVariantInheritanceJob($parent->getKey()))->handle();
 
     expect($variant->fresh()->overridden_fields)->toBe(['description']);
 });
@@ -49,7 +49,7 @@ it('clears overridden_fields when variant equals parent (idempotent)', function 
         'overridden_fields' => ['name'],
     ]));
 
-    (new MigrateProductVariantInheritance($parent->getKey()))->handle();
+    (new MigrateProductVariantInheritanceJob($parent->getKey()))->handle();
 
     expect($variant->fresh()->overridden_fields)->toBeNull();
 });
@@ -66,7 +66,7 @@ it('processes all parents when no parent_id given', function (): void {
         'name' => 'B-other',
     ]));
 
-    (new MigrateProductVariantInheritance(null))->handle();
+    (new MigrateProductVariantInheritanceJob(null))->handle();
 
     expect($variantA->fresh()->overridden_fields)->toBeNull();
     expect($variantB->fresh()->overridden_fields)->toBe(['name']);
@@ -88,7 +88,7 @@ it('removes redundant variant prices that match parent', function (): void {
         'price' => 10,
     ]);
 
-    (new MigrateProductVariantInheritance($parent->getKey()))->handle();
+    (new MigrateProductVariantInheritanceJob($parent->getKey()))->handle();
 
     expect($variant->ownPrices()->count())->toBe(0);
 });
@@ -109,7 +109,7 @@ it('keeps variant prices that differ from parent', function (): void {
         'price' => 15,
     ]);
 
-    (new MigrateProductVariantInheritance($parent->getKey()))->handle();
+    (new MigrateProductVariantInheritanceJob($parent->getKey()))->handle();
 
     expect($variant->ownPrices()->count())->toBe(1);
     expect($variant->ownPrices->first()->price)->toEqual(15);
@@ -123,7 +123,7 @@ it('removes redundant variant categories that match parent', function (): void {
     $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
     $variant->ownCategories()->attach([$cat->getKey()]);
 
-    (new MigrateProductVariantInheritance($parent->getKey()))->handle();
+    (new MigrateProductVariantInheritanceJob($parent->getKey()))->handle();
 
     expect($variant->ownCategories()->count())->toBe(0);
 });

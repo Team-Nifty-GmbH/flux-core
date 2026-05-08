@@ -21,9 +21,9 @@ class ResetFieldOnAllVariants extends FluxAction
     public function performAction(): int
     {
         $parent = resolve_static(Product::class, 'query')
-            ->whereKey($this->data['parent_id'])
+            ->whereKey($this->getData('parent_id'))
             ->first();
 
-        return $parent->resetFieldOnAllVariants($this->data['field']);
+        return $parent->resetFieldOnAllVariants($this->getData('field'));
     }
 }

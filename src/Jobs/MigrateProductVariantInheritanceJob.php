@@ -10,7 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class MigrateProductVariantInheritance implements ShouldQueue
+class MigrateProductVariantInheritanceJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -25,7 +25,16 @@ class MigrateProductVariantInheritance implements ShouldQueue
     {
         $query = resolve_static(Product::class, 'query')
             ->whereNotNull('parent_id')
-            ->with('parent');
+            ->with([
+                'parent.ownPrices',
+                'parent.ownCategories',
+                'parent.ownProductProperties',
+                'parent.ownSuppliers',
+                'ownPrices',
+                'ownCategories',
+                'ownProductProperties',
+                'ownSuppliers',
+            ]);
 
         if ($this->parentId !== null) {
             $query->where('parent_id', $this->parentId);
@@ -41,7 +50,7 @@ class MigrateProductVariantInheritance implements ShouldQueue
             }
         });
 
-        Log::info('MigrateProductVariantInheritance processed variants', [
+        Log::info('MigrateProductVariantInheritanceJob processed variants', [
             'parent_id' => $this->parentId,
             'processed' => $processed,
         ]);
@@ -64,11 +73,7 @@ class MigrateProductVariantInheritance implements ShouldQueue
             }
         }
 
-        $variant->setRawAttributes(array_merge(
-            $variant->getAttributes(),
-            ['overridden_fields' => $overridden ? json_encode($overridden) : null]
-        ), sync: false);
-
+        $variant->overridden_fields = $overridden ?: null;
         $variant->saveQuietly();
     }
 
@@ -91,7 +96,7 @@ class MigrateProductVariantInheritance implements ShouldQueue
 
         foreach ($variant->ownPrices as $variantPrice) {
             $parentPrice = $parentPriceIndex->get($variantPrice->price_list_id);
-            if ($parentPrice && (string) $parentPrice->price === (string) $variantPrice->price) {
+            if ($parentPrice && bccomp((string) $parentPrice->price, (string) $variantPrice->price, 4) === 0) {
                 $variantPrice->delete();
             }
         }

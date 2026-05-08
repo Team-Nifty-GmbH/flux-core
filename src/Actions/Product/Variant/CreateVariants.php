@@ -5,7 +5,6 @@ namespace FluxErp\Actions\Product\Variant;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Models\Product;
-use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\Product\Variant\CreateVariantsRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -44,8 +43,7 @@ class CreateVariants extends FluxAction
         $product['parent_id'] = $parentProduct->id;
         $product['tenants'] = $parentProduct->tenants->pluck('id')->toArray();
 
-        $inheritanceEnabled = (bool) (resolve_static(Tenant::class, 'default')
-            ?->product_variant_inheritance_enabled);
+        $inheritanceEnabled = app(Product::class)->inheritanceEnabled();
 
         if ($inheritanceEnabled) {
             unset($product['categories'], $product['tags'], $product['prices']);

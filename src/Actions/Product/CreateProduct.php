@@ -99,8 +99,7 @@ class CreateProduct extends FluxAction
             $this->data['bundle_type_enum'] = null;
         }
 
-        $inheritanceEnabled = (bool) (resolve_static(Tenant::class, 'default')
-            ?->product_variant_inheritance_enabled);
+        $inheritanceEnabled = app(Product::class)->inheritanceEnabled();
 
         if (
             ! $inheritanceEnabled
