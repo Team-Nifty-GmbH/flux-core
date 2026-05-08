@@ -7,9 +7,7 @@
         <div
             class="flex shrink-0 items-center justify-between border-b border-gray-200 p-3 dark:border-gray-700"
         >
-            <h3
-                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ __('Scan') }}
             </h3>
             <x-button
@@ -23,9 +21,7 @@
 
         <template x-if="isProcessing">
             <div class="flex flex-1 items-center justify-center">
-                <div
-                    class="text-center text-gray-700 dark:text-gray-300"
-                >
+                <div class="text-center text-gray-700 dark:text-gray-300">
                     <x-icon
                         name="arrow-path"
                         class="mx-auto mb-4 h-8 w-8 animate-spin"
