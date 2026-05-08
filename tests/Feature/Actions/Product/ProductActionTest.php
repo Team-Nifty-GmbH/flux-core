@@ -8,7 +8,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
-use Illuminate\Support\Facades\Cache;
 
 test('create product with defaults', function (): void {
     $product = CreateProduct::make([
@@ -66,7 +65,7 @@ test('delete product with children fails', function (): void {
 
 it('does not copy parent prices into variant when inheritance is enabled', function (): void {
     Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    Tenant::clearDefaultCache();
 
     $listA = PriceList::factory()->create();
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
@@ -90,7 +89,7 @@ it('does not copy parent prices into variant when inheritance is enabled', funct
 
 it('still copies parent prices into variant when inheritance is disabled', function (): void {
     Tenant::default()->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    Tenant::clearDefaultCache();
 
     $listA = PriceList::factory()->create();
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);

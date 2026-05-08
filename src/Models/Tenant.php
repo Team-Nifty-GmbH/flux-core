@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Cache;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Engines\Engine;
 use Spatie\MediaLibrary\HasMedia;
@@ -51,7 +50,7 @@ class Tenant extends FluxModel implements HasMedia
 
         static::saving(function (self $tenant): void {
             if ($tenant->isDirty('product_variant_inheritance_enabled')) {
-                Cache::memo()->forget('default_' . morph_alias(self::class));
+                self::clearDefaultCache();
             }
         });
     }

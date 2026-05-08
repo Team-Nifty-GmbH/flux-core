@@ -3,6 +3,11 @@
 namespace FluxErp\Livewire\Product;
 
 use Exception;
+use FluxErp\Actions\Product\PromoteParentToStandalone;
+use FluxErp\Actions\Product\ResetFieldOnAllVariants;
+use FluxErp\Actions\Product\ResetProductField;
+use FluxErp\Actions\Product\ResetProductRelation;
+use FluxErp\Actions\Product\ResetRelationOnAllVariants;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Facades\ProductType;
@@ -250,6 +255,11 @@ class Product extends Component
         $product = resolve_static(ProductModel::class, 'query')
             ->whereKey($this->product->id)
             ->first();
+
+        $variantOwnPriceListIds = $product?->isVariant()
+            ? $product->ownPrices()->pluck('price_list_id')->all()
+            : [];
+
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
         $priceLists = resolve_static(PriceList::class, 'query')
@@ -270,7 +280,7 @@ class Product extends Component
                 'is_default',
                 'is_purchase',
             ])
-            ->map(function (PriceList $priceList) use ($priceListHelper) {
+            ->map(function (PriceList $priceList) use ($priceListHelper, $variantOwnPriceListIds) {
                 $price = $priceListHelper
                     ->setPriceList($priceList)
                     ->price();
@@ -288,6 +298,7 @@ class Product extends Component
                     'is_default' => $priceList->is_default,
                     'is_purchase' => $priceList->is_purchase,
                     'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price?->parent) || is_null($price),
+                    'variant_owns_price' => in_array($priceList->id, $variantOwnPriceListIds, strict: true),
                 ];
             });
 
@@ -392,6 +403,86 @@ class Product extends Component
         $this->recalculateDisplayedProductProperties();
     }
 
+    public function resetField(string $field): void
+    {
+        try {
+            ResetProductField::make([
+                'id' => $this->product->id,
+                'field' => $field,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+
+            return;
+        }
+
+        $this->resetProduct();
+    }
+
+    #[Renderless]
+    public function resetRelation(string $relation, mixed $key = null): void
+    {
+        try {
+            ResetProductRelation::make([
+                'id' => $this->product->id,
+                'relation' => $relation,
+                'key' => $key,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+        }
+    }
+
+    #[Renderless]
+    public function resetFieldOnAllVariants(string $field): int
+    {
+        try {
+            return ResetFieldOnAllVariants::make([
+                'parent_id' => $this->product->id,
+                'field' => $field,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+
+            return 0;
+        }
+    }
+
+    #[Renderless]
+    public function resetRelationOnAllVariants(string $relation, mixed $key = null): int
+    {
+        try {
+            return ResetRelationOnAllVariants::make([
+                'parent_id' => $this->product->id,
+                'relation' => $relation,
+                'key' => $key,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+
+            return 0;
+        }
+    }
+
+    #[Renderless]
+    public function promoteToStandalone(): void
+    {
+        try {
+            PromoteParentToStandalone::make([
+                'id' => $this->product->id,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+        }
+    }
+
+    public function deactivate(): bool
+    {
+        $this->product->is_active = false;
+
+        return $this->save();
+    }
+
     public function save(): bool
     {
         if ($this->priceLists !== null) {
@@ -475,6 +566,74 @@ class Product extends Component
     public function vatRates(): array
     {
         return app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
+    }
+
+    #[Computed]
+    public function inheritanceState(): ?array
+    {
+        $product = $this->product->getProductModel();
+        if (! $product?->isVariant()) {
+            return null;
+        }
+
+        $overriddenFields = count($product->overridden_fields ?? []);
+        $overriddenPrices = $product->ownPrices()->count();
+
+        if ($overriddenFields === 0 && $overriddenPrices === 0) {
+            return null;
+        }
+
+        return [
+            'fields' => $overriddenFields,
+            'prices' => $overriddenPrices,
+        ];
+    }
+
+    #[Computed]
+    public function inheritanceCounters(): array
+    {
+        $product = $this->product->getProductModel();
+        if (! $product) {
+            return [];
+        }
+
+        $hasChildren = $product->children()->exists();
+        if (! $product->was_parent && ! $hasChildren) {
+            return [];
+        }
+
+        $children = $product->children()->get(['id', 'overridden_fields']);
+        $totalVariants = $children->count();
+
+        if ($totalVariants === 0) {
+            return [];
+        }
+
+        $counters = [];
+        foreach ($product->getInheritableFields() as $field) {
+            $overriding = $children->filter(
+                fn ($v) => in_array($field, $v->overridden_fields ?? [], strict: true)
+            )->count();
+
+            $counters[$field] = [
+                'inheriting' => $totalVariants - $overriding,
+                'total' => $totalVariants,
+            ];
+        }
+
+        return $counters;
+    }
+
+    #[Computed]
+    public function isOrphanedParent(): bool
+    {
+        $product = $this->product->getProductModel();
+
+        if (! $product?->was_parent) {
+            return false;
+        }
+
+        return ! $product->children()->where('is_active', true)->exists();
     }
 
     #[Computed(persist: true)]

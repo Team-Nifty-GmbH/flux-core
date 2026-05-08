@@ -31,6 +31,8 @@ class VariantList extends ProductList
 
     public bool $isSelectable = true;
 
+    public bool $onlyOverrides = false;
+
     #[Modelable]
     public ProductForm $product;
 
@@ -268,6 +270,23 @@ class VariantList extends ProductList
             ->success(__(':model restored', ['model' => __('Product')]))
             ->send();
         $this->loadData();
+    }
+
+    public function updatedOnlyOverrides(): void
+    {
+        $this->loadData();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        $builder->with('parent');
+
+        if ($this->onlyOverrides) {
+            $builder->whereNotNull('overridden_fields')
+                ->whereJsonLength('overridden_fields', '>', 0);
+        }
+
+        return $builder;
     }
 
     protected function itemToArray($item): array
