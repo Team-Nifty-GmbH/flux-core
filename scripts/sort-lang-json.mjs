@@ -18,8 +18,10 @@ function sortKeys(obj) {
                 return 0;
             })
             .map((k) => [k, sortKeys(obj[k])]);
+
         return Object.fromEntries(sortedEntries);
     }
+
     return obj;
 }
 
