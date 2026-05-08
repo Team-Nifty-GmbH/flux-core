@@ -8,12 +8,11 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tenant;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 
 beforeEach(function (): void {
     $this->tenant = Tenant::default();
     $this->tenant->update(['product_variant_inheritance_enabled' => true]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    Tenant::clearDefaultCache();
 });
 
 it('isVariant returns true when parent_id is set', function (): void {
@@ -26,7 +25,7 @@ it('isVariant returns true when parent_id is set', function (): void {
 
 it('inheritanceEnabled returns false when tenant flag is false', function (): void {
     $this->tenant->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    Tenant::clearDefaultCache();
 
     $product = Product::factory()->create();
 
@@ -127,7 +126,7 @@ it('non-variant ignores overridden_fields entirely (defensive)', function (): vo
 
 it('falls back to own column when feature toggle is off', function (): void {
     $this->tenant->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    Tenant::clearDefaultCache();
 
     $parent = Product::factory()->create(['name' => 'Parent Name']);
     $variant = Product::factory()->create([

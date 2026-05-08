@@ -6,11 +6,10 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
-use Illuminate\Support\Facades\Cache;
 
 beforeEach(function (): void {
     Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    Tenant::clearDefaultCache();
 });
 
 /**

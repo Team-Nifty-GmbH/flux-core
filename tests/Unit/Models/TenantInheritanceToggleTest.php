@@ -1,7 +1,6 @@
 <?php
 
 use FluxErp\Models\Tenant;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -41,7 +40,7 @@ it('evicts default-tenant cache when product_variant_inheritance_enabled is togg
     // Start from a known-false baseline so we can observe the toggle taking effect.
     $tenant = Tenant::default();
     $tenant->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    Tenant::clearDefaultCache();
 
     expect(Tenant::default()->product_variant_inheritance_enabled)->toBeFalse();
 
@@ -53,4 +52,19 @@ it('evicts default-tenant cache when product_variant_inheritance_enabled is togg
 
     // Tenant::default() should now reflect the change because the saving hook evicted the memo.
     expect(Tenant::default()->product_variant_inheritance_enabled)->toBeTrue();
+});
+
+test('clearDefaultCache evicts the default-tenant memo', function (): void {
+    $tenant = Tenant::default();          // memoize attributes
+
+    // Mutate the underlying row directly via DB (bypasses model events that would clear the cache).
+    DB::table('tenants')->where('id', $tenant->getKey())->update(['name' => 'NewName']);
+
+    // Without clearing, default() returns memoized (stale) attributes.
+    expect(Tenant::default()->name)->toBe($tenant->name);
+
+    Tenant::clearDefaultCache();
+
+    // After clearing, default() recomputes from DB and reflects the change.
+    expect(Tenant::default()->name)->toBe('NewName');
 });
