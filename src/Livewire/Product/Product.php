@@ -3,6 +3,11 @@
 namespace FluxErp\Livewire\Product;
 
 use Exception;
+use FluxErp\Actions\Product\PromoteParentToStandalone;
+use FluxErp\Actions\Product\ResetFieldOnAllVariants;
+use FluxErp\Actions\Product\ResetProductField;
+use FluxErp\Actions\Product\ResetProductRelation;
+use FluxErp\Actions\Product\ResetRelationOnAllVariants;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Facades\ProductType;
@@ -390,6 +395,79 @@ class Product extends Component
         $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
         $this->recalculateDisplayedProductProperties();
+    }
+
+    public function resetField(string $field): void
+    {
+        try {
+            ResetProductField::make([
+                'id' => $this->product->id,
+                'field' => $field,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+
+            return;
+        }
+
+        $this->resetProduct();
+    }
+
+    #[Renderless]
+    public function resetRelation(string $relation, mixed $key = null): void
+    {
+        try {
+            ResetProductRelation::make([
+                'id' => $this->product->id,
+                'relation' => $relation,
+                'key' => $key,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+        }
+    }
+
+    #[Renderless]
+    public function resetFieldOnAllVariants(string $field): int
+    {
+        try {
+            return ResetFieldOnAllVariants::make([
+                'parent_id' => $this->product->id,
+                'field' => $field,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+
+            return 0;
+        }
+    }
+
+    #[Renderless]
+    public function resetRelationOnAllVariants(string $relation, mixed $key = null): int
+    {
+        try {
+            return ResetRelationOnAllVariants::make([
+                'parent_id' => $this->product->id,
+                'relation' => $relation,
+                'key' => $key,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+
+            return 0;
+        }
+    }
+
+    #[Renderless]
+    public function promoteToStandalone(): void
+    {
+        try {
+            PromoteParentToStandalone::make([
+                'id' => $this->product->id,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            $this->addError('inheritance', $e->validator->errors()->first());
+        }
     }
 
     public function save(): bool
