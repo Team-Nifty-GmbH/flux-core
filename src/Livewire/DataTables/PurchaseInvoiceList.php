@@ -34,6 +34,8 @@ class PurchaseInvoiceList extends BaseDataTable
 
     public bool $positiveEmptyState = true;
 
+    public bool $autoOpenEditModal = false;
+
     public array $enabledCols = [
         'url',
         'media.file_name',
@@ -75,6 +77,27 @@ class PurchaseInvoiceList extends BaseDataTable
 
     protected string $model = PurchaseInvoice::class;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        $id = session()->pull('open_purchase_invoice_id');
+        if (! $id) {
+            return;
+        }
+
+        $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
+            ->whereKey($id)
+            ->first();
+
+        if (! $purchaseInvoice) {
+            return;
+        }
+
+        $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
+        $this->autoOpenEditModal = true;
+    }
+
     protected function getTableActions(): array
     {
         return [
@@ -113,11 +136,7 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->mediaForm->reset();
 
         if ($purchaseInvoice?->exists) {
-            $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
-            $this->purchaseInvoiceForm->fill($purchaseInvoice);
-            $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
-                ?: $purchaseInvoice->invoice->getUrl();
-            $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+            $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
         }
 
         $this->js(<<<'JS'
@@ -276,6 +295,15 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         return true;
+    }
+
+    protected function fillEditFormFromPurchaseInvoice(PurchaseInvoice $purchaseInvoice): void
+    {
+        $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
+        $this->purchaseInvoiceForm->fill($purchaseInvoice);
+        $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
+            ?: $purchaseInvoice->invoice->getUrl();
+        $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
     }
 
     protected function getScannedDocumentAction(): string
