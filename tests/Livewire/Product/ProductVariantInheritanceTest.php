@@ -119,3 +119,75 @@ test('non-variant edit form does not render inheritance indicator chrome', funct
         ->assertDontSeeHtml('Vererbt')
         ->assertDontSeeHtml('Überschrieben');
 });
+
+test('priceLists payload marks variant_owns_price true when variant has own price', function (): void {
+    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $parent = ProductModel::factory()->create();
+    FluxErp\Models\Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => '10.0000',
+    ]);
+    $variant = ProductModel::factory()->create(['parent_id' => $parent->getKey()]);
+    FluxErp\Models\Price::factory()->create([
+        'product_id' => $variant->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => '15.0000',
+    ]);
+
+    $component = Livewire::test(Product::class, ['id' => $variant->getKey()])
+        ->call('getPriceLists');
+
+    $listEntry = collect($component->get('priceLists'))->firstWhere('id', $listA->getKey());
+
+    expect($listEntry['variant_owns_price'])->toBeTrue();
+});
+
+test('priceLists payload marks variant_owns_price false when variant inherits from parent product', function (): void {
+    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $parent = ProductModel::factory()->create();
+    FluxErp\Models\Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => '10.0000',
+    ]);
+    $variant = ProductModel::factory()->create(['parent_id' => $parent->getKey()]);
+
+    $component = Livewire::test(Product::class, ['id' => $variant->getKey()])
+        ->call('getPriceLists');
+
+    $listEntry = collect($component->get('priceLists'))->firstWhere('id', $listA->getKey());
+
+    expect($listEntry['variant_owns_price'])->toBeFalse();
+});
+
+test('priceLists payload marks variant_owns_price false on non-variant products', function (): void {
+    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false]);
+    $product = ProductModel::factory()->create();
+    FluxErp\Models\Price::factory()->create([
+        'product_id' => $product->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => '10.0000',
+    ]);
+
+    $component = Livewire::test(Product::class, ['id' => $product->getKey()])
+        ->call('getPriceLists');
+
+    $listEntry = collect($component->get('priceLists'))->firstWhere('id', $listA->getKey());
+
+    expect($listEntry['variant_owns_price'])->toBeFalse();
+});
+
+test('variant prices tab shows Vererbt badge for inherited price-lists', function (): void {
+    $listA = FluxErp\Models\PriceList::factory()->create(['is_default' => false, 'name' => 'Liste A']);
+    $parent = ProductModel::factory()->create();
+    FluxErp\Models\Price::factory()->create([
+        'product_id' => $parent->getKey(),
+        'price_list_id' => $listA->getKey(),
+        'price' => '10.0000',
+    ]);
+    $variant = ProductModel::factory()->create(['parent_id' => $parent->getKey()]);
+
+    Livewire::test(Product::class, ['id' => $variant->getKey()])
+        ->assertSeeHtml('Vererbt');
+});

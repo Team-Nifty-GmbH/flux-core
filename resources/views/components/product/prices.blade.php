@@ -71,6 +71,42 @@
                         color="amber"
                         x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)"
                     />
+                    <x-badge
+                        x-cloak
+                        x-show="
+                            $wire.product.parent_id &&
+                            priceList.variant_owns_price
+                        "
+                        color="amber"
+                        :text="__('Überschrieben')"
+                    />
+                    <x-badge
+                        x-cloak
+                        x-show="
+                            $wire.product.parent_id &&
+                            !priceList.variant_owns_price &&
+                            priceList.price_id
+                        "
+                        color="gray"
+                        :text="__('Vererbt')"
+                    />
+                    <x-button
+                        x-cloak
+                        x-show="
+                            $wire.product.parent_id &&
+                            priceList.variant_owns_price
+                        "
+                        icon="arrow-uturn-left"
+                        color="secondary"
+                        flat
+                        sm
+                        :title="__('Auf geerbt zurücksetzen')"
+                        x-on:click="
+                            $wire
+                                .resetRelation('prices', priceList.id)
+                                .then(() => $wire.getPriceLists())
+                        "
+                    />
                     <div x-show="priceList.parent">
                         <x-toggle
                             x-model.boolean="priceList.is_editable"

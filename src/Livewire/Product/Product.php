@@ -255,6 +255,11 @@ class Product extends Component
         $product = resolve_static(ProductModel::class, 'query')
             ->whereKey($this->product->id)
             ->first();
+
+        $variantOwnPriceListIds = $product?->isVariant()
+            ? $product->ownPrices()->pluck('price_list_id')->all()
+            : [];
+
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
         $priceLists = resolve_static(PriceList::class, 'query')
@@ -275,7 +280,7 @@ class Product extends Component
                 'is_default',
                 'is_purchase',
             ])
-            ->map(function (PriceList $priceList) use ($priceListHelper) {
+            ->map(function (PriceList $priceList) use ($priceListHelper, $variantOwnPriceListIds) {
                 $price = $priceListHelper
                     ->setPriceList($priceList)
                     ->price();
@@ -293,6 +298,7 @@ class Product extends Component
                     'is_default' => $priceList->is_default,
                     'is_purchase' => $priceList->is_purchase,
                     'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price?->parent) || is_null($price),
+                    'variant_owns_price' => in_array($priceList->id, $variantOwnPriceListIds, strict: true),
                 ];
             });
 
