@@ -25,10 +25,19 @@ function csrfToken() {
     return meta ? meta.content : '';
 }
 
+async function readJsonSafe(response) {
+    try {
+        return await response.json();
+    } catch (e) {
+        return null;
+    }
+}
+
 async function chunkedUpload(file, progress) {
-    const initResponse = await fetch('/flux/file-pond/chunk', {
+    const initResponse = await fetch('/file-pond/chunk', {
         method: 'POST',
         headers: {
+            Accept: 'application/json',
             'X-CSRF-TOKEN': csrfToken(),
             'Upload-Length': String(file.size),
             'Upload-Name': btoa(
@@ -37,15 +46,20 @@ async function chunkedUpload(file, progress) {
         },
     });
 
+    const initBody = await readJsonSafe(initResponse);
+
     if (!initResponse.ok) {
         throw new Error(
-            (await initResponse.text()) || 'Chunked upload init failed',
+            initBody?.statusMessage || 'Chunked upload init failed',
         );
     }
 
-    const transferId = (await initResponse.text()).trim();
-    const patchUrl =
-        '/flux/file-pond/chunk?patch=' + encodeURIComponent(transferId);
+    const transferId = initBody?.data?.transfer_id;
+    if (!transferId) {
+        throw new Error('Chunked upload init returned no transfer id');
+    }
+
+    const patchUrl = '/file-pond/chunk?patch=' + encodeURIComponent(transferId);
 
     let offset = 0;
     while (offset < file.size) {
@@ -55,6 +69,7 @@ async function chunkedUpload(file, progress) {
         const patchResponse = await fetch(patchUrl, {
             method: 'PATCH',
             headers: {
+                Accept: 'application/json',
                 'X-CSRF-TOKEN': csrfToken(),
                 'Content-Type': 'application/offset+octet-stream',
                 'Upload-Offset': String(offset),
@@ -66,16 +81,13 @@ async function chunkedUpload(file, progress) {
             body: chunk,
         });
 
+        const patchBody = await readJsonSafe(patchResponse);
+
         if (!patchResponse.ok) {
-            throw new Error(
-                (await patchResponse.text()) || 'Chunk upload failed',
-            );
+            throw new Error(patchBody?.statusMessage || 'Chunk upload failed');
         }
 
-        offset = parseInt(
-            patchResponse.headers.get('Upload-Offset') || end,
-            10,
-        );
+        offset = patchBody?.data?.offset ?? end;
         progress?.(true, offset, file.size);
     }
 

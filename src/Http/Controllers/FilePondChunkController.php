@@ -2,9 +2,10 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Helpers\ResponseHelper;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -14,51 +15,52 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class FilePondChunkController extends Controller
 {
-    private const TRANSFER_ID_PATTERN = '/^[a-f0-9]{8}:[A-Za-z0-9]{40}\.[a-z0-9]+$/';
-
-    public function handle(Request $request): Response
+    public function handle(Request $request): JsonResponse
     {
-        // S3 / cloud disks are not supported yet — a future iteration could
-        // proxy chunks straight into S3 multipart uploads.
         if (FileUploadConfiguration::isUsingS3() || FileUploadConfiguration::isUsingGCS()) {
-            return response('Chunked uploads require a local disk', 501);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 501,
+                statusMessage: 'Chunked uploads require a local disk',
+            );
         }
 
         return match ($request->method()) {
             'POST' => $this->init($request),
             'PATCH' => $this->patch($request),
-            default => response('Method Not Allowed', 405),
+            default => ResponseHelper::methodNotAllowed('Method Not Allowed'),
         };
     }
 
-    protected function init(Request $request): Response
+    protected function init(Request $request): JsonResponse
     {
         $length = (int) $request->header('Upload-Length');
         $name = base64_decode((string) $request->header('Upload-Name'), true) ?: $request->header('Upload-Name');
 
         if ($length <= 0) {
-            return response('Invalid Upload-Length header', 400);
+            return ResponseHelper::unprocessableEntity('Invalid Upload-Length header');
         }
 
         if (! is_string($name) || trim($name) === '') {
-            return response('Invalid Upload-Name header', 400);
+            return ResponseHelper::unprocessableEntity('Invalid Upload-Name header');
         }
 
         if ($length > $this->maxUploadSize()) {
-            return response('File exceeds the maximum upload size', 413);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 413,
+                statusMessage: 'File exceeds the maximum upload size',
+            );
         }
 
         $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
         if ($extension === '' || ! preg_match('/^[a-z0-9]+$/', $extension)) {
-            return response('Invalid file extension', 422);
+            return ResponseHelper::unprocessableEntity('Invalid file extension');
         }
 
         $filename = Str::random(40) . '.' . $extension;
         $signedPath = TemporaryUploadedFile::signPath($filename);
 
         $disk = FileUploadConfiguration::storage();
-
-        $user = auth('web')->user();
+        $user = auth()->user();
 
         $disk->put(FileUploadConfiguration::path($filename), '');
         $disk->put(FileUploadConfiguration::path($filename . '.chunk'), json_encode([
@@ -69,12 +71,13 @@ class FilePondChunkController extends Controller
             'user_type' => $user?->getMorphClass(),
         ]));
 
-        return response($signedPath, 200, [
-            'Content-Type' => 'text/plain',
-        ]);
+        return ResponseHelper::ok(
+            statusMessage: 'ok',
+            data: ['transfer_id' => $signedPath],
+        );
     }
 
-    protected function patch(Request $request): Response
+    protected function patch(Request $request): JsonResponse
     {
         [$disk, $filename, $session, $error] = $this->resolveTransfer($request);
         if ($error) {
@@ -88,31 +91,39 @@ class FilePondChunkController extends Controller
         $currentSize = file_exists($absolutePath) ? filesize($absolutePath) : 0;
 
         if ($offset !== $currentSize) {
-            return response('Upload-Offset does not match', 409, [
-                'Upload-Offset' => (string) $currentSize,
-            ]);
+            return ResponseHelper::conflict(
+                'Upload-Offset does not match',
+                ['offset' => $currentSize],
+            );
         }
 
         $body = $request->getContent();
         $chunkSize = strlen($body);
 
         if ($chunkSize === 0) {
-            return response('Empty chunk', 400);
+            return ResponseHelper::unprocessableEntity('Empty chunk');
         }
 
         if ($offset + $chunkSize > $expected) {
-            return response('Chunk exceeds declared upload length', 413);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 413,
+                statusMessage: 'Chunk exceeds declared upload length',
+            );
         }
 
         $handle = fopen($absolutePath, 'ab');
         if ($handle === false) {
-            return response('Unable to open upload target', 500);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 500,
+                statusMessage: 'Unable to open upload target',
+            );
         }
 
         try {
             if (! flock($handle, LOCK_EX)) {
                 throw new FileException('Unable to lock upload target');
             }
+
             $written = fwrite($handle, $body);
             fflush($handle);
             flock($handle, LOCK_UN);
@@ -121,7 +132,10 @@ class FilePondChunkController extends Controller
         }
 
         if ($written !== $chunkSize) {
-            return response('Failed to write full chunk', 500);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 500,
+                statusMessage: 'Failed to write full chunk',
+            );
         }
 
         $newSize = $offset + $chunkSize;
@@ -133,51 +147,61 @@ class FilePondChunkController extends Controller
             }
         }
 
-        return response('', 204, [
-            'Upload-Offset' => (string) $newSize,
-        ]);
+        return ResponseHelper::ok(
+            statusMessage: 'ok',
+            data: ['offset' => $newSize],
+        );
     }
 
     /**
-     * @return array{0: ?FilesystemAdapter, 1: ?string, 2: ?array, 3: ?Response}
+     * @return array{0: ?FilesystemAdapter, 1: ?string, 2: ?array, 3: ?JsonResponse}
      */
     protected function resolveTransfer(Request $request): array
     {
         $signedPath = (string) $request->query('patch');
 
-        if (! preg_match(self::TRANSFER_ID_PATTERN, $signedPath)) {
-            return [null, null, null, response('Invalid transfer id', 400)];
+        if (! preg_match('/^[a-f0-9]{8}:[A-Za-z0-9]{40}\.[a-z0-9]+$/', $signedPath)) {
+            return [null, null, null, ResponseHelper::unprocessableEntity('Invalid transfer id')];
         }
 
         $filename = TemporaryUploadedFile::extractPathFromSignedPath($signedPath);
         if ($filename === false) {
-            return [null, null, null, response('Invalid signature', 403)];
+            return [null, null, null, ResponseHelper::createResponseFromBase(
+                statusCode: 403,
+                statusMessage: 'Invalid signature',
+            )];
         }
 
         $disk = FileUploadConfiguration::storage();
         $sessionPath = FileUploadConfiguration::path($filename . '.chunk');
 
         if (! $disk->exists($sessionPath)) {
-            return [null, null, null, response('Unknown transfer', 404)];
+            return [null, null, null, ResponseHelper::notFound('Unknown transfer')];
         }
 
         $session = json_decode($disk->get($sessionPath), true) ?: [];
-        if (! isset($session['expected_size'])) {
-            return [null, null, null, response('Corrupt transfer session', 500)];
+        if (! ($session['expected_size'] ?? null)) {
+            return [null, null, null, ResponseHelper::createResponseFromBase(
+                statusCode: 500,
+                statusMessage: 'Corrupt transfer session',
+            )];
         }
 
-        $user = auth('web')->user();
+        $user = auth()->user();
         $sessionUserId = $session['user_id'] ?? null;
         $sessionUserType = $session['user_type'] ?? null;
 
         if ($sessionUserId !== $user?->getKey() || $sessionUserType !== $user?->getMorphClass()) {
-            return [null, null, null, response('Forbidden', 403)];
+            return [null, null, null, ResponseHelper::createResponseFromBase(
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+            )];
         }
 
         return [$disk, $filename, $session, null];
     }
 
-    protected function finalize(FilesystemAdapter $disk, string $filename, array $session): ?Response
+    protected function finalize(FilesystemAdapter $disk, string $filename, array $session): ?JsonResponse
     {
         $absolutePath = $disk->path(FileUploadConfiguration::path($filename));
 
@@ -202,7 +226,7 @@ class FilePondChunkController extends Controller
             $disk->delete(FileUploadConfiguration::path($filename));
             $disk->delete(FileUploadConfiguration::path($filename . '.json'));
 
-            return response($validator->errors()->first('file'), 422);
+            return ResponseHelper::unprocessableEntity($validator->errors()->first('file'));
         }
 
         return null;

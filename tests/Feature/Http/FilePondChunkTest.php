@@ -9,6 +9,22 @@ beforeEach(function (): void {
     FileUploadConfiguration::storage();
 });
 
+function chunkInit(array $headers = ['Upload-Length' => '1024', 'Upload-Name' => null]): Illuminate\Testing\TestResponse
+{
+    $headers['Upload-Name'] ??= base64_encode('test.pdf');
+
+    return test()->call(
+        method: 'POST',
+        uri: route('file-pond.chunk'),
+        server: test()->transformHeadersToServerVars($headers)
+    );
+}
+
+function transferIdFrom(Illuminate\Testing\TestResponse $response): string
+{
+    return data_get($response->json(), 'data.transfer_id');
+}
+
 test('chunk init requires authentication', function (): void {
     auth('web')->logout();
 
@@ -21,18 +37,11 @@ test('chunk init requires authentication', function (): void {
 });
 
 test('chunk init returns a signed transfer id', function (): void {
-    $response = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '1024',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $response = chunkInit();
 
     $response->assertOk();
 
-    $signedPath = $response->getContent();
+    $signedPath = transferIdFrom($response);
 
     expect($signedPath)
         ->toMatch('/^[a-f0-9]{8}:[A-Za-z0-9]{40}\.pdf$/');
@@ -47,27 +56,19 @@ test('chunk init returns a signed transfer id', function (): void {
 });
 
 test('chunk init rejects empty upload length', function (): void {
-    $response = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '0',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $response = chunkInit([
+        'Upload-Length' => '0',
+        'Upload-Name' => base64_encode('test.pdf'),
+    ]);
 
-    $response->assertStatus(400);
+    $response->assertStatus(422);
 });
 
 test('chunk init rejects invalid extension', function (): void {
-    $response = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '1024',
-            'Upload-Name' => base64_encode('no-extension'),
-        ])
-    );
+    $response = chunkInit([
+        'Upload-Length' => '1024',
+        'Upload-Name' => base64_encode('no-extension'),
+    ]);
 
     $response->assertStatus(422);
 });
@@ -75,14 +76,10 @@ test('chunk init rejects invalid extension', function (): void {
 test('chunk init rejects files exceeding max size', function (): void {
     config(['flux.file_uploads.max_size' => '1K']);
 
-    $response = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '4096',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $response = chunkInit([
+        'Upload-Length' => '4096',
+        'Upload-Name' => base64_encode('test.pdf'),
+    ]);
 
     $response->assertStatus(413);
 });
@@ -93,17 +90,13 @@ test('multiple chunks assemble into the final file', function (): void {
     $body = random_bytes(2048);
     $totalSize = strlen($body);
 
-    $initResponse = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => (string) $totalSize,
-            'Upload-Name' => base64_encode('payload.bin'),
-        ])
-    );
+    $initResponse = chunkInit([
+        'Upload-Length' => (string) $totalSize,
+        'Upload-Name' => base64_encode('payload.bin'),
+    ]);
 
     $initResponse->assertOk();
-    $signedPath = $initResponse->getContent();
+    $signedPath = transferIdFrom($initResponse);
 
     $patchUrl = route('file-pond.chunk') . '?patch=' . urlencode($signedPath);
 
@@ -124,8 +117,8 @@ test('multiple chunks assemble into the final file', function (): void {
             content: $chunk,
         );
 
-        $response->assertNoContent();
-        expect((int) $response->headers->get('Upload-Offset'))->toBe($end);
+        $response->assertOk();
+        expect(data_get($response->json(), 'data.offset'))->toBe($end);
 
         $offset = $end;
     }
@@ -146,16 +139,12 @@ test('multiple chunks assemble into the final file', function (): void {
 });
 
 test('chunk patch rejects mismatching offsets', function (): void {
-    $initResponse = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '2048',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $initResponse = chunkInit([
+        'Upload-Length' => '2048',
+        'Upload-Name' => base64_encode('test.pdf'),
+    ]);
 
-    $signedPath = $initResponse->getContent();
+    $signedPath = transferIdFrom($initResponse);
 
     $response = $this->call(
         method: 'PATCH',
@@ -171,16 +160,12 @@ test('chunk patch rejects mismatching offsets', function (): void {
 });
 
 test('chunk patch rejects requests from other users', function (): void {
-    $initResponse = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '2048',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $initResponse = chunkInit([
+        'Upload-Length' => '2048',
+        'Upload-Name' => base64_encode('test.pdf'),
+    ]);
 
-    $signedPath = $initResponse->getContent();
+    $signedPath = transferIdFrom($initResponse);
 
     $otherUser = User::factory()->create([
         'is_active' => true,
@@ -212,21 +197,17 @@ test('chunk patch rejects invalid signed path', function (): void {
         content: 'data',
     );
 
-    $response->assertStatus(400);
+    $response->assertStatus(422);
 });
 
 test('chunk patch rejects chunks that exceed the declared upload length', function (): void {
-    $initResponse = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '128',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $initResponse = chunkInit([
+        'Upload-Length' => '128',
+        'Upload-Name' => base64_encode('test.pdf'),
+    ]);
 
     $initResponse->assertOk();
-    $signedPath = $initResponse->getContent();
+    $signedPath = transferIdFrom($initResponse);
 
     $response = $this->call(
         method: 'PATCH',
@@ -242,17 +223,13 @@ test('chunk patch rejects chunks that exceed the declared upload length', functi
 });
 
 test('chunk patch rejects empty bodies', function (): void {
-    $initResponse = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '128',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $initResponse = chunkInit([
+        'Upload-Length' => '128',
+        'Upload-Name' => base64_encode('test.pdf'),
+    ]);
 
     $initResponse->assertOk();
-    $signedPath = $initResponse->getContent();
+    $signedPath = transferIdFrom($initResponse);
 
     $response = $this->call(
         method: 'PATCH',
@@ -264,18 +241,14 @@ test('chunk patch rejects empty bodies', function (): void {
         content: '',
     );
 
-    $response->assertStatus(400);
+    $response->assertStatus(422);
 });
 
 test('chunk init rejects negative upload length', function (): void {
-    $response = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '-1',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
+    $response = chunkInit([
+        'Upload-Length' => '-1',
+        'Upload-Name' => base64_encode('test.pdf'),
+    ]);
 
-    $response->assertStatus(400);
+    $response->assertStatus(422);
 });
