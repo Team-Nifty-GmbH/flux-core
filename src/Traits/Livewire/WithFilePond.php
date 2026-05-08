@@ -127,14 +127,13 @@ trait WithFilePond
         }
 
         $disk = FileUploadConfiguration::storage();
-        $relativePath = FileUploadConfiguration::path($filename);
 
-        if (! $disk->exists($relativePath)) {
-            return null;
-        }
-
-        // Reject files that are still being assembled.
-        if ($disk->exists(FileUploadConfiguration::path($filename . '.chunk'))) {
+        // The data file, the metadata sidecar, and the absence of the chunk
+        // marker together prove the upload finalized successfully.
+        if (! $disk->exists(FileUploadConfiguration::path($filename))
+            || ! $disk->exists(FileUploadConfiguration::path($filename . '.json'))
+            || $disk->exists(FileUploadConfiguration::path($filename . '.chunk'))
+        ) {
             return null;
         }
 

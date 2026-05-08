@@ -214,3 +214,68 @@ test('chunk patch rejects invalid signed path', function (): void {
 
     $response->assertStatus(400);
 });
+
+test('chunk patch rejects chunks that exceed the declared upload length', function (): void {
+    $initResponse = $this->call(
+        method: 'POST',
+        uri: route('file-pond.chunk'),
+        server: $this->transformHeadersToServerVars([
+            'Upload-Length' => '128',
+            'Upload-Name' => base64_encode('test.pdf'),
+        ])
+    );
+
+    $initResponse->assertOk();
+    $signedPath = $initResponse->getContent();
+
+    $response = $this->call(
+        method: 'PATCH',
+        uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
+        server: $this->transformHeadersToServerVars([
+            'Upload-Offset' => '0',
+            'Content-Type' => 'application/offset+octet-stream',
+        ]),
+        content: str_repeat('a', 256),
+    );
+
+    $response->assertStatus(413);
+});
+
+test('chunk patch rejects empty bodies', function (): void {
+    $initResponse = $this->call(
+        method: 'POST',
+        uri: route('file-pond.chunk'),
+        server: $this->transformHeadersToServerVars([
+            'Upload-Length' => '128',
+            'Upload-Name' => base64_encode('test.pdf'),
+        ])
+    );
+
+    $initResponse->assertOk();
+    $signedPath = $initResponse->getContent();
+
+    $response = $this->call(
+        method: 'PATCH',
+        uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
+        server: $this->transformHeadersToServerVars([
+            'Upload-Offset' => '0',
+            'Content-Type' => 'application/offset+octet-stream',
+        ]),
+        content: '',
+    );
+
+    $response->assertStatus(400);
+});
+
+test('chunk init rejects negative upload length', function (): void {
+    $response = $this->call(
+        method: 'POST',
+        uri: route('file-pond.chunk'),
+        server: $this->transformHeadersToServerVars([
+            'Upload-Length' => '-1',
+            'Upload-Name' => base64_encode('test.pdf'),
+        ])
+    );
+
+    $response->assertStatus(400);
+});
