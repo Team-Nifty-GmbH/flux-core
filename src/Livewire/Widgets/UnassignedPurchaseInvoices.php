@@ -9,6 +9,7 @@ use FluxErp\Traits\Livewire\Widget\Widgetable;
 use FluxErp\Traits\Livewire\WithDocumentScanning;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Number;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -48,7 +49,7 @@ class UnassignedPurchaseInvoices extends Component
         return resolve_static(PurchaseInvoice::class, 'query')
             ->whereNull('order_id')
             ->with([
-                'contact.invoiceAddress:id,contact_id,name',
+                'contact.invoiceAddress',
                 'currency:id,iso',
                 'invoice:id,file_name',
             ])
@@ -89,21 +90,21 @@ class UnassignedPurchaseInvoices extends Component
 
     protected function toListItem(PurchaseInvoice $invoice): array
     {
-        $supplier = data_get($invoice, 'contact.invoiceAddress.name');
+        $supplier = data_get($invoice, 'contact.invoiceAddress')?->getLabel();
         $invoiceNumber = $invoice->invoice_number;
         $filename = data_get($invoice, 'invoice.file_name');
 
         $name = $supplier ?: $invoiceNumber ?: $filename ?: '#' . $invoice->getKey();
 
+        $currencyIso = data_get($invoice, 'currency.iso');
         $captionParts = array_filter([
             $invoice->invoice_date?->format('d.m.Y'),
-            ! is_null($invoice->total_gross_price)
-                ? number_format(
+            ! is_null($invoice->total_gross_price) && ! blank($currencyIso)
+                ? Number::currency(
                     (float) $invoice->total_gross_price,
-                    2,
-                    ',',
-                    '.',
-                ) . ' ' . (data_get($invoice, 'currency.iso') ?? '')
+                    $currencyIso,
+                    app()->getLocale(),
+                )
                 : null,
             $supplier && $invoiceNumber ? $invoiceNumber : null,
         ]);
