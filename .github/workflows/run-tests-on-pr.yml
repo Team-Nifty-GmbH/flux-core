@@ -53,6 +53,9 @@ jobs:
       - name: Prettier
         run: npx prettier . --check
 
+      - name: Translation key sort
+        run: node scripts/sort-lang-json.mjs --check
+
   unit-feature:
     name: Unit & Feature Tests
     needs: lint

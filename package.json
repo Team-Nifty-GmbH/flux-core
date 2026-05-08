@@ -4,7 +4,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build && node scripts/copy-opencv.mjs",
-        "format": "prettier --write ."
+        "format": "prettier --write . && node scripts/sort-lang-json.mjs",
+        "sort-lang": "node scripts/sort-lang-json.mjs"
     },
     "devDependencies": {
         "@alpinejs/collapse": "^3.15.2",
