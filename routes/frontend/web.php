@@ -377,17 +377,17 @@ Route::middleware('web')
                 return $media;
             })->name('media.private');
 
-            // The signed URL itself is the authorization — Livewire validated
-            // permission and data shape before generating it. Same threat
-            // model as media.private above.
             Route::get('/media-collection-download/{token}', function (string $token) {
                 $payload = Crypt::decrypt($token);
 
-                $stream = DownloadMultipleMedia::make(data_get($payload, 'data', []))->execute();
+                $stream = DownloadMultipleMedia::make(data_get($payload, 'data') ?? [])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
 
                 return response()->streamDownload(
                     fn () => $stream->getZipStream(),
-                    Str::finish((string) data_get($payload, 'name', 'media'), '.zip'),
+                    Str::finish((string) (data_get($payload, 'name') ?? 'media'), '.zip'),
                     ['Content-Type' => 'application/zip'],
                 );
             })
