@@ -8,6 +8,8 @@ use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
+use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait WithFilePond
 {
@@ -114,5 +116,30 @@ trait WithFilePond
         }
 
         return true;
+    }
+
+    #[Renderless]
+    public function acceptChunkedUpload(string $signedPath, ?string $collectionName = null): ?string
+    {
+        $filename = TemporaryUploadedFile::extractPathFromSignedPath($signedPath);
+        if ($filename === false) {
+            return null;
+        }
+
+        $disk = FileUploadConfiguration::storage();
+        $relativePath = FileUploadConfiguration::path($filename);
+
+        if (! $disk->exists($relativePath)) {
+            return null;
+        }
+
+        // Reject files that are still being assembled.
+        if ($disk->exists(FileUploadConfiguration::path($filename . '.chunk'))) {
+            return null;
+        }
+
+        $this->files[] = TemporaryUploadedFile::createFromLivewire($filename);
+
+        return $this->validateOnDemand($filename, $collectionName) ? $filename : null;
     }
 }

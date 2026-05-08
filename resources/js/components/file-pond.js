@@ -15,6 +15,69 @@ function loadLocale(lang) {
     return bundledLocales[lang] || bundledLocales['en'];
 }
 
+// Files larger than this use the chunked upload endpoint to bypass
+// PHP's post_max_size / Octane FrankenPHP request body limits.
+const CHUNK_THRESHOLD = 4 * 1024 * 1024;
+const CHUNK_SIZE = 4 * 1024 * 1024;
+
+function csrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
+async function chunkedUpload(file, progress) {
+    const initResponse = await fetch('/flux/file-pond/chunk', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken(),
+            'Upload-Length': String(file.size),
+            'Upload-Name': btoa(unescape(encodeURIComponent(file.name))),
+        },
+    });
+
+    if (!initResponse.ok) {
+        throw new Error(
+            (await initResponse.text()) || 'Chunked upload init failed',
+        );
+    }
+
+    const transferId = (await initResponse.text()).trim();
+    const patchUrl =
+        '/flux/file-pond/chunk?patch=' + encodeURIComponent(transferId);
+
+    let offset = 0;
+    while (offset < file.size) {
+        const end = Math.min(offset + CHUNK_SIZE, file.size);
+        const chunk = file.slice(offset, end);
+
+        const patchResponse = await fetch(patchUrl, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken(),
+                'Content-Type': 'application/offset+octet-stream',
+                'Upload-Offset': String(offset),
+                'Upload-Length': String(file.size),
+                'Upload-Name': btoa(unescape(encodeURIComponent(file.name))),
+            },
+            body: chunk,
+        });
+
+        if (!patchResponse.ok) {
+            throw new Error(
+                (await patchResponse.text()) || 'Chunk upload failed',
+            );
+        }
+
+        offset = parseInt(
+            patchResponse.headers.get('Upload-Offset') || end,
+            10,
+        );
+        progress?.(true, offset, file.size);
+    }
+
+    return transferId;
+}
+
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
 
 export default function (
@@ -134,6 +197,32 @@ export default function (
                         transfer,
                         options,
                     ) => {
+                        if (file.size > CHUNK_THRESHOLD) {
+                            try {
+                                const signedPath = await chunkedUpload(
+                                    file,
+                                    progress,
+                                );
+
+                                const tempFileId =
+                                    await $wire.acceptChunkedUpload(
+                                        signedPath,
+                                        this.selectedCollection,
+                                    );
+
+                                if (tempFileId) {
+                                    this.tempFilesId.push(tempFileId);
+                                    load(tempFileId);
+                                } else {
+                                    error('Chunked upload rejected');
+                                }
+                            } catch (e) {
+                                error(e?.message || 'Chunked upload failed');
+                            }
+
+                            return;
+                        }
+
                         const onSuccess = async (tempFileId) => {
                             if (
                                 await $wire.validateOnDemand(
