@@ -84,6 +84,7 @@ const initializeNativeBridge = async () => {
                 bytes.forEach((b) => {
                     str += String.fromCharCode(b);
                 });
+
                 return btoa(str)
                     .replace(/\+/g, '-')
                     .replace(/\//g, '_')
@@ -99,6 +100,7 @@ const initializeNativeBridge = async () => {
                     new TextEncoder().encode(verifier),
                 );
                 const challenge = base64UrlEncode(new Uint8Array(digest));
+
                 return { verifier, challenge };
             };
 
@@ -127,11 +129,13 @@ const initializeNativeBridge = async () => {
                                 reject(new Error(error));
                                 return;
                             }
+
                             const code = u.searchParams.get('code');
                             if (!code) {
                                 reject(new Error('missing_code'));
                                 return;
                             }
+
                             resolve(code);
                         } catch (e) {
                             reject(e);
@@ -163,12 +167,13 @@ const initializeNativeBridge = async () => {
                     }),
                 });
 
+                const body = await r.json().catch(() => ({}));
+
                 if (!r.ok) {
-                    const data = await r.json().catch(() => ({}));
-                    throw new Error(data.error || 'exchange_failed');
+                    throw new Error(body.statusMessage || 'exchange_failed');
                 }
 
-                return r.json();
+                return body.data || {};
             };
 
             bridge.passkeyLogin = async () => {
@@ -230,12 +235,15 @@ const initializeNativeBridge = async () => {
                         },
                     );
 
+                    const startBody = await startResp.json().catch(() => ({}));
+
                     if (!startResp.ok) {
-                        const data = await startResp.json().catch(() => ({}));
-                        throw new Error(data.error || 'start_failed');
+                        throw new Error(
+                            startBody.statusMessage || 'start_failed',
+                        );
                     }
 
-                    const { bridge_url: bridgeUrl } = await startResp.json();
+                    const bridgeUrl = startBody.data?.bridge_url;
 
                     const callbackPromise = waitForCallback();
                     await Browser.open({

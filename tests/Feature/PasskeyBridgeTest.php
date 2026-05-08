@@ -107,7 +107,7 @@ test('finishLogin attaches the authenticated user and returns the redirect', fun
     ]);
 
     $response->assertOk();
-    expect($response->json('redirect'))->toStartWith('nuxbe://auth-callback?code=');
+    expect($response->json('data.redirect'))->toStartWith('nuxbe://auth-callback?code=');
 
     $state = Cache::get(STATE_PREFIX . $code);
     expect($state)->not->toBeNull()
@@ -121,7 +121,7 @@ test('finishLogin rejects an unknown code', function (): void {
         'response' => json_encode(['type' => 'public-key']),
     ]);
 
-    $response->assertStatus(400)->assertJson(['error' => 'invalid_bridge_code']);
+    $response->assertStatus(422)->assertJson(['statusMessage' => 'invalid_bridge_code']);
 });
 
 test('finishLogin rejects a state that is already attached to a user', function (): void {
@@ -140,7 +140,7 @@ test('finishLogin rejects a state that is already attached to a user', function 
         'response' => json_encode(['type' => 'public-key']),
     ]);
 
-    $response->assertStatus(400)->assertJson(['error' => 'invalid_bridge_code']);
+    $response->assertStatus(422)->assertJson(['statusMessage' => 'invalid_bridge_code']);
 });
 
 test('finishLogin returns 401 when no passkey matches', function (): void {
@@ -155,7 +155,7 @@ test('finishLogin returns 401 when no passkey matches', function (): void {
         'response' => json_encode(['type' => 'public-key']),
     ]);
 
-    $response->assertStatus(401)->assertJson(['error' => 'invalid_passkey']);
+    $response->assertStatus(401)->assertJson(['statusMessage' => 'passkey_authentication_failed']);
 });
 
 test('startRegistration requires authentication', function (): void {
@@ -182,7 +182,7 @@ test('startRegistration stores a register state and returns a transfer-tokenised
 
     $response->assertOk();
 
-    parse_str(parse_url($response->json('bridge_url'), PHP_URL_QUERY), $query);
+    parse_str(parse_url($response->json('data.bridge_url'), PHP_URL_QUERY), $query);
     $transferToken = $query['transfer_token'] ?? null;
     expect($transferToken)->not->toBeNull();
 
@@ -246,7 +246,7 @@ test('finishRegister rejects when transfer_token does not map to the supplied co
         'response' => json_encode(['type' => 'public-key']),
     ]);
 
-    $response->assertStatus(400)->assertJson(['error' => 'invalid_bridge_code']);
+    $response->assertStatus(422)->assertJson(['statusMessage' => 'invalid_bridge_code']);
 });
 
 test('exchange returns the magic login URL for a successful login state', function (): void {
@@ -260,7 +260,7 @@ test('exchange returns the magic login URL for a successful login state', functi
     ]);
 
     $response->assertOk();
-    expect($response->json('magic_login_url'))->not->toBeNull()
+    expect($response->json('data.magic_login_url'))->not->toBeNull()
         ->and(Cache::get(STATE_PREFIX . $code))->toBeNull();
 });
 
@@ -274,7 +274,7 @@ test('exchange returns ok for a successful register state', function (): void {
         'code_verifier' => $verifier,
     ]);
 
-    $response->assertOk()->assertJson(['status' => 'ok']);
+    $response->assertOk()->assertJson(['statusMessage' => 'ok']);
     expect(Cache::get(STATE_PREFIX . $code))->toBeNull();
 });
 
@@ -288,7 +288,7 @@ test('exchange rejects a verifier that does not match the challenge', function (
         'code_verifier' => 'wrong-verifier-' . str_repeat('y', 30),
     ]);
 
-    $response->assertStatus(400)->assertJson(['error' => 'invalid_verifier']);
+    $response->assertStatus(422)->assertJson(['statusMessage' => 'invalid_verifier']);
     expect(Cache::get(STATE_PREFIX . $code))->toBeNull();
 });
 
@@ -301,7 +301,7 @@ test('exchange rejects a code that has already been pulled', function (): void {
         'code_verifier' => $verifier,
     ]);
 
-    $response->assertStatus(400)->assertJson(['error' => 'invalid_code']);
+    $response->assertStatus(422)->assertJson(['statusMessage' => 'invalid_code']);
 });
 
 test('exchange rejects a code whose login has not been completed', function (): void {
@@ -314,7 +314,7 @@ test('exchange rejects a code whose login has not been completed', function (): 
         'code_verifier' => $verifier,
     ]);
 
-    $response->assertStatus(400)->assertJson(['error' => 'invalid_code']);
+    $response->assertStatus(422)->assertJson(['statusMessage' => 'invalid_code']);
 });
 
 class FakeAuthOptionsAction extends GeneratePasskeyAuthenticationOptionsAction

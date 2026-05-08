@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\PasskeyBridgeExchangeRequest;
 use FluxErp\Http\Requests\PasskeyBridgeFinishLoginRequest;
 use FluxErp\Http\Requests\PasskeyBridgeFinishRegisterRequest;
@@ -67,14 +68,17 @@ class PasskeyBridgeController extends Controller
         $state = $this->getState($validated['code']);
 
         if (! $state || $state['kind'] !== self::KIND_LOGIN || ! is_null($state['user_id'])) {
-            return response()->json(['error' => 'invalid_bridge_code'], 400);
+            return ResponseHelper::unprocessableEntity('invalid_bridge_code');
         }
 
         $action = PasskeyConfig::getAction('find_passkey', FindPasskeyToAuthenticateAction::class);
         $passkey = $action->execute($validated['response'], $state['options']);
 
         if (! $passkey || ! $passkey->authenticatable) {
-            return response()->json(['error' => 'invalid_passkey'], 401);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 401,
+                statusMessage: 'passkey_authentication_failed',
+            );
         }
 
         $this->putState($validated['code'], [
@@ -84,9 +88,12 @@ class PasskeyBridgeController extends Controller
             'user_id' => $passkey->getAttribute('authenticatable_id'),
         ]);
 
-        return response()->json([
-            'redirect' => $this->buildRedirect($state['redirect_uri'], $validated['code']),
-        ]);
+        return ResponseHelper::ok(
+            statusMessage: 'ok',
+            data: [
+                'redirect' => $this->buildRedirect($state['redirect_uri'], $validated['code']),
+            ],
+        );
     }
 
     public function startRegistration(PasskeyBridgeStartRequest $request): JsonResponse
@@ -94,7 +101,10 @@ class PasskeyBridgeController extends Controller
         $user = Auth::user();
 
         if (! $user) {
-            return response()->json(['error' => 'unauthenticated'], 401);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 401,
+                statusMessage: 'unauthenticated',
+            );
         }
 
         $validated = $request->validated();
@@ -122,11 +132,14 @@ class PasskeyBridgeController extends Controller
             now()->addMinutes(self::TTL_MINUTES)
         );
 
-        return response()->json([
-            'bridge_url' => route('passkey-bridge.register.show', [
-                'transfer_token' => $transferToken,
-            ]),
-        ]);
+        return ResponseHelper::ok(
+            statusMessage: 'ok',
+            data: [
+                'bridge_url' => route('passkey-bridge.register.show', [
+                    'transfer_token' => $transferToken,
+                ]),
+            ],
+        );
     }
 
     public function showRegister(PasskeyBridgeShowRegisterRequest $request): View
@@ -163,13 +176,16 @@ class PasskeyBridgeController extends Controller
             || $state['kind'] !== self::KIND_REGISTER
             || is_null($state['user_id'])
         ) {
-            return response()->json(['error' => 'invalid_bridge_code'], 400);
+            return ResponseHelper::unprocessableEntity('invalid_bridge_code');
         }
 
         $authenticatable = $this->resolveUser($state);
 
         if (! $authenticatable) {
-            return response()->json(['error' => 'invalid_bridge_code'], 400);
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 401,
+                statusMessage: 'authenticatable_not_found',
+            );
         }
 
         $action = PasskeyConfig::getAction('store_passkey', StorePasskeyAction::class);
@@ -183,15 +199,18 @@ class PasskeyBridgeController extends Controller
                 ['name' => $validated['name']],
             );
         } catch (Throwable) {
-            return response()->json(['error' => 'invalid_passkey'], 422);
+            return ResponseHelper::unprocessableEntity('invalid_passkey');
         }
 
         Cache::forget(self::TRANSFER_PREFIX . $validated['transfer_token']);
         $this->putState($validated['code'], [...$state, 'options' => null]);
 
-        return response()->json([
-            'redirect' => $this->buildRedirect($state['redirect_uri'], $validated['code']),
-        ]);
+        return ResponseHelper::ok(
+            statusMessage: 'ok',
+            data: [
+                'redirect' => $this->buildRedirect($state['redirect_uri'], $validated['code']),
+            ],
+        );
     }
 
     public function exchange(PasskeyBridgeExchangeRequest $request): JsonResponse
@@ -201,7 +220,7 @@ class PasskeyBridgeController extends Controller
         $state = Cache::pull(self::STATE_PREFIX . $validated['code']);
 
         if (! $state || is_null($state['user_id'])) {
-            return response()->json(['error' => 'invalid_code'], 400);
+            return ResponseHelper::unprocessableEntity('invalid_code');
         }
 
         $expectedChallenge = $this->base64UrlEncode(
@@ -209,16 +228,19 @@ class PasskeyBridgeController extends Controller
         );
 
         if (! hash_equals($state['challenge'], $expectedChallenge)) {
-            return response()->json(['error' => 'invalid_verifier'], 400);
+            return ResponseHelper::unprocessableEntity('invalid_verifier');
         }
 
         if ($state['kind'] === self::KIND_REGISTER) {
-            return response()->json(['status' => 'ok']);
+            return ResponseHelper::ok(statusMessage: 'ok');
         }
 
-        return response()->json([
-            'magic_login_url' => $this->generateMagicLoginUrl($state),
-        ]);
+        return ResponseHelper::ok(
+            statusMessage: 'ok',
+            data: [
+                'magic_login_url' => $this->generateMagicLoginUrl($state),
+            ],
+        );
     }
 
     protected function buildRedirect(string $redirectUri, string $code): string
