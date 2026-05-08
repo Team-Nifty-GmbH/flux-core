@@ -20,10 +20,13 @@ class PriceCalculation
     public function __construct(protected OrderPosition $orderPosition, protected array $data)
     {
         $this->orderPosition->loadMissing([
-            'product:id,vat_rate_id',
+            'product:id,parent_id,vat_rate_id',
             'product.vatRate:id,rate_percentage',
             'product.ownPrices:id,product_id,price_list_id,price',
-            'product.ownPrices.priceList:id,is_net',
+            'product.ownPrices.priceList:id,is_net,is_purchase',
+            'product.parent:id,parent_id',
+            'product.parent.ownPrices:id,product_id,price_list_id,price',
+            'product.parent.ownPrices.priceList:id,is_net,is_purchase',
         ]);
     }
 
@@ -140,9 +143,9 @@ class PriceCalculation
         if ($stockPosting) {
             $purchasePrice = bcdiv($stockPosting->purchase_price, $stockPosting->posting);
         } else {
-            $purchasePrice = $this->orderPosition->product?->ownPrices()
-                ->whereRelation('priceList', 'is_purchase')
-                ->first()
+            $purchasePrice = $this->orderPosition->product
+                ?->prices
+                ?->first(fn (Price $price) => (bool) $price->priceList?->is_purchase)
                 ?->getNet($this->orderPosition->vat_rate_percentage);
         }
 
@@ -173,12 +176,13 @@ class PriceCalculation
 
         // Collect & set missing data
         if ($this->orderPosition->product) {
-            $this->orderPosition->product_prices = $this->orderPosition->product->ownPrices()
-                ->get([
-                    'id',
-                    'price_list_id',
-                    'price',
-                ]);
+            $this->orderPosition->product_prices = $this->orderPosition->product->prices
+                ->map(fn (Price $price) => [
+                    'id' => $price->getKey(),
+                    'price_list_id' => $price->price_list_id,
+                    'price' => $price->price,
+                ])
+                ->all();
         }
 
         $this->orderPosition->unit_price = $price;
