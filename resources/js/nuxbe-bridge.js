@@ -14,6 +14,8 @@ const initializeNativeBridge = async () => {
     try {
         const Capacitor = window.Capacitor;
         const Plugins = Capacitor.Plugins || {};
+        const App = Plugins.App;
+        const Browser = Plugins.Browser;
         const Camera = Plugins.Camera;
         const CapacitorBarcodeScanner = Plugins.CapacitorBarcodeScanner;
         const Preferences = Plugins.Preferences;
@@ -69,6 +71,206 @@ const initializeNativeBridge = async () => {
                 };
             }
         };
+
+        // Passkey bridge: WebAuthn cannot run in WKWebView for a multi-tenant
+        // app (no Associated Domains entitlement is possible per-tenant), so
+        // delegate to the system browser via a PKCE-protected redirect flow.
+        if (App && Browser) {
+            const PASSKEY_REDIRECT_URI = 'nuxbe://auth-callback';
+            const PASSKEY_TIMEOUT_MS = 5 * 60 * 1000;
+
+            const base64UrlEncode = (bytes) => {
+                let str = '';
+                bytes.forEach((b) => {
+                    str += String.fromCharCode(b);
+                });
+
+                return btoa(str)
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+            };
+
+            const generatePkcePair = async () => {
+                const verifierBytes = new Uint8Array(32);
+                crypto.getRandomValues(verifierBytes);
+                const verifier = base64UrlEncode(verifierBytes);
+                const digest = await crypto.subtle.digest(
+                    'SHA-256',
+                    new TextEncoder().encode(verifier),
+                );
+                const challenge = base64UrlEncode(new Uint8Array(digest));
+
+                return { verifier, challenge };
+            };
+
+            const waitForCallback = () =>
+                new Promise((resolve, reject) => {
+                    let handle = null;
+                    let timer = null;
+                    const cleanup = () => {
+                        if (handle) handle.remove();
+                        if (timer) clearTimeout(timer);
+                    };
+
+                    App.addListener('appUrlOpen', (event) => {
+                        if (
+                            !event?.url ||
+                            !event.url.startsWith(PASSKEY_REDIRECT_URI)
+                        ) {
+                            return;
+                        }
+
+                        cleanup();
+                        try {
+                            const u = new URL(event.url);
+                            const error = u.searchParams.get('error');
+                            if (error) {
+                                reject(new Error(error));
+                                return;
+                            }
+
+                            const code = u.searchParams.get('code');
+                            if (!code) {
+                                reject(new Error('missing_code'));
+                                return;
+                            }
+
+                            resolve(code);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    }).then((h) => {
+                        handle = h;
+                    });
+
+                    timer = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('passkey_bridge_timeout'));
+                    }, PASSKEY_TIMEOUT_MS);
+                });
+
+            const csrf = () =>
+                document.querySelector('meta[name=csrf-token]')?.content || '';
+
+            const exchange = async (code, verifier) => {
+                const r = await fetch('/auth/passkey-bridge/exchange', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code,
+                        code_verifier: verifier,
+                    }),
+                });
+
+                const body = await r.json().catch(() => ({}));
+
+                if (!r.ok) {
+                    throw new Error(body.statusMessage || 'exchange_failed');
+                }
+
+                return body.data || {};
+            };
+
+            bridge.passkeyLogin = async () => {
+                try {
+                    const { verifier, challenge } = await generatePkcePair();
+                    const url = new URL(
+                        '/auth/passkey-bridge/login',
+                        window.location.origin,
+                    );
+                    url.searchParams.set('code_challenge', challenge);
+                    url.searchParams.set('redirect_uri', PASSKEY_REDIRECT_URI);
+
+                    const callbackPromise = waitForCallback();
+                    await Browser.open({
+                        url: url.toString(),
+                        presentationStyle: 'popover',
+                    });
+
+                    const code = await callbackPromise;
+                    await Browser.close().catch(() => {});
+
+                    const { magic_login_url: magicLoginUrl } = await exchange(
+                        code,
+                        verifier,
+                    );
+
+                    if (magicLoginUrl) {
+                        window.location.href = magicLoginUrl;
+                    }
+
+                    return { success: true };
+                } catch (error) {
+                    await Browser.close().catch(() => {});
+
+                    return {
+                        success: false,
+                        error: error?.message || 'passkey_login_failed',
+                    };
+                }
+            };
+
+            bridge.passkeyRegister = async () => {
+                try {
+                    const { verifier, challenge } = await generatePkcePair();
+                    const startResp = await fetch(
+                        '/auth/passkey-bridge/start-registration',
+                        {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Accept: 'application/json',
+                                'X-CSRF-TOKEN': csrf(),
+                            },
+                            body: JSON.stringify({
+                                code_challenge: challenge,
+                                redirect_uri: PASSKEY_REDIRECT_URI,
+                            }),
+                        },
+                    );
+
+                    const startBody = await startResp.json().catch(() => ({}));
+
+                    if (!startResp.ok) {
+                        throw new Error(
+                            startBody.statusMessage || 'start_failed',
+                        );
+                    }
+
+                    const bridgeUrl = startBody.data?.bridge_url;
+
+                    const callbackPromise = waitForCallback();
+                    await Browser.open({
+                        url: bridgeUrl,
+                        presentationStyle: 'popover',
+                    });
+
+                    const code = await callbackPromise;
+                    await Browser.close().catch(() => {});
+                    await exchange(code, verifier);
+
+                    return { success: true };
+                } catch (error) {
+                    await Browser.close().catch(() => {});
+
+                    return {
+                        success: false,
+                        error: error?.message || 'passkey_register_failed',
+                    };
+                }
+            };
+
+            // Override the global helper used by the existing
+            // <x-authenticate-passkey> button on the login page so it goes
+            // through the bridge when running inside the Capacitor app.
+            window.authenticateWithPasskey = async () => bridge.passkeyLogin();
+        }
 
         // Camera - Capture new photo
         if (Camera) {

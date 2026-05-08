@@ -141,7 +141,7 @@
                         @section('force-two-factor-setup.passkey')
                             <div
                                 class="space-y-4"
-                                x-show="browserSupportsWebAuthn"
+                                x-show="browserSupportsWebAuthn()"
                                 x-cloak
                             >
                                 <h3 class="text-lg font-semibold text-gray-900">
@@ -160,7 +160,20 @@
                                         {{ __('Once the passkey is registered the page reloads and you can continue.') }}
                                     </li>
                                 </ol>
-                                <livewire:passkeys />
+                                <div
+                                    x-show="
+                                        !window.nuxbeAppBridge?.isNative?.()
+                                    "
+                                    x-cloak
+                                >
+                                    <livewire:passkeys />
+                                </div>
+                                <div
+                                    x-show="window.nuxbeAppBridge?.isNative?.()"
+                                    x-cloak
+                                >
+                                    <x-flux::passkey-bridge-register />
+                                </div>
                                 <div class="flex justify-between gap-2 pt-2">
                                     <x-button
                                         :text="__('Back')"
