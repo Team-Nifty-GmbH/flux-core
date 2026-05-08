@@ -2,10 +2,13 @@
 
 namespace FluxErp\Http\Controllers;
 
-use Closure;
+use FluxErp\Http\Requests\PasskeyBridgeExchangeRequest;
+use FluxErp\Http\Requests\PasskeyBridgeFinishLoginRequest;
+use FluxErp\Http\Requests\PasskeyBridgeFinishRegisterRequest;
+use FluxErp\Http\Requests\PasskeyBridgeShowRegisterRequest;
+use FluxErp\Http\Requests\PasskeyBridgeStartRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
@@ -29,9 +32,9 @@ class PasskeyBridgeController extends Controller
 
     protected const TRANSFER_PREFIX = 'passkey_bridge_transfer_';
 
-    public function showLogin(Request $request): View
+    public function showLogin(PasskeyBridgeStartRequest $request): View
     {
-        $validated = $this->validateBridgeRequest($request);
+        $validated = $request->validated();
 
         $action = PasskeyConfig::getAction(
             'generate_passkey_authentication_options',
@@ -57,12 +60,9 @@ class PasskeyBridgeController extends Controller
         ]);
     }
 
-    public function finishLogin(Request $request): JsonResponse
+    public function finishLogin(PasskeyBridgeFinishLoginRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'code' => ['required', 'string', 'size:64'],
-            'response' => ['required', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $state = $this->getState($validated['code']);
 
@@ -89,7 +89,7 @@ class PasskeyBridgeController extends Controller
         ]);
     }
 
-    public function startRegistration(Request $request): JsonResponse
+    public function startRegistration(PasskeyBridgeStartRequest $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -97,7 +97,7 @@ class PasskeyBridgeController extends Controller
             return response()->json(['error' => 'unauthenticated'], 401);
         }
 
-        $validated = $this->validateBridgeRequest($request);
+        $validated = $request->validated();
 
         $action = PasskeyConfig::getAction(
             'generate_passkey_register_options',
@@ -129,11 +129,9 @@ class PasskeyBridgeController extends Controller
         ]);
     }
 
-    public function showRegister(Request $request): View
+    public function showRegister(PasskeyBridgeShowRegisterRequest $request): View
     {
-        $validated = $request->validate([
-            'transfer_token' => ['required', 'string', 'size:64'],
-        ]);
+        $validated = $request->validated();
 
         $code = Cache::get(self::TRANSFER_PREFIX . $validated['transfer_token']);
         $state = $code ? $this->getState($code) : null;
@@ -152,14 +150,9 @@ class PasskeyBridgeController extends Controller
         ]);
     }
 
-    public function finishRegister(Request $request): JsonResponse
+    public function finishRegister(PasskeyBridgeFinishRegisterRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'code' => ['required', 'string', 'size:64'],
-            'transfer_token' => ['required', 'string', 'size:64'],
-            'name' => ['required', 'string', 'max:255'],
-            'response' => ['required', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $mappedCode = Cache::get(self::TRANSFER_PREFIX . $validated['transfer_token']);
         $state = $this->getState($validated['code']);
@@ -201,12 +194,9 @@ class PasskeyBridgeController extends Controller
         ]);
     }
 
-    public function exchange(Request $request): JsonResponse
+    public function exchange(PasskeyBridgeExchangeRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'code' => ['required', 'string', 'size:64'],
-            'code_verifier' => ['required', 'string', 'min:43', 'max:128'],
-        ]);
+        $validated = $request->validated();
 
         $state = Cache::pull(self::STATE_PREFIX . $validated['code']);
 
@@ -229,29 +219,6 @@ class PasskeyBridgeController extends Controller
         return response()->json([
             'magic_login_url' => $this->generateMagicLoginUrl($state),
         ]);
-    }
-
-    protected function validateBridgeRequest(Request $request): array
-    {
-        return $request->validate([
-            'code_challenge' => ['required', 'string', 'size:43'],
-            'redirect_uri' => ['required', 'string', 'max:255', $this->redirectUriRule()],
-        ]);
-    }
-
-    protected function redirectUriRule(): Closure
-    {
-        return function (string $attribute, string $value, Closure $fail): void {
-            $scheme = parse_url($value, PHP_URL_SCHEME);
-            $allowed = config(
-                'flux.passkey_bridge.allowed_redirect_schemes',
-                ['nuxbe']
-            );
-
-            if (! is_string($scheme) || ! in_array($scheme, $allowed, true)) {
-                $fail('The :attribute scheme is not permitted.');
-            }
-        };
     }
 
     protected function buildRedirect(string $redirectUri, string $code): string

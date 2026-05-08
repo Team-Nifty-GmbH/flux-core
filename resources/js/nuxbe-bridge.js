@@ -118,6 +118,7 @@ const initializeNativeBridge = async () => {
                         ) {
                             return;
                         }
+
                         cleanup();
                         try {
                             const u = new URL(event.url);
@@ -161,10 +162,12 @@ const initializeNativeBridge = async () => {
                         code_verifier: verifier,
                     }),
                 });
+
                 if (!r.ok) {
                     const data = await r.json().catch(() => ({}));
                     throw new Error(data.error || 'exchange_failed');
                 }
+
                 return r.json();
             };
 
@@ -191,12 +194,15 @@ const initializeNativeBridge = async () => {
                         code,
                         verifier,
                     );
+
                     if (magicLoginUrl) {
                         window.location.href = magicLoginUrl;
                     }
+
                     return { success: true };
                 } catch (error) {
                     await Browser.close().catch(() => {});
+
                     return {
                         success: false,
                         error: error?.message || 'passkey_login_failed',
@@ -207,7 +213,6 @@ const initializeNativeBridge = async () => {
             bridge.passkeyRegister = async () => {
                 try {
                     const { verifier, challenge } = await generatePkcePair();
-
                     const startResp = await fetch(
                         '/auth/passkey-bridge/start-registration',
                         {
@@ -224,10 +229,12 @@ const initializeNativeBridge = async () => {
                             }),
                         },
                     );
+
                     if (!startResp.ok) {
                         const data = await startResp.json().catch(() => ({}));
                         throw new Error(data.error || 'start_failed');
                     }
+
                     const { bridge_url: bridgeUrl } = await startResp.json();
 
                     const callbackPromise = waitForCallback();
@@ -238,11 +245,12 @@ const initializeNativeBridge = async () => {
 
                     const code = await callbackPromise;
                     await Browser.close().catch(() => {});
-
                     await exchange(code, verifier);
+
                     return { success: true };
                 } catch (error) {
                     await Browser.close().catch(() => {});
+
                     return {
                         success: false,
                         error: error?.message || 'passkey_register_failed',
