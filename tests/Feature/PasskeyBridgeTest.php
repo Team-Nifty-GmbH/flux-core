@@ -75,21 +75,23 @@ test('showLogin stores a login state in cache and renders the page', function ()
 });
 
 test('showLogin rejects a redirect_uri scheme that is not allowed', function (): void {
-    $response = $this->get(route('passkey-bridge.login.show', [
+    $response = $this->getJson(route('passkey-bridge.login.show', [
         'code_challenge' => pkceChallenge(pkceVerifier()),
         'redirect_uri' => 'https://evil.example.com/callback',
     ]));
 
-    $response->assertSessionHasErrors('redirect_uri');
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('redirect_uri');
 });
 
 test('showLogin rejects a code_challenge with the wrong length', function (): void {
-    $response = $this->get(route('passkey-bridge.login.show', [
+    $response = $this->getJson(route('passkey-bridge.login.show', [
         'code_challenge' => 'too-short',
         'redirect_uri' => 'nuxbe://auth-callback',
     ]));
 
-    $response->assertSessionHasErrors('code_challenge');
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('code_challenge');
 });
 
 test('finishLogin attaches the authenticated user and returns the redirect', function (): void {
