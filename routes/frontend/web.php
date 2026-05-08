@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Actions\Printing;
 use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
@@ -121,8 +122,10 @@ use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
@@ -373,5 +376,21 @@ Route::middleware('web')
             Route::get('/media-private/{media}/{filename}', function (Media $media) {
                 return $media;
             })->name('media.private');
+
+            Route::get('/media-collection-download/{token}', function (string $token) {
+                $payload = Crypt::decrypt($token);
+
+                $stream = DownloadMultipleMedia::make(data_get($payload, 'data') ?? [])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+
+                return response()->streamDownload(
+                    fn () => $stream->getZipStream(),
+                    Str::finish((string) (data_get($payload, 'name') ?? 'media'), '.zip'),
+                    ['Content-Type' => 'application/zip'],
+                );
+            })
+                ->name('media-collection.download');
         });
     });
