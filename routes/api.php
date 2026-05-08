@@ -193,6 +193,11 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
+use FluxErp\Actions\Product\PromoteParentToStandalone;
+use FluxErp\Actions\Product\ResetFieldOnAllVariants;
+use FluxErp\Actions\Product\ResetProductField;
+use FluxErp\Actions\Product\ResetProductRelation;
+use FluxErp\Actions\Product\ResetRelationOnAllVariants;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
@@ -935,6 +940,11 @@ Route::prefix('api')
                 Route::put('/products', UpdateProduct::class);
                 Route::delete('/products/{id}', DeleteProduct::class);
                 Route::post('/products/{id}/restore', RestoreProduct::class);
+                Route::post('/products/{id}/promote-to-standalone', PromoteParentToStandalone::class);
+                Route::post('/products/{id}/reset-field', ResetProductField::class);
+                Route::post('/products/{id}/reset-relation', ResetProductRelation::class);
+                Route::post('/products/{parent_id}/variants/reset-field', ResetFieldOnAllVariants::class);
+                Route::post('/products/{parent_id}/variants/reset-relation', ResetRelationOnAllVariants::class);
 
                 // Product bundle products
                 Route::get('/product-bundle-products/{id}', [BaseController::class, 'show'])
