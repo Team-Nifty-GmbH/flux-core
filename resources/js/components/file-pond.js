@@ -31,7 +31,9 @@ async function chunkedUpload(file, progress) {
         headers: {
             'X-CSRF-TOKEN': csrfToken(),
             'Upload-Length': String(file.size),
-            'Upload-Name': btoa(String.fromCharCode(...new TextEncoder().encode(file.name))),
+            'Upload-Name': btoa(
+                String.fromCharCode(...new TextEncoder().encode(file.name)),
+            ),
         },
     });
 
@@ -57,7 +59,9 @@ async function chunkedUpload(file, progress) {
                 'Content-Type': 'application/offset+octet-stream',
                 'Upload-Offset': String(offset),
                 'Upload-Length': String(file.size),
-                'Upload-Name': btoa(String.fromCharCode(...new TextEncoder().encode(file.name))),
+                'Upload-Name': btoa(
+                    String.fromCharCode(...new TextEncoder().encode(file.name)),
+                ),
             },
             body: chunk,
         });
