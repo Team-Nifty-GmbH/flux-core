@@ -170,47 +170,6 @@ test('chunk patch rejects mismatching offsets', function (): void {
     $response->assertStatus(409);
 });
 
-test('chunk head returns current offset for resume', function (): void {
-    $initResponse = $this->call(
-        method: 'POST',
-        uri: route('file-pond.chunk'),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Length' => '2048',
-            'Upload-Name' => base64_encode('test.pdf'),
-        ])
-    );
-
-    $initResponse->assertOk();
-    $signedPath = $initResponse->getContent();
-
-    $headBeforePatch = $this->call(
-        method: 'HEAD',
-        uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
-    );
-    expect($headBeforePatch->status())->toBe(200, 'HEAD before PATCH failed: ' . $headBeforePatch->getContent());
-    expect((int) $headBeforePatch->headers->get('Upload-Offset'))->toBe(0);
-
-    $patchResponse = $this->call(
-        method: 'PATCH',
-        uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
-        server: $this->transformHeadersToServerVars([
-            'Upload-Offset' => '0',
-            'Content-Type' => 'application/offset+octet-stream',
-        ]),
-        content: str_repeat('a', 512),
-    );
-
-    $patchResponse->assertNoContent();
-
-    $response = $this->call(
-        method: 'HEAD',
-        uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
-    );
-
-    expect($response->status())->toBe(200, 'HEAD after PATCH failed: ' . $response->getContent());
-    expect((int) $response->headers->get('Upload-Offset'))->toBe(512);
-});
-
 test('chunk patch rejects requests from other users', function (): void {
     $initResponse = $this->call(
         method: 'POST',

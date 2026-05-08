@@ -27,7 +27,6 @@ class FilePondChunkController extends Controller
         return match ($request->method()) {
             'POST' => $this->init($request),
             'PATCH' => $this->patch($request),
-            'HEAD' => $this->head($request),
             default => response('Method Not Allowed', 405),
         };
     }
@@ -136,22 +135,6 @@ class FilePondChunkController extends Controller
 
         return response('', 204, [
             'Upload-Offset' => (string) $newSize,
-        ]);
-    }
-
-    protected function head(Request $request): Response
-    {
-        [$disk, $filename, , $error] = $this->resolveTransfer($request);
-        if ($error) {
-            return $error;
-        }
-
-        $absolutePath = $disk->path(FileUploadConfiguration::path($filename));
-        $currentSize = file_exists($absolutePath) ? filesize($absolutePath) : 0;
-
-        return response('', 200, [
-            'Upload-Offset' => (string) $currentSize,
-            'Cache-Control' => 'no-store',
         ]);
     }
 
