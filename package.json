@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build && cp node_modules/@techstark/opencv-js/dist/opencv.js dist/opencv.js",
+        "build": "vite build && node scripts/copy-opencv.mjs",
         "format": "prettier --write ."
     },
     "devDependencies": {

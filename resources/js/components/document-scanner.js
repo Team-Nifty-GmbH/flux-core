@@ -234,12 +234,29 @@ export default ($wire) => ({
         // streams large scripts reliably across mobile WebViews. Cache the
         // promise on window so a second mount of the modal reuses it.
         if (!window.__fluxOpenCvLoading) {
+            const TIMEOUT_MS = 30_000;
             window.__fluxOpenCvLoading = new Promise((resolve, reject) => {
+                let timeoutId = null;
+                const succeed = () => {
+                    window.clearTimeout(timeoutId);
+                    resolve();
+                };
+                const fail = (error) => {
+                    window.clearTimeout(timeoutId);
+                    delete window.__fluxOpenCvLoading;
+                    reject(error);
+                };
+
+                timeoutId = window.setTimeout(
+                    () => fail(new Error('Timed out loading opencv.js')),
+                    TIMEOUT_MS,
+                );
+
                 const script = document.createElement('script');
                 script.src = '/flux/opencv.js';
                 script.onload = () => {
                     if (!window.cv) {
-                        reject(
+                        fail(
                             new Error(
                                 'opencv.js executed but window.cv is missing',
                             ),
@@ -248,7 +265,7 @@ export default ($wire) => ({
                         return;
                     }
                     if (window.cv.HEAPU8) {
-                        resolve();
+                        succeed();
 
                         return;
                     }
@@ -261,11 +278,11 @@ export default ($wire) => ({
                                 // never let a previous handler block readiness
                             }
                         }
-                        resolve();
+                        succeed();
                     };
                 };
                 script.onerror = () =>
-                    reject(new Error('opencv.js script load failed'));
+                    fail(new Error('opencv.js script load failed'));
                 document.head.appendChild(script);
             });
         }
