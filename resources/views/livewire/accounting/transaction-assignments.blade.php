@@ -156,7 +156,7 @@
                 <x-tab.items :tab="__('All')" />
                 <x-tab.items :tab="__('Assignment suggestions')">
                     <x-slot:right>
-                        <x-badge round="full">
+                        <x-badge round>
                             <x-slot:text>
                                 <span
                                     x-text="$wire.suggestionCount ?? 0"
@@ -167,7 +167,7 @@
                 </x-tab.items>
                 <x-tab.items :tab="__('Open transactions')">
                     <x-slot:right>
-                        <x-badge round="full">
+                        <x-badge round>
                             <x-slot:text>
                                 <span
                                     x-text="$wire.unassignedCount ?? 0"
