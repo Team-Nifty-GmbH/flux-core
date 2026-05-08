@@ -191,3 +191,56 @@ test('variant prices tab shows Vererbt badge for inherited price-lists', functio
     Livewire::test(Product::class, ['id' => $variant->getKey()])
         ->assertSeeHtml('Vererbt');
 });
+
+test('parent product computes inheritance counters per inheritable field', function (): void {
+    $parent = ProductModel::factory()->create();
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $component = Livewire::test(Product::class, ['id' => $parent->getKey()]);
+
+    $counters = $component->instance()->inheritanceCounters;
+
+    expect($counters['name']['inheriting'])->toBe(1);
+    expect($counters['name']['total'])->toBe(2);
+    expect($counters['description']['inheriting'])->toBe(2);
+    expect($counters['description']['total'])->toBe(2);
+});
+
+test('inheritanceCounters is empty for non-parent products', function (): void {
+    $product = ProductModel::factory()->create([
+        'parent_id' => null,
+        'was_parent' => false,
+    ]);
+
+    $component = Livewire::test(Product::class, ['id' => $product->getKey()]);
+
+    expect($component->instance()->inheritanceCounters)->toBe([]);
+});
+
+test('variant bulk-reset panel renders on parent product edit view', function (): void {
+    $parent = ProductModel::factory()->create();
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+
+    Livewire::test(Product::class, ['id' => $parent->getKey()])
+        ->assertSeeHtml('Auswirkung auf Varianten');
+});
+
+test('variant bulk-reset panel does not render on non-parent products', function (): void {
+    $product = ProductModel::factory()->create([
+        'parent_id' => null,
+        'was_parent' => false,
+    ]);
+
+    Livewire::test(Product::class, ['id' => $product->getKey()])
+        ->assertDontSeeHtml('Auswirkung auf Varianten');
+});

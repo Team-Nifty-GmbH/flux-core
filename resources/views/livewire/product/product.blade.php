@@ -97,6 +97,9 @@
             @stack('product-detail-header-actions')
         </div>
     </div>
+    <x-flux::product.variant-bulk-reset
+        :counters="$this->inheritanceCounters"
+    />
     <x-flux::tabs wire:model.live="tab" wire:loading="tab" :$tabs wire:ignore />
     @stack('product-detail-after-tabs')
 </div>

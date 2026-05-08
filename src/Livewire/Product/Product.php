@@ -561,6 +561,41 @@ class Product extends Component
         return app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
     }
 
+    #[Computed]
+    public function inheritanceCounters(): array
+    {
+        $product = $this->product->getProductModel();
+        if (! $product) {
+            return [];
+        }
+
+        $hasChildren = $product->children()->exists();
+        if (! $product->was_parent && ! $hasChildren) {
+            return [];
+        }
+
+        $children = $product->children()->get(['id', 'overridden_fields']);
+        $totalVariants = $children->count();
+
+        if ($totalVariants === 0) {
+            return [];
+        }
+
+        $counters = [];
+        foreach ($product->getInheritableFields() as $field) {
+            $overriding = $children->filter(
+                fn ($v) => in_array($field, $v->overridden_fields ?? [], strict: true)
+            )->count();
+
+            $counters[$field] = [
+                'inheriting' => $totalVariants - $overriding,
+                'total' => $totalVariants,
+            ];
+        }
+
+        return $counters;
+    }
+
     #[Computed(persist: true)]
     public function viewName()
     {
