@@ -8,6 +8,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Tenant;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function (): void {
     $this->tenant = Tenant::default();
@@ -514,3 +515,45 @@ it('resetRelation throws on non-inheritable relation', function (): void {
 
     $variant->resetRelation('orderPositions');
 })->throws(InvalidArgumentException::class, 'orderPositions');
+
+it('resetFieldOnAllVariants issues a bounded number of queries (set-based)', function (): void {
+    $parent = Product::factory()->create();
+    Product::factory()->count(10)->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+
+    DB::enableQueryLog();
+    $parent->resetFieldOnAllVariants('name');
+    $log = collect(DB::getQueryLog())
+        ->reject(fn (array $entry): bool => str_contains($entry['query'], 'from `languages`'))
+        ->values();
+    DB::disableQueryLog();
+
+    // Pre-refactor: 1 children select + N per-variant saves => grows with N.
+    // Post-refactor: 1 children select + 1 grouped UPDATE (transaction-wrapped, BEGIN/COMMIT
+    // not emitted by the query log) => 2 non-language queries regardless of variant count.
+    expect($log->count())->toBeLessThan(5);
+});
+
+it('resetRelationOnAllVariants issues a bounded number of queries for BelongsToMany', function (): void {
+    $cat = Category::factory()->create([
+        'model_type' => morph_alias(Product::class),
+    ]);
+    $parent = Product::factory()->create();
+    $variants = Product::factory()->count(5)->create(['parent_id' => $parent->getKey()]);
+    foreach ($variants as $variant) {
+        $variant->ownCategories()->attach([$cat->getKey()]);
+    }
+
+    DB::enableQueryLog();
+    $parent->resetRelationOnAllVariants('categories', $cat->getKey());
+    $log = collect(DB::getQueryLog())
+        ->reject(fn (array $entry): bool => str_contains($entry['query'], 'from `languages`'))
+        ->values();
+    DB::disableQueryLog();
+
+    // Post-refactor: 1 children pluck + 1 sample variant select + 1 distinct count + 1 delete
+    // = 4 non-language queries regardless of variant count.
+    expect($log->count())->toBeLessThan(6);
+});

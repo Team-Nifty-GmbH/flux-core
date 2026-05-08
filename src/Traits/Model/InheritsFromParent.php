@@ -4,6 +4,10 @@ namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Tenant;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use LogicException;
 
@@ -127,17 +131,35 @@ trait InheritsFromParent
             );
         }
 
-        $touched = 0;
+        $variants = $this->children()
+            ->whereJsonContains('overridden_fields', $field)
+            ->select(['id', 'overridden_fields'])
+            ->get();
 
-        $this->children()->each(function (self $variant) use ($field, &$touched): void {
-            if ($variant->overrides($field)) {
-                $variant->resetField($field);
-                $variant->save();
-                $touched++;
+        if ($variants->isEmpty()) {
+            return 0;
+        }
+
+        // Group by the new shape so we issue one UPDATE per distinct resulting JSON.
+        $groups = $variants->groupBy(function ($variant) use ($field) {
+            $remaining = array_values(array_filter(
+                $variant->overridden_fields ?? [],
+                fn (string $f): bool => $f !== $field
+            ));
+
+            return $remaining === [] ? '__null__' : json_encode($remaining);
+        });
+
+        DB::transaction(function () use ($groups): void {
+            foreach ($groups as $newShapeKey => $rows) {
+                $newValue = $newShapeKey === '__null__' ? null : json_decode($newShapeKey, true);
+                static::query()
+                    ->whereKey($rows->pluck('id')->all())
+                    ->update(['overridden_fields' => $newValue]);
             }
         });
 
-        return $touched;
+        return $variants->count();
     }
 
     public function resetRelation(string $relation, mixed $key = null): static
@@ -179,20 +201,65 @@ trait InheritsFromParent
             );
         }
 
-        $touched = 0;
         $ownMethod = 'own' . ucfirst($relation);
+        $variantIds = $this->children()->pluck('id');
 
-        $this->children()->each(function (self $variant) use ($relation, $key, $ownMethod, &$touched): void {
-            $countBefore = $variant->{$ownMethod}()->count();
-            $variant->resetRelation($relation, $key);
-            $countAfter = $variant->{$ownMethod}()->count();
+        if ($variantIds->isEmpty()) {
+            return 0;
+        }
 
-            if ($countAfter < $countBefore) {
-                $touched++;
+        // Build a fresh "own" relation on a representative variant so we can read its
+        // SQL shape without invoking it on each child individually.
+        $sampleVariant = static::query()->whereKey($variantIds->first())->first();
+        if (! $sampleVariant) {
+            return 0;
+        }
+
+        $rel = $sampleVariant->{$ownMethod}();
+
+        if ($rel instanceof BelongsToMany) {
+            $pivotTable = $rel->getTable();
+            $foreignPivotKey = $rel->getForeignPivotKeyName();
+            $relatedPivotKey = $rel->getRelatedPivotKeyName();
+
+            $query = DB::table($pivotTable)
+                ->whereIn($foreignPivotKey, $variantIds);
+
+            if ($key !== null) {
+                $query->where($relatedPivotKey, $key);
             }
-        });
 
-        return $touched;
+            if ($rel instanceof MorphToMany) {
+                $query->where($rel->getMorphType(), $rel->getMorphClass());
+            }
+
+            $touched = $query->clone()->distinct()->pluck($foreignPivotKey)->count();
+
+            $query->delete();
+
+            return $touched;
+        }
+
+        if ($rel instanceof HasMany) {
+            $relatedTable = $rel->getRelated()->getTable();
+            $relatedForeignKey = $rel->getForeignKeyName();
+
+            $query = DB::table($relatedTable)
+                ->whereIn($relatedForeignKey, $variantIds);
+
+            if ($key !== null) {
+                $foreignKey = $this->resolveForeignKeyForInheritableRelation($relation);
+                $query->where($foreignKey, $key);
+            }
+
+            $touched = $query->clone()->distinct()->pluck($relatedForeignKey)->count();
+
+            $query->delete();
+
+            return $touched;
+        }
+
+        throw new LogicException("Unsupported relation type for bulk reset: [$relation].");
     }
 
     /**
