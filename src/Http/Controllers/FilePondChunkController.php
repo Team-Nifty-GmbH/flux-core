@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -234,12 +235,17 @@ class FilePondChunkController extends Controller
 
     protected function maxUploadSize(): int
     {
+        $default = 5 * 1024 * 1024 * 1024;
         $configured = config('flux.file_uploads.max_size');
 
-        if ($configured) {
-            return (int) Number::fromFileSizeToBytes($configured);
+        if (! $configured) {
+            return $default;
         }
 
-        return 5 * 1024 * 1024 * 1024;
+        try {
+            return (int) Number::fromFileSizeToBytes($configured);
+        } catch (InvalidArgumentException) {
+            return $default;
+        }
     }
 }
