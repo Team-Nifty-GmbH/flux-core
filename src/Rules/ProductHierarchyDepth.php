@@ -23,8 +23,7 @@ class ProductHierarchyDepth implements ValidationRule
         }
 
         if (! is_null($candidate->parent_id)) {
-            $fail('The :attribute may not point to a variant; only top-level products can have variants.')
-                ->translate();
+            $fail(__('The :attribute may not point to a variant; only top-level products can have variants.'));
         }
     }
 }

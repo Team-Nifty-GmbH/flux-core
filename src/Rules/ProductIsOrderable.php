@@ -25,8 +25,7 @@ class ProductIsOrderable implements ValidationRule
         $hasActiveChildren = $product->children()->where('is_active', true)->exists();
 
         if ($hasActiveChildren || $product->was_parent) {
-            $fail('The selected product has variants — please select a variant instead.')
-                ->translate();
+            $fail(__('The selected product has variants — please select a variant instead.'));
         }
     }
 }

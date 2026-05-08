@@ -22,7 +22,7 @@ class ResetProductField extends FluxAction
     {
         $variant = resolve_static(Product::class, 'query')
             ->whereKey($this->getData('id'))
-            ->first();
+            ->firstOrFail();
 
         $variant->resetField($this->getData('field'));
         $variant->save();

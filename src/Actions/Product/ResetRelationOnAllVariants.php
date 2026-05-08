@@ -22,7 +22,7 @@ class ResetRelationOnAllVariants extends FluxAction
     {
         $parent = resolve_static(Product::class, 'query')
             ->whereKey($this->getData('parent_id'))
-            ->first();
+            ->firstOrFail();
 
         return $parent->resetRelationOnAllVariants(
             $this->getData('relation'),
