@@ -250,7 +250,12 @@ class FluxServiceProvider extends ServiceProvider
             config(['two-factor.recovery.enabled' => false]);
             config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
             config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
-            config(['passkeys.actions.generate_passkey_authentication_options' => resolve_static(GeneratePasskeyAuthenticationOptionsAction::class, 'class')]);
+            config([
+                'passkeys.actions.generate_passkey_authentication_options' => resolve_static(
+                    GeneratePasskeyAuthenticationOptionsAction::class,
+                    'class'
+                ),
+            ]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
