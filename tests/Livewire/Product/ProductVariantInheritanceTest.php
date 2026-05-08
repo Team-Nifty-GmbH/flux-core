@@ -292,3 +292,66 @@ test('inheritanceState returns null on variants with no overrides', function ():
 
     expect($component->instance()->inheritanceState)->toBeNull();
 });
+
+test('variant list filters to only overridden variants when toggle is on', function (): void {
+    $parent = ProductModel::factory()->create();
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $form = new FluxErp\Livewire\Forms\ProductForm(
+        Livewire::new(FluxErp\Livewire\Product\VariantList::class),
+        'product'
+    );
+    $form->fill($parent);
+
+    $component = Livewire::test(FluxErp\Livewire\Product\VariantList::class, ['product' => $form]);
+
+    $reflection = new ReflectionMethod($component->instance(), 'getBuilder');
+    $reflection->setAccessible(true);
+
+    $countAll = $reflection->invoke(
+        $component->instance(),
+        ProductModel::query()->where('parent_id', $parent->getKey())
+    )->count();
+    expect($countAll)->toBe(2);
+
+    $component->set('onlyOverrides', true);
+
+    $countOverrides = $reflection->invoke(
+        $component->instance(),
+        ProductModel::query()->where('parent_id', $parent->getKey())
+    )->count();
+    expect($countOverrides)->toBe(1);
+});
+
+test('variant list eager-loads parent so accessor lookups do not N+1', function (): void {
+    $parent = ProductModel::factory()->create();
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => null,
+    ]);
+
+    $form = new FluxErp\Livewire\Forms\ProductForm(
+        Livewire::new(FluxErp\Livewire\Product\VariantList::class),
+        'product'
+    );
+    $form->fill($parent);
+
+    $component = Livewire::test(FluxErp\Livewire\Product\VariantList::class, ['product' => $form]);
+
+    $reflection = new ReflectionMethod($component->instance(), 'getBuilder');
+    $reflection->setAccessible(true);
+    $builder = $reflection->invoke($component->instance(), ProductModel::query());
+
+    expect($builder->getEagerLoads())->toHaveKey('parent');
+});
