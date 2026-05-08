@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const check = process.argv.includes('--check');
+const langDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'lang');
 
 function sortKeys(obj) {
     if (Array.isArray(obj)) return obj.map(sortKeys);
@@ -21,14 +23,21 @@ function sortKeys(obj) {
     return obj;
 }
 
-const files = readdirSync('lang')
+const files = readdirSync(langDir)
     .filter((f) => f.endsWith('.json'))
-    .map((f) => join('lang', f));
+    .map((f) => join(langDir, f));
 
 let drift = false;
 for (const file of files) {
     const original = readFileSync(file, 'utf8');
-    const parsed = JSON.parse(original);
+
+    let parsed;
+    try {
+        parsed = JSON.parse(original);
+    } catch (err) {
+        throw new Error(`Failed to parse JSON in "${file}": ${err.message}`);
+    }
+
     const sorted = JSON.stringify(sortKeys(parsed), null, 4) + '\n';
 
     if (original === sorted) continue;
