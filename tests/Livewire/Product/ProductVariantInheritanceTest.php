@@ -4,6 +4,7 @@ use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Category;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\Tenant;
+use FluxErp\Models\VatRate;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -354,4 +355,81 @@ test('variant list eager-loads parent so accessor lookups do not N+1', function 
     $builder = $reflection->invoke($component->instance(), ProductModel::query());
 
     expect($builder->getEagerLoads())->toHaveKey('parent');
+});
+
+test('orphaned-parent banner shows on parent that lost all active variants', function (): void {
+    $parent = ProductModel::factory()->create([
+        'parent_id' => null,
+        'was_parent' => true,
+    ]);
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => false,
+    ]);
+
+    Livewire::test(Product::class, ['id' => $parent->getKey()])
+        ->assertSeeHtml('Dieses Produkt hatte Varianten')
+        ->assertSeeHtml('Als eigenständiges Produkt aktivieren')
+        ->assertSeeHtml('Produkt deaktivieren')
+        ->assertSeeHtml('Neue Variante anlegen');
+});
+
+test('orphaned-parent banner does not show when active children exist', function (): void {
+    $parent = ProductModel::factory()->create([
+        'was_parent' => true,
+    ]);
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => true,
+    ]);
+
+    Livewire::test(Product::class, ['id' => $parent->getKey()])
+        ->assertDontSeeHtml('Dieses Produkt hatte Varianten');
+});
+
+test('orphaned-parent banner does not show on standalone products', function (): void {
+    $product = ProductModel::factory()->create([
+        'parent_id' => null,
+        'was_parent' => false,
+    ]);
+
+    Livewire::test(Product::class, ['id' => $product->getKey()])
+        ->assertDontSeeHtml('Dieses Produkt hatte Varianten');
+});
+
+test('isOrphanedParent computed returns true when was_parent and no active children', function (): void {
+    $parent = ProductModel::factory()->create([
+        'was_parent' => true,
+    ]);
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => false,
+    ]);
+
+    $component = Livewire::test(Product::class, ['id' => $parent->getKey()]);
+
+    expect($component->instance()->isOrphanedParent)->toBeTrue();
+});
+
+test('deactivate banner action persists is_active false', function (): void {
+    $parent = ProductModel::factory()
+        ->for(VatRate::default())
+        ->create([
+            'parent_id' => null,
+            'was_parent' => true,
+            'is_active' => true,
+            'is_bundle' => false,
+        ]);
+    $parent->tenants()->attach(Tenant::default()->getKey());
+
+    ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => false,
+    ]);
+
+    Livewire::test(Product::class, ['id' => $parent->getKey()])
+        ->call('deactivate')
+        ->assertReturned(true);
+
+    expect($parent->fresh()->is_active)->toBeFalse();
 });

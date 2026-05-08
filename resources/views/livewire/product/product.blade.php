@@ -97,6 +97,9 @@
             @stack('product-detail-header-actions')
         </div>
     </div>
+    <x-flux::product.inheritance-orphan-banner
+        :visible="$this->isOrphanedParent"
+    />
     @if($state = $this->inheritanceState)
         <x-badge color="amber" sm>
             {{ __(':fields Felder überschrieben, :prices Preise abweichend', $state) }}

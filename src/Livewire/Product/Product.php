@@ -476,6 +476,13 @@ class Product extends Component
         }
     }
 
+    public function deactivate(): bool
+    {
+        $this->product->is_active = false;
+
+        return $this->save();
+    }
+
     public function save(): bool
     {
         if ($this->priceLists !== null) {
@@ -615,6 +622,18 @@ class Product extends Component
         }
 
         return $counters;
+    }
+
+    #[Computed]
+    public function isOrphanedParent(): bool
+    {
+        $product = $this->product->getProductModel();
+
+        if (! $product?->was_parent) {
+            return false;
+        }
+
+        return ! $product->children()->where('is_active', true)->exists();
     }
 
     #[Computed(persist: true)]
