@@ -316,6 +316,19 @@ class FrontendAssets
 
     protected function pretendResponseIsFile(string $path, string $contentType)
     {
-        return Utils::pretendResponseIsFile($path, $contentType);
+        $response = Utils::pretendResponseIsFile($path, $contentType);
+
+        // FrankenPHP / Caddy `encode zstd br gzip` mis-frames brotli responses
+        // for PHP-generated bodies (HEAD returns content-length: 1, GET drops
+        // it entirely). Some clients — notably iOS WKWebView used by Capacitor
+        // — hang the import indefinitely. `no-transform` tells the encoder and
+        // any intermediary to leave the body untouched.
+        $existing = $response->headers->get('Cache-Control', '');
+        $response->headers->set(
+            'Cache-Control',
+            $existing === '' ? 'no-transform' : $existing . ', no-transform',
+        );
+
+        return $response;
     }
 }
