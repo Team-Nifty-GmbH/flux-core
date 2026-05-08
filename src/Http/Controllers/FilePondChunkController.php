@@ -18,27 +18,12 @@ class FilePondChunkController extends Controller
 
     public function handle(Request $request): Response
     {
-        if (! $this->diskSupportsChunking()) {
-            return response('Chunked uploads require a local disk', 501);
-        }
-
         return match ($request->method()) {
             'POST' => $this->init($request),
             'PATCH' => $this->patch($request),
             'HEAD' => $this->head($request),
             default => response('Method Not Allowed', 405),
         };
-    }
-
-    protected function diskSupportsChunking(): bool
-    {
-        if (FileUploadConfiguration::isUsingS3() || FileUploadConfiguration::isUsingGCS()) {
-            return false;
-        }
-
-        $config = FileUploadConfiguration::diskConfig();
-
-        return is_array($config) && ($config['driver'] ?? null) === 'local';
     }
 
     protected function init(Request $request): Response
