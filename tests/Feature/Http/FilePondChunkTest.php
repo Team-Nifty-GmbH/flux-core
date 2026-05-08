@@ -183,6 +183,13 @@ test('chunk head returns current offset for resume', function (): void {
     $initResponse->assertOk();
     $signedPath = $initResponse->getContent();
 
+    $headBeforePatch = $this->call(
+        method: 'HEAD',
+        uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
+    );
+    expect($headBeforePatch->status())->toBe(200, 'HEAD before PATCH failed: ' . $headBeforePatch->getContent());
+    expect((int) $headBeforePatch->headers->get('Upload-Offset'))->toBe(0);
+
     $patchResponse = $this->call(
         method: 'PATCH',
         uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
@@ -200,7 +207,7 @@ test('chunk head returns current offset for resume', function (): void {
         uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
     );
 
-    $response->assertOk();
+    expect($response->status())->toBe(200, 'HEAD after PATCH failed: ' . $response->getContent());
     expect((int) $response->headers->get('Upload-Offset'))->toBe(512);
 });
 
