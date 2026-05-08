@@ -3,6 +3,13 @@
 use FluxErp\Actions\Passkey\GeneratePasskeyAuthenticationOptionsAction;
 use Illuminate\Support\Facades\Session;
 
+beforeEach(function (): void {
+    config([
+        'passkeys.relying_party.id' => 'localhost',
+        'passkeys.relying_party.name' => 'Flux Test',
+    ]);
+});
+
 test('options are persisted with put so they survive aged flash data', function (): void {
     Session::start();
 
