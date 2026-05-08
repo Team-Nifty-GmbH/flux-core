@@ -18,6 +18,12 @@ class FilePondChunkController extends Controller
 
     public function handle(Request $request): Response
     {
+        // S3 / cloud disks are not supported yet — a future iteration could
+        // proxy chunks straight into S3 multipart uploads.
+        if (FileUploadConfiguration::isUsingS3() || FileUploadConfiguration::isUsingGCS()) {
+            return response('Chunked uploads require a local disk', 501);
+        }
+
         return match ($request->method()) {
             'POST' => $this->init($request),
             'PATCH' => $this->patch($request),

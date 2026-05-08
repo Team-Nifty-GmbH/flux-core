@@ -180,9 +180,10 @@ test('chunk head returns current offset for resume', function (): void {
         ])
     );
 
+    $initResponse->assertOk();
     $signedPath = $initResponse->getContent();
 
-    $this->call(
+    $patchResponse = $this->call(
         method: 'PATCH',
         uri: route('file-pond.chunk') . '?patch=' . urlencode($signedPath),
         server: $this->transformHeadersToServerVars([
@@ -191,6 +192,8 @@ test('chunk head returns current offset for resume', function (): void {
         ]),
         content: str_repeat('a', 512),
     );
+
+    $patchResponse->assertNoContent();
 
     $response = $this->call(
         method: 'HEAD',
