@@ -101,3 +101,21 @@ test('promoteToStandalone surfaces error when active children still exist', func
         ->call('promoteToStandalone')
         ->assertHasErrors(['inheritance']);
 });
+
+test('variant edit form renders inheritance indicator on inheritable fields', function (): void {
+    $parent = ProductModel::factory()->create();
+    $variant = ProductModel::factory()->create([
+        'parent_id' => $parent->getKey(),
+    ]);
+
+    Livewire::test(Product::class, ['id' => $variant->getKey()])
+        ->assertSeeHtml('Vererbt');
+});
+
+test('non-variant edit form does not render inheritance indicator chrome', function (): void {
+    $product = ProductModel::factory()->create(['parent_id' => null]);
+
+    Livewire::test(Product::class, ['id' => $product->getKey()])
+        ->assertDontSeeHtml('Vererbt')
+        ->assertDontSeeHtml('Überschrieben');
+});

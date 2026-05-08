@@ -6,6 +6,7 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\RestoreProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
@@ -119,6 +120,8 @@ class ProductForm extends FluxForm
 
     public ?float $weight_gram = null;
 
+    protected ?Product $cachedProductModel = null;
+
     public function fill($values): void
     {
         if ($values instanceof Model) {
@@ -160,6 +163,17 @@ class ProductForm extends FluxForm
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
             ];
         }, $this->bundle_products);
+    }
+
+    public function getProductModel(): ?Product
+    {
+        if (! $this->id) {
+            return null;
+        }
+
+        return $this->cachedProductModel ??= resolve_static(Product::class, 'query')
+            ->whereKey($this->id)
+            ->first();
     }
 
     protected function getActions(): array
