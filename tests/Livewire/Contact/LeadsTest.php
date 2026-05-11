@@ -69,7 +69,10 @@ test('can create lead via save', function (): void {
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
     ]);
-    $leadState = LeadState::factory()->create();
+    $leadState = LeadState::factory()->create([
+        'is_won' => false,
+        'is_lost' => false,
+    ]);
 
     Livewire::test(Leads::class, ['contactId' => $contact->getKey()])
         ->call('edit', null)
