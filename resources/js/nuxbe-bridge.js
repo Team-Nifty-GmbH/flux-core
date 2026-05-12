@@ -113,34 +113,36 @@ const initializeNativeBridge = async () => {
                         if (timer) clearTimeout(timer);
                     };
 
-                    App.addListener('appUrlOpen', (event) => {
-                        if (
-                            !event?.url ||
-                            !event.url.startsWith(PASSKEY_REDIRECT_URI)
-                        ) {
-                            return;
-                        }
-
-                        cleanup();
-                        try {
-                            const u = new URL(event.url);
-                            const error = u.searchParams.get('error');
-                            if (error) {
-                                reject(new Error(error));
+                    Promise.resolve(
+                        App.addListener('appUrlOpen', (event) => {
+                            if (
+                                !event?.url ||
+                                !event.url.startsWith(PASSKEY_REDIRECT_URI)
+                            ) {
                                 return;
                             }
 
-                            const code = u.searchParams.get('code');
-                            if (!code) {
-                                reject(new Error('missing_code'));
-                                return;
-                            }
+                            cleanup();
+                            try {
+                                const u = new URL(event.url);
+                                const error = u.searchParams.get('error');
+                                if (error) {
+                                    reject(new Error(error));
+                                    return;
+                                }
 
-                            resolve(code);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    }).then((h) => {
+                                const code = u.searchParams.get('code');
+                                if (!code) {
+                                    reject(new Error('missing_code'));
+                                    return;
+                                }
+
+                                resolve(code);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        }),
+                    ).then((h) => {
                         handle = h;
                     });
 
