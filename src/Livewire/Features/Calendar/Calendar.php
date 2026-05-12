@@ -32,8 +32,6 @@ class Calendar extends Component
 
     public CalendarForm $calendar;
 
-    public ?array $calendarObject = null;
-
     #[Locked]
     public array $calendarPeriod = [
         'start' => null,
@@ -82,6 +80,13 @@ class Calendar extends Component
     }
 
     #[Renderless]
+    public function changeCalendar(array $calendar = []): void
+    {
+        $this->calendar->reset();
+        $this->calendar->fill($calendar);
+    }
+
+    #[Renderless]
     public function deleteCalendar(): bool
     {
         try {
@@ -106,8 +111,6 @@ class Calendar extends Component
         JS);
     }
 
-    #[On('calendar-event-click')]
-    #[On('calendar-event-change')]
     public function editEvent(array $event, ?string $trigger = null): void
     {
         $isEditable = data_get($event, 'extendedProps.is_editable', true)
@@ -393,8 +396,6 @@ class Calendar extends Component
         $this->storeViewSettings($view);
     }
 
-    #[Renderless]
-    #[On('calendar-date-click')]
     public function timeslotClick(bool $allDay, string $dateStr, array $view): void
     {
         if (! $this->calendar->is_editable) {
@@ -424,12 +425,6 @@ class Calendar extends Component
             'is_repeatable' => $this->calendar->has_repeatable_events,
             'has_repeats' => false,
         ]);
-    }
-
-    public function updatedCalendarObject(): void
-    {
-        $this->calendar->reset();
-        $this->calendar->fill($this->calendarObject ?? []);
     }
 
     protected function calculateRepeatableEvents($calendar, Collection $calendarEvents): Collection
