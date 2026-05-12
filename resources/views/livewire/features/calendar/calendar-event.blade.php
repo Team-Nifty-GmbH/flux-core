@@ -18,16 +18,21 @@
                                     await $wire.isCalendarEventRepeatable(
                                         $event.detail.select.id,
                                     ),
-                                )
+                                );
                                 $wire.$set(
                                     'event.extended_props',
-                                    $event.detail.select.customProperties.map(function (item) {
-                                        item.value = null;
+                                    $event.detail.select.customProperties.map(
+                                        function (item) {
+                                            item.value = null;
 
-                                        return item;
-                                    })
-                                )
-                                $wire.$set('event.calendar', $event.detail.select)
+                                            return item;
+                                        },
+                                    ),
+                                );
+                                $wire.$set(
+                                    'event.calendar',
+                                    $event.detail.select,
+                                );
                             "
                             select="label:label|value:id"
                             :request="[
