@@ -35,6 +35,9 @@
                         throw new Error(data.statusMessage || 'finish_failed');
                     }
                     const { data: { redirect } = {} } = await r.json();
+                    if (! redirect) {
+                        throw new Error('missing_redirect');
+                    }
                     window.location.href = redirect;
                 } catch (e) {
                     this.state = 'error';
