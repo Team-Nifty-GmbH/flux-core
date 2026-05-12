@@ -6,7 +6,12 @@
     x-bind:style="{ height: height + 'px' }"
     class="flex h-full"
 >
-    <livewire:features.calendar.calendar-event-edit wire:model="event" />
+    @island(name: 'calendar-event')
+        <livewire:features.calendar.calendar-event-edit
+            wire:model="event"
+            wire:key="calendar-event-edit"
+        />
+    @endisland
     @section('calendar-modal')
         <x-modal id="calendar-modal" :title="__('Edit Calendar')">
             @section('calendar-edit')
@@ -18,12 +23,12 @@
                             required
                             select="label:label|value:id"
                             :request="[
-                        'url' => route('calendar-search'),
-                        'method' => 'POST',
-                        'params' => [
-                            'onlyGroups' => true,
-                        ]
-                    ]"
+                                'url' => route('calendar-search'),
+                                'method' => 'POST',
+                                'params' => [
+                                    'onlyGroups' => true,
+                                ]
+                            ]"
                         />
                     </div>
                     <x-input
@@ -176,11 +181,12 @@
                     }
                 "
                 x-on:folder-tree-select="
-                    (event) => $wire.$set('calendarObject', event.detail)
+                    (event) => {
+                        let { children, ...calendar } = event.detail;
+                        $wire.changeCalendar(calendar);
+                    }
                 "
-                x-on:folder-tree-unselect="
-                    () => $wire.$set('calendarObject', null)
-                "
+                x-on:folder-tree-unselect="$wire.changeCalendar()"
                 class="w-full pt-2"
             >
                 <x-flux::checkbox-tree
