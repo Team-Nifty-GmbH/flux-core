@@ -17,12 +17,19 @@ function loadLocale(lang) {
 
 // Files larger than this use the chunked upload endpoint to bypass
 // PHP's post_max_size / Octane FrankenPHP request body limits.
-const CHUNK_THRESHOLD = 4 * 1024 * 1024;
+// 1 MB stays well under the 2 MB upload_max_filesize default once Livewire's
+// base64 encoding inflates the payload by ~33%.
+const CHUNK_THRESHOLD = 1024 * 1024;
 const CHUNK_SIZE = 4 * 1024 * 1024;
 
 function csrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.content : '';
+}
+
+function isAuthenticated() {
+    const meta = document.querySelector('meta[name="user-authenticated"]');
+    return meta?.content === 'true';
 }
 
 async function readJsonSafe(response) {
@@ -102,6 +109,7 @@ export default function (
     lang,
     modalTranslations,
     inputTranslation,
+    { chunked = true } = {},
 ) {
     return {
         tempFilesId: [],
@@ -112,6 +120,7 @@ export default function (
         fileCount: null,
         pond: null,
         multipleFileUpload: true,
+        chunkedEnabled: chunked && isAuthenticated(),
         async setCollection(collectionName, id = null) {
             if (collectionName !== null) {
                 //  on selected - check if collection is single file upload
@@ -213,7 +222,10 @@ export default function (
                         transfer,
                         options,
                     ) => {
-                        if (file.size > CHUNK_THRESHOLD) {
+                        if (
+                            this.chunkedEnabled &&
+                            file.size > CHUNK_THRESHOLD
+                        ) {
                             try {
                                 const signedPath = await chunkedUpload(
                                     file,
