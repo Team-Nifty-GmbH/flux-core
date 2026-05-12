@@ -111,6 +111,9 @@ class Calendar extends Component
         JS);
     }
 
+    #[Renderless]
+    #[On('calendar-event-click')]
+    #[On('calendar-event-change')]
     public function editEvent(array $event, ?string $trigger = null): void
     {
         $isEditable = data_get($event, 'extendedProps.is_editable', true)
@@ -189,6 +192,8 @@ class Calendar extends Component
                 $tsui.open.modal('edit-event-modal');
             JS);
         }
+
+        $this->renderIsland('calendar-event');
     }
 
     #[Renderless]
@@ -396,6 +401,8 @@ class Calendar extends Component
         $this->storeViewSettings($view);
     }
 
+    #[Renderless]
+    #[On('calendar-date-click')]
     public function timeslotClick(bool $allDay, string $dateStr, array $view): void
     {
         if (! $this->calendar->is_editable) {

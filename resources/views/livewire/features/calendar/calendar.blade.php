@@ -5,25 +5,6 @@
     x-resize.document="changedHeight()"
     x-bind:style="{ height: height + 'px' }"
     class="flex h-full"
-    x-on:calendar-date-click="
-        $wire
-            .$island('calendar-event')
-            .timeslotClick(
-                $event.detail.allDay,
-                $event.detail.dateStr,
-                $event.detail.view,
-            )
-    "
-    x-on:calendar-event-click="
-        $wire
-            .$island('calendar-event')
-            .editEvent($event.detail.event, $event.detail.trigger)
-    "
-    x-on:calendar-event-change="
-        $wire
-            .$island('calendar-event')
-            .editEvent($event.detail.event, $event.detail.trigger)
-    "
 >
     @island(name: 'calendar-event')
         <livewire:features.calendar.calendar-event-edit
