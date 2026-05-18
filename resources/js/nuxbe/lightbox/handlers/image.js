@@ -1,7 +1,14 @@
 import { lightbox } from '../../lightbox.js';
 
 const IMAGE_EXTS = new Set([
-    'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif', 'bmp',
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'webp',
+    'svg',
+    'avif',
+    'bmp',
 ]);
 
 lightbox.register({

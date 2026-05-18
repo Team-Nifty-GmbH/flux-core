@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Image\Exceptions\InvalidManipulation;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -208,7 +209,7 @@ trait InteractsWithMedia
             return [];
         }
 
-        $uploaders = \Spatie\Activitylog\Models\Activity::query()
+        $uploaders = resolve_static(Activity::class, 'query')
             ->where('subject_type', morph_alias(FluxMedia::class))
             ->whereIn('subject_id', $media->modelKeys())
             ->where('event', 'created')
@@ -218,11 +219,10 @@ trait InteractsWithMedia
 
         return $media
             ->makeVisible(['name', 'collection_name'])
-            ->map(function (FluxMedia $item) use ($uploaders) {
+            ->map(function (FluxMedia $item) use ($uploaders): array {
                 $array = $item->toArray();
                 $causer = $uploaders->get($item->getKey())?->causer;
-                $array['uploaded_by'] = $causer?->getAttribute('name')
-                    ?? $causer?->getAttribute('label');
+                $array['uploaded_by'] = $causer?->name ?? $causer?->label;
 
                 return $array;
             })

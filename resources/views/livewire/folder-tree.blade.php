@@ -348,10 +348,9 @@
                                     </span>
                                 </div>
                             </div>
-
                             <div class="flex flex-col gap-1">
                                 <div
-                                    class="break-words text-base font-medium text-gray-900 dark:text-gray-100"
+                                    class="text-base font-medium break-words text-gray-900 dark:text-gray-100"
                                     x-text="selection.name"
                                 ></div>
                                 <div
@@ -365,7 +364,7 @@
                                                 ?.toUpperCase()
                                         "
                                     ></span>
-                                    <span aria-hidden="true">&middot;</span>
+                                    <span>&middot;</span>
                                     <span
                                         x-text="
                                             $nuxbe.format.fileSize(
@@ -373,22 +372,25 @@
                                             )
                                         "
                                     ></span>
-                                    <template
-                                        x-if="selection.collection_name"
-                                    >
+                                    <template x-if="selection.collection_name">
                                         <span
                                             class="inline-flex items-center gap-2"
                                         >
-                                            <span aria-hidden="true">&middot;</span>
+                                            <span>&middot;</span>
                                             <span
                                                 class="truncate"
-                                                x-text="selection.collection_name"
+                                                x-text="
+                                                    selection.collection_name
+                                                "
                                             ></span>
                                         </span>
                                     </template>
                                 </div>
                                 <template
-                                    x-if="selection.uploaded_by || selection.created_at"
+                                    x-if="
+                                        selection.uploaded_by ||
+                                        selection.created_at
+                                    "
                                 >
                                     <div
                                         class="text-xs text-gray-500 dark:text-gray-400"
@@ -398,7 +400,9 @@
                                                 {{ __('Uploaded by') }}
                                                 <span
                                                     class="font-medium text-gray-700 dark:text-gray-300"
-                                                    x-text="selection.uploaded_by"
+                                                    x-text="
+                                                        selection.uploaded_by
+                                                    "
                                                 ></span>
                                             </span>
                                         </template>
@@ -410,14 +414,17 @@
                                                     <span>{{ __('on') }}</span>
                                                 </template>
                                                 <span
-                                                    x-text="$nuxbe.format.datetime(selection.created_at)"
+                                                    x-text="
+                                                        $nuxbe.format.datetime(
+                                                            selection.created_at,
+                                                        )
+                                                    "
                                                 ></span>
                                             </span>
                                         </template>
                                     </div>
                                 </template>
                             </div>
-
                             <div class="flex flex-wrap gap-2">
                                 <x-button
                                     color="indigo"
@@ -449,15 +456,22 @@
                                             :text="__('Delete')"
                                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
                                             x-on:click="
-                                                $wire.delete(selection.id).then(() => {
-                                                    try {
-                                                        removeNode(selection.id);
-                                                        this.selected = null;
-                                                        this.selection = {};
-                                                    } catch (error) {
-                                                        console.error(error);
-                                                    }
-                                                })
+                                                $wire
+                                                    .delete(selection.id)
+                                                    .then(() => {
+                                                        try {
+                                                            removeNode(
+                                                                selection.id,
+                                                            );
+                                                            this.selected =
+                                                                null;
+                                                            this.selection = {};
+                                                        } catch (error) {
+                                                            console.error(
+                                                                error,
+                                                            );
+                                                        }
+                                                    })
                                             "
                                         />
                                     </div>

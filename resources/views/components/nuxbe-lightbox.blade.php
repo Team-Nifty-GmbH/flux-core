@@ -8,8 +8,11 @@
             const { url, mime, title } = event.detail;
             this.runCleanup();
             const handler = window.$nuxbe?.lightbox?.resolve(url, mime);
-            if (! handler) {
-                console.warn('[nuxbe lightbox] no handler resolved for', { url, mime });
+            if (!handler) {
+                console.warn('[nuxbe lightbox] no handler resolved for', {
+                    url,
+                    mime,
+                });
                 return;
             }
             this.$refs.content.replaceChildren();
@@ -53,20 +56,23 @@
         },
     }"
     x-on:nuxbe:lightbox:open.window="openFromEvent($event)"
-    x-on:keydown.escape.window="if (open) close()"
+    x-on:keydown.escape.window="if (open) close();"
     x-show="open"
     x-transition.opacity.duration.200ms
     x-cloak
     x-on:click.self="close"
     class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
-    role="dialog"
-    aria-modal="true"
 >
+    <div
+        x-show="downloadName"
+        x-on:click.stop
+        class="absolute top-4 right-16 left-4 max-w-[calc(100%-5rem)] truncate rounded-full bg-black/60 px-4 py-2 text-sm text-white"
+        x-text="downloadName"
+    ></div>
     <button
         type="button"
         x-on:click="close"
         class="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-        aria-label="{{ __('Close') }}"
     >
         <span class="text-2xl leading-none">&times;</span>
     </button>
@@ -82,9 +88,9 @@
         x-on:click.stop
         target="_blank"
         rel="noopener"
-        class="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-sm text-white hover:bg-black/80"
+        class="absolute right-4 bottom-4 inline-flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-sm text-white hover:bg-black/80"
     >
-        <span aria-hidden="true">&darr;</span>
+        <span>&darr;</span>
         <span>{{ __('Download') }}</span>
     </a>
 </div>

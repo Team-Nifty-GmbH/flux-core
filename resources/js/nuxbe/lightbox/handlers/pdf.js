@@ -22,7 +22,7 @@ lightbox.register({
 
         fetch(url, { credentials: 'same-origin', signal: controller.signal })
             .then((response) => {
-                if (! response.ok) {
+                if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
                 return response.blob();
