@@ -58,6 +58,11 @@ class MediaFolder extends FluxModel implements HasMedia
             if ($model->wasChanged(['parent_id', 'slug'])) {
                 $original = $model->getRawOriginal('slug');
                 $quotedSlug = $model->getConnection()->getPdo()->quote($model->slug);
+
+                if ($quotedSlug === false) {
+                    $quotedSlug = "'" . addslashes($model->slug) . "'";
+                }
+
                 $model->getAllDescendantsQuery()
                     ->update([
                         'slug' => DB::raw('CONCAT(' . $quotedSlug
