@@ -191,12 +191,20 @@ trait InteractsWithMedia
                         ->orderBy('name', 'ASC')
                         ->get([
                             'id',
+                            'uuid',
+                            'model_type',
+                            'model_id',
+                            'collection_name',
                             'name',
                             'file_name',
-                            'collection_name',
-                            'disk',
-                            'size',
                             'mime_type',
+                            'disk',
+                            'conversions_disk',
+                            'size',
+                            'manipulations',
+                            'custom_properties',
+                            'generated_conversions',
+                            'responsive_images',
                             'created_at',
                         ])
                         ->makeVisible(['name', 'collection_name'])
