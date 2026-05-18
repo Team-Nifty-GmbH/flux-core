@@ -57,11 +57,11 @@ class MediaFolder extends FluxModel implements HasMedia
         static::saved(function (MediaFolder $model): void {
             if ($model->wasChanged(['parent_id', 'slug'])) {
                 $original = $model->getRawOriginal('slug');
-                $replace = $model->slug;
+                $quotedSlug = $model->getConnection()->getPdo()->quote($model->slug);
                 $model->getAllDescendantsQuery()
                     ->update([
-                        'slug' => DB::raw('CONCAT(\'' . $replace
-                            . '\', SUBSTRING(slug, ' . strlen($original) + 1 . '))'
+                        'slug' => DB::raw('CONCAT(' . $quotedSlug
+                            . ', SUBSTRING(slug, ' . (strlen($original) + 1) . '))'
                         ),
                     ]);
             }
