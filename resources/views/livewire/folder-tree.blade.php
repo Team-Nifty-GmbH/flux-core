@@ -410,6 +410,12 @@
                                     icon="clipboard-document"
                                     :text="__('Copy link')"
                                     x-on:click="
+                                        if (! navigator.clipboard?.writeText) {
+                                            $tsui.interaction('toast')
+                                                .error('{{ __('Error') }}', '{{ __('Failed to copy to clipboard. Please try again.') }}')
+                                                .send()
+                                            return
+                                        }
                                         navigator.clipboard
                                             .writeText(selection.original_url)
                                             .then(() => {

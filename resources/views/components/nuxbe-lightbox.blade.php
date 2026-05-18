@@ -4,6 +4,7 @@
         cleanup: null,
         downloadUrl: null,
         downloadName: null,
+        previousBodyOverflow: '',
         openFromEvent(event) {
             const { url, mime, title } = event.detail;
             this.runCleanup();
@@ -34,6 +35,7 @@
             this.downloadUrl = url;
             this.downloadName = title || '';
             this.open = true;
+            this.previousBodyOverflow = document.body.style.overflow;
             document.body.style.overflow = 'hidden';
         },
         close() {
@@ -42,7 +44,8 @@
             this.$refs.content.replaceChildren();
             this.downloadUrl = null;
             this.downloadName = null;
-            document.body.style.overflow = '';
+            document.body.style.overflow = this.previousBodyOverflow;
+            this.previousBodyOverflow = '';
         },
         runCleanup() {
             if (typeof this.cleanup === 'function') {

@@ -189,7 +189,24 @@ trait InteractsWithMedia
                                 ->where('collection_name', $slug)
                         )
                         ->orderBy('name', 'ASC')
-                        ->get()
+                        ->get([
+                            'id',
+                            'uuid',
+                            'model_type',
+                            'model_id',
+                            'collection_name',
+                            'name',
+                            'file_name',
+                            'mime_type',
+                            'disk',
+                            'conversions_disk',
+                            'size',
+                            'manipulations',
+                            'custom_properties',
+                            'generated_conversions',
+                            'responsive_images',
+                            'created_at',
+                        ])
                         ->makeVisible(['name', 'collection_name'])
                         ->toArray()
                 ),
