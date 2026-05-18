@@ -437,27 +437,30 @@
                                     "
                                 />
                                 @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
-                                    <x-button
+                                    <div
                                         x-cloak
                                         x-show="!$wire.isReadonly && !readOnly"
-                                        color="red"
-                                        light
-                                        icon="trash"
-                                        :text="__('Delete')"
                                         class="ml-auto"
-                                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
-                                        x-on:click="
-                                            $wire.delete(selection.id).then(() => {
-                                                try {
-                                                    removeNode(selection.id);
-                                                    this.selected = null;
-                                                    this.selection = {};
-                                                } catch (error) {
-                                                    console.error(error);
-                                                }
-                                            })
-                                        "
-                                    />
+                                    >
+                                        <x-button
+                                            color="red"
+                                            light
+                                            icon="trash"
+                                            :text="__('Delete')"
+                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
+                                            x-on:click="
+                                                $wire.delete(selection.id).then(() => {
+                                                    try {
+                                                        removeNode(selection.id);
+                                                        this.selected = null;
+                                                        this.selection = {};
+                                                    } catch (error) {
+                                                        console.error(error);
+                                                    }
+                                                })
+                                            "
+                                        />
+                                    </div>
                                 @endcanAction
                             </div>
                         @show
