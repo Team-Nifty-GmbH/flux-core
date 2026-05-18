@@ -122,8 +122,8 @@ class MediaList extends BaseDataTable
         $itemArray['url'] = $item->hasGeneratedConversion('thumb')
             ? $item->getUrl('thumb')
             : (
-                Str::startsWith($item->mime_type, 'image/')
-                    ? $item->getUrl('thumb')
+                Str::startsWith((string) $item->mime_type, 'image/')
+                    ? $item->getUrl()
                     : route('icons', ['name' => 'document'])
             );
         $itemArray['original_url'] = $item->original_url;
