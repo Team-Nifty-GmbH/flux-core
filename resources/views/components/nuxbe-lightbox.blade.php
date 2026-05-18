@@ -2,6 +2,8 @@
     x-data="{
         open: false,
         cleanup: null,
+        downloadUrl: null,
+        downloadName: null,
         openFromEvent(event) {
             const { url, mime, title } = event.detail;
             this.runCleanup();
@@ -26,6 +28,8 @@
                 this.$refs.content.replaceChildren();
                 return;
             }
+            this.downloadUrl = url;
+            this.downloadName = title || '';
             this.open = true;
             document.body.style.overflow = 'hidden';
         },
@@ -33,6 +37,8 @@
             this.open = false;
             this.runCleanup();
             this.$refs.content.replaceChildren();
+            this.downloadUrl = null;
+            this.downloadName = null;
             document.body.style.overflow = '';
         },
         runCleanup() {
@@ -69,4 +75,16 @@
         x-on:click.stop
         class="flex max-h-full max-w-full items-center justify-center"
     ></div>
+    <a
+        x-show="downloadUrl"
+        x-bind:href="downloadUrl"
+        x-bind:download="downloadName"
+        x-on:click.stop
+        target="_blank"
+        rel="noopener"
+        class="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-sm text-white hover:bg-black/80"
+    >
+        <span aria-hidden="true">&darr;</span>
+        <span>{{ __('Download') }}</span>
+    </a>
 </div>
