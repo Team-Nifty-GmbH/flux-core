@@ -49,6 +49,7 @@
     x-on:nuxbe:lightbox:open.window="openFromEvent($event)"
     x-on:keydown.escape.window="if (open) close()"
     x-show="open"
+    x-transition.opacity.duration.200ms
     x-cloak
     x-on:click.self="close"
     class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
