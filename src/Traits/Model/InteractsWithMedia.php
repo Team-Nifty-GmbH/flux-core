@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\Models\Activity;
 use Spatie\Image\Exceptions\InvalidManipulation;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -178,7 +177,21 @@ trait InteractsWithMedia
                 'is_static' => data_get($item, 'is_static') ?? false,
                 'children' => array_merge(
                     $this->calculateTree(data_get($item, 'children') ?? []),
-                    $this->collectMediaForLevel($id, $slug)
+                    resolve_static(FluxMedia::class, 'query')
+                        ->when(
+                            $id,
+                            fn (Builder $query) => $query
+                                ->where('model_type', morph_alias(MediaFolder::class))
+                                ->where('model_id', $id),
+                            fn (Builder $query) => $query
+                                ->where('model_type', $this->getMorphClass())
+                                ->where('model_id', $this->getKey())
+                                ->where('collection_name', $slug)
+                        )
+                        ->orderBy('name', 'ASC')
+                        ->get()
+                        ->makeVisible(['name', 'collection_name'])
+                        ->toArray()
                 ),
             ];
         }
@@ -187,45 +200,5 @@ trait InteractsWithMedia
             ->sortBy('name')
             ->values()
             ->toArray();
-    }
-
-    protected function collectMediaForLevel(int|string|null $folderId, ?string $slug): array
-    {
-        $media = resolve_static(FluxMedia::class, 'query')
-            ->when(
-                $folderId,
-                fn (Builder $query) => $query
-                    ->where('model_type', morph_alias(MediaFolder::class))
-                    ->where('model_id', $folderId),
-                fn (Builder $query) => $query
-                    ->where('model_type', $this->getMorphClass())
-                    ->where('model_id', $this->getKey())
-                    ->where('collection_name', $slug)
-            )
-            ->orderBy('name', 'ASC')
-            ->get();
-
-        if ($media->isEmpty()) {
-            return [];
-        }
-
-        $uploaders = resolve_static(Activity::class, 'query')
-            ->where('subject_type', morph_alias(FluxMedia::class))
-            ->whereIn('subject_id', $media->modelKeys())
-            ->where('event', 'created')
-            ->with('causer')
-            ->get()
-            ->keyBy('subject_id');
-
-        return $media
-            ->makeVisible(['name', 'collection_name'])
-            ->map(function (FluxMedia $item) use ($uploaders): array {
-                $array = $item->toArray();
-                $causer = $uploaders->get($item->getKey())?->causer;
-                $array['uploaded_by'] = $causer?->name ?? $causer?->label;
-
-                return $array;
-            })
-            ->all();
     }
 }

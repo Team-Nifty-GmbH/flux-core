@@ -386,43 +386,15 @@
                                         </span>
                                     </template>
                                 </div>
-                                <template
-                                    x-if="
-                                        selection.uploaded_by ||
-                                        selection.created_at
-                                    "
-                                >
+                                <template x-if="selection.created_at">
                                     <div
                                         class="text-xs text-gray-500 dark:text-gray-400"
-                                    >
-                                        <template x-if="selection.uploaded_by">
-                                            <span>
-                                                {{ __('Uploaded by') }}
-                                                <span
-                                                    class="font-medium text-gray-700 dark:text-gray-300"
-                                                    x-text="
-                                                        selection.uploaded_by
-                                                    "
-                                                ></span>
-                                            </span>
-                                        </template>
-                                        <template x-if="selection.created_at">
-                                            <span>
-                                                <template
-                                                    x-if="selection.uploaded_by"
-                                                >
-                                                    <span>{{ __('on') }}</span>
-                                                </template>
-                                                <span
-                                                    x-text="
-                                                        $nuxbe.format.datetime(
-                                                            selection.created_at,
-                                                        )
-                                                    "
-                                                ></span>
-                                            </span>
-                                        </template>
-                                    </div>
+                                        x-text="
+                                            $nuxbe.format.datetime(
+                                                selection.created_at,
+                                            )
+                                        "
+                                    ></div>
                                 </template>
                             </div>
                             <div class="flex flex-wrap gap-2">
@@ -438,9 +410,18 @@
                                     icon="clipboard-document"
                                     :text="__('Copy link')"
                                     x-on:click="
-                                        navigator.clipboard?.writeText(
-                                            selection.original_url,
-                                        )
+                                        navigator.clipboard
+                                            .writeText(selection.original_url)
+                                            .then(() => {
+                                                $tsui.interaction('toast')
+                                                    .success('{{ __('Copied!') }}', '{{ __('Link copied to clipboard') }}')
+                                                    .send()
+                                            })
+                                            .catch(() => {
+                                                $tsui.interaction('toast')
+                                                    .error('{{ __('Error') }}', '{{ __('Failed to copy to clipboard. Please try again.') }}')
+                                                    .send()
+                                            })
                                     "
                                 />
                                 @canAction(\FluxErp\Actions\Media\DeleteMedia::class)

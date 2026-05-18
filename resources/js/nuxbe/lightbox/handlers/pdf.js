@@ -1,16 +1,38 @@
 import { lightbox } from '../../lightbox.js';
 
+function buildSpinner() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex flex-col items-center gap-3 text-white';
+
+    const ring = document.createElement('div');
+    ring.className =
+        'h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-white';
+
+    const label = document.createElement('span');
+    label.className = 'text-sm';
+    label.textContent = window.translations?.['Loading...'] ?? 'Loading...';
+
+    wrapper.append(ring, label);
+    return wrapper;
+}
+
+function buildError() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex flex-col items-center gap-3 text-white';
+
+    const label = document.createElement('span');
+    label.className = 'text-sm';
+    label.textContent =
+        window.translations?.['Could not load PDF'] ?? 'Could not load PDF';
+
+    wrapper.append(label);
+    return wrapper;
+}
+
 lightbox.register({
     matches: ({ ext, mime }) => mime === 'application/pdf' || ext === 'pdf',
     render: ({ url, container }) => {
-        const spinner = document.createElement('div');
-        spinner.className = 'flex flex-col items-center gap-3 text-white';
-        spinner.innerHTML = `
-            <div class="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-white"></div>
-            <span class="text-sm">${
-                window.translations?.['Loading...'] ?? 'Loading...'
-            }</span>
-        `;
+        const spinner = buildSpinner();
         container.appendChild(spinner);
 
         const iframe = document.createElement('iframe');
@@ -42,10 +64,7 @@ lightbox.register({
                     return;
                 }
                 console.warn('[nuxbe lightbox] pdf fetch failed', error);
-                spinner.innerHTML = `<span class="text-sm">${
-                    window.translations?.['Could not load PDF'] ??
-                    'Could not load PDF'
-                }</span>`;
+                spinner.replaceWith(buildError());
             });
 
         return () => {
