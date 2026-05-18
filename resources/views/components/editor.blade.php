@@ -50,7 +50,6 @@
     >
         <div
             x-cloak
-            x-transition
             x-show="proxy && proxy.isEditable"
             x-ref="controlPanel-{{ $id }}"
             id="controlPanel"
