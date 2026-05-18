@@ -7,6 +7,7 @@
             this.runCleanup();
             const handler = window.$nuxbe?.lightbox?.resolve(url, mime);
             if (! handler) {
+                console.warn('[nuxbe lightbox] no handler resolved for', { url, mime });
                 return;
             }
             this.$refs.content.replaceChildren();
@@ -22,6 +23,8 @@
             } catch (error) {
                 console.warn('[nuxbe lightbox] handler error', error);
                 this.cleanup = null;
+                this.$refs.content.replaceChildren();
+                return;
             }
             this.open = true;
             document.body.style.overflow = 'hidden';
@@ -49,6 +52,8 @@
     x-cloak
     x-on:click.self="close"
     class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+    role="dialog"
+    aria-modal="true"
 >
     <button
         type="button"
