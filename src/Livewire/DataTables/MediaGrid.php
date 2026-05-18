@@ -51,7 +51,7 @@ class MediaGrid extends MediaList
         $itemArray['url'] = $item->hasGeneratedConversion('thumb_400x400')
             ? $item->getUrl('thumb_400x400')
             : (
-                Str::startsWith($item->mime_type, 'image/')
+                Str::startsWith((string) $item->mime_type, 'image/')
                     ? $item->getUrl()
                     : route('icons', ['name' => 'document'])
             );
