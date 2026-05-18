@@ -13,6 +13,7 @@ function buildSpinner() {
     label.textContent = window.translations?.['Loading...'] ?? 'Loading...';
 
     wrapper.append(ring, label);
+
     return wrapper;
 }
 
@@ -26,6 +27,7 @@ function buildError() {
         window.translations?.['Could not load PDF'] ?? 'Could not load PDF';
 
     wrapper.append(label);
+
     return wrapper;
 }
 
@@ -47,6 +49,7 @@ lightbox.register({
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
+
                 return response.blob();
             })
             .then((blob) => {
@@ -63,6 +66,7 @@ lightbox.register({
                 if (error.name === 'AbortError') {
                     return;
                 }
+
                 console.warn('[nuxbe lightbox] pdf fetch failed', error);
                 spinner.replaceWith(buildError());
             });

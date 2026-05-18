@@ -12,6 +12,7 @@ lightbox.register({
         video.autoplay = true;
         video.className = 'max-w-full max-h-full';
         container.appendChild(video);
+
         return () => {
             video.pause();
             video.src = '';

@@ -20,6 +20,7 @@ lightbox.register({
         if (title) {
             img.alt = title;
         }
+
         img.className =
             'h-auto w-auto max-h-[90vh] max-w-[90vw] object-contain';
         img.style.minWidth = '16rem';

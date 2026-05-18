@@ -1,11 +1,11 @@
 <div
     x-data
     x-on:data-table-row-clicked.window="
-        const r = $event.detail?.record;
-        if (r?.original_url) {
-            $nuxbe.openLightbox(r.original_url, {
-                mime: r.mime_type,
-                title: r.name,
+        const record = $event.detail?.record;
+        if (record?.original_url) {
+            $nuxbe.openLightbox(record.original_url, {
+                mime: record.mime_type,
+                title: record.name,
             });
         }
     "

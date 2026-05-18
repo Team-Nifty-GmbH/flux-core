@@ -11,6 +11,7 @@ lightbox.register({
         audio.controls = true;
         audio.autoplay = true;
         container.appendChild(audio);
+
         return () => {
             audio.pause();
             audio.src = '';

@@ -5,6 +5,7 @@ function extFromUrl(url) {
     try {
         const path = new URL(url, window.location.origin).pathname;
         const match = path.match(/\.([a-z0-9]+)$/i);
+
         return match ? match[1].toLowerCase() : '';
     } catch {
         return '';
@@ -18,6 +19,7 @@ function findHandler(url, mime) {
             return handler;
         }
     }
+
     return fallbackHandler;
 }
 
