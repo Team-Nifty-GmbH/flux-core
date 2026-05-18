@@ -34,6 +34,19 @@ class Media extends BaseMedia
         'order_column',
     ];
 
+    protected $appends = [
+        'original_url',
+        'preview_url',
+        'thumb_url',
+    ];
+
+    public function getThumbUrlAttribute(): string
+    {
+        return $this->hasGeneratedConversion('thumb_800x800')
+            ? $this->getUrl('thumb_800x800')
+            : '';
+    }
+
     // Relations
     public function category(): MorphToMany
     {
