@@ -369,8 +369,12 @@
                                                     x-cloak
                                                     x-show="previewSupported"
                                                     x-on:click="
-                                                        $nuxbe.openDetailModal(
+                                                        $nuxbe.openLightbox(
                                                             selection.original_url,
+                                                            {
+                                                                mime: selection.mime_type,
+                                                                title: selection.name,
+                                                            },
                                                         )
                                                     "
                                                     icon="eye"
@@ -398,8 +402,12 @@
                                     x-on:load="previewSupported = true"
                                     x-on:error="previewSupported = false"
                                     x-on:click="
-                                        $nuxbe.openDetailModal(
+                                        $nuxbe.openLightbox(
                                             selection.original_url,
+                                            {
+                                                mime: selection.mime_type,
+                                                title: selection.name,
+                                            },
                                         )
                                     "
                                     class="cursor-pointer object-contain"
