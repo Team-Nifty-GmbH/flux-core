@@ -202,18 +202,7 @@ trait InteractsWithMedia
                     ->where('collection_name', $slug)
             )
             ->orderBy('name', 'ASC')
-            ->get([
-                'id',
-                'name',
-                'file_name',
-                'collection_name',
-                'disk',
-                'conversions_disk',
-                'size',
-                'mime_type',
-                'generated_conversions',
-                'created_at',
-            ]);
+            ->get();
 
         if ($media->isEmpty()) {
             return [];
