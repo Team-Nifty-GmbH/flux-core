@@ -50,6 +50,7 @@
             </div>
         @endif
         <x-dialog />
+        <x-nuxbe-lightbox />
     @endpersist
 
     @auth('web')
