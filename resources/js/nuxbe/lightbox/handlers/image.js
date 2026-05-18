@@ -13,7 +13,10 @@ lightbox.register({
         if (title) {
             img.alt = title;
         }
-        img.className = 'max-w-full max-h-full object-contain';
+        img.className =
+            'h-auto w-auto max-h-[90vh] max-w-[90vw] object-contain';
+        img.style.minWidth = '16rem';
+        img.style.minHeight = '16rem';
         container.appendChild(img);
     },
 });
