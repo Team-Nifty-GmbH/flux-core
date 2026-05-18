@@ -60,7 +60,7 @@ class MediaFolder extends FluxModel implements HasMedia
                 $quotedSlug = $model->getConnection()->getPdo()->quote($model->slug);
 
                 if ($quotedSlug === false) {
-                    $quotedSlug = "'" . addslashes($model->slug) . "'";
+                    $quotedSlug = '\'' . addslashes($model->slug) . '\'';
                 }
 
                 $model->getAllDescendantsQuery()
