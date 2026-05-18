@@ -42,8 +42,8 @@ class Media extends BaseMedia
 
     public function getThumbUrlAttribute(): string
     {
-        return $this->hasGeneratedConversion('thumb_800x800')
-            ? $this->getUrl('thumb_800x800')
+        return $this->hasGeneratedConversion('thumb_400x400')
+            ? $this->getUrl('thumb_400x400')
             : '';
     }
 
