@@ -29,7 +29,9 @@ trait SupportsFileDownloads
         }
 
         try {
-            DownloadMedia::make(['id' => $media->getKey()])
+            DownloadMedia::make([
+                'id' => $media->getKey(),
+            ])
                 ->checkPermission()
                 ->validate();
         } catch (ValidationException|UnauthorizedException $e) {
