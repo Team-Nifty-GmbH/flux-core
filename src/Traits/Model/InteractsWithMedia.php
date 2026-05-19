@@ -81,31 +81,35 @@ trait InteractsWithMedia
         $undotted = [];
         foreach ($mediaCollections as $mediaCollection) {
             $slug = data_get($mediaCollection, 'slug') ?? '';
+
             if (
                 is_null(data_get($mediaCollection, 'id'))
                 && str_contains($slug, '.')
             ) {
-                $path = '';
+                $cursor = &$undotted;
                 $childSlug = '';
-                foreach (explode('.', $slug) as $index => $part) {
-                    if ($index === 0 && array_key_exists($part, $undotted)) {
-                        $path = $childSlug = $part;
 
-                        continue;
-                    }
+                foreach (explode('.', $slug) as $part) {
+                    $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
 
-                    $childSlug .= ($childSlug ? '.' : '') . $part;
-                    $path .= ($path ? '.children.' : '') . $part;
-
-                    Arr::set(
-                        $undotted,
-                        $path,
-                        [
+                    if (! isset($cursor[$part]) || ! is_array($cursor[$part])) {
+                        $cursor[$part] = [
                             'name' => Str::headline($part),
                             'slug' => $childSlug,
-                        ],
-                    );
+                        ];
+                    }
+
+                    if (
+                        ! isset($cursor[$part]['children'])
+                        || ! is_array($cursor[$part]['children'])
+                    ) {
+                        $cursor[$part]['children'] = [];
+                    }
+
+                    $cursor = &$cursor[$part]['children'];
                 }
+
+                unset($cursor);
             } else {
                 Arr::set($undotted, $slug, $mediaCollection);
             }
