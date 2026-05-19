@@ -24,7 +24,7 @@ class MarkPaymentReminderSent extends FluxAction
         $paymentReminder = resolve_static(PaymentReminder::class, 'query')
             ->whereKey($this->getData('id'))
             ->with('order')
-            ->first();
+            ->firstOrFail();
 
         $order = $paymentReminder->order;
         $nextDateDays = $order->{'payment_reminder_days_' . ($paymentReminder->reminder_level + 1)}

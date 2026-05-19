@@ -28,10 +28,7 @@ class BundlePaymentReminders extends FluxAction
         $orders = resolve_static(Order::class, 'query')
             ->whereIntegerInRaw('id', $this->getData('order_ids'))
             ->with(['contact', 'orderType:id,order_type_enum'])
-            ->whereNotNull('invoice_number')
-            ->where('is_locked', true)
-            ->where('balance', '!=', 0)
-            ->whereHasMailablePaymentReminderAddress()
+            ->wherePaymentReminderEligible()
             ->get()
             ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
                 && $order->orderType->order_type_enum->multiplier() === 1

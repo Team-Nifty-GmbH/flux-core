@@ -73,11 +73,7 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
         $orderIds = resolve_static(Order::class, 'query')
             ->when($this->orderIds, fn (Builder $query) => $query->whereKey($this->orderIds))
             ->with(['orderType:id,order_type_enum'])
-            ->whereNotNull('invoice_number')
-            ->where('is_locked', true)
-            ->where('balance', '!=', 0)
-            ->whereDate('payment_reminder_next_date', '<=', now()->toDateString())
-            ->whereHasMailablePaymentReminderAddress()
+            ->wherePaymentReminderDue()
             ->get(['id', 'order_type_id'])
             ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
                 && $order->orderType->order_type_enum->multiplier() === 1

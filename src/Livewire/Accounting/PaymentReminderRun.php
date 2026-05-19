@@ -35,11 +35,7 @@ class PaymentReminderRun extends Component
     public function loadData(): void
     {
         $orders = resolve_static(Order::class, 'query')
-            ->whereNotNull('invoice_number')
-            ->where('is_locked', true)
-            ->where('balance', '!=', 0)
-            ->whereDate('payment_reminder_next_date', '<=', now()->toDateString())
-            ->whereHasMailablePaymentReminderAddress()
+            ->wherePaymentReminderDue()
             ->with(['contact:id,customer_number', 'orderType:id,order_type_enum'])
             ->get()
             ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
