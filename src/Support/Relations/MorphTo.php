@@ -11,7 +11,7 @@ class MorphTo extends EloquentMorphTo
     {
         $class = resolve_static(Model::getActualClassNameForMorph($type), 'class');
 
-        return tap(new $class(), function ($instance) {
+        return tap(new $class(), function ($instance): void {
             if (! $instance->getConnectionName()) {
                 $instance->setConnection($this->getConnection()->getName());
             }
