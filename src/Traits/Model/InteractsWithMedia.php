@@ -92,7 +92,7 @@ trait InteractsWithMedia
                 foreach (explode('.', $slug) as $part) {
                     $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
 
-                    if (! isset($cursor[$part]) || ! is_array($cursor[$part])) {
+                    if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
                         $cursor[$part] = [
                             'name' => Str::headline($part),
                             'slug' => $childSlug,
@@ -100,7 +100,7 @@ trait InteractsWithMedia
                     }
 
                     if (
-                        ! isset($cursor[$part]['children'])
+                        ! array_key_exists('children', $cursor[$part])
                         || ! is_array($cursor[$part]['children'])
                     ) {
                         $cursor[$part]['children'] = [];
