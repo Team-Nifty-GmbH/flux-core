@@ -377,6 +377,30 @@ Route::middleware('web')
                 return $media;
             })->name('media.private');
 
+            Route::get('/media/{media}', function (Media $media) {
+                $disposition = (request()->boolean('download') ? 'attachment' : 'inline')
+                    . '; filename="' . $media->file_name . '"';
+
+                $disk = Storage::disk($media->disk);
+                $path = $media->getPathRelativeToRoot();
+
+                if ($disk->providesTemporaryUrls()) {
+                    return redirect()->away(
+                        $disk->temporaryUrl(
+                            $path,
+                            now()->addMinutes(5),
+                            ['ResponseContentDisposition' => $disposition],
+                        )
+                    );
+                }
+
+                return $disk->response(
+                    $path,
+                    $media->file_name,
+                    ['Content-Disposition' => $disposition],
+                );
+            })->name('media.show');
+
             Route::get('/media-collection-download/{token}', function (string $token) {
                 $payload = Crypt::decrypt($token);
 
