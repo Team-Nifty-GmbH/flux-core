@@ -31,11 +31,9 @@
                             <label
                                 class="flex flex-1 cursor-pointer items-start gap-3"
                             >
-                                <input
-                                    type="checkbox"
+                                <x-checkbox
                                     wire:model.live="selected"
                                     value="{{ $group['key'] }}"
-                                    class="mt-1"
                                 />
                                 <div class="flex flex-col gap-1">
                                     <div class="font-medium">
