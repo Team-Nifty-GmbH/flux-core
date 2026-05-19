@@ -127,6 +127,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
 /*
@@ -378,8 +379,12 @@ Route::middleware('web')
             })->name('media.private');
 
             Route::get('/media/{media}', function (Media $media) {
-                $disposition = (request()->boolean('download') ? 'attachment' : 'inline')
-                    . '; filename="' . $media->file_name . '"';
+                $disposition = HeaderUtils::makeDisposition(
+                    request()->boolean('download')
+                        ? HeaderUtils::DISPOSITION_ATTACHMENT
+                        : HeaderUtils::DISPOSITION_INLINE,
+                    $media->file_name,
+                );
 
                 $disk = Storage::disk($media->disk);
                 $path = $media->getPathRelativeToRoot();
