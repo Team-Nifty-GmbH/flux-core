@@ -12,6 +12,7 @@ use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\PaymentReminderRun;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
@@ -265,6 +266,7 @@ Route::middleware('web')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
+                        Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
                         Route::get('/transaction-assignments', TransactionAssignments::class)

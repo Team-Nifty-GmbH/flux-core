@@ -3,13 +3,10 @@
 namespace FluxErp\Jobs\Accounting;
 
 use Cron\CronExpression;
-use FluxErp\Actions\MailMessage\SendMail;
-use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
-use FluxErp\Actions\Printing;
+use FluxErp\Actions\PaymentReminder\BundlePaymentReminders;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Models\Order;
-use FluxErp\Models\PaymentReminder;
 use FluxErp\Settings\AccountingSettings;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -18,7 +15,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Str;
-use Throwable;
 
 class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
 {
@@ -74,7 +70,7 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
             return;
         }
 
-        resolve_static(Order::class, 'query')
+        $orderIds = resolve_static(Order::class, 'query')
             ->when($this->orderIds, fn (Builder $query) => $query->whereKey($this->orderIds))
             ->with(['orderType:id,order_type_enum'])
             ->whereNotNull('invoice_number')
@@ -82,132 +78,19 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
             ->where('balance', '!=', 0)
             ->whereDate('payment_reminder_next_date', '<=', now()->toDateString())
             ->whereHasMailablePaymentReminderAddress()
-            ->cursor()
-            ->each(function (Order $order): void {
-                if ($order->orderType->order_type_enum->isPurchase()
-                    || $order->orderType->order_type_enum->multiplier() != 1
-                ) {
-                    return;
-                }
+            ->get(['id', 'order_type_id'])
+            ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
+                && $order->orderType->order_type_enum->multiplier() === 1
+            )
+            ->pluck('id')
+            ->all();
 
-                $this->processOrder($order);
-            });
-    }
-
-    protected function processOrder(Order $order): void
-    {
-        try {
-            $paymentReminder = CreatePaymentReminder::make([
-                'order_id' => $order->getKey(),
-            ])
-                ->validate()
-                ->execute();
-
-            $this->sendPaymentReminderEmail($paymentReminder);
-        } catch (Throwable $e) {
-            logger()->error('Failed to process payment reminder for order ' . $order->getKey(), [
-                'error' => $e->getMessage(),
-                'order_id' => $order->getKey(),
-            ]);
-        }
-    }
-
-    protected function sendPaymentReminderEmail(PaymentReminder $paymentReminder): void
-    {
-        /** @var Order $order */
-        $order = $paymentReminder->order;
-
-        if (! $order->contact) {
+        if (! $orderIds) {
             return;
         }
 
-        $paymentReminderText = $paymentReminder->getPaymentReminderText();
-
-        if (! $paymentReminderText?->emailTemplate) {
-            return;
-        }
-
-        $paymentReminderPdf = Printing::make([
-            'model_type' => $paymentReminder->getMorphClass(),
-            'model_id' => $paymentReminder->getKey(),
-            'view' => 'payment-reminder',
-            'html' => false,
-            'preview' => false,
-            'attach_relation' => 'order',
-        ])
+        BundlePaymentReminders::make(['order_ids' => $orderIds])
             ->validate()
             ->execute();
-
-        if (! $paymentReminderPdf) {
-            logger()->error('Failed to generate PDF for payment reminder ' . $paymentReminder->getKey());
-
-            return;
-        }
-
-        $invoicePdf = $order->invoice();
-
-        $address = $order->resolveMailablePaymentReminderAddress();
-
-        $to = $paymentReminderText->mail_to ?? [];
-
-        if ($email = $address?->email_primary) {
-            $to[] = $email;
-        }
-
-        $cc = $paymentReminderText->mail_cc ?? [];
-        $to = array_values(array_unique(array_filter($to)));
-        $cc = array_values(array_unique(array_filter($cc)));
-
-        if (! $to) {
-            return;
-        }
-
-        $attachments = [
-            [
-                'id' => $paymentReminderPdf->getKey(),
-                'name' => $paymentReminderPdf->file_name,
-            ],
-        ];
-
-        if ($invoicePdf) {
-            $attachments[] = [
-                'id' => $invoicePdf->getKey(),
-                'name' => $invoicePdf->file_name,
-            ];
-        }
-
-        $result = SendMail::make([
-            'template_id' => $paymentReminderText->email_template_id,
-            'to' => $to,
-            'cc' => $cc ?: null,
-            'attachments' => $attachments,
-            'blade_parameters' => [
-                'order' => $order,
-                'contact' => $order->contact,
-                'paymentReminder' => $paymentReminder,
-            ],
-            'communicatables' => [
-                [
-                    'model_type' => $order->getMorphClass(),
-                    'model_id' => $order->getKey(),
-                ],
-            ],
-        ])
-            ->validate()
-            ->execute();
-
-        if (! data_get($result, 'success', false)) {
-            activity()
-                ->event('payment_reminder_email_failed')
-                ->byAnonymous()
-                ->performedOn($order)
-                ->withProperties([
-                    'error' => data_get($result, 'error'),
-                    'message' => data_get($result, 'message'),
-                    'payment_reminder_id' => $paymentReminder->getKey(),
-                    'to' => $to,
-                ])
-                ->log('Payment reminder email failed');
-        }
     }
 }
