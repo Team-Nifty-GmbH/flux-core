@@ -10,12 +10,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 trait SupportsFileDownloads
 {
     use EnsureUsedInLivewire;
 
+    #[Renderless]
     public function download(Media $media): void
     {
         if (! file_exists($media->getPath())) {
@@ -38,9 +40,14 @@ trait SupportsFileDownloads
             return;
         }
 
-        $this->redirect($media->getUrl());
+        $this->redirect(URL::temporarySignedRoute(
+            'media.show',
+            now()->addMinutes(5),
+            ['media' => $media->getKey(), 'download' => 1],
+        ));
     }
 
+    #[Renderless]
     public function downloadCollection(int|string $id, array|string $collection): void
     {
         // If $id is an integer we assume it's a media folder

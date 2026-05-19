@@ -127,6 +127,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
 /*
@@ -375,7 +376,37 @@ Route::middleware('web')
         Route::middleware('signed')->group(function (): void {
             Route::get('/media-private/{media}/{filename}', function (Media $media) {
                 return $media;
-            })->name('media.private');
+            })
+                ->name('media.private');
+
+            Route::get('/media/{media}', function (Media $media) {
+                $disposition = HeaderUtils::makeDisposition(
+                    request()->boolean('download')
+                        ? HeaderUtils::DISPOSITION_ATTACHMENT
+                        : HeaderUtils::DISPOSITION_INLINE,
+                    $media->file_name,
+                );
+
+                $disk = Storage::disk($media->disk);
+                $path = $media->getPathRelativeToRoot();
+
+                if ($disk->providesTemporaryUrls()) {
+                    return redirect()->away(
+                        $disk->temporaryUrl(
+                            $path,
+                            now()->addMinutes(5),
+                            ['ResponseContentDisposition' => $disposition],
+                        )
+                    );
+                }
+
+                return $disk->response(
+                    $path,
+                    $media->file_name,
+                    ['Content-Disposition' => $disposition],
+                );
+            })
+                ->name('media.show');
 
             Route::get('/media-collection-download/{token}', function (string $token) {
                 $payload = Crypt::decrypt($token);
