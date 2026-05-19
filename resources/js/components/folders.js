@@ -255,7 +255,10 @@ export default function folders(
 
                 // Check if the current node matches the search term (in the `nameAttribute`)
                 const matches = this.getSearchAttributes().some((attribute) => {
-                    return node[attribute].toLowerCase().includes(lowerSearch);
+                    return (
+                        node[attribute]?.toLowerCase().includes(lowerSearch) ??
+                        false
+                    );
                 });
 
                 // If the node matches, include it along with ALL its children

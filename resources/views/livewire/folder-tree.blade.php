@@ -4,8 +4,10 @@
             <x-flux::checkbox-tree
                 tree="$wire.getTree()"
                 name-attribute="name"
+                :search-attributes="['name', 'file_name', 'collection_name']"
                 moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'))"
                 sortable
+                with-search
                 x-sort:item="childNode"
             >
                 <x-slot:beforeTree>
