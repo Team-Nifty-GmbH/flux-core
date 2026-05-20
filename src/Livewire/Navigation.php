@@ -65,7 +65,7 @@ class Navigation extends Component
     {
         $menuAll = Menu::all();
         data_forget($menuAll, 'settings.children');
-        $menuHash = md5(serialize($menuAll));
+        $menuHash = md5(serialize($menuAll) . '|' . $this->authFingerprint());
 
         $cached = Session::get('navigations.' . $menuHash);
         if (is_array($cached)) {
@@ -100,6 +100,21 @@ class Navigation extends Component
         Session::put('navigations.' . $menuHash, $navigations);
 
         return collect($navigations);
+    }
+
+    protected function authFingerprint(): string
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return 'guest';
+        }
+
+        $permissionIds = method_exists($user, 'getAllPermissions')
+            ? $user->getAllPermissions()->pluck('id')->sort()->values()->all()
+            : [];
+
+        return $user->getAuthIdentifier() . ':' . md5(implode(',', $permissionIds));
     }
 
     protected function getVisits(): ?array
