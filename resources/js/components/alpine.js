@@ -13,6 +13,7 @@ import sort from '@alpinejs/sort';
 import collapse from '@alpinejs/collapse';
 import navigationSpinner from './navigation-spinner.js';
 import wireNavigation from './wire-navigation.js';
+import teleportRestore from './teleport-restore.js';
 import comments from './comments.js';
 import familyTree from './family-tree.js';
 import documentScanner from './document-scanner.js';
@@ -75,6 +76,7 @@ Alpine.data('folder_tree', folders);
 Alpine.data('comments', comments);
 
 document.addEventListener('livewire:navigated', wireNavigation, { once: true });
+document.addEventListener('livewire:navigated', teleportRestore);
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();
