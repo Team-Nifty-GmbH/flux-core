@@ -111,10 +111,10 @@ class Navigation extends Component
         }
 
         $permissionIds = method_exists($user, 'getAllPermissions')
-            ? $user->getAllPermissions()->pluck('id')->sort()->values()->all()
-            : [];
+            ? $user->getAllPermissions()->pluck('id')->sort()->implode(',')
+            : '';
 
-        return $user->getAuthIdentifier() . ':' . md5(implode(',', $permissionIds));
+        return $user->getAuthIdentifier() . ':' . $permissionIds;
     }
 
     protected function getVisits(): ?array
