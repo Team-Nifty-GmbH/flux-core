@@ -20,7 +20,7 @@
         x-on:close="$wire.resetEditForm()"
     >
         <div
-            class="grid h-[calc(100vh-5rem)] content-stretch gap-4 overflow-hidden sm:grid-cols-2"
+            class="grid h-full min-h-0 content-stretch gap-4 overflow-hidden sm:grid-cols-2"
             x-data="{
                 showPayment: false,
                 showBank: false,

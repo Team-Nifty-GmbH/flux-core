@@ -148,6 +148,8 @@ class PurchaseInvoiceList extends BaseDataTable
     public function resetEditForm(): void
     {
         $this->resetErrorBag();
+        $this->purchaseInvoiceForm->reset();
+        $this->mediaForm->reset();
     }
 
     #[Renderless]
