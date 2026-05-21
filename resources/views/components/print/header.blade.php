@@ -16,6 +16,7 @@
                 >
                     <h2
                         style="
+                            margin: 0;
                             font-size: 20px;
                             line-height: 28px;
                             font-weight: 600;
@@ -23,7 +24,10 @@
                     >
                         {{ $subject ?? '' }}
                     </h2>
-                    <div class="page-count" style="font-size: 12px"></div>
+                    <div
+                        class="page-count"
+                        style="margin: 0; font-size: 12px; line-height: 16px"
+                    ></div>
                 </div>
             @show
             @section('logo')
