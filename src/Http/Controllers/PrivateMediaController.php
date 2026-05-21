@@ -26,6 +26,9 @@ class PrivateMediaController extends Controller
 
         $disk = Storage::disk($media->conversions_disk);
         $relativePath = $media->getPathRelativeToRoot($conversion);
+
+        abort_unless($disk->exists($relativePath), 404);
+
         $fileName = basename($relativePath);
 
         $disposition = HeaderUtils::makeDisposition(
@@ -37,7 +40,7 @@ class PrivateMediaController extends Controller
             return redirect()->away(
                 $disk->temporaryUrl(
                     $relativePath,
-                    now()->addMinutes(5),
+                    now()->addMinutes(Media::PRIVATE_URL_TTL_MINUTES),
                     ['ResponseContentDisposition' => $disposition],
                 )
             );

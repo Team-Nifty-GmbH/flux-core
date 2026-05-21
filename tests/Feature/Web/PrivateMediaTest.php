@@ -63,3 +63,15 @@ test('signed route with conversion query 404s when the conversion is not generat
 
     $this->get($url)->assertNotFound();
 });
+
+test('signed route with conversion query 404s when the conversion file is missing on disk', function (): void {
+    @unlink($this->media->getPath('thumb_400x400'));
+
+    $url = URL::temporarySignedRoute('media.private', now()->addMinutes(5), [
+        'media' => $this->media->getKey(),
+        'filename' => $this->filename,
+        'conversion' => 'thumb_400x400',
+    ]);
+
+    $this->get($url)->assertNotFound();
+});

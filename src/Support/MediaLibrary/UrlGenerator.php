@@ -2,6 +2,7 @@
 
 namespace FluxErp\Support\MediaLibrary;
 
+use FluxErp\Models\Media;
 use Illuminate\Support\Facades\URL;
 use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 
@@ -26,7 +27,11 @@ class UrlGenerator extends DefaultUrlGenerator
                 $params['conversion'] = $this->conversion->getName();
             }
 
-            return URL::temporarySignedRoute('media.private', now()->addMinutes(5), $params);
+            return URL::temporarySignedRoute(
+                'media.private',
+                now()->addMinutes(Media::PRIVATE_URL_TTL_MINUTES),
+                $params,
+            );
         }
 
         return parent::getUrl();
