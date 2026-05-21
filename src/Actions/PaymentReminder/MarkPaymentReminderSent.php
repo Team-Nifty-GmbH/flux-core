@@ -23,7 +23,7 @@ class MarkPaymentReminderSent extends FluxAction
     {
         $paymentReminder = resolve_static(PaymentReminder::class, 'query')
             ->whereKey($this->getData('id'))
-            ->with('order')
+            ->with('order:id,payment_reminder_days_1,payment_reminder_days_2,payment_reminder_days_3')
             ->firstOrFail();
 
         $order = $paymentReminder->order;

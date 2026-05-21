@@ -23,12 +23,18 @@ class CreatePaymentReminder extends FluxAction
 
     public function performAction(): PaymentReminder
     {
-        $paymentReminder = app(PaymentReminder::class, ['attributes' => $this->data]);
+        $markAsSent = $this->getData('mark_as_sent') ?? true;
+
+        $paymentReminder = app(PaymentReminder::class, [
+            'attributes' => array_diff_key($this->data, ['mark_as_sent' => null]),
+        ]);
         $paymentReminder->save();
 
-        MarkPaymentReminderSent::make(['id' => $paymentReminder->getKey()])
-            ->validate()
-            ->execute();
+        if ($markAsSent) {
+            MarkPaymentReminderSent::make(['id' => $paymentReminder->getKey()])
+                ->validate()
+                ->execute();
+        }
 
         return $paymentReminder->fresh();
     }

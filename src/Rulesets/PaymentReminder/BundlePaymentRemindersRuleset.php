@@ -18,7 +18,7 @@ class BundlePaymentRemindersRuleset extends FluxRuleset
             'order_ids.*' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Order::class]),
+                app(ModelExists::class, ['model' => Order::class])->wherePaymentReminderEligible(),
             ],
         ];
     }

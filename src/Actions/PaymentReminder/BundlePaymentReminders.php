@@ -64,21 +64,27 @@ class BundlePaymentReminders extends FluxAction
 
         try {
             foreach ($orders as $order) {
-                $reminder = app(PaymentReminder::class, [
-                    'attributes' => ['order_id' => $order->getKey()],
-                ]);
-                $reminder->save();
+                $reminder = CreatePaymentReminder::make([
+                    'order_id' => $order->getKey(),
+                    'mark_as_sent' => false,
+                ])
+                    ->validate()
+                    ->execute();
                 $reminders->push($reminder);
             }
         } catch (Throwable $e) {
-            return $this->abortGroup($reminders, $orders, $e->getMessage());
+            $this->abortGroup($reminders, $orders, $e->getMessage());
+
+            return null;
         }
 
-        $attachments = collect();
+        $attachments = [];
         $reminderText = $reminders->first()?->getPaymentReminderText();
 
         if (! $reminderText?->emailTemplate) {
-            return $this->abortGroup($reminders, $orders, 'Missing payment reminder template');
+            $this->abortGroup($reminders, $orders, 'Missing payment reminder template');
+
+            return null;
         }
 
         foreach ($reminders as $reminder) {
@@ -94,19 +100,21 @@ class BundlePaymentReminders extends FluxAction
                 ->execute();
 
             if (! $pdf) {
-                return $this->abortGroup($reminders, $orders, 'PDF generation failed');
+                $this->abortGroup($reminders, $orders, 'PDF generation failed');
+
+                return null;
             }
 
-            $attachments->push([
+            $attachments[] = [
                 'id' => $pdf->getKey(),
                 'name' => $pdf->file_name,
-            ]);
+            ];
 
             if ($invoicePdf = $reminder->order->invoice()) {
-                $attachments->push([
+                $attachments[] = [
                     'id' => $invoicePdf->getKey(),
                     'name' => $invoicePdf->file_name,
-                ]);
+                ];
             }
         }
 
@@ -123,14 +131,16 @@ class BundlePaymentReminders extends FluxAction
         $cc = array_values(array_unique(array_filter($cc)));
 
         if (! $to) {
-            return $this->abortGroup($reminders, $orders, 'No recipient address');
+            $this->abortGroup($reminders, $orders, 'No recipient address');
+
+            return null;
         }
 
         $result = SendMail::make([
             'template_id' => $reminderText->email_template_id,
             'to' => $to,
             'cc' => $cc ?: null,
-            'attachments' => $attachments->all(),
+            'attachments' => $attachments,
             'blade_parameters' => [
                 'order' => $firstOrder,
                 'contact' => $firstOrder->contact,
@@ -138,21 +148,25 @@ class BundlePaymentReminders extends FluxAction
                 'paymentReminders' => $reminders,
                 'orders' => $orders,
             ],
-            'communicatables' => $orders->map(fn (Order $order) => [
-                'model_type' => $order->getMorphClass(),
-                'model_id' => $order->getKey(),
-            ])->all(),
+            'communicatables' => $orders
+                ->map(fn (Order $order) => [
+                    'model_type' => $order->getMorphClass(),
+                    'model_id' => $order->getKey(),
+                ])
+                ->all(),
         ])
             ->validate()
             ->execute();
 
         if (! data_get($result, 'success', false)) {
-            return $this->abortGroup(
+            $this->abortGroup(
                 $reminders,
                 $orders,
                 data_get($result, 'error') ?? data_get($result, 'message'),
                 $to,
             );
+
+            return null;
         }
 
         $reminders->each(function (PaymentReminder $reminder): void {
@@ -169,7 +183,7 @@ class BundlePaymentReminders extends FluxAction
         Collection $orders,
         ?string $reason,
         ?array $to = null,
-    ): ?Collection {
+    ): void {
         $reminders->each(fn (PaymentReminder $reminder) => $reminder->forceDelete());
 
         $orders->each(function (Order $order) use ($reason, $to): void {
@@ -183,7 +197,5 @@ class BundlePaymentReminders extends FluxAction
                 ]))
                 ->log('Payment reminder send failed');
         });
-
-        return null;
     }
 }

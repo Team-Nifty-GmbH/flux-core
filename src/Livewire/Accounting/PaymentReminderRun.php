@@ -34,6 +34,8 @@ class PaymentReminderRun extends Component
 
     public function loadData(): void
     {
+        $this->selected = [];
+
         $orders = resolve_static(Order::class, 'query')
             ->wherePaymentReminderDue()
             ->with(['contact:id,customer_number', 'orderType:id,order_type_enum'])
@@ -45,15 +47,15 @@ class PaymentReminderRun extends Component
         $this->groups = $orders
             ->groupBy(fn (Order $order) => $order->contact_id . '-' . ((int) $order->payment_reminder_current_level + 1))
             ->map(function (Collection $group): array {
-                $first = $group->first();
-                $address = $first->resolveMailablePaymentReminderAddress();
+                $order = $group->first();
+                $address = $order->resolveMailablePaymentReminderAddress();
 
                 return [
-                    'key' => $first->contact_id . '-' . ((int) $first->payment_reminder_current_level + 1),
-                    'contact_id' => $first->contact_id,
-                    'contact_name' => $address?->getLabel() ?? $first->contact?->customer_number,
+                    'key' => $order->contact_id . '-' . ((int) $order->payment_reminder_current_level + 1),
+                    'contact_id' => $order->contact_id,
+                    'contact_name' => $address?->getLabel() ?? $order->contact?->customer_number,
                     'recipient_email' => $address?->email_primary,
-                    'next_level' => (int) $first->payment_reminder_current_level + 1,
+                    'next_level' => (int) $order->payment_reminder_current_level + 1,
                     'order_count' => $group->count(),
                     'total_balance' => $group->sum('balance'),
                     'orders' => $group
@@ -102,7 +104,6 @@ class PaymentReminderRun extends Component
             ->all();
 
         $this->sendBundle($orderIds);
-        $this->selected = [];
         $this->loadData();
     }
 
