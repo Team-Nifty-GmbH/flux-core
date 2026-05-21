@@ -16,6 +16,8 @@ class Media extends BaseMedia
 {
     use HasPackageFactory, LogsActivity, ResolvesRelationsThroughContainer;
 
+    public const int PRIVATE_URL_TTL_MINUTES = 5;
+
     public bool $isTemporary = false;
 
     public ?string $path = null;

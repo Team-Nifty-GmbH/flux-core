@@ -6,6 +6,7 @@ use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
+use FluxErp\Http\Controllers\PrivateMediaController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
@@ -374,9 +375,7 @@ Route::middleware('web')
         });
 
         Route::middleware('signed')->group(function (): void {
-            Route::get('/media-private/{media}/{filename}', function (Media $media) {
-                return $media;
-            })
+            Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
                 ->name('media.private');
 
             Route::get('/media/{media}', function (Media $media) {
