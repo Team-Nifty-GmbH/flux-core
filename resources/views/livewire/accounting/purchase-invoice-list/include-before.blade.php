@@ -17,9 +17,10 @@
         scope="fullscreen"
         scrollable
         persistent
+        x-on:close="$wire.resetEditForm()"
     >
         <div
-            class="grid h-full min-h-screen content-stretch gap-4 sm:grid-cols-2"
+            class="grid h-[calc(100vh-5rem)] content-stretch gap-4 overflow-hidden sm:grid-cols-2"
             x-data="{
                 showPayment: false,
                 showBank: false,
@@ -50,7 +51,7 @@
                 @show
             @show
 
-            <div class="flex flex-col gap-4 overflow-auto px-2">
+            <div class="flex min-h-0 flex-col gap-4 overflow-y-auto px-2">
                 @section('tenant')
                     @if(count($tenants ?? []) > 1)
                         <div
