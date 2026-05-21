@@ -145,6 +145,14 @@ class PurchaseInvoiceList extends BaseDataTable
     }
 
     #[Renderless]
+    public function resetEditForm(): void
+    {
+        $this->resetErrorBag();
+        $this->purchaseInvoiceForm->reset();
+        $this->mediaForm->reset();
+    }
+
+    #[Renderless]
     public function fillFromSelectedContact(Contact $contact): void
     {
         $bankConnection = $contact->contactBankConnections()->latest()->first();
