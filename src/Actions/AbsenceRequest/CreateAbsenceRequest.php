@@ -7,6 +7,8 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
+use FluxErp\Notifications\AbsenceRequest\AbsenceRequestCreatedNotification;
+use FluxErp\Notifications\AbsenceRequest\AbsenceRequestSubstituteAssignedNotification;
 use FluxErp\Rulesets\AbsenceRequest\CreateAbsenceRequestRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -36,7 +38,22 @@ class CreateAbsenceRequest extends FluxAction
             $absenceRequest->substitutes()->attach($substitutes);
         }
 
-        return $absenceRequest->refresh();
+        $absenceRequest->refresh();
+
+        $authId = auth()->id();
+        $manager = $absenceRequest->employee?->employeeDepartment?->manager?->user;
+        if ($manager && $manager->getKey() !== $authId) {
+            $manager->notify(new AbsenceRequestCreatedNotification($absenceRequest));
+        }
+
+        foreach ($absenceRequest->substitutes as $substitute) {
+            $user = $substitute->user;
+            if ($user && $user->getKey() !== $authId) {
+                $user->notify(new AbsenceRequestSubstituteAssignedNotification($absenceRequest, $substitute));
+            }
+        }
+
+        return $absenceRequest;
     }
 
     public function validateData(): void
