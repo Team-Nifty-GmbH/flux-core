@@ -5,6 +5,7 @@ namespace FluxErp\Actions\AbsenceRequest;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Models\AbsenceRequest;
+use FluxErp\Models\Employee;
 use FluxErp\Rulesets\AbsenceRequest\UpdateAbsenceRequestRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -24,12 +25,17 @@ class UpdateAbsenceRequest extends FluxAction
 
     public function performAction(): AbsenceRequest
     {
+        /** @var AbsenceRequest $absenceRequest */
         $absenceRequest = resolve_static(AbsenceRequest::class, 'query')
             ->whereKey($this->getData('id'))
             ->first();
 
-        $absenceRequest->fill($this->getData());
+        $absenceRequest->fill(Arr::except($this->getData(), 'substitutes'));
         $absenceRequest->save();
+
+        if (array_key_exists('substitutes', $this->data)) {
+            $absenceRequest->substitutes()->sync($this->getData('substitutes') ?? []);
+        }
 
         return $absenceRequest->withoutRelations()->fresh();
     }
@@ -46,7 +52,10 @@ class UpdateAbsenceRequest extends FluxAction
             ->fill($this->getData());
 
         if (is_array($substitutes)) {
-            $absenceRequest->setRelation('substitutes', $substitutes);
+            $absenceRequest->setRelation(
+                'substitutes',
+                resolve_static(Employee::class, 'query')->whereKey($substitutes)->get()
+            );
         }
 
         $errors = [];
