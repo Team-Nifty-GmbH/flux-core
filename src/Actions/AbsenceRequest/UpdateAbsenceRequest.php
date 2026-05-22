@@ -6,6 +6,8 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
+use FluxErp\Notifications\AbsenceRequest\AbsenceRequestSubstituteAssignedNotification;
+use FluxErp\Notifications\AbsenceRequest\AbsenceRequestSubstituteUnassignedNotification;
 use FluxErp\Rulesets\AbsenceRequest\UpdateAbsenceRequestRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -30,12 +32,31 @@ class UpdateAbsenceRequest extends FluxAction
             ->whereKey($this->getData('id'))
             ->first();
 
+        $oldSubstituteIds = $absenceRequest->substitutes()->pluck('employees.id')->all();
+
         $absenceRequest->fill(Arr::except($this->getData(), 'substitutes'));
         $absenceRequest->save();
 
-        if (array_key_exists('substitutes', $this->data)) {
-            $absenceRequest->substitutes()->sync($this->getData('substitutes') ?? []);
+        if (! array_key_exists('substitutes', $this->data)) {
+            return $absenceRequest->withoutRelations()->fresh();
         }
+
+        $absenceRequest->substitutes()->sync($this->getData('substitutes') ?? []);
+        $newSubstituteIds = $absenceRequest->substitutes()->pluck('employees.id')->all();
+
+        $added = array_values(array_diff($newSubstituteIds, $oldSubstituteIds));
+        $removed = array_values(array_diff($oldSubstituteIds, $newSubstituteIds));
+
+        $this->notifySubstitutes(
+            $absenceRequest,
+            $added,
+            AbsenceRequestSubstituteAssignedNotification::class,
+        );
+        $this->notifySubstitutes(
+            $absenceRequest,
+            $removed,
+            AbsenceRequestSubstituteUnassignedNotification::class,
+        );
 
         return $absenceRequest->withoutRelations()->fresh();
     }
@@ -122,5 +143,28 @@ class UpdateAbsenceRequest extends FluxAction
         if ($errors) {
             throw ValidationException::withMessages($errors);
         }
+    }
+
+    protected function notifySubstitutes(
+        AbsenceRequest $absenceRequest,
+        array $employeeIds,
+        string $notification,
+    ): void {
+        if (! $employeeIds) {
+            return;
+        }
+
+        $authId = auth()->id();
+
+        resolve_static(Employee::class, 'query')
+            ->whereIntegerInRaw('id', $employeeIds)
+            ->with('user')
+            ->get()
+            ->each(function (Employee $employee) use ($absenceRequest, $notification, $authId): void {
+                $user = $employee->user;
+                if ($user && $user->getKey() !== $authId) {
+                    $user->notify(new $notification($absenceRequest, $employee));
+                }
+            });
     }
 }
