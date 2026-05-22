@@ -33,30 +33,41 @@ class UpdateAbsenceRequest extends FluxAction
             ->first();
 
         $oldSubstituteIds = $absenceRequest->substitutes()->pluck('employees.id')->all();
+        $datesChanged = $this->datesChanged($absenceRequest);
 
         $absenceRequest->fill(Arr::except($this->getData(), 'substitutes'));
         $absenceRequest->save();
 
-        if (! array_key_exists('substitutes', $this->data)) {
-            return $absenceRequest->withoutRelations()->fresh();
+        $substitutesInInput = array_key_exists('substitutes', $this->data);
+        if ($substitutesInInput) {
+            $absenceRequest->substitutes()->sync($this->getData('substitutes') ?? []);
         }
 
-        $absenceRequest->substitutes()->sync($this->getData('substitutes') ?? []);
         $newSubstituteIds = $absenceRequest->substitutes()->pluck('employees.id')->all();
-
         $added = array_values(array_diff($newSubstituteIds, $oldSubstituteIds));
         $removed = array_values(array_diff($oldSubstituteIds, $newSubstituteIds));
+        $kept = array_values(array_intersect($newSubstituteIds, $oldSubstituteIds));
 
-        $this->notifySubstitutes(
-            $absenceRequest,
-            $added,
-            AbsenceRequestSubstituteAssignedNotification::class,
-        );
-        $this->notifySubstitutes(
-            $absenceRequest,
-            $removed,
-            AbsenceRequestSubstituteUnassignedNotification::class,
-        );
+        if ($substitutesInInput) {
+            $this->notifySubstitutes(
+                $absenceRequest,
+                $added,
+                AbsenceRequestSubstituteAssignedNotification::class,
+            );
+            $this->notifySubstitutes(
+                $absenceRequest,
+                $removed,
+                AbsenceRequestSubstituteUnassignedNotification::class,
+            );
+        }
+
+        if ($datesChanged) {
+            $this->notifySubstitutes(
+                $absenceRequest,
+                $kept,
+                AbsenceRequestSubstituteAssignedNotification::class,
+            );
+        }
 
         return $absenceRequest->withoutRelations()->fresh();
     }
@@ -143,6 +154,28 @@ class UpdateAbsenceRequest extends FluxAction
         if ($errors) {
             throw ValidationException::withMessages($errors);
         }
+    }
+
+    protected function datesChanged(AbsenceRequest $absenceRequest): bool
+    {
+        foreach (['start_date', 'end_date'] as $field) {
+            if (! array_key_exists($field, $this->data)) {
+                continue;
+            }
+            if ($absenceRequest->{$field}?->toDateString() !== $this->getData($field)) {
+                return true;
+            }
+        }
+        foreach (['start_time', 'end_time'] as $field) {
+            if (! array_key_exists($field, $this->data)) {
+                continue;
+            }
+            if ((string) $absenceRequest->{$field} !== (string) $this->getData($field)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function notifySubstitutes(
