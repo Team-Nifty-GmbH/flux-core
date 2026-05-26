@@ -11,6 +11,7 @@ use FluxErp\Notifications\AbsenceRequest\AbsenceRequestSubstituteUnassignedNotif
 use FluxErp\Rulesets\AbsenceRequest\UpdateAbsenceRequestRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class UpdateAbsenceRequest extends FluxAction
@@ -27,44 +28,48 @@ class UpdateAbsenceRequest extends FluxAction
 
     public function performAction(): AbsenceRequest
     {
+        $data = $this->getData();
+        $substitutes = Arr::pull($data, 'substitutes');
+
         /** @var AbsenceRequest $absenceRequest */
         $absenceRequest = resolve_static(AbsenceRequest::class, 'query')
             ->whereKey($this->getData('id'))
             ->first();
 
-        $oldSubstituteIds = $absenceRequest->substitutes()->pluck('employees.id')->all();
-        $datesChanged = $this->datesChanged($absenceRequest);
-
-        $absenceRequest->fill(Arr::except($this->getData(), 'substitutes'));
+        $absenceRequest->fill($data);
         $absenceRequest->save();
 
-        $substitutesInInput = array_key_exists('substitutes', $this->data);
-        if ($substitutesInInput) {
-            $absenceRequest->substitutes()->sync($this->getData('substitutes') ?? []);
-        }
+        $datesChanged = $absenceRequest->wasChanged(['start_date', 'end_date', 'start_time', 'end_time']);
 
-        $newSubstituteIds = $absenceRequest->substitutes()->pluck('employees.id')->all();
-        $added = array_values(array_diff($newSubstituteIds, $oldSubstituteIds));
-        $removed = array_values(array_diff($oldSubstituteIds, $newSubstituteIds));
-        $kept = array_values(array_intersect($newSubstituteIds, $oldSubstituteIds));
+        if (is_array($substitutes)) {
+            $sync = $absenceRequest->substitutes()->sync($substitutes);
 
-        if ($substitutesInInput) {
-            $this->notifySubstitutes(
+            $this->notifySubstituteIds(
                 $absenceRequest,
-                $added,
+                $sync['attached'],
                 AbsenceRequestSubstituteAssignedNotification::class,
             );
-            $this->notifySubstitutes(
+            $this->notifySubstituteIds(
                 $absenceRequest,
-                $removed,
+                $sync['detached'],
                 AbsenceRequestSubstituteUnassignedNotification::class,
             );
-        }
 
-        if ($datesChanged) {
-            $this->notifySubstitutes(
+            if ($datesChanged) {
+                $kept = array_values(array_diff(
+                    $absenceRequest->substitutes()->pluck('employees.id')->all(),
+                    $sync['attached'],
+                ));
+                $this->notifySubstituteIds(
+                    $absenceRequest,
+                    $kept,
+                    AbsenceRequestSubstituteAssignedNotification::class,
+                );
+            }
+        } elseif ($datesChanged) {
+            $this->notifySubstituteIds(
                 $absenceRequest,
-                $kept,
+                $absenceRequest->substitutes()->pluck('employees.id')->all(),
                 AbsenceRequestSubstituteAssignedNotification::class,
             );
         }
@@ -156,29 +161,11 @@ class UpdateAbsenceRequest extends FluxAction
         }
     }
 
-    protected function datesChanged(AbsenceRequest $absenceRequest): bool
-    {
-        foreach (['start_date', 'end_date'] as $field) {
-            if (! array_key_exists($field, $this->data)) {
-                continue;
-            }
-            if ($absenceRequest->{$field}?->toDateString() !== $this->getData($field)) {
-                return true;
-            }
-        }
-        foreach (['start_time', 'end_time'] as $field) {
-            if (! array_key_exists($field, $this->data)) {
-                continue;
-            }
-            if ((string) $absenceRequest->{$field} !== (string) $this->getData($field)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    protected function notifySubstitutes(
+    /**
+     * @param  array<int, int>  $employeeIds
+     * @param  class-string<\FluxErp\Notifications\Notification>  $notification
+     */
+    protected function notifySubstituteIds(
         AbsenceRequest $absenceRequest,
         array $employeeIds,
         string $notification,
@@ -189,15 +176,15 @@ class UpdateAbsenceRequest extends FluxAction
 
         $authId = auth()->id();
 
-        resolve_static(Employee::class, 'query')
+        $users = resolve_static(Employee::class, 'query')
             ->whereIntegerInRaw('id', $employeeIds)
             ->with('user')
             ->get()
-            ->each(function (Employee $employee) use ($absenceRequest, $notification, $authId): void {
-                $user = $employee->user;
-                if ($user && $user->getKey() !== $authId) {
-                    $user->notify(new $notification($absenceRequest, $employee));
-                }
-            });
+            ->pluck('user')
+            ->filter(fn ($user) => $user && $user->getKey() !== $authId);
+
+        if ($users->isNotEmpty()) {
+            Notification::send($users, $notification::make($absenceRequest));
+        }
     }
 }

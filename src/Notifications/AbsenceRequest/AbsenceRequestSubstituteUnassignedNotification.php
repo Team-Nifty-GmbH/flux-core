@@ -4,7 +4,6 @@ namespace FluxErp\Notifications\AbsenceRequest;
 
 use FluxErp\Contracts\HasToastNotification;
 use FluxErp\Models\AbsenceRequest;
-use FluxErp\Models\Employee;
 use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
 use FluxErp\Traits\Makeable;
@@ -16,10 +15,7 @@ class AbsenceRequestSubstituteUnassignedNotification extends Notification implem
 {
     use Makeable, Queueable;
 
-    public function __construct(
-        protected AbsenceRequest $absenceRequest,
-        protected Employee $substitute,
-    ) {}
+    public function __construct(protected AbsenceRequest $absenceRequest) {}
 
     public function toArray(object $notifiable): array
     {

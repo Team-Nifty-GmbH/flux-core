@@ -12,6 +12,7 @@ use FluxErp\Notifications\AbsenceRequest\AbsenceRequestSubstituteAssignedNotific
 use FluxErp\Rulesets\AbsenceRequest\CreateAbsenceRequestRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class CreateAbsenceRequest extends FluxAction
@@ -46,11 +47,15 @@ class CreateAbsenceRequest extends FluxAction
             $manager->notify(AbsenceRequestCreatedNotification::make($absenceRequest));
         }
 
-        foreach ($absenceRequest->substitutes as $substitute) {
-            $user = $substitute->user;
-            if ($user && $user->getKey() !== $authId) {
-                $user->notify(AbsenceRequestSubstituteAssignedNotification::make($absenceRequest, $substitute));
-            }
+        $substituteUsers = $absenceRequest->substitutes
+            ->pluck('user')
+            ->filter(fn ($user) => $user && $user->getKey() !== $authId);
+
+        if ($substituteUsers->isNotEmpty()) {
+            Notification::send(
+                $substituteUsers,
+                AbsenceRequestSubstituteAssignedNotification::make($absenceRequest),
+            );
         }
 
         return $absenceRequest;

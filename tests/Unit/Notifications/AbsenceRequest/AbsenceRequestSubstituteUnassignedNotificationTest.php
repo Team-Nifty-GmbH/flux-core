@@ -9,14 +9,11 @@ test('substitute unassigned notification renders requesting employee name', func
     $requestingEmployee = new Employee();
     $requestingEmployee->forceFill(['name' => 'Sonja Zitt']);
 
-    $substitute = new Employee();
-    $substitute->forceFill(['name' => 'Max']);
-
     $absenceRequest = new AbsenceRequest();
     $absenceRequest->forceFill(['id' => 1]);
     $absenceRequest->setRelation('employee', $requestingEmployee);
 
-    $payload = (new AbsenceRequestSubstituteUnassignedNotification($absenceRequest, $substitute))
+    $payload = (new AbsenceRequestSubstituteUnassignedNotification($absenceRequest))
         ->toArray(User::factory()->create());
 
     expect($payload['title'])->toBe(__('You are no longer substitute for :employee', ['employee' => 'Sonja Zitt']));

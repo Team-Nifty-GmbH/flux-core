@@ -10,9 +10,6 @@ test('substitute assigned notification renders requesting employee name and date
     $requestingEmployee = new Employee();
     $requestingEmployee->forceFill(['name' => 'Sonja Zitt']);
 
-    $substitute = new Employee();
-    $substitute->forceFill(['name' => 'Max']);
-
     $absenceRequest = new AbsenceRequest();
     $absenceRequest->forceFill([
         'id' => 1,
@@ -21,7 +18,7 @@ test('substitute assigned notification renders requesting employee name and date
     ]);
     $absenceRequest->setRelation('employee', $requestingEmployee);
 
-    $payload = (new AbsenceRequestSubstituteAssignedNotification($absenceRequest, $substitute))
+    $payload = (new AbsenceRequestSubstituteAssignedNotification($absenceRequest))
         ->toArray(User::factory()->create());
 
     expect($payload['title'])->toBe(__('You are substitute for :employee', ['employee' => 'Sonja Zitt']))
