@@ -43,7 +43,9 @@ class AbsenceRequestCreatedNotification extends Notification implements ShouldQu
 
     public function toWebPush(object $notifiable): ?WebPushMessage
     {
-        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
+        if (! method_exists($notifiable, 'pushSubscriptions')
+            || ! $notifiable->pushSubscriptions()->exists()
+        ) {
             return null;
         }
 
