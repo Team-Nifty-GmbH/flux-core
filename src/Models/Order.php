@@ -1109,55 +1109,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     public function recalculateOrderPositionSlugPositions(): static
     {
-        DB::table('order_positions')
-            ->where('order_id', $this->getKey())
-            ->whereNull('parent_id')
-            ->update([
-                'slug_position' => DB::raw('LPAD(sort_number, 8, "0")'),
-            ]);
-
-        $query = "
-            WITH RECURSIVE position_hierarchy AS (
-                SELECT
-                    id,
-                    parent_id,
-                    order_id,
-                    slug_position,
-                    sort_number,
-                    0 AS level
-                FROM
-                    order_positions
-                WHERE
-                    order_id = ? AND parent_id IS NULL
-
-                UNION ALL
-
-                SELECT
-                    c.id,
-                    c.parent_id,
-                    c.order_id,
-                    CONCAT(p.slug_position, '.', LPAD(c.sort_number, 8, '0')) AS slug_position,
-                    c.sort_number,
-                    p.level + 1 AS level
-                FROM
-                    position_hierarchy p
-                JOIN
-                    order_positions c ON p.id = c.parent_id AND c.order_id = ?
-            )
-
-            UPDATE order_positions op,
-                   position_hierarchy ph
-            SET op.slug_position = ph.slug_position
-            WHERE op.id = ph.id
-              AND op.order_id = ?
-              AND op.parent_id IS NOT NULL;
-        ";
-
-        DB::statement($query, [
-            $this->getKey(),
-            $this->getKey(),
-            $this->getKey(),
-        ]);
+        $this->reslugOrderPositionsUnder(null, null);
 
         return $this;
     }
@@ -1338,6 +1290,39 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
         if ($orderTypeId = data_get($info, 'order_type_id')) {
             $builder->where('order_type_id', $orderTypeId);
+        }
+    }
+
+    protected function reslugOrderPositionsUnder(?int $parentId, ?string $parentSlug): void
+    {
+        $counter = 0;
+
+        $positions = resolve_static(OrderPosition::class, 'query')
+            ->where('order_id', $this->getKey())
+            ->when(
+                is_null($parentId),
+                fn (Builder $query) => $query->whereNull('parent_id'),
+                fn (Builder $query) => $query->where('parent_id', $parentId),
+            )
+            ->orderBy('sort_number')
+            ->get(['id', 'is_free_text']);
+
+        foreach ($positions as $position) {
+            if ($position->is_free_text) {
+                $newSlug = null;
+            } else {
+                $counter++;
+                $segment = str_pad((string) $counter, 8, '0', STR_PAD_LEFT);
+                $newSlug = is_null($parentSlug) ? $segment : $parentSlug . '.' . $segment;
+            }
+
+            DB::table('order_positions')
+                ->where('id', $position->getKey())
+                ->update(['slug_position' => $newSlug]);
+
+            if (! $position->is_free_text) {
+                $this->reslugOrderPositionsUnder($position->getKey(), $newSlug);
+            }
         }
     }
 
