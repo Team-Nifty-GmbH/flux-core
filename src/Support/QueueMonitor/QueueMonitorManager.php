@@ -177,7 +177,8 @@ class QueueMonitorManager
                 'job_batch_id' => $event->job->batchId ?? null,
                 'job_id' => $event->id,
                 'name' => static::getJobName($event),
-                'queue' => $event->job->queue ?: 'default',
+                'queue' => $event->queue
+                    ?: config("queue.connections.{$event->connectionName}.queue", 'default'),
                 'state' => Queued::class,
                 'queued_at' => now(),
                 'data' => $data ?? null,
