@@ -42,7 +42,7 @@ class ApproveAbsenceRequest extends FluxAction
 
         $user = $absenceRequest->employee?->user;
         if ($user && $user->getKey() !== auth()->id()) {
-            $user->notify(new AbsenceRequestApprovedNotification($absenceRequest));
+            $user->notify(AbsenceRequestApprovedNotification::make($absenceRequest));
         }
 
         return $absenceRequest->fresh();

@@ -41,7 +41,7 @@ class RevokeAbsenceRequest extends FluxAction
 
         $user = $absenceRequest->employee?->user;
         if ($user && $user->getKey() !== auth()->id()) {
-            $user->notify(new AbsenceRequestRevokedNotification($absenceRequest));
+            $user->notify(AbsenceRequestRevokedNotification::make($absenceRequest));
         }
 
         return $absenceRequest->fresh();

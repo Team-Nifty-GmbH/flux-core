@@ -43,13 +43,13 @@ class CreateAbsenceRequest extends FluxAction
         $authId = auth()->id();
         $manager = $absenceRequest->employee?->employeeDepartment?->manager?->user;
         if ($manager && $manager->getKey() !== $authId) {
-            $manager->notify(new AbsenceRequestCreatedNotification($absenceRequest));
+            $manager->notify(AbsenceRequestCreatedNotification::make($absenceRequest));
         }
 
         foreach ($absenceRequest->substitutes as $substitute) {
             $user = $substitute->user;
             if ($user && $user->getKey() !== $authId) {
-                $user->notify(new AbsenceRequestSubstituteAssignedNotification($absenceRequest, $substitute));
+                $user->notify(AbsenceRequestSubstituteAssignedNotification::make($absenceRequest, $substitute));
             }
         }
 
