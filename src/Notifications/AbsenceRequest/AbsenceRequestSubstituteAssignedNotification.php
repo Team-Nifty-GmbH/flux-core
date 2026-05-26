@@ -2,6 +2,7 @@
 
 namespace FluxErp\Notifications\AbsenceRequest;
 
+use FluxErp\Contracts\HasToastNotification;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Notifications\Notification;
@@ -12,7 +13,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use NotificationChannels\WebPush\WebPushMessage;
 
-class AbsenceRequestSubstituteAssignedNotification extends Notification implements ShouldQueue
+class AbsenceRequestSubstituteAssignedNotification extends Notification implements HasToastNotification, ShouldQueue
 {
     use Makeable, Queueable;
 
