@@ -7,7 +7,6 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -26,8 +25,6 @@ class Notifications extends Component
 
     public function render(): View|Factory|Application
     {
-        Log::info('notifications created');
-
         return view('flux::livewire.features.notifications');
     }
 
