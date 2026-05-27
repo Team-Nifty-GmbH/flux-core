@@ -27,7 +27,7 @@
         <x-slide
             id="notifications-slide"
             scope="notifications"
-            x-on:close="$wire.closeNotifications()"
+            x-on:close="$wire.closeNotifications().then(() => $dispatch('notifications:clear'))"
         >
             <div
                 x-data="{
