@@ -64,6 +64,7 @@
                 :label="__('Count')"
                 :min="0.01"
             />
+            @stack('product-bundle-modal-fields')
         </div>
         <x-slot:footer>
             <x-button
