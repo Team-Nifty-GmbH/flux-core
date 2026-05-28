@@ -48,10 +48,6 @@ class Notifications extends Component
     public function closeNotifications(): void
     {
         $this->loaded = 0;
-
-        $this->js(<<<'JS'
-            removeAll();
-        JS);
     }
 
     #[Renderless]
