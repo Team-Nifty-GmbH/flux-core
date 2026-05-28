@@ -10,7 +10,7 @@
     <div class="overflow-auto">
         <table class="w-full">
             <tbody>
-                @forelse($birthdays as $birthday)
+                @forelse ($birthdays as $birthday)
                     <tr class="border-t border-gray-100 dark:border-gray-700">
                         <td class="py-1.5 text-sm">{{ $birthday['name'] }}</td>
                         <td class="py-1.5 text-right text-sm text-gray-500">

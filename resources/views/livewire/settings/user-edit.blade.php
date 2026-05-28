@@ -98,7 +98,7 @@
                         :label="__('Force Two-Factor Authentication')"
                         wire:model="userForm.force_two_factor"
                     />
-                    @if($userForm->id)
+                    @if ($userForm->id)
                         <x-button
                             :text="__('Reset Two-Factor Authentication')"
                             color="red"
@@ -132,7 +132,7 @@
                 />
             @show
             @section('user-edit.default-mail-account')
-                @if($userForm->mail_accounts)
+                @if ($userForm->mail_accounts)
                     <x-select.styled
                         :label="__('Default Mail Account')"
                         wire:model="userForm.default_mail_account_id"
@@ -152,7 +152,7 @@
                 />
             @show
             @section('user-edit.default-printer')
-                @if($userPrinters)
+                @if ($userPrinters)
                     <x-select.styled
                         :label="__('Default Printer')"
                         wire:model="printerUserForm.pivot_id"
@@ -233,8 +233,8 @@
                             ->hasRole('Super Admin');
                     @endphp
 
-                    @foreach($roles as $role)
-                        @if($role['name'] === 'Super Admin' && ! $superAdmin)
+                    @foreach ($roles as $role)
+                        @if ($role['name'] === 'Super Admin' && ! $superAdmin)
                             @continue
                         @endif
                         <div class="flex">
@@ -266,7 +266,7 @@
                 </div>
                 <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
                     <div class="grid grid-cols-6 gap-3">
-                        @foreach($permissions as $permission)
+                        @foreach ($permissions as $permission)
                             <div class="col-span-3 font-medium">
                                 {{ __($permission['name']) }}
                             </div>
@@ -295,7 +295,7 @@
         @canAction(\FluxErp\Actions\User\UpdateUserTenants::class)
             <div x-show="active === 'tenants'" x-cloak>
                 <div class="max-h-96 space-y-3 overflow-y-auto">
-                    @foreach($tenants as $tenant)
+                    @foreach ($tenants as $tenant)
                         <div class="flex">
                             <div class="flex-1 text-sm">
                                 {{ $tenant['name'] }}

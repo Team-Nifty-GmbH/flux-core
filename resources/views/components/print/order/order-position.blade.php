@@ -1,8 +1,8 @@
 @use(Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
 <tbody>
     <tr
-        @if($loop ?? false)
-            @if($loop->odd)
+        @if ($loop ?? false)
+            @if ($loop->odd)
                 style="background: #f2f4f7"
             @endif
         @endif
@@ -21,7 +21,7 @@
         <td
             style="padding-top: 8px; padding-bottom: 8px; padding-right: 32px; vertical-align: top; padding-left: {{ $position->depth * 15 }}px;"
         >
-            @if($position->is_alternative)
+            @if ($position->is_alternative)
                 <x-badge
                     color="amber"
                     style="margin-bottom: 8px"
@@ -54,7 +54,7 @@
                 vertical-align: top;
             "
         >
-            @if(! $position->is_free_text && ! $position->is_bundle_position)
+            @if (! $position->is_free_text && ! $position->is_bundle_position)
                 {{ Number::format($position->amount) }}
                 {{ data_get($position, 'product.unit.abbreviation') }}
             @endif
@@ -67,7 +67,7 @@
                 vertical-align: top;
             "
         >
-            @if(bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) === 1)
+            @if (bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) === 1)
                 <div style="font-size: 12px; white-space: nowrap">
                     <div style="text-decoration: line-through">
                         {{ Number::currency($isNet ? $position->total_base_net_price : $position->total_base_gross_price) }}

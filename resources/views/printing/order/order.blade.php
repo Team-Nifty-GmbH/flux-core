@@ -85,7 +85,7 @@
                                     {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
                                 </td>
                             </tr>
-                            @if($model->commission)
+                            @if ($model->commission)
                                 <tr style="line-height: 1">
                                     <td
                                         style="
@@ -127,7 +127,7 @@
             "
         >
             {{ render_editor_blade($model->header, ['order' => $model]) }}
-            @if($model->orderType?->document_header)
+            @if ($model->orderType?->document_header)
                 {{ render_editor_blade($model->orderType->document_header, ['order' => $model]) }}
             @endif
         </div>
@@ -197,7 +197,7 @@
                     @show
                 </thead>
                 @section('positions.positions')
-                    @foreach($model->orderPositions as $position)
+                    @foreach ($model->orderPositions as $position)
                         <x-flux::print.order.order-position
                             :position="$position"
                             :is-net="$isNet"
@@ -209,7 +209,7 @@
             </table>
         @show
     </div>
-    @if($summary)
+    @if ($summary)
         @section('summary')
             <div style="padding-bottom: 24px">
                 <table
@@ -231,7 +231,7 @@
                                 {{ __('Summary') }}
                             </td>
                         </tr>
-                        @foreach($summary as $summaryItem)
+                        @foreach ($summary as $summaryItem)
                             <tr>
                                 <td>{{ $summaryItem->slug_position }}</td>
                                 <td style="white-space: nowrap">
@@ -269,7 +269,7 @@
                     </td>
                 </tr>
                 @section('total.discounts')
-                    @if(bccomp($model->total_base_net_price ?? 0, $model->total_net_price ?? 0) !== 0)
+                    @if (bccomp($model->total_base_net_price ?? 0, $model->total_net_price ?? 0) !== 0)
                         <tr>
                             <td style="text-align: right">
                                 {{ __('Sum net without discount') }}
@@ -285,7 +285,7 @@
                                 {{ Number::currency($model->total_base_net_price) }}
                             </td>
                         </tr>
-                        @if(bccomp($model->total_position_discount_percentage ?? 0, 0) !== 0)
+                        @if (bccomp($model->total_position_discount_percentage ?? 0, 0) !== 0)
                             <tr>
                                 <td style="text-align: right">
                                     <span>{{ __('Position discounts') }}</span>
@@ -304,7 +304,7 @@
                                     {{ Number::currency(bcmul($model->total_position_discount_flat ?? 0, -1)) }}
                                 </td>
                             </tr>
-                            @if($model->discounts->isNotEmpty())
+                            @if ($model->discounts->isNotEmpty())
                                 <tr>
                                     <td style="text-align: right">
                                         {{ __('Sum net discounted') }}
@@ -322,7 +322,7 @@
                                 </tr>
                             @endif
                         @endif
-                        @foreach($model->discounts as $discount)
+                        @foreach ($model->discounts as $discount)
                             <tr>
                                 <td style="text-align: right">
                                     <span>
@@ -369,7 +369,7 @@
                     </tr>
                 @show
                 @section('total.vats')
-                    @foreach($model->total_vats ?? [] as $vat)
+                    @foreach ($model->total_vats ?? [] as $vat)
                         <tr>
                             <td style="text-align: right">
                                 {{
@@ -416,7 +416,7 @@
     @section('footer')
         <div style="font-size: 12px; line-height: 16px; break-inside: avoid">
             {{ render_editor_blade($model->footer, ['order' => $model]) }}
-            @if($model->orderType?->document_footer)
+            @if ($model->orderType?->document_footer)
                 {{ render_editor_blade($model->orderType->document_footer, ['order' => $model]) }}
             @endif
 

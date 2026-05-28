@@ -39,7 +39,7 @@
 
     @show
     @persist('notifications')
-        @if(auth()->check() && auth()->id())
+        @if (auth()->check() && auth()->id())
             <div
                 id="{{ \Illuminate\Support\Str::uuid() }}"
                 x-on:ts-ui:toast-upsert.window="
@@ -108,7 +108,7 @@
     @endauth
 
     <x-flux::layout>
-        @if(
+        @if (
             ! $navigation
             && auth()->check()
             && auth()->id()
@@ -156,7 +156,7 @@
                             x-on:click="window.location.reload()"
                         />
 
-                        @if(resolve_static(\FluxErp\Models\PriceList::class, 'default'))
+                        @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
                             @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
                                     <livewire:cart.cart lazy />
@@ -180,7 +180,7 @@
             </x-slot:header>
         @endif
 
-        @if(
+        @if (
             ! $navigation
             && auth()->check()
             && auth()->id()

@@ -163,7 +163,7 @@
         </div>
     @show
     @section('contact-channels')
-        @if(! $onlyPostal)
+        @if (! $onlyPostal)
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label
                     :label="__('Date Of Birth')"
@@ -281,7 +281,7 @@
                 </div>
             </div>
         @show
-        @if(! $onlyPostal)
+        @if (! $onlyPostal)
             @section('contact-channels.url')
                 <div
                     class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
@@ -421,7 +421,7 @@
     @show
 </div>
 @section('attributes')
-    @if(! $onlyPostal)
+    @if (! $onlyPostal)
         <h3
             class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
         >

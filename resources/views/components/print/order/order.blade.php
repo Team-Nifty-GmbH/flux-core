@@ -1,8 +1,8 @@
 @use(Illuminate\Support\Number)
 <tbody>
     <tr
-        @if($loop ?? false)
-            @if($loop->odd)
+        @if ($loop ?? false)
+            @if ($loop->odd)
                 style="background: #f2f4f7"
             @endif
         @endif
