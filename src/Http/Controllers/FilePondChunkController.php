@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class FilePondChunkController extends Controller
 {
+    protected static bool $hasPermission = false;
+
     public function handle(Request $request): JsonResponse
     {
         if (FileUploadConfiguration::isUsingS3() || FileUploadConfiguration::isUsingGCS()) {
