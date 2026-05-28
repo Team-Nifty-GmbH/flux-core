@@ -27,7 +27,7 @@
                 </div>
             @show
             @section('logo')
-                @if($tenant?->logo_small)
+                @if ($tenant?->logo_small)
                     <div
                         style="
                             float: right;
