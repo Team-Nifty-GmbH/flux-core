@@ -32,9 +32,9 @@ class Ticket extends Component
 
     public array $ticketTypes;
 
-    public function mount(int $id): void
+    public function mount(string $id): void
     {
-        $this->fetchTicket($id);
+        $this->fetchTicket((int) $id);
     }
 
     public function render(): View
