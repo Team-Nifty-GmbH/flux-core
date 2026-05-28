@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -251,4 +252,21 @@ test('chunk init rejects negative upload length', function (): void {
     ]);
 
     $response->assertStatus(422);
+});
+
+test('chunk init does not require the auto-derived permission', function (): void {
+    Permission::query()->create([
+        'name' => 'file-pond.chunk.post',
+        'guard_name' => 'web',
+    ]);
+
+    $user = User::factory()->create([
+        'is_active' => true,
+        'language_id' => $this->defaultLanguage->getKey(),
+    ]);
+    $this->be($user, 'web');
+
+    $response = chunkInit();
+
+    $response->assertOk();
 });
