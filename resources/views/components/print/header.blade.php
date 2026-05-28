@@ -27,21 +27,23 @@
                 </div>
             @show
             @section('logo')
-                <div
-                    style="
-                        float: right;
-                        display: inline-block;
-                        max-height: 288px;
-                        width: 176px;
-                        text-align: right;
-                    "
-                >
-                    <img
-                        class="logo-small"
-                        src="{{ $tenant->logo_small }}"
-                        alt="logo-small"
-                    />
-                </div>
+                @if ($tenant?->logo_small)
+                    <div
+                        style="
+                            float: right;
+                            display: inline-block;
+                            max-height: 288px;
+                            width: 176px;
+                            text-align: right;
+                        "
+                    >
+                        <img
+                            class="logo-small"
+                            src="{{ $tenant->logo_small }}"
+                            alt="logo-small"
+                        />
+                    </div>
+                @endif
             @show
             <div style="clear: both"></div>
         </div>
