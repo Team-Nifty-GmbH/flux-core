@@ -145,12 +145,13 @@
         @endif
     @endforeach
     @foreach ($buttonInstances as $buttonInstance)
-        @if (method_exists($buttonInstance, 'companions'))
+        @if ($buttonInstance instanceof \FluxErp\Contracts\HasEditorButtonCompanions)
             @foreach ($buttonInstance->companions() as $companion)
+                @continue(! is_array($companion) || ! isset($companion['class']) || ! is_string($companion['class']))
                 @livewire(
                     $companion['class'],
-                    $companion['params'] ?? [],
-                    key('editor-' . $id . '-companion-' . $loop->parent->index . '-' . $loop->index)
+                    is_array($companion['params'] ?? null) ? $companion['params'] : [],
+                    key('editor-' . $id . '-companion-' . $companion['class'] . '-' . $loop->parent->index . '-' . $loop->index)
                 )
             @endforeach
         @endif
