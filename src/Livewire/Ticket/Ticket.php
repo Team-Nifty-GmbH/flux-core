@@ -34,6 +34,8 @@ class Ticket extends Component
 
     public function mount(string $id): void
     {
+        abort_if(! ctype_digit($id), 404);
+
         $this->fetchTicket((int) $id);
     }
 
