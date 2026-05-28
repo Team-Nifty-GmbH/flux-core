@@ -144,4 +144,15 @@
             @endif
         @endif
     @endforeach
+    @foreach ($buttonInstances as $buttonInstance)
+        @if (method_exists($buttonInstance, 'companions'))
+            @foreach ($buttonInstance->companions() as $companion)
+                @livewire(
+                    $companion['class'],
+                    $companion['params'] ?? [],
+                    key('editor-' . $id . '-companion-' . $loop->parent->index . '-' . $loop->index)
+                )
+            @endforeach
+        @endif
+    @endforeach
 </div>
