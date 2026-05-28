@@ -148,7 +148,7 @@
         </x-modal>
 
     @show
-    @if($showCalendars)
+    @if ($showCalendars)
         <div class="whitespace-nowrap" wire:ignore>
             <div
                 x-data="{

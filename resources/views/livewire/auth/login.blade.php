@@ -137,7 +137,7 @@
                                     dusk="login-button"
                                 ></x-button>
                             </div>
-                            @if(app(\FluxErp\Settings\SecuritySettings::class)->magic_login_links_enabled)
+                            @if (app(\FluxErp\Settings\SecuritySettings::class)->magic_login_links_enabled)
                                 <div x-transition x-cloak x-show="$wire.email">
                                     <x-button
                                         loading
@@ -151,7 +151,7 @@
                             @endif
                         </form>
                         @section('passkey-login')
-                            @if(Route::hasMacro('passkeys'))
+                            @if (Route::hasMacro('passkeys'))
                                 <div
                                     class="mt-6"
                                     x-show="browserSupportsWebAuthn()"

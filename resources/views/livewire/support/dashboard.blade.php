@@ -5,7 +5,7 @@
     x-on:remove-group.window="removeNewGroup($event.detail.groupName)"
 >
     @section('dashboard-widget-select')
-        @if($this->canEdit)
+        @if ($this->canEdit)
             <x-flux::dashboard.widget-select />
         @endif
 

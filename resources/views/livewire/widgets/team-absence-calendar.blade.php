@@ -37,7 +37,7 @@
                     >
                         {{ __('Employee') }}
                     </th>
-                    @foreach($calendarDays as $calDay)
+                    @foreach ($calendarDays as $calDay)
                         <th
                             @class([
                                 'border-r border-b px-0.5 py-1 text-center text-xs font-medium dark:border-gray-700',
@@ -58,7 +58,7 @@
             </thead>
 
             <tbody>
-                @foreach($departments as $deptIndex => $department)
+                @foreach ($departments as $deptIndex => $department)
                     <tr
                         class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
                         x-on:click="expandedDepts[{{ $deptIndex }}] = !(expandedDepts[{{ $deptIndex }}] ?? true)"
@@ -84,7 +84,7 @@
                             </div>
                         </td>
                     </tr>
-                    @foreach($department['employees'] as $employee)
+                    @foreach ($department['employees'] as $employee)
                         <tr
                             x-cloak
                             x-show="expandedDepts[{{ $deptIndex }}] ?? true"
@@ -101,7 +101,7 @@
                                 </span>
                             </td>
 
-                            @foreach($calendarDays as $dateKey => $calDay)
+                            @foreach ($calendarDays as $dateKey => $calDay)
                                 @php
                                     $dayData = $employee['days'][$dateKey] ?? null;
                                 @endphp
@@ -112,11 +112,11 @@
                                         'bg-gray-100 dark:bg-gray-700' => $calDay['isWeekend'] && ! $calDay['isToday'],
                                         'bg-white dark:bg-gray-900' => ! $calDay['isWeekend'] && ! $calDay['isToday'],
                                     ])
-                                    @if($dayData)
+                                    @if ($dayData)
                                         title="{{ $dayData['name'] }}{{ ($dayData['is_holiday'] ?? false) && $dayData['type'] !== 'holiday' ? ' — ' . $dayData['holiday_name'] : '' }}"
                                     @endif
                                 >
-                                    @if($dayData)
+                                    @if ($dayData)
                                         <div
                                             @class([
                                                 'mx-auto size-5 rounded',
@@ -157,7 +157,7 @@
     <div
         class="mt-2 flex flex-wrap items-center gap-3 border-t pt-2 dark:border-gray-700"
     >
-        @foreach($absenceTypes as $type)
+        @foreach ($absenceTypes as $type)
             <div class="flex items-center gap-1.5">
                 <div
                     class="size-3 shrink-0 rounded"

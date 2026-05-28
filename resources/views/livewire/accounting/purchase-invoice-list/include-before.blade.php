@@ -53,7 +53,7 @@
 
             <div class="flex min-h-0 flex-col gap-4 overflow-y-auto px-2">
                 @section('tenant')
-                    @if(count($tenants ?? []) > 1)
+                    @if (count($tenants ?? []) > 1)
                         <div
                             x-bind:class="
                                 $wire.purchaseInvoiceForm.order_id &&
@@ -234,7 +234,7 @@
                         </button>
                         <div x-cloak x-show="showPayment" x-collapse>
                             <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
-                                @if(count($currencies ?? []) > 1)
+                                @if (count($currencies ?? []) > 1)
                                     <div
                                         x-bind:class="
                                             $wire.purchaseInvoiceForm

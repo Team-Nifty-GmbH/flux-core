@@ -85,7 +85,7 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             {{ __('Your account is protected with two-factor authentication.') }}
                         </p>
-                        @if(! $isForced)
+                        @if (! $isForced)
                             <x-button
                                 :text="__('Disable')"
                                 color="red"
@@ -114,7 +114,7 @@
                             wire:click="startSetup()"
                         />
                     </div>
-                    @if($isForced)
+                    @if ($isForced)
                         <p class="text-sm text-amber-600 dark:text-amber-400">
                             {{ __('Your administrator requires you to enable two-factor authentication.') }}
                         </p>

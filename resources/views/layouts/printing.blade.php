@@ -29,16 +29,16 @@
     @show
 </head>
 <body class="text-xs">
-    @if($hasHeader ?? true)
+    @if ($hasHeader ?? true)
         <x-flux::print.header />
     @endif
 
-    @if($hasFooter ?? true)
+    @if ($hasFooter ?? true)
         <x-flux::print.footer />
     @endif
 
     {!! $slot !!}
-    @if($signaturePath)
+    @if ($signaturePath)
         <div class="mt-10 flex justify-end">
             <div>
                 <img

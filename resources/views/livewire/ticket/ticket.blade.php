@@ -87,7 +87,7 @@
                                 />
                             </x-card>
                             @section('content.widget')
-                                @if($ticket->model_type &&
+                                @if ($ticket->model_type &&
                             ($widgetComponent = resolve_static(
                                 morphed_model($ticket->model_type),
                                 'getLivewireComponentWidget'

@@ -24,7 +24,7 @@
                         </h1>
                     @show
                     @section('cart-sidebar.content')
-                        @foreach($this->cart?->cartItems ?? [] as $key => $cartItem)
+                        @foreach ($this->cart?->cartItems ?? [] as $key => $cartItem)
                             <x-flux::shop.cart-item
                                 :cartItem="$cartItem"
                                 :key="$cartItem->id"
@@ -41,7 +41,7 @@
                             </div>
                         </div>
                         <div class="text-2xs text-secondary-400">
-                            @if(auth()->user()?->priceList?->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')?->is_net)
+                            @if (auth()->user()?->priceList?->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')?->is_net)
                                 * {{ __('All prices net plus VAT') }}
                             @else
                                 * {{ __('All prices gross including VAT') }}
@@ -60,7 +60,7 @@
                                     :text="__('Close')"
                                     x-on:click="show = false"
                                 />
-                                @if($this->cart->cartItems->isNotEmpty())
+                                @if ($this->cart->cartItems->isNotEmpty())
                                     @section('cart-sidebar.footer.buttons.buy')
                                         <x-button
                                             wire:click="addToCurrentOrder()"
