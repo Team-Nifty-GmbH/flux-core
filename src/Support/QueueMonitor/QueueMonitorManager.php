@@ -137,16 +137,19 @@ class QueueMonitorManager
     {
         $now = Carbon::now();
 
+        $queue = $event->job->getQueue()
+            ?: config("queue.connections.{$event->connectionName}.queue", 'default');
+
         $monitor = resolve_static(QueueMonitor::class, 'query')
             ->where('job_id', $jobId = static::getJobId($event->job))
-            ->where('queue', $event->job->getQueue() ?? config('queue.default'))
+            ->where('queue', $queue)
             ->whereState('state', Queued::class)
             ->firstOrNew();
 
         $monitor->fill([
             'job_uuid' => $event->job->uuid(),
             'job_id' => static::getJobId($event->job),
-            'queue' => $event->job->getQueue() ?: config('queue.default'),
+            'queue' => $queue,
             'name' => static::getJobName($event),
             'started_at' => $now,
             'started_at_exact' => $now->format('Y-m-d H:i:s.u'),
