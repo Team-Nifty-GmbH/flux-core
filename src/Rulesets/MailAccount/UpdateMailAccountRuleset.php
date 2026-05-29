@@ -2,9 +2,11 @@
 
 namespace FluxErp\Rulesets\MailAccount;
 
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class UpdateMailAccountRuleset extends FluxRuleset
 {
@@ -19,7 +21,12 @@ class UpdateMailAccountRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => MailAccount::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
-            'protocol' => 'nullable|string|max:255|in:imap,pop3,nntp',
+            'protocol' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::in(app(MailDriverManager::class)->driverNames()),
+            ],
             'password' => 'exclude_if:password,null|string|max:255',
             'host' => 'nullable|string|max:255',
             'port' => 'nullable|integer',

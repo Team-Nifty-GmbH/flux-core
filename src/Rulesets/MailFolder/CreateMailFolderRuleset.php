@@ -27,6 +27,8 @@ class CreateMailFolderRuleset extends FluxRuleset
             ],
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
+            'remote_id' => 'nullable|string|max:255',
+            'delta_link' => 'nullable|string',
             'can_create_ticket' => 'boolean',
             'can_create_purchase_invoice' => 'boolean',
             'can_create_lead' => 'boolean',
