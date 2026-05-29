@@ -152,6 +152,7 @@
                         :options="$languages"
                     />
                 </div>
+                @stack('order-create-modal-content')
             </div>
         </section>
         <x-errors />

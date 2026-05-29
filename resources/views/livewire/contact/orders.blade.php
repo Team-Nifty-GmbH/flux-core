@@ -126,6 +126,7 @@
                         :options="$languages"
                     />
                 </div>
+                @stack('contact-order-create-modal-content')
             </div>
         </section>
         <x-slot:footer>
