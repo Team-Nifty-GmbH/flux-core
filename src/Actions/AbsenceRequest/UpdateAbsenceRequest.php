@@ -177,7 +177,7 @@ class UpdateAbsenceRequest extends FluxAction
         $authId = auth()->id();
 
         $users = resolve_static(Employee::class, 'query')
-            ->whereIntegerInRaw('id', $employeeIds)
+            ->whereKey($employeeIds)
             ->with('user')
             ->get()
             ->pluck('user')
