@@ -2,25 +2,25 @@
 
 namespace FluxErp\Notifications\AbsenceRequest;
 
-use FluxErp\Contracts\HasToastNotification;
+use FluxErp\Contracts\RoutableToastNotification;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\ToastNotification\NotificationAction;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
 use FluxErp\Traits\Makeable;
+use FluxErp\Traits\Notification\DelegatesToToastNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use NotificationChannels\WebPush\WebPushMessage;
 
-class AbsenceRequestApprovedNotification extends Notification implements HasToastNotification, ShouldQueue
+class AbsenceRequestApprovedNotification extends Notification implements RoutableToastNotification, ShouldQueue
 {
-    use Makeable, Queueable;
+    use DelegatesToToastNotification, Makeable, Queueable;
 
     public function __construct(protected AbsenceRequest $absenceRequest) {}
 
-    public function toArray(object $notifiable): array
+    public function getRoute(): ?string
     {
-        return $this->toToastNotification($notifiable)->toArray();
+        return $this->absenceRequest->getUrl();
     }
 
     public function toToastNotification(object $notifiable): ToastNotification
@@ -36,18 +36,7 @@ class AbsenceRequestApprovedNotification extends Notification implements HasToas
             ->accept(
                 NotificationAction::make()
                     ->label(__('View'))
-                    ->url($this->absenceRequest->getUrl())
+                    ->url($this->getRoute())
             );
-    }
-
-    public function toWebPush(object $notifiable): ?WebPushMessage
-    {
-        if (! method_exists($notifiable, 'pushSubscriptions')
-            || ! $notifiable->pushSubscriptions()->exists()
-        ) {
-            return null;
-        }
-
-        return $this->toToastNotification($notifiable)->toWebPush();
     }
 }
