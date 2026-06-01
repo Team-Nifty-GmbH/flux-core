@@ -41,10 +41,15 @@ class ImapMailSyncDriver implements MailSyncDriver
 
     protected function resolveStartUid(MailFolder $folder): ?int
     {
+        // message_uid is a string column to accommodate non-numeric provider ids
+        // (Graph, Gmail history ids). For IMAP-family drivers the value is always
+        // numeric, but a lexicographic MAX would return "9" for {"9","10"}.
+        // Cast to unsigned so the comparison stays numeric.
         $maxUid = resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $folder->mailAccount->getKey())
             ->where('mail_folder_id', $folder->getKey())
-            ->max('message_uid');
+            ->selectRaw('MAX(CAST(message_uid AS UNSIGNED)) AS max_uid')
+            ->value('max_uid');
 
         if ($maxUid) {
             return (int) $maxUid;

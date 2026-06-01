@@ -16,10 +16,18 @@ return new class() extends Migration
 
     public function down(): void
     {
-        DB::table('communications')
+        $nonNumericIds = DB::table('communications')
             ->whereNotNull('message_uid')
-            ->whereRaw("message_uid NOT REGEXP '^[0-9]+$'")
-            ->update(['message_uid' => null]);
+            ->pluck('message_uid', 'id')
+            ->reject(fn (string $uid) => ctype_digit($uid))
+            ->keys()
+            ->all();
+
+        if ($nonNumericIds) {
+            DB::table('communications')
+                ->whereIn('id', $nonNumericIds)
+                ->update(['message_uid' => null]);
+        }
 
         Schema::table('communications', function (Blueprint $table): void {
             $table->integer('message_uid')->nullable()->change();

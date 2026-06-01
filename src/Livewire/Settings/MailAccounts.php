@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
@@ -21,7 +22,6 @@ use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use Throwable;
 
 class MailAccounts extends MailAccountList
 {
@@ -179,7 +179,8 @@ class MailAccounts extends MailAccountList
     #[Computed]
     public function protocolOptions(): array
     {
-        $imapFamily = ['imap', 'pop3', 'nntp'];
+        $manager = app(MailDriverManager::class);
+        $imapFamily = $manager->imapFamilyDriverNames();
 
         return array_map(
             fn (string $name) => [
@@ -188,14 +189,14 @@ class MailAccounts extends MailAccountList
                     ? Str::upper($name)
                     : __(Str::headline($name)),
             ],
-            app(MailDriverManager::class)->driverNames(),
+            $manager->driverNames(),
         );
     }
 
     #[Computed]
     public function imapProtocols(): array
     {
-        return ['imap', 'pop3', 'nntp'];
+        return app(MailDriverManager::class)->imapFamilyDriverNames();
     }
 
     #[Renderless]
@@ -207,7 +208,7 @@ class MailAccounts extends MailAccountList
             $this->toast()
                 ->success(__('Connection successful'))
                 ->send();
-        } catch (ValidationException|Throwable $e) {
+        } catch (ValidationException|Exception $e) {
             exception_to_notifications($e, $this);
         }
     }

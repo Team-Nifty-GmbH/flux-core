@@ -10,6 +10,18 @@ use ReflectionMethod;
 
 class MailDriverManager extends Manager
 {
+    /**
+     * Driver names that share the IMAP-family configuration shape
+     * (host, port, encryption, password). External drivers (e.g. msgraph)
+     * are not part of this set.
+     *
+     * @return array<int, string>
+     */
+    public function imapFamilyDriverNames(): array
+    {
+        return ['imap', 'pop3', 'nntp'];
+    }
+
     public function getDefaultDriver(): string
     {
         return 'imap';
@@ -20,9 +32,15 @@ class MailDriverManager extends Manager
      */
     public function driverNames(): array
     {
+        $reflection = new ReflectionClass(self::class);
+
         $builtIn = [];
 
-        foreach ((new ReflectionClass($this))->getMethods(ReflectionMethod::IS_PROTECTED) as $method) {
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PROTECTED) as $method) {
+            if ($method->getDeclaringClass()->getName() !== self::class) {
+                continue;
+            }
+
             if (! Str::startsWith($method->getName(), 'create') || ! Str::endsWith($method->getName(), 'Driver')) {
                 continue;
             }
