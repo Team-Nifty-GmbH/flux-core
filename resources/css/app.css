@@ -191,7 +191,27 @@
 }
 
 @utility mention {
-    @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300;
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium no-underline;
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-200;
+}
+
+/* Per-type mention pill colors (rendered via MentionRenderer as
+   `mention mention--<type>`). Unlayered so they override the `mention`
+   utility's default color. */
+.mention--user {
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-200;
+}
+
+.mention--ticket {
+    @apply bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200;
+}
+
+.mention--order {
+    @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200;
+}
+
+.mention--missing {
+    @apply bg-secondary-100 text-secondary-500 dark:bg-secondary-800 dark:text-secondary-400 italic;
 }
 
 @utility blade-variable-pill {

@@ -47,6 +47,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\Printable;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
@@ -83,7 +84,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Conditionable, Filterable, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasStates, HasTenantAssignment,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -415,6 +416,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 ]
             ),
         ];
+    }
+
+    public static function mentionTypeIcon(): string
+    {
+        return 'document-text';
     }
 
     protected function casts(): array
@@ -1339,6 +1345,16 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         if ($orderTypeId = data_get($info, 'order_type_id')) {
             $builder->where('order_type_id', $orderTypeId);
         }
+    }
+
+    public function getMentionUrl(): string
+    {
+        return $this->detailRoute() ?? '#';
+    }
+
+    public function getMentionLabel(): string
+    {
+        return (string) ($this->order_number ?? $this->getLabel() ?? '#' . $this->getKey());
     }
 
     // Attributes

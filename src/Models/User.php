@@ -22,6 +22,7 @@ use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\HasWidgets;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\InteractsWithPasskeys;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\MonitorsQueue;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\SoftDeletes;
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -52,7 +54,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 {
     use Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles, HasUserModification, HasUuid,
-        HasWidgets, InteractsWithMedia, InteractsWithPasskeys, MonitorsQueue, Notifiable, SoftDeletes,
+        HasWidgets, InteractsWithMedia, InteractsWithPasskeys, Mentionable, MonitorsQueue, Notifiable, SoftDeletes,
         TwoFactorAuthentication;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -106,6 +108,24 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
                 'is_active',
             ],
         ];
+    }
+
+    public static function mentionTypeIcon(): string
+    {
+        return 'user';
+    }
+
+    public static function searchMentionCandidates(string $query, int $limit = 5): Collection
+    {
+        $trimmed = trim($query);
+        if ($trimmed === '') {
+            return collect();
+        }
+
+        return static::search($trimmed)
+            ->query(fn ($builder) => $builder->where('is_active', true))
+            ->take($limit)
+            ->get();
     }
 
     protected function casts(): array
@@ -276,6 +296,16 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function sendLoginLink(): void
     {
         Mail::to($this->email)->queue(MagicLoginLink::make($this->generateLoginLink()));
+    }
+
+    public function getMentionUrl(): string
+    {
+        return route('settings.users.edit', ['user' => $this->getKey()]);
+    }
+
+    public function getMentionLabel(): string
+    {
+        return (string) ($this->name ?? $this->firstname ?? $this->email ?? '#' . $this->getKey());
     }
 
     // Attributes

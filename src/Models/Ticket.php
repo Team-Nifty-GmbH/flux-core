@@ -19,6 +19,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
@@ -32,7 +33,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable
 {
     use Commentable, Communicatable, Filterable, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Mentionable, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -73,6 +74,11 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
                 'state',
             ],
         ];
+    }
+
+    public static function mentionTypeIcon(): string
+    {
+        return 'chat-bubble-left-right';
     }
 
     protected function casts(): array
@@ -156,5 +162,15 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
         return ScoutCustomize::make($this)
             ->with(['authenticatable', 'ticketType:id,name'])
             ->toSearchableArray();
+    }
+
+    public function getMentionUrl(): string
+    {
+        return $this->detailRoute() ?? '#';
+    }
+
+    public function getMentionLabel(): string
+    {
+        return (string) ($this->title ?? '#' . $this->getKey());
     }
 }

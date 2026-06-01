@@ -12,13 +12,16 @@ function updateSuggestionItems(element, props) {
     props.items.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'suggestion-item flex gap-1 justify-start';
-        const img = document.createElement('img');
-        img.src = item.src;
-        img.className = 'h-6 w-6 rounded-full';
+
+        if (item.src) {
+            const img = document.createElement('img');
+            img.src = item.src;
+            img.className = 'h-6 w-6 rounded-full';
+            div.appendChild(img);
+        }
+
         const span = document.createElement('span');
         span.textContent = item.label;
-
-        div.appendChild(img);
         div.appendChild(span);
 
         div.addEventListener('mousedown', (event) => {
@@ -30,42 +33,22 @@ function updateSuggestionItems(element, props) {
     });
 }
 
-export const MentionConfig = (searchModel, element) =>
-    Mention.configure({
+const buildMentionExtension = (name, char, types, element) =>
+    Mention.extend({ name }).configure({
         HTMLAttributes: { class: 'mention' },
         suggestion: {
+            char,
             items: async ({ query }) => {
-                return (
-                    await Promise.all(
-                        searchModel.map(async (model) => {
-                            let data = {};
-                            if (model === 'user') {
-                                data = {
-                                    where: [
-                                        {
-                                            column: 'is_active',
-                                            operator: '=',
-                                            value: true,
-                                        },
-                                    ],
-                                };
-                            }
+                const { data } = await axios.post('/search/mentionable', {
+                    q: query,
+                    types,
+                });
 
-                            return (
-                                await axios.post(
-                                    `/search/${model}?search=${query}`,
-                                    data,
-                                )
-                            ).data.map((item) => {
-                                return {
-                                    id: model + ':' + item.id,
-                                    label: item.label,
-                                    src: item.image,
-                                };
-                            });
-                        }),
-                    )
-                ).flat();
+                return data.map((item) => ({
+                    id: item.token.replace(/^[@#]/, ''),
+                    label: item.label,
+                    src: null,
+                }));
             },
 
             render: () => {
@@ -153,3 +136,9 @@ export const MentionConfig = (searchModel, element) =>
             },
         },
     });
+
+export const UserMentionConfig = (element) =>
+    buildMentionExtension('mention', '@', ['user'], element);
+
+export const RecordMentionConfig = (recordTypes, element) =>
+    buildMentionExtension('recordMention', '#', recordTypes, element);
