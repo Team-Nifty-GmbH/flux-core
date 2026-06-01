@@ -33,7 +33,7 @@ class Notifications extends Component
     {
         $accept = data_get($notification->data, 'accept');
         $notification->markAsRead();
-        $this->unread = $this->unread - 1;
+        $this->unread = max(0, $this->unread - 1);
 
         $this->js(<<<'JS'
             $tsui.close.slide('notifications-slide');
@@ -66,7 +66,7 @@ class Notifications extends Component
     {
         $notification->markAsRead();
 
-        $this->unread = $this->unread - 1;
+        $this->unread = max(0, $this->unread - 1);
         if (! $this->unread) {
             $this->js(<<<'JS'
                 $tsui.close.slide('notifications-slide');
