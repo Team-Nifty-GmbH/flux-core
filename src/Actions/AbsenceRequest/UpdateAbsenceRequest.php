@@ -161,10 +161,6 @@ class UpdateAbsenceRequest extends FluxAction
         }
     }
 
-    /**
-     * @param  array<int, int>  $employeeIds
-     * @param  class-string<\FluxErp\Notifications\Notification>  $notification
-     */
     protected function notifySubstituteIds(
         AbsenceRequest $absenceRequest,
         array $employeeIds,
