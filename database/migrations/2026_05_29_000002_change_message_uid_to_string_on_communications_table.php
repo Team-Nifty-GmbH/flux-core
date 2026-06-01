@@ -25,7 +25,7 @@ return new class() extends Migration
 
         if ($nonNumericIds) {
             DB::table('communications')
-                ->whereIn('id', $nonNumericIds)
+                ->whereIntegerInRaw('id', $nonNumericIds)
                 ->update(['message_uid' => null]);
         }
 

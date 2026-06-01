@@ -32,15 +32,9 @@ class MailDriverManager extends Manager
      */
     public function driverNames(): array
     {
-        $reflection = new ReflectionClass(self::class);
-
         $builtIn = [];
 
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PROTECTED) as $method) {
-            if ($method->getDeclaringClass()->getName() !== self::class) {
-                continue;
-            }
-
+        foreach ((new ReflectionClass(static::class))->getMethods(ReflectionMethod::IS_PROTECTED) as $method) {
             if (! Str::startsWith($method->getName(), 'create') || ! Str::endsWith($method->getName(), 'Driver')) {
                 continue;
             }
