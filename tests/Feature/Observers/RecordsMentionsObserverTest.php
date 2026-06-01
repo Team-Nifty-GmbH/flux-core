@@ -5,7 +5,9 @@ use FluxErp\Models\Mention;
 use FluxErp\Models\User;
 use FluxErp\Notifications\MentionNotification;
 use FluxErp\Tests\Fixtures\CommentLikeFixture;
+use FluxErp\Tests\Fixtures\FixtureMentionNotification;
 use FluxErp\Tests\Fixtures\MentionableFixture;
+use FluxErp\Tests\Fixtures\NotifyingCommentFixture;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 
@@ -62,6 +64,34 @@ it('fires MentionNotification only for newly-added user mentions on edit', funct
 
     Notification::assertNotSentTo($u, MentionNotification::class); // already mentioned
     Notification::assertSentTo($u2, MentionNotification::class);   // new
+});
+
+it('does not crash subscribing an authorized record mention whose target is not notifiable', function (): void {
+    $role = FluxErp\Models\Role::create(['name' => 'Super Admin', 'guard_name' => 'web']);
+    $this->user->assignRole($role);
+
+    $fixture = MentionableFixture::query()->create(['name' => 'Acme']);
+
+    CommentLikeFixture::createWithText("Hallo #ticket:{$fixture->id}");
+
+    expect(
+        Mention::query()
+            ->where('mention_target_type', 'ticket')
+            ->where('mention_target_id', $fixture->id)
+            ->where('mention_type', MentionTypeEnum::Record->value)
+            ->count()
+    )->toBe(1);
+});
+
+it('dispatches a source-provided notification when the source implements ProvidesMentionNotification', function (): void {
+    Notification::fake();
+    NotifyingCommentFixture::register('notifying_comment');
+    $u = User::factory()->create();
+
+    NotifyingCommentFixture::createWithText("Hallo @user:{$u->id}");
+
+    Notification::assertSentTo($u, FixtureMentionNotification::class);
+    Notification::assertNotSentTo($u, MentionNotification::class);
 });
 
 it('removes mention rows when the source is deleted', function (): void {

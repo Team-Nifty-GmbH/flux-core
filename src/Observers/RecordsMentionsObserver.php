@@ -2,8 +2,8 @@
 
 namespace FluxErp\Observers;
 
-use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\MentionsContent;
+use FluxErp\Contracts\ProvidesMentionNotification;
 use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Models\Mention;
 use FluxErp\Models\User;
@@ -40,8 +40,11 @@ class RecordsMentionsObserver
         $type = MentionTypeEnum::from($row['mention_type']);
 
         if ($type === MentionTypeEnum::User && $row['user_id']) {
-            User::query()->whereKey($row['user_id'])->first()
-                ?->notify(new MentionNotification($source));
+            $notification = $source instanceof ProvidesMentionNotification
+                ? $source->mentionNotification()
+                : new MentionNotification($source);
+
+            User::query()->whereKey($row['user_id'])->first()?->notify($notification);
 
             return;
         }
@@ -65,7 +68,7 @@ class RecordsMentionsObserver
             return;
         }
 
-        if ($target instanceof IsSubscribable) {
+        if (method_exists($target, 'subscribeNotificationChannel')) {
             $target->subscribeNotificationChannel(
                 channel: method_exists($source, 'broadcastChannel')
                     ? $source->broadcastChannel()

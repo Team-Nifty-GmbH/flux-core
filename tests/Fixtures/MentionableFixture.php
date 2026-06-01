@@ -2,13 +2,14 @@
 
 namespace FluxErp\Tests\Fixtures;
 
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Traits\Model\Mentionable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
-class MentionableFixture extends Model
+class MentionableFixture extends Model implements IsSubscribable
 {
     use Mentionable;
 
