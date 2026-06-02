@@ -110,7 +110,7 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
     #[Renderless]
     public function show(array $params): void
     {
-        $payment_type_id = data_get($params, 'payment_type_id');
+        $paymentTypeId = data_get($params, 'payment_type_id');
         $name = data_get($params, 'name');
         $start = $this->getStart()->toDateTimeString();
         $end = $this->getEnd()->toDateTimeString();
@@ -118,7 +118,7 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->where('payment_type_id', $payment_type_id)
+                ->where('payment_type_id', $paymentTypeId)
                 ->whereBetween('invoice_date', [$start, $end]),
             __('Payment type: :name', ['name' => $name]) . ' ' .
             __('between :start and :end', ['start' => $start, 'end' => $end]),
