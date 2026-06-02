@@ -7,6 +7,7 @@ use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Rulesets\PaymentReminder\CreatePaymentReminderRuleset;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class CreatePaymentReminder extends FluxAction
@@ -23,11 +24,9 @@ class CreatePaymentReminder extends FluxAction
 
     public function performAction(): PaymentReminder
     {
-        $markAsSent = $this->getData('mark_as_sent') ?? true;
+        $markAsSent = Arr::pull($this->data, 'mark_as_sent') ?? true;
 
-        $paymentReminder = app(PaymentReminder::class, [
-            'attributes' => array_diff_key($this->data, ['mark_as_sent' => null]),
-        ]);
+        $paymentReminder = app(PaymentReminder::class, ['attributes' => $this->data]);
         $paymentReminder->save();
 
         if ($markAsSent) {
