@@ -19,13 +19,13 @@
             />
         </x-slot:action>
 
-        @if ($this->isEmpty)
-            <div class="py-12 text-center text-sm text-secondary-500">
+        @if($this->isEmpty)
+            <div class="text-secondary-500 py-12 text-center text-sm">
                 {{ __('No payment reminders are due today.') }}
             </div>
         @else
             <div class="flex flex-col gap-3">
-                @foreach ($groups as $group)
+                @foreach($groups as $group)
                     <x-card>
                         <div class="flex items-start justify-between gap-3">
                             <label
@@ -39,14 +39,8 @@
                                     <div class="font-medium">
                                         {{ $group['contact_name'] ?? __('Unknown') }}
                                     </div>
-                                    <div class="text-sm text-secondary-500">
-                                        {{ __('Reminder Level') }}:
-                                        {{ $group['next_level'] }}
-                                        &middot;
-                                        {{ $group['order_count'] }}
-                                        {{ __('invoice(s)') }}
-                                        &middot;
-                                        {{ $group['recipient_email'] ?? __('No email') }}
+                                    <div class="text-secondary-500 text-sm">
+                                        {{ __('Reminder Level') }}: {{ $group['next_level'] }} &middot; {{ $group['order_count'] }} {{ __('invoice(s)') }} &middot; {{ $group['recipient_email'] ?? __('No email') }}
                                     </div>
                                 </div>
                             </label>
@@ -64,9 +58,9 @@
                             </div>
                         </div>
                         <div class="mt-3 flex flex-col gap-1 text-sm">
-                            @foreach ($group['orders'] as $order)
+                            @foreach($group['orders'] as $order)
                                 <div
-                                    class="flex justify-between border-t border-secondary-100 py-1 dark:border-secondary-700"
+                                    class="border-secondary-100 dark:border-secondary-700 flex justify-between border-t py-1"
                                 >
                                     <span>{{ $order['invoice_number'] }}</span>
                                     <span class="text-secondary-500">
