@@ -19,13 +19,13 @@
             />
         </x-slot:action>
 
-        @if($this->isEmpty)
+        @if ($this->isEmpty)
             <div class="text-secondary-500 py-12 text-center text-sm">
                 {{ __('No payment reminders are due today.') }}
             </div>
         @else
             <div class="flex flex-col gap-3">
-                @foreach($groups as $group)
+                @foreach ($groups as $group)
                     <x-card>
                         <div class="flex items-start justify-between gap-3">
                             <label
@@ -58,7 +58,7 @@
                             </div>
                         </div>
                         <div class="mt-3 flex flex-col gap-1 text-sm">
-                            @foreach($group['orders'] as $order)
+                            @foreach ($group['orders'] as $order)
                                 <div
                                     class="border-secondary-100 dark:border-secondary-700 flex justify-between border-t py-1"
                                 >
