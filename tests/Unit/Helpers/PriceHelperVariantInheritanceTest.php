@@ -4,13 +4,10 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
-use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
-use Illuminate\Support\Facades\Cache;
 
 beforeEach(function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
 
     $this->vatRate = VatRate::default() ?? VatRate::factory()->create(['is_default' => true]);
 });
@@ -82,8 +79,7 @@ test('variant returns null when neither variant nor parent has price', function 
 });
 
 test('variant does not inherit parent price when inheritance is disabled', function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $list = PriceList::factory()->create(['is_default' => false]);
     $parent = Product::factory()->create(['vat_rate_id' => $this->vatRate->getKey()]);

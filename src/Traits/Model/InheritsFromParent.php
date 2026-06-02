@@ -2,7 +2,7 @@
 
 namespace FluxErp\Traits\Model;
 
-use FluxErp\Models\Tenant;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,10 +19,8 @@ use LogicException;
  *   protected array $inheritableFields = [...];     // column names
  *   protected array $inheritableRelations = [...];  // relation method names
  *
- * Inheritance is gated by the install's default tenant flag
- * `product_variant_inheritance_enabled`. The check uses Tenant::default(),
- * meaning the toggle applies install-wide rather than per-tenant-of-the-record.
- * This matches the spec contract.
+ * Inheritance is gated install-wide via the `product.variant_inheritance_enabled`
+ * setting. Disable it in `ProductSettings` to bypass parent fallback entirely.
  *
  * @property-read array<int, string> $inheritableFields
  * @property-read array<int, string> $inheritableRelations
@@ -36,9 +34,7 @@ trait InheritsFromParent
 
     public function inheritanceEnabled(): bool
     {
-        $tenant = resolve_static(Tenant::class, 'default');
-
-        return (bool) ($tenant?->product_variant_inheritance_enabled);
+        return (bool) app(ProductSettings::class)->variant_inheritance_enabled;
     }
 
     public function isInheritableField(string $field): bool

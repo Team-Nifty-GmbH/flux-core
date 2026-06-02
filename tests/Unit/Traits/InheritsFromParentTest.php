@@ -6,15 +6,12 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
-use FluxErp\Models\Tenant;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 beforeEach(function (): void {
-    $this->tenant = Tenant::default();
-    $this->tenant->update(['product_variant_inheritance_enabled' => true]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
 });
 
 it('isVariant returns true when parent_id is set', function (): void {
@@ -25,16 +22,15 @@ it('isVariant returns true when parent_id is set', function (): void {
     expect($parent->isVariant())->toBeFalse();
 });
 
-it('inheritanceEnabled returns false when tenant flag is false', function (): void {
-    $this->tenant->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+it('inheritanceEnabled returns false when settings flag is false', function (): void {
+    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $product = Product::factory()->create();
 
     expect($product->inheritanceEnabled())->toBeFalse();
 });
 
-it('inheritanceEnabled returns true when tenant flag is true', function (): void {
+it('inheritanceEnabled returns true when settings flag is true', function (): void {
     $product = Product::factory()->create();
 
     expect($product->inheritanceEnabled())->toBeTrue();
@@ -127,8 +123,7 @@ it('non-variant ignores overridden_fields entirely (defensive)', function (): vo
 });
 
 it('falls back to own column when feature toggle is off', function (): void {
-    $this->tenant->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $parent = Product::factory()->create(['name' => 'Parent Name']);
     $variant = Product::factory()->create([

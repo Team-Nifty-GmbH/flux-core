@@ -16,8 +16,8 @@ use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
-use FluxErp\Rules\ProductIsOrderable;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
 
@@ -86,8 +86,12 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 ),
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
-                app(ProductIsOrderable::class),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->where('was_parent', false)
+                    ->whereDoesntHave(
+                        'children',
+                        fn (Builder $query) => $query->where('is_active', true)
+                    ),
             ],
             'supplier_contact_id' => [
                 'integer',

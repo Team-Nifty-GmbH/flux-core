@@ -7,11 +7,9 @@ use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
-use Illuminate\Support\Facades\Cache;
 
 it('does not attach inherited categories to a new variant when inheritance is enabled', function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => true]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
 
     $cat = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
@@ -34,8 +32,7 @@ it('does not attach inherited categories to a new variant when inheritance is en
 });
 
 it('still attaches parent categories to a new variant when inheritance is disabled', function (): void {
-    Tenant::default()->update(['product_variant_inheritance_enabled' => false]);
-    Cache::memo()->forget('default_' . morph_alias(Tenant::class));
+    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $cat = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);

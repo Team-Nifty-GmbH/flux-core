@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Cache;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Engines\Engine;
 use Spatie\MediaLibrary\HasMedia;
@@ -39,30 +38,12 @@ class Tenant extends FluxModel implements HasMedia
         'media',
     ];
 
-    protected static function booted(): void
-    {
-        parent::booted();
-
-        static::creating(function (self $tenant): void {
-            if (! array_key_exists('product_variant_inheritance_enabled', $tenant->getAttributes())) {
-                $tenant->product_variant_inheritance_enabled = true;
-            }
-        });
-
-        static::saving(function (self $tenant): void {
-            if ($tenant->isDirty('product_variant_inheritance_enabled')) {
-                Cache::memo()->forget('default_' . morph_alias(self::class));
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
             'opening_hours' => 'array',
             'is_default' => 'boolean',
-            'product_variant_inheritance_enabled' => 'boolean',
         ];
     }
 

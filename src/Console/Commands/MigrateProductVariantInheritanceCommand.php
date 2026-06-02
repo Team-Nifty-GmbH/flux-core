@@ -3,7 +3,7 @@
 namespace FluxErp\Console\Commands;
 
 use FluxErp\Jobs\MigrateProductVariantInheritanceJob;
-use FluxErp\Models\Tenant;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Console\Command;
 
 class MigrateProductVariantInheritanceCommand extends Command
@@ -14,10 +14,8 @@ class MigrateProductVariantInheritanceCommand extends Command
 
     public function handle(): int
     {
-        $tenant = resolve_static(Tenant::class, 'default');
-
-        if (! $tenant?->product_variant_inheritance_enabled) {
-            $this->error('Product variant inheritance is disabled for the default tenant.');
+        if (! app(ProductSettings::class)->variant_inheritance_enabled) {
+            $this->error('Product variant inheritance is disabled (see ProductSettings).');
 
             return self::FAILURE;
         }
