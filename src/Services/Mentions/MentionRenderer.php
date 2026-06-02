@@ -58,19 +58,26 @@ class MentionRenderer
                 }
 
                 $label = e($record->getMentionLabel());
+                $typeLabel = e($types[$key]::mentionTypeLabel());
 
                 try {
                     $url = $record->getMentionUrl();
                 } catch (Throwable) {
-                    return sprintf('<span class="mention mention--%s">%s</span>', e($key), $label);
+                    return sprintf(
+                        '<span class="mention mention--%s" data-mention-type="%s">%s</span>',
+                        e($key),
+                        $typeLabel,
+                        $label,
+                    );
                 }
 
                 return sprintf(
-                    '<a class="mention mention--%s" href="%s" data-mention="%s:%d">%s</a>',
+                    '<a class="mention mention--%s" href="%s" data-mention="%s:%d" data-mention-type="%s">%s</a>',
                     e($key),
                     e($url),
                     e($key),
                     $id,
+                    $typeLabel,
                     $label,
                 );
             },

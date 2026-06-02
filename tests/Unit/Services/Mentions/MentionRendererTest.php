@@ -29,6 +29,25 @@ it('replaces #key:id tokens with anchor pills', function (): void {
     expect($html)->toContain('RMA 1234');
 });
 
+it('includes the type label on the record pill', function (): void {
+    MentionableFixture::register('mentionable_fixture');
+    $record = MentionableFixture::create(['name' => 'RMA 1234']);
+    $key = $record::mentionTypeKey();
+
+    $html = $this->renderer->tokensToHtml("#{$key}:{$record->getKey()}");
+
+    expect($html)->toContain('data-mention-type="' . $record::mentionTypeLabel() . '"');
+    expect($html)->toContain('RMA 1234');
+});
+
+it('omits the type label on user pills', function (): void {
+    $user = FluxErp\Models\User::factory()->create();
+
+    $html = $this->renderer->tokensToHtml("@user:{$user->getKey()}");
+
+    expect($html)->not->toContain('data-mention-type');
+});
+
 it('replaces @user:id tokens with user pills', function (): void {
     $user = FluxErp\Models\User::factory()->create();
 

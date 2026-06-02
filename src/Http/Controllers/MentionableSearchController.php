@@ -28,12 +28,27 @@ class MentionableSearchController extends Controller
             abort(422, 'Unknown mentionable types: ' . $unknown->implode(', '));
         }
 
-        $query = (string) $request->input('q', '');
+        $query = trim((string) $request->input('q', ''));
+
+        $scope = null;
+        if (preg_match('/^([A-Za-z_]+):(.*)$/s', $query, $matches)) {
+            $candidateKey = strtolower($matches[1]);
+            if ($requested->contains($candidateKey)) {
+                $scope = $candidateKey;
+                $query = trim($matches[2]);
+            }
+        }
+
+        if ($query === '' && $scope === null) {
+            return response()->json($this->scopeChips($requested, $typesByKey));
+        }
+
+        $searchTypes = $scope !== null ? collect([$scope]) : $requested;
         $user = $request->user();
         $results = collect();
         $userKey = morph_alias(User::class);
 
-        foreach ($requested as $key) {
+        foreach ($searchTypes as $key) {
             $class = $typesByKey[$key];
 
             $candidates = $class::searchMentionCandidates($query, 5)
@@ -48,6 +63,7 @@ class MentionableSearchController extends Controller
                 }
 
                 $results->push([
+                    'kind' => 'record',
                     'token' => ($key === $userKey ? '@' : '#') . $key . ':' . $record->getKey(),
                     'label' => $record->getMentionLabel(),
                     'type_key' => $key,
@@ -59,5 +75,27 @@ class MentionableSearchController extends Controller
         }
 
         return response()->json($results->all());
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, string>  $requested
+     * @param  array<string, class-string>  $typesByKey
+     * @return array<int, array{kind: string, scope_key: string, label: string, type_icon: string}>
+     */
+    protected function scopeChips($requested, array $typesByKey): array
+    {
+        if ($requested->count() < 2) {
+            return [];
+        }
+
+        return $requested
+            ->map(fn (string $key): array => [
+                'kind' => 'scope',
+                'scope_key' => $key,
+                'label' => $typesByKey[$key]::mentionTypeLabel(),
+                'type_icon' => $typesByKey[$key]::mentionTypeIcon(),
+            ])
+            ->values()
+            ->all();
     }
 }
