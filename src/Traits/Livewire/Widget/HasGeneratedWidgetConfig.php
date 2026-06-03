@@ -168,6 +168,63 @@ trait HasGeneratedWidgetConfig
         }
     }
 
+    protected function resolveLabelsForGroup(string $column, iterable $values): array
+    {
+        $collected = collect($values)->filter(fn ($v) => ! is_null($v))->unique()->values();
+
+        if (! str_ends_with($column, '_id') || $column === 'id') {
+            return $collected
+                ->mapWithKeys(fn ($value) => [(string) $value => strip_tags($this->formatColumnValue($column, $value))])
+                ->all();
+        }
+
+        $datatable = $this->getDataTableInstance();
+
+        if (is_null($datatable)) {
+            return $collected
+                ->mapWithKeys(fn ($value) => [(string) $value => (string) $value])
+                ->all();
+        }
+
+        try {
+            $model = app($datatable::getWidgetModel());
+            $relationName = Str::camel(Str::beforeLast($column, '_id'));
+
+            if (! method_exists($model, $relationName)) {
+                return $collected
+                    ->mapWithKeys(fn ($value) => [(string) $value => strip_tags($this->formatColumnValue($column, $value))])
+                    ->all();
+            }
+
+            $relation = $model->{$relationName}();
+            $related = $relation->getRelated();
+            $ownerKey = method_exists($relation, 'getOwnerKeyName') ? $relation->getOwnerKeyName() : $related->getKeyName();
+
+            $records = $related->newQuery()
+                ->whereIn($ownerKey, $collected->all())
+                ->get()
+                ->keyBy($ownerKey);
+
+            return $collected
+                ->mapWithKeys(function ($value) use ($records) {
+                    $record = $records->get($value);
+
+                    if (! $record) {
+                        return [(string) $value => (string) $value];
+                    }
+
+                    $label = $this->resolveRelatedRecordLabel($record);
+
+                    return [(string) $value => (string) ($label ?? $record->getKey())];
+                })
+                ->all();
+        } catch (Throwable) {
+            return $collected
+                ->mapWithKeys(fn ($value) => [(string) $value => (string) $value])
+                ->all();
+        }
+    }
+
     protected function resolveJsFormatterName(?string $column): string
     {
         if (! $column) {
@@ -193,6 +250,29 @@ trait HasGeneratedWidgetConfig
             $formatter instanceof BooleanFormatter => 'boolean',
             default => 'string',
         };
+    }
+
+    protected function resolveRelatedRecordLabel(mixed $record): ?string
+    {
+        foreach (['detailLabel', 'getLabel'] as $method) {
+            if (method_exists($record, $method)) {
+                $label = $record->{$method}();
+
+                if (! blank($label)) {
+                    return (string) $label;
+                }
+            }
+        }
+
+        foreach (['name', 'label', 'title'] as $attribute) {
+            $value = data_get($record, $attribute);
+
+            if (! blank($value)) {
+                return (string) $value;
+            }
+        }
+
+        return null;
     }
 
     protected function resolveFormatter(string $column): mixed

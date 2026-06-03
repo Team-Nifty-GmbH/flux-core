@@ -70,14 +70,17 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
 
         $type = $this->getConfigValue('type', 'bar_chart');
         $isPie = $type === 'pie_chart';
+        $rawGroupValues = $results->pluck($groupColumn);
+        $labelMap = $this->resolveLabelsForGroup($groupColumn, $rawGroupValues);
+        $categories = $rawGroupValues
+            ->map(fn ($value) => $labelMap[(string) $value] ?? (string) $value)
+            ->toArray();
 
         if ($isPie) {
             $pieStyle = $this->getConfigValue('pie_style', 'pie');
             $this->chart = ['type' => $pieStyle];
             $this->series = $results->pluck('aggregate_value')->map(fn ($v) => round((float) $v, 2))->toArray();
-            $this->labels = $results->pluck($groupColumn)
-                ->map(fn ($v) => strip_tags($this->formatColumnValue($groupColumn, $v)))
-                ->toArray();
+            $this->labels = $categories;
             $this->showTotals = false;
         } else {
             $this->series = [
@@ -88,7 +91,7 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
             ];
 
             $this->xaxis = [
-                'categories' => $results->pluck($groupColumn)->toArray(),
+                'categories' => $categories,
             ];
 
             $this->showTotals = (bool) $this->getConfigValue('show_totals', true);
@@ -105,7 +108,9 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
         }
 
         $this->valueFormatterType = $this->resolveJsFormatterName($valueColumn);
-        $this->xAxisFormatterType = $this->resolveJsFormatterName($groupColumn);
+        $this->xAxisFormatterType = str_ends_with($groupColumn, '_id') || $groupColumn === 'id'
+            ? 'string'
+            : $this->resolveJsFormatterName($groupColumn);
     }
 
     #[Renderless]
