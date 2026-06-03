@@ -21,6 +21,7 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
+use FluxErp\Traits\Model\Mentionable;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Model\Trackable;
 use FluxErp\Traits\Scout\Searchable;
@@ -35,7 +36,7 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 {
     use Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
         HasSerialNumberRange, HasStates, HasTags, HasTenantAssignment, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, SoftDeletes, Trackable;
+        LogsActivity, Mentionable, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

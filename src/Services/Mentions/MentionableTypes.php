@@ -2,6 +2,7 @@
 
 namespace FluxErp\Services\Mentions;
 
+use FluxErp\Models\User;
 use FluxErp\Traits\Model\Mentionable;
 
 class MentionableTypes
@@ -21,5 +22,20 @@ class MentionableTypes
         }
 
         return $map;
+    }
+
+    /**
+     * Type keys for `#` record mentions (every mentionable type except the user/people type).
+     *
+     * @return array<int, string>
+     */
+    public static function recordKeys(): array
+    {
+        $userKey = morph_alias(User::class);
+
+        return array_values(array_filter(
+            array_keys(static::map()),
+            fn (string $key): bool => $key !== $userKey,
+        ));
     }
 }

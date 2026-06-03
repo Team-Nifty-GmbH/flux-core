@@ -6,6 +6,7 @@ use FluxErp\Models\User;
 use FluxErp\Services\Mentions\MentionableTypes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class MentionableSearchController extends Controller
 {
@@ -50,9 +51,15 @@ class MentionableSearchController extends Controller
         foreach ($searchTypes as $key) {
             $class = $typesByKey[$key];
 
-            $candidates = $class::searchMentionCandidates($query, 5)
-                ->filter(fn ($record): bool => $user ? $user->can('view', $record) : true)
-                ->values();
+            try {
+                $candidates = $class::searchMentionCandidates($query, 5)
+                    ->filter(fn ($record): bool => $user ? $user->can('view', $record) : true)
+                    ->values();
+            } catch (Throwable $e) {
+                report($e);
+
+                continue;
+            }
 
             foreach ($candidates as $record) {
                 $results->push([

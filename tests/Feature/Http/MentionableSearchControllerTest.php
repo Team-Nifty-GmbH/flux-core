@@ -29,6 +29,25 @@ it('returns mention candidates filtered by policy', function (): void {
         ->assertJsonMissing(['token' => '#ticket:' . $forbidden->getKey()]);
 });
 
+it('skips a mentionable type whose search throws without failing the request', function (): void {
+    Role::findOrCreate('Super Admin');
+    $admin = User::factory()->create();
+    $admin->assignRole('Super Admin');
+
+    $ticket = Ticket::factory()->create([
+        'title' => 'Findme Ticket',
+        'authenticatable_type' => morph_alias(User::class),
+        'authenticatable_id' => $admin->id,
+    ]);
+
+    FluxErp\Tests\Fixtures\ThrowingMentionFixture::register('throwing_fixture');
+
+    $this->actingAs($admin, 'web')
+        ->postJson('/search/mentionable', ['q' => 'Findme', 'types' => ['ticket', 'throwing_fixture']])
+        ->assertOk()
+        ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
+});
+
 it('returns 422 for unknown types', function (): void {
     $u = User::factory()->create();
 
