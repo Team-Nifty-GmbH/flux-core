@@ -1347,16 +1347,6 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         }
     }
 
-    public function getMentionUrl(): string
-    {
-        return $this->detailRoute() ?? '#';
-    }
-
-    public function getMentionLabel(): string
-    {
-        return (string) ($this->order_number ?? $this->getLabel() ?? '#' . $this->getKey());
-    }
-
     // Attributes
     protected function discountPercentage(): Attribute
     {

@@ -50,14 +50,14 @@ it('omits the type label on user pills', function (): void {
     expect($html)->not->toContain('data-mention-type');
 });
 
-it('replaces @user:id tokens with user pills', function (): void {
+it('replaces @user:id tokens with non-linking user pills', function (): void {
     $user = FluxErp\Models\User::factory()->create();
 
     $html = $this->renderer->tokensToHtml("Ping @user:{$user->getKey()} bitte");
 
-    expect($html)->toContain('<a');
-    expect($html)->toContain('class="mention mention--user');
+    expect($html)->toContain('<span class="mention mention--user');
     expect($html)->toContain("data-user-id=\"{$user->getKey()}\"");
+    expect($html)->not->toContain('<a');
 });
 
 it('falls back to plain text for deleted targets', function (): void {

@@ -298,16 +298,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         Mail::to($this->email)->queue(MagicLoginLink::make($this->generateLoginLink()));
     }
 
-    public function getMentionUrl(): string
-    {
-        return route('settings.users.edit', ['user' => $this->getKey()]);
-    }
-
-    public function getMentionLabel(): string
-    {
-        return (string) ($this->name ?? $this->firstname ?? $this->email ?? '#' . $this->getKey());
-    }
-
     // Attributes
     protected function password(): Attribute
     {

@@ -6,7 +6,6 @@ use FluxErp\Models\User;
 use FluxErp\Services\Mentions\MentionableTypes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Throwable;
 
 class MentionableSearchController extends Controller
 {
@@ -56,12 +55,6 @@ class MentionableSearchController extends Controller
                 ->values();
 
             foreach ($candidates as $record) {
-                try {
-                    $url = $record->getMentionUrl();
-                } catch (Throwable) {
-                    continue;
-                }
-
                 $results->push([
                     'kind' => 'record',
                     'token' => ($key === $userKey ? '@' : '#') . $key . ':' . $record->getKey(),
@@ -69,7 +62,7 @@ class MentionableSearchController extends Controller
                     'type_key' => $key,
                     'type_label' => $class::mentionTypeLabel(),
                     'type_icon' => $class::mentionTypeIcon(),
-                    'url' => $url,
+                    'url' => $record->getMentionUrl(),
                 ]);
             }
         }

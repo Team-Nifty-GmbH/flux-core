@@ -4,7 +4,6 @@ namespace FluxErp\Services\Mentions;
 
 use FluxErp\Models\User;
 use Illuminate\Support\Collection;
-use Throwable;
 
 class MentionRenderer
 {
@@ -60,10 +59,9 @@ class MentionRenderer
                 $label = e($record->getMentionLabel());
                 $typeLabel = e($types[$key]::mentionTypeLabel());
                 $stateAttrs = $record->getMentionState()?->toPillAttributes() ?? '';
+                $url = $record->getMentionUrl();
 
-                try {
-                    $url = $record->getMentionUrl();
-                } catch (Throwable) {
+                if ($url === null) {
                     return sprintf(
                         '<span class="mention mention--%s" data-mention-type="%s"%s>%s</span>',
                         e($key),
@@ -105,19 +103,12 @@ class MentionRenderer
         return preg_replace_callback(
             $pattern,
             function (array $m) use ($users): string {
-                $id = (int) $m[1];
-                $user = $users[$id] ?? null;
+                $user = $users[(int) $m[1]] ?? null;
                 if ($user === null) {
                     return '<span class="mention mention--missing">' . e(__('@deleted entry')) . '</span>';
                 }
 
-                return sprintf(
-                    '<a class="mention mention--user" href="%s" data-mention="user:%d" data-user-id="%d">%s</a>',
-                    e($user->getMentionUrl()),
-                    $id,
-                    $id,
-                    e($user->getMentionLabel()),
-                );
+                return $this->renderUserPill($user);
             },
             $text,
         ) ?? $text;
@@ -141,17 +132,33 @@ class MentionRenderer
                     return $m[0];
                 }
 
-                $id = (int) $user->getKey();
-
-                return sprintf(
-                    '<a class="mention mention--user" href="%s" data-mention="user:%d" data-user-id="%d">%s</a>',
-                    e($user->getMentionUrl()),
-                    $id,
-                    $id,
-                    e($user->getMentionLabel()),
-                );
+                return $this->renderUserPill($user);
             },
             $text,
         ) ?? $text;
+    }
+
+    private function renderUserPill(User $user): string
+    {
+        $id = (int) $user->getKey();
+        $label = e($user->getMentionLabel());
+        $url = $user->getMentionUrl();
+
+        if ($url === null) {
+            return sprintf(
+                '<span class="mention mention--user" data-mention="user:%d" data-user-id="%d">%s</span>',
+                $id,
+                $id,
+                $label,
+            );
+        }
+
+        return sprintf(
+            '<a class="mention mention--user" href="%s" data-mention="user:%d" data-user-id="%d">%s</a>',
+            e($url),
+            $id,
+            $id,
+            $label,
+        );
     }
 }

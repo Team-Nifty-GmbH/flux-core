@@ -163,14 +163,4 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
             ->with(['authenticatable', 'ticketType:id,name'])
             ->toSearchableArray();
     }
-
-    public function getMentionUrl(): string
-    {
-        return $this->detailRoute() ?? '#';
-    }
-
-    public function getMentionLabel(): string
-    {
-        return (string) ($this->title ?? '#' . $this->getKey());
-    }
 }

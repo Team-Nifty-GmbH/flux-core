@@ -7,7 +7,7 @@ use FluxErp\Support\Mentions\MentionState;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use RuntimeException;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 trait Mentionable
 {
@@ -48,15 +48,16 @@ trait Mentionable
 
     public function getMentionLabel(): string
     {
+        if ($this instanceof InteractsWithDataTables) {
+            return $this->getLabel() ?? '#' . $this->getKey();
+        }
+
         return (string) ($this->name ?? $this->getKey());
     }
 
-    public function getMentionUrl(): string
+    public function getMentionUrl(): ?string
     {
-        throw new RuntimeException(sprintf(
-            'Model [%s] uses the Mentionable trait and must implement getMentionUrl().',
-            static::class,
-        ));
+        return $this instanceof InteractsWithDataTables ? $this->getUrl() : null;
     }
 
     public function getMentionState(): ?MentionState
