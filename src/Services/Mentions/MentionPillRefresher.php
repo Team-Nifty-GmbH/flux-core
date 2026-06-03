@@ -56,9 +56,13 @@ class MentionPillRefresher
 
     private function stripStateAttributes(string $attrs): string
     {
+        if (preg_match('/\bdata-mention-state="/i', $attrs) !== 1) {
+            return $attrs;
+        }
+
         $attrs = preg_replace('/\s+data-mention-state="[^"]*"/i', '', $attrs);
         $attrs = preg_replace('/\s+title="[^"]*"/i', '', $attrs);
-        $attrs = preg_replace('/\s+style="[^"]*"/i', '', $attrs);
+        $attrs = preg_replace('/\s+style="[^"]*--mention-state-color[^"]*"/i', '', $attrs);
 
         return $attrs;
     }
