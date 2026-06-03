@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Mention from '@tiptap/extension-mention';
+import { mergeAttributes } from '@tiptap/core';
 import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 
 let suggestionPopup = null;
@@ -59,6 +60,7 @@ function updateSuggestionItems(element, props, options = {}) {
                 id: item.id,
                 label: item.label,
                 mentionType: options.showTypeBadge ? item.typeLabel : null,
+                mentionUrl: item.url ?? null,
             });
         });
 
@@ -83,10 +85,29 @@ const buildMentionExtension = (name, char, types, element) => {
                             ? { 'data-mention-type': attributes.mentionType }
                             : {},
                 },
+                mentionUrl: {
+                    default: null,
+                    parseHTML: (element) => element.getAttribute('href'),
+                    renderHTML: () => ({}),
+                },
             };
+        },
+        parseHTML() {
+            return [
+                { tag: `span[data-type="${this.name}"]` },
+                { tag: `a[data-type="${this.name}"]` },
+            ];
         },
     }).configure({
         HTMLAttributes: { class: 'mention' },
+        renderHTML: ({ options, node }) => [
+            'a',
+            mergeAttributes(
+                options.HTMLAttributes,
+                node.attrs.mentionUrl ? { href: node.attrs.mentionUrl } : {},
+            ),
+            `${node.attrs.mentionSuggestionChar ?? ''}${node.attrs.label ?? node.attrs.id}`,
+        ],
         suggestion: {
             char,
             items: async ({ query }) => {
@@ -109,6 +130,7 @@ const buildMentionExtension = (name, char, types, element) => {
                         id: item.token.replace(/^[@#]/, ''),
                         label: item.label,
                         typeLabel: item.type_label,
+                        url: item.url,
                         src: null,
                     };
                 });

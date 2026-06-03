@@ -20,6 +20,18 @@ it('converts multiple spans in one body', function (): void {
     expect(MentionHtml::toTokens($html))->toBe('@user:1 and #order:9');
 });
 
+it('converts a record mention anchor to a token', function (): void {
+    $html = 'See <a class="mention" data-type="recordMention" data-id="ticket:7" href="/tickets/7">#7</a>';
+
+    expect(MentionHtml::toTokens($html))->toBe('See #ticket:7');
+});
+
+it('leaves non-mention anchors untouched', function (): void {
+    $html = 'Visit <a href="https://example.com">site</a>';
+
+    expect(MentionHtml::toTokens($html))->toBe($html);
+});
+
 it('leaves existing plain tokens and unrelated markup untouched', function (): void {
     $html = '<p>plain @user:5 and <strong>bold</strong></p>';
 
