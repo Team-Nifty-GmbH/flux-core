@@ -7,6 +7,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
+use FluxErp\Http\Controllers\Controller;
 use FluxErp\Models\Permission;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Model\HasModelPermission;
@@ -115,6 +116,13 @@ class InitPermissions extends Command
         foreach ($routes as $route) {
             $permissionName = route_to_permission($route, false);
             if (! $permissionName || $this->isVendorRoute($route) || str_starts_with($permissionName, 'search.')) {
+                $bar->advance();
+
+                continue;
+            }
+
+            $controllerClass = is_string($route->action['uses'] ?? null) ? $route->getControllerClass() : null;
+            if ($controllerClass && is_a($controllerClass, Controller::class, true) && ! $controllerClass::hasPermission()) {
                 $bar->advance();
 
                 continue;

@@ -4,6 +4,8 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Facades\Menu;
 use FluxErp\Livewire\Navigation;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\Permission;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -30,4 +32,27 @@ test('shows order types', function (): void {
     Livewire::actingAs($this->user)
         ->test(Navigation::class)
         ->assertDontSee(Str::headline($orderTypes->first()->name));
+});
+
+test('navigation cache is invalidated when user permissions change', function (): void {
+    Menu::clear();
+    Route::middleware('auth:web')->get('navigation-cache-probe', fn () => null)
+        ->name('navigation-cache-probe');
+    Menu::register(route: 'navigation-cache-probe', label: 'Cache Probe Page');
+
+    $permission = Permission::findOrCreate('navigation-cache-probe.get', 'web');
+
+    // First render: user lacks the permission, the menu item must be filtered out
+    // and the (empty) result gets cached in the session.
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertDontSee('Cache Probe Page');
+
+    // Permission grant happens between the two renders — exactly the situation the
+    // session-side menu cache used to swallow.
+    $this->user->givePermissionTo($permission);
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertSee('Cache Probe Page');
 });

@@ -40,6 +40,41 @@ test('calendar page loads without js errors', function (): void {
     visitCalendar()->assertNoJavascriptErrors();
 });
 
+test('event edit modal renders exactly one calendar-event component', function (): void {
+    createCalendarWithOwner();
+
+    $page = visitCalendar();
+
+    $count = $page->script(<<<'JS'
+        () => new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                const modal = document.querySelector('#edit-event-modal');
+                if (!modal) {
+                    resolve('no-modal');
+                    return;
+                }
+                resolve(modal.querySelectorAll('[wire\\:name="features.calendar.calendar-event"]').length);
+            }, 5000);
+            const check = () => {
+                const modal = document.querySelector('#edit-event-modal');
+                if (!modal) { setTimeout(check, 200); return; }
+                const count = modal.querySelectorAll('[wire\\:name="features.calendar.calendar-event"]').length;
+                if (count > 0) {
+                    clearTimeout(timeout);
+                    setTimeout(() => {
+                        resolve(modal.querySelectorAll('[wire\\:name="features.calendar.calendar-event"]').length);
+                    }, 1000);
+                } else {
+                    setTimeout(check, 200);
+                }
+            };
+            check();
+        })
+    JS);
+
+    expect($count)->toBe(1, 'edit-event-modal must contain exactly one features.calendar.calendar-event component, found: ' . $count);
+});
+
 test('saving a new calendar event works without js errors', function (): void {
     createCalendarWithOwner();
 

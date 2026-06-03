@@ -81,31 +81,35 @@ trait InteractsWithMedia
         $undotted = [];
         foreach ($mediaCollections as $mediaCollection) {
             $slug = data_get($mediaCollection, 'slug') ?? '';
+
             if (
                 is_null(data_get($mediaCollection, 'id'))
                 && str_contains($slug, '.')
             ) {
-                $path = '';
+                $cursor = &$undotted;
                 $childSlug = '';
-                foreach (explode('.', $slug) as $index => $part) {
-                    if ($index === 0 && array_key_exists($part, $undotted)) {
-                        $path = $childSlug = $part;
 
-                        continue;
-                    }
+                foreach (explode('.', $slug) as $part) {
+                    $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
 
-                    $childSlug .= ($childSlug ? '.' : '') . $part;
-                    $path .= ($path ? '.children.' : '') . $part;
-
-                    Arr::set(
-                        $undotted,
-                        $path,
-                        [
+                    if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
+                        $cursor[$part] = [
                             'name' => Str::headline($part),
                             'slug' => $childSlug,
-                        ],
-                    );
+                        ];
+                    }
+
+                    if (
+                        ! array_key_exists('children', $cursor[$part])
+                        || ! is_array($cursor[$part]['children'])
+                    ) {
+                        $cursor[$part]['children'] = [];
+                    }
+
+                    $cursor = &$cursor[$part]['children'];
                 }
+
+                unset($cursor);
             } else {
                 Arr::set($undotted, $slug, $mediaCollection);
             }
@@ -191,12 +195,20 @@ trait InteractsWithMedia
                         ->orderBy('name', 'ASC')
                         ->get([
                             'id',
+                            'uuid',
+                            'model_type',
+                            'model_id',
+                            'collection_name',
                             'name',
                             'file_name',
-                            'collection_name',
-                            'disk',
-                            'size',
                             'mime_type',
+                            'disk',
+                            'conversions_disk',
+                            'size',
+                            'manipulations',
+                            'custom_properties',
+                            'generated_conversions',
+                            'responsive_images',
                             'created_at',
                         ])
                         ->makeVisible(['name', 'collection_name'])

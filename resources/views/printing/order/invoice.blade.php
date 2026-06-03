@@ -29,7 +29,7 @@
             {{ __('Performance Date') }}:
         </td>
         <td style="padding: 0; text-align: right">
-            @if($model->system_delivery_date_end && $model->system_delivery_date_end->format('Y-m-d') !== $model->system_delivery_date->format('Y-m-d'))
+            @if ($model->system_delivery_date_end && $model->system_delivery_date_end->format('Y-m-d') !== $model->system_delivery_date->format('Y-m-d'))
                 {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
                 -
                 {{ ($model->system_delivery_date_end ?: now())->locale(app()->getLocale())->isoFormat('L') }}

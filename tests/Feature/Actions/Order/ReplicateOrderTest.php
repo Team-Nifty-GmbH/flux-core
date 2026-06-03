@@ -13,6 +13,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Illuminate\Support\Str;
@@ -1319,3 +1320,59 @@ test('replicate order preserves free text block parent-child structure', functio
         ->and($newChildren->pluck('name')->sort()->values()->all())
         ->toBe(['Child Position 1', 'Child Position 2']);
 });
+
+test('replicates with null agent_id when contact agent was deleted', function (OrderTypeEnum $targetEnum): void {
+    $deletedAgent = User::factory()->create([
+        'language_id' => $this->defaultLanguage->getKey(),
+    ]);
+
+    $contact = Contact::factory()->create([
+        'has_delivery_lock' => false,
+        'credit_line' => null,
+        'agent_id' => $deletedAgent->getKey(),
+    ]);
+
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    $orderOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => $targetEnum,
+        'is_active' => true,
+    ]);
+
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'agent_id' => $deletedAgent->getKey(),
+        'contact_id' => $contact->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'invoice_number' => $targetEnum === OrderTypeEnum::Retoure ? Str::random() : null,
+        'is_locked' => true,
+    ]);
+
+    $deletedAgent->delete();
+
+    $replicated = ReplicateOrder::make([
+        'id' => $order->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'order_type_id' => $targetOrderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect($replicated->agent_id)->toBeNull();
+})->with([
+    'retoure' => OrderTypeEnum::Retoure,
+    'split order' => OrderTypeEnum::SplitOrder,
+]);

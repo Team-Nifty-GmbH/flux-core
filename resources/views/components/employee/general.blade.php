@@ -84,6 +84,11 @@
                 wire:model="employee.account_holder"
                 x-bind:disabled="!isEditing"
             />
+            <x-checkbox
+                :label="__('Is Active')"
+                wire:model="employee.is_active"
+                x-bind:disabled="!isEditing"
+            />
         </div>
     </x-card>
 
@@ -253,6 +258,13 @@
                         'searchFields' => ['name'],
                     ]
                 ]"
+            />
+            <x-select.native
+                :label="__('Salary Type')"
+                wire:model="employee.salary_type"
+                :options="\FluxErp\Enums\SalaryTypeEnum::valuesLocalized()"
+                :hint="__('For hourly employees no negative balance is accumulated; positive overtime is still tracked.')"
+                x-bind:disabled="!isEditing"
             />
         </div>
     </x-card>

@@ -20,17 +20,15 @@ class SearchController extends Controller
         // check if $model is a morph alias
         $model = morphed_model($model) ?? $model;
         $model = qualify_model(str_replace('/', '\\', $model));
+
+        abort_unless(class_exists($model), 404);
+
         $isSearchable = in_array(
             Searchable::class,
             class_uses_recursive(resolve_static($model, 'class'))
         );
 
-        if (
-            ! class_exists($model)
-            || (! $isSearchable && ! $request->input('searchFields'))
-        ) {
-            abort(404);
-        }
+        abort_if(! $isSearchable && ! $request->input('searchFields'), 404);
 
         Event::dispatch('tall-datatables-searching', $request);
 

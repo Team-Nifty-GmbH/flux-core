@@ -52,7 +52,7 @@
                     </address>
                 @show
                 @section('footer.bank-connections')
-                    @foreach($tenant->bankConnections as $bankConnection)
+                    @foreach ($tenant->bankConnections as $bankConnection)
                         <div
                             style="
                                 float: right;
@@ -66,7 +66,7 @@
                             <div>{{ $bankConnection->iban ?? '' }}</div>
                             <div>{{ $bankConnection->bic ?? '' }}</div>
                         </div>
-                        @if($tenant->logo_small)
+                        @if ($tenant->logo_small)
                             @break
                         @endif
                     @endforeach

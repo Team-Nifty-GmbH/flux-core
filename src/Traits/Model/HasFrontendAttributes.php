@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait HasFrontendAttributes
 {
-    use \TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
+    use \TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes {
+        getDetailRouteName as public;
+    }
 
     public static function getLivewireComponentWidget(): string
     {

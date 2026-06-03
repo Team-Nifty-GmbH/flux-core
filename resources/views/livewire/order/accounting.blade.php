@@ -186,68 +186,64 @@
         </div>
     </x-card>
 
-    @teleport('body')
-        <x-modal
-            id="order-transaction-modal"
-            x-on:open="$tsui.focus('order-transaction-amount')"
-        >
-            <div class="flex flex-col gap-4">
+    <x-modal
+        id="order-transaction-modal"
+        x-on:open="$tsui.focus('order-transaction-amount')"
+    >
+        <div class="flex flex-col gap-4">
+            <x-number
+                id="order-transaction-amount"
+                :label="__('Amount')"
+                wire:model="orderTransactionForm.amount"
+                step="0.01"
+                :corner-hint="__('Amount')"
+                placeholder="0.00"
+            />
+            <div
+                x-cloak
+                x-show="$wire.orderTransactionForm.orderCurrencyIso"
+                class="flex flex-col gap-4"
+            >
                 <x-number
-                    id="order-transaction-amount"
-                    :label="__('Amount')"
-                    wire:model="orderTransactionForm.amount"
+                    :label="__('Exchange Rate')"
+                    wire:model="orderTransactionForm.exchange_rate"
+                    step="0.0001"
+                    placeholder="0.0000"
+                    x-on:change="$wire.calcOrderCurrencyAmount()"
+                />
+                <x-number
+                    wire:model="orderTransactionForm.order_currency_amount"
                     step="0.01"
-                    :corner-hint="__('Amount')"
                     placeholder="0.00"
-                />
-                <div
-                    x-cloak
-                    x-show="$wire.orderTransactionForm.orderCurrencyIso"
-                    class="flex flex-col gap-4"
+                    x-on:change="$wire.calcExchangeRate()"
                 >
-                    <x-number
-                        :label="__('Exchange Rate')"
-                        wire:model="orderTransactionForm.exchange_rate"
-                        step="0.0001"
-                        placeholder="0.0000"
-                        x-on:change="$wire.calcOrderCurrencyAmount()"
-                    />
-                    <x-number
-                        wire:model="orderTransactionForm.order_currency_amount"
-                        step="0.01"
-                        placeholder="0.00"
-                        x-on:change="$wire.calcExchangeRate()"
-                    >
-                        <x-slot:label>
-                            {{ __('Order Currency Amount') }} (
-                            <span
-                                x-text="
-                                    $wire.orderTransactionForm.orderCurrencyIso
-                                "
-                            ></span>
-                            )
-                        </x-slot:label>
-                    </x-number>
-                </div>
+                    <x-slot:label>
+                        {{ __('Order Currency Amount') }} (
+                        <span
+                            x-text="$wire.orderTransactionForm.orderCurrencyIso"
+                        ></span>
+                        )
+                    </x-slot:label>
+                </x-number>
             </div>
-            <x-slot:footer>
-                <x-button
-                    color="secondary"
-                    :text="__('Cancel')"
-                    x-on:click="$tsui.close.modal('order-transaction-modal')"
-                />
-                <x-button
-                    :text="__('Save')"
-                    x-on:click="
-                        $wire.save().then((success) => {
-                            if (success)
-                                $tsui.close.modal('order-transaction-modal');
-                        })
-                    "
-                />
-            </x-slot:footer>
-        </x-modal>
-    @endteleport
+        </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('order-transaction-modal')"
+            />
+            <x-button
+                :text="__('Save')"
+                x-on:click="
+                    $wire.save().then((success) => {
+                        if (success)
+                            $tsui.close.modal('order-transaction-modal');
+                    })
+                "
+            />
+        </x-slot:footer>
+    </x-modal>
 
     <x-modal
         id="reset-payment-reminder-level-modal"

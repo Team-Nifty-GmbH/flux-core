@@ -4,8 +4,10 @@
             <x-flux::checkbox-tree
                 tree="$wire.getTree()"
                 name-attribute="name"
+                :search-attributes="['name', 'file_name', 'collection_name']"
                 moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'))"
                 sortable
+                with-search
                 x-sort:item="childNode"
             >
                 <x-slot:beforeTree>
@@ -277,148 +279,194 @@
                         @show
                     </div>
                     <div
-                        class="flex w-full flex-col gap-3"
+                        class="flex w-full flex-col gap-4"
                         x-cloak
                         x-show="selection.file_name && selected"
                     >
-                        <div class="flex flex-wrap gap-2 pb-1.5">
-                            <x-button
-                                color="indigo"
-                                :text="__('Download')"
-                                x-on:click="$wire.download(selection.id)"
-                            />
-                            @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
-                                <x-button
-                                    x-cloak
-                                    x-show="!$wire.isReadonly && !readOnly"
-                                    color="red"
-                                    :text="__('Delete')"
-                                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
-                                    x-on:click="
-                                        $wire.delete(selection.id).then(() => {
-                                            try {
-                                                removeNode(selection.id);
-                                                this.selected = null;
-                                                this.selection = {};
-                                            } catch (error) {
-                                                console.error(error);
-                                            }
-                                        })
-                                    "
-                                />
-                            @endcanAction
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            @section('folder-tree.upload.media')
-                                @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                                    <x-input
-                                        :text="__('Name')"
-                                        disabled
-                                        x-model="selection.name"
+                        @section('folder-tree.upload.media')
+                            <div
+                                class="group relative flex h-72 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-800"
+                                x-on:click="
+                                    $nuxbe.openLightbox(
+                                        selection.original_url,
+                                        {
+                                            mime: selection.mime_type,
+                                            title: selection.name,
+                                        },
+                                    )
+                                "
+                            >
+                                <template x-if="selection.thumb_url">
+                                    <img
+                                        x-bind:src="selection.thumb_url"
+                                        x-bind:alt="selection.name"
+                                        class="max-h-full max-w-full object-contain"
                                     />
-                                    <x-input
-                                        :label="__('Path')"
-                                        disabled
-                                        x-model="selection.collection_name"
-                                    />
-                                    <x-input
-                                        :label="__('File type')"
-                                        disabled
-                                        x-bind:value="
+                                </template>
+                                <template x-if="!selection.thumb_url">
+                                    <object
+                                        x-on:load="previewSupported = true"
+                                        x-on:error="previewSupported = false"
+                                        class="pointer-events-none h-full w-full object-contain"
+                                        x-bind:type="selection.mime_type"
+                                        x-bind:data="
+                                            selection.original_url +
+                                            '#zoom=85&scrollbar=0&toolbar=0&navpanes=0&view=FitH'
+                                        "
+                                    >
+                                        <div
+                                            class="flex h-full w-full items-center justify-center text-sm text-gray-400"
+                                        >
+                                            {{ __('No preview available') }}
+                                        </div>
+                                    </object>
+                                </template>
+                                <div
+                                    class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-1.5 text-sm font-medium text-gray-900"
+                                    >
+                                        <svg
+                                            class="h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.75"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                                            />
+                                        </svg>
+                                        {{ __('Open preview') }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <div
+                                    class="text-base font-medium break-words text-gray-900 dark:text-gray-100"
+                                    x-text="selection.name"
+                                ></div>
+                                <div
+                                    class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-gray-500 dark:text-gray-400"
+                                >
+                                    <span
+                                        x-text="
                                             selection.file_name
                                                 ?.split('.')
                                                 .pop()
+                                                ?.toUpperCase()
                                         "
-                                    />
-                                    <x-input
-                                        :label="__('MIME-Type')"
-                                        disabled
-                                        x-bind:value="selection.mime_type"
-                                    />
-                                    <x-input
-                                        :label="__('Size')"
-                                        disabled
-                                        x-bind:value="
+                                    ></span>
+                                    <span>&middot;</span>
+                                    <span
+                                        x-text="
                                             $nuxbe.format.fileSize(
                                                 selection?.size,
                                             )
                                         "
-                                    />
-                                    <x-input
-                                        :label="__('File')"
-                                        disabled
-                                        x-bind:value="selection.file_name"
-                                    />
-                                    <x-input
-                                        :label="__('Disk')"
-                                        disabled
-                                        x-bind:value="selection.disk"
-                                    />
-                                    <x-input
-                                        :label="__('Link')"
-                                        readonly
-                                        x-ref="originalLink"
-                                        type="text"
-                                        x-bind:value="selection.original_url"
-                                    >
-                                        <x-slot:suffix>
-                                            <div
-                                                class="absolute inset-y-0 right-0 flex items-center p-0.5"
-                                            >
-                                                <x-button
-                                                    x-cloak
-                                                    x-show="previewSupported"
-                                                    x-on:click="
-                                                        $nuxbe.openDetailModal(
-                                                            selection.original_url,
-                                                        )
-                                                    "
-                                                    icon="eye"
-                                                    class="h-full rounded-l-md"
-                                                    color="indigo"
-                                                    squared
-                                                />
-                                                <x-button
-                                                    x-on:click="
-                                                        $refs.originalLink.select();
-                                                        document.execCommand(
-                                                            'copy',
-                                                        );
-                                                    "
-                                                    class="h-full rounded-r-md"
-                                                    icon="clipboard-document"
-                                                    color="indigo"
-                                                    squared
-                                                />
-                                            </div>
-                                        </x-slot:suffix>
-                                    </x-input>
-                                @endcanAction
-                                <object
-                                    x-on:load="previewSupported = true"
-                                    x-on:error="previewSupported = false"
-                                    x-on:click="
-                                        $nuxbe.openDetailModal(
-                                            selection.original_url,
-                                        )
-                                    "
-                                    class="cursor-pointer object-contain"
-                                    x-bind:type="selection.mime_type"
-                                    x-bind:data="
-                                        selection.original_url +
-                                        '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'
-                                    "
-                                    width="100%"
-                                    height="200px"
-                                >
+                                    ></span>
+                                    <template x-if="selection.collection_name">
+                                        <span
+                                            class="inline-flex items-center gap-2"
+                                        >
+                                            <span>&middot;</span>
+                                            <span
+                                                class="truncate"
+                                                x-text="
+                                                    selection.collection_name
+                                                "
+                                            ></span>
+                                        </span>
+                                    </template>
+                                </div>
+                                <template x-if="selection.created_at">
                                     <div
-                                        class="flex h-48 w-full items-center justify-center bg-gray-200 text-gray-400"
+                                        class="text-xs text-gray-500 dark:text-gray-400"
+                                        x-text="
+                                            $nuxbe.format.datetime(
+                                                selection.created_at,
+                                            )
+                                        "
+                                    ></div>
+                                </template>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <x-button
+                                    color="indigo"
+                                    icon="arrow-down-tray"
+                                    :text="__('Download')"
+                                    x-on:click="$wire.download(selection.id)"
+                                />
+                                <x-button
+                                    color="secondary"
+                                    light
+                                    icon="clipboard-document"
+                                    :text="__('Copy link')"
+                                    x-on:click="
+                                        if (! navigator.clipboard?.writeText) {
+                                            $tsui.interaction('toast')
+                                                .error('{{ __('Error') }}', '{{ __('Failed to copy to clipboard. Please try again.') }}')
+                                                .send()
+                                            return
+                                        }
+                                        navigator.clipboard
+                                            .writeText(selection.original_url)
+                                            .then(() => {
+                                                $tsui.interaction('toast')
+                                                    .success('{{ __('Copied!') }}', '{{ __('Link copied to clipboard') }}')
+                                                    .send()
+                                            })
+                                            .catch(() => {
+                                                $tsui.interaction('toast')
+                                                    .error('{{ __('Error') }}', '{{ __('Failed to copy to clipboard. Please try again.') }}')
+                                                    .send()
+                                            })
+                                    "
+                                />
+                                @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
+                                    <div
+                                        x-cloak
+                                        x-show="!$wire.isReadonly && !readOnly"
+                                        class="ml-auto"
                                     >
-                                        {{ __('Your browser does not support preview for this file.') }}
+                                        <x-button
+                                            color="red"
+                                            light
+                                            icon="trash"
+                                            :text="__('Delete')"
+                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
+                                            x-on:click="
+                                                $wire
+                                                    .delete(selection.id)
+                                                    .then(() => {
+                                                        try {
+                                                            removeNode(
+                                                                selection.id,
+                                                            );
+                                                            this.selected =
+                                                                null;
+                                                            this.selection = {};
+                                                        } catch (error) {
+                                                            console.error(
+                                                                error,
+                                                            );
+                                                        }
+                                                    })
+                                            "
+                                        />
                                     </div>
-                                </object>
-                            @show
-                        </div>
+                                @endcanAction
+                            </div>
+                        @show
                     </div>
                 </div>
             </x-flux::checkbox-tree>

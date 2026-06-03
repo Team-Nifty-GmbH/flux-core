@@ -7,6 +7,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\DayPartEnum;
+use FluxErp\Enums\SalaryTypeEnum;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
@@ -15,6 +16,7 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\EmployeeDay\CloseEmployeeDayRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class CloseEmployeeDay extends FluxAction
 {
@@ -165,6 +167,10 @@ class CloseEmployeeDay extends FluxAction
             $actualHours
         );
 
+        if ($employee->salary_type === SalaryTypeEnum::Hourly && bccomp($plusMinusOvertimeHours, 0) === -1) {
+            $plusMinusOvertimeHours = 0;
+        }
+
         $data = array_map(
             fn ($value) => bccomp($value, 0) === 1 ? bcround($value, 2) : 0,
             $data
@@ -245,5 +251,21 @@ class CloseEmployeeDay extends FluxAction
         $employeeDay->absenceRequests()->sync($absenceRequests);
 
         return $employeeDay->withoutRelations()->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (resolve_static(Employee::class, 'query')
+            ->whereKey($this->getData('employee_id'))
+            ->employed(Carbon::parse($this->getData('date')))
+            ->doesntExist()
+        ) {
+            throw ValidationException::withMessages([
+                'date' => ['Employee is not employed during the given date.'],
+            ])
+                ->errorBag('closeEmployeeDay');
+        }
     }
 }

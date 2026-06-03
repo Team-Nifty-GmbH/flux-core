@@ -433,3 +433,37 @@ test('process subscription order calculates next period from existing child orde
         ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe($nextYear->format('Y-m-d'))
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($nextYear->copy()->endOfYear()->format('Y-m-d'));
 });
+
+test('process subscription order dispatches SubscriptionOrderFailedEvent on failure', function (): void {
+    Illuminate\Support\Facades\Event::fake([
+        FluxErp\Events\Order\SubscriptionOrderFailedEvent::class,
+    ]);
+
+    // Force a validation failure by pointing the order to a contact in a different tenant
+    // (matches the approach in the existing "throws exception on validation error" test).
+    $otherTenant = Tenant::factory()->create();
+    $otherContact = Contact::factory()
+        ->hasAttached($otherTenant, relationship: 'tenants')
+        ->create();
+
+    Illuminate\Support\Facades\DB::table('orders')
+        ->where('id', $this->subscriptionOrder->getKey())
+        ->update(['contact_id' => $otherContact->getKey()]);
+
+    $processor = new ProcessSubscriptionOrder();
+
+    expect(fn () => $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey(),
+    ))->toThrow(Illuminate\Validation\ValidationException::class);
+
+    Illuminate\Support\Facades\Event::assertDispatched(
+        FluxErp\Events\Order\SubscriptionOrderFailedEvent::class,
+        function (FluxErp\Events\Order\SubscriptionOrderFailedEvent $event): bool {
+            return $event->order->is($this->subscriptionOrder)
+                && $event->exceptionClass === Illuminate\Validation\ValidationException::class
+                && $event->exceptionMessage !== ''
+                && $event->validationErrors !== [];
+        }
+    );
+});

@@ -24,13 +24,13 @@
             }
         },
         get isMultiGroup() {
-            return $wire.groupKeys.length > 1
+            return ($wire.groupKeys?.length ?? 0) > 1
         },
         get isLastGroup() {
-            return $wire.currentGroupIndex >= $wire.groupKeys.length - 1
+            return ($wire.currentGroupIndex ?? 0) >= ($wire.groupKeys?.length ?? 0) - 1
         },
         get isFirstGroup() {
-            return $wire.currentGroupIndex <= 0
+            return ($wire.currentGroupIndex ?? 0) <= 0
         },
     }"
 >
@@ -57,7 +57,12 @@
                         <span x-text="$wire.currentGroupRecipientCount"></span> {{ __('recipient(s)') }}
                     </span>
                     <span class="text-gray-400">·</span>
-                    <span class="text-gray-500" x-text="'{{ __('Group') }} ' + ($wire.currentGroupIndex + 1) + '/' + $wire.groupKeys.length"></span>
+                    <span
+                        class="text-gray-500"
+                        x-text="$wire.groupKeys?.length > 0
+                            ? '{{ __('Group') }} ' + (($wire.currentGroupIndex ?? 0) + 1) + '/' + $wire.groupKeys.length
+                            : '-'"
+                    ></span>
                 </div>
             </div>
 
@@ -187,7 +192,7 @@
                                 </x-slot>
                                 <x-slot:text>
                                     <div
-                                        x-on:click.prevent="file.id && $wire.downloadAttachment(file.id)"
+                                        x-on:click.prevent="file.id && $wire.download(file.id)"
                                         x-bind:class="file.id ? 'cursor-pointer' : ''"
                                     >
                                         <span x-text="file.name"></span>

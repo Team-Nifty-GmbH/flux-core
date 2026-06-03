@@ -5,6 +5,7 @@ namespace FluxErp\Actions\AbsenceRequest;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Models\AbsenceRequest;
+use FluxErp\Notifications\AbsenceRequest\AbsenceRequestRevokedNotification;
 use FluxErp\Rulesets\AbsenceRequest\ChangeAbsenceRequestStateRuleset;
 use Illuminate\Support\Arr;
 
@@ -37,6 +38,11 @@ class RevokeAbsenceRequest extends FluxAction
             ]
         ));
         $absenceRequest->save();
+
+        $user = $absenceRequest->employee?->user;
+        if ($user && $user->getKey() !== auth()->id()) {
+            $user->notify(AbsenceRequestRevokedNotification::make($absenceRequest));
+        }
 
         return $absenceRequest->fresh();
     }

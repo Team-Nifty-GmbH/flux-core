@@ -53,31 +53,24 @@ abstract class FluxAction
 
     public function __serialize(): array
     {
-        $data = [
-            'data' => $this->data,
-            'result' => $this->result,
-        ];
+        $data = array_diff_key(get_object_vars($this), array_flip($this->nonSerializableProperties()));
 
         try {
-            serialize($this->rules);
+            serialize($data['rules'] ?? null);
         } catch (Throwable) {
-            return $data;
+            unset($data['rules']);
         }
-
-        $data['rules'] = $this->rules;
 
         return $data;
     }
 
     public function __unserialize(array $data): void
     {
-        $this->data = data_get($data, 'data');
-        $this->result = data_get($data, 'result');
-        $rules = data_get($data, 'rules');
+        foreach ($data as $key => $value) {
+            $this->{$key} = $value;
+        }
 
-        if (! is_null($rules)) {
-            $this->rules = $rules;
-        } else {
+        if (! array_key_exists('rules', $data)) {
             $this->setRulesFromRulesets();
         }
     }
@@ -317,6 +310,13 @@ abstract class FluxAction
         }
 
         return $this;
+    }
+
+    protected function nonSerializableProperties(): array
+    {
+        return [
+            'dispatcher',
+        ];
     }
 
     protected function convertEmptyStringToNull(array $data): array

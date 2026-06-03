@@ -12,15 +12,16 @@ use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\SupportsFileDownloads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Mail extends CommunicationList
 {
+    use SupportsFileDownloads;
+
     public ?string $folderId = null;
 
     public array $folders = [];
@@ -124,21 +125,6 @@ class Mail extends CommunicationList
         $this->js(<<<'JS'
             $tsui.close.modal('show-mail');
         JS);
-    }
-
-    public function download(Media $mediaItem): false|BinaryFileResponse
-    {
-        if (! file_exists($mediaItem->getPath())) {
-            if (method_exists($this, 'notification')) {
-                $this->toast()
-                    ->error(__('File not found!'))
-                    ->send();
-            }
-
-            return false;
-        }
-
-        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
     public function getNewMessages(): void

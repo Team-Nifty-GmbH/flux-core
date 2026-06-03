@@ -30,6 +30,21 @@ class QueueMonitorManager
         return $job->getJobId() ?? md5($job->getRawBody());
     }
 
+    public static function getJobName(object $event): string
+    {
+        $instance = static::resolveJobInstance($event);
+
+        if ($instance && method_exists($instance, 'getName')) {
+            return $instance->getName();
+        }
+
+        if (is_object($instance)) {
+            return get_class($instance);
+        }
+
+        return (string) static::getJobClass($event->job);
+    }
+
     public static function handle(JobQueued|JobProcessing|JobProcessed|JobFailed|JobExceptionOccurred $event): void
     {
         $method = lcfirst(class_basename($event));
@@ -122,17 +137,20 @@ class QueueMonitorManager
     {
         $now = Carbon::now();
 
+        $queue = $event->job->getQueue()
+            ?: config("queue.connections.{$event->connectionName}.queue", 'default');
+
         $monitor = resolve_static(QueueMonitor::class, 'query')
             ->where('job_id', $jobId = static::getJobId($event->job))
-            ->where('queue', $event->job->getQueue() ?? config('queue.default'))
+            ->where('queue', $queue)
             ->whereState('state', Queued::class)
             ->firstOrNew();
 
         $monitor->fill([
             'job_uuid' => $event->job->uuid(),
             'job_id' => static::getJobId($event->job),
-            'queue' => $event->job->getQueue() ?: config('queue.default'),
-            'name' => static::getJobClass($event->job),
+            'queue' => $queue,
+            'name' => static::getJobName($event),
             'started_at' => $now,
             'started_at_exact' => $now->format('Y-m-d H:i:s.u'),
             'attempt' => $event->job->attempts(),
@@ -161,11 +179,37 @@ class QueueMonitorManager
             ->create([
                 'job_batch_id' => $event->job->batchId ?? null,
                 'job_id' => $event->id,
-                'name' => get_class(static::getJobClass($event->job)),
-                'queue' => $event->job->queue ?: 'default',
+                'name' => static::getJobName($event),
+                'queue' => $event->queue
+                    ?: config("queue.connections.{$event->connectionName}.queue", 'default'),
                 'state' => Queued::class,
                 'queued_at' => now(),
                 'data' => $data ?? null,
             ]);
+    }
+
+    protected static function resolveJobInstance(object $event): ?object
+    {
+        if ($event instanceof JobQueued && is_object($event->job)) {
+            return $event->job;
+        }
+
+        if (! method_exists($event->job, 'payload')) {
+            return null;
+        }
+
+        $command = data_get($event->job->payload(), 'data.command');
+
+        if (! is_string($command)) {
+            return null;
+        }
+
+        try {
+            $instance = unserialize($command);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return is_object($instance) ? $instance : null;
     }
 }
