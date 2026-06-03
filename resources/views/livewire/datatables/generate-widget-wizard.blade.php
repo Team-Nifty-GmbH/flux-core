@@ -420,7 +420,9 @@
                 >
                     {{ __('Preview') }}
                 </h3>
-                <div>
+                <div
+                    class="dark:bg-secondary-800 h-96 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700"
+                >
                     <livewire:dynamic-component
                         :is="$this->resolveComponentName()"
                         :config="$this->getPreviewConfig()"
