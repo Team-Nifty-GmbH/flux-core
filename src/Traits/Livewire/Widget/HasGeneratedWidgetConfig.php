@@ -7,6 +7,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 use TeamNiftyGmbH\DataTable\Formatters\BooleanFormatter;
 use TeamNiftyGmbH\DataTable\Formatters\DateFormatter;
 use TeamNiftyGmbH\DataTable\Formatters\FloatFormatter;
@@ -303,8 +304,22 @@ trait HasGeneratedWidgetConfig
             }
 
             $stringCasts = array_filter($modelCasts, 'is_string');
+            $resolvedCasts = array_map(
+                function (string $cast): string {
+                    $castClass = str_contains($cast, ':') ? substr($cast, 0, strpos($cast, ':')) : $cast;
 
-            return $registry->resolveForColumn($baseCol, $stringCasts);
+                    if (class_exists($castClass) && is_subclass_of($castClass, HasFrontendFormatter::class)) {
+                        $formatter = $castClass::getFrontendFormatter();
+
+                        return is_string($formatter) ? $formatter : $cast;
+                    }
+
+                    return $cast;
+                },
+                $stringCasts
+            );
+
+            return $registry->resolveForColumn($baseCol, $resolvedCasts);
         } catch (Throwable) {
             return null;
         }
