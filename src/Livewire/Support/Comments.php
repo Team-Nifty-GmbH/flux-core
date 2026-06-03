@@ -6,6 +6,7 @@ use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
+use FluxErp\Services\Mentions\MentionPillRefresher;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
@@ -114,9 +115,21 @@ abstract class Comments extends Component
                 )
                 ->paginate(page: $this->commentPage);
 
-            $data = $comments->getCollection()->map(function ($comment) {
+            $refresher = app(MentionPillRefresher::class);
+
+            $data = $comments->getCollection()->map(function ($comment) use ($refresher): Comment {
                 $comment->is_current_user = $comment->getRawOriginal('created_by')
                     === auth()->user()?->getMorphClass() . ':' . auth()->id();
+
+                if (is_string($comment->comment)) {
+                    $comment->comment = $refresher->refresh($comment->comment);
+                }
+
+                $comment->children->each(function ($child) use ($refresher): void {
+                    if (is_string($child->comment)) {
+                        $child->comment = $refresher->refresh($child->comment);
+                    }
+                });
 
                 return $comment;
             });
@@ -152,7 +165,7 @@ abstract class Comments extends Component
             return [];
         }
 
-        return resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
+        $comments = resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),
                 'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
@@ -165,10 +178,18 @@ abstract class Comments extends Component
                 fn (Builder $query) => $query->where('is_internal', false)
             )
             ->where('is_sticky', true)
-            ->get()
-            ->map(function (Comment $comment) {
+            ->get();
+
+        $refresher = app(MentionPillRefresher::class);
+
+        return $comments
+            ->map(function (Comment $comment) use ($refresher): Comment {
                 $comment->is_current_user = $comment->getRawOriginal('created_by')
                     === auth()->user()?->getMorphClass() . ':' . auth()->id();
+
+                if (is_string($comment->comment)) {
+                    $comment->comment = $refresher->refresh($comment->comment);
+                }
 
                 return $comment;
             })

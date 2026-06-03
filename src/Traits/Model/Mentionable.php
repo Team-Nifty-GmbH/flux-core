@@ -2,6 +2,8 @@
 
 namespace FluxErp\Traits\Model;
 
+use FluxErp\States\State;
+use FluxErp\Support\Mentions\MentionState;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -55,5 +57,16 @@ trait Mentionable
             'Model [%s] uses the Mentionable trait and must implement getMentionUrl().',
             static::class,
         ));
+    }
+
+    public function getMentionState(): ?MentionState
+    {
+        $state = $this->state ?? null;
+
+        if (! $state instanceof State) {
+            return null;
+        }
+
+        return new MentionState(__(Str::headline((string) $state)), $state->color());
     }
 }

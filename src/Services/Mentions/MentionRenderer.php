@@ -59,25 +59,28 @@ class MentionRenderer
 
                 $label = e($record->getMentionLabel());
                 $typeLabel = e($types[$key]::mentionTypeLabel());
+                $stateAttrs = $record->getMentionState()?->toPillAttributes() ?? '';
 
                 try {
                     $url = $record->getMentionUrl();
                 } catch (Throwable) {
                     return sprintf(
-                        '<span class="mention mention--%s" data-mention-type="%s">%s</span>',
+                        '<span class="mention mention--%s" data-mention-type="%s"%s>%s</span>',
                         e($key),
                         $typeLabel,
+                        $stateAttrs,
                         $label,
                     );
                 }
 
                 return sprintf(
-                    '<a class="mention mention--%s" href="%s" data-mention="%s:%d" data-mention-type="%s">%s</a>',
+                    '<a class="mention mention--%s" href="%s" data-mention="%s:%d" data-mention-type="%s"%s>%s</a>',
                     e($key),
                     e($url),
                     e($key),
                     $id,
                     $typeLabel,
+                    $stateAttrs,
                     $label,
                 );
             },

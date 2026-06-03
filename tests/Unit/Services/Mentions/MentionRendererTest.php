@@ -9,6 +9,8 @@ beforeEach(function (): void {
         Schema::create('mentionable_fixtures', function ($table): void {
             $table->id();
             $table->string('name')->nullable();
+            $table->string('state_label')->nullable();
+            $table->string('state_color')->nullable();
             $table->timestamps();
         });
     }
@@ -82,4 +84,30 @@ it('escapes label HTML', function (): void {
 
     expect($html)->not->toContain('<script>');
     expect($html)->toContain('&lt;script&gt;');
+});
+
+it('adds the state dot attributes for a record with a state', function (): void {
+    MentionableFixture::register('mentionable_fixture');
+    $record = MentionableFixture::create([
+        'name' => 'RMA 1234',
+        'state_label' => 'In Progress',
+        'state_color' => 'violet',
+    ]);
+    $key = $record::mentionTypeKey();
+
+    $html = $this->renderer->tokensToHtml("#{$key}:{$record->getKey()}");
+
+    expect($html)->toContain('data-mention-state="In Progress"');
+    expect($html)->toContain('title="In Progress"');
+    expect($html)->toContain('style="--mention-state-color: var(--color-violet-500)"');
+});
+
+it('omits the state dot attributes for a record without a state', function (): void {
+    MentionableFixture::register('mentionable_fixture');
+    $record = MentionableFixture::create(['name' => 'RMA 1234']);
+    $key = $record::mentionTypeKey();
+
+    $html = $this->renderer->tokensToHtml("#{$key}:{$record->getKey()}");
+
+    expect($html)->not->toContain('data-mention-state');
 });

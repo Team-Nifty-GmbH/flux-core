@@ -214,12 +214,17 @@
     @apply bg-secondary-100 text-secondary-500 dark:bg-secondary-800 dark:text-secondary-400 italic;
 }
 
-/* Type tag shown inside record pills (e.g. "TICKET" / "AUFTRAG"), driven by the
-   data-mention-type attribute so it works for both the editor node and the
-   rendered anchor without an extra child element. */
-.mention[data-mention-type]::before {
+.mention[data-mention-state]::before {
+    content: '';
+    @apply inline-block size-1.5 rounded-full;
+    background: var(--mention-state-color, currentColor);
+    order: -2;
+}
+
+.mention[data-mention-type]::after {
     content: attr(data-mention-type);
     @apply rounded bg-black/5 px-1 text-[0.625rem] font-semibold tracking-wide uppercase opacity-70 dark:bg-white/15;
+    order: -1;
 }
 
 @utility blade-variable-pill {

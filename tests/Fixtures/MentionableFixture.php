@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Fixtures;
 
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Support\Mentions\MentionState;
 use FluxErp\Traits\Model\Mentionable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -51,5 +52,14 @@ class MentionableFixture extends Model implements IsSubscribable
     public function getMentionUrl(): string
     {
         return '/fixtures/' . $this->getKey();
+    }
+
+    public function getMentionState(): ?MentionState
+    {
+        if ($this->state_label === null) {
+            return null;
+        }
+
+        return new MentionState((string) $this->state_label, (string) ($this->state_color ?? 'violet'));
     }
 }
