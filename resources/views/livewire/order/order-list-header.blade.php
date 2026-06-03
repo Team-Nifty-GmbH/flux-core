@@ -148,7 +148,7 @@
                                             ],
                                         ]"
                                     />
-                                    @if(resolve_static(\FluxErp\Models\Warehouse::class, 'query')->count() > 1)
+                                    @if (resolve_static(\FluxErp\Models\Warehouse::class, 'query')->count() > 1)
                                         <div
                                             x-cloak
                                             x-show="
@@ -434,7 +434,7 @@
                                                         )
                                                 "
                                             />
-                                            @if(resolve_static(\FluxErp\Models\LedgerAccount::class, 'query')->where('ledger_account_type_enum', $order->isPurchase ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue)->exists())
+                                            @if (resolve_static(\FluxErp\Models\LedgerAccount::class, 'query')->where('ledger_account_type_enum', $order->isPurchase ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue)->exists())
                                                 <x-select.styled
                                                     :label="__('Ledger Account')"
                                                     wire:model.number="orderPosition.ledger_account_id"
@@ -458,7 +458,7 @@
                                                 />
                                             @endif
 
-                                            @if(resolve_static(\FluxErp\Models\ContactBankConnection::class, 'query')->where('contact_id', $order->contact_id)->where('is_credit_account', true)->exists())
+                                            @if (resolve_static(\FluxErp\Models\ContactBankConnection::class, 'query')->where('contact_id', $order->contact_id)->where('is_credit_account', true)->exists())
                                                 <x-select.styled
                                                     :label="__('Credit Account')"
                                                     wire:model.number="orderPosition.credit_account_id"
