@@ -528,6 +528,7 @@
                             :blade-variables="\FluxErp\Facades\Editor::getTranslatedVariables(\FluxErp\Models\OrderPosition::class)"
                         />
                     @show
+                    @stack('order-edit-position-modal-fields')
                 </div>
                 <x-errors />
             </div>
