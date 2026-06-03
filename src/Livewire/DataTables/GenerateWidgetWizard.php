@@ -11,6 +11,7 @@ use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\HasWidgetGeneration;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -113,6 +114,10 @@ class GenerateWidgetWizard extends Component
                 }
             }
         }
+
+        if ($this->step < $this->minStep()) {
+            $this->step = $this->minStep();
+        }
     }
 
     public function render(): View
@@ -187,7 +192,7 @@ class GenerateWidgetWizard extends Component
 
     public function previousStep(): void
     {
-        $this->step = max($this->step - 1, 1);
+        $this->step = max($this->step - 1, $this->minStep());
         $this->persistWizardState();
     }
 
@@ -223,6 +228,36 @@ class GenerateWidgetWizard extends Component
         session()->forget('widget-wizard-state');
 
         $this->redirectRoute('dashboard', navigate: true);
+    }
+
+    public function resetWizard(): void
+    {
+        session()->forget('widget-wizard-state');
+
+        $this->reset([
+            'widgetType',
+            'showTotals',
+            'horizontalBars',
+            'curveStyle',
+            'timeGrouping',
+            'pieStyle',
+            'valueColumn',
+            'aggregate',
+            'groupColumn',
+            'dateColumn',
+            'selectedColumns',
+            'sortColumn',
+            'sortDirection',
+            'limit',
+            'name',
+            'targetDashboard',
+            'timeframeAware',
+            'timeframeDateColumn',
+            'isShared',
+            'previewData',
+        ]);
+
+        $this->step = $this->minStep();
     }
 
     public function save(): void
@@ -334,9 +369,32 @@ class GenerateWidgetWizard extends Component
             'value_list' => GeneratedValueList::class,
         ];
 
-        $class = $classMap[$this->widgetType] ?? throw new \InvalidArgumentException("Unknown widget type: {$this->widgetType}");
+        $class = $classMap[$this->widgetType] ?? throw new InvalidArgumentException("Unknown widget type: {$this->widgetType}");
 
         return app('livewire.finder')->normalizeName($class);
+    }
+
+    protected function minStep(): int
+    {
+        return empty($this->userFilters) ? 2 : 1;
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'valueColumn' => __('Value Column'),
+            'aggregate' => __('Aggregate Function'),
+            'groupColumn' => __('X-Axis'),
+            'dateColumn' => __('Date Column'),
+            'selectedColumns' => __('Columns'),
+            'sortColumn' => __('Sort Column'),
+            'sortDirection' => __('Sort Direction'),
+            'limit' => __('Limit'),
+            'name' => __('Name'),
+            'targetDashboard' => __('Target Dashboard'),
+            'timeframeDateColumn' => __('Date Column for Timeframe'),
+            'widgetType' => __('Widget Type'),
+        ];
     }
 
     protected function persistWizardState(): void

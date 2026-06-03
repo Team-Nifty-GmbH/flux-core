@@ -5,7 +5,7 @@ namespace FluxErp\Traits\Livewire\DataTable;
 use Illuminate\Database\Eloquent\Builder;
 use InvalidArgumentException;
 use Spatie\ModelInfo\Attributes\Attribute;
-use Spatie\ModelInfo\ModelInfo;
+use Spatie\ModelInfo\Attributes\AttributeFinder;
 use TeamNiftyGmbH\DataTable\DataTable;
 
 trait HasWidgetGeneration
@@ -61,17 +61,18 @@ trait HasWidgetGeneration
         $numericTypes = ['integer', 'bigint', 'smallint', 'tinyint', 'mediumint', 'decimal', 'float', 'double'];
         $dateTypes = ['date', 'datetime', 'timestamp'];
 
-        $modelInfo = ModelInfo::forModel($this->getModel());
-
-        return $modelInfo->attributes
+        return AttributeFinder::forModel($this->getModel())
             ->filter(fn (Attribute $attribute) => ! $attribute->virtual && ! $attribute->appended)
             ->map(function (Attribute $attribute) use ($numericTypes, $dateTypes) {
                 $dbType = strtolower($attribute->type ?? '');
+                $cast = strtolower($attribute->cast ?? '');
 
-                $isNumeric = collect($numericTypes)->contains(fn ($t) => str_starts_with($dbType, $t));
-                $isDate = collect($dateTypes)->contains(fn ($t) => str_starts_with($dbType, $t));
+                $isNumeric = collect($numericTypes)->contains(fn (string $t) => str_starts_with($dbType, $t));
+                $isDate = collect($dateTypes)->contains(fn (string $t) => str_starts_with($dbType, $t));
+                $isBoolean = $attribute->phpType === 'bool' || in_array($cast, ['bool', 'boolean'], true);
+                $isForeignKey = $attribute->name === 'id' || str_ends_with($attribute->name, '_id');
 
-                if ($isNumeric) {
+                if ($isNumeric && ! $isBoolean && ! $isForeignKey) {
                     $type = 'numeric';
                 } elseif ($isDate) {
                     $type = 'date';
@@ -89,14 +90,28 @@ trait HasWidgetGeneration
             ->all();
     }
 
-    protected function getCustomSidebarTabs(): array
+    public function getSidebarTabs(): array
     {
-        return [
-            [
-                'id' => 'save-as-widget',
-                'label' => __('Widget'),
-                'view' => 'flux::livewire.datatables.sidebar-widget-tab',
-            ],
+        $tabs = parent::getSidebarTabs();
+
+        $widgetTab = [
+            'id' => 'save-as-widget',
+            'label' => __('Widget'),
+            'view' => 'flux::livewire.datatables.sidebar-widget-tab',
         ];
+
+        $insertAt = 0;
+
+        foreach ($tabs as $index => $tab) {
+            if (data_get($tab, 'id') === 'edit-filters') {
+                $insertAt = $index + 1;
+
+                break;
+            }
+        }
+
+        array_splice($tabs, $insertAt, 0, [$widgetTab]);
+
+        return $tabs;
     }
 }

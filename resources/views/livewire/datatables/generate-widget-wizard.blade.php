@@ -1,4 +1,4 @@
-<div class="py-6">
+<div class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
     <div class="mb-6">
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             {{ __('Generate Widget') }}
@@ -8,31 +8,96 @@
         </p>
     </div>
 
+    @php
+        $stepLabels = [
+            1 => __('Filters'),
+            2 => __('Type'),
+            3 => __('Data'),
+            4 => __('Settings'),
+            5 => __('Preview'),
+        ];
+
+        if (empty($userFilters)) {
+            unset($stepLabels[1]);
+        }
+    @endphp
+    <nav class="mb-6" aria-label="Progress">
+        <ol class="flex items-center">
+            @foreach($stepLabels as $stepNumber => $stepLabel)
+                @php
+                    $isActive = $stepNumber === $step;
+                    $isCompleted = $stepNumber < $step;
+                @endphp
+                <li
+                    @class(['relative flex-1', 'pr-2 sm:pr-6' => ! $loop->last])
+                >
+                    <div class="flex items-center">
+                        <span
+                            @class([
+                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors',
+                            'border-primary-600 bg-primary-600 text-white' => $isCompleted,
+                            'border-primary-600 text-primary-600 dark:text-primary-400' => $isActive,
+                            'border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-500' => ! $isActive && ! $isCompleted,
+                        ])
+                        >
+                            @if($isCompleted)
+                                <x-icon name="check" class="h-4 w-4" />
+                            @else
+                                {{ $stepNumber }}
+                            @endif
+                        </span>
+                        <span
+                            @class([
+                            'ml-3 hidden text-sm font-medium sm:block',
+                            'text-primary-600 dark:text-primary-400' => $isActive,
+                            'text-gray-900 dark:text-gray-100' => $isCompleted,
+                            'text-gray-500 dark:text-gray-500' => ! $isActive && ! $isCompleted,
+                        ])
+                        >
+                            {{ $stepLabel }}
+                        </span>
+                        @if(! $loop->last)
+                            <span
+                                @class([
+                                'ml-3 hidden h-px flex-1 sm:block',
+                                'bg-primary-600' => $isCompleted,
+                                'bg-gray-300 dark:bg-gray-600' => ! $isCompleted,
+                            ])
+                            ></span>
+                        @endif
+                    </div>
+                </li>
+            @endforeach
+        </ol>
+    </nav>
+
     <x-card>
         {{-- Step 1: Filter Review --}}
         <div x-show="$wire.step === 1" x-cloak>
-            <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3
+                class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100"
+            >
                 {{ __('Active Filters') }}
             </h3>
-            @if (count($userFilters) > 0)
+            @if(count($userFilters) > 0)
                 <div class="flex flex-wrap gap-2">
-                    @foreach ($userFilters as $groupIndex => $group)
-                        @if ($groupIndex > 0)
+                    @foreach($userFilters as $groupIndex => $group)
+                        @if($groupIndex > 0)
                             <x-badge color="emerald" :text="__('or')" />
                         @endif
-                        @foreach ($group as $filterIndex => $filter)
+                        @foreach($group as $filterIndex => $filter)
                             <x-badge
                                 color="primary"
                                 :text="data_get($filter, 'column', '') . ' ' . data_get($filter, 'operator', '') . ' ' . (is_array(data_get($filter, 'value')) ? implode(', ', data_get($filter, 'value')) : data_get($filter, 'value', ''))"
                             />
-                            @if (! $loop->last)
+                            @if(! $loop->last)
                                 <x-badge color="red" :text="__('and')" />
                             @endif
                         @endforeach
                     @endforeach
                 </div>
             @else
-                <p class="text-sm italic text-gray-500 dark:text-gray-400">
+                <p class="text-sm text-gray-500 italic dark:text-gray-400">
                     {{ __('No filters set — all data will be included.') }}
                 </p>
             @endif
@@ -40,7 +105,9 @@
 
         {{-- Step 2: Widget Type Selection --}}
         <div x-show="$wire.step === 2" x-cloak>
-            <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3
+                class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100"
+            >
                 {{ __('Select Widget Type') }}
             </h3>
             <div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
@@ -54,24 +121,48 @@
                         ['key' => 'value_list', 'icon' => 'list-bullet', 'label' => __('List'), 'description' => __('Top N entries')],
                     ];
                 @endphp
-                @foreach ($types as $type)
+                @foreach($types as $type)
                     <div
-                        class="cursor-pointer rounded-lg border-2 p-4 transition-colors hover:border-primary-300 dark:hover:border-primary-700"
+                        class="hover:border-primary-300 dark:hover:border-primary-700 cursor-pointer rounded-lg border-2 p-4 transition-colors"
                         x-bind:class="$wire.widgetType === '{{ $type['key'] }}' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700'"
                         x-on:click="$wire.set('widgetType', '{{ $type['key'] }}')"
                     >
-                        <div class="flex flex-col items-center gap-2 text-center">
-                            <x-icon :name="$type['icon']" class="h-8 w-8 text-gray-600 dark:text-gray-400" />
-                            <span class="font-medium text-gray-900 dark:text-gray-100">{{ $type['label'] }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ $type['description'] }}</span>
+                        <div
+                            class="flex flex-col items-center gap-2 text-center"
+                        >
+                            <x-icon
+                                :name="$type['icon']"
+                                class="h-8 w-8 text-gray-600 dark:text-gray-400"
+                            />
+                            <span
+                                class="font-medium text-gray-900 dark:text-gray-100"
+                                >{{ $type['label'] }}</span
+                            >
+                            <span
+                                class="text-sm text-gray-500 dark:text-gray-400"
+                                >{{ $type['description'] }}</span
+                            >
                         </div>
                     </div>
                 @endforeach
             </div>
 
             {{-- Type-specific options --}}
-            <div class="mt-4 space-y-3" x-show="$wire.widgetType" x-cloak>
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div
+                class="mt-4 space-y-3"
+                x-show="
+                    [
+                        'bar_chart',
+                        'line_chart',
+                        'area_chart',
+                        'pie_chart',
+                    ].includes($wire.widgetType)
+                "
+                x-cloak
+            >
+                <h4
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                     {{ __('Options') }}
                 </h4>
                 <div x-show="$wire.widgetType === 'bar_chart'" x-cloak>
@@ -80,7 +171,17 @@
                         :label="__('Horizontal bars')"
                     />
                 </div>
-                <div x-show="['bar_chart', 'line_chart', 'area_chart', 'pie_chart'].includes($wire.widgetType)" x-cloak>
+                <div
+                    x-show="
+                        [
+                            'bar_chart',
+                            'line_chart',
+                            'area_chart',
+                            'pie_chart',
+                        ].includes($wire.widgetType)
+                    "
+                    x-cloak
+                >
                     <x-toggle
                         wire:model="showTotals"
                         :label="__('Show totals')"
@@ -98,7 +199,12 @@
                         select="label:label|value:value"
                     />
                 </div>
-                <div x-show="['line_chart', 'area_chart'].includes($wire.widgetType)" x-cloak>
+                <div
+                    x-show="
+                        ['line_chart', 'area_chart'].includes($wire.widgetType)
+                    "
+                    x-cloak
+                >
                     <x-select.styled
                         searchable
                         wire:model="curveStyle"
@@ -116,7 +222,9 @@
 
         {{-- Step 3: Data Configuration --}}
         <div x-show="$wire.step === 3" x-cloak>
-            <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3
+                class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100"
+            >
                 {{ __('Data Configuration') }}
             </h3>
             <div class="flex flex-col gap-4">
@@ -126,7 +234,7 @@
                         <x-select.styled
                             searchable
                             wire:model="aggregate"
-                            :label="__('Aggregate Function')"
+                            :label="__('Aggregate Function') . ' *'"
                             :options="[
                                 ['value' => 'sum', 'label' => __('Sum')],
                                 ['value' => 'avg', 'label' => __('Average')],
@@ -140,7 +248,7 @@
                             <x-select.styled
                                 searchable
                                 wire:model="valueColumn"
-                                :label="__('Value Column')"
+                                :label="__('Value Column') . ' *'"
                                 :options="$this->getNumericColumns()"
                                 select="label:label|value:name"
                             />
@@ -149,12 +257,22 @@
                 </div>
 
                 {{-- Charts (Bar, Line, Area) --}}
-                <div x-show="['bar_chart', 'line_chart', 'area_chart', 'pie_chart'].includes($wire.widgetType)" x-cloak>
+                <div
+                    x-show="
+                        [
+                            'bar_chart',
+                            'line_chart',
+                            'area_chart',
+                            'pie_chart',
+                        ].includes($wire.widgetType)
+                    "
+                    x-cloak
+                >
                     <div class="flex flex-col gap-4">
                         <x-select.styled
                             searchable
                             wire:model.live="groupColumn"
-                            :label="__('X-Axis')"
+                            :label="__('X-Axis') . ' *'"
                             :options="$availableColumns"
                             select="label:label|value:name"
                         />
@@ -162,7 +280,7 @@
                             $selectedXColumn = collect($availableColumns)->firstWhere('name', $groupColumn);
                             $isDateColumn = data_get($selectedXColumn, 'type') === 'date';
                         @endphp
-                        @if ($isDateColumn)
+                        @if($isDateColumn)
                             <x-select.styled
                                 searchable
                                 wire:model="timeGrouping"
@@ -180,7 +298,7 @@
                         <x-select.styled
                             searchable
                             wire:model="aggregate"
-                            :label="__('Aggregate Function')"
+                            :label="__('Aggregate Function') . ' *'"
                             :options="[
                                 ['value' => 'sum', 'label' => __('Sum')],
                                 ['value' => 'avg', 'label' => __('Average')],
@@ -194,7 +312,7 @@
                             <x-select.styled
                                 searchable
                                 wire:model="valueColumn"
-                                :label="__('Y-Axis')"
+                                :label="__('Y-Axis') . ' *'"
                                 :options="$this->getNumericColumns()"
                                 select="label:label|value:name"
                             />
@@ -243,49 +361,63 @@
 
         {{-- Step 4: Metadata --}}
         <div x-show="$wire.step === 4" x-cloak>
-            <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3
+                class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100"
+            >
                 {{ __('Widget Settings') }}
             </h3>
             <div class="flex flex-col gap-4">
                 <x-input
                     wire:model="name"
-                    :label="__('Name')"
+                    :label="__('Name') . ' *'"
                     required
                 />
                 <x-select.styled
                     searchable
-                                wire:model="targetDashboard"
-                    :label="__('Target Dashboard')"
+                    wire:model="targetDashboard"
+                    :label="__('Target Dashboard') . ' *'"
                     :options="collect($this->getAvailableDashboards)->map(fn ($label, $value) => ['value' => $value, 'label' => $label])->values()->toArray()"
                     select="label:label|value:value"
                     required
                 />
-                <x-toggle
-                    wire:model.live="timeframeAware"
-                    :label="__('Bind to Dashboard Timeframe')"
-                />
+                <div class="flex flex-col gap-1">
+                    <x-toggle
+                        wire:model.live="timeframeAware"
+                        :label="__('Bind to Dashboard Timeframe')"
+                    />
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('Filter widget data by the dashboard\'s active date range.') }}
+                    </p>
+                </div>
                 <div x-show="$wire.timeframeAware" x-cloak>
                     <x-select.styled
                         searchable
-                                wire:model="timeframeDateColumn"
+                        wire:model="timeframeDateColumn"
                         :label="__('Date Column for Timeframe')"
                         :options="$this->getDateColumns()"
                         select="label:label|value:name"
                     />
                 </div>
                 @can('widget.generate-share')
-                    <x-toggle
-                        wire:model="isShared"
-                        :label="__('Share with all users')"
-                    />
+                    <div class="flex flex-col gap-1">
+                        <x-toggle
+                            wire:model="isShared"
+                            :label="__('Share with all users')"
+                        />
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('When enabled, this widget becomes visible to every user with dashboard access.') }}
+                        </p>
+                    </div>
                 @endcan
             </div>
         </div>
 
         {{-- Step 5: Preview --}}
-        @if ($step === 5)
+        @if($step === 5)
             <div>
-                <h3 class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
+                <h3
+                    class="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100"
+                >
                     {{ __('Preview') }}
                 </h3>
                 <div>
@@ -300,7 +432,7 @@
         <x-slot:footer>
             <div class="flex w-full items-center justify-between">
                 <div>
-                    @if ($step > 1)
+                    @if($step > (empty($userFilters) ? 2 : 1))
                         <x-button
                             :text="__('Back')"
                             color="secondary"
@@ -312,13 +444,21 @@
                 </div>
                 <div class="flex gap-2">
                     <x-button
+                        :text="__('Start Over')"
+                        color="secondary"
+                        flat
+                        loading
+                        wire:click="resetWizard"
+                        wire:flux-confirm.type.warning="{{ __('All wizard inputs will be cleared. Continue?') }}"
+                    />
+                    <x-button
                         :text="__('Cancel')"
                         color="secondary"
                         flat
                         loading
                         wire:click="cancel"
                     />
-                    @if ($step < 5)
+                    @if($step < 5)
                         <x-button
                             :text="__('Next')"
                             color="primary"
