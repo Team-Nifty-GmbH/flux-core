@@ -43,6 +43,8 @@ beforeEach(function (): void {
         'payment_reminder_current_level' => 0,
         'payment_reminder_next_date' => now()->subDay()->toDateString(),
     ]);
+
+    $this->order->update(['balance' => 100]);
 });
 
 test('bundle requires order_ids', function (): void {

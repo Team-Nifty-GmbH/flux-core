@@ -76,7 +76,7 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
             ->wherePaymentReminderDue()
             ->get(['id', 'order_type_id'])
             ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
-                && $order->orderType->order_type_enum->multiplier() === 1
+                && bccomp($order->orderType->order_type_enum->multiplier(), '1') === 0
             )
             ->pluck('id')
             ->all();

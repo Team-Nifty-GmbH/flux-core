@@ -5,16 +5,21 @@ use FluxErp\Jobs\Accounting\AutoSendPaymentRemindersJob;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Settings\AccountingSettings;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
+    Mail::fake();
+
     AccountingSettings::fake([
         'auto_send_reminders' => true,
         'auto_accept_secure_transaction_matches' => false,
@@ -40,6 +45,12 @@ beforeEach(function (): void {
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ]);
+
+    $emailTemplate = EmailTemplate::factory()->create();
+    PaymentReminderText::factory()->create([
+        'reminder_level' => 1,
+        'email_template_id' => $emailTemplate->getKey(),
+    ]);
 });
 
 test('sends payment reminders for overdue orders', function (): void {

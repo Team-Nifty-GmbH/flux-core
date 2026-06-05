@@ -4,7 +4,6 @@ namespace FluxErp\Actions\PaymentReminder;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\MailMessage\SendMail;
-use FluxErp\Actions\Printing;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Rulesets\PaymentReminder\BundlePaymentRemindersRuleset;
@@ -31,7 +30,7 @@ class BundlePaymentReminders extends FluxAction
             ->wherePaymentReminderEligible()
             ->get()
             ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
-                && $order->orderType->order_type_enum->multiplier() === 1
+                && bccomp($order->orderType->order_type_enum->multiplier(), '1') === 0
             );
 
         $groups = $orders->groupBy(
@@ -88,26 +87,11 @@ class BundlePaymentReminders extends FluxAction
         }
 
         foreach ($reminders as $reminder) {
-            $pdf = Printing::make([
+            $attachments[] = [
                 'model_type' => $reminder->getMorphClass(),
                 'model_id' => $reminder->getKey(),
                 'view' => 'payment-reminder',
-                'html' => false,
-                'preview' => false,
                 'attach_relation' => 'order',
-            ])
-                ->validate()
-                ->execute();
-
-            if (! $pdf) {
-                $this->abortGroup($reminders, $orders, 'PDF generation failed');
-
-                return null;
-            }
-
-            $attachments[] = [
-                'id' => $pdf->getKey(),
-                'name' => $pdf->file_name,
             ];
 
             if ($invoicePdf = $reminder->order->invoice()) {
@@ -184,7 +168,9 @@ class BundlePaymentReminders extends FluxAction
         ?string $reason,
         ?array $to = null,
     ): void {
-        $reminders->each(fn (PaymentReminder $reminder) => $reminder->forceDelete());
+        PaymentReminder::withoutEvents(function () use ($reminders): void {
+            $reminders->each(fn (PaymentReminder $reminder) => $reminder->forceDelete());
+        });
 
         $orders->each(function (Order $order) use ($reason, $to): void {
             activity()
