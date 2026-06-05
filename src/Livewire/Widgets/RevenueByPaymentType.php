@@ -2,14 +2,15 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use Carbon\CarbonPeriod;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
-use FluxErp\Models\Order as OrderModel;
+use FluxErp\Models\Order;
 use FluxErp\Models\PaymentType;
-use FluxErp\Support\Metrics\Charts\Bar;
 use FluxErp\Traits\Livewire\Widget\HasTemporalXAxisFormatter;
+use FluxErp\Traits\Livewire\Widget\HasTrendExpressions;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Livewire\Widget\MoneyChartFormattingTrait;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +20,7 @@ use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 class RevenueByPaymentType extends BarChart implements HasWidgetOptions
 {
-    use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+    use HasTemporalXAxisFormatter, HasTrendExpressions, IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
     public ?array $chart = [
         'type' => 'bar',
@@ -33,8 +34,6 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
         ],
     ];
 
-    public array $optionData = [];
-
     public bool $showTotals = false;
 
     public static function getCategory(): ?string
@@ -47,48 +46,61 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
         return Dashboard::class;
     }
 
+    #[Renderless]
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
     public function calculateChart(): void
     {
-        $paymentMethods = resolve_static(PaymentType::class, 'query')
+        $paymentTypes = resolve_static(PaymentType::class, 'query')
             ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name']);
 
         $this->series = [];
-        $this->optionData = [];
-        $categories = null;
 
-        foreach ($paymentMethods as $paymentMethod) {
-            $query = resolve_static(OrderModel::class, 'query')
-                ->where('payment_type_id', $paymentMethod->getKey())
-                ->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_number')
-                ->revenue();
+        $start = $this->getStart();
+        $end = $this->getEnd();
+        $unit = $this->getUnit() ?? 'day';
+        $format = $this->getTrendFormat($unit);
 
-            $result = Bar::make($query)
-                ->setDateColumn('invoice_date')
-                ->setRange($this->timeFrame)
-                ->setEndingDate($this->getEnd())
-                ->setStartingDate($this->getStart())
-                ->sum('total_net_price');
+        $orderQuery = resolve_static(Order::class, 'query');
+        $driver = $orderQuery->getConnection()->getDriverName();
+        $grammar = $orderQuery->getQuery()->getGrammar();
+        $wrappedDateColumn = $grammar->wrap('invoice_date');
 
-            $formattedPaymentMethodName = $paymentMethod->name;
+        $dateExpression = $this->getTrendExpression($driver, $wrappedDateColumn, $unit);
+
+        $rows = $orderQuery
+            ->revenue()
+            ->whereNotNull('invoice_date')
+            ->whereBetween('invoice_date', [$start, $end])
+            ->whereNotNull('invoice_number')
+            ->selectRaw("{$dateExpression} as period, payment_type_id, sum({$grammar->wrap('total_net_price')}) as total")
+            ->groupBy('period', 'payment_type_id')
+            ->get(['period', 'payment_type_id', 'total']);
+
+        $periods = collect(CarbonPeriod::create($start, '1 ' . $unit, $end))
+            ->map(fn ($d) => $d->format($format))
+            ->all();
+
+        $groupedByPayment = $rows->groupBy('payment_type_id');
+
+        foreach ($paymentTypes as $paymentType) {
+            $byPeriod = $groupedByPayment->get($paymentType->getKey())?->keyBy('period') ?? collect();
 
             $this->series[] = [
-                'name' => $formattedPaymentMethodName,
-                'data' => $result->getData(),
+                'name' => $paymentType->name,
+                'data' => array_map(fn ($p) => (float) ($byPeriod->get($p)?->total ?? 0), $periods),
+                'payment_type_id' => $paymentType->getKey(),
             ];
-
-            $this->optionData[] = [
-                'label' => $formattedPaymentMethodName,
-                'payment_type_id' => $paymentMethod->getKey(),
-            ];
-
-            $categories ??= $result->getLabels();
         }
 
         $this->xaxis = [
-            'categories' => $categories ?? [],
+            'categories' => $periods,
         ];
     }
 
@@ -96,15 +108,15 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
     public function options(): array
     {
         return array_map(
-            fn (array $data) => [
-                'label' => data_get($data, 'label'),
+            fn (array $seriesItem) => [
+                'label' => data_get($seriesItem, 'name'),
                 'method' => 'show',
                 'params' => [
-                    'payment_type_id' => data_get($data, 'payment_type_id'),
-                    'name' => data_get($data, 'label'),
+                    'payment_type_id' => data_get($seriesItem, 'payment_type_id'),
+                    'name' => data_get($seriesItem, 'name'),
                 ],
             ],
-            $this->optionData
+            $this->series
         );
     }
 
@@ -119,23 +131,16 @@ class RevenueByPaymentType extends BarChart implements HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
+                ->revenue()
                 ->where('payment_type_id', $paymentTypeId)
                 ->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_number')
-                ->revenue()
-                ->whereBetween('invoice_date', [$start, $end]),
-            __('Payment Type: :name', ['name' => $name]) . ' ' .
-            __('between :start and :end', ['start' => $start, 'end' => $end]),
+                ->whereBetween('invoice_date', [$start, $end])
+                ->whereNotNull('invoice_number'),
+            __('Payment Type: :name', ['name' => $name]) . ' '
+            . __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
             ->store();
 
         $this->redirectRoute('orders.orders', navigate: true);
-    }
-
-    #[Renderless]
-    public function calculateByTimeFrame(): void
-    {
-        $this->calculateChart();
-        $this->updateData();
     }
 }
