@@ -53,3 +53,45 @@ test('assign orders from selectedOrders property', function (): void {
         ->exists()
     )->toBeTrue();
 });
+
+test('gotoPage updates page and dispatches refresh', function (): void {
+    Livewire::test(TransactionAssignments::class)
+        ->call('gotoPage', 3)
+        ->assertSet('paginators.page', 3)
+        ->assertDispatched('refresh-transactions');
+});
+
+test('editOrderTransaction populates form with order gross total and balance', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+    ]);
+
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+    $orderType = OrderType::factory()->create();
+    $order = Order::factory()->create([
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'tenant_id' => Tenant::default()->getKey(),
+        'language_id' => Language::default()->getKey(),
+        'price_list_id' => PriceList::default()->getKey(),
+        'payment_type_id' => PaymentType::default()->getKey(),
+        'currency_id' => Currency::default()->getKey(),
+        'order_type_id' => $orderType->getKey(),
+        'total_gross_price' => 250,
+        'balance' => 100,
+    ]);
+
+    $orderTransaction = OrderTransaction::query()->create([
+        'transaction_id' => $transaction->getKey(),
+        'order_id' => $order->getKey(),
+        'amount' => 50,
+        'is_accepted' => false,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('editOrderTransaction', $orderTransaction->getAttribute('pivot_id'))
+        ->assertSet('orderTransactionForm.orderGrossTotal', 250.0)
+        ->assertSet('orderTransactionForm.orderBalance', 100.0);
+});

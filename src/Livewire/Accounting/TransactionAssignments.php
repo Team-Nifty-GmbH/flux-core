@@ -293,6 +293,13 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function gotoPage(int $page): void
+    {
+        $this->setPage($page);
+        $this->refreshTransactions();
+    }
+
+    #[Renderless]
     public function showComments(Transaction $transaction): void
     {
         $this->transactionForm->reset();
