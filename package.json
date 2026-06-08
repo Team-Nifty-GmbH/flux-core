@@ -24,7 +24,7 @@
         "@tailwindcss/vite": "^4.3.0",
         "@tiptap/core": "^3.25.0",
         "@tiptap/extension-image": "^3.25.0",
-        "@tiptap/extension-link": "^3.25.0",
+        "@tiptap/extension-link": "^3.26.0",
         "@tiptap/extension-mention": "^3.25.0",
         "@tiptap/extension-table": "^3.25.0",
         "@tiptap/extension-text-align": "^3.25.0",
