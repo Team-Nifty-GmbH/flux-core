@@ -10,6 +10,7 @@ use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Controllers\AuthenticateUsingPasskeyController;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
+use FluxErp\Http\Middleware\BlockLivewireExploitPayloads;
 use FluxErp\Http\Middleware\EnsureTwoFactorSetup;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
@@ -282,6 +283,9 @@ class FluxServiceProvider extends ServiceProvider
         /** @var Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
+
+        $kernel->prependMiddlewareToGroup('web', BlockLivewireExploitPayloads::class);
+        $kernel->prependMiddlewareToGroup('api', BlockLivewireExploitPayloads::class);
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
