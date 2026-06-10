@@ -197,3 +197,164 @@ test('amount validation only runs when origin position exists in parent order', 
         'amount' => 999,
     ], 'origin_position_id');
 });
+
+test('clearing amount on free text group parent keeps child amounts', function (): void {
+    $parent = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+        'amount' => 4,
+        'discount_percentage' => null,
+    ]);
+
+    $children = collect([4, 16])->map(fn (int $amount) => OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'amount' => $amount,
+        'amount_bundle' => null,
+        'discount_percentage' => null,
+    ]));
+
+    UpdateOrderPosition::make([
+        'id' => $parent->getKey(),
+        'name' => 'Changed Group Title',
+        'amount' => 0,
+    ])->validate()->execute();
+
+    expect($children[0]->refresh()->amount)->toEqual(4.0)
+        ->and($children[1]->refresh()->amount)->toEqual(16.0);
+});
+
+test('setting amount to null on free text group parent keeps child amounts', function (): void {
+    $parent = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+        'amount' => 4,
+        'discount_percentage' => null,
+    ]);
+
+    $child = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'amount' => 4,
+        'amount_bundle' => null,
+        'discount_percentage' => null,
+    ]);
+
+    UpdateOrderPosition::make([
+        'id' => $parent->getKey(),
+        'name' => 'Changed Group Title',
+        'amount' => null,
+    ])->validate()->execute();
+
+    expect($child->refresh()->amount)->toEqual(4.0);
+});
+
+test('changing amount on free text group parent rescales child amounts proportionally', function (): void {
+    $parent = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+        'amount' => 4,
+        'discount_percentage' => null,
+    ]);
+
+    $children = collect([4, 16])->map(fn (int $amount) => OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'amount' => $amount,
+        'amount_bundle' => null,
+        'discount_percentage' => null,
+    ]));
+
+    UpdateOrderPosition::make([
+        'id' => $parent->getKey(),
+        'amount' => 8,
+    ])->validate()->execute();
+
+    expect($children[0]->refresh()->amount)->toEqual(8.0)
+        ->and($children[1]->refresh()->amount)->toEqual(32.0);
+});
+
+test('clearing amount on bundle parent keeps bundle child amounts', function (): void {
+    $parent = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'amount' => 2,
+        'discount_percentage' => null,
+    ]);
+
+    $child = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'is_bundle_position' => true,
+        'amount' => 6,
+        'amount_bundle' => 3,
+        'discount_percentage' => null,
+    ]);
+
+    UpdateOrderPosition::make([
+        'id' => $parent->getKey(),
+        'amount' => 0,
+    ])->validate()->execute();
+
+    expect($child->refresh()->amount)->toEqual(6.0);
+});
+
+test('changing amount on bundle parent rescales bundle children by amount bundle', function (): void {
+    $parent = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'amount' => 2,
+        'discount_percentage' => null,
+    ]);
+
+    $child = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'is_bundle_position' => true,
+        'amount' => 6,
+        'amount_bundle' => 3,
+        'discount_percentage' => null,
+    ]);
+
+    UpdateOrderPosition::make([
+        'id' => $parent->getKey(),
+        'amount' => 5,
+    ])->validate()->execute();
+
+    expect($child->refresh()->amount)->toEqual(15.0);
+});
