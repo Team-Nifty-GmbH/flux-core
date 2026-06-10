@@ -358,3 +358,65 @@ test('changing amount on bundle parent rescales bundle children by amount bundle
 
     expect($child->refresh()->amount)->toEqual(15.0);
 });
+
+test('setting negative amount on free text group parent keeps child amounts', function (): void {
+    $parent = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+        'amount' => 4,
+        'discount_percentage' => null,
+    ]);
+
+    $child = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'amount' => 16,
+        'amount_bundle' => null,
+        'discount_percentage' => null,
+    ]);
+
+    UpdateOrderPosition::make([
+        'id' => $parent->getKey(),
+        'amount' => -1,
+    ])->validate()->execute();
+
+    expect($child->refresh()->amount)->toEqual(16.0);
+});
+
+test('rescale uses positive previous amount as baseline only', function (): void {
+    $parent = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => true,
+        'is_alternative' => false,
+        'amount' => -2,
+        'discount_percentage' => null,
+    ]);
+
+    $child = OrderPosition::factory()->create([
+        'order_id' => $this->order->getKey(),
+        'parent_id' => $parent->getKey(),
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'is_free_text' => false,
+        'is_alternative' => false,
+        'amount' => 16,
+        'amount_bundle' => null,
+        'discount_percentage' => null,
+    ]);
+
+    UpdateOrderPosition::make([
+        'id' => $parent->getKey(),
+        'amount' => 4,
+    ])->validate()->execute();
+
+    expect($child->refresh()->amount)->toEqual(16.0);
+});
