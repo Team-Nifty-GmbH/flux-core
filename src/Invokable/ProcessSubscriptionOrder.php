@@ -61,6 +61,7 @@ class ProcessSubscriptionOrder implements Repeatable
             ->where('is_active', true)
             ->first();
 
+        $cronExpression = null;
         if ($schedule?->cron_expression) {
             $cronExpression = new CronExpression($schedule->cron_expression);
             $nextRunDate = $cronExpression->getNextRunDate(
@@ -72,6 +73,34 @@ class ProcessSubscriptionOrder implements Repeatable
         }
 
         try {
+            if ($cronExpression) {
+                $dueAt = $schedule->due_at ?? now();
+                $previousOccurrence = Carbon::instance(
+                    $cronExpression->getPreviousRunDate($dueAt->toDateTime())
+                );
+
+                // A period that ends before the due occurrence AND starts at or before
+                // the previous occurrence is a full cycle that already elapsed - the
+                // subscription order carries stale dates and would produce an order
+                // with last cycle's performance period. Pro rata first periods start
+                // mid-cycle and stay allowed.
+                if (
+                    $order->system_delivery_date_end->lt($dueAt->copy()->startOfDay())
+                    && $order->system_delivery_date->copy()->startOfDay()
+                        ->lte($previousOccurrence->copy()->startOfDay())
+                ) {
+                    throw ValidationException::withMessages([
+                        'system_delivery_date' => [
+                            sprintf(
+                                'The calculated performance period %s - %s lies entirely in the past, the subscription order dates seem stale.',
+                                $order->system_delivery_date->toDateString(),
+                                $order->system_delivery_date_end->toDateString()
+                            ),
+                        ],
+                    ]);
+                }
+            }
+
             $newOrder = ReplicateOrder::make($order)
                 ->validate()
                 ->execute();

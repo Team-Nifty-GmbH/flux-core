@@ -467,3 +467,194 @@ test('process subscription order dispatches SubscriptionOrderFailedEvent on fail
         }
     );
 });
+
+test('process subscription order rejects stale full-cycle period entirely in the past', function (): void {
+    // Reproduces stale source data: the subscription order still carries last
+    // year's dates, so the derived period would be a full cycle that already
+    // elapsed - the resulting invoice would show last year's performance period.
+    $this->travelTo(Carbon\Carbon::create(2030, 6, 8, 6));
+
+    Illuminate\Support\Facades\Event::fake([
+        FluxErp\Events\Order\SubscriptionOrderFailedEvent::class,
+    ]);
+
+    $this->subscriptionOrder->update([
+        'order_date' => Carbon\Carbon::create(2029, 6, 1),
+        'system_delivery_date' => null,
+        'system_delivery_date_end' => null,
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'yearlyOn',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [6, 1, '06:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 6 1 6 *',
+        'due_at' => Carbon\Carbon::create(2030, 6, 1, 6),
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    expect(fn () => $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey(),
+    ))->toThrow(Illuminate\Validation\ValidationException::class);
+
+    expect(
+        Order::query()
+            ->where('created_from_id', $this->subscriptionOrder->getKey())
+            ->exists()
+    )->toBeFalse();
+
+    Illuminate\Support\Facades\Event::assertDispatched(
+        FluxErp\Events\Order\SubscriptionOrderFailedEvent::class
+    );
+});
+
+test('process subscription order allows pro rata first period ending at the current cycle start', function (): void {
+    // A subscription created mid-cycle gets a partial first period that ends
+    // right before the current cron occurrence - this must stay possible.
+    $this->travelTo(Carbon\Carbon::create(2030, 6, 1, 6));
+
+    $this->subscriptionOrder->update([
+        'order_date' => Carbon\Carbon::create(2030, 1, 24),
+        'system_delivery_date' => Carbon\Carbon::create(2030, 1, 24),
+        'system_delivery_date_end' => null,
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'yearlyOn',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [6, 1, '06:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 6 1 6 *',
+        'due_at' => Carbon\Carbon::create(2030, 6, 1, 6),
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->first();
+
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe('2030-01-24')
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2030-05-31');
+});
+
+test('process subscription order allows current full-cycle period derived from previous child', function (): void {
+    // Healthy chain: latest child ended yesterday, the new period starts today
+    // at the due date and ends in the future - must not be rejected.
+    $this->travelTo(Carbon\Carbon::create(2030, 6, 1, 6));
+
+    $this->subscriptionOrder->update([
+        'order_date' => Carbon\Carbon::create(2029, 6, 1),
+        'system_delivery_date' => Carbon\Carbon::create(2029, 6, 1),
+        'system_delivery_date_end' => Carbon\Carbon::create(2030, 5, 31),
+    ]);
+
+    Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $this->targetOrderType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'created_from_id' => $this->subscriptionOrder->getKey(),
+        'parent_id' => null,
+        'system_delivery_date' => Carbon\Carbon::create(2029, 6, 1),
+        'system_delivery_date_end' => Carbon\Carbon::create(2030, 5, 31),
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'yearlyOn',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => [6, 1, '06:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        'cron_expression' => '0 6 1 6 *',
+        'due_at' => Carbon\Carbon::create(2030, 6, 1, 6),
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->whereDate('system_delivery_date', '2030-06-01')
+        ->first();
+
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2031-05-31');
+});
