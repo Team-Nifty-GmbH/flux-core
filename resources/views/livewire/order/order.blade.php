@@ -964,7 +964,7 @@
                                         @foreach ($additionalModelActions as $modelAction)
                                             {{ $modelAction }}
                                         @endforeach
-
+                                        @stack('order-detail-action-card-actions')
                                     @show
                                 </div>
                             </x-card>
