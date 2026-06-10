@@ -183,12 +183,20 @@
                                         color="secondary"
                                         light
                                         :text="__('Add folder')"
-                                        wire:click="saveFolder({
-                                        parent_id: selection.id,
-                                        name: '{{ __('New folder') }}',
-                                        is_new: true,
-                                        children: []
-                                    }).then((folder) => { if (folder) addFolder(selectionProxy, folder); })"
+                                        x-on:click="
+                                            $wire
+                                                .saveFolder({
+                                                    parent_id: selection.id,
+                                                    name: '{{ __('New folder') }}',
+                                                    is_new: true,
+                                                    children: [],
+                                                })
+                                                .then((folder) => {
+                                                    if (folder) {
+                                                        addFolder(selectionProxy, folder)
+                                                    }
+                                                })
+                                        "
                                     />
                                 @endcanAction
                                 @canAction(\FluxErp\Actions\Media\DownloadMultipleMedia::class)
