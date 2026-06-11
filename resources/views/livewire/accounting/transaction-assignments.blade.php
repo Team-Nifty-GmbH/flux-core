@@ -766,7 +766,7 @@
                                         "
                                         x-on:click="
                                             link.url !== null &&
-                                                ! link.active &&
+                                                !link.active &&
                                                 $wire.gotoPage(
                                                     parseInt(link.label),
                                                 )
