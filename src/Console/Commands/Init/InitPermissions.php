@@ -27,7 +27,7 @@ class InitPermissions extends Command
 
     protected $signature = 'init:permissions';
 
-    private array $currentPermissions = [];
+    protected array $currentPermissions = [];
 
     public function handle(): void
     {
@@ -45,6 +45,7 @@ class InitPermissions extends Command
         $this->registerWidgetPermissions();
         $this->registerTabPermissions();
         $this->registerPrintPermissions();
+        $this->registerCustomPermissions();
 
         resolve_static(Permission::class, 'query')
             ->whereKey(array_keys($this->currentPermissions))
@@ -248,6 +249,24 @@ class InitPermissions extends Command
                 $role->givePermissionTo($newPermissions);
             }
         }
+    }
+
+    // Override this method to register custom permissions
+    protected function registerCustomPermissions(): void
+    {
+        $this->info('Registering custom permissions…');
+        /*
+        $permission = resolve_static(
+            Permission::class,
+            'findOrCreate',
+            [
+                'name' => 'permission-name', // name of the custom permission
+                'guardName' => 'web', // e.g. web, sanctum
+            ]
+        );
+
+        unset($this->currentPermissions[$permission->id]);
+        */
     }
 
     /**
