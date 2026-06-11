@@ -153,8 +153,14 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function bootCommands(): void
     {
-        $commands = file_exists($cachePath = $this->app->bootstrapPath('cache/flux-commands.php'))
-            ? array_filter(require $cachePath, fn (string $class) => class_exists($class))
+        $cached = file_exists($cachePath = $this->app->bootstrapPath('cache/flux-commands.php'))
+            ? require $cachePath
+            : null;
+
+        // A partially written cache file makes require return int(1) -
+        // fall back to discovery instead of failing the whole boot.
+        $commands = is_array($cached)
+            ? array_filter($cached, fn (string $class) => class_exists($class))
             : once(fn () => $this->findCommands());
 
         $this->commands($commands);

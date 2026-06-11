@@ -9,9 +9,11 @@ use FluxErp\Facades\Widget;
 use FluxErp\Jobs\ProcessSubscriptionOrderJob;
 use FluxErp\Widgets\WidgetManager;
 
-beforeEach(function (): void {
+function deleteFluxCacheFiles(): void
+{
     $cacheFiles = [
         'flux-actions.php',
+        'flux-commands.php',
         'flux-widgets.php',
         'flux-repeatables.php',
         'flux-view-classes.php',
@@ -21,10 +23,19 @@ beforeEach(function (): void {
 
     foreach ($cacheFiles as $file) {
         $path = app()->bootstrapPath('cache/' . $file);
+
         if (file_exists($path)) {
             unlink($path);
         }
     }
+}
+
+beforeEach(function (): void {
+    deleteFluxCacheFiles();
+});
+
+afterEach(function (): void {
+    deleteFluxCacheFiles();
 });
 
 test('flux:optimize generates all cache files', function (): void {
@@ -33,6 +44,7 @@ test('flux:optimize generates all cache files', function (): void {
 
     $cacheFiles = [
         'flux-actions.php',
+        'flux-commands.php',
         'flux-widgets.php',
         'flux-repeatables.php',
         'flux-view-classes.php',
