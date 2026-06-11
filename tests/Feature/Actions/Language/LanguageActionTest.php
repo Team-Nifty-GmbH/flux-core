@@ -6,16 +6,18 @@ use FluxErp\Actions\Language\UpdateLanguage;
 use FluxErp\Models\Language;
 
 test('create language', function (): void {
+    // 'zz' is not a valid ISO 639-1 code, so the default language created
+    // in Pest.php via fake()->languageCode() can never collide with it.
     $language = CreateLanguage::make([
-        'name' => 'Französisch',
-        'iso_name' => 'French',
-        'language_code' => 'fr',
+        'name' => 'Testsprache',
+        'iso_name' => 'Testish',
+        'language_code' => 'zz',
     ])->validate()->execute();
 
     expect($language)
         ->toBeInstanceOf(Language::class)
-        ->name->toBe('Französisch')
-        ->language_code->toBe('fr');
+        ->name->toBe('Testsprache')
+        ->language_code->toBe('zz');
 });
 
 test('create language requires name iso_name language_code', function (): void {
