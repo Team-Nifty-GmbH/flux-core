@@ -19,8 +19,23 @@
                 if (email && email[1]) {
                     value = email[1]
                 }
-                $wire.mailMessage[type].push(value)
+                if (! $wire.mailMessage[type].includes(value)) {
+                    $wire.mailMessage[type].push(value)
+                }
                 $event.target.value = null
+            }
+        },
+        addSelectedReceiver($event, $el, type) {
+            const value = $event.detail.item?.value
+
+            if (value && ! $wire.mailMessage[type].includes(value)) {
+                $wire.mailMessage[type].push(value)
+            }
+
+            const input = $el.querySelector('input')
+            if (input) {
+                input.value = ''
+                input.dispatchEvent(new Event('input', { bubbles: true }))
             }
         },
         get isMultiGroup() {
@@ -66,6 +81,21 @@
                 </div>
             </div>
 
+            @php
+                // The request params are encoded into the url because the
+                // autocomplete component renders its params ref as a JS
+                // expression that its own script cannot parse back.
+                $receiverSearchRequest = [
+                    'url' => route('search', \FluxErp\Models\Address::class) . '?' . http_build_query([
+                        'searchFields' => ['email_primary', 'name'],
+                        'fields' => ['email_primary'],
+                        'mapping' => ['value' => 'email_primary', 'description' => 'label'],
+                        'where' => [['email_primary', '!=', '']],
+                    ]),
+                    'method' => 'get',
+                ];
+            @endphp
+
             <div class="flex flex-col gap-1.5">
                 <x-label :label="__('To')" />
                 <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
@@ -89,9 +119,11 @@
                         </x-badge>
                     </template>
                 </div>
-                <x-input
+                <x-autocomplete
                     :placeholder="__('Add a new to')"
-                    x-on:blur="addReceiver($event, 'to')"
+                    lazy="2"
+                    :request="$receiverSearchRequest"
+                    x-on:select="addSelectedReceiver($event, $el, 'to')"
                     x-on:keyup="addReceiver($event, 'to')"
                     class="w-full"
                     x-bind:disabled="$wire.multiple"
@@ -119,9 +151,11 @@
                         </x-badge>
                     </template>
                 </div>
-                <x-input
+                <x-autocomplete
                     :placeholder="__('Add a new cc')"
-                    x-on:blur="addReceiver($event, 'cc')"
+                    lazy="2"
+                    :request="$receiverSearchRequest"
+                    x-on:select="addSelectedReceiver($event, $el, 'cc')"
                     x-on:keyup="addReceiver($event, 'cc')"
                     class="w-full"
                 />
@@ -148,9 +182,11 @@
                         </x-badge>
                     </template>
                 </div>
-                <x-input
+                <x-autocomplete
                     :placeholder="__('Add a new bcc')"
-                    x-on:blur="addReceiver($event, 'bcc')"
+                    lazy="2"
+                    :request="$receiverSearchRequest"
+                    x-on:select="addSelectedReceiver($event, $el, 'bcc')"
                     x-on:keyup="addReceiver($event, 'bcc')"
                     class="w-full"
                 />

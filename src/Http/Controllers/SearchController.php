@@ -205,16 +205,25 @@ class SearchController extends Controller
     protected function formatAndDispatch(Collection $result, string $model, Request $request)
     {
         if (is_a(app($model), InteractsWithDataTables::class)) {
-            $result = $result->map(fn ($item) => array_merge(
-                [
-                    'id' => $item->getKey(),
-                    'label' => $item->getLabel() ?? '-',
-                    'description' => $item->getDescription(),
-                    'image' => $item->getAvatarUrl(),
-                ],
-                $item->only($request->input('fields', [])),
-                $item->only($request->input('appends', [])),
-            ));
+            $result = $result->map(function ($item) use ($request): array {
+                $formatted = array_merge(
+                    [
+                        'id' => $item->getKey(),
+                        'label' => $item->getLabel() ?? '-',
+                        'description' => $item->getDescription(),
+                        'image' => $item->getAvatarUrl(),
+                    ],
+                    $item->only($request->input('fields', [])),
+                    $item->only($request->input('appends', [])),
+                );
+
+                // mapping sources are limited to keys already exposed above
+                foreach (Arr::wrap($request->input('mapping', [])) as $target => $source) {
+                    data_set($formatted, $target, data_get($formatted, $source));
+                }
+
+                return $formatted;
+            });
         }
 
         Event::dispatch('tall-datatables-searched', [$request, $result]);
