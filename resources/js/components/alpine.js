@@ -15,6 +15,7 @@ import navigationSpinner from './navigation-spinner.js';
 import wireNavigation from './wire-navigation.js';
 import teleportRestore from './teleport-restore.js';
 import comments from './comments.js';
+import pillbox from './pillbox.js';
 import familyTree from './family-tree.js';
 import documentScanner from './document-scanner.js';
 import validationErrors from './validation-errors.js';
@@ -66,6 +67,7 @@ if (window.Alpine?.version) {
     window.Alpine.directive('template-outlet', templateOutlet);
     window.Alpine.data('folder_tree', folders);
     window.Alpine.data('comments', comments);
+    window.Alpine.data('pillbox', pillbox);
 } else {
     window.addEventListener('alpine:init', () => {
         window.Alpine.plugin(sort);
@@ -74,6 +76,7 @@ if (window.Alpine?.version) {
         window.Alpine.directive('template-outlet', templateOutlet);
         window.Alpine.data('folder_tree', folders);
         window.Alpine.data('comments', comments);
+        window.Alpine.data('pillbox', pillbox);
     });
 }
 
