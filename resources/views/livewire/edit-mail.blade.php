@@ -26,7 +26,7 @@
             }
         },
         addSelectedReceiver($event, $el, type) {
-            const value = $event.detail.item?.value
+            const value = $event.detail?.item?.value
 
             if (! value) {
                 return
