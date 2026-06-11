@@ -192,7 +192,7 @@ class OrderForm extends FluxForm
 
     protected ?string $modelClass = Order::class;
 
-    protected PriceList $priceList;
+    protected ?PriceList $priceList = null;
 
     public function fill($values): void
     {
@@ -275,7 +275,8 @@ class OrderForm extends FluxForm
                 'rounding_number',
                 'rounding_mode',
                 'is_net',
-            ]);
+            ])
+            ?? resolve_static(PriceList::class, 'default');
     }
 
     public function save(): void
