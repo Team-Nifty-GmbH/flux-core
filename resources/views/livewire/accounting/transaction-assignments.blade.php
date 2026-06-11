@@ -765,14 +765,11 @@
                                                 : ''
                                         "
                                         x-on:click="
-                                            if (
-                                                link.url !== null &&
-                                                !link.active
-                                            ) {
+                                            link.url !== null &&
+                                                ! link.active &&
                                                 $wire.gotoPage(
                                                     parseInt(link.label),
-                                                );
-                                            }
+                                                )
                                         "
                                     />
                                 </template>
