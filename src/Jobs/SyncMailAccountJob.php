@@ -4,9 +4,11 @@ namespace FluxErp\Jobs;
 
 use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
+use FluxErp\Contracts\ShouldBeMonitored;
 use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use FluxErp\Traits\IsMonitored;
 use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -15,9 +17,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
+class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TracksSchedule;
+    use Dispatchable, InteractsWithQueue, IsMonitored, Queueable, SerializesModels, TracksSchedule;
 
     private readonly MailAccount $mailAccount;
 
@@ -64,6 +66,11 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         return true;
     }
 
+    public function getName(): string
+    {
+        return __('Mail sync :email', ['email' => $this->mailAccount->email]);
+    }
+
     public function handle(): void
     {
         $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
@@ -74,9 +81,15 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $this->mailAccount->mailFolders()
+        $folders = $this->mailAccount->mailFolders()
             ->where('is_active', true)
-            ->each(fn (MailFolder $folder) => $driver->syncMessages($folder));
+            ->get();
+        $total = $folders->count();
+
+        $folders->each(function (MailFolder $folder) use ($driver, $total): void {
+            $driver->syncMessages($folder);
+            $this->queueProgressChunk($total, 1);
+        });
     }
 
     public function uniqueId(): string
