@@ -61,10 +61,12 @@
         },
     }"
 >
+    {{-- close.self: the recipient autocompletes dispatch bubbling close
+        events when their dropdown closes, which must not clear the form --}}
     <x-modal
         size="7xl"
         id="edit-mail"
-        x-on:close="$wire.clear()"
+        x-on:close.self="$wire.clear()"
         persistent
     >
         <x-slot:title>{{ __('Email') }}</x-slot>

@@ -123,3 +123,44 @@ test('typing a free email address adds a recipient pill on enter', function (): 
         10000
     )->assertNoJavascriptErrors();
 });
+
+test('recipient pill survives closing an autocomplete dropdown', function (): void {
+    $page = visit(route('mail'))
+        ->assertNoSmoke();
+
+    $page->click(__('New Email'));
+
+    waitForCondition(
+        $page,
+        "() => {
+            const modal = document.getElementById('edit-mail');
+
+            return modal && getComputedStyle(modal).display !== 'none';
+        }",
+        10000
+    );
+
+    $page->fill('#edit-mail input >> nth=0', 'keepme@example.com');
+    $page->keys('#edit-mail input >> nth=0', 'Enter');
+
+    waitForCondition(
+        $page,
+        "() => [...document.querySelectorAll('#edit-mail span')]
+            .some((item) => item.textContent.trim() === 'keepme@example.com')",
+        10000
+    );
+
+    // open the bcc dropdown, then close it again - the bubbling close
+    // event must not clear the form
+    $page->fill('#edit-mail input >> nth=2', 'something');
+    $page->script("() => new Promise((r) => setTimeout(r, 600))");
+    $page->keys('#edit-mail input >> nth=2', 'Escape');
+    $page->script("() => new Promise((r) => setTimeout(r, 1500))");
+
+    waitForCondition(
+        $page,
+        "() => [...document.querySelectorAll('#edit-mail span')]
+            .some((item) => item.textContent.trim() === 'keepme@example.com')",
+        5000
+    )->assertNoJavascriptErrors();
+});
