@@ -28,15 +28,27 @@
         addSelectedReceiver($event, $el, type) {
             const value = $event.detail.item?.value
 
-            if (value && ! $wire.mailMessage[type].includes(value)) {
-                $wire.mailMessage[type].push(value)
+            if (! value) {
+                return
             }
 
-            const input = $el.querySelector('input')
-            if (input) {
+            // the autocomplete dispatches the select event on a teleported
+            // root, so the listener sits on window and resolves its field by
+            // the input value the component just synced
+            this.$nextTick(() => {
+                const input = $el.querySelector('input')
+
+                if (! input || input.value !== value) {
+                    return
+                }
+
+                if (! $wire.mailMessage[type].includes(value)) {
+                    $wire.mailMessage[type].push(value)
+                }
+
                 input.value = ''
                 input.dispatchEvent(new Event('input', { bubbles: true }))
-            }
+            })
         },
         get isMultiGroup() {
             return ($wire.groupKeys?.length ?? 0) > 1
@@ -119,15 +131,20 @@
                         </x-badge>
                     </template>
                 </div>
-                <x-autocomplete
-                    :placeholder="__('Add a new to')"
-                    lazy="2"
-                    :request="$receiverSearchRequest"
-                    x-on:select="addSelectedReceiver($event, $el, 'to')"
-                    x-on:keyup="addReceiver($event, 'to')"
+                {{-- the autocomplete component only forwards its own events,
+                    so the receiver handlers listen on a wrapper instead --}}
+                <div
                     class="w-full"
-                    x-bind:disabled="$wire.multiple"
-                />
+                    x-bind:class="$wire.multiple && 'pointer-events-none opacity-50'"
+                    x-on:keyup="addReceiver($event, 'to')"
+                    x-on:select.window="addSelectedReceiver($event, $el, 'to')"
+                >
+                    <x-autocomplete
+                        :placeholder="__('Add a new to')"
+                        lazy="2"
+                        :request="$receiverSearchRequest"
+                    />
+                </div>
             </div>
             <div class="flex flex-col gap-1.5">
                 <x-label :label="__('CC')" />
@@ -151,14 +168,17 @@
                         </x-badge>
                     </template>
                 </div>
-                <x-autocomplete
-                    :placeholder="__('Add a new cc')"
-                    lazy="2"
-                    :request="$receiverSearchRequest"
-                    x-on:select="addSelectedReceiver($event, $el, 'cc')"
-                    x-on:keyup="addReceiver($event, 'cc')"
+                <div
                     class="w-full"
-                />
+                    x-on:keyup="addReceiver($event, 'cc')"
+                    x-on:select.window="addSelectedReceiver($event, $el, 'cc')"
+                >
+                    <x-autocomplete
+                        :placeholder="__('Add a new cc')"
+                        lazy="2"
+                        :request="$receiverSearchRequest"
+                    />
+                </div>
             </div>
             <div class="flex flex-col gap-1.5">
                 <x-label :label="__('BCC')" />
@@ -182,14 +202,17 @@
                         </x-badge>
                     </template>
                 </div>
-                <x-autocomplete
-                    :placeholder="__('Add a new bcc')"
-                    lazy="2"
-                    :request="$receiverSearchRequest"
-                    x-on:select="addSelectedReceiver($event, $el, 'bcc')"
-                    x-on:keyup="addReceiver($event, 'bcc')"
+                <div
                     class="w-full"
-                />
+                    x-on:keyup="addReceiver($event, 'bcc')"
+                    x-on:select.window="addSelectedReceiver($event, $el, 'bcc')"
+                >
+                    <x-autocomplete
+                        :placeholder="__('Add a new bcc')"
+                        lazy="2"
+                        :request="$receiverSearchRequest"
+                    />
+                </div>
             </div>
             <div class="grow">
                 <x-input
