@@ -23,8 +23,8 @@ test('new email button opens a blank compose modal', function (): void {
 });
 
 test('compose to field suggests matching addresses', function (): void {
-    $contact = \FluxErp\Models\Contact::factory()->create();
-    \FluxErp\Models\Address::factory()->create([
+    $contact = FluxErp\Models\Contact::factory()->create();
+    FluxErp\Models\Address::factory()->create([
         'contact_id' => $contact->getKey(),
         'email_primary' => 'suggestme@example.com',
         'is_main_address' => true,
@@ -56,8 +56,8 @@ test('compose to field suggests matching addresses', function (): void {
 });
 
 test('selecting a suggestion adds a recipient pill', function (): void {
-    $contact = \FluxErp\Models\Contact::factory()->create();
-    \FluxErp\Models\Address::factory()->create([
+    $contact = FluxErp\Models\Contact::factory()->create();
+    FluxErp\Models\Address::factory()->create([
         'contact_id' => $contact->getKey(),
         'email_primary' => 'pickme@example.com',
         'is_main_address' => true,
@@ -153,9 +153,9 @@ test('recipient pill survives closing an autocomplete dropdown', function (): vo
     // open the bcc dropdown, then close it again - the bubbling close
     // event must not clear the form
     $page->fill('#edit-mail input >> nth=2', 'something');
-    $page->script("() => new Promise((r) => setTimeout(r, 600))");
+    $page->script('() => new Promise((r) => setTimeout(r, 600))');
     $page->keys('#edit-mail input >> nth=2', 'Escape');
-    $page->script("() => new Promise((r) => setTimeout(r, 1500))");
+    $page->script('() => new Promise((r) => setTimeout(r, 1500))');
 
     waitForCondition(
         $page,
