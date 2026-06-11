@@ -1,55 +1,5 @@
 <div
     x-data="{
-        addReceiver($event, type) {
-            let value = $event.target.value
-            if ($event instanceof KeyboardEvent && $event.which !== 13) {
-                value = value.slice(0, -1)
-            }
-
-            value = value.trim()
-
-            if (
-                value &&
-                ($event instanceof FocusEvent ||
-                    $event.code === 'Comma' ||
-                    $event.code === 'Enter' ||
-                    $event.code === 'Space')
-            ) {
-                const email = value.match(/<([^>]*)>/)
-                if (email && email[1]) {
-                    value = email[1]
-                }
-                if (! $wire.mailMessage[type].includes(value)) {
-                    $wire.mailMessage[type].push(value)
-                }
-                $event.target.value = null
-            }
-        },
-        addSelectedReceiver($event, $el, type) {
-            const value = $event.detail?.item?.value
-
-            if (! value) {
-                return
-            }
-
-            // the autocomplete dispatches the select event on a teleported
-            // root, so the listener sits on window and resolves its field by
-            // the input value the component just synced
-            this.$nextTick(() => {
-                const input = $el.querySelector('input')
-
-                if (! input || input.value !== value) {
-                    return
-                }
-
-                if (! $wire.mailMessage[type].includes(value)) {
-                    $wire.mailMessage[type].push(value)
-                }
-
-                input.value = ''
-                input.dispatchEvent(new Event('input', { bubbles: true }))
-            })
-        },
         get isMultiGroup() {
             return ($wire.groupKeys?.length ?? 0) > 1
         },
@@ -61,8 +11,8 @@
         },
     }"
 >
-    {{-- close.self: the recipient autocompletes dispatch bubbling close
-        events when their dropdown closes, which must not clear the form --}}
+    {{-- close.self: bubbling close events from nested components must
+        not clear the form --}}
     <x-modal
         size="7xl"
         id="edit-mail"
@@ -96,126 +46,43 @@
             </div>
 
             @php
-                // The request params are encoded into the url because the
-                // autocomplete component renders its params ref as a JS
-                // expression that its own script cannot parse back.
                 $receiverSearchRequest = [
-                    'url' => route('search', \FluxErp\Models\Address::class) . '?' . http_build_query([
+                    'url' => route('search', \FluxErp\Models\Address::class),
+                    'method' => 'post',
+                    'params' => [
                         'searchFields' => ['email_primary', 'name'],
                         'fields' => ['email_primary'],
                         'mapping' => ['value' => 'email_primary', 'description' => 'label'],
                         'where' => [['email_primary', '!=', '']],
-                    ]),
-                    'method' => 'get',
+                    ],
                 ];
             @endphp
 
-            <div class="flex flex-col gap-1.5">
-                <x-label :label="__('To')" />
-                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
-                    <template x-for="to in $wire.mailMessage.to || []">
-                        <x-badge flat color="indigo">
-                            <x-slot:text>
-                                <span x-text="to"></span>
-                            </x-slot>
-                            <x-slot
-                                name="right"
-                                class="relative flex h-2 w-2 items-center"
-                            >
-                                <button
-                                    type="button"
-                                    x-on:click="$wire.mailMessage.to.splice($wire.mailMessage.to.indexOf(to), 1)"
-                                    x-bind:disabled="$wire.multiple"
-                                >
-                                    <x-icon name="x-mark" class="h-4 w-4" />
-                                </button>
-                            </x-slot>
-                        </x-badge>
-                    </template>
-                </div>
-                {{-- the autocomplete component only forwards its own events,
-                    so the receiver handlers listen on a wrapper instead --}}
-                <div
-                    class="w-full"
-                    x-bind:class="$wire.multiple && 'pointer-events-none opacity-50'"
-                    x-on:keyup="addReceiver($event, 'to')"
-                    x-on:select.window="addSelectedReceiver($event, $el, 'to')"
-                >
-                    <x-autocomplete
-                        :placeholder="__('Add a new to')"
-                        lazy="2"
-                        :request="$receiverSearchRequest"
-                    />
-                </div>
-            </div>
-            <div class="flex flex-col gap-1.5">
-                <x-label :label="__('CC')" />
-                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
-                    <template x-for="cc in $wire.mailMessage.cc || []">
-                        <x-badge flat color="indigo">
-                            <x-slot:text>
-                                <span x-text="cc"></span>
-                            </x-slot>
-                            <x-slot
-                                name="right"
-                                class="relative flex h-2 w-2 items-center"
-                            >
-                                <button
-                                    type="button"
-                                    x-on:click="$wire.mailMessage.cc.splice($wire.mailMessage.cc.indexOf(cc), 1)"
-                                >
-                                    <x-icon name="x-mark" class="h-4 w-4" />
-                                </button>
-                            </x-slot>
-                        </x-badge>
-                    </template>
-                </div>
-                <div
-                    class="w-full"
-                    x-on:keyup="addReceiver($event, 'cc')"
-                    x-on:select.window="addSelectedReceiver($event, $el, 'cc')"
-                >
-                    <x-autocomplete
-                        :placeholder="__('Add a new cc')"
-                        lazy="2"
-                        :request="$receiverSearchRequest"
-                    />
-                </div>
-            </div>
-            <div class="flex flex-col gap-1.5">
-                <x-label :label="__('BCC')" />
-                <div class="flex gap-1">
-                    <template x-for="bcc in $wire.mailMessage.bcc || []">
-                        <x-badge flat color="indigo">
-                            <x-slot:text>
-                                <span x-text="bcc"></span>
-                            </x-slot>
-                            <x-slot
-                                name="right"
-                                class="relative flex h-2 w-2 items-center"
-                            >
-                                <button
-                                    type="button"
-                                    x-on:click="$wire.mailMessage.bcc.splice($wire.mailMessage.bcc.indexOf(bcc), 1)"
-                                >
-                                    <x-icon name="x-mark" class="h-4 w-4" />
-                                </button>
-                            </x-slot>
-                        </x-badge>
-                    </template>
-                </div>
-                <div
-                    class="w-full"
-                    x-on:keyup="addReceiver($event, 'bcc')"
-                    x-on:select.window="addSelectedReceiver($event, $el, 'bcc')"
-                >
-                    <x-autocomplete
-                        :placeholder="__('Add a new bcc')"
-                        lazy="2"
-                        :request="$receiverSearchRequest"
-                    />
-                </div>
-            </div>
+            <x-flux::pillbox
+                wire:model="mailMessage.to"
+                class="flex flex-col gap-1.5"
+                x-bind:class="$wire.multiple && 'pointer-events-none opacity-50'"
+                :label="__('To')"
+                :placeholder="__('Add a new to')"
+                lazy="2"
+                :request="$receiverSearchRequest"
+            />
+            <x-flux::pillbox
+                wire:model="mailMessage.cc"
+                class="flex flex-col gap-1.5"
+                :label="__('CC')"
+                :placeholder="__('Add a new cc')"
+                lazy="2"
+                :request="$receiverSearchRequest"
+            />
+            <x-flux::pillbox
+                wire:model="mailMessage.bcc"
+                class="flex flex-col gap-1.5"
+                :label="__('BCC')"
+                :placeholder="__('Add a new bcc')"
+                lazy="2"
+                :request="$receiverSearchRequest"
+            />
             <div class="grow">
                 <x-input
                     wire:model="mailMessage.subject"

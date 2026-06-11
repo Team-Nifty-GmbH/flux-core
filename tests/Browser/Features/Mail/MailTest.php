@@ -87,7 +87,7 @@ test('selecting a suggestion adds a recipient pill', function (): void {
         10000
     );
 
-    $page->click('li[dusk="tallstackui_autocomplete_option"]');
+    $page->click('li[dusk="flux_pillbox_option"]');
 
     waitForCondition(
         $page,
