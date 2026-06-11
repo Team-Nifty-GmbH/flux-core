@@ -27,6 +27,10 @@ if ($auditLocale = env('TRANSLATION_AUDIT_LOCALE')) {
     });
 }
 
+// Browser assertions default to 5s; CI runners are slow enough that
+// heavy pages (orders, dashboards) occasionally exceed that and flake.
+Pest\Browser\Playwright\Playwright::setTimeout(15000);
+
 pest()
     ->beforeEach(function (): void {
         /** @var $this FluxErp\Tests\TestCase */
