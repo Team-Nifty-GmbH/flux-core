@@ -1,8 +1,13 @@
 <?php
 
+use FluxErp\Contracts\MailSyncDriver;
+use FluxErp\Contracts\ReportsSyncProgress;
 use FluxErp\Contracts\ShouldBeMonitored;
 use FluxErp\Jobs\SyncMailAccountJob;
+use FluxErp\Mail\ImapMailSyncDriver;
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\MailFolder;
 use FluxErp\Traits\IsMonitored;
 
 test('sync mail account job is monitored', function (): void {
@@ -18,4 +23,51 @@ test('sync mail account job name contains the account email', function (): void 
     $job = new SyncMailAccountJob($mailAccount);
 
     expect($job->getName())->toContain('inbox@example.com');
+});
+
+test('imap mail sync driver reports sync progress', function (): void {
+    expect(is_a(ImapMailSyncDriver::class, ReportsSyncProgress::class, true))->toBeTrue();
+});
+
+test('sync mail account job passes a progress callback to the driver', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory()->state(['is_active' => true]))
+        ->create();
+
+    $spy = new class() implements MailSyncDriver, ReportsSyncProgress
+    {
+        public array $callbacks = [];
+
+        public array $syncedFolders = [];
+
+        public function syncFolders(MailAccount $account): array
+        {
+            return [];
+        }
+
+        public function syncMessages(MailFolder $folder): void
+        {
+            $this->syncedFolders[] = $folder->getKey();
+        }
+
+        public function testConnection(MailAccount $account): bool
+        {
+            return true;
+        }
+
+        public function withProgressCallback(?Closure $callback): static
+        {
+            $this->callbacks[] = $callback;
+
+            return $this;
+        }
+    };
+
+    app(MailDriverManager::class)->extend('imap', fn () => $spy);
+
+    (new SyncMailAccountJob($mailAccount))->handle();
+
+    expect($spy->syncedFolders)->toBe([$mailAccount->mailFolders->first()->getKey()])
+        ->and(array_filter($spy->callbacks))->toHaveCount(1)
+        ->and(end($spy->callbacks))->toBeNull();
 });

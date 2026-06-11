@@ -70,6 +70,24 @@ it('updates an existing communication from an imap message with integer uid', fu
     expect($communication->refresh()->message_uid)->toBe('42');
 });
 
+it('reports progress for each stored message', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $progress = [];
+    makeTestableBuilder($folder)
+        ->onProgress(function (int $processed, int $total) use (&$progress): void {
+            $progress[] = [$processed, $total];
+        })
+        ->pushMessage(makeImapMessage(uid: 50, messageId: '<progress-1@example.com>'))
+        ->pushMessage(makeImapMessage(uid: 51, messageId: '<progress-2@example.com>'))
+        ->store();
+
+    expect($progress)->toBe([[1, 2], [2, 2]]);
+});
+
 function makeTestableBuilder(MailFolder $folder): ImapMessageBuilder
 {
     return new class($folder) extends ImapMessageBuilder
