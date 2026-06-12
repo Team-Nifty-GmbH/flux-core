@@ -16,7 +16,7 @@ class MailAccountForm extends FluxForm
 {
     public ?string $email = null;
 
-    public string $encryption = 'ssl';
+    public ?string $encryption = 'ssl';
 
     public bool $has_valid_certificate = true;
 
