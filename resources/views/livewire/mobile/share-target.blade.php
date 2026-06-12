@@ -1,5 +1,6 @@
 <div
     class="mx-auto w-full max-w-2xl p-4"
+    data-testid="share-target"
     x-data="{
         state: 'loading',
         async init() {
