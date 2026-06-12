@@ -11,8 +11,6 @@
         },
     }"
 >
-    {{-- close.self: bubbling close events from nested components must
-        not clear the form --}}
     <x-modal
         size="7xl"
         id="edit-mail"
@@ -53,7 +51,7 @@
                         'searchFields' => ['email_primary', 'name'],
                         'fields' => ['email_primary'],
                         'mapping' => ['value' => 'email_primary', 'description' => 'label'],
-                        'where' => [['email_primary', '!=', '']],
+                        'whereNotNull' => ['email_primary'],
                     ],
                 ];
             @endphp
