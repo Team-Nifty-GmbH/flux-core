@@ -149,6 +149,8 @@
                                     ></x-button>
                                 </div>
                             @endif
+
+                            @stack('auth-login-actions')
                         </form>
                         @section('passkey-login')
                             @if (Route::hasMacro('passkeys'))
