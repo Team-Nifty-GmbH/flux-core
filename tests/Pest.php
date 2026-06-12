@@ -54,6 +54,7 @@ pest()
         ]);
 
         $this->defaultLanguage = Language::default() ?? Language::factory()->create([
+            'language_code' => 'de',
             'is_default' => true,
         ]);
 
