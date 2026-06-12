@@ -13,12 +13,15 @@ return new class() extends Migration
             $table->unsignedInteger('order_column')->nullable()->after('order_type_enum');
         });
 
-        DB::table('order_types')
-            ->whereRaw('0 = (@rownum := 0)')
-            ->orderBy('id')
-            ->update([
-                'order_column' => DB::raw('@rownum := @rownum + 1'),
-            ]);
+        // Session variables are mysql-only and break sqlite installations,
+        // number the rows driver-agnostically instead.
+        $position = 1;
+
+        foreach (DB::table('order_types')->orderBy('id')->pluck('id') as $id) {
+            DB::table('order_types')
+                ->where('id', $id)
+                ->update(['order_column' => $position++]);
+        }
     }
 
     public function down(): void
