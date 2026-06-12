@@ -33,7 +33,7 @@ class MailAccountForm extends FluxForm
 
     public ?string $password = null;
 
-    public int $port = 993;
+    public ?int $port = 993;
 
     public ?string $protocol = 'imap';
 
