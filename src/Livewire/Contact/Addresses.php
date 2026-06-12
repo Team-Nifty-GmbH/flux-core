@@ -154,21 +154,15 @@ class Addresses extends Component
     #[Renderless]
     public function getListeners(): array
     {
-        $model = app(Address::class);
-
-        $listeners = [];
-        foreach ($this->addresses as $address) {
-            $model->id = $address['id'];
-            $channel = 'echo-private:' . $model->broadcastChannel();
-            $listeners[$channel . ',.AddressUpdated'] = 'addressUpdated';
-            $listeners[$channel . ',.AddressDeleted'] = 'addressDeleted';
-        }
-
         $contactModel = app(Contact::class);
         $contactModel->id = $this->contact->id;
-        $listeners['echo-private:' . $contactModel->broadcastChannel() . ',.AddressCreated'] = 'loadAddresses';
+        $channel = 'echo-private:' . $contactModel->broadcastChannel();
 
-        return $listeners;
+        return [
+            $channel . ',.AddressCreated' => 'loadAddresses',
+            $channel . ',.AddressUpdated' => 'addressUpdated',
+            $channel . ',.AddressDeleted' => 'addressDeleted',
+        ];
     }
 
     public function getTabs(): array
@@ -221,25 +215,15 @@ class Addresses extends Component
 
     public function loadAddresses(): void
     {
-        $addresses = resolve_static(Address::class, 'query')
+        $this->addresses = resolve_static(Address::class, 'query')
             ->where('contact_id', $this->contact->id)
             ->orderByDesc('is_main_address')
             ->orderByDesc('is_invoice_address')
             ->orderByDesc('is_delivery_address')
             ->orderByDesc('is_active')
             ->get()
-            ->each(fn (Address $address) => $address->append('postal_address'));
-
-        foreach ($addresses as $address) {
-            $this->listeners[
-                'echo-private:' . $address->broadcastChannel(false) . ',.AddressUpdated'
-            ] = 'addressUpdated';
-            $this->listeners[
-                'echo-private:' . $address->broadcastChannel(false) . ',.AddressDeleted'
-            ] = 'addressDeleted';
-        }
-
-        $this->addresses = $addresses->toArray();
+            ->each(fn (Address $address) => $address->append('postal_address'))
+            ->toArray();
     }
 
     #[Renderless]

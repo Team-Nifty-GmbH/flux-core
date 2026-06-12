@@ -63,3 +63,64 @@ test('switch tabs', function (): void {
         ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
         ->cycleTabs();
 });
+
+test('address updated event on the contact channel reloads the selected address', function (): void {
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
+
+    Address::query()
+        ->whereKey($this->addressForm->id)
+        ->update(['street' => $street = Str::uuid()->toString()]);
+
+    $component
+        ->dispatch(
+            'echo-private:contact.' . $this->contactForm->id . ',.AddressUpdated',
+            ['model' => ['id' => $this->addressForm->id]]
+        )
+        ->assertOk()
+        ->assertSet('address.street', $street);
+});
+
+test('address deleted event on the contact channel removes the address from the list', function (): void {
+    $secondAddress = Address::factory()->create([
+        'contact_id' => $this->contactForm->id,
+    ]);
+
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
+
+    expect(collect($component->get('addresses'))->pluck('id'))->toContain($secondAddress->getKey());
+
+    $secondAddress->delete();
+
+    $component
+        ->dispatch(
+            'echo-private:contact.' . $this->contactForm->id . ',.AddressDeleted',
+            ['model' => ['id' => $secondAddress->getKey()]]
+        )
+        ->assertOk();
+
+    expect(collect($component->get('addresses'))->pluck('id'))->not->toContain($secondAddress->getKey());
+});
+
+test('listeners stay stable when the address list changes', function (): void {
+    $secondAddress = Address::factory()->create([
+        'contact_id' => $this->contactForm->id,
+    ]);
+
+    $component = Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
+
+    $listenersOnMount = $component->instance()->getListeners();
+
+    $secondAddress->delete();
+
+    $component->dispatch(
+        'echo-private:contact.' . $this->contactForm->id . ',.AddressDeleted',
+        ['model' => ['id' => $secondAddress->getKey()]]
+    );
+
+    // client echo subscriptions are frozen at mount - every listener that existed
+    // on mount has to stay valid for the whole component lifetime
+    expect($component->instance()->getListeners())->toBe($listenersOnMount);
+});
