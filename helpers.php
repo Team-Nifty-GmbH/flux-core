@@ -698,3 +698,102 @@ if (! function_exists('render_editor_blade')) {
         return new Illuminate\Support\HtmlString(Illuminate\Support\Facades\Blade::render($converted, $data));
     }
 }
+
+if (! function_exists('split_html_for_print')) {
+    /**
+     * Splits rendered HTML into top-level chunks so the PDF renderer can
+     * insert page breaks between them - dompdf cannot break a single table
+     * row across pages. Lists are split into one list element per item,
+     * keeping ordered list numbering via the start attribute.
+     *
+     * @return array<int, string>
+     */
+    function split_html_for_print(?string $html): array
+    {
+        $html = trim($html ?? '');
+
+        if ($html === '') {
+            return [];
+        }
+
+        $dom = new DOMDocument();
+        $previousErrorSetting = libxml_use_internal_errors(true);
+        $loaded = $dom->loadHTML(
+            '<?xml encoding="utf-8"?><div>' . $html . '</div>',
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+        );
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousErrorSetting);
+
+        $root = $dom->documentElement;
+
+        if (! $loaded || is_null($root)) {
+            return [$html];
+        }
+
+        $chunks = [];
+
+        foreach ($root->childNodes as $node) {
+            if ($node instanceof DOMText) {
+                if (trim($node->textContent) !== '') {
+                    $chunks[] = $dom->saveHTML($node);
+                }
+
+                continue;
+            }
+
+            if (! $node instanceof DOMElement) {
+                continue;
+            }
+
+            $nodeName = strtolower($node->nodeName);
+
+            if (! in_array($nodeName, ['ul', 'ol'], true)) {
+                $chunks[] = $dom->saveHTML($node);
+
+                continue;
+            }
+
+            $items = [];
+            foreach ($node->childNodes as $child) {
+                if ($child instanceof DOMElement && strtolower($child->nodeName) === 'li') {
+                    $items[] = $child;
+                }
+            }
+
+            if (count($items) < 2) {
+                $chunks[] = $dom->saveHTML($node);
+
+                continue;
+            }
+
+            $isOrdered = $nodeName === 'ol';
+            $start = max((int) ($node->getAttribute('start') ?: 1), 1);
+            $lastIndex = count($items) - 1;
+
+            foreach ($items as $index => $item) {
+                /** @var DOMElement $wrapper */
+                $wrapper = $node->cloneNode();
+                $wrapper->appendChild($item->cloneNode(true));
+
+                if ($isOrdered) {
+                    $wrapper->setAttribute('start', (string) ($start + $index));
+                }
+
+                $styles = array_filter([
+                    rtrim($node->getAttribute('style'), '; '),
+                    $index > 0 ? 'margin-top: 0' : null,
+                    $index < $lastIndex ? 'margin-bottom: 0' : null,
+                ]);
+
+                if ($styles) {
+                    $wrapper->setAttribute('style', implode('; ', $styles));
+                }
+
+                $chunks[] = $dom->saveHTML($wrapper);
+            }
+        }
+
+        return $chunks;
+    }
+}
