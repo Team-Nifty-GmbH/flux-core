@@ -7,14 +7,14 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 
-it('can be instantiated from a mail folder', function (): void {
+test('can be instantiated from a mail folder', function (): void {
     $folder = new MailFolder();
     $builder = new ImapMessageBuilder($folder);
 
     expect($builder)->toBeInstanceOf(ImapMessageBuilder::class);
 });
 
-it('returns itself for chainable filter methods', function (): void {
+test('returns itself for chainable filter methods', function (): void {
     $folder = new MailFolder();
     $builder = new ImapMessageBuilder($folder);
 
@@ -23,7 +23,7 @@ it('returns itself for chainable filter methods', function (): void {
         ->and($builder->newSince(100))->toBe($builder);
 });
 
-it('returns empty collection before fetch', function (): void {
+test('returns empty collection before fetch', function (): void {
     $folder = new MailFolder();
     $builder = new ImapMessageBuilder($folder);
 
@@ -31,7 +31,7 @@ it('returns empty collection before fetch', function (): void {
         ->and($builder->count())->toBe(0);
 });
 
-it('creates a communication from an imap message with integer uid', function (): void {
+test('creates a communication from an imap message with integer uid', function (): void {
     $mailAccount = MailAccount::factory()
         ->has(MailFolder::factory())
         ->create();
@@ -49,7 +49,7 @@ it('creates a communication from an imap message with integer uid', function ():
     ]);
 });
 
-it('updates an existing communication from an imap message with integer uid', function (): void {
+test('updates an existing communication from an imap message with integer uid', function (): void {
     $mailAccount = MailAccount::factory()
         ->has(MailFolder::factory())
         ->create();
@@ -68,6 +68,24 @@ it('updates an existing communication from an imap message with integer uid', fu
         ->store();
 
     expect($communication->refresh()->message_uid)->toBe('42');
+});
+
+test('reports progress for each stored message', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $progress = [];
+    makeTestableBuilder($folder)
+        ->onProgress(function (int $processed, int $total) use (&$progress): void {
+            $progress[] = [$processed, $total];
+        })
+        ->pushMessage(makeImapMessage(uid: 50, messageId: '<progress-1@example.com>'))
+        ->pushMessage(makeImapMessage(uid: 51, messageId: '<progress-2@example.com>'))
+        ->store();
+
+    expect($progress)->toBe([[1, 2], [2, 2]]);
 });
 
 function makeTestableBuilder(MailFolder $folder): ImapMessageBuilder

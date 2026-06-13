@@ -23,6 +23,10 @@ class ImapMessageBuilder
 
     protected ?int $sinceUid = null;
 
+    protected ?Closure $progressCallback = null;
+
+    protected int $progressProcessed = 0;
+
     /** @var Collection<int, ImapMessage> */
     protected Collection $messages;
 
@@ -68,12 +72,20 @@ class ImapMessageBuilder
         return $this;
     }
 
+    public function onProgress(?Closure $callback): static
+    {
+        $this->progressCallback = $callback;
+
+        return $this;
+    }
+
     public function reset(): static
     {
         $this->filterSeen = false;
         $this->filterUnseen = false;
         $this->fetchBody = true;
         $this->sinceUid = null;
+        $this->progressProcessed = 0;
         $this->messages = new Collection();
 
         return $this;
@@ -125,8 +137,11 @@ class ImapMessageBuilder
 
     public function store(): static
     {
+        $total = $this->messages->count();
+
         foreach ($this->messages as $imapMessage) {
             $this->storeMessage($imapMessage);
+            $this->progressCallback?->__invoke(++$this->progressProcessed, $total);
         }
 
         return $this;
@@ -216,6 +231,7 @@ class ImapMessageBuilder
 
                 if ($onMessage) {
                     $onMessage($imapMessage);
+                    $this->progressCallback?->__invoke(++$this->progressProcessed, $messages->total());
                 } else {
                     $this->messages->push($imapMessage);
                 }
@@ -250,6 +266,7 @@ class ImapMessageBuilder
 
                 if ($onMessage) {
                     $onMessage($imapMessage);
+                    $this->progressCallback?->__invoke(++$this->progressProcessed, $messages->total());
                 } else {
                     $this->messages->push($imapMessage);
                 }
