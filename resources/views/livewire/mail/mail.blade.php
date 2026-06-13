@@ -162,10 +162,19 @@
                 :with-search="true"
             >
                 <x-slot:afterTree>
-                    <div class="pt-4">
+                    <div
+                        x-show="$wire.mailAccounts"
+                        x-cloak
+                        class="flex flex-col gap-2 pt-4"
+                    >
                         <x-button
-                            x-show="$wire.mailAccounts"
-                            x-cloak
+                            class="w-full"
+                            :text="__('New Email')"
+                            icon="pencil-square"
+                            x-on:click="$wire.composeMail()"
+                            color="indigo"
+                        />
+                        <x-button
                             spinner="getNewMessages()"
                             class="w-full"
                             :text="__('Get new messages')"
