@@ -76,6 +76,15 @@ test('split_html_for_print respects an existing start attribute on ordered lists
         ->and($chunks[1])->toContain('start="6"');
 });
 
+test('split_html_for_print respects explicit li value attributes', function (): void {
+    $chunks = split_html_for_print('<ol><li>One</li><li value="7">Seven</li><li>Eight</li></ol>');
+
+    expect($chunks)->toHaveCount(3)
+        ->and($chunks[0])->toContain('start="1"')
+        ->and($chunks[1])->toContain('start="7"')
+        ->and($chunks[2])->toContain('start="8"');
+});
+
 test('split_html_for_print keeps single item lists unsplit', function (): void {
     $chunks = split_html_for_print('<ul><li>Only</li></ul>');
 

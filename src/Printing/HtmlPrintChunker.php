@@ -9,11 +9,6 @@ use DOMText;
 
 class HtmlPrintChunker
 {
-    protected function render(DOMNode $node): string
-    {
-        return (string) $node->ownerDocument->saveHTML($node);
-    }
-
     /**
      * Split rendered HTML into top-level chunks so the PDF renderer can
      * insert page breaks between them - dompdf cannot break a single
@@ -43,6 +38,11 @@ class HtmlPrintChunker
         return $chunks;
     }
 
+    protected function renderNode(DOMNode $node): string
+    {
+        return (string) $node->ownerDocument->saveHTML($node);
+    }
+
     protected function parse(string $html): ?DOMElement
     {
         $dom = new DOMDocument();
@@ -63,7 +63,7 @@ class HtmlPrintChunker
     protected function chunkNode(DOMNode $node): array
     {
         if ($node instanceof DOMText) {
-            return trim($node->textContent) === '' ? [] : [$this->render($node)];
+            return trim($node->textContent) === '' ? [] : [$this->renderNode($node)];
         }
 
         if (! $node instanceof DOMElement) {
@@ -74,7 +74,7 @@ class HtmlPrintChunker
             return $this->splitList($node);
         }
 
-        return [$this->render($node)];
+        return [$this->renderNode($node)];
     }
 
     /**
@@ -88,11 +88,11 @@ class HtmlPrintChunker
         $items = $this->listItems($list);
 
         if (count($items) < 2) {
-            return [$this->render($list)];
+            return [$this->renderNode($list)];
         }
 
         $isOrdered = strtolower($list->nodeName) === 'ol';
-        $start = max((int) ($list->getAttribute('start') ?: 1), 1);
+        $number = max((int) ($list->getAttribute('start') ?: 1), 1);
         $lastIndex = count($items) - 1;
 
         $chunks = [];
@@ -102,14 +102,21 @@ class HtmlPrintChunker
             $wrapper->appendChild($item->cloneNode(true));
 
             if ($isOrdered) {
-                $wrapper->setAttribute('start', (string) ($start + $index));
+                // Continue from an explicit <li value> so author-defined
+                // numbering survives the split instead of being flattened.
+                if (($value = $item->getAttribute('value')) !== '') {
+                    $number = (int) $value;
+                }
+
+                $wrapper->setAttribute('start', (string) $number);
+                $number++;
             }
 
             if ($style = $this->chunkStyle($list, $index, $lastIndex)) {
                 $wrapper->setAttribute('style', $style);
             }
 
-            $chunks[] = $this->render($wrapper);
+            $chunks[] = $this->renderNode($wrapper);
         }
 
         return $chunks;
