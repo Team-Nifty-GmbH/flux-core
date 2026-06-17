@@ -90,7 +90,8 @@ class MyResponsibleTasks extends Component implements HasWidgetOptions
                 ->where('responsible_user_id', $userId)
                 ->whereNotIn('state', $endStates),
             static::getLabel()
-        )->store();
+        )
+            ->store();
 
         $this->redirectRoute('tasks', navigate: true);
     }

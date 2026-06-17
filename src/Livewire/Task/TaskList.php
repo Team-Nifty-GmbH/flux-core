@@ -81,11 +81,15 @@ class TaskList extends BaseTaskList
     {
         $taskIds = $this->getSelectedValues();
 
-        if ($taskIds === []) {
+        if (blank($taskIds)) {
             return;
         }
 
-        ExecuteActionsJob::dispatch(DeleteTask::class, $taskIds, __('Deleting tasks'));
+        resolve_static(ExecuteActionsJob::class, 'dispatch', [
+            DeleteTask::class,
+            $taskIds,
+            __('Deleting tasks'),
+        ]);
 
         $this->reset('selected');
     }
@@ -109,7 +113,7 @@ class TaskList extends BaseTaskList
 
         $taskIds = $this->getSelectedValues();
 
-        if ($taskIds === []) {
+        if (blank($taskIds)) {
             return false;
         }
 
@@ -124,7 +128,11 @@ class TaskList extends BaseTaskList
             ])
             ->all();
 
-        ExecuteActionsJob::dispatch(UpdateTask::class, $payloads, __('Updating task state'));
+        resolve_static(ExecuteActionsJob::class, 'dispatch', [
+            UpdateTask::class,
+            $payloads,
+            __('Updating task state'),
+        ]);
 
         $this->reset('selected', 'selectedState');
 

@@ -83,7 +83,8 @@ class MyTasks extends Component implements HasWidgetOptions
                 ->whereRelation('users', 'users.id', $userId)
                 ->whereNotIn('state', $endStates),
             static::getLabel()
-        )->store();
+        )
+            ->store();
 
         $this->redirectRoute('tasks', navigate: true);
     }

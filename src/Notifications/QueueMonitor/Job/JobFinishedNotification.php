@@ -34,16 +34,14 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
     {
         $accept = unserialize($this->model->accept) ?: null;
         $reject = unserialize($this->model->reject) ?: null;
-        $hasAction = ! is_null($accept) || ! is_null($reject);
 
         $persistentOverride = data_get($this->model->data, 'toast_persistent');
         $timeoutOverride = data_get($this->model->data, 'toast_timeout');
-        $timeout = is_null($timeoutOverride) ? 30 : max(1, (int) $timeoutOverride);
 
         $persistent = match (true) {
             ! is_null($persistentOverride) => (bool) $persistentOverride,
             ! is_null($timeoutOverride) => false,
-            default => $hasAction,
+            default => ! is_null($accept) || ! is_null($reject),
         };
 
         return ToastNotification::make()
@@ -54,7 +52,9 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
             ->when(
                 $persistent,
                 fn (ToastNotification $toast): ToastNotification => $toast->persistent(),
-                fn (ToastNotification $toast): ToastNotification => $toast->timeout($timeout),
+                fn (ToastNotification $toast): ToastNotification => $toast->timeout(
+                    is_null($timeoutOverride) ? 30 : max(1, (int) $timeoutOverride)
+                ),
             )
             ->accept($accept)
             ->reject($reject)
