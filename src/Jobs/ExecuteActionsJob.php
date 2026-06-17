@@ -17,10 +17,10 @@ class ExecuteActionsJob implements ShouldBeMonitored, ShouldQueue
     use Dispatchable, InteractsWithQueue, IsMonitored, Queueable;
 
     /**
+     * Each payload entry is a full action data array or a scalar treated as the action's id.
+     *
      * @param  class-string<FluxAction>  $action
-     * @param  array<int, array<string, mixed>|int|string>  $payloads  Each entry is either a full
-     *                                                                 action data array or a scalar that is
-     *                                                                 treated as the action's id.
+     * @param  array<int, array<string, mixed>|int|string>  $payloads
      */
     public function __construct(
         protected string $action,
