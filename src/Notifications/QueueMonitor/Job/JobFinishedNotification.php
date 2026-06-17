@@ -32,14 +32,31 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
 
     public function toToastNotification(object $notifiable): ToastNotification
     {
+        $accept = unserialize($this->model->accept) ?: null;
+        $reject = unserialize($this->model->reject) ?: null;
+        $hasAction = ! is_null($accept) || ! is_null($reject);
+
+        $persistentOverride = data_get($this->model->data, 'toast_persistent');
+        $timeoutOverride = data_get($this->model->data, 'toast_timeout');
+
+        $persistent = match (true) {
+            ! is_null($persistentOverride) => (bool) $persistentOverride,
+            ! is_null($timeoutOverride) => false,
+            default => $hasAction,
+        };
+
         return ToastNotification::make()
             ->id($this->id)
             ->notifiable($notifiable)
             ->title(__(':job_name is finished', ['job_name' => __($this->model->getJobName())]))
             ->description($this->model->message)
-            ->persistent()
-            ->accept(unserialize($this->model->accept) ?: null)
-            ->reject(unserialize($this->model->reject) ?: null)
+            ->when(
+                $persistent,
+                fn (ToastNotification $toast): ToastNotification => $toast->persistent(),
+                fn (ToastNotification $toast): ToastNotification => $toast->timeout((int) ($timeoutOverride ?? 30)),
+            )
+            ->accept($accept)
+            ->reject($reject)
             ->progress($this->model->jobBatch?->progress ?? $this->model->progress)
             ->markAsRead()
             ->attributes([
