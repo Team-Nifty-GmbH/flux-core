@@ -37,7 +37,12 @@ class TallstackToast {
         // TallStackUI only arms its auto-dismiss timer once, on init. A toast that
         // was created persistent (e.g. a job progress toast) never gets a timer,
         // so when an update turns it into a timed toast we have to remove it ourselves.
-        if (wasPersistent && !toast.persistent && toast.timeout && !toast._autoDismissArmed) {
+        if (
+            wasPersistent &&
+            !toast.persistent &&
+            toast.timeout &&
+            !toast._autoDismissArmed
+        ) {
             toast._autoDismissArmed = true;
 
             setTimeout(
