@@ -703,10 +703,7 @@
                                 {{ __('results') }}
                                 <x-select.native
                                     class="ml-1 border-0 bg-transparent py-0 pr-6 pl-1 text-sm text-gray-600 focus:ring-0 dark:text-gray-300"
-                                    wire:model="perPage"
-                                    x-on:change="
-                                        $wire.setPerPage($event.target.value)
-                                    "
+                                    wire:model.live="perPage"
                                 >
                                     <option value="15">
                                         15 {{ __('per page') }}

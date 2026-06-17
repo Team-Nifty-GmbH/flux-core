@@ -284,10 +284,8 @@ class TransactionAssignments extends Component
         JS);
     }
 
-    #[Renderless]
-    public function setPerPage(int $perPage): void
+    public function updatedPerPage(): void
     {
-        $this->perPage = $perPage;
         $this->resetPage();
         $this->refreshTransactions();
     }

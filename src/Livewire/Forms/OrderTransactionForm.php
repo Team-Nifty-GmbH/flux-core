@@ -68,10 +68,10 @@ class OrderTransactionForm extends FluxForm
             $this->orderCurrencyIso = $order?->currency_id !== $transactionCurrencyId
                 ? resolve_static(Currency::class, 'query')->whereKey($order?->currency_id)->value('iso')
                 : null;
-            $this->orderGrossTotal = $order?->total_gross_price !== null
+            $this->orderGrossTotal = ! is_null($order?->total_gross_price)
                 ? (float) $order->total_gross_price
                 : null;
-            $this->orderBalance = $order?->balance !== null
+            $this->orderBalance = ! is_null($order?->balance)
                 ? (float) $order->balance
                 : null;
         } else {

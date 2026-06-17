@@ -61,6 +61,15 @@ test('gotoPage updates page and dispatches refresh', function (): void {
         ->assertDispatched('refresh-transactions');
 });
 
+test('updating perPage resets the page and dispatches refresh', function (): void {
+    Livewire::test(TransactionAssignments::class)
+        ->call('gotoPage', 3)
+        ->set('perPage', 50)
+        ->assertSet('perPage', 50)
+        ->assertSet('paginators.page', 1)
+        ->assertDispatched('refresh-transactions');
+});
+
 test('editOrderTransaction populates form with order gross total and balance', function (): void {
     $bankConnection = BankConnection::factory()->create();
     $transaction = Transaction::factory()->create([
