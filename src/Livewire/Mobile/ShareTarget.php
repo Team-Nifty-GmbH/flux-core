@@ -2,7 +2,8 @@
 
 namespace FluxErp\Livewire\Mobile;
 
-use FluxErp\ShareTargetActions\ShareTargetActionManager;
+use FluxErp\Actions\ActionManager;
+use FluxErp\Contracts\HandlesSharedFiles;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -34,8 +35,12 @@ class ShareTarget extends Component
             $this->files
         );
 
-        return collect(app(ShareTargetActionManager::class)->all())
-            ->map(fn (string $action) => [
+        return app(ActionManager::class)
+            ->all()
+            ->pluck('class')
+            ->filter(fn (string $action): bool => is_a($action, HandlesSharedFiles::class, true)
+                && $action::canPerformAction(false))
+            ->map(fn (string $action): array => [
                 'class' => $action,
                 'label' => $action::label(),
                 'icon' => $action::icon(),
@@ -50,7 +55,7 @@ class ShareTarget extends Component
     #[Renderless]
     public function executeAction(string $action): void
     {
-        if (! app(ShareTargetActionManager::class)->has($action) || ! $this->files) {
+        if (! is_a($action, HandlesSharedFiles::class, true) || ! $this->files) {
             $this->toast()
                 ->error(__('Invalid action.'))
                 ->send();
@@ -59,7 +64,7 @@ class ShareTarget extends Component
         }
 
         try {
-            $redirect = app($action)->handle($this->files);
+            $redirect = app($action)->handleSharedFiles($this->files);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

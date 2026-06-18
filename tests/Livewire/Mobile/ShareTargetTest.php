@@ -1,8 +1,9 @@
 <?php
 
+use FluxErp\Actions\PurchaseInvoice\UploadPurchaseInvoice;
 use FluxErp\Livewire\Mobile\ShareTarget;
+use FluxErp\Models\Permission;
 use FluxErp\Models\PurchaseInvoice;
-use FluxErp\ShareTargetActions\UploadPurchaseInvoice;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
@@ -39,6 +40,27 @@ test('upload purchase invoice action creates one purchase invoice per file', fun
     expect($purchaseInvoices)->toHaveCount(2)
         ->and($purchaseInvoices->first()->media_id)->not->toBeNull()
         ->and($purchaseInvoices->first()->getFirstMedia('purchase_invoice'))->not->toBeNull();
+});
+
+test('action is hidden when the user lacks its permission', function (): void {
+    Permission::findOrCreate('action.' . UploadPurchaseInvoice::name(), 'web');
+
+    $component = Livewire::test(ShareTarget::class)
+        ->set('files', [fakeSharedInvoice()]);
+
+    expect(collect($component->instance()->actions())->pluck('class'))
+        ->not->toContain(UploadPurchaseInvoice::class);
+});
+
+test('action is shown when the user has its permission', function (): void {
+    $permission = Permission::findOrCreate('action.' . UploadPurchaseInvoice::name(), 'web');
+    $this->user->givePermissionTo($permission);
+
+    $component = Livewire::test(ShareTarget::class)
+        ->set('files', [fakeSharedInvoice()]);
+
+    expect(collect($component->instance()->actions())->pluck('class'))
+        ->toContain(UploadPurchaseInvoice::class);
 });
 
 test('unregistered action is rejected', function (): void {

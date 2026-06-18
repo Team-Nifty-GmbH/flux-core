@@ -1,12 +1,22 @@
 <?php
 
-namespace FluxErp\ShareTargetActions;
+namespace FluxErp\Actions\PurchaseInvoice;
 
-use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
+use FluxErp\Actions\FluxAction;
+use FluxErp\Contracts\HandlesSharedFiles;
+use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Traits\Action\HasSharedFileDefaults;
 use Illuminate\Validation\ValidationException;
 
-class UploadPurchaseInvoice extends ShareTargetAction
+class UploadPurchaseInvoice extends FluxAction implements HandlesSharedFiles
 {
+    use HasSharedFileDefaults;
+
+    public static function models(): array
+    {
+        return [PurchaseInvoice::class];
+    }
+
     public static function accepts(?string $mimeType): bool
     {
         return in_array(
@@ -37,7 +47,12 @@ class UploadPurchaseInvoice extends ShareTargetAction
         return true;
     }
 
-    public function handle(array $files): ?string
+    public function performAction(): ?string
+    {
+        return $this->handleSharedFiles($this->getData('files', []));
+    }
+
+    public function handleSharedFiles(array $files): ?string
     {
         $exceptions = [];
         $created = 0;
