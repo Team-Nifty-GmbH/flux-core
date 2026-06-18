@@ -1,12 +1,8 @@
 <?php
 
-use FluxErp\Actions\Task\DeleteTask;
-use FluxErp\Actions\Task\UpdateTask;
-use FluxErp\Jobs\ExecuteActionsJob;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Models\Task;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -51,9 +47,7 @@ test('list is selectable', function (): void {
         ->assertSet('isSelectable', true);
 });
 
-test('delete selected dispatches execute actions job with delete task action', function (): void {
-    Bus::fake();
-
+test('delete selected deletes the selected tasks', function (): void {
     $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
 
     Livewire::actingAs($this->user)
@@ -62,22 +56,18 @@ test('delete selected dispatches execute actions job with delete task action', f
         ->call('deleteSelected')
         ->assertSet('selected', []);
 
-    Bus::assertDispatched(
-        ExecuteActionsJob::class,
-        fn (ExecuteActionsJob $job): bool => (new ReflectionProperty($job, 'action'))->getValue($job) === DeleteTask::class
-            && (new ReflectionProperty($job, 'payloads'))->getValue($job) === [$task->getKey()]
-    );
+    $this->assertSoftDeleted($task);
 });
 
 test('delete selected does nothing without selection', function (): void {
-    Bus::fake();
+    $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
 
     Livewire::actingAs($this->user)
         ->test(TaskList::class)
         ->set('selected', [])
         ->call('deleteSelected');
 
-    Bus::assertNotDispatched(ExecuteActionsJob::class);
+    $this->assertModelExists($task);
 });
 
 test('open change state modal resets state and opens modal', function (): void {
@@ -89,9 +79,7 @@ test('open change state modal resets state and opens modal', function (): void {
         ->assertOpensModal('change-task-state-modal');
 });
 
-test('change state dispatches execute actions job with update task action', function (): void {
-    Bus::fake();
-
+test('change state updates the selected tasks', function (): void {
     $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
 
     $component = Livewire::actingAs($this->user)
@@ -107,21 +95,13 @@ test('change state dispatches execute actions job with update task action', func
         ->assertSet('selected', [])
         ->assertSet('selectedState', null);
 
-    Bus::assertDispatched(
-        ExecuteActionsJob::class,
-        function (ExecuteActionsJob $job) use ($task, $state): bool {
-            $payloads = (new ReflectionProperty($job, 'payloads'))->getValue($job);
-
-            return (new ReflectionProperty($job, 'action'))->getValue($job) === UpdateTask::class
-                && data_get($payloads, '0.id') === $task->getKey()
-                && data_get($payloads, '0.state') === $state;
-        }
-    );
+    $this->assertDatabaseHas('tasks', [
+        'id' => $task->getKey(),
+        'state' => $state,
+    ]);
 });
 
-test('change state rejects invalid state', function (): void {
-    Bus::fake();
-
+test('change state rejects invalid state with a validation error', function (): void {
     $task = Task::factory()->create(['name' => Str::uuid(), 'state' => 'open']);
 
     Livewire::actingAs($this->user)
@@ -129,7 +109,11 @@ test('change state rejects invalid state', function (): void {
         ->set('selected', [$task->getKey()])
         ->set('selectedState', 'not-a-real-state')
         ->call('changeState')
-        ->assertReturned(false);
+        ->assertReturned(false)
+        ->assertHasErrors('selectedState');
 
-    Bus::assertNotDispatched(ExecuteActionsJob::class);
+    $this->assertDatabaseHas('tasks', [
+        'id' => $task->getKey(),
+        'state' => 'open',
+    ]);
 });

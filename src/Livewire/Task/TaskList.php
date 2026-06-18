@@ -5,10 +5,10 @@ namespace FluxErp\Livewire\Task;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\UpdateTask;
-use FluxErp\Jobs\ExecuteActionsJob;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use FluxErp\Support\Bus\BulkExecutor;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +20,8 @@ class TaskList extends BaseTaskList
 {
     public array $availableStates = [];
 
+    public bool $isSelectable = true;
+
     public ?string $selectedState = null;
 
     public TaskForm $task;
@@ -29,8 +31,6 @@ class TaskList extends BaseTaskList
     public function mount(): void
     {
         parent::mount();
-
-        $this->isSelectable = true;
 
         $this->availableStates = app(Task::class)
             ->getStatesFor('state')
@@ -85,11 +85,12 @@ class TaskList extends BaseTaskList
             return;
         }
 
-        resolve_static(ExecuteActionsJob::class, 'dispatch', [
+        BulkExecutor::make(
             DeleteTask::class,
-            $taskIds,
-            __('Deleting tasks'),
-        ]);
+            array_map(fn (int $id): array => ['id' => $id], $taskIds),
+        )
+            ->name(__('Deleting tasks'))
+            ->dispatch();
 
         $this->reset('selected');
     }
@@ -108,6 +109,13 @@ class TaskList extends BaseTaskList
     public function changeState(): bool
     {
         if (! in_array($this->selectedState, Arr::pluck($this->availableStates, 'name'), true)) {
+            exception_to_notifications(
+                ValidationException::withMessages([
+                    'selectedState' => [__('The selected state is invalid.')],
+                ]),
+                $this
+            );
+
             return false;
         }
 
@@ -128,11 +136,9 @@ class TaskList extends BaseTaskList
             ])
             ->all();
 
-        resolve_static(ExecuteActionsJob::class, 'dispatch', [
-            UpdateTask::class,
-            $payloads,
-            __('Updating task state'),
-        ]);
+        BulkExecutor::make(UpdateTask::class, $payloads)
+            ->name(__('Updating task state'))
+            ->dispatch();
 
         $this->reset('selected', 'selectedState');
 
