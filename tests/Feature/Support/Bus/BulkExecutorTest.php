@@ -7,6 +7,10 @@ use FluxErp\Models\Task;
 use FluxErp\Support\Bus\BulkExecutor;
 use Illuminate\Support\Str;
 
+beforeEach(function (): void {
+    config()->set('queue.default', 'sync');
+});
+
 test('throws for a flux action that is not bulk executable', function (): void {
     expect(fn () => BulkExecutor::make(CreateTask::class, [['name' => Str::uuid()]])->dispatch())
         ->toThrow(InvalidArgumentException::class);

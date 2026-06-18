@@ -6,6 +6,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
+beforeEach(function (): void {
+    config()->set('queue.default', 'sync');
+});
+
 test('create new task', function (): void {
     Livewire::actingAs($this->user)
         ->test(TaskList::class)
