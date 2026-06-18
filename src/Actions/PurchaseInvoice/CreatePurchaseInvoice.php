@@ -21,9 +21,7 @@ use SplFileInfo;
 
 class CreatePurchaseInvoice extends FluxAction implements HandlesSharedFiles
 {
-    use HasSharedFileDefaults {
-        acceptedMimeTypes as baseAcceptedMimeTypes;
-    }
+    use HasSharedFileDefaults;
 
     public static function models(): array
     {
@@ -33,7 +31,9 @@ class CreatePurchaseInvoice extends FluxAction implements HandlesSharedFiles
     protected static function acceptedMimeTypes(): array
     {
         return [
-            ...static::baseAcceptedMimeTypes(),
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
             'application/xml',
             'text/xml',
         ];
