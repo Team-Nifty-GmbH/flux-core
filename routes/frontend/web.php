@@ -45,6 +45,7 @@ use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
+use FluxErp\Livewire\Mobile\ShareTarget;
 use FluxErp\Livewire\MyEmployeeProfile\MyAbsenceRequest;
 use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeDay;
 use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeProfile;
@@ -165,6 +166,8 @@ Route::middleware('web')
 
         Route::middleware(['auth:web', '2fa.setup', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
+
+            Route::get('/mobile/share-target', ShareTarget::class)->name('mobile.share-target');
 
             Route::get('/private-storage/{path}', function (string $path) {
                 return response()

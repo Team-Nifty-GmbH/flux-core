@@ -6,13 +6,17 @@ import {
     startAuthentication,
     startRegistration,
 } from '@simplewebauthn/browser';
-import nuxbeAppBridge from './nuxbe-bridge.js';
+import nuxbeAppBridge, {
+    loadSharedFiles,
+    clearSharedFiles,
+} from './nuxbe-bridge.js';
 
 // Import all modules into single bundle
 import './components/alpine.js';
 import './components/apex-charts.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
+window.nuxbeShareTarget = { loadSharedFiles, clearSharedFiles };
 window.browserSupportsWebAuthn = browserSupportsWebAuthn;
 window.startAuthentication = startAuthentication;
 window.startRegistration = startRegistration;
