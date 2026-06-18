@@ -125,6 +125,7 @@ use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
+use FluxErp\Support\MediaLibrary\ContentDisposition;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -384,7 +385,7 @@ Route::middleware('web')
                 ->name('media.private');
 
             Route::get('/media/{media}', function (Media $media) {
-                $disposition = HeaderUtils::makeDisposition(
+                $disposition = ContentDisposition::make(
                     request()->boolean('download')
                         ? HeaderUtils::DISPOSITION_ATTACHMENT
                         : HeaderUtils::DISPOSITION_INLINE,
