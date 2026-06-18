@@ -365,6 +365,14 @@ export default function folders(
                 return null;
             }
 
+            // A node's slug already encodes its full dotted path from the root,
+            // so deriving it again by walking ancestors would prepend the parent
+            // segments a second time (e.g. "Berater.1 Update" -> "Berater.Berater.1 Update").
+            // Return the slug as-is instead.
+            if (attribute === 'slug') {
+                return node.slug ?? null;
+            }
+
             const findPath = (node, path = []) => {
                 path.push(node[attribute]);
 
@@ -400,13 +408,7 @@ export default function folders(
                 return null;
             };
 
-            const pathArray = findPath(node);
-
-            if (attribute === 'slug' && pathArray) {
-                return pathArray.join('.');
-            }
-
-            return pathArray;
+            return findPath(node);
         },
     };
 }

@@ -27,7 +27,7 @@
                                 x-on:click="$wire.saveFolder({name: '{{ __('New folder') }}'}).then((folder) => { if (folder) addFolder(null, folder); })"
                             />
                         @endcanAction
-
+                        @stack('folder-tree-tree-actions')
                     @show
                 </x-slot:afterTree>
                 <div
@@ -210,6 +210,7 @@
                                 @endcanAction
 
                             @show
+                            @stack('folder-tree-selection-actions')
                         </div>
                         @section('folder-tree.upload.attributes')
                             @canAction(\FluxErp\Actions\MediaFolder\UpdateMediaFolder::class)
