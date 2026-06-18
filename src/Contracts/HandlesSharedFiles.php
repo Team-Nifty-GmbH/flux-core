@@ -4,13 +4,6 @@ namespace FluxErp\Contracts;
 
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-/**
- * Marks a FluxAction as available as a target for files shared into the app.
- *
- * Implementing actions are discovered through the ActionManager, so they are
- * registered like any other action. Default implementations for the metadata
- * methods are provided by {@see \FluxErp\Traits\Action\HasSharedFileDefaults}.
- */
 interface HandlesSharedFiles
 {
     public static function icon(): string;

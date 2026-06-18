@@ -4,12 +4,6 @@ namespace FluxErp\Traits\Action;
 
 use Illuminate\Support\Str;
 
-/**
- * Default metadata for actions implementing {@see \FluxErp\Contracts\HandlesSharedFiles}.
- *
- * Accepts every mime type and a single file by default; concrete actions
- * override what they need.
- */
 trait HasSharedFileDefaults
 {
     public static function icon(): string

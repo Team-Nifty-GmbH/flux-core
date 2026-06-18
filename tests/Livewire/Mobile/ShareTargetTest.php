@@ -1,6 +1,6 @@
 <?php
 
-use FluxErp\Actions\PurchaseInvoice\UploadPurchaseInvoice;
+use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Livewire\Mobile\ShareTarget;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PurchaseInvoice;
@@ -24,14 +24,14 @@ test('upload purchase invoice action is registered and enabled for shared files'
 
     $actions = collect($component->instance()->actions());
 
-    expect($actions->pluck('class'))->toContain(UploadPurchaseInvoice::class)
-        ->and($actions->firstWhere('class', UploadPurchaseInvoice::class)['enabled'])->toBeTrue();
+    expect($actions->pluck('class'))->toContain(CreatePurchaseInvoice::class)
+        ->and($actions->firstWhere('class', CreatePurchaseInvoice::class)['enabled'])->toBeTrue();
 });
 
 test('upload purchase invoice action creates one purchase invoice per file', function (): void {
     Livewire::test(ShareTarget::class)
         ->set('files', [fakeSharedInvoice('invoice-1.jpeg', 10), fakeSharedInvoice('invoice-2.jpeg', 20)])
-        ->call('executeAction', UploadPurchaseInvoice::class)
+        ->call('executeAction', CreatePurchaseInvoice::class)
         ->assertOk()
         ->assertDispatched('share-target-completed');
 
@@ -43,24 +43,24 @@ test('upload purchase invoice action creates one purchase invoice per file', fun
 });
 
 test('action is hidden when the user lacks its permission', function (): void {
-    Permission::findOrCreate('action.' . UploadPurchaseInvoice::name(), 'web');
+    Permission::findOrCreate('action.' . CreatePurchaseInvoice::name(), 'web');
 
     $component = Livewire::test(ShareTarget::class)
         ->set('files', [fakeSharedInvoice()]);
 
     expect(collect($component->instance()->actions())->pluck('class'))
-        ->not->toContain(UploadPurchaseInvoice::class);
+        ->not->toContain(CreatePurchaseInvoice::class);
 });
 
 test('action is shown when the user has its permission', function (): void {
-    $permission = Permission::findOrCreate('action.' . UploadPurchaseInvoice::name(), 'web');
+    $permission = Permission::findOrCreate('action.' . CreatePurchaseInvoice::name(), 'web');
     $this->user->givePermissionTo($permission);
 
     $component = Livewire::test(ShareTarget::class)
         ->set('files', [fakeSharedInvoice()]);
 
     expect(collect($component->instance()->actions())->pluck('class'))
-        ->toContain(UploadPurchaseInvoice::class);
+        ->toContain(CreatePurchaseInvoice::class);
 });
 
 test('unregistered action is rejected', function (): void {
@@ -75,7 +75,7 @@ test('unregistered action is rejected', function (): void {
 
 test('action without files is rejected', function (): void {
     Livewire::test(ShareTarget::class)
-        ->call('executeAction', UploadPurchaseInvoice::class)
+        ->call('executeAction', CreatePurchaseInvoice::class)
         ->assertOk()
         ->assertNotDispatched('share-target-completed');
 
@@ -85,7 +85,7 @@ test('action without files is rejected', function (): void {
 test('duplicate files still complete with partial success', function (): void {
     Livewire::test(ShareTarget::class)
         ->set('files', [fakeSharedInvoice('invoice-1.jpeg'), fakeSharedInvoice('invoice-copy.jpeg')])
-        ->call('executeAction', UploadPurchaseInvoice::class)
+        ->call('executeAction', CreatePurchaseInvoice::class)
         ->assertOk()
         ->assertDispatched('share-target-completed');
 

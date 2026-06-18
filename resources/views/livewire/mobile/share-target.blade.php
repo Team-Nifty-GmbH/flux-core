@@ -4,49 +4,12 @@
     x-data="{
         state: 'loading',
         async init() {
-            const plugins = window.Capacitor?.Plugins;
+            const files = await window.nuxbeShareTarget.loadSharedFiles();
 
-            if (!plugins?.Preferences || !plugins?.Filesystem) {
+            if (files === null) {
                 this.state = 'no-bridge';
 
                 return;
-            }
-
-            const { value } = await plugins.Preferences.get({
-                key: 'pending_shared_files',
-            });
-            const metas = value ? JSON.parse(value) : [];
-
-            if (!metas.length) {
-                this.state = 'empty';
-
-                return;
-            }
-
-            const files = [];
-
-            for (const meta of metas) {
-                try {
-                    const { data } = await plugins.Filesystem.readFile({
-                        path: meta.path,
-                        directory: 'CACHE',
-                    });
-                    const bytes = Uint8Array.from(atob(data), (char) =>
-                        char.charCodeAt(0),
-                    );
-
-                    files.push(
-                        new File([bytes], meta.name, {
-                            type: meta.mimeType || 'application/octet-stream',
-                        }),
-                    );
-                } catch (error) {
-                    console.error(
-                        '[SHARE TARGET] Failed to read shared file:',
-                        meta.path,
-                        error,
-                    );
-                }
             }
 
             if (!files.length) {
@@ -68,29 +31,9 @@
                 },
             );
         },
-        async cleanup() {
-            const plugins = window.Capacitor?.Plugins;
-
-            if (!plugins?.Preferences || !plugins?.Filesystem) {
-                return;
-            }
-
-            try {
-                await plugins.Preferences.remove({
-                    key: 'pending_shared_files',
-                });
-                await plugins.Filesystem.rmdir({
-                    path: 'shared_files',
-                    directory: 'CACHE',
-                    recursive: true,
-                });
-            } catch (error) {
-                console.error('[SHARE TARGET] Cleanup failed:', error);
-            }
-        },
     }"
     x-on:share-target-completed.window="
-        cleanup().then(() => {
+        window.nuxbeShareTarget.clearSharedFiles().then(() => {
             window.location.href = $event.detail.redirect;
         })
     "
