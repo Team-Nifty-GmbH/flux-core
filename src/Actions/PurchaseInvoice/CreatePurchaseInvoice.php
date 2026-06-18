@@ -21,41 +21,22 @@ use SplFileInfo;
 
 class CreatePurchaseInvoice extends FluxAction implements HandlesSharedFiles
 {
-    use HasSharedFileDefaults;
+    use HasSharedFileDefaults {
+        acceptedMimeTypes as baseAcceptedMimeTypes;
+    }
 
     public static function models(): array
     {
         return [PurchaseInvoice::class];
     }
 
-    public static function accepts(?string $mimeType): bool
+    protected static function acceptedMimeTypes(): array
     {
-        return in_array(
-            $mimeType,
-            [
-                'application/pdf',
-                'image/jpeg',
-                'image/png',
-                'application/xml',
-                'text/xml',
-            ],
-            true
-        );
-    }
-
-    public static function icon(): string
-    {
-        return 'document-arrow-up';
-    }
-
-    public static function label(): string
-    {
-        return __('Upload purchase invoice');
-    }
-
-    public static function supportsMultiple(): bool
-    {
-        return true;
+        return [
+            ...static::baseAcceptedMimeTypes(),
+            'application/xml',
+            'text/xml',
+        ];
     }
 
     protected function getRulesets(): string|array

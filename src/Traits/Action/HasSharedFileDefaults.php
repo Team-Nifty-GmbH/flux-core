@@ -8,7 +8,7 @@ trait HasSharedFileDefaults
 {
     public static function icon(): string
     {
-        return 'document';
+        return 'document-arrow-up';
     }
 
     public static function label(): string
@@ -18,11 +18,20 @@ trait HasSharedFileDefaults
 
     public static function accepts(?string $mimeType): bool
     {
-        return true;
+        return in_array($mimeType, static::acceptedMimeTypes(), true);
     }
 
     public static function supportsMultiple(): bool
     {
-        return false;
+        return true;
+    }
+
+    protected static function acceptedMimeTypes(): array
+    {
+        return [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+        ];
     }
 }
