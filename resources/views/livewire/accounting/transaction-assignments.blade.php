@@ -159,6 +159,35 @@
                             >)
                         </x-slot:text>
                     </x-button>
+                    <x-button
+                        sm
+                        color="secondary"
+                        x-cloak
+                        x-show="
+                            $wire.orderTransactionForm.transactionAmount !==
+                                null &&
+                            $wire.orderTransactionForm.transactionAmount !==
+                                $wire.orderTransactionForm.orderGrossTotal &&
+                            $wire.orderTransactionForm.transactionAmount !==
+                                $wire.orderTransactionForm.orderBalance
+                        "
+                        x-on:click="
+                            $wire.orderTransactionForm.amount =
+                                $wire.orderTransactionForm.transactionAmount
+                        "
+                    >
+                        <x-slot:text>
+                            {{ __('Apply Payment Amount') }} (<span
+                                x-html="
+                                    $nuxbe.format.money(
+                                        $wire.orderTransactionForm
+                                            .transactionAmount,
+                                    )
+                                "
+                            ></span
+                            >)
+                        </x-slot:text>
+                    </x-button>
                 </div>
             </div>
             <div
@@ -417,9 +446,7 @@
                                             class="flex w-full justify-between rounded bg-slate-100 p-2 font-semibold"
                                         >
                                             <div class="flex gap-2">
-                                                <div
-                                                    class="block overflow-hidden transition-all duration-200 lg:hidden lg:group-hover:block"
-                                                >
+                                                <div class="block">
                                                     <x-button
                                                         class="h-full"
                                                         color="secondary"
@@ -491,9 +518,7 @@
                                                         ></span>
                                                     </div>
                                                 </div>
-                                                <div
-                                                    class="block overflow-hidden transition-all duration-200 lg:hidden lg:group-hover:block"
-                                                >
+                                                <div class="block">
                                                     <x-button
                                                         class="h-full"
                                                         color="secondary"
@@ -509,9 +534,11 @@
                                 <div class="px-2 pt-2">
                                     <div class="flex flex-col">
                                         <div
-                                            class="flex flex-row items-center justify-between border-t border-slate-200 pt-2"
+                                            class="flex flex-col-reverse gap-2 border-t border-slate-200 pt-2 lg:flex-row lg:items-center lg:justify-between"
                                         >
-                                            <div class="flex flex-row gap-2">
+                                            <div
+                                                class="flex flex-row flex-wrap gap-2"
+                                            >
                                                 <x-button
                                                     sm
                                                     x-cloak
@@ -586,7 +613,7 @@
                                                 />
                                             </div>
                                             <div
-                                                class="flex flex-row items-center gap-4 pr-2"
+                                                class="flex flex-col items-end gap-y-1 lg:pr-2"
                                             >
                                                 <div
                                                     x-cloak
