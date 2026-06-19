@@ -2680,6 +2680,7 @@
     "The selected agent does not exist.": "Der ausgewählte Vertreter existiert nicht.",
     "The selected department is not available for the selected location.": "Die ausgewählte Abteilung ist für den ausgewählten Standort nicht verfügbar.",
     "The selected location is not available for the given department.": "Der ausgewählte Standort ist für die gegebene Abteilung nicht verfügbar.",
+    "The selected state is invalid.": "Der ausgewählte Status ist ungültig.",
     "The sent IBAN is not valid": "Die gesendete IBAN ist ungültig",
     "The token will not be shown again after closing the modal.": "Das Token wird nach dem Schließen des Dialogs nicht mehr angezeigt.",
     "The total gross :total-gross must match the sum of all position total prices :pos-total.": "Der Gesamtbetrag brutto :total-gross muss der Summe aller Positionen Gesamtpreise :pos-total entsprechen.",

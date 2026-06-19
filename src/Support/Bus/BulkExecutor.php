@@ -4,6 +4,7 @@ namespace FluxErp\Support\Bus;
 
 use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Contracts\SupportsBulkExecution;
+use FluxErp\Traits\Makeable;
 use Illuminate\Support\Facades\Bus;
 use InvalidArgumentException;
 
@@ -17,6 +18,8 @@ use InvalidArgumentException;
  */
 class BulkExecutor
 {
+    use Makeable;
+
     protected ?string $name = null;
 
     /**
@@ -27,15 +30,6 @@ class BulkExecutor
         protected string $action,
         protected array $payloads,
     ) {}
-
-    /**
-     * @param  class-string  $action
-     * @param  array<int, array<string, mixed>>  $payloads
-     */
-    public static function make(string $action, array $payloads): static
-    {
-        return new static($action, $payloads);
-    }
 
     public function name(string $name): static
     {
@@ -64,7 +58,7 @@ class BulkExecutor
             fn (array $payload) => $this->action::make($payload)
                 ->checkPermission()
                 ->validate(),
-            array_values($this->payloads),
+            $this->payloads,
         );
 
         Bus::monitoredBatch($jobs)
