@@ -7,6 +7,7 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -28,12 +29,19 @@ class Notifications extends Component
         return view('flux::livewire.features.notifications');
     }
 
+    #[On('notifications-changed')]
+    public function refreshUnread(): void
+    {
+        $this->unread = auth()->user()->unreadNotifications()->count();
+    }
+
     #[Renderless]
     public function acceptNotify(Notification $notification): void
     {
         $accept = data_get($notification->data, 'accept');
         $notification->markAsRead();
         $this->unread = max(0, $this->unread - 1);
+        $this->dispatch('notifications-changed');
 
         $this->js(<<<'JS'
             $tsui.close.slide('notifications-slide');
@@ -55,6 +63,7 @@ class Notifications extends Component
     {
         auth()->user()->unreadNotifications->markAsRead();
         $this->unread = 0;
+        $this->dispatch('notifications-changed');
 
         $this->js(<<<'JS'
             $tsui.close.slide('notifications-slide');
@@ -67,6 +76,7 @@ class Notifications extends Component
         $notification->markAsRead();
 
         $this->unread = max(0, $this->unread - 1);
+        $this->dispatch('notifications-changed');
         if (! $this->unread) {
             $this->js(<<<'JS'
                 $tsui.close.slide('notifications-slide');
@@ -100,6 +110,8 @@ class Notifications extends Component
         $notification->toast($this)
             ->id(data_get($notify, 'contextId'))
             ->send();
+
+        $this->dispatch('notifications-changed');
     }
 
     #[Renderless]
