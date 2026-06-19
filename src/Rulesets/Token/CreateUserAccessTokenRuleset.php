@@ -16,10 +16,8 @@ class CreateUserAccessTokenRuleset extends FluxRuleset
                 'required',
                 'string',
                 Rule::in([
-                    '*',
                     'interface',
                     'user',
-                    'address',
                 ]),
             ],
         ];
