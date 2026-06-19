@@ -8,6 +8,7 @@ use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Notification extends DatabaseNotification
@@ -15,6 +16,15 @@ class Notification extends DatabaseNotification
     use MassPrunable, ResolvesRelationsThroughContainer;
 
     // Public methods
+    public function menuArea(): ?string
+    {
+        if (data_get($this->data, 'menu_indicator') === false) {
+            return null;
+        }
+
+        return Str::before(data_get($this->data, 'accept.route', ''), '.') ?: null;
+    }
+
     public function prunable(): Builder
     {
         return static::query()
