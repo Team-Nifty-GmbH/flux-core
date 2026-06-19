@@ -22,7 +22,7 @@ class Notification extends DatabaseNotification
             return null;
         }
 
-        return Str::before(data_get($this->data, 'accept.route', ''), '.') ?: null;
+        return Str::before(data_get($this->data, 'accept.route') ?? '', '.') ?: null;
     }
 
     public function prunable(): Builder
