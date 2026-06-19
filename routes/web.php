@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\Token\CreateUserAccessToken;
 use FluxErp\Http\Controllers\AssetController;
 use FluxErp\Http\Controllers\FilePondChunkController;
 use FluxErp\Http\Controllers\LoginLinkController;
@@ -53,6 +54,9 @@ Route::middleware('web')
         Route::middleware(['auth:web', 'throttle:300,1'])->group(function (): void {
             Route::match(['POST', 'PATCH'], '/file-pond/chunk', [FilePondChunkController::class, 'handle'])
                 ->name('file-pond.chunk');
+
+            Route::post('/user/access-token', CreateUserAccessToken::class)
+                ->name('user.access-token');
         });
 
         Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function (): void {
