@@ -204,7 +204,9 @@ abstract class FluxAction
             }
         }
 
-        $isBulk = $this instanceof SupportsBulkExecution && array_is_list($this->data);
+        $isBulk = $this instanceof SupportsBulkExecution
+            && count($this->data) > 0
+            && array_is_list($this->data);
 
         // Only wrap in a transaction if not already inside one. Nested actions
         // (e.g. CreateOrder calling CreateOrderPosition) would otherwise create
@@ -303,16 +305,30 @@ abstract class FluxAction
             $this->setRulesFromRulesets();
         }
 
-        if ($isBulk = $this instanceof SupportsBulkExecution && array_is_list($this->data)) {
+        if ($this instanceof SupportsBulkExecution
+            && count($this->data) > 0
+            && array_is_list($this->data)
+        ) {
             $bulk = $this->data;
+            $data = [];
+
+            foreach ($bulk as $item) {
+                $this->data = $item;
+
+                $this->fireActionEvent(event: 'preparingForValidation');
+                $this->prepareForValidation();
+
+                if ($this->fireActionEvent(event: 'validating') !== false) {
+                    $this->validateData();
+
+                    $this->fireActionEvent(event: 'validated', halt: false);
+                }
+
+                $data[] = $this->data;
+            }
+
+            $this->data = $data;
         } else {
-            $bulk = [$this->data];
-        }
-
-        $data = [];
-        foreach ($bulk as $item) {
-            $this->data = $item;
-
             $this->fireActionEvent(event: 'preparingForValidation');
             $this->prepareForValidation();
 
@@ -321,11 +337,7 @@ abstract class FluxAction
 
                 $this->fireActionEvent(event: 'validated', halt: false);
             }
-
-            $data[] = $this->data;
         }
-
-        $this->data = $isBulk ? $data : array_first($data);
 
         return $this;
     }
