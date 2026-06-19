@@ -441,6 +441,9 @@
                                             })
                                     "
                                 />
+
+                                @stack('folder-tree-file-actions')
+
                                 @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                                     <div
                                         x-cloak
