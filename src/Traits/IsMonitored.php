@@ -52,6 +52,16 @@ trait IsMonitored
         return 0;
     }
 
+    public function toastPersistent(bool $persistent = true): void
+    {
+        $this->queueData(['toast_persistent' => $persistent], merge: true);
+    }
+
+    public function toastTimeout(int $seconds = 30): void
+    {
+        $this->queueData(['toast_timeout' => $seconds], merge: true);
+    }
+
     public function queueData(array $data, bool $merge = false): void
     {
         if (! $monitor = $this->getQueueMonitor()) {

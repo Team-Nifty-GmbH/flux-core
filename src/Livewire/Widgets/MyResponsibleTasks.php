@@ -2,15 +2,21 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Task\TaskList;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class MyResponsibleTasks extends Component
+class MyResponsibleTasks extends Component implements HasWidgetOptions
 {
     use Widgetable;
 
@@ -59,6 +65,35 @@ class MyResponsibleTasks extends Component
     public function loadMore(): void
     {
         $this->limit += 25;
+    }
+
+    #[Renderless]
+    public function options(): array
+    {
+        return [
+            [
+                'label' => __('Show'),
+                'method' => 'showInTaskList',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function showInTaskList(): void
+    {
+        $userId = auth()->id();
+        $endStates = $this->getEndStates();
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(TaskList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->where('responsible_user_id', $userId)
+                ->whereNotIn('state', $endStates),
+            static::getLabel()
+        )
+            ->store();
+
+        $this->redirectRoute('tasks', navigate: true);
     }
 
     public function placeholder(): View|Factory

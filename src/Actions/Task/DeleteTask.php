@@ -2,11 +2,12 @@
 
 namespace FluxErp\Actions\Task;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\DeleteTaskRuleset;
 
-class DeleteTask extends FluxAction
+class DeleteTask extends DispatchableFluxAction implements SupportsBulkExecution
 {
     public static function models(): array
     {
