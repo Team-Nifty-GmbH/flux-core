@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Models\Media;
+use FluxErp\Support\MediaLibrary\ContentDisposition;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -31,7 +32,7 @@ class PrivateMediaController extends Controller
 
         $fileName = basename($relativePath);
 
-        $disposition = HeaderUtils::makeDisposition(
+        $disposition = ContentDisposition::make(
             HeaderUtils::DISPOSITION_INLINE,
             $fileName,
         );
