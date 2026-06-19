@@ -212,36 +212,9 @@ abstract class FluxAction
         // transaction counter — breaking RefreshDatabase rollback in tests and
         // risking inconsistent state on deadlock retry in production.
         if (DB::transactionLevel() === 0) {
-            DB::transaction(
-                function () use ($isBulk) {
-                    if ($isBulk) {
-                        $bulk = $this->data;
-
-                        foreach ($bulk as $data) {
-                            $this->data = $data;
-                            $this->result[] = $this->performAction();
-                        }
-
-                        $this->data = $bulk;
-                    } else {
-                        $this->result = $this->performAction();
-                    }
-                },
-                5
-            );
+            DB::transaction(fn () => $this->bulkPerformAction($isBulk), 5);
         } else {
-            if ($isBulk) {
-                $bulk = $this->data;
-
-                foreach ($bulk as $data) {
-                    $this->data = $data;
-                    $this->result[] = $this->performAction();
-                }
-
-                $this->data = $bulk;
-            } else {
-                $this->result = $this->performAction();
-            }
+            $this->bulkPerformAction($isBulk);
         }
 
         if ($current) {
@@ -352,7 +325,7 @@ abstract class FluxAction
             $data[] = $this->data;
         }
 
-        $this->data = $isBulk ? $data : array_first($this->data);
+        $this->data = $isBulk ? $data : array_first($data);
 
         return $this;
     }
@@ -383,5 +356,22 @@ abstract class FluxAction
     protected function validateData(): void
     {
         $this->data = Validator::validate($this->getData(), $this->getRules());
+    }
+
+    final protected function bulkPerformAction(bool $isBulk): void
+    {
+        if ($isBulk) {
+            $bulk = $this->data;
+            $this->result = [];
+
+            foreach ($bulk as $data) {
+                $this->data = $data;
+                $this->result[] = $this->performAction();
+            }
+
+            $this->data = $bulk;
+        } else {
+            $this->result = $this->performAction();
+        }
     }
 }
