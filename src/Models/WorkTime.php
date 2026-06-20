@@ -14,10 +14,12 @@ use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -256,6 +258,19 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
             ->using(EmployeeDayWorkTime::class)
             ->withPivot(['hours_contributed', 'break_minutes_contributed'])
             ->withTimestamps();
+    }
+
+    public function broadcastOn(string $event): array
+    {
+        $channels = Arr::wrap(parent::broadcastOn($event));
+
+        if (! is_null($this->user_id)) {
+            $channels[] = new PrivateChannel(
+                app(User::class)->getMorphClass() . '.' . $this->user_id
+            );
+        }
+
+        return $channels;
     }
 
     public function model(): MorphTo
