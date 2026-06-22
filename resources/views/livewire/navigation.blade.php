@@ -67,7 +67,7 @@
                                 @endif
                                 class="dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-gray-500 transition-colors hover:bg-gray-800/50"
                             >
-                                <div class="w-16 flex-none">
+                                <div class="relative w-16 flex-none">
                                     <div
                                         class="flex w-full justify-center text-white"
                                     >
@@ -76,6 +76,13 @@
                                             class="h-4 w-4"
                                         />
                                     </div>
+                                    @if ($notificationCount = data_get($notificationCounts, $key))
+                                        <span
+                                            class="absolute top-1/2 left-3 flex h-4 min-w-4 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-none font-semibold text-white"
+                                        >
+                                            {{ $notificationCount }}
+                                        </span>
+                                    @endif
                                 </div>
                                 <span class="truncate text-sm text-white">
                                     {{ __($navigation["label"] ?? $key) }}

@@ -166,7 +166,7 @@ test('create documents', function (): void {
         ->call('openCreateDocumentsModal')
         ->assertExecutesJs("\$tsui.open.modal('create-documents-$componentId')")
         ->assertSet('printLayouts', [
-            ['layout' => 'invoice', 'label' => 'invoice'],
+            ['layout' => 'invoice', 'label' => 'Invoice'],
         ])
         ->set([
             'selectedPrintLayouts' => [

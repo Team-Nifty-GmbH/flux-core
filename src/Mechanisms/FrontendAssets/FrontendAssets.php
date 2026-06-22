@@ -293,17 +293,22 @@ class FrontendAssets
 
     protected function registerRoutes(): void
     {
-        Route::get('/flux/flux.css', fn () => $this->returnCssAsFile())
+        // Closures must not capture $this — route:cache serializes them and a
+        // stale bound instance unserializes as __PHP_Incomplete_Class after deploys.
+        Route::get('/flux/flux.css', static fn () => app(static::class)->returnCssAsFile())
             ->name('flux.assets.css');
 
-        Route::get('/flux/flux.js', fn () => $this->returnJsAsFile())
+        Route::get('/flux/flux.js', static fn () => app(static::class)->returnJsAsFile())
             ->name('flux.assets.js');
 
-        Route::get('/flux/packages/{package}/{file}', fn (string $package, string $file) => $this->returnPackageAssetFile($package, $file))
+        Route::get(
+            '/flux/packages/{package}/{file}',
+            static fn (string $package, string $file) => app(static::class)->returnPackageAssetFile($package, $file)
+        )
             ->where('file', '.+')
             ->name('flux.assets.package');
 
-        Route::get('/flux/{file}', fn (string $file) => $this->returnAssetFile($file))
+        Route::get('/flux/{file}', static fn (string $file) => app(static::class)->returnAssetFile($file))
             ->where('file', '.+')
             ->name('flux.assets.file');
     }

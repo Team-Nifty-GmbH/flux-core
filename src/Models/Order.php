@@ -1444,6 +1444,22 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             );
     }
 
+    protected function scopeWherePaymentReminderEligible(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_number')
+            ->where('is_locked', true)
+            ->where('balance', '!=', 0)
+            ->whereHasMailablePaymentReminderAddress();
+    }
+
+    protected function scopeWherePaymentReminderDue(Builder $query): Builder
+    {
+        return $query
+            ->wherePaymentReminderEligible()
+            ->whereDate('payment_reminder_next_date', '<=', now()->toDateString());
+    }
+
     // Protected methods
     protected function makeAllSearchableUsing(Builder $query): Builder
     {

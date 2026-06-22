@@ -3,15 +3,33 @@
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Facades\Menu;
 use FluxErp\Livewire\Navigation;
+use FluxErp\Models\Notification;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
+function createNavigationNotification(?string $route): Notification
+{
+    return test()->user->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => 'test',
+        'data' => is_null($route) ? [] : ['accept' => ['route' => $route]],
+    ]);
+}
+
 test('renders successfully', function (): void {
     Livewire::test(Navigation::class)
         ->assertOk();
+});
+
+test('passes unread notification counts per menu area to the view', function (): void {
+    createNavigationNotification('tickets');
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertViewHas('notificationCounts', fn (array $counts): bool => ($counts['tickets'] ?? 0) === 1);
 });
 
 test('shows order types', function (): void {

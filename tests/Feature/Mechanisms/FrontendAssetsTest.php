@@ -3,6 +3,8 @@
 use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
 use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
 use Illuminate\Support\Facades\Route;
+use Laravel\SerializableClosure\SerializableClosure;
+use Laravel\SerializableClosure\Support\ReflectionClosure;
 
 beforeEach(function (): void {
     $this->frontendAssets = app(FrontendAssets::class);
@@ -275,6 +277,32 @@ describe('Octane Compatibility', function (): void {
         $response2 = $this->actingAsGuest()->get(route('login'));
         $response2->assertOk();
         expect($response2->getContent())->toContain('<link rel="stylesheet"');
+    });
+});
+
+describe('Route Cache Compatibility', function (): void {
+    test('asset route closures do not capture the frontend assets instance', function (string $routeName): void {
+        $closure = Route::getRoutes()->getByName($routeName)->getAction('uses');
+
+        $reflection = new ReflectionClosure($closure);
+
+        expect($reflection->isBindingRequired())->toBeFalse();
+    })->with([
+        'flux.assets.css',
+        'flux.assets.js',
+        'flux.assets.package',
+        'flux.assets.file',
+    ]);
+
+    test('asset route closures survive serialization round-trip', function (): void {
+        $closure = Route::getRoutes()->getByName('flux.assets.css')->getAction('uses');
+
+        $rehydrated = unserialize(serialize(new SerializableClosure($closure)))
+            ->getClosure();
+
+        $response = $rehydrated();
+
+        expect($response->headers->get('Content-Type'))->toBe('text/css; charset=utf-8');
     });
 });
 

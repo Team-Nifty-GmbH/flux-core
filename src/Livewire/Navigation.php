@@ -3,24 +3,39 @@
 namespace FluxErp\Livewire;
 
 use FluxErp\Facades\Menu;
+use FluxErp\Models\Notification;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Navigation extends Component
 {
+    public function mount(): void
+    {
+        $this->markAreaRead(Route::currentRouteName());
+    }
+
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.navigation', [
             'navigations' => $this->getMenu(),
             'visits' => $this->getVisits(),
             'favorites' => $this->getFavorites(),
+            'notificationCounts' => $this->getNotificationCounts(),
         ]);
+    }
+
+    #[On('notifications-changed')]
+    public function refreshNotificationCounts(): void
+    {
+        // Re-render so the per-area badges pick up the latest unread counts.
     }
 
     public function addFavorite(string $url, ?string $name = null): void
@@ -47,6 +62,49 @@ class Navigation extends Component
             ->favorites()
             ->whereKey($id)
             ->delete();
+    }
+
+    protected function markAreaRead(?string $routeName): void
+    {
+        $user = auth()->user();
+
+        if (! method_exists($user, 'unreadNotifications')) {
+            return;
+        }
+
+        $area = Str::before($routeName ?? '', '.') ?: null;
+
+        if (blank($area)) {
+            return;
+        }
+
+        $ids = $user->unreadNotifications
+            ->filter(fn (Notification $notification): bool => $notification->menuArea() === $area)
+            ->modelKeys();
+
+        if (blank($ids)) {
+            return;
+        }
+
+        $user->unreadNotifications()
+            ->whereKey($ids)
+            ->update(['read_at' => now()]);
+
+        $this->dispatch('notifications-changed');
+    }
+
+    protected function getNotificationCounts(): array
+    {
+        $user = auth()->user();
+
+        if (! method_exists($user, 'unreadNotifications')) {
+            return [];
+        }
+
+        return $user->unreadNotifications
+            ->countBy(fn (Notification $notification): ?string => $notification->menuArea())
+            ->forget('')
+            ->all();
     }
 
     protected function getFavorites(): ?array

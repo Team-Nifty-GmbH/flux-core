@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire;
 
 use FluxErp\Livewire\Forms\WorkTimeForm;
+use FluxErp\Models\User;
 use FluxErp\Models\WorkTime as WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Livewire\Actions;
@@ -31,27 +32,7 @@ class WorkTime extends Component
 
     public function mount(): void
     {
-        $this->activeWorkTimes = resolve_static(WorkTimeModel::class, 'query')
-            ->with('workTimeType:id,name')
-            ->where('user_id', auth()->id())
-            ->where('is_daily_work_time', false)
-            ->where('is_locked', false)
-            ->get()
-            ->toArray();
-
-        $this->dailyWorkTime->fill(resolve_static(WorkTimeModel::class, 'query')
-            ->where('user_id', auth()->id())
-            ->where('is_daily_work_time', true)
-            ->where('is_pause', false)
-            ->where('is_locked', false)
-            ->first() ?? []);
-
-        $this->dailyWorkTimePause->fill(resolve_static(WorkTimeModel::class, 'query')
-            ->where('user_id', auth()->id())
-            ->where('is_daily_work_time', true)
-            ->where('is_pause', true)
-            ->where('is_locked', false)
-            ->first() ?? []);
+        $this->loadWorkTimes();
     }
 
     public function render(): Factory|Application|View
@@ -63,6 +44,33 @@ class WorkTime extends Component
                 ->toArray(),
             'trackableTypes' => get_models_with_trait(Trackable::class),
         ]);
+    }
+
+    public function loadWorkTimes(): void
+    {
+        $this->activeWorkTimes = resolve_static(WorkTimeModel::class, 'query')
+            ->with('workTimeType:id,name')
+            ->where('user_id', auth()->id())
+            ->where('is_daily_work_time', false)
+            ->where('is_locked', false)
+            ->get()
+            ->toArray();
+
+        $this->dailyWorkTime->reset();
+        $this->dailyWorkTime->fill(resolve_static(WorkTimeModel::class, 'query')
+            ->where('user_id', auth()->id())
+            ->where('is_daily_work_time', true)
+            ->where('is_pause', false)
+            ->where('is_locked', false)
+            ->first() ?? []);
+
+        $this->dailyWorkTimePause->reset();
+        $this->dailyWorkTimePause->fill(resolve_static(WorkTimeModel::class, 'query')
+            ->where('user_id', auth()->id())
+            ->where('is_daily_work_time', true)
+            ->where('is_pause', true)
+            ->where('is_locked', false)
+            ->first() ?? []);
     }
 
     #[Renderless]
@@ -263,9 +271,18 @@ class WorkTime extends Component
 
     protected function getListeners(): array
     {
-        return [
+        $listeners = [
             'echo-private:' . resolve_static(WorkTimeType::class, 'getBroadcastChannel')
             . ',.WorkTimeTypeCreated' => '$refresh',
         ];
+
+        if ($userId = auth()->id()) {
+            $userChannel = 'echo-private:' . morph_alias(User::class) . '.' . $userId;
+            $listeners[$userChannel . ',.WorkTimeCreated'] = 'loadWorkTimes';
+            $listeners[$userChannel . ',.WorkTimeUpdated'] = 'loadWorkTimes';
+            $listeners[$userChannel . ',.WorkTimeDeleted'] = 'loadWorkTimes';
+        }
+
+        return $listeners;
     }
 }

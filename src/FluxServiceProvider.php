@@ -15,6 +15,7 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Notification;
@@ -125,6 +126,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->bind(BaseAuthenticateUsingPasskeyController::class, AuthenticateUsingPasskeyController::class);
 
         $this->app->singleton(AssetManager::class);
+        $this->app->singleton(MailDriverManager::class);
         $this->app->singleton(ProductTypeManager::class);
 
         // Register core providers in correct order

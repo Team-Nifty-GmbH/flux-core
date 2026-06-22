@@ -26,7 +26,7 @@
         "spatie/laravel-model-info": "^2.0",
         "spatie/laravel-model-states": "^2.4",
         "spatie/laravel-passkeys": "^1.6",
-        "spatie/laravel-permission": "^7.2",
+        "spatie/laravel-permission": "^8.0",
         "spatie/laravel-query-builder": "^7.0",
         "spatie/laravel-settings": "^3.4",
         "spatie/laravel-tags": "^4.3",

@@ -686,5 +686,6 @@
             />
             <x-button color="indigo" :text="__('Save')" wire:click="save()" />
         </div>
+        @stack('profile-integration-sections')
     @show
 </div>

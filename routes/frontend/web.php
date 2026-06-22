@@ -14,6 +14,7 @@ use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\PaymentReminderRun;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
@@ -45,6 +46,7 @@ use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
+use FluxErp\Livewire\Mobile\ShareTarget;
 use FluxErp\Livewire\MyEmployeeProfile\MyAbsenceRequest;
 use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeDay;
 use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeProfile;
@@ -124,6 +126,7 @@ use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
+use FluxErp\Support\MediaLibrary\ContentDisposition;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -165,6 +168,8 @@ Route::middleware('web')
 
         Route::middleware(['auth:web', '2fa.setup', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
+
+            Route::get('/mobile/share-target', ShareTarget::class)->name('mobile.share-target');
 
             Route::get('/private-storage/{path}', function (string $path) {
                 return response()
@@ -268,6 +273,7 @@ Route::middleware('web')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
+                        Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
                         Route::get('/transaction-assignments', TransactionAssignments::class)
@@ -382,7 +388,7 @@ Route::middleware('web')
                 ->name('media.private');
 
             Route::get('/media/{media}', function (Media $media) {
-                $disposition = HeaderUtils::makeDisposition(
+                $disposition = ContentDisposition::make(
                     request()->boolean('download')
                         ? HeaderUtils::DISPOSITION_ATTACHMENT
                         : HeaderUtils::DISPOSITION_INLINE,
