@@ -8,6 +8,13 @@ use function Livewire\trigger;
 
 trait RespondsToApiRequests
 {
+    protected array $apiResponseExcept = [
+        'config',
+        'dashboardComponent',
+        'options',
+        'widgetId',
+    ];
+
     public function __invoke()
     {
         $name = app('livewire.finder')->normalizeName(static::class);
@@ -27,7 +34,13 @@ trait RespondsToApiRequests
         $data = [];
 
         foreach ((new ReflectionClass(static::class))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $data[$property->getName()] = $this->{$property->getName()};
+            $name = $property->getName();
+
+            if (in_array($name, $this->apiResponseExcept, true)) {
+                continue;
+            }
+
+            $data[$name] = $this->{$name};
         }
 
         return array_filter($data, fn (mixed $value): bool => ! is_null($value));

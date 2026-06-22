@@ -45,8 +45,9 @@ test('widget api returns the computed result for the given parameters', function
     $this->user->givePermissionTo($this->permission);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->actingAs($this->user)
-        ->getJson('/api/widgets/current-work-time-model?employeeId=' . $this->employee->getKey());
+    $response = $this->getJson(
+        '/api/widgets/current-work-time-model?employeeId=' . $this->employee->getKey()
+    );
 
     $response->assertOk();
 
@@ -58,8 +59,7 @@ test('widget api validates the request parameters', function (): void {
     $this->user->givePermissionTo($this->permission);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->actingAs($this->user)
-        ->getJson('/api/widgets/current-work-time-model');
+    $response = $this->getJson('/api/widgets/current-work-time-model');
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrorFor('employeeId');
@@ -71,8 +71,7 @@ test('widget api forbids users without the permission', function (): void {
     ]);
     Sanctum::actingAs($otherUser, ['user']);
 
-    $response = $this->actingAs($otherUser)
-        ->getJson('/api/widgets/current-work-time-model');
+    $response = $this->getJson('/api/widgets/current-work-time-model');
 
     $response->assertForbidden();
 });
