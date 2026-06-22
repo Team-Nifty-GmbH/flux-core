@@ -271,14 +271,18 @@ class WorkTime extends Component
 
     protected function getListeners(): array
     {
-        $userChannel = 'echo-private:' . app(User::class)->getMorphClass() . '.' . auth()->id();
-
-        return [
+        $listeners = [
             'echo-private:' . resolve_static(WorkTimeType::class, 'getBroadcastChannel')
             . ',.WorkTimeTypeCreated' => '$refresh',
-            $userChannel . ',.WorkTimeCreated' => 'loadWorkTimes',
-            $userChannel . ',.WorkTimeUpdated' => 'loadWorkTimes',
-            $userChannel . ',.WorkTimeDeleted' => 'loadWorkTimes',
         ];
+
+        if ($userId = auth()->id()) {
+            $userChannel = 'echo-private:' . morph_alias(User::class) . '.' . $userId;
+            $listeners[$userChannel . ',.WorkTimeCreated'] = 'loadWorkTimes';
+            $listeners[$userChannel . ',.WorkTimeUpdated'] = 'loadWorkTimes';
+            $listeners[$userChannel . ',.WorkTimeDeleted'] = 'loadWorkTimes';
+        }
+
+        return $listeners;
     }
 }

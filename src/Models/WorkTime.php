@@ -266,7 +266,7 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
 
         if (! is_null($this->user_id)) {
             $channels[] = new PrivateChannel(
-                app(User::class)->getMorphClass() . '.' . $this->user_id
+                morph_alias(User::class) . '.' . $this->user_id
             );
         }
 
