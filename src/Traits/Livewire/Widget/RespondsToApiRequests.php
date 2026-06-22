@@ -2,51 +2,36 @@
 
 namespace FluxErp\Traits\Livewire\Widget;
 
-use ReflectionClass;
-use ReflectionProperty;
-use function Livewire\trigger;
-
 trait RespondsToApiRequests
 {
-    protected array $apiResponseExcept = [
-        'config',
-        'dashboardComponent',
-        'options',
-        'widgetId',
-    ];
-
     public function __invoke()
     {
-        $name = app('livewire.finder')->normalizeName(static::class);
-        $component = app('livewire')->new($name);
-
-        foreach (request()->validate($component->apiRules()) as $parameter => $value) {
-            $component->{$parameter} = $value;
+        foreach (request()->validate($this->apiRules()) as $parameter => $value) {
+            $this->{$parameter} = $value;
         }
 
-        trigger('mount', $component, [], null, null, []);
+        $this->mount();
 
-        return response()->json(['data' => $component->toApiResponse()]);
+        return response()->json(['data' => $this->toApiResponse()]);
     }
 
     public function toApiResponse(): array
     {
         $data = [];
 
-        foreach ((new ReflectionClass(static::class))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $name = $property->getName();
-
-            if (in_array($name, $this->apiResponseExcept, true)) {
-                continue;
-            }
-
-            $data[$name] = $this->{$name};
+        foreach ($this->apiResponseProperties() as $property) {
+            $data[$property] = $this->{$property};
         }
 
-        return array_filter($data, fn (mixed $value): bool => ! is_null($value));
+        return $data;
     }
 
     protected function apiRules(): array
+    {
+        return [];
+    }
+
+    protected function apiResponseProperties(): array
     {
         return [];
     }

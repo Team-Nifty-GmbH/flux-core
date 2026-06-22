@@ -7,6 +7,7 @@ use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
 use FluxErp\Models\WorkTimeModel;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;
@@ -53,7 +54,19 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
     protected function apiRules(): array
     {
         return [
-            'employeeId' => 'required|integer|exists:employees,id',
+            'employeeId' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Employee::class]),
+            ],
+        ];
+    }
+
+    protected function apiResponseProperties(): array
+    {
+        return [
+            'sum',
+            'subValue',
         ];
     }
 
