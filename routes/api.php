@@ -415,9 +415,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('api')
     ->middleware(['throttle:api', SetAcceptHeaders::class])
     ->group(function (): void {
+        Route::get('/broadcasting/connection', [MobileController::class, 'broadcastingConnection']);
         Route::get('/health', [MobileController::class, 'health']);
         Route::get('/mobile/config', [MobileController::class, 'config']);
-        Route::get('/broadcasting/connection', [MobileController::class, 'broadcastingConnection']);
         Route::delete('/mobile/device-token/{deviceId}', [MobileController::class, 'deleteDeviceToken']);
 
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
