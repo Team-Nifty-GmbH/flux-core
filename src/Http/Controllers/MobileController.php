@@ -74,6 +74,19 @@ class MobileController extends Controller
             ]);
     }
 
+    public function broadcastingConnection(): JsonResponse
+    {
+        $connection = config('broadcasting.connections.' . config('broadcasting.default'));
+
+        return response()
+            ->json([
+                'key' => data_get($connection, 'key'),
+                'host' => data_get($connection, 'options.host'),
+                'port' => data_get($connection, 'options.port'),
+                'scheme' => data_get($connection, 'options.scheme'),
+            ]);
+    }
+
     public function deleteDeviceToken(string $deviceId): JsonResponse|Response
     {
         $deviceToken = resolve_static(DeviceToken::class, 'query')
