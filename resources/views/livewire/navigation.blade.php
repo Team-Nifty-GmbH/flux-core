@@ -121,7 +121,7 @@
                                             <span class="truncate">
                                                 {{ __($child["label"]) }}
                                             </span>
-                                            @if ($childNotificationCount = data_get($childNotificationCounts, data_get($child, "route_name")))
+                                            @if ($childNotificationCount = data_get($childNotificationCounts, data_get($child, 'route_name')))
                                                 <span
                                                     class="ml-auto flex h-4 min-w-4 flex-none items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-none font-semibold text-white"
                                                 >

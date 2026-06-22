@@ -119,7 +119,7 @@ class Navigation extends Component
         }
 
         $childRouteNames = $navigations
-            ->flatMap(fn (array $navigation): array => data_get($navigation, 'children', []))
+            ->flatMap(fn (array $navigation): array => data_get($navigation, 'children') ?? [])
             ->pluck('route_name')
             ->filter()
             ->all();
@@ -154,7 +154,9 @@ class Navigation extends Component
                 continue;
             }
 
-            if (is_null($match) || strlen($routeName) > strlen($match)) {
+            // Among the matching ancestors the deepest one (most route segments)
+            // is the most specific menu entry the notification belongs to.
+            if (is_null($match) || substr_count($routeName, '.') > substr_count($match, '.')) {
                 $match = $routeName;
             }
         }
