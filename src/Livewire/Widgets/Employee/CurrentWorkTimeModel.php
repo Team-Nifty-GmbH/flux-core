@@ -2,15 +2,20 @@
 
 namespace FluxErp\Livewire\Widgets\Employee;
 
+use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
 use FluxErp\Models\WorkTimeModel;
+use FluxErp\Rules\ModelExists;
+use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;
 
-class CurrentWorkTimeModel extends ValueBox
+class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
 {
+    use RespondsToApiRequests;
+
     #[Locked]
     public ?int $employeeId = null;
 
@@ -44,6 +49,25 @@ class CurrentWorkTimeModel extends ValueBox
 
         $this->sum = Number::format($workTimeModel->getDailyWorkHours(), 2) . 'h';
         $this->subValue = __(':days days per week', ['days' => $workTimeModel->work_days_per_week]);
+    }
+
+    protected function apiRules(): array
+    {
+        return [
+            'employeeId' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Employee::class]),
+            ],
+        ];
+    }
+
+    protected function apiResponseProperties(): array
+    {
+        return [
+            'sum',
+            'subValue',
+        ];
     }
 
     protected function icon(): string
