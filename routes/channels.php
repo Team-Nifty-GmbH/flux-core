@@ -29,6 +29,11 @@ foreach (Relation::morphMap() as $class) {
         continue;
     }
 
+    // User has a dedicated ownership-scoped channel below; skip the generic one.
+    if (is_a($class, morphed_model('user'), true)) {
+        continue;
+    }
+
     $channel = class_to_broadcast_channel($class);
 
     Broadcast::channel(
@@ -46,8 +51,9 @@ foreach (Relation::morphMap() as $class) {
 }
 
 Broadcast::channel(
-    class_to_broadcast_channel(morphed_model('user')),
-    fn ($user, $id) => (int) $user->id === (int) $id
+    class_to_broadcast_channel(morphed_model('user'), false) . '.{id}',
+    fn (Authenticatable $user, int|string $id): bool => (int) $user->getKey() === (int) $id,
+    ['guards' => ['web', 'address', 'sanctum', 'token']]
 );
 
 Broadcast::channel('job-batch.{id}', function () {
