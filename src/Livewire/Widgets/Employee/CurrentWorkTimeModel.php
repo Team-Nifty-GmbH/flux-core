@@ -2,15 +2,19 @@
 
 namespace FluxErp\Livewire\Widgets\Employee;
 
+use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
 use FluxErp\Models\WorkTimeModel;
+use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;
 
-class CurrentWorkTimeModel extends ValueBox
+class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
 {
+    use RespondsToApiRequests;
+
     #[Locked]
     public ?int $employeeId = null;
 

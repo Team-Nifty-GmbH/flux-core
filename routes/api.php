@@ -309,6 +309,7 @@ use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
+use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
@@ -1208,6 +1209,9 @@ Route::prefix('api')
                 Route::post('/warehouses', CreateWarehouse::class);
                 Route::put('/warehouses', UpdateWarehouse::class);
                 Route::delete('/warehouses/{id}', DeleteWarehouse::class);
+
+                // Widgets
+                Route::get('/widgets/current-work-time-model', CurrentWorkTimeModel::class);
 
                 // WorkTimeModels
                 Route::get('/work-time-models/{id}', [BaseController::class, 'show'])
