@@ -50,6 +50,13 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
         $this->subValue = __(':days days per week', ['days' => $workTimeModel->work_days_per_week]);
     }
 
+    protected function apiRules(): array
+    {
+        return [
+            'employeeId' => 'required|integer|exists:employees,id',
+        ];
+    }
+
     protected function icon(): string
     {
         return 'wrench';

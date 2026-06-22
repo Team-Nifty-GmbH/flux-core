@@ -41,28 +41,28 @@ beforeEach(function (): void {
     ]);
 });
 
-test('widget api returns the computed result', function (): void {
+test('widget api returns the computed result for the given parameters', function (): void {
     $this->user->givePermissionTo($this->permission);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)
-        ->getJson('/api/widgets/current-work-time-model');
+        ->getJson('/api/widgets/current-work-time-model?employeeId=' . $this->employee->getKey());
 
     $response->assertOk();
 
-    expect($response->json('data.sum'))->toEqual(Number::format(8, 2) . 'h');
+    expect($response->json('data.sum'))->toEqual(Number::format(8, 2) . 'h')
+        ->and($response->json('data.subValue'))->toContain('5');
 });
 
-test('widget api is scoped to the calling user employee', function (): void {
+test('widget api validates the request parameters', function (): void {
     $this->user->givePermissionTo($this->permission);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)
         ->getJson('/api/widgets/current-work-time-model');
 
-    $response->assertOk();
-
-    expect($response->json('data.subValue'))->toContain('5');
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrorFor('employeeId');
 });
 
 test('widget api forbids users without the permission', function (): void {

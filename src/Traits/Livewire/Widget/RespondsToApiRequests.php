@@ -2,63 +2,39 @@
 
 namespace FluxErp\Traits\Livewire\Widget;
 
-use Illuminate\Http\JsonResponse;
 use ReflectionClass;
 use ReflectionProperty;
+use function Livewire\trigger;
 
 trait RespondsToApiRequests
 {
-    /**
-     * Public widget properties that are framework/context state, not part of
-     * the computed result.
-     */
-    protected array $apiResponseExcept = [
-        'config',
-        'dashboardComponent',
-        'employeeId',
-        'options',
-        'timeFrame',
-        'userId',
-        'widgetId',
-    ];
-
-    public function __invoke(): JsonResponse
+    public function __invoke()
     {
-        $this->fillApiContext();
+        $name = app('livewire.finder')->normalizeName(static::class);
+        $component = app('livewire')->new($name);
 
-        return response()->json(['data' => $this->toApiResponse()]);
+        foreach (request()->validate($component->apiRules()) as $parameter => $value) {
+            $component->{$parameter} = $value;
+        }
+
+        trigger('mount', $component, [], null, null, []);
+
+        return response()->json(['data' => $component->toApiResponse()]);
     }
 
     public function toApiResponse(): array
     {
-        $this->mount();
-
         $data = [];
-        $reflection = new ReflectionClass(static::class);
 
-        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $name = $property->getName();
-
-            if (in_array($name, $this->apiResponseExcept, true)) {
-                continue;
-            }
-
-            $data[$name] = $this->{$name};
+        foreach ((new ReflectionClass(static::class))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            $data[$property->getName()] = $this->{$property->getName()};
         }
 
         return array_filter($data, fn (mixed $value): bool => ! is_null($value));
     }
 
-    protected function fillApiContext(): void
+    protected function apiRules(): array
     {
-        $user = auth()->user();
-
-        if (property_exists($this, 'employeeId')) {
-            $this->employeeId = $user?->employee?->getKey();
-        }
-
-        if (property_exists($this, 'userId')) {
-            $this->userId = $user?->getKey();
-        }
+        return [];
     }
 }
