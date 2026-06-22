@@ -18,11 +18,16 @@ class Notification extends DatabaseNotification
     // Public methods
     public function menuArea(): ?string
     {
+        return Str::before($this->menuRoute() ?? '', '.') ?: null;
+    }
+
+    public function menuRoute(): ?string
+    {
         if (data_get($this->data, 'menu_indicator') === false) {
             return null;
         }
 
-        return Str::before(data_get($this->data, 'accept.route') ?? '', '.') ?: null;
+        return data_get($this->data, 'accept.route') ?: null;
     }
 
     public function prunable(): Builder
