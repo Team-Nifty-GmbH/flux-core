@@ -418,7 +418,6 @@ Route::prefix('api')
         Route::get('/broadcasting/connection', [MobileController::class, 'broadcastingConnection']);
         Route::get('/health', [MobileController::class, 'health']);
         Route::get('/mobile/config', [MobileController::class, 'config']);
-        Route::delete('/mobile/device-token/{deviceId}', [MobileController::class, 'deleteDeviceToken']);
 
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
@@ -631,6 +630,9 @@ Route::prefix('api')
                 Route::post('/currencies', CreateCurrency::class);
                 Route::put('/currencies', UpdateCurrency::class);
                 Route::delete('/currencies/{id}', DeleteCurrency::class);
+
+                // DeviceTokens
+                Route::delete('/mobile/device-token/{deviceId}', [MobileController::class, 'deleteDeviceToken']);
 
                 // DiscountGroups
                 Route::get('/discount-groups/{id}', [BaseController::class, 'show'])
