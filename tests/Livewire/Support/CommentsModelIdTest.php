@@ -5,7 +5,7 @@ use FluxErp\Models\Comment;
 use FluxErp\Models\Lead;
 use Livewire\Livewire;
 
-test('loadComments uses the passed model id so a renderless parent can switch records', function (): void {
+test('loadComments returns the comments for the bound model id', function (): void {
     $leadA = Lead::factory()->create();
     $leadB = Lead::factory()->create();
 
@@ -20,22 +20,33 @@ test('loadComments uses the passed model id so a renderless parent can switch re
 
     $component = Livewire::test(Comments::class)->instance();
 
-    $resultA = $component->loadComments($leadA->getKey());
+    $component->modelId = $leadA->getKey();
 
-    expect($component->modelId)->toBe($leadA->getKey())
-        ->and(collect($resultA['data'])->pluck('id'))
+    expect(collect($component->loadComments()['data'])->pluck('id'))
         ->toContain($commentA->getKey())
         ->not->toContain($commentB->getKey());
 
-    $resultB = $component->loadComments($leadB->getKey());
+    $component->modelId = $leadB->getKey();
 
-    expect($component->modelId)->toBe($leadB->getKey())
-        ->and(collect($resultB['data'])->pluck('id'))
+    expect(collect($component->loadComments()['data'])->pluck('id'))
         ->toContain($commentB->getKey())
         ->not->toContain($commentA->getKey());
 });
 
-test('loadStickyComments uses the passed model id', function (): void {
+test('loadStickyComments returns nothing when the bound record is not accessible', function (): void {
+    Comment::factory()->create([
+        'model_type' => morph_alias(Lead::class),
+        'model_id' => 999999,
+        'is_sticky' => true,
+    ]);
+
+    $component = Livewire::test(Comments::class)->instance();
+    $component->modelId = 999999;
+
+    expect($component->loadStickyComments())->toBe([]);
+});
+
+test('loadStickyComments returns stickies for an accessible record', function (): void {
     $lead = Lead::factory()->create();
 
     $sticky = Comment::factory()->create([
@@ -45,15 +56,11 @@ test('loadStickyComments uses the passed model id', function (): void {
     ]);
 
     $component = Livewire::test(Comments::class)->instance();
+    $component->modelId = $lead->getKey();
 
-    $result = $component->loadStickyComments($lead->getKey());
-
-    expect($component->modelId)->toBe($lead->getKey())
-        ->and(collect($result)->pluck('id'))->toContain($sticky->getKey());
+    expect(collect($component->loadStickyComments())->pluck('id'))->toContain($sticky->getKey());
 });
 
 test('loadComments without a model id returns an empty result', function (): void {
-    $component = Livewire::test(Comments::class)->instance();
-
-    expect($component->loadComments())->toBe([]);
+    expect(Livewire::test(Comments::class)->instance()->loadComments())->toBe([]);
 });

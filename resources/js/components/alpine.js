@@ -60,9 +60,6 @@ window.allLocales = allLocales;
 
 navigationSpinner();
 
-// Resolves the live record id for a Modelable component. The bound modelId can go stale when
-// the embedding parent swaps the record while skipping its own render (a renderless modal
-// opener), so read the current value straight from the parent via the wire:model binding.
 const resolveModelId = (el) => () => {
     const root = el.closest('[wire\\:id]');
 
@@ -71,7 +68,10 @@ const resolveModelId = (el) => () => {
     }
 
     const wire = window.Livewire.find(root.getAttribute('wire:id'));
-    const binding = root.getAttribute('wire:model');
+    const bindingAttr = root
+        .getAttributeNames()
+        .find((name) => name.startsWith('wire:model'));
+    const binding = bindingAttr ? root.getAttribute(bindingAttr) : null;
 
     if (binding?.startsWith('$parent.') && wire?.$parent) {
         const value = wire.$parent.get(binding.slice('$parent.'.length));

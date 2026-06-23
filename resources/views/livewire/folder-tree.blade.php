@@ -134,9 +134,6 @@
                         },
                     }"
                     x-init="
-                        // Self-heal a stale modelId: when the embedding parent swaps the record
-                        // renderlessly, the bound modelId never updates. Reload from the parent's
-                        // live id whenever the tree becomes visible again (tab switch / reopen).
                         $el._refreshTreeObserver = new IntersectionObserver(
                             (entries) => {
                                 if (

@@ -80,12 +80,8 @@ abstract class Comments extends Component
     }
 
     #[Renderless]
-    public function loadComments(?int $modelId = null): array
+    public function loadComments(): array
     {
-        // The frontend resolves the live record id from the parent (Modelable can go stale
-        // when the parent reopens a modal renderlessly) and passes it in explicitly.
-        $this->modelId = $modelId ?? $this->modelId;
-
         if (! $this->modelId) {
             return [];
         }
@@ -150,11 +146,17 @@ abstract class Comments extends Component
     }
 
     #[Renderless]
-    public function loadStickyComments(?int $modelId = null): array
+    public function loadStickyComments(): array
     {
-        $this->modelId = $modelId ?? $this->modelId;
-
         if (! $this->modelId) {
+            return [];
+        }
+
+        $recordExists = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->exists();
+
+        if (! $recordExists) {
             return [];
         }
 

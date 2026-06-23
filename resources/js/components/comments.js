@@ -4,24 +4,17 @@ export default function comments() {
         stickyComments: [],
         initialized: false,
 
-        loadedModelId: null,
-
         async init() {
             this.loadComments();
 
             this.$wire.$watch('modelId', () => this.loadComments());
 
-            // The modelId is bound from the parent via wire:model (Modelable). When the parent
-            // swaps the bound record while skipping its own render (e.g. a renderless modal
-            // opener), the bound value stays stale and $watch never fires. Reload whenever this
-            // section becomes visible again (tab switch / modal reopen) if the parent's current
-            // value differs from what we last loaded.
             this.commentsObserver = new IntersectionObserver((entries) => {
                 if (
                     entries.some((entry) => entry.isIntersecting) &&
-                    this.$resolveModelId() !== this.loadedModelId
+                    this.$resolveModelId() !== this.$wire.modelId
                 ) {
-                    this.loadComments();
+                    this.$wire.modelId = this.$resolveModelId();
                 }
             });
             this.commentsObserver.observe(this.$root);
@@ -39,12 +32,9 @@ export default function comments() {
         },
 
         loadComments() {
-            const modelId = this.$resolveModelId();
-            this.loadedModelId = modelId;
-
             Promise.all([
-                this.$wire.loadComments(modelId),
-                this.$wire.loadStickyComments(modelId),
+                this.$wire.loadComments(),
+                this.$wire.loadStickyComments(),
             ]).then(([commentsResponse, stickyCommentsResponse]) => {
                 this.comments = commentsResponse.data;
                 this.stickyComments = stickyCommentsResponse;
