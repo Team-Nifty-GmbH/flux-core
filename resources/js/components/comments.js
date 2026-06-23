@@ -4,10 +4,25 @@ export default function comments() {
         stickyComments: [],
         initialized: false,
 
+        loadedModelId: null,
+
         async init() {
             this.loadComments();
 
             this.$wire.$watch('modelId', () => this.loadComments());
+
+            // The modelId is bound from the parent via wire:model (Modelable). When the parent
+            // swaps the bound record while skipping its own render (e.g. a renderless modal
+            // opener), the bound value stays stale and $watch never fires. Reload whenever this
+            // section becomes visible again (tab switch / modal reopen) if the parent's current
+            // value differs from what we last loaded.
+            this.commentsObserver = new IntersectionObserver((entries) => {
+                if (entries.some((entry) => entry.isIntersecting)
+                    && this.resolveModelId() !== this.loadedModelId) {
+                    this.loadComments();
+                }
+            });
+            this.commentsObserver.observe(this.$root);
 
             if (window.Echo && this.echoChannel) {
                 window.Echo.private(this.echoChannel)
@@ -17,10 +32,36 @@ export default function comments() {
             }
         },
 
+        destroy() {
+            this.commentsObserver?.disconnect();
+        },
+
+        /**
+         * Read the live record id from the parent through the Modelable binding instead of
+         * trusting the possibly-stale local modelId.
+         */
+        resolveModelId() {
+            const root = this.$root.closest('[wire\\:id]');
+            const binding = root?.getAttribute('wire:model');
+
+            if (binding?.startsWith('$parent.') && this.$wire.$parent) {
+                const value = this.$wire.$parent.get(binding.slice('$parent.'.length));
+
+                if (value !== undefined && value !== null) {
+                    return value;
+                }
+            }
+
+            return this.$wire.get('modelId');
+        },
+
         loadComments() {
+            const modelId = this.resolveModelId();
+            this.loadedModelId = modelId;
+
             Promise.all([
-                this.$wire.loadComments(),
-                this.$wire.loadStickyComments(),
+                this.$wire.loadComments(modelId),
+                this.$wire.loadStickyComments(modelId),
             ]).then(([commentsResponse, stickyCommentsResponse]) => {
                 this.comments = commentsResponse.data;
                 this.stickyComments = stickyCommentsResponse;
