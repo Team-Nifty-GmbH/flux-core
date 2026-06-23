@@ -11,10 +11,19 @@ class MentionableTypesManager
     use Macroable;
 
     /**
+     * @var array<string, class-string>|null
+     */
+    protected ?array $map = null;
+
+    /**
      * @return array<string, class-string>
      */
     public function map(): array
     {
+        if ($this->map !== null) {
+            return $this->map;
+        }
+
         if (! function_exists('get_models_with_trait')) {
             return [];
         }
@@ -24,7 +33,7 @@ class MentionableTypesManager
             $map[$class::mentionTypeKey()] = $class;
         }
 
-        return $map;
+        return $this->map = $map;
     }
 
     /**
