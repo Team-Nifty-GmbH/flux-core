@@ -278,16 +278,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         Mail::to($this->email)->queue(MagicLoginLink::make($this->generateLoginLink()));
     }
 
-    // Attributes
-    protected function password(): Attribute
-    {
-        return Attribute::set(
-            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
-        );
-    }
-
-    // Protected methods
-    protected function generateLoginLink(): string
+    public function generateLoginLink(): string
     {
         $plaintextToken = Str::uuid()->toString();
         $expires = now()->addMinutes(15);
@@ -307,6 +298,14 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
             [
                 'token' => $plaintextToken,
             ]
+        );
+    }
+
+    // Attributes
+    protected function password(): Attribute
+    {
+        return Attribute::set(
+            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
         );
     }
 }

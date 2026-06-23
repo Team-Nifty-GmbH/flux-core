@@ -89,4 +89,12 @@ class AuthController extends Controller
     {
         return response()->json(['status' => 'token valid']);
     }
+
+    public function loginUrl(Request $request): JsonResponse
+    {
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: ['url' => $request->user()->generateLoginLink()],
+        );
+    }
 }

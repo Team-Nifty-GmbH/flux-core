@@ -19,6 +19,8 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
     #[Locked]
     public ?int $employeeId = null;
 
+    public ?float $weeklyTarget = null;
+
     public static function getCategory(): ?string
     {
         return 'Employees';
@@ -49,6 +51,7 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
 
         $this->sum = Number::format($workTimeModel->getDailyWorkHours(), 2) . 'h';
         $this->subValue = __(':days days per week', ['days' => $workTimeModel->work_days_per_week]);
+        $this->weeklyTarget = (float) $workTimeModel->weekly_hours;
     }
 
     protected function apiRules(): array
@@ -67,6 +70,7 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
         return [
             'sum',
             'subValue',
+            'weeklyTarget',
         ];
     }
 
