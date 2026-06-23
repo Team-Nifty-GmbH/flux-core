@@ -17,8 +17,10 @@ export default function comments() {
             // section becomes visible again (tab switch / modal reopen) if the parent's current
             // value differs from what we last loaded.
             this.commentsObserver = new IntersectionObserver((entries) => {
-                if (entries.some((entry) => entry.isIntersecting)
-                    && this.$resolveModelId() !== this.loadedModelId) {
+                if (
+                    entries.some((entry) => entry.isIntersecting) &&
+                    this.$resolveModelId() !== this.loadedModelId
+                ) {
                     this.loadComments();
                 }
             });
