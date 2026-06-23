@@ -40,7 +40,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
         ?string $locale = null,
     ): BaseCollection|BaseTag|static {
         $tags = collect($values)->map(
-            fn ($value) => $value instanceof BaseTag
+            fn (mixed $value) => $value instanceof BaseTag
                 ? $value
                 : static::findOrCreateFromString((string) $value, $type, $locale)
         );
