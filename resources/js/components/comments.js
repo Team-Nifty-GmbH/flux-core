@@ -18,7 +18,7 @@ export default function comments() {
             // value differs from what we last loaded.
             this.commentsObserver = new IntersectionObserver((entries) => {
                 if (entries.some((entry) => entry.isIntersecting)
-                    && this.resolveModelId() !== this.loadedModelId) {
+                    && this.$resolveModelId() !== this.loadedModelId) {
                     this.loadComments();
                 }
             });
@@ -36,27 +36,8 @@ export default function comments() {
             this.commentsObserver?.disconnect();
         },
 
-        /**
-         * Read the live record id from the parent through the Modelable binding instead of
-         * trusting the possibly-stale local modelId.
-         */
-        resolveModelId() {
-            const root = this.$root.closest('[wire\\:id]');
-            const binding = root?.getAttribute('wire:model');
-
-            if (binding?.startsWith('$parent.') && this.$wire.$parent) {
-                const value = this.$wire.$parent.get(binding.slice('$parent.'.length));
-
-                if (value !== undefined && value !== null) {
-                    return value;
-                }
-            }
-
-            return this.$wire.get('modelId');
-        },
-
         loadComments() {
-            const modelId = this.resolveModelId();
+            const modelId = this.$resolveModelId();
             this.loadedModelId = modelId;
 
             Promise.all([

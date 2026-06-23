@@ -129,7 +129,22 @@
                             this.selection = {}
                             this.setCollection(null)
                         },
+                        destroy() {
+                            this.$el._refreshTreeObserver?.disconnect()
+                        },
                     }"
+                    x-init="
+                        // Self-heal a stale modelId: when the embedding parent swaps the record
+                        // renderlessly, the bound modelId never updates. Reload from the parent's
+                        // live id whenever the tree becomes visible again (tab switch / reopen).
+                        $el._refreshTreeObserver = new IntersectionObserver((entries) => {
+                            if (entries.some((entry) => entry.isIntersecting)
+                                && $resolveModelId() !== $wire.modelId) {
+                                window.dispatchEvent(new CustomEvent('refresh-tree', { detail: { id: $resolveModelId() } }));
+                            }
+                        });
+                        $el._refreshTreeObserver.observe($el);
+                    "
                     x-on:folder-tree-select.window="treeSelect($event.detail)"
                     x-on:refresh-tree.window="
                         $wire.modelId = $event.detail.id;

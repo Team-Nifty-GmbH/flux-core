@@ -60,24 +60,45 @@ window.allLocales = allLocales;
 
 navigationSpinner();
 
-if (window.Alpine?.version) {
+// Resolves the live record id for a Modelable component. The bound modelId can go stale when
+// the embedding parent swaps the record while skipping its own render (a renderless modal
+// opener), so read the current value straight from the parent via the wire:model binding.
+const resolveModelId = (el) => () => {
+    const root = el.closest('[wire\\:id]');
+
+    if (!root || !window.Livewire) {
+        return null;
+    }
+
+    const wire = window.Livewire.find(root.getAttribute('wire:id'));
+    const binding = root.getAttribute('wire:model');
+
+    if (binding?.startsWith('$parent.') && wire?.$parent) {
+        const value = wire.$parent.get(binding.slice('$parent.'.length));
+
+        if (value !== undefined && value !== null) {
+            return value;
+        }
+    }
+
+    return wire?.get('modelId') ?? null;
+};
+
+const registerFluxAlpine = () => {
     window.Alpine.plugin(sort);
     window.Alpine.plugin(collapse);
     window.Alpine.plugin(nuxbe);
     window.Alpine.directive('template-outlet', templateOutlet);
+    window.Alpine.magic('resolveModelId', resolveModelId);
     window.Alpine.data('folder_tree', folders);
     window.Alpine.data('comments', comments);
     window.Alpine.data('pillbox', pillbox);
+};
+
+if (window.Alpine?.version) {
+    registerFluxAlpine();
 } else {
-    window.addEventListener('alpine:init', () => {
-        window.Alpine.plugin(sort);
-        window.Alpine.plugin(collapse);
-        window.Alpine.plugin(nuxbe);
-        window.Alpine.directive('template-outlet', templateOutlet);
-        window.Alpine.data('folder_tree', folders);
-        window.Alpine.data('comments', comments);
-        window.Alpine.data('pillbox', pillbox);
-    });
+    window.addEventListener('alpine:init', registerFluxAlpine);
 }
 
 document.addEventListener('livewire:navigated', wireNavigation, { once: true });
