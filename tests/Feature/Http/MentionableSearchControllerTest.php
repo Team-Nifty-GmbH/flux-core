@@ -6,7 +6,7 @@ use FluxErp\Models\User;
 use FluxErp\Tests\Fixtures\FixtureTicketPolicy;
 use Illuminate\Support\Facades\Gate;
 
-it('returns mention candidates filtered by policy', function (): void {
+test('returns mention candidates filtered by policy', function (): void {
     $user = User::factory()->create();
     $allowed = Ticket::factory()->create([
         'title' => 'Allowed Test',
@@ -29,7 +29,7 @@ it('returns mention candidates filtered by policy', function (): void {
         ->assertJsonMissing(['token' => '#ticket:' . $forbidden->getKey()]);
 });
 
-it('skips a mentionable type whose search throws without failing the request', function (): void {
+test('skips a mentionable type whose search throws without failing the request', function (): void {
     Role::findOrCreate('Super Admin');
     $admin = User::factory()->create();
     $admin->assignRole('Super Admin');
@@ -48,7 +48,7 @@ it('skips a mentionable type whose search throws without failing the request', f
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
 });
 
-it('returns 422 for unknown types', function (): void {
+test('returns 422 for unknown types', function (): void {
     $u = User::factory()->create();
 
     $this->actingAs($u, 'web')
@@ -56,7 +56,7 @@ it('returns 422 for unknown types', function (): void {
         ->assertStatus(422);
 });
 
-it('combines results from multiple types', function (): void {
+test('combines results from multiple types', function (): void {
     Role::findOrCreate('Super Admin');
     $admin = User::factory()->create();
     $admin->assignRole('Super Admin');
@@ -74,7 +74,7 @@ it('combines results from multiple types', function (): void {
         ->assertJsonCount(2);
 });
 
-it('excludes inactive users from mention candidates', function (): void {
+test('excludes inactive users from mention candidates', function (): void {
     Role::findOrCreate('Super Admin');
     $admin = User::factory()->create();
     $admin->assignRole('Super Admin');
@@ -89,7 +89,7 @@ it('excludes inactive users from mention candidates', function (): void {
         ->assertJsonFragment(['token' => '@user:' . $active->getKey()]);
 });
 
-it('tags record results with a record kind', function (): void {
+test('tags record results with a record kind', function (): void {
     $user = User::factory()->create();
     $ticket = Ticket::factory()->create([
         'title' => 'Kindcheck',
@@ -106,7 +106,7 @@ it('tags record results with a record kind', function (): void {
         ->assertJsonFragment(['kind' => 'record', 'token' => '#ticket:' . $ticket->getKey()]);
 });
 
-it('scopes the search to a single type via a type prefix', function (): void {
+test('scopes the search to a single type via a type prefix', function (): void {
     Role::findOrCreate('Super Admin');
     $admin = User::factory()->create();
     $admin->assignRole('Super Admin');
@@ -125,7 +125,7 @@ it('scopes the search to a single type via a type prefix', function (): void {
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
 });
 
-it('matches the type prefix case-insensitively', function (): void {
+test('matches the type prefix case-insensitively', function (): void {
     $user = User::factory()->create();
     $ticket = Ticket::factory()->create([
         'title' => 'Caseme',
@@ -142,7 +142,7 @@ it('matches the type prefix case-insensitively', function (): void {
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
 });
 
-it('treats an unknown type prefix as a normal query', function (): void {
+test('treats an unknown type prefix as a normal query', function (): void {
     $user = User::factory()->create();
     $ticket = Ticket::factory()->create([
         'title' => 'banana:Splitme',
@@ -159,7 +159,7 @@ it('treats an unknown type prefix as a normal query', function (): void {
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
 });
 
-it('returns type scope chips for an empty query with multiple types', function (): void {
+test('returns type scope chips for an empty query with multiple types', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user, 'web')
@@ -169,7 +169,7 @@ it('returns type scope chips for an empty query with multiple types', function (
         ->assertJsonFragment(['kind' => 'scope', 'scope_key' => 'order']);
 });
 
-it('does not return scope chips for a single-type empty query', function (): void {
+test('does not return scope chips for a single-type empty query', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user, 'web')

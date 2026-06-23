@@ -1,7 +1,8 @@
 <?php
 
-namespace FluxErp\Services\Mentions;
+namespace FluxErp\Support\Mentions;
 
+use FluxErp\Facades\MentionableTypes;
 use FluxErp\Models\User;
 use Illuminate\Support\Collection;
 
@@ -16,7 +17,7 @@ class MentionRenderer
         return $text;
     }
 
-    private function renderRecordTokens(string $text): string
+    protected function renderRecordTokens(string $text): string
     {
         $types = MentionableTypes::map();
         $userKey = morph_alias(User::class);
@@ -86,7 +87,7 @@ class MentionRenderer
         ) ?? $text;
     }
 
-    private function renderExplicitUserTokens(string $text): string
+    protected function renderExplicitUserTokens(string $text): string
     {
         $userKey = morph_alias(User::class);
         $pattern = '/(?<!\\\\)(?<![A-Za-z0-9._-])@' . preg_quote($userKey, '/') . ':(\d+)/i';
@@ -114,7 +115,7 @@ class MentionRenderer
         ) ?? $text;
     }
 
-    private function renderMemberTokens(string $text, Collection $members): string
+    protected function renderMemberTokens(string $text, Collection $members): string
     {
         if ($members->isEmpty()) {
             return $text;
@@ -138,7 +139,7 @@ class MentionRenderer
         ) ?? $text;
     }
 
-    private function renderUserPill(User $user): string
+    protected function renderUserPill(User $user): string
     {
         $id = (int) $user->getKey();
         $label = e($user->getMentionLabel());

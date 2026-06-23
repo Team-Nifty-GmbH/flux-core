@@ -32,17 +32,17 @@ beforeEach(function (): void {
     MentionableFixture::register('ticket');
 });
 
-it('persists a user mention when a source model is saved', function (): void {
+test('persists a user mention when a source model is saved', function (): void {
     $u = User::factory()->create();
     CommentLikeFixture::createWithText("Hallo @user:{$u->id}");
 
     expect(Mention::count())->toBe(1);
     expect(Mention::first()->user_id)->toBe($u->id);
-    expect(Mention::first()->mention_type)->toBe(MentionTypeEnum::User);
+    expect(Mention::first()->mention_type_enum->value)->toBe(MentionTypeEnum::User);
     expect(Mention::first()->mention_target_type)->toBeNull();
 });
 
-it('persists a record mention when a source model is saved', function (): void {
+test('persists a record mention when a source model is saved', function (): void {
     $fixture = MentionableFixture::query()->create(['name' => 'Acme']);
     CommentLikeFixture::createWithText("Hallo #ticket:{$fixture->id}");
 
@@ -50,7 +50,7 @@ it('persists a record mention when a source model is saved', function (): void {
     expect(Mention::first()->mention_target_type)->toBe('ticket');
 });
 
-it('fires MentionNotification only for newly-added user mentions on edit', function (): void {
+test('fires MentionNotification only for newly-added user mentions on edit', function (): void {
     Notification::fake();
     $u = User::factory()->create();
     $u2 = User::factory()->create();
@@ -66,7 +66,7 @@ it('fires MentionNotification only for newly-added user mentions on edit', funct
     Notification::assertSentTo($u2, MentionNotification::class);   // new
 });
 
-it('does not crash subscribing an authorized record mention whose target is not notifiable', function (): void {
+test('does not crash subscribing an authorized record mention whose target is not notifiable', function (): void {
     $role = FluxErp\Models\Role::create(['name' => 'Super Admin', 'guard_name' => 'web']);
     $this->user->assignRole($role);
 
@@ -78,12 +78,12 @@ it('does not crash subscribing an authorized record mention whose target is not 
         Mention::query()
             ->where('mention_target_type', 'ticket')
             ->where('mention_target_id', $fixture->id)
-            ->where('mention_type', MentionTypeEnum::Record->value)
+            ->where('mention_type_enum', MentionTypeEnum::Record)
             ->count()
     )->toBe(1);
 });
 
-it('dispatches a source-provided notification when the source implements ProvidesMentionNotification', function (): void {
+test('dispatches a source-provided notification when the source implements ProvidesMentionNotification', function (): void {
     Notification::fake();
     NotifyingCommentFixture::register('notifying_comment');
     $u = User::factory()->create();
@@ -94,7 +94,7 @@ it('dispatches a source-provided notification when the source implements Provide
     Notification::assertNotSentTo($u, MentionNotification::class);
 });
 
-it('removes mention rows when the source is deleted', function (): void {
+test('removes mention rows when the source is deleted', function (): void {
     $u = User::factory()->create();
     $source = CommentLikeFixture::createWithText("@user:{$u->id}");
 

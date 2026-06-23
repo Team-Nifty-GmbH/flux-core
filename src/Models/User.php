@@ -101,6 +101,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return false;
     }
 
+    public static function mentionTypeIcon(): string
+    {
+        return 'user';
+    }
+
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -108,11 +113,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
                 'is_active',
             ],
         ];
-    }
-
-    public static function mentionTypeIcon(): string
-    {
-        return 'user';
     }
 
     public static function searchMentionCandidates(string $query, int $limit = 5): Collection

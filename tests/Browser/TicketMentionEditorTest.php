@@ -12,7 +12,7 @@ use function Pest\Browser\visit;
  * (PlaywrightOutdatedException). See CommentMentionEditorTest for the selector
  * caveats (duplicated comment input, no open-form trigger).
  */
-it('mentions a ticket from inside a comment and persists the @ticket token', function (): void {
+test('mentions a ticket from inside a comment and persists the @ticket token', function (): void {
     $actor = User::factory()->create();
     $referenced = Ticket::factory()->create([
         'title' => 'Reference Me',
@@ -42,7 +42,7 @@ it('mentions a ticket from inside a comment and persists the @ticket token', fun
  * keeps the suggestion open so the rest of the term is searched within that
  * type only.
  */
-it('scopes the # search to tickets via a scope chip', function (): void {
+test('scopes the # search to tickets via a scope chip', function (): void {
     $actor = User::factory()->create();
     $referenced = Ticket::factory()->create([
         'title' => 'Scope Target',

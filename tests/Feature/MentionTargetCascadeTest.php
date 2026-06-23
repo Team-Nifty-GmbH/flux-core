@@ -4,11 +4,11 @@ use FluxErp\Models\Comment;
 use FluxErp\Models\Mention;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
-use FluxErp\Services\Mentions\MentionHtml;
-use FluxErp\Services\Mentions\MentionRenderer;
+use FluxErp\Support\Mentions\MentionHtml;
+use FluxErp\Support\Mentions\MentionRenderer;
 use Illuminate\Support\Facades\Notification;
 
-it('deletes mention rows when the source comment is deleted', function (): void {
+test('deletes mention rows when the source comment is deleted', function (): void {
     Notification::fake();
     $user = User::factory()->create();
     $ticket = Ticket::factory()->create([
@@ -29,7 +29,7 @@ it('deletes mention rows when the source comment is deleted', function (): void 
     expect(Mention::count())->toBe(0);
 });
 
-it('renders fallback pill for deleted record target', function (): void {
+test('renders fallback pill for deleted record target', function (): void {
     Notification::fake();
     $user = User::factory()->create();
     $ticket = Ticket::factory()->create([

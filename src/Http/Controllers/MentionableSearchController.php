@@ -2,8 +2,8 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Facades\MentionableTypes;
 use FluxErp\Models\User;
-use FluxErp\Services\Mentions\MentionableTypes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;

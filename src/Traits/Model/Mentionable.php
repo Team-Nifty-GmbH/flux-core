@@ -18,7 +18,7 @@ trait Mentionable
 
     public static function mentionTypeLabel(): string
     {
-        return Str::headline(class_basename(static::class));
+        return Str::headline(morph_alias(static::class));
     }
 
     public static function mentionTypeIcon(): string

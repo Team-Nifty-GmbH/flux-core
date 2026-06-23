@@ -4,7 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\MentionsContent;
-use FluxErp\Services\Mentions\MentionHtml;
+use FluxErp\Support\Mentions\MentionHtml;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
@@ -61,6 +61,14 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
         return $this->model_type . '.' . $this->model_id;
     }
 
+    public function broadcastWith(): array
+    {
+        $data = $this->toArray();
+        $data['user'] = $this->user;
+
+        return ['model' => $data];
+    }
+
     /**
      * @return array<int, string>
      */
@@ -72,14 +80,6 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
     public function mentionScannableText(): string
     {
         return MentionHtml::toTokens((string) $this->comment);
-    }
-
-    public function broadcastWith(): array
-    {
-        $data = $this->toArray();
-        $data['user'] = $this->user;
-
-        return ['model' => $data];
     }
 
     // Attributes

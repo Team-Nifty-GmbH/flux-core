@@ -3,16 +3,13 @@
 namespace FluxErp\Enums;
 
 use FluxErp\Enums\Traits\EnumTrait;
+use FluxErp\Support\Enums\FluxEnum;
 
-enum MentionTypeEnum: string
+class MentionTypeEnum extends FluxEnum
 {
     use EnumTrait;
 
-    case User = 'user';
+    final public const string User = 'user';
 
-    case Record = 'record';
-
-    case Channel = 'channel';
-
-    case Here = 'here';
+    final public const string Record = 'record';
 }

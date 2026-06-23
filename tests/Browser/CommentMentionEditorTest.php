@@ -16,7 +16,7 @@ use function Pest\Browser\visit;
  * visible instance. There is no "open comment form" trigger; the form is always
  * rendered when the user may create comments.
  */
-it('mentions a user in a comment and persists the @user token', function (): void {
+test('mentions a user in a comment and persists the @user token', function (): void {
     $user = User::factory()->create(['firstname' => 'Findus']);
     $actor = User::factory()->create();
     $ticket = Ticket::factory()->create([

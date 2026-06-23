@@ -19,8 +19,9 @@ class Mention extends FluxModel
     protected function casts(): array
     {
         return [
-            'mention_type' => MentionTypeEnum::class,
+            'mention_type_enum' => MentionTypeEnum::class,
             'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 

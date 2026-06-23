@@ -8,7 +8,7 @@ use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Models\Mention;
 use FluxErp\Models\User;
 use FluxErp\Notifications\MentionNotification;
-use FluxErp\Services\Mentions\MentionSync;
+use FluxErp\Support\Mentions\MentionSync;
 use Illuminate\Database\Eloquent\Model;
 
 class RecordsMentionsObserver
@@ -35,9 +35,9 @@ class RecordsMentionsObserver
     /**
      * @param  array<string, mixed>  $row
      */
-    private function dispatchForAddedRow(Model $source, array $row): void
+    protected function dispatchForAddedRow(Model $source, array $row): void
     {
-        $type = MentionTypeEnum::from($row['mention_type']);
+        $type = $row['mention_type_enum'];
 
         if ($type === MentionTypeEnum::User && $row['user_id']) {
             $notification = $source instanceof ProvidesMentionNotification

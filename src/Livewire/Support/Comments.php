@@ -6,7 +6,7 @@ use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
-use FluxErp\Services\Mentions\MentionPillRefresher;
+use FluxErp\Support\Mentions\MentionPillRefresher;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;

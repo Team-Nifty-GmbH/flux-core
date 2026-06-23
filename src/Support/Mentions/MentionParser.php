@@ -1,8 +1,9 @@
 <?php
 
-namespace FluxErp\Services\Mentions;
+namespace FluxErp\Support\Mentions;
 
 use FluxErp\Enums\MentionTypeEnum;
+use FluxErp\Facades\MentionableTypes;
 use FluxErp\Models\User;
 use Illuminate\Support\Collection;
 
@@ -10,7 +11,7 @@ class MentionParser
 {
     /**
      * @param  Collection<int, object>  $members
-     * @return array<int, array{type: MentionTypeEnum, user_id: ?int, mentionable_type: ?string, mentionable_id: ?int, raw: string}>
+     * @return array<int, array{type: string, user_id: ?int, mentionable_type: ?string, mentionable_id: ?int, raw: string}>
      */
     public function parse(string $text, Collection $members): array
     {
@@ -81,18 +82,6 @@ class MentionParser
             $token = strtolower($tokenMatch[0]);
             $raw = '@' . $tokenMatch[0];
 
-            if ($token === 'here') {
-                $out[] = $this->plain(MentionTypeEnum::Here, null, $raw);
-
-                continue;
-            }
-
-            if ($token === 'all' || $token === 'channel') {
-                $out[] = $this->plain(MentionTypeEnum::Channel, null, $raw);
-
-                continue;
-            }
-
             if (isset($byFirstname[$token])) {
                 foreach ($byFirstname[$token] as $u) {
                     $out[] = $this->plain(MentionTypeEnum::User, (int) $u->id, $raw);
@@ -112,7 +101,7 @@ class MentionParser
     /**
      * @param  array<int, array{0: int, 1: int}>  $consumed
      */
-    private function offsetConsumed(int $offset, array $consumed): bool
+    protected function offsetConsumed(int $offset, array $consumed): bool
     {
         foreach ($consumed as [$start, $end]) {
             if ($offset >= $start && $offset < $end) {
@@ -124,9 +113,9 @@ class MentionParser
     }
 
     /**
-     * @return array{type: MentionTypeEnum, user_id: ?int, mentionable_type: ?string, mentionable_id: ?int, raw: string}
+     * @return array{type: string, user_id: ?int, mentionable_type: ?string, mentionable_id: ?int, raw: string}
      */
-    private function plain(MentionTypeEnum $type, ?int $userId, string $raw): array
+    protected function plain(string $type, ?int $userId, string $raw): array
     {
         return [
             'type' => $type,

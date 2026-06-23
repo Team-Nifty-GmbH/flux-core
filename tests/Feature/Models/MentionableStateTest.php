@@ -18,7 +18,7 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
 });
 
-it('exposes the ticket state as its mention state', function (): void {
+test('exposes the ticket state as its mention state', function (): void {
     $ticket = Ticket::factory()->create([
         'authenticatable_type' => $this->user->getMorphClass(),
         'authenticatable_id' => $this->user->getKey(),
@@ -33,7 +33,7 @@ it('exposes the ticket state as its mention state', function (): void {
     expect($state->color)->toBe('violet');
 });
 
-it('exposes the order state as its mention state', function (): void {
+test('exposes the order state as its mention state', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
     $orderType = OrderType::factory()->create(['order_type_enum' => OrderTypeEnum::Order]);

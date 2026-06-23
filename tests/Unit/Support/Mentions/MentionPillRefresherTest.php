@@ -1,6 +1,6 @@
 <?php
 
-use FluxErp\Services\Mentions\MentionPillRefresher;
+use FluxErp\Support\Mentions\MentionPillRefresher;
 use FluxErp\Tests\Fixtures\MentionableFixture;
 use Illuminate\Support\Facades\Schema;
 
@@ -19,7 +19,7 @@ beforeEach(function (): void {
     MentionableFixture::register('mentionable_fixture');
 });
 
-it('injects current state attributes into a stored record pill', function (): void {
+test('injects current state attributes into a stored record pill', function (): void {
     $record = MentionableFixture::create([
         'name' => 'RMA 1234',
         'state_label' => 'In Progress',
@@ -40,7 +40,7 @@ it('injects current state attributes into a stored record pill', function (): vo
     expect($out)->toContain('<p>Schau ');
 });
 
-it('reflects the records current state, not a stored one', function (): void {
+test('reflects the records current state, not a stored one', function (): void {
     $record = MentionableFixture::create([
         'name' => 'RMA 1234',
         'state_label' => 'Done',
@@ -60,7 +60,7 @@ it('reflects the records current state, not a stored one', function (): void {
     expect(substr_count($out, 'data-mention-state='))->toBe(1);
 });
 
-it('drops state attributes for a deleted record', function (): void {
+test('drops state attributes for a deleted record', function (): void {
     $html = '<a data-id="mentionable_fixture:999999" data-mention-state="Old"'
         . ' title="Old" style="--mention-state-color: var(--color-red-500)" href="/x">Gone</a>';
 
@@ -71,13 +71,13 @@ it('drops state attributes for a deleted record', function (): void {
     expect($out)->toContain('href="/x"');
 });
 
-it('leaves non-mention html untouched', function (): void {
+test('leaves non-mention html untouched', function (): void {
     $html = '<p>Email foo@bar.com and a <a href="/page">link</a></p>';
 
     expect($this->refresher->refresh($html))->toBe($html);
 });
 
-it('does not touch user pills', function (): void {
+test('does not touch user pills', function (): void {
     $userKey = morph_alias(FluxErp\Models\User::class);
     $html = '<a data-id="' . $userKey . ':1" href="/users/1">@Bob</a>';
 

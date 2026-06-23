@@ -39,6 +39,7 @@ use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
 use FluxErp\Support\Bus\Dispatcher as FluxDispatcher;
 use FluxErp\Support\Container\ProductTypeManager;
+use FluxErp\Support\Mentions\MentionableTypesManager;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -127,6 +128,7 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->singleton(AssetManager::class);
         $this->app->singleton(MailDriverManager::class);
+        $this->app->singleton(MentionableTypesManager::class);
         $this->app->singleton(ProductTypeManager::class);
 
         // Register core providers in correct order

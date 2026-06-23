@@ -65,6 +65,11 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
     }
 
     // Public static methods
+    public static function mentionTypeIcon(): string
+    {
+        return 'chat-bubble-left-right';
+    }
+
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -74,11 +79,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
                 'state',
             ],
         ];
-    }
-
-    public static function mentionTypeIcon(): string
-    {
-        return 'chat-bubble-left-right';
     }
 
     protected function casts(): array

@@ -8,7 +8,7 @@ use FluxErp\States\Ticket\WaitingForSupport;
 use Illuminate\Support\Arr;
 use Livewire\Livewire;
 
-it('returns the mentioned ticket current state when loading comments', function (): void {
+test('returns the mentioned ticket current state when loading comments', function (): void {
     $host = Ticket::factory()->create([
         'authenticatable_type' => morph_alias(get_class($this->user)),
         'authenticatable_id' => $this->user->getKey(),
@@ -46,7 +46,7 @@ it('returns the mentioned ticket current state when loading comments', function 
         ->and($body)->toContain('var(--color-' . $mentionState->color . '-500)');
 });
 
-it('returns the mentioned ticket current state for child/reply comments when loading comments', function (): void {
+test('returns the mentioned ticket current state for child/reply comments when loading comments', function (): void {
     $host = Ticket::factory()->create([
         'authenticatable_type' => morph_alias(get_class($this->user)),
         'authenticatable_id' => $this->user->getKey(),

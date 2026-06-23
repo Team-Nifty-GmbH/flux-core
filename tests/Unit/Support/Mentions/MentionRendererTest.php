@@ -1,6 +1,6 @@
 <?php
 
-use FluxErp\Services\Mentions\MentionRenderer;
+use FluxErp\Support\Mentions\MentionRenderer;
 use FluxErp\Tests\Fixtures\MentionableFixture;
 use Illuminate\Support\Facades\Schema;
 
@@ -18,7 +18,7 @@ beforeEach(function (): void {
     $this->renderer = app(MentionRenderer::class);
 });
 
-it('replaces #key:id tokens with anchor pills', function (): void {
+test('replaces #key:id tokens with anchor pills', function (): void {
     MentionableFixture::register('mentionable_fixture');
     $record = MentionableFixture::create(['name' => 'RMA 1234']);
     $key = $record::mentionTypeKey();
@@ -31,7 +31,7 @@ it('replaces #key:id tokens with anchor pills', function (): void {
     expect($html)->toContain('RMA 1234');
 });
 
-it('includes the type label on the record pill', function (): void {
+test('includes the type label on the record pill', function (): void {
     MentionableFixture::register('mentionable_fixture');
     $record = MentionableFixture::create(['name' => 'RMA 1234']);
     $key = $record::mentionTypeKey();
@@ -42,7 +42,7 @@ it('includes the type label on the record pill', function (): void {
     expect($html)->toContain('RMA 1234');
 });
 
-it('omits the type label on user pills', function (): void {
+test('omits the type label on user pills', function (): void {
     $user = FluxErp\Models\User::factory()->create();
 
     $html = $this->renderer->tokensToHtml("@user:{$user->getKey()}");
@@ -50,7 +50,7 @@ it('omits the type label on user pills', function (): void {
     expect($html)->not->toContain('data-mention-type');
 });
 
-it('replaces @user:id tokens with non-linking user pills', function (): void {
+test('replaces @user:id tokens with non-linking user pills', function (): void {
     $user = FluxErp\Models\User::factory()->create();
 
     $html = $this->renderer->tokensToHtml("Ping @user:{$user->getKey()} bitte");
@@ -60,7 +60,7 @@ it('replaces @user:id tokens with non-linking user pills', function (): void {
     expect($html)->not->toContain('<a');
 });
 
-it('falls back to plain text for deleted targets', function (): void {
+test('falls back to plain text for deleted targets', function (): void {
     MentionableFixture::register('mentionable_fixture');
 
     $html = $this->renderer->tokensToHtml('#mentionable_fixture:999999');
@@ -69,13 +69,13 @@ it('falls back to plain text for deleted targets', function (): void {
     expect($html)->not->toContain('<a');
 });
 
-it('leaves unknown type keys untouched', function (): void {
+test('leaves unknown type keys untouched', function (): void {
     $html = $this->renderer->tokensToHtml('#unknowntype:1');
 
     expect($html)->toBe('#unknowntype:1');
 });
 
-it('escapes label HTML', function (): void {
+test('escapes label HTML', function (): void {
     MentionableFixture::register('mentionable_fixture');
     $record = MentionableFixture::create(['name' => '<script>alert(1)</script>']);
     $key = $record::mentionTypeKey();
@@ -86,7 +86,7 @@ it('escapes label HTML', function (): void {
     expect($html)->toContain('&lt;script&gt;');
 });
 
-it('adds the state dot attributes for a record with a state', function (): void {
+test('adds the state dot attributes for a record with a state', function (): void {
     MentionableFixture::register('mentionable_fixture');
     $record = MentionableFixture::create([
         'name' => 'RMA 1234',
@@ -102,7 +102,7 @@ it('adds the state dot attributes for a record with a state', function (): void 
     expect($html)->toContain('style="--mention-state-color: var(--color-violet-500)"');
 });
 
-it('omits the state dot attributes for a record without a state', function (): void {
+test('omits the state dot attributes for a record without a state', function (): void {
     MentionableFixture::register('mentionable_fixture');
     $record = MentionableFixture::create(['name' => 'RMA 1234']);
     $key = $record::mentionTypeKey();

@@ -1,9 +1,8 @@
 <?php
 
-namespace FluxErp\Services\Mentions;
+namespace FluxErp\Support\Mentions;
 
 use FluxErp\Contracts\MentionsContent;
-use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Models\Mention;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -44,9 +43,10 @@ class MentionSync
                 'mention_source_id' => $source->getKey(),
                 'mention_target_type' => $row['mentionable_type'],
                 'mention_target_id' => $row['mentionable_id'],
-                'mention_type' => $row['type']->value,
+                'mention_type_enum' => $row['type'],
                 'user_id' => $row['user_id'],
                 'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
 
@@ -64,9 +64,11 @@ class MentionSync
         return (object) ['added' => $toCreate, 'removed' => $toDelete];
     }
 
-    private function keyForExisting(Mention $m): string
+    protected function keyForExisting(Mention $m): string
     {
-        $type = $m->mention_type instanceof MentionTypeEnum ? $m->mention_type->value : (string) $m->mention_type;
+        $type = is_object($m->mention_type_enum)
+            ? $m->mention_type_enum->value
+            : (string) ($m->mention_type_enum ?? '');
 
         return implode('|', [
             $type,
@@ -79,10 +81,10 @@ class MentionSync
     /**
      * @param  array<string, mixed>  $row
      */
-    private function keyForParsed(array $row): string
+    protected function keyForParsed(array $row): string
     {
         return implode('|', [
-            $row['type']->value,
+            $row['type'],
             (string) ($row['mentionable_type'] ?? ''),
             (string) ($row['mentionable_id'] ?? ''),
             (string) ($row['user_id'] ?? ''),

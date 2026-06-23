@@ -1,7 +1,8 @@
 <?php
 
-namespace FluxErp\Services\Mentions;
+namespace FluxErp\Support\Mentions;
 
+use FluxErp\Facades\MentionableTypes;
 use FluxErp\Models\User;
 
 class MentionPillRefresher
@@ -54,7 +55,7 @@ class MentionPillRefresher
         ) ?? $html;
     }
 
-    private function stripStateAttributes(string $attrs): string
+    protected function stripStateAttributes(string $attrs): string
     {
         if (preg_match('/\bdata-mention-state="/i', $attrs) !== 1) {
             return $attrs;

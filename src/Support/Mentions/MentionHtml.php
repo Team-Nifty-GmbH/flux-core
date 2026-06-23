@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Services\Mentions;
+namespace FluxErp\Support\Mentions;
 
 use FluxErp\Models\User;
 

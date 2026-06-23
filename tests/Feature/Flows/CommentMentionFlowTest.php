@@ -7,7 +7,7 @@ use FluxErp\Models\User;
 use FluxErp\Notifications\MentionNotification;
 use Illuminate\Support\Facades\Notification;
 
-it('records record-mentions from comment HTML and subscribes the target', function (): void {
+test('records record-mentions from comment HTML and subscribes the target', function (): void {
     Notification::fake();
     $actor = User::factory()->create();
     $ticket = Ticket::factory()->create([
@@ -26,7 +26,7 @@ it('records record-mentions from comment HTML and subscribes the target', functi
     expect(Mention::where('mention_source_id', $comment->getKey())->count())->toBe(1);
 });
 
-it('notifies a user mentioned via comment HTML', function (): void {
+test('notifies a user mentioned via comment HTML', function (): void {
     Notification::fake();
     $u = User::factory()->create();
     $actor = User::factory()->create();
