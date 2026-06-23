@@ -76,14 +76,12 @@ class MobileController extends Controller
 
     public function broadcastingConnection(): JsonResponse
     {
-        $connection = config('broadcasting.connections.' . config('broadcasting.default'));
-
         return response()
             ->json([
-                'key' => data_get($connection, 'key'),
-                'host' => data_get($connection, 'options.host'),
-                'port' => data_get($connection, 'options.port'),
-                'scheme' => data_get($connection, 'options.scheme'),
+                'key' => config('flux.vite.reverb_app_key'),
+                'host' => config('flux.vite.reverb_host'),
+                'port' => (int) config('flux.vite.reverb_port'),
+                'scheme' => config('flux.vite.reverb_protocol'),
             ]);
     }
 
