@@ -2,14 +2,18 @@
 
 namespace FluxErp\Http\Controllers;
 
+use Closure;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -78,14 +82,28 @@ class AuthController extends Controller
     public function loginUrl(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'redirect' => ['nullable', 'string', 'max:2048'],
+            'redirect' => ['nullable', 'string', function (string $attribute, mixed $value, Closure $fail): void {
+                if (! blank($value) && ! Route::has($value)) {
+                    $fail(__('The :attribute must be a valid route name.', ['attribute' => $attribute]));
+                }
+            }],
+            'redirect_params' => ['nullable', 'array'],
         ]);
+
+        $intended = null;
+        if (! blank($validated['redirect'] ?? null)) {
+            try {
+                $intended = route($validated['redirect'], $validated['redirect_params'] ?? []);
+            } catch (UrlGenerationException) {
+                throw ValidationException::withMessages([
+                    'redirect' => __('The :attribute route parameters are invalid.', ['attribute' => 'redirect']),
+                ]);
+            }
+        }
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: ['url' => $request->user()->generateLoginLink(
-                $this->resolveSafeRedirect($validated['redirect'] ?? null)
-            )],
+            data: ['url' => $request->user()->generateLoginLink($intended)],
         );
     }
 
@@ -102,24 +120,5 @@ class AuthController extends Controller
     public function validateToken(): JsonResponse
     {
         return response()->json(['status' => 'token valid']);
-    }
-
-    protected function resolveSafeRedirect(?string $redirect): ?string
-    {
-        if (blank($redirect)) {
-            return null;
-        }
-
-        if (! str_contains($redirect, '://') && ! str_starts_with($redirect, '//') && ! str_starts_with($redirect, '/')) {
-            $redirect = '/' . $redirect;
-        }
-
-        if (str_starts_with($redirect, '/') && ! str_starts_with($redirect, '//')) {
-            return url($redirect);
-        }
-
-        return parse_url($redirect, PHP_URL_HOST) === parse_url(config('app.url'), PHP_URL_HOST)
-            ? $redirect
-            : null;
     }
 }

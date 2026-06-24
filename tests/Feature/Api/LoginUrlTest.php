@@ -23,42 +23,41 @@ test('the login url endpoint requires the user ability', function (): void {
     $this->postJson('/api/user/login-url')->assertForbidden();
 });
 
-test('the login url honours a same-host redirect target', function (): void {
+test('the login url redirects to a named route', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
-    $url = $this->postJson('/api/user/login-url', ['redirect' => '/orders/5'])
-        ->assertOk()
-        ->json('data.url');
-
-    $this->get($url)->assertRedirect(url('/orders/5'));
-});
-
-test('the login url ignores an external redirect target', function (): void {
-    Sanctum::actingAs($this->user, ['user']);
-
-    $url = $this->postJson('/api/user/login-url', ['redirect' => 'https://evil.example.com/phish'])
+    $url = $this->postJson('/api/user/login-url', ['redirect' => 'dashboard'])
         ->assertOk()
         ->json('data.url');
 
     $this->get($url)->assertRedirect(route('dashboard'));
 });
 
-test('the login url treats a bare path as app-relative', function (): void {
+test('the login url resolves a named route with parameters', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
-    $url = $this->postJson('/api/user/login-url', ['redirect' => 'profile/settings'])
+    $url = $this->postJson('/api/user/login-url', [
+        'redirect' => 'orders.id',
+        'redirect_params' => ['id' => 5],
+    ])
         ->assertOk()
         ->json('data.url');
 
-    $this->get($url)->assertRedirect(url('/profile/settings'));
+    $this->get($url)->assertRedirect(route('orders.id', ['id' => 5]));
 });
 
-test('the login url rejects a protocol-relative redirect target', function (): void {
+test('the login url rejects an unknown route name', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
-    $url = $this->postJson('/api/user/login-url', ['redirect' => '//evil.example.com/phish'])
-        ->assertOk()
-        ->json('data.url');
+    $this->postJson('/api/user/login-url', ['redirect' => 'this.route.does.not.exist'])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('redirect');
+});
 
-    $this->get($url)->assertRedirect(route('dashboard'));
+test('the login url rejects a named route with missing parameters', function (): void {
+    Sanctum::actingAs($this->user, ['user']);
+
+    $this->postJson('/api/user/login-url', ['redirect' => 'orders.id'])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('redirect');
 });
