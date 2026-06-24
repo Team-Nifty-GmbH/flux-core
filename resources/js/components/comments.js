@@ -9,12 +9,26 @@ export default function comments() {
 
             this.$wire.$watch('modelId', () => this.loadComments());
 
+            this.commentsObserver = new IntersectionObserver((entries) => {
+                if (
+                    entries.some((entry) => entry.isIntersecting) &&
+                    this.$resolveModelId() !== this.$wire.modelId
+                ) {
+                    this.$wire.modelId = this.$resolveModelId();
+                }
+            });
+            this.commentsObserver.observe(this.$root);
+
             if (window.Echo && this.echoChannel) {
                 window.Echo.private(this.echoChannel)
                     .listen('.CommentCreated', () => this.loadComments())
                     .listen('.CommentUpdated', () => this.loadComments())
                     .listen('.CommentDeleted', () => this.loadComments());
             }
+        },
+
+        destroy() {
+            this.commentsObserver?.disconnect();
         },
 
         loadComments() {
