@@ -110,7 +110,11 @@ class AuthController extends Controller
             return null;
         }
 
-        if (str_starts_with($redirect, '/')) {
+        if (! str_contains($redirect, '://') && ! str_starts_with($redirect, '//') && ! str_starts_with($redirect, '/')) {
+            $redirect = '/' . $redirect;
+        }
+
+        if (str_starts_with($redirect, '/') && ! str_starts_with($redirect, '//')) {
             return url($redirect);
         }
 

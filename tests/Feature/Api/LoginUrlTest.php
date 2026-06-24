@@ -42,3 +42,23 @@ test('the login url ignores an external redirect target', function (): void {
 
     $this->get($url)->assertRedirect(route('dashboard'));
 });
+
+test('the login url treats a bare path as app-relative', function (): void {
+    Sanctum::actingAs($this->user, ['user']);
+
+    $url = $this->postJson('/api/user/login-url', ['redirect' => 'profile/settings'])
+        ->assertOk()
+        ->json('data.url');
+
+    $this->get($url)->assertRedirect(url('/profile/settings'));
+});
+
+test('the login url rejects a protocol-relative redirect target', function (): void {
+    Sanctum::actingAs($this->user, ['user']);
+
+    $url = $this->postJson('/api/user/login-url', ['redirect' => '//evil.example.com/phish'])
+        ->assertOk()
+        ->json('data.url');
+
+    $this->get($url)->assertRedirect(route('dashboard'));
+});
