@@ -41,6 +41,7 @@ class SendPaymentReminderJob implements ShouldQueue
 
         $reminder = CreatePaymentReminder::make([
             'order_id' => $order->getKey(),
+            'reminder_level' => (int) $order->payment_reminder_current_level + 1,
             'mark_as_sent' => false,
         ])
             ->validate()

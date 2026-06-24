@@ -20,6 +20,9 @@ use Illuminate\Support\Str;
 beforeEach(function (): void {
     Mail::fake();
 
+    // Reminders are dispatched as a queued batch; run them synchronously here.
+    config(['queue.default' => 'sync']);
+
     AccountingSettings::fake([
         'auto_send_reminders' => true,
         'auto_accept_secure_transaction_matches' => false,

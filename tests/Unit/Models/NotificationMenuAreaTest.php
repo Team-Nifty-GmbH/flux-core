@@ -24,8 +24,8 @@ test('has no menu area when opting out of the menu indicator', function (): void
 });
 
 test('exposes the full route as the menu route', function (): void {
-    expect(notificationWith(['accept' => ['route' => 'accounting.payment-reminders']])->menuRoute())
-        ->toBe('accounting.payment-reminders');
+    expect(notificationWith(['accept' => ['route' => 'accounting.payment-reminder-run']])->menuRoute())
+        ->toBe('accounting.payment-reminder-run');
 });
 
 test('has no menu route without a route', function (): void {
