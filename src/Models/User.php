@@ -226,6 +226,29 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
             ->first();
     }
 
+    public function generateLoginLink(): string
+    {
+        $plaintextToken = Str::uuid()->toString();
+        $expires = now()->addMinutes(15);
+        Cache::put('login_token_' . $plaintextToken,
+            [
+                'user_type' => $this->getMorphClass(),
+                'user_id' => $this->getKey(),
+                'guard' => 'web',
+                'intended_url' => Session::get('url.intended', route('dashboard')),
+            ],
+            $expires
+        );
+
+        return URL::temporarySignedRoute(
+            'login-link',
+            $expires,
+            [
+                'token' => $plaintextToken,
+            ]
+        );
+    }
+
     /**
      * @throws Exception
      */
@@ -283,30 +306,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     {
         return Attribute::set(
             fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
-        );
-    }
-
-    // Protected methods
-    protected function generateLoginLink(): string
-    {
-        $plaintextToken = Str::uuid()->toString();
-        $expires = now()->addMinutes(15);
-        Cache::put('login_token_' . $plaintextToken,
-            [
-                'user_type' => $this->getMorphClass(),
-                'user_id' => $this->getKey(),
-                'guard' => 'web',
-                'intended_url' => Session::get('url.intended', route('dashboard')),
-            ],
-            $expires
-        );
-
-        return URL::temporarySignedRoute(
-            'login-link',
-            $expires,
-            [
-                'token' => $plaintextToken,
-            ]
         );
     }
 }

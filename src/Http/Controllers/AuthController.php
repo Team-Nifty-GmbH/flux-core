@@ -75,6 +75,14 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
+    public function loginUrl(Request $request): JsonResponse
+    {
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: ['url' => $request->user()->generateLoginLink()],
+        );
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $request->user()->tokens()->delete();
