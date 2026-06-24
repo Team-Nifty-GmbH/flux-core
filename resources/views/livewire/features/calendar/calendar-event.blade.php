@@ -634,6 +634,7 @@
                                     :text="__('Reactivate')"
                                     primary
                                     wire:click="reactivate()"
+                                    loading="reactivate()"
                                 />
                             </div>
                         @endcanAction

@@ -46,7 +46,11 @@
                 "
             />
             @stack('transaction-assign-orders-modal-footer')
-            <x-button :text="__('Assign')" wire:click="assignOrders" />
+            <x-button
+                :text="__('Assign')"
+                wire:click="assignOrders()"
+                loading="assignOrders()"
+            />
         </x-slot:footer>
     </x-modal>
 
@@ -669,6 +673,7 @@
                             color="emerald"
                             wire:flux-confirm.type.warning="{{ __('Accept all assignments|All suggested transaction assignments will be accepted') }}"
                             wire:click="acceptAll()"
+                            loading="acceptAll()"
                             :text="__('Accept all')"
                             x-cloak
                             x-show="$wire.tab === '{{ __('Assignment suggestions') }}' && data.data?.length > 0"

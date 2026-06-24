@@ -28,10 +28,10 @@
                 />
                 @stack('create-documents-preview-modal-footer')
                 <x-button
-                    loading
                     color="indigo"
                     :text="__('Download')"
                     wire:click="downloadPreview()"
+                    loading="downloadPreview()"
                 />
             </x-slot:footer>
         </x-modal>
