@@ -48,8 +48,8 @@
             @stack('transaction-assign-orders-modal-footer')
             <x-button
                 :text="__('Assign')"
-                wire:click="assignOrders"
-                loading="assignOrders"
+                wire:click="assignOrders()"
+                loading="assignOrders()"
             />
         </x-slot:footer>
     </x-modal>
