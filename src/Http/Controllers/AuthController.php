@@ -77,9 +77,15 @@ class AuthController extends Controller
 
     public function loginUrl(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'redirect' => ['nullable', 'string', 'max:2048'],
+        ]);
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: ['url' => $request->user()->generateLoginLink()],
+            data: ['url' => $request->user()->generateLoginLink(
+                $this->resolveSafeRedirect($validated['redirect'] ?? null)
+            )],
         );
     }
 
@@ -96,5 +102,20 @@ class AuthController extends Controller
     public function validateToken(): JsonResponse
     {
         return response()->json(['status' => 'token valid']);
+    }
+
+    protected function resolveSafeRedirect(?string $redirect): ?string
+    {
+        if (blank($redirect)) {
+            return null;
+        }
+
+        if (str_starts_with($redirect, '/')) {
+            return url($redirect);
+        }
+
+        return parse_url($redirect, PHP_URL_HOST) === parse_url(config('app.url'), PHP_URL_HOST)
+            ? $redirect
+            : null;
     }
 }

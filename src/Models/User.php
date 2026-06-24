@@ -226,7 +226,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
             ->first();
     }
 
-    public function generateLoginLink(): string
+    public function generateLoginLink(?string $intendedUrl = null): string
     {
         $plaintextToken = Str::uuid()->toString();
         $expires = now()->addMinutes(15);
@@ -235,7 +235,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
                 'user_type' => $this->getMorphClass(),
                 'user_id' => $this->getKey(),
                 'guard' => 'web',
-                'intended_url' => Session::get('url.intended', route('dashboard')),
+                'intended_url' => $intendedUrl ?? Session::get('url.intended', route('dashboard')),
             ],
             $expires
         );

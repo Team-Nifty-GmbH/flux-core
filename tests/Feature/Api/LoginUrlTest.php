@@ -22,3 +22,23 @@ test('the login url endpoint requires the user ability', function (): void {
 
     $this->postJson('/api/user/login-url')->assertForbidden();
 });
+
+test('the login url honours a same-host redirect target', function (): void {
+    Sanctum::actingAs($this->user, ['user']);
+
+    $url = $this->postJson('/api/user/login-url', ['redirect' => '/orders/5'])
+        ->assertOk()
+        ->json('data.url');
+
+    $this->get($url)->assertRedirect(url('/orders/5'));
+});
+
+test('the login url ignores an external redirect target', function (): void {
+    Sanctum::actingAs($this->user, ['user']);
+
+    $url = $this->postJson('/api/user/login-url', ['redirect' => 'https://evil.example.com/phish'])
+        ->assertOk()
+        ->json('data.url');
+
+    $this->get($url)->assertRedirect(route('dashboard'));
+});
