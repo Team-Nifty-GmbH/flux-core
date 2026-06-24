@@ -51,7 +51,7 @@ test('the login url rejects an unknown route name', function (): void {
 
     $this->postJson('/api/user/login-url', ['redirect' => 'this.route.does.not.exist'])
         ->assertStatus(422)
-        ->assertJsonValidationErrors('redirect');
+        ->assertJsonStructure(['errors' => ['redirect']]);
 });
 
 test('the login url rejects a named route with missing parameters', function (): void {
@@ -59,5 +59,5 @@ test('the login url rejects a named route with missing parameters', function ():
 
     $this->postJson('/api/user/login-url', ['redirect' => 'orders.id'])
         ->assertStatus(422)
-        ->assertJsonValidationErrors('redirect');
+        ->assertJsonStructure(['errors' => ['redirect']]);
 });

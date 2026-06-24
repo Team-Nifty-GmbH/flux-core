@@ -2,18 +2,15 @@
 
 namespace FluxErp\Http\Controllers;
 
-use Closure;
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Http\Requests\LoginUrlRequest;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -79,27 +76,13 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function loginUrl(Request $request): JsonResponse
+    public function loginUrl(LoginUrlRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'redirect' => ['nullable', 'string', function (string $attribute, mixed $value, Closure $fail): void {
-                if (! blank($value) && ! Route::has($value)) {
-                    $fail(__('The :attribute must be a valid route name.', ['attribute' => $attribute]));
-                }
-            }],
-            'redirect_params' => ['nullable', 'array'],
-        ]);
+        $validated = $request->validated();
 
-        $intended = null;
-        if (! blank($validated['redirect'] ?? null)) {
-            try {
-                $intended = route($validated['redirect'], $validated['redirect_params'] ?? []);
-            } catch (UrlGenerationException) {
-                throw ValidationException::withMessages([
-                    'redirect' => __('The :attribute route parameters are invalid.', ['attribute' => 'redirect']),
-                ]);
-            }
-        }
+        $intended = blank($validated['redirect'] ?? null)
+            ? null
+            : route($validated['redirect'], $validated['redirect_params'] ?? []);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
