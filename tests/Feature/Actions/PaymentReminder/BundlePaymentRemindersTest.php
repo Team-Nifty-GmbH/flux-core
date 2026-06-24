@@ -2,15 +2,15 @@
 
 use FluxErp\Actions\PaymentReminder\BundlePaymentReminders;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Jobs\Accounting\SendPaymentReminderJob;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Facades\Queue;
 
 beforeEach(function (): void {
     $contact = Contact::factory()->create();
@@ -51,26 +51,33 @@ test('bundle requires order_ids', function (): void {
     BundlePaymentReminders::assertValidationErrors([], 'order_ids');
 });
 
-test('failed send leaves no reminder record and logs activity on order', function (): void {
-    $orderId = $this->order->getKey();
-    $originalLevel = $this->order->payment_reminder_current_level;
-    $originalNextDate = $this->order->payment_reminder_next_date?->toDateString();
+test('dispatches a send job per eligible order', function (): void {
+    Queue::fake();
 
-    BundlePaymentReminders::make(['order_ids' => [$orderId]])
+    $result = BundlePaymentReminders::make(['order_ids' => [$this->order->getKey()]])
         ->validate()
         ->execute();
 
-    expect(PaymentReminder::query()->where('order_id', $orderId)->count())->toBe(0);
+    expect($result['queued'])->toBe(1);
 
-    $order = Order::query()->whereKey($orderId)->first();
-    expect($order->payment_reminder_current_level)->toBe($originalLevel);
-    expect($order->payment_reminder_next_date?->toDateString())->toBe($originalNextDate);
+    Queue::assertPushed(
+        SendPaymentReminderJob::class,
+        fn (SendPaymentReminderJob $job) => $job->orderId === $this->order->getKey()
+    );
+});
 
-    $failureLogged = Activity::query()
-        ->where('subject_type', morph_alias(Order::class))
-        ->where('subject_id', $orderId)
-        ->where('event', 'payment_reminder_send_failed')
-        ->exists();
+test('passes the recipient override to the job', function (): void {
+    Queue::fake();
 
-    expect($failureLogged)->toBeTrue();
+    BundlePaymentReminders::make([
+        'order_ids' => [$this->order->getKey()],
+        'recipients' => [$this->order->contact_id . '-1' => 'override@example.com'],
+    ])
+        ->validate()
+        ->execute();
+
+    Queue::assertPushed(
+        SendPaymentReminderJob::class,
+        fn (SendPaymentReminderJob $job) => $job->recipientOverride === 'override@example.com'
+    );
 });

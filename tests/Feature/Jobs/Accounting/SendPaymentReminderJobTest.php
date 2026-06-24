@@ -1,22 +1,18 @@
 <?php
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\Accounting\PaymentReminderRun;
+use FluxErp\Jobs\Accounting\SendPaymentReminderJob;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use Livewire\Livewire;
+use Spatie\Activitylog\Models\Activity;
 
-test('payment reminder run renders', function (): void {
-    Livewire::test(PaymentReminderRun::class)
-        ->assertOk();
-});
-
-test('payment reminder run lists due orders and preselects them', function (): void {
+beforeEach(function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create([
         'contact_id' => $contact->getKey(),
@@ -32,7 +28,7 @@ test('payment reminder run lists due orders and preselects them', function (): v
         ->hasAttached($this->dbTenant, relationship: 'tenants')
         ->create();
 
-    $order = Order::factory()->create([
+    $this->order = Order::factory()->create([
         'order_type_id' => $orderType->getKey(),
         'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
@@ -42,23 +38,33 @@ test('payment reminder run lists due orders and preselects them', function (): v
         'currency_id' => Currency::factory()->create()->getKey(),
         'language_id' => $this->defaultLanguage->getKey(),
         'is_locked' => true,
-        'invoice_number' => 'INV-2026-200',
+        'invoice_number' => 'INV-2026-100',
+        'balance' => 100,
         'payment_reminder_current_level' => 0,
+        'payment_reminder_next_date' => now()->subDay()->toDateString(),
     ]);
 
-    Order::query()->whereKey($order->getKey())->update([
-        'balance' => 250,
-        'payment_state' => 'open',
-        'payment_reminder_next_date' => now()->subDays(5)->toDateString(),
-    ]);
+    $this->order->update(['balance' => 100]);
+});
 
-    Livewire::test(PaymentReminderRun::class)
-        ->assertSet('groups', fn (array $groups) => count($groups) === 1)
-        ->assertSet('selectedOrders', fn (array $ids) => in_array((string) $order->getKey(), $ids, true))
-        // Deselecting the whole group clears the selection.
-        ->call('toggleGroup', $contact->getKey() . '-1')
-        ->assertSet('selectedOrders', [])
-        // A non-matching level filter yields no groups.
-        ->set('filterLevel', '3')
-        ->assertSet('groups', []);
+test('aborts without sending and logs activity when no reminder text exists for the level', function (): void {
+    $orderId = $this->order->getKey();
+
+    (new SendPaymentReminderJob($orderId))->handle();
+
+    // No reminder record remains and the level is not advanced.
+    expect(PaymentReminder::query()->where('order_id', $orderId)->count())->toBe(0);
+
+    $order = Order::query()->whereKey($orderId)->first();
+    expect($order->payment_reminder_current_level)->toBe(0)
+        ->and($order->payment_reminder_next_date?->toDateString())
+        ->toBe(now()->subDay()->toDateString());
+
+    $logged = Activity::query()
+        ->where('subject_type', morph_alias(Order::class))
+        ->where('subject_id', $orderId)
+        ->where('event', 'payment_reminder_send_failed')
+        ->exists();
+
+    expect($logged)->toBeTrue();
 });

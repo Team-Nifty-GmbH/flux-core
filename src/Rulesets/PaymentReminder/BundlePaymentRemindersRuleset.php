@@ -21,6 +21,8 @@ class BundlePaymentRemindersRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Order::class])
                     ->wherePaymentReminderEligible(),
             ],
+            'recipients' => 'nullable|array',
+            'recipients.*' => 'email',
         ];
     }
 }
