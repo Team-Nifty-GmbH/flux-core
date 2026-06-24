@@ -43,6 +43,7 @@
                         color="red"
                         icon="x-mark"
                         wire:click="removeProduct({{ $cartFormItem['product_id'] }})"
+                        loading="removeProduct({{ $cartFormItem['product_id'] }})"
                         class="absolute top-2 right-2 z-10 h-4 w-4"
                     />
                 @endif
@@ -75,6 +76,7 @@
                 color="red"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Watchlist')]) }}"
                 wire:click="delete()"
+                loading="delete()"
                 :text="__('Delete')"
             />
         @endif
@@ -82,6 +84,7 @@
         <x-button
             color="indigo"
             wire:click="addToCart()"
+            loading="addToCart()"
             :text="__('Add products to cart')"
         />
     </x-slot:footer>

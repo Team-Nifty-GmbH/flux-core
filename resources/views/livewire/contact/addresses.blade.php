@@ -295,6 +295,7 @@
                                     <x-button
                                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"
                                         wire:click="delete()"
+                                        loading="delete()"
                                         color="red"
                                         :text="__('Delete')"
                                     />

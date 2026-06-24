@@ -62,6 +62,7 @@
                     :text="__('Assign')"
                     color="primary"
                     wire:click="assignWorkTimeModel()"
+                    loading="assignWorkTimeModel()"
                 />
             </div>
         </div>

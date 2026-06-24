@@ -201,6 +201,7 @@
                                 color="primary"
                                 icon="plus"
                                 wire:click="addCategoryDiscount()"
+                                loading="addCategoryDiscount()"
                             />
                         </div>
                     </div>
