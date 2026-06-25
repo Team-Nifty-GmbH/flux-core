@@ -10,6 +10,7 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 class ResourceView extends Component
@@ -60,9 +61,9 @@ class ResourceView extends Component
 
     public function cancel(): void
     {
+        $id = $this->resourceForm->id;
         $this->resourceForm->reset();
-        $this->mount($this->resourceForm->id);
-
+        $this->mount($id);
         $this->edit = false;
     }
 

@@ -96,6 +96,7 @@ class ResourceBooking extends FluxModel implements Calendarable, InteractsWithDa
         Carbon|string $end,
         ?array $info = null
     ): void {
+        $builder->with('resource:id,name');
         $builder->where(function (Builder $query) use ($start, $end): void {
             $query
                 ->whereBetween('start', [$start, $end])

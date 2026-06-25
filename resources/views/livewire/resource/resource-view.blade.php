@@ -115,7 +115,9 @@
             @endcan
         </x-slot:action>
 
-        <livewire:data-tables.resource-booking-list :resource-id="$resourceForm->id" />
+        <div x-on:data-table-row-clicked="$wire.editBooking($event.detail.id ?? $event.detail.record.id)">
+            <livewire:data-tables.resource-booking-list :resource-id="$resourceForm->id" />
+        </div>
     </x-card>
 
     <!-- Booking form modal -->
