@@ -38,11 +38,8 @@ class UpdateResourceBooking extends FluxAction
             ->whereKey(data_get($this->data, 'id'))
             ->first();
 
-        $this->mergeRules([
+        $this->addRules([
             'start' => [
-                'sometimes',
-                'required',
-                'date',
                 app(ResourceAvailable::class, [
                     'resourceId' => data_get($this->data, 'resource_id', $booking?->resource_id),
                     'start' => data_get($this->data, 'start', $booking?->start?->toDateTimeString()),

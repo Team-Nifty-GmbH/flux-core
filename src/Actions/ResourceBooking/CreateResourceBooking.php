@@ -29,10 +29,8 @@ class CreateResourceBooking extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->mergeRules([
+        $this->addRules([
             'start' => [
-                'required',
-                'date',
                 app(ResourceAvailable::class, [
                     'resourceId' => data_get($this->data, 'resource_id'),
                     'start' => data_get($this->data, 'start'),

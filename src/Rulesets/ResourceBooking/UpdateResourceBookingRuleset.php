@@ -46,8 +46,8 @@ class UpdateResourceBookingRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Order::class]),
             ],
-            'start' => 'sometimes|required|date',
-            'end' => 'sometimes|required|date|after:start',
+            'start' => ['sometimes', 'required', 'date'],
+            'end' => ['sometimes', 'required', 'date', 'after:start'],
             'description' => 'sometimes|nullable|string',
         ];
     }

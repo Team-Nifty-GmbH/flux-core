@@ -40,8 +40,8 @@ class CreateResourceBookingRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Order::class]),
             ],
-            'start' => 'required|date',
-            'end' => 'required|date|after:start',
+            'start' => ['required', 'date'],
+            'end' => ['required', 'date', 'after:start'],
             'description' => 'nullable|string',
         ];
     }
