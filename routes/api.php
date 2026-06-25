@@ -224,6 +224,12 @@ use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
 use FluxErp\Actions\RecordOrigin\CreateRecordOrigin;
 use FluxErp\Actions\RecordOrigin\DeleteRecordOrigin;
 use FluxErp\Actions\RecordOrigin\UpdateRecordOrigin;
+use FluxErp\Actions\Resource\CreateResource;
+use FluxErp\Actions\Resource\DeleteResource;
+use FluxErp\Actions\Resource\UpdateResource;
+use FluxErp\Actions\ResourceBooking\CreateResourceBooking;
+use FluxErp\Actions\ResourceBooking\DeleteResourceBooking;
+use FluxErp\Actions\ResourceBooking\UpdateResourceBooking;
 use FluxErp\Actions\Role\CreateRole;
 use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRole;
@@ -380,6 +386,8 @@ use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\RecordOrigin;
+use FluxErp\Models\Resource;
+use FluxErp\Models\ResourceBooking;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
@@ -1024,6 +1032,23 @@ Route::prefix('api')
                 Route::post('/purchase-invoice-positions', CreatePurchaseInvoicePosition::class);
                 Route::put('/purchase-invoice-positions', UpdatePurchaseInvoicePosition::class);
                 Route::delete('/purchase-invoice-positions/{id}', DeletePurchaseInvoicePosition::class);
+
+                // ResourceBookings
+                Route::get('/resource-bookings/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', ResourceBooking::class);
+                Route::get('/resource-bookings', [BaseController::class, 'index'])
+                    ->defaults('model', ResourceBooking::class);
+                Route::post('/resource-bookings', CreateResourceBooking::class);
+                Route::put('/resource-bookings', UpdateResourceBooking::class);
+                Route::delete('/resource-bookings/{id}', DeleteResourceBooking::class);
+
+                // Resources
+                Route::get('/resources/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Resource::class);
+                Route::get('/resources', [BaseController::class, 'index'])->defaults('model', Resource::class);
+                Route::post('/resources', CreateResource::class);
+                Route::put('/resources', UpdateResource::class);
+                Route::delete('/resources/{id}', DeleteResource::class);
 
                 // Roles
                 Route::get('/roles', [BaseController::class, 'index'])->defaults('model', Role::class);
