@@ -42,7 +42,7 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
 
     public function toMail(object $notifiable): MailMessage
     {
-        return parent::toMail($notifiable)
+        $mail = parent::toMail($notifiable)
             ->when(
                 $ticketAccount = resolve_static(MailAccount::class, 'query')
                     ->whereHas('mailFolders', fn ($query) => $query->where('can_create_ticket', true))
@@ -55,6 +55,13 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
                 . $this->model->model->getKey()
                 . ']</span>'
             ));
+
+        array_unshift(
+            $mail->introLines,
+            new HtmlString('<span style="display: none">[flux:quote]</span>')
+        );
+
+        return $mail;
     }
 
     public function via(object $notifiable): array

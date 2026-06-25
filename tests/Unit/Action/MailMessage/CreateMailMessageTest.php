@@ -3,6 +3,7 @@
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Models\Address;
+use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
@@ -59,6 +60,55 @@ test('add comment to ticket from mail message', function (): void {
     ]);
 
     expect($ticket->communications()->where('communications.id', $result->id)->exists())->toBeTrue();
+});
+
+test('strips quoted conversation from comment created from mail reply', function (): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+    $ticket = Ticket::factory()->create([
+        'authenticatable_type' => $this->address->getMorphClass(),
+        'authenticatable_id' => $this->address->getKey(),
+    ]);
+
+    $reply = 'habs freigegeben.' . PHP_EOL . 'Nächstes mal schreib ich den Mandanten dazu.';
+    $token = '[flux:comment:' . $ticket->getMorphClass() . ':' . $ticket->getKey() . ']';
+    $quotedHistory = 'Mit freundlichen Grüßen' . PHP_EOL . 'Alexander' . PHP_EOL
+        . '[flux:quote]' . PHP_EOL
+        . 'Hallo, es gibt eine neue Antwort auf Ihr Ticket.' . PHP_EOL
+        . 'Vorherige Kommentare: Hier der Videolink' . PHP_EOL
+        . 'Ursprüngliches Ticket: ...' . PHP_EOL
+        . $token;
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->id,
+        'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+        'from' => 'Tester McTestFace <' . $this->address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'text_body' => $reply . PHP_EOL . $quotedHistory,
+        'html_body' => '<p>' . $reply . '</p>'
+            . '<span style="display: none">[flux:quote]</span>'
+            . '<p>Vorherige Kommentare: Hier der Videolink' . $token . '</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ]);
+    $action->validate()->execute();
+
+    $listener = new CreateMailExecutedSubscriber();
+    $listener->handle($action);
+
+    $comment = Comment::query()
+        ->where('model_type', $ticket->getMorphClass())
+        ->where('model_id', $ticket->getKey())
+        ->latest('id')
+        ->first();
+
+    expect($comment)->not->toBeNull()
+        ->and($comment->comment)->toContain('habs freigegeben')
+        ->and($comment->comment)->not->toContain('Vorherige Kommentare')
+        ->and($comment->comment)->not->toContain('Ursprüngliches Ticket')
+        ->and($comment->comment)->not->toContain('flux:comment')
+        ->and($comment->comment)->not->toContain('[flux:quote]');
 });
 
 test('create ticket from mail message', function (): void {

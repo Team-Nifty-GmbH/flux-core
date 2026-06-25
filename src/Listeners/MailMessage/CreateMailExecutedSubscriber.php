@@ -211,11 +211,14 @@ class CreateMailExecutedSubscriber
             $model = $matches[1];
             $id = $matches[2];
 
+            $textBody = $this->stripQuotedReply($message->text_body);
+            $htmlBody = $this->stripQuotedReply($message->html_body);
+
             try {
                 $comment = CreateComment::make([
                     'model_type' => $model,
                     'model_id' => $id,
-                    'comment' => nl2br($message->text_body ?? '') ?: $message->html_body ?? $message->subject,
+                    'comment' => nl2br($textBody ?? '') ?: $htmlBody ?? $message->subject,
                     'is_internal' => false,
                 ])
                     ->actingAs($this->address)
@@ -235,5 +238,18 @@ class CreateMailExecutedSubscriber
         return [
             'action.executed: ' . resolve_static(CreateMailMessage::class, 'class') => 'handle',
         ];
+    }
+
+    protected function stripQuotedReply(?string $body): ?string
+    {
+        if ($body === null) {
+            return null;
+        }
+
+        $position = mb_strpos($body, '[flux:quote]');
+
+        return $position === false
+            ? $body
+            : rtrim(mb_substr($body, 0, $position));
     }
 }
