@@ -12,7 +12,7 @@ class RouteExists implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
-    private ?string $parameterAttribute;
+    protected ?string $parameterAttribute;
 
     public function __construct(?string $parameterAttribute = null)
     {
