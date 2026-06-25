@@ -124,6 +124,7 @@ return [
     'prohibited_unless' => ':Attribute ist unzulässig, wenn :other nicht :values ist.',
     'prohibits' => ':Attribute verbietet die Angabe von :other.',
     'regex' => ':Attribute Format ist ungültig.',
+    'resource_unavailable' => 'Die ausgewählte Ressource ist im gewählten Zeitraum nicht verfügbar.',
     'required' => ':Attribute muss ausgefüllt werden.',
     'required_array_keys' => 'Dieses Feld muss Einträge enthalten für: :values.',
     'required_if' => ':Attribute muss ausgefüllt werden, wenn :other den Wert :value hat.',
