@@ -8,6 +8,7 @@ use FluxErp\Actions\Resource\DeleteResource;
 use FluxErp\Actions\Resource\UpdateResource;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
@@ -22,8 +23,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Resource extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Categorizable, Filterable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, Searchable, SoftDeletes;
+    use Categorizable, Filterable, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     public static string $iconName = 'cube';
 
