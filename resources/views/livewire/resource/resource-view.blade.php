@@ -5,8 +5,8 @@
             <div>
                 <x-avatar
                     xl
-                    :label="$resource->getFirstMediaUrl('avatar') ? false : strtoupper(substr($resource->name ?? '', 0, 2))"
-                    :image="$resource->getFirstMediaUrl('avatar')"
+                    :label="$avatarUrl ? false : strtoupper(substr($resourceForm->name ?? '', 0, 2))"
+                    :image="$avatarUrl"
                 />
             </div>
             <div>
@@ -115,7 +115,7 @@
             @endcan
         </x-slot:action>
 
-        <livewire:data-tables.resource-booking-list :resource-id="$resource->getKey()" />
+        <livewire:data-tables.resource-booking-list :resource-id="$resourceForm->id" />
     </x-card>
 
     <!-- Booking form modal -->
@@ -149,6 +149,32 @@
                     'method' => 'POST',
                 ]"
             />
+
+            <x-select.native wire:model.live="resourceBookingForm.assignable_type" :label="__('Assignee Type')">
+                <option value="">{{ __('None') }}</option>
+                <option value="user">{{ __('User') }}</option>
+                <option value="employee">{{ __('Employee') }}</option>
+                <option value="contact">{{ __('Contact') }}</option>
+            </x-select.native>
+
+            @php
+                $assignableModel = match ($resourceBookingForm->assignable_type) {
+                    'user' => \FluxErp\Models\User::class,
+                    'employee' => \FluxErp\Models\Employee::class,
+                    'contact' => \FluxErp\Models\Contact::class,
+                    default => null,
+                };
+            @endphp
+
+            @if ($assignableModel)
+                <x-select.styled
+                    wire:model="resourceBookingForm.assignable_id"
+                    :label="__('Assignee')"
+                    select="value:id"
+                    unfiltered
+                    :request="['url' => route('search', $assignableModel), 'method' => 'POST']"
+                />
+            @endif
 
             <x-textarea
                 wire:model="resourceBookingForm.description"

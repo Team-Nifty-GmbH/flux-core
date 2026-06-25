@@ -10,7 +10,6 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 class ResourceView extends Component
@@ -18,6 +17,8 @@ class ResourceView extends Component
     use Actions;
 
     public bool $edit = false;
+
+    public ?string $avatarUrl = '';
 
     public ResourceBookingForm $resourceBookingForm;
 
@@ -31,16 +32,12 @@ class ResourceView extends Component
             ->firstOrFail();
 
         $this->resourceForm->fill($resource);
+        $this->avatarUrl = $resource->getFirstMediaUrl('avatar');
     }
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.resource.resource-view', [
-            'resource' => Resource::query()
-                ->whereKey($this->resourceForm->id)
-                ->with(['product:id,name'])
-                ->firstOrFail(),
-        ]);
+        return view('flux::livewire.resource.resource-view');
     }
 
     public function save(): bool
@@ -61,7 +58,6 @@ class ResourceView extends Component
         return true;
     }
 
-    #[Renderless]
     public function cancel(): void
     {
         $this->resourceForm->reset();
