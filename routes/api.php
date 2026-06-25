@@ -307,6 +307,7 @@ use FluxErp\Http\Controllers\MobileController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
+use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
@@ -1176,6 +1177,9 @@ Route::prefix('api')
                 });
                 Route::post('/user/login-url', [AuthController::class, 'loginUrl'])
                     ->middleware('ability:user');
+
+                Route::get('/search/{model}', SearchController::class)
+                    ->where('model', '(.*)');
 
                 Route::get('/users/{id}', [BaseController::class, 'show'])->defaults('model', User::class);
                 Route::get('/users', [BaseController::class, 'index'])->defaults('model', User::class);
