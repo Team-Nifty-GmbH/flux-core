@@ -1179,7 +1179,7 @@ Route::prefix('api')
                     ->middleware('ability:user');
 
                 Route::get('/search/{model}', SearchController::class)
-                    ->where('model', '(.*)');
+                    ->where('model', '[A-Za-z0-9._-]+');
 
                 Route::get('/users/{id}', [BaseController::class, 'show'])->defaults('model', User::class);
                 Route::get('/users', [BaseController::class, 'index'])->defaults('model', User::class);
