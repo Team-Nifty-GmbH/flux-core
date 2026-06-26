@@ -2680,6 +2680,8 @@
     "The given columns must be unique.": "Jede Spalte darf nur einmal angegeben werden.",
     "The given data was invalid.": "Die übermittelten Daten waren ungültig.",
     "The given order already has a parent.": "Der Auftrag ist bereits einem anderen Auftrag untergeordnet.",
+    "The given route does not exist.": "Die angegebene Route existiert nicht.",
+    "The given route is missing required parameters.": "Der angegebenen Route fehlen erforderliche Parameter.",
     "The login link is invalid or has expired.": "Der Anmeldelink ist ungültig oder abgelaufen.",
     "The main record must not be in the merge records.": "Der Hauptdatensatz darf nicht in den zusammenzuführenden Datensätzen sein.",
     "The media collection is read-only and cannot be modified.": "Die Mediensammlung ist schreibgeschützt und kann nicht geändert werden.",
