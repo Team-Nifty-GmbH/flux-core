@@ -1044,6 +1044,10 @@ Route::prefix('api')
                 Route::put('/schedules', UpdateSchedule::class);
                 Route::delete('/schedules/{id}', DeleteSchedule::class);
 
+                // Search
+                Route::get('/search/{model}', SearchController::class)
+                    ->where('model', '[A-Za-z0-9._-]+');
+
                 // SepaMandates
                 Route::get('/sepa-mandates/{id}', [BaseController::class, 'show'])
                     ->defaults('model', SepaMandate::class);
@@ -1177,9 +1181,6 @@ Route::prefix('api')
                 });
                 Route::post('/user/login-url', [AuthController::class, 'loginUrl'])
                     ->middleware('ability:user');
-
-                Route::get('/search/{model}', SearchController::class)
-                    ->where('model', '[A-Za-z0-9._-]+');
 
                 Route::get('/users/{id}', [BaseController::class, 'show'])->defaults('model', User::class);
                 Route::get('/users', [BaseController::class, 'index'])->defaults('model', User::class);
