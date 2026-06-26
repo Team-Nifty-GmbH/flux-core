@@ -31,10 +31,10 @@ test('the notifications endpoint returns the user notifications with an unread c
 
     $response = $this->getJson('/api/user/notifications')->assertOk();
 
-    expect($response->json('data'))->toHaveCount(1);
-    expect($response->json('data.0'))->toHaveKeys(['id', 'title', 'description', 'type', 'url', 'read_at', 'created_at']);
-    expect($response->json('data.0.title'))->toBe('A title');
-    expect($response->json('data.0.url'))->toBe('https://example.test/tickets/1');
+    expect($response->json('data.data'))->toHaveCount(1);
+    expect($response->json('data.data.0'))->toHaveKeys(['id', 'title', 'description', 'type', 'url', 'read_at', 'created_at']);
+    expect($response->json('data.data.0.title'))->toBe('A title');
+    expect($response->json('data.data.0.url'))->toBe('https://example.test/tickets/1');
     expect($response->json('unread_count'))->toBe(1);
 });
 
@@ -59,4 +59,23 @@ test('marking all notifications read clears the unread count', function (): void
 
     expect($response->json('data.unread_count'))->toBe(0);
     expect($this->user->unreadNotifications()->count())->toBe(0);
+});
+
+test('marking read rejects an id that does not belong to the user', function (): void {
+    $other = FluxErp\Models\User::factory()->create(['language_id' => $this->user->language_id]);
+    $foreign = makeNotification($other);
+    $this->user->givePermissionTo($this->readPermission);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $this->postJson('/api/user/notifications/read', ['id' => $foreign->getKey()])
+        ->assertStatus(422)
+        ->assertJsonValidationErrorFor('id');
+});
+
+test('marking read requires either an id or all', function (): void {
+    $this->user->givePermissionTo($this->readPermission);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $this->postJson('/api/user/notifications/read', [])
+        ->assertStatus(422);
 });

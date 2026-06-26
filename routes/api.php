@@ -1175,10 +1175,10 @@ Route::prefix('api')
 
                     return ResponseHelper::createResponseFromBase(statusCode: 200, data: $user);
                 });
-                Route::get('/user/notifications', [NotificationController::class, 'userIndex']);
-                Route::post('/user/notifications/read', [NotificationController::class, 'markRead']);
                 Route::post('/user/login-url', [AuthController::class, 'loginUrl'])
                     ->middleware('ability:user');
+                Route::get('/user/notifications', [NotificationController::class, 'userIndex']);
+                Route::post('/user/notifications/read', [NotificationController::class, 'markRead']);
 
                 Route::get('/users/{id}', [BaseController::class, 'show'])->defaults('model', User::class);
                 Route::get('/users', [BaseController::class, 'index'])->defaults('model', User::class);

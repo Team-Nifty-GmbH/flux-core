@@ -13,11 +13,12 @@ class NotificationController extends Controller
     {
         $user = $request->user();
 
+        $page = max((int) $request->page, 1);
+        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
+
         $notifications = $user->notifications()
-            ->latest()
-            ->limit(30)
-            ->get()
-            ->map(fn ($notification): array => [
+            ->paginate(perPage: $perPage, page: $page)
+            ->through(fn ($notification): array => [
                 'id' => $notification->getKey(),
                 'title' => data_get($notification->data, 'title'),
                 'description' => data_get($notification->data, 'description'),
@@ -25,13 +26,15 @@ class NotificationController extends Controller
                 'url' => data_get($notification->data, 'accept.url'),
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at,
-            ]);
+            ])
+            ->appends($request->query());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $notifications,
             additions: ['unread_count' => $user->unreadNotifications()->count()],
-        )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
+        )
+            ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
     public function markRead(MarkNotificationsReadRequest $request): JsonResponse
@@ -40,9 +43,12 @@ class NotificationController extends Controller
         $user = $request->user();
 
         if (data_get($validated, 'all')) {
-            $user->unreadNotifications->markAsRead();
+            $user->unreadNotifications()->update(['read_at' => now()]);
         } elseif (! blank(data_get($validated, 'id'))) {
-            $user->notifications()->whereKey(data_get($validated, 'id'))->first()?->markAsRead();
+            $user->notifications()
+                ->whereKey(data_get($validated, 'id'))
+                ->first()
+                ?->markAsRead();
         }
 
         return ResponseHelper::createResponseFromBase(
