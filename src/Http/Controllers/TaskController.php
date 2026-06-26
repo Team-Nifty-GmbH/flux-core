@@ -15,17 +15,12 @@ class TaskController extends Controller
     {
         $userId = $request->user()->getKey();
 
-        $endStates = TaskState::all()
-            ->filter(fn (string $state): bool => $state::$isEndState)
-            ->keys()
-            ->toArray();
-
         $tasks = resolve_static(Task::class, 'query')
             ->where(function (Builder $query) use ($userId): void {
                 $query->where('responsible_user_id', $userId)
                     ->orWhereRelation('users', 'users.id', $userId);
             })
-            ->whereNotIn('state', $endStates)
+            ->whereNotIn('state', TaskState::endStateNames())
             ->orderByDesc('priority')
             ->orderByRaw('ISNULL(due_date), due_date ASC')
             ->get(['id', 'name', 'state'])
