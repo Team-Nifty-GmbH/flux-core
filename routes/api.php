@@ -304,6 +304,7 @@ use FluxErp\Http\Controllers\BaseController;
 use FluxErp\Http\Controllers\CommentController;
 use FluxErp\Http\Controllers\EventSubscriptionController;
 use FluxErp\Http\Controllers\MobileController;
+use FluxErp\Http\Controllers\NotificationController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
@@ -1181,6 +1182,8 @@ Route::prefix('api')
                 });
                 Route::post('/user/login-url', [AuthController::class, 'loginUrl'])
                     ->middleware('ability:user');
+                Route::get('/user/notifications', [NotificationController::class, 'userIndex']);
+                Route::post('/user/notifications/read', [NotificationController::class, 'markRead']);
 
                 Route::get('/users/{id}', [BaseController::class, 'show'])->defaults('model', User::class);
                 Route::get('/users', [BaseController::class, 'index'])->defaults('model', User::class);
