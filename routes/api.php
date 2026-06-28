@@ -307,6 +307,7 @@ use FluxErp\Http\Controllers\MobileController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
+use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
@@ -1042,6 +1043,10 @@ Route::prefix('api')
                 Route::post('/schedules', CreateSchedule::class);
                 Route::put('/schedules', UpdateSchedule::class);
                 Route::delete('/schedules/{id}', DeleteSchedule::class);
+
+                // Search
+                Route::get('/search/{model}', SearchController::class)
+                    ->where('model', '[A-Za-z0-9._-]+');
 
                 // SepaMandates
                 Route::get('/sepa-mandates/{id}', [BaseController::class, 'show'])
