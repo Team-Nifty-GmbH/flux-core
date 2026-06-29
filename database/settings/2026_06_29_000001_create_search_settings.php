@@ -8,7 +8,7 @@ return new class() extends SettingsMigration
     {
         $this->migrator->add('search.semantic_search_enabled', false);
         $this->migrator->add('search.embedder_url', '');
-        $this->migrator->addEncrypted('search.embedder_api_key', '');
+        $this->migrator->addEncrypted('search.embedder_api_key', null);
         $this->migrator->add('search.embedder_model', 'text-embedding-3-small');
         $this->migrator->add('search.embedder_dimensions', 1536);
         $this->migrator->add('search.semantic_ratio', 0.5);

@@ -11,7 +11,7 @@ class SearchSettings extends FluxSettings
     public string $embedder_url = '';
 
     #[ShouldBeEncrypted]
-    public string $embedder_api_key = '';
+    public ?string $embedder_api_key = null;
 
     public string $embedder_model = 'text-embedding-3-small';
 

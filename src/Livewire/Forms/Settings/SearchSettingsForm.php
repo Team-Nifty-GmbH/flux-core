@@ -13,7 +13,7 @@ class SearchSettingsForm extends SettingsForm
     public string $embedder_url = '';
 
     #[RenderAs(RenderAs::PASSWORD)]
-    public string $embedder_api_key = '';
+    public ?string $embedder_api_key = null;
 
     public string $embedder_model = 'text-embedding-3-small';
 
