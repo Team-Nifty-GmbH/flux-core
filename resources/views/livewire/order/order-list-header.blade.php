@@ -566,6 +566,7 @@
                                     $tsui.close.modal('edit-order-position');
                             })
                         "
+                        loading="changedProductId"
                         x-cloak
                         x-show="!$wire.order.is_locked"
                         :text="__('Save')"

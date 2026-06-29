@@ -972,3 +972,13 @@ test('sort group names match between top level and free text children', function
     expect($groups)->not->toBeEmpty();
     expect(array_unique($groups))->toHaveCount(1, 'Sort group names must match between top level and free text children');
 });
+
+test('save button is gated on the product round-trip so it cannot submit before product_id is set', function (): void {
+    // Selecting a product fills product_id/name/unit_price/vat_rate_id via the changedProductId
+    // round-trip. The save button must be disabled while that request is in flight, otherwise
+    // addOrderPosition validates against a still-empty product_id and fails with required errors.
+    Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+        ->assertOk()
+        ->assertSeeHtml('wire:target="changedProductId"')
+        ->assertSeeHtml('wire:loading.attr="disabled"');
+});
