@@ -57,7 +57,7 @@ class SearchController extends Controller
             $query = ! is_string($request->input('search'))
                 ? resolve_static($model, 'query')->limit(20)
                 : resolve_static($model, 'search', ['query' => $request->input('search')])
-                    ->toEloquentBuilder(perPage: $perPageSearch);
+                    ->toEloquentBuilder(highlight: [], perPage: $perPageSearch);
         } elseif ($request->has('search')) {
             $query = resolve_static($model, 'query');
             $query->where(function (Builder $query) use ($request): void {
