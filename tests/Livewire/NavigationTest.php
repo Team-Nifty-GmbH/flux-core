@@ -32,6 +32,28 @@ test('passes unread notification counts per menu area to the view', function ():
         ->assertViewHas('notificationCounts', fn (array $counts): bool => ($counts['tickets'] ?? 0) === 1);
 });
 
+test('passes unread notification counts per sub menu route to the view', function (): void {
+    createNavigationNotification('accounting.payment-reminders');
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertViewHas(
+            'childNotificationCounts',
+            fn (array $counts): bool => ($counts['accounting.payment-reminders'] ?? 0) === 1
+        );
+});
+
+test('counts a sub menu detail notification on its closest sub menu route', function (): void {
+    createNavigationNotification('accounting.payment-reminders.show');
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertViewHas(
+            'childNotificationCounts',
+            fn (array $counts): bool => ($counts['accounting.payment-reminders'] ?? 0) === 1
+        );
+});
+
 test('shows order types', function (): void {
     $orderTypes = OrderType::factory(5)
         ->create([

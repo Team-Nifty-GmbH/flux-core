@@ -74,6 +74,17 @@ class MobileController extends Controller
             ]);
     }
 
+    public function broadcastingConnection(): JsonResponse
+    {
+        return response()
+            ->json([
+                'key' => config('flux.vite.reverb_app_key'),
+                'host' => config('flux.vite.reverb_host'),
+                'port' => (int) config('flux.vite.reverb_port'),
+                'scheme' => config('flux.vite.reverb_protocol'),
+            ]);
+    }
+
     public function deleteDeviceToken(string $deviceId): JsonResponse|Response
     {
         $deviceToken = resolve_static(DeviceToken::class, 'query')

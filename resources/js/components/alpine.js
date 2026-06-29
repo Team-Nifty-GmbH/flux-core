@@ -60,24 +60,45 @@ window.allLocales = allLocales;
 
 navigationSpinner();
 
-if (window.Alpine?.version) {
+const resolveModelId = (el) => () => {
+    const root = el.closest('[wire\\:id]');
+
+    if (!root || !window.Livewire) {
+        return null;
+    }
+
+    const wire = window.Livewire.find(root.getAttribute('wire:id'));
+    const bindingAttr = root
+        .getAttributeNames()
+        .find((name) => name.startsWith('wire:model'));
+    const binding = bindingAttr ? root.getAttribute(bindingAttr) : null;
+
+    if (binding?.startsWith('$parent.') && wire?.$parent) {
+        const value = wire.$parent.get(binding.slice('$parent.'.length));
+
+        if (value !== undefined && value !== null) {
+            return value;
+        }
+    }
+
+    return wire?.get('modelId') ?? null;
+};
+
+const registerFluxAlpine = () => {
     window.Alpine.plugin(sort);
     window.Alpine.plugin(collapse);
     window.Alpine.plugin(nuxbe);
     window.Alpine.directive('template-outlet', templateOutlet);
+    window.Alpine.magic('resolveModelId', resolveModelId);
     window.Alpine.data('folder_tree', folders);
     window.Alpine.data('comments', comments);
     window.Alpine.data('pillbox', pillbox);
+};
+
+if (window.Alpine?.version) {
+    registerFluxAlpine();
 } else {
-    window.addEventListener('alpine:init', () => {
-        window.Alpine.plugin(sort);
-        window.Alpine.plugin(collapse);
-        window.Alpine.plugin(nuxbe);
-        window.Alpine.directive('template-outlet', templateOutlet);
-        window.Alpine.data('folder_tree', folders);
-        window.Alpine.data('comments', comments);
-        window.Alpine.data('pillbox', pillbox);
-    });
+    window.addEventListener('alpine:init', registerFluxAlpine);
 }
 
 document.addEventListener('livewire:navigated', wireNavigation, { once: true });

@@ -24,11 +24,14 @@ class Navigation extends Component
 
     public function render(): View|Factory|Application
     {
+        $navigations = $this->getMenu();
+
         return view('flux::livewire.navigation', [
-            'navigations' => $this->getMenu(),
+            'navigations' => $navigations,
             'visits' => $this->getVisits(),
             'favorites' => $this->getFavorites(),
             'notificationCounts' => $this->getNotificationCounts(),
+            'childNotificationCounts' => $this->getChildNotificationCounts($navigations),
         ]);
     }
 
@@ -105,6 +108,60 @@ class Navigation extends Component
             ->countBy(fn (Notification $notification): ?string => $notification->menuArea())
             ->forget('')
             ->all();
+    }
+
+    protected function getChildNotificationCounts(Collection $navigations): array
+    {
+        $user = auth()->user();
+
+        if (! method_exists($user, 'unreadNotifications')) {
+            return [];
+        }
+
+        $childRouteNames = $navigations
+            ->flatMap(fn (array $navigation): array => data_get($navigation, 'children') ?? [])
+            ->pluck('route_name')
+            ->filter()
+            ->all();
+
+        if (blank($childRouteNames)) {
+            return [];
+        }
+
+        $counts = [];
+
+        foreach ($user->unreadNotifications as $notification) {
+            $route = $notification->menuRoute();
+
+            if (blank($route)) {
+                continue;
+            }
+
+            if ($match = $this->matchClosestRoute($route, $childRouteNames)) {
+                $counts[$match] = ($counts[$match] ?? 0) + 1;
+            }
+        }
+
+        return $counts;
+    }
+
+    protected function matchClosestRoute(string $route, array $routeNames): ?string
+    {
+        $match = null;
+
+        foreach ($routeNames as $routeName) {
+            if ($route !== $routeName && ! str_starts_with($route, $routeName . '.')) {
+                continue;
+            }
+
+            // Among the matching ancestors the deepest one (most route segments)
+            // is the most specific menu entry the notification belongs to.
+            if (is_null($match) || substr_count($routeName, '.') > substr_count($match, '.')) {
+                $match = $routeName;
+            }
+        }
+
+        return $match;
     }
 
     protected function getFavorites(): ?array

@@ -62,10 +62,16 @@
                     color="red"
                     :text="__('Delete') "
                     wire:click="delete()"
+                    loading="delete()"
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Ticket')]) }}"
                 />
             @endcanAction
-            <x-button color="indigo" :text="__('Save')" wire:click="save()" />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save()"
+                loading="save()"
+            />
             @stack('ticket-detail-header-actions')
         @show
     </div>

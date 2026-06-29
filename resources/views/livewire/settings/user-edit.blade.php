@@ -105,6 +105,7 @@
                             size="sm"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Two-Factor Authentication')]) }}"
                             wire:click="resetTwoFactor()"
+                            loading="resetTwoFactor()"
                         />
                     @endif
                 </div>
@@ -364,6 +365,7 @@
                         color="red"
                         :text="__('Delete')"
                         wire:click="delete()"
+                        loading="delete()"
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
                     />
                 @endcanAction
@@ -379,6 +381,7 @@
                         color="indigo"
                         :text="__('Save')"
                         wire:click="save()"
+                        loading="save()"
                     />
                 </div>
             </div>

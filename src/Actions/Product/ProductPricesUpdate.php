@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\Price\UpdatePrice;
 use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Helpers\PriceHelper;
@@ -50,16 +51,17 @@ class ProductPricesUpdate extends FluxAction
                 ->addDiscount($discount)
                 ->setPriceList($basePriceList ?? $priceList)
                 ->price();
-            $priceId = $price?->getKey();
+
+            if (! $price) {
+                continue;
+            }
+
+            $priceId = $price->getKey();
 
             if ($basePriceList) {
                 $priceId = $product->prices()
                     ->where('price_list_id', $priceList->getKey())
                     ->value('id');
-            }
-
-            if (! $priceId) {
-                continue;
             }
 
             if ($this->getData('rounding_method_enum')) {
@@ -76,8 +78,20 @@ class ProductPricesUpdate extends FluxAction
                 );
             }
 
-            UpdatePrice::make([
-                'id' => $priceId,
+            if ($priceId) {
+                UpdatePrice::make([
+                    'id' => $priceId,
+                    'product_id' => $product->id,
+                    'price_list_id' => $priceList->id,
+                    'price' => $price->price,
+                ])
+                    ->validate()
+                    ->execute();
+
+                continue;
+            }
+
+            CreatePrice::make([
                 'product_id' => $product->id,
                 'price_list_id' => $priceList->id,
                 'price' => $price->price,

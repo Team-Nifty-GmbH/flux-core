@@ -116,9 +116,18 @@
                                                 wire:current="rounded-md bg-indigo-600/50 dark:bg-indigo-700/5 hover:bg-indigo-600/10"
                                             @endif
                                             href="{{ $child["uri"] }}"
-                                            class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50"
+                                            class="dark:hover:text-light flex items-center gap-2 rounded-md p-2 pr-3 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50"
                                         >
-                                            {{ __($child["label"]) }}
+                                            <span class="truncate">
+                                                {{ __($child["label"]) }}
+                                            </span>
+                                            @if ($childNotificationCount = data_get($childNotificationCounts, data_get($child, 'route_name')))
+                                                <span
+                                                    class="ml-auto flex h-4 min-w-4 flex-none items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-none font-semibold text-white"
+                                                >
+                                                    {{ $childNotificationCount }}
+                                                </span>
+                                            @endif
                                         </a>
                                     @endforeach
                                 </div>
@@ -248,6 +257,7 @@
                                             color="red"
                                             icon="trash"
                                             wire:click="deleteFavorite({{ $favorite['id'] }})"
+                                            loading="deleteFavorite({{ $favorite['id'] }})"
                                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
                                         />
                                     </div>

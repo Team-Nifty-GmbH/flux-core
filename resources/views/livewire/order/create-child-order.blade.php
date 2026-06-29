@@ -139,6 +139,7 @@
                                         icon="trash"
                                         sm
                                         wire:click="removePosition({{ $index }})"
+                                        loading="removePosition({{ $index }})"
                                     />
                                 </div>
                             @else
@@ -192,6 +193,7 @@
                                             color="red"
                                             icon="trash"
                                             wire:click="removePosition({{ $index }})"
+                                            loading="removePosition({{ $index }})"
                                         />
                                     </x-slot:actions>
                                 </x-flux::list-item>
@@ -262,7 +264,7 @@
                     color="indigo"
                     :text="$this->getTitle()"
                     wire:click="save()"
-                    loading
+                    loading="save()"
                     x-bind:disabled="
                         !$wire.replicateOrder.order_type_id ||
                         !$wire.replicateOrder.order_positions.length
