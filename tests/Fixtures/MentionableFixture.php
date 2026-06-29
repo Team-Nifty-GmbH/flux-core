@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Fixtures;
 
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Facades\MentionableType;
 use FluxErp\Support\Mentions\MentionState;
 use FluxErp\Traits\Model\Mentionable;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,8 @@ class MentionableFixture extends Model implements IsSubscribable
         ]);
 
         Cache::forget('models_with_trait:' . Mentionable::class);
+
+        MentionableType::autoDiscover();
     }
 
     /**
@@ -47,6 +50,11 @@ class MentionableFixture extends Model implements IsSubscribable
             ->where('name', 'like', $trimmed . '%')
             ->limit($limit)
             ->get();
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
     }
 
     public function getMentionUrl(): string

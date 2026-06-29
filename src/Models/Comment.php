@@ -4,7 +4,6 @@ namespace FluxErp\Models;
 
 use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\MentionsContent;
-use FluxErp\Support\Mentions\MentionHtml;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
@@ -72,14 +71,9 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsCon
     /**
      * @return array<int, string>
      */
-    public function mentionableTextFields(): array
+    public function mentionableColumns(): array
     {
         return ['comment'];
-    }
-
-    public function mentionScannableText(): string
-    {
-        return MentionHtml::toTokens((string) $this->comment);
     }
 
     // Attributes

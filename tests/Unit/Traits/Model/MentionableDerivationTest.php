@@ -16,8 +16,8 @@ test('returns a null mention url when getUrl is null', function (): void {
     expect($model->getMentionUrl())->toBeNull();
 });
 
-test('uses the name fallback label for a trait-only model without InteractsWithDataTables', function (): void {
-    $model = new MentionableFixture(['name' => 'Generic Name']);
+test('falls back to the keyed label for a trait-only model without getLabel', function (): void {
+    $model = (new MentionableFixture())->forceFill(['id' => 7]);
 
-    expect($model->getMentionLabel())->toBe('Generic Name');
+    expect($model->getMentionLabel())->toBe('#7');
 });

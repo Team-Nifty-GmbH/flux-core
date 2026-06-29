@@ -8,14 +8,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Mention extends FluxModel
 {
-    public $timestamps = false;
-
-    protected $table = 'mentions';
-
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [
@@ -25,14 +17,15 @@ class Mention extends FluxModel
         ];
     }
 
-    public function source(): MorphTo
+    // Relations
+    public function mentionSource(): MorphTo
     {
-        return $this->morphTo('source', 'mention_source_type', 'mention_source_id');
+        return $this->morphTo();
     }
 
-    public function target(): MorphTo
+    public function mentionTarget(): MorphTo
     {
-        return $this->morphTo('target', 'mention_target_type', 'mention_target_id');
+        return $this->morphTo();
     }
 
     public function user(): BelongsTo

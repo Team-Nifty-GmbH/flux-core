@@ -32,7 +32,7 @@ class NotifyingCommentFixture extends Model implements MentionsContent, Provides
     /**
      * @return array<int, string>
      */
-    public function mentionableTextFields(): array
+    public function mentionableColumns(): array
     {
         return ['body'];
     }

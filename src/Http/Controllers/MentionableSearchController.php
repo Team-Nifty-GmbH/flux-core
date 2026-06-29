@@ -2,8 +2,7 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Facades\MentionableTypes;
-use FluxErp\Models\User;
+use FluxErp\Facades\MentionableType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -20,7 +19,7 @@ class MentionableSearchController extends Controller
             'types.*' => 'string',
         ]);
 
-        $typesByKey = MentionableTypes::map();
+        $typesByKey = MentionableType::all();
         $requested = collect($request->input('types', array_keys($typesByKey)));
 
         $unknown = $requested->reject(fn (string $key): bool => isset($typesByKey[$key]));
@@ -46,7 +45,7 @@ class MentionableSearchController extends Controller
         $searchTypes = $scope !== null ? collect([$scope]) : $requested;
         $user = $request->user();
         $results = collect();
-        $userKey = morph_alias(User::class);
+        $userKeys = MentionableType::getUserMentionableTypes(keysOnly: true);
 
         foreach ($searchTypes as $key) {
             $class = $typesByKey[$key];
@@ -64,7 +63,7 @@ class MentionableSearchController extends Controller
             foreach ($candidates as $record) {
                 $results->push([
                     'kind' => 'record',
-                    'token' => ($key === $userKey ? '@' : '#') . $key . ':' . $record->getKey(),
+                    'token' => (in_array($key, $userKeys, true) ? '@' : '#') . $key . ':' . $record->getKey(),
                     'label' => $record->getMentionLabel(),
                     'type_key' => $key,
                     'type_label' => $class::mentionTypeLabel(),

@@ -3,8 +3,7 @@
 namespace FluxErp\Support\Mentions;
 
 use FluxErp\Enums\MentionTypeEnum;
-use FluxErp\Facades\MentionableTypes;
-use FluxErp\Models\User;
+use FluxErp\Facades\MentionableType;
 use Illuminate\Support\Collection;
 
 class MentionParser
@@ -21,8 +20,8 @@ class MentionParser
         $out = [];
         $consumed = [];
 
-        $recordTypes = MentionableTypes::map();
-        $userKey = morph_alias(User::class);
+        $recordTypes = MentionableType::getRecordMentionableTypes();
+        $userKeys = MentionableType::getUserMentionableTypes(keysOnly: true);
 
         preg_match_all(
             '/(?<!\\\\)(?<![A-Za-z0-9._-])#([a-z][a-z0-9_]*):(\d+)/i',
@@ -32,7 +31,7 @@ class MentionParser
         );
         foreach ($matches[0] as $i => $fullMatch) {
             $key = strtolower($matches[1][$i][0]);
-            if ($key === $userKey || ! isset($recordTypes[$key])) {
+            if (! array_key_exists($key, $recordTypes)) {
                 continue;
             }
 
@@ -46,21 +45,28 @@ class MentionParser
             $consumed[] = [$fullMatch[1], $fullMatch[1] + strlen($fullMatch[0])];
         }
 
-        preg_match_all(
-            '/(?<!\\\\)(?<![A-Za-z0-9._-])@' . preg_quote($userKey, '/') . ':(\d+)/i',
-            $stripped,
-            $matches,
-            PREG_OFFSET_CAPTURE,
-        );
-        foreach ($matches[0] as $i => $fullMatch) {
-            $out[] = [
-                'type' => MentionTypeEnum::User,
-                'user_id' => (int) $matches[1][$i][0],
-                'mentionable_type' => null,
-                'mentionable_id' => null,
-                'raw' => $fullMatch[0],
-            ];
-            $consumed[] = [$fullMatch[1], $fullMatch[1] + strlen($fullMatch[0])];
+        if ($userKeys !== []) {
+            $userAlternation = implode(
+                '|',
+                array_map(fn (string $key): string => preg_quote($key, '/'), $userKeys),
+            );
+
+            preg_match_all(
+                '/(?<!\\\\)(?<![A-Za-z0-9._-])@(' . $userAlternation . '):(\d+)/i',
+                $stripped,
+                $matches,
+                PREG_OFFSET_CAPTURE,
+            );
+            foreach ($matches[0] as $i => $fullMatch) {
+                $out[] = [
+                    'type' => MentionTypeEnum::User,
+                    'user_id' => (int) $matches[2][$i][0],
+                    'mentionable_type' => null,
+                    'mentionable_id' => null,
+                    'raw' => $fullMatch[0],
+                ];
+                $consumed[] = [$fullMatch[1], $fullMatch[1] + strlen($fullMatch[0])];
+            }
         }
 
         preg_match_all(

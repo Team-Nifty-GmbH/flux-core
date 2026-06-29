@@ -2,15 +2,25 @@
 
 namespace FluxErp\Traits\Model;
 
+use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\States\State;
 use FluxErp\Support\Mentions\MentionState;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 trait Mentionable
 {
+    public static function mentionType(): string
+    {
+        return MentionTypeEnum::Record;
+    }
+
+    public static function mentionTypeIcon(): string
+    {
+        return 'tag';
+    }
+
     public static function mentionTypeKey(): string
     {
         return morph_alias(static::class);
@@ -19,11 +29,6 @@ trait Mentionable
     public static function mentionTypeLabel(): string
     {
         return Str::headline(morph_alias(static::class));
-    }
-
-    public static function mentionTypeIcon(): string
-    {
-        return 'tag';
     }
 
     /**
@@ -48,26 +53,32 @@ trait Mentionable
 
     public function getMentionLabel(): string
     {
-        if ($this instanceof InteractsWithDataTables) {
+        if (method_exists($this, 'getLabel')) {
             return $this->getLabel() ?? '#' . $this->getKey();
         }
 
-        return (string) ($this->name ?? $this->getKey());
-    }
-
-    public function getMentionUrl(): ?string
-    {
-        return $this instanceof InteractsWithDataTables ? $this->getUrl() : null;
+        return '#' . $this->getKey();
     }
 
     public function getMentionState(): ?MentionState
     {
-        $state = $this->state ?? null;
+        $column = $this->mentionStateColumn();
+        $state = $column !== null ? ($this->{$column} ?? null) : null;
 
         if (! $state instanceof State) {
             return null;
         }
 
-        return new MentionState(__(Str::headline((string) $state)), $state->color());
+        return MentionState::make(__(Str::headline((string) $state)), $state->color());
+    }
+
+    public function getMentionUrl(): ?string
+    {
+        return method_exists($this, 'getUrl') ? $this->getUrl() : null;
+    }
+
+    public function mentionStateColumn(): ?string
+    {
+        return 'state';
     }
 }

@@ -4,8 +4,8 @@ namespace FluxErp\Traits\Model;
 
 use FluxErp\Contracts\MentionsContent;
 use FluxErp\Observers\RecordsMentionsObserver;
+use FluxErp\Support\Mentions\MentionHtml;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 
 trait RecordsMentions
 {
@@ -20,18 +20,10 @@ trait RecordsMentions
         });
     }
 
-    /**
-     * @return Collection<int, object>|null
-     */
-    public function mentionableMembersScope(): ?Collection
-    {
-        return null;
-    }
-
     public function mentionScannableText(): string
     {
-        return collect($this->mentionableTextFields())
-            ->map(fn (string $field): string => (string) $this->getAttribute($field))
+        return collect($this->mentionableColumns())
+            ->map(fn (string $column): string => MentionHtml::toTokens((string) $this->getAttribute($column)))
             ->implode("\n");
     }
 }

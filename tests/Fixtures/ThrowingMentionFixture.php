@@ -2,6 +2,7 @@
 
 namespace FluxErp\Tests\Fixtures;
 
+use FluxErp\Facades\MentionableType;
 use FluxErp\Traits\Model\Mentionable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -24,6 +25,8 @@ class ThrowingMentionFixture extends Model
         ]);
 
         Cache::forget('models_with_trait:' . Mentionable::class);
+
+        MentionableType::autoDiscover();
     }
 
     public static function searchMentionCandidates(string $query, int $limit = 5): Collection

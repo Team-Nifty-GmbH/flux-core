@@ -121,15 +121,7 @@ abstract class Comments extends Component
                 $comment->is_current_user = $comment->getRawOriginal('created_by')
                     === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
-                if (is_string($comment->comment)) {
-                    $comment->comment = $refresher->refresh($comment->comment);
-                }
-
-                $comment->children->each(function ($child) use ($refresher): void {
-                    if (is_string($child->comment)) {
-                        $child->comment = $refresher->refresh($child->comment);
-                    }
-                });
+                $this->refreshMentionPills($comment, $refresher);
 
                 return $comment;
             });
@@ -187,9 +179,7 @@ abstract class Comments extends Component
                 $comment->is_current_user = $comment->getRawOriginal('created_by')
                     === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
-                if (is_string($comment->comment)) {
-                    $comment->comment = $refresher->refresh($comment->comment);
-                }
+                $this->refreshMentionPills($comment, $refresher);
 
                 return $comment;
             })
@@ -252,6 +242,19 @@ abstract class Comments extends Component
             $this->commentForm->save();
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
+        }
+    }
+
+    protected function refreshMentionPills(Comment $comment, MentionPillRefresher $refresher): void
+    {
+        if (is_string($comment->comment)) {
+            $comment->comment = $refresher->refresh($comment->comment);
+        }
+
+        if ($comment->relationLoaded('children')) {
+            $comment->children->each(function (Comment $child) use ($refresher): void {
+                $this->refreshMentionPills($child, $refresher);
+            });
         }
     }
 }

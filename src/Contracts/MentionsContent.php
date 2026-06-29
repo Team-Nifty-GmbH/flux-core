@@ -7,7 +7,7 @@ interface MentionsContent
     /**
      * @return array<int, string>
      */
-    public function mentionableTextFields(): array;
+    public function mentionableColumns(): array;
 
     public function mentionScannableText(): string;
 }

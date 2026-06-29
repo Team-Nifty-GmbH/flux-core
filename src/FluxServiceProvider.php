@@ -30,6 +30,7 @@ use FluxErp\Providers\ComponentServiceProvider;
 use FluxErp\Providers\EditorServiceProvider;
 use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MacroServiceProvider;
+use FluxErp\Providers\MentionableTypeServiceProvider;
 use FluxErp\Providers\MenuServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RepeatableServiceProvider;
@@ -39,7 +40,6 @@ use FluxErp\Providers\ViewServiceProvider;
 use FluxErp\Providers\WidgetServiceProvider;
 use FluxErp\Support\Bus\Dispatcher as FluxDispatcher;
 use FluxErp\Support\Container\ProductTypeManager;
-use FluxErp\Support\Mentions\MentionableTypesManager;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -128,7 +128,6 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->singleton(AssetManager::class);
         $this->app->singleton(MailDriverManager::class);
-        $this->app->singleton(MentionableTypesManager::class);
         $this->app->singleton(ProductTypeManager::class);
 
         // Register core providers in correct order
@@ -143,6 +142,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->register(MacroServiceProvider::class);
 
         $this->app->register(ActionServiceProvider::class);
+        $this->app->register(MentionableTypeServiceProvider::class);
         $this->app->register(RepeatableServiceProvider::class);
         $this->app->register(WidgetServiceProvider::class);
         $this->app->register(EditorServiceProvider::class);

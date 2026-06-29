@@ -54,7 +54,7 @@
                     <x-flux::editor
                         class="comment-input"
                         scope="comment"
-                        :mentionable="\FluxErp\Facades\MentionableTypes::recordKeys()"
+                        :mentionable="\FluxErp\Facades\MentionableType::getRecordMentionableTypes(keysOnly: true)"
                     />
                 </div>
                 <div class="grow pt-4">

@@ -2,8 +2,7 @@
 
 namespace FluxErp\Support\Mentions;
 
-use FluxErp\Facades\MentionableTypes;
-use FluxErp\Models\User;
+use FluxErp\Facades\MentionableType;
 
 class MentionPillRefresher
 {
@@ -11,60 +10,60 @@ class MentionPillRefresher
 
     public function refresh(string $html): string
     {
-        $userKey = morph_alias(User::class);
-        $types = MentionableTypes::map();
+        $userKeys = MentionableType::getUserMentionableTypes(keysOnly: true);
+        $types = MentionableType::all();
 
-        if (! preg_match_all(self::PILL, $html, $matches, PREG_SET_ORDER)) {
+        if (! preg_match_all(static::PILL, $html, $matches, PREG_SET_ORDER)) {
             return $html;
         }
 
         $idsByKey = [];
-        foreach ($matches as $m) {
-            $key = strtolower($m[3]);
-            if ($key !== $userKey && isset($types[$key])) {
-                $idsByKey[$key][] = (int) $m[4];
+        foreach ($matches as $match) {
+            $key = strtolower($match[3]);
+            if (! in_array($key, $userKeys, true) && array_key_exists($key, $types)) {
+                $idsByKey[$key][] = (int) $match[4];
             }
         }
 
         $recordsByKey = [];
         foreach ($idsByKey as $key => $ids) {
-            $recordsByKey[$key] = $types[$key]::query()
+            $recordsByKey[$key] = resolve_static($types[$key], 'query')
                 ->whereKey(array_unique($ids))
                 ->get()
                 ->keyBy(fn ($record) => $record->getKey());
         }
 
         return preg_replace_callback(
-            self::PILL,
-            function (array $m) use ($userKey, $types, $recordsByKey): string {
-                $tag = $m[1];
-                $attrs = $this->stripStateAttributes($m[2]);
-                $key = strtolower($m[3]);
-                $id = (int) $m[4];
+            static::PILL,
+            function (array $match) use ($userKeys, $types, $recordsByKey): string {
+                $tag = $match[1];
+                $attributes = $this->stripStateAttributes($match[2]);
+                $key = strtolower($match[3]);
+                $id = (int) $match[4];
 
-                if ($key === $userKey || ! isset($types[$key])) {
-                    return $m[0];
+                if (in_array($key, $userKeys, true) || ! array_key_exists($key, $types)) {
+                    return $match[0];
                 }
 
                 $state = ($recordsByKey[$key][$id] ?? null)?->getMentionState();
-                $stateAttrs = $state?->toPillAttributes() ?? '';
+                $stateAttributes = $state?->toPillAttributes() ?? '';
 
-                return '<' . $tag . $attrs . $stateAttrs . '>';
+                return '<' . $tag . $attributes . $stateAttributes . '>';
             },
             $html,
         ) ?? $html;
     }
 
-    protected function stripStateAttributes(string $attrs): string
+    protected function stripStateAttributes(string $attributes): string
     {
-        if (preg_match('/\bdata-mention-state="/i', $attrs) !== 1) {
-            return $attrs;
+        if (preg_match('/\bdata-mention-state="/i', $attributes) !== 1) {
+            return $attributes;
         }
 
-        $attrs = preg_replace('/\s+data-mention-state="[^"]*"/i', '', $attrs);
-        $attrs = preg_replace('/\s+title="[^"]*"/i', '', $attrs);
-        $attrs = preg_replace('/\s+style="[^"]*--mention-state-color[^"]*"/i', '', $attrs);
+        $attributes = preg_replace('/\s+data-mention-state="[^"]*"/i', '', $attributes);
+        $attributes = preg_replace('/\s+title="[^"]*"/i', '', $attributes);
+        $attributes = preg_replace('/\s+style="[^"]*--mention-state-color[^"]*"/i', '', $attributes);
 
-        return $attrs;
+        return $attributes;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Support\Mentions;
 
-use FluxErp\Facades\MentionableTypes;
+use FluxErp\Facades\MentionableType;
 use FluxErp\Models\User;
 use Illuminate\Support\Collection;
 
@@ -19,8 +19,7 @@ class MentionRenderer
 
     protected function renderRecordTokens(string $text): string
     {
-        $types = MentionableTypes::map();
-        $userKey = morph_alias(User::class);
+        $types = MentionableType::getRecordMentionableTypes();
         $pattern = '/(?<!\\\\)(?<![A-Za-z0-9._-])#([a-z][a-z0-9_]*):(\d+)/i';
 
         if (! preg_match_all($pattern, $text, $matches)) {
@@ -30,14 +29,14 @@ class MentionRenderer
         $idsByKey = [];
         foreach ($matches[1] as $i => $rawKey) {
             $key = strtolower($rawKey);
-            if ($key !== $userKey && isset($types[$key])) {
+            if (array_key_exists($key, $types)) {
                 $idsByKey[$key][] = (int) $matches[2][$i];
             }
         }
 
         $recordsByKey = [];
         foreach ($idsByKey as $key => $ids) {
-            $recordsByKey[$key] = $types[$key]::query()
+            $recordsByKey[$key] = resolve_static($types[$key], 'query')
                 ->whereKey(array_unique($ids))
                 ->get()
                 ->keyBy(fn ($record) => $record->getKey());
@@ -45,11 +44,11 @@ class MentionRenderer
 
         return preg_replace_callback(
             $pattern,
-            function (array $m) use ($types, $userKey, $recordsByKey): string {
-                $key = strtolower($m[1]);
-                $id = (int) $m[2];
-                if ($key === $userKey || ! isset($types[$key])) {
-                    return $m[0];
+            function (array $matches) use ($types, $recordsByKey): string {
+                $key = strtolower($matches[1]);
+                $id = (int) $matches[2];
+                if (! array_key_exists($key, $types)) {
+                    return $matches[0];
                 }
 
                 $record = $recordsByKey[$key][$id] ?? null;
@@ -89,22 +88,30 @@ class MentionRenderer
 
     protected function renderExplicitUserTokens(string $text): string
     {
-        $userKey = morph_alias(User::class);
-        $pattern = '/(?<!\\\\)(?<![A-Za-z0-9._-])@' . preg_quote($userKey, '/') . ':(\d+)/i';
+        $userKeys = MentionableType::getUserMentionableTypes(keysOnly: true);
+        if ($userKeys === []) {
+            return $text;
+        }
+
+        $userAlternation = implode(
+            '|',
+            array_map(fn (string $key): string => preg_quote($key, '/'), $userKeys),
+        );
+        $pattern = '/(?<!\\\\)(?<![A-Za-z0-9._-])@(' . $userAlternation . '):(\d+)/i';
 
         if (! preg_match_all($pattern, $text, $matches)) {
             return $text;
         }
 
         $users = User::query()
-            ->whereKey(array_unique(array_map('intval', $matches[1])))
+            ->whereKey(array_unique(array_map('intval', $matches[2])))
             ->get()
             ->keyBy(fn ($user) => $user->getKey());
 
         return preg_replace_callback(
             $pattern,
-            function (array $m) use ($users): string {
-                $user = $users[(int) $m[1]] ?? null;
+            function (array $matches) use ($users): string {
+                $user = $users[(int) $matches[2]] ?? null;
                 if ($user === null) {
                     return '<span class="mention mention--missing">' . e(__('@deleted entry')) . '</span>';
                 }

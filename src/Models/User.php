@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
@@ -99,6 +100,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public static function hasPermission(): bool
     {
         return false;
+    }
+
+    public static function mentionType(): string
+    {
+        return MentionTypeEnum::User;
     }
 
     public static function mentionTypeIcon(): string

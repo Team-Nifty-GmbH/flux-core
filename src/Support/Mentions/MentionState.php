@@ -2,8 +2,12 @@
 
 namespace FluxErp\Support\Mentions;
 
-readonly class MentionState
+use FluxErp\Traits\Makeable;
+
+class MentionState
 {
+    use Makeable;
+
     protected const COLOR_SHADE = '500';
 
     public function __construct(
@@ -17,7 +21,7 @@ readonly class MentionState
             return 'currentColor';
         }
 
-        return 'var(--color-' . $this->color . '-' . self::COLOR_SHADE . ')';
+        return 'var(--color-' . $this->color . '-' . static::COLOR_SHADE . ')';
     }
 
     public function toPillAttributes(): string
