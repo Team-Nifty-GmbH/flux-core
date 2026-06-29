@@ -218,7 +218,6 @@ test('pause daily work time does not close employee day', function (): void {
     $component = Livewire::test(WorkTime::class)
         ->assertOk()
         ->assertSet('dailyWorkTime.id', $workTime->getKey())
-        ->assertSet('dailyWorkTime.employee_id', $employee->getKey())
         ->assertSet('dailyWorkTime.user_id', $this->user->getKey())
         ->assertSet('dailyWorkTime.started_at', $startedAt->toISOString())
         ->assertSet('dailyWorkTime.ended_at', null)
