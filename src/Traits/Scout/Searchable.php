@@ -6,7 +6,7 @@ use FluxErp\Settings\SearchSettings;
 use FluxErp\Support\Scout\ScoutCustomize;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Searchable as BaseSearchable;
-use Throwable;
+use Spatie\LaravelSettings\Exceptions\MissingSettings;
 
 trait Searchable
 {
@@ -20,12 +20,13 @@ trait Searchable
 
         // Semantic search: turn the keyword query into a hybrid (keyword + vector) query.
         if (config('scout.driver') === 'meilisearch' && $search = static::activeSearchSettings()) {
-            $builder->options([
+            // options() replaces, so merge to preserve any caller-provided options.
+            $builder->options(array_merge($builder->options ?? [], [
                 'hybrid' => [
                     'embedder' => 'default',
                     'semanticRatio' => $search->semantic_ratio,
                 ],
-            ]);
+            ]));
         }
 
         return $builder;
@@ -52,14 +53,16 @@ trait Searchable
     {
         try {
             $search = app(SearchSettings::class);
-        } catch (Throwable) {
+
+            if (! $search->semantic_search_enabled || $search->embedder_url === '') {
+                return null;
+            }
+        } catch (MissingSettings) {
             // Settings not migrated yet -> behave as if semantic search is off.
             return null;
         }
 
-        return ($search->semantic_search_enabled && $search->embedder_url !== '')
-            ? $search
-            : null;
+        return $search;
     }
 
     protected static function embedderDefinition(SearchSettings $search): array
