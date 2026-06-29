@@ -21,9 +21,11 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\HasWidgets;
 use FluxErp\Traits\Model\InteractsWithMedia;
+use FluxErp\Traits\Model\InteractsWithPasskeys;
 use FluxErp\Traits\Model\MonitorsQueue;
 use FluxErp\Traits\Model\Notifiable;
 use FluxErp\Traits\Model\SoftDeletes;
+use FluxErp\Traits\Model\TwoFactorAuthentication;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -38,17 +40,20 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Laragear\TwoFactor\Contracts\TwoFactorAuthenticatable;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
-class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
+class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, HasPasskeys, InteractsWithDataTables, TwoFactorAuthenticatable
 {
     use Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles, HasUserModification, HasUuid,
-        HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+        HasWidgets, InteractsWithMedia, InteractsWithPasskeys, MonitorsQueue, Notifiable, SoftDeletes,
+        TwoFactorAuthentication;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -106,6 +111,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     protected function casts(): array
     {
         return [
+            'force_two_factor' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

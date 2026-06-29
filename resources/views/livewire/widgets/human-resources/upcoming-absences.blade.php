@@ -21,7 +21,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($absences as $absence)
+                @forelse ($absences as $absence)
                     <tr class="border-t border-gray-100 dark:border-gray-700">
                         <td class="py-1.5 text-sm">
                             {{ $absence['employee_name'] }}

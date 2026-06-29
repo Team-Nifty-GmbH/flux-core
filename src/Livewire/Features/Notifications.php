@@ -7,7 +7,7 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Blade;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -29,12 +29,19 @@ class Notifications extends Component
         return view('flux::livewire.features.notifications');
     }
 
+    #[On('notifications-changed')]
+    public function refreshUnread(): void
+    {
+        $this->unread = auth()->user()->unreadNotifications()->count();
+    }
+
     #[Renderless]
     public function acceptNotify(Notification $notification): void
     {
         $accept = data_get($notification->data, 'accept');
         $notification->markAsRead();
-        $this->unread = $this->unread - 1;
+        $this->unread = max(0, $this->unread - 1);
+        $this->dispatch('notifications-changed');
 
         $this->js(<<<'JS'
             $tsui.close.slide('notifications-slide');
@@ -49,10 +56,6 @@ class Notifications extends Component
     public function closeNotifications(): void
     {
         $this->loaded = 0;
-
-        $this->js(<<<'JS'
-            removeAll();
-        JS);
     }
 
     #[Renderless]
@@ -60,6 +63,7 @@ class Notifications extends Component
     {
         auth()->user()->unreadNotifications->markAsRead();
         $this->unread = 0;
+        $this->dispatch('notifications-changed');
 
         $this->js(<<<'JS'
             $tsui.close.slide('notifications-slide');
@@ -71,7 +75,8 @@ class Notifications extends Component
     {
         $notification->markAsRead();
 
-        $this->unread = $this->unread - 1;
+        $this->unread = max(0, $this->unread - 1);
+        $this->dispatch('notifications-changed');
         if (! $this->unread) {
             $this->js(<<<'JS'
                 $tsui.close.slide('notifications-slide');
@@ -84,17 +89,6 @@ class Notifications extends Component
     {
         if (request()->header('referer') === data_get($notify, 'accept.url')) {
             return;
-        }
-
-        if (! is_null(data_get($notify, 'progress'))) {
-            $notify['description'] = Blade::render(<<<'BLADE'
-                {!! data_get($notify, 'description') !!}
-                <div class="flex gap-1.5 items-center h-6">
-                    <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200 dark:bg-gray-700 w-full">
-                        <div x-bind:style="{width: notification.progress * 100 + '%'}" class="transition-all shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 dark:bg-indigo-700"></div>
-                    </div>
-                </div>
-            BLADE, ['notify' => $notify]);
         }
 
         if (data_get($notify, 'accept') || data_get($notify, 'reject')) {
@@ -116,6 +110,8 @@ class Notifications extends Component
         $notification->toast($this)
             ->id(data_get($notify, 'contextId'))
             ->send();
+
+        $this->dispatch('notifications-changed');
     }
 
     #[Renderless]

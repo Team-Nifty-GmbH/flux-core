@@ -4,9 +4,12 @@ namespace FluxErp\Jobs;
 
 use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
-use FluxErp\Models\Communication;
+use FluxErp\Contracts\ReportsSyncProgress;
+use FluxErp\Contracts\ShouldBeMonitored;
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use FluxErp\Traits\IsMonitored;
 use FluxErp\Traits\Job\TracksSchedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -15,9 +18,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
+class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TracksSchedule;
+    use Dispatchable, InteractsWithQueue, IsMonitored, Queueable, SerializesModels, TracksSchedule;
 
     private readonly MailAccount $mailAccount;
 
@@ -64,77 +67,60 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         return true;
     }
 
+    public function getName(): string
+    {
+        return __('Mail sync :email', ['email' => $this->mailAccount->email]);
+    }
+
     public function handle(): void
     {
-        $this->mailAccount->syncFolders();
+        $driver = app(MailDriverManager::class)->driver($this->mailAccount->protocol);
+
+        $driver->syncFolders($this->mailAccount);
 
         if ($this->onlyFolders) {
             return;
         }
 
-        $this->mailAccount->mailFolders()
+        $folders = $this->mailAccount->mailFolders()
             ->where('is_active', true)
-            ->each(function (MailFolder $folder): void {
-                $startUid = $this->resolveStartUid($folder);
+            ->get();
+        $total = $folders->count();
 
-                $builder = $folder->messages();
-
-                if (! is_null($startUid)) {
-                    $builder->newSince($startUid);
+        try {
+            $folders->each(function (MailFolder $folder, int $index) use ($driver, $total): void {
+                if ($driver instanceof ReportsSyncProgress) {
+                    $driver->withProgressCallback(
+                        fn (int $processed, int $totalMessages) => $this->queueUpdate([
+                            'progress' => ($index + ($totalMessages > 0 ? min($processed / $totalMessages, 1) : 1))
+                                / $total
+                                * 100,
+                            'message' => __(':processed of :total mails (:folder)', [
+                                'processed' => $processed,
+                                'total' => $totalMessages,
+                                'folder' => $folder->name,
+                            ]),
+                        ])
+                    );
                 }
 
-                $builder->fetchAndStore();
-
-                $builder
-                    ->reset()
-                    ->unseen()
-                    ->withoutBody()
-                    ->fetch()
-                    ->syncReadStatus();
+                $driver->syncMessages($folder);
+                $this->queueProgressChunk($total, 1);
             });
+        } finally {
+            if ($driver instanceof ReportsSyncProgress) {
+                $driver->withProgressCallback(null);
+            }
+        }
+    }
+
+    public function progressCooldown(): int
+    {
+        return 2;
     }
 
     public function uniqueId(): string
     {
         return $this->mailAccount->uuid;
-    }
-
-    protected function resolveStartUid(MailFolder $folder): ?int
-    {
-        $maxUid = resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->getKey())
-            ->where('mail_folder_id', $folder->getKey())
-            ->max('message_uid');
-
-        if ($maxUid) {
-            return (int) $maxUid;
-        }
-
-        $client = $this->mailAccount->getImapClient();
-
-        if (! $client) {
-            return null;
-        }
-
-        $imapFolder = $client->getFolderByPath($folder->slug, utf7: true);
-
-        if (! $imapFolder) {
-            return null;
-        }
-
-        $firstMessage = $imapFolder->messages()
-            ->all()
-            ->since($this->mailAccount->created_at)
-            ->limit(1)
-            ->get()
-            ?->first();
-
-        if ($firstMessage) {
-            return max($firstMessage->getUid() - 1, 0) ?: null;
-        }
-
-        return ! is_null($uidnext = data_get($imapFolder->examine(), 'uidnext'))
-            ? max($uidnext - 1, 0)
-            : null;
     }
 }

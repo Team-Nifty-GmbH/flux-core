@@ -1,14 +1,28 @@
 <div class="flex max-h-full flex-col gap-4 p-4">
     <div>
-        <h2
-            class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
-        >
-            {{ __('My Responsible Tasks') }}
-        </h2>
+        <div class="flex w-full items-start justify-between gap-2">
+            <h2
+                class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+            >
+                {{ __('My Responsible Tasks') }}
+            </h2>
+            @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
+                <div class="flex-none">
+                    <x-dropdown icon="ellipsis-vertical" static>
+                        @foreach ($this->options() ?? [] as $option)
+                            <x-dropdown.items
+                                :text="data_get($option, 'label')"
+                                wire:click="{{ data_get($option, 'method') }}()"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                </div>
+            @endif
+        </div>
         <hr class="mt-2" />
     </div>
     <div class="flex-1 overflow-auto">
-        @forelse($tasks as $task)
+        @forelse ($tasks as $task)
             <div
                 class="{{ ! $loop->last ? 'border-b border-gray-100 dark:border-gray-700/50' : '' }} flex items-start gap-3 py-3"
             >
@@ -24,7 +38,7 @@
                         class="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
                     >
                         {!! $task->state->badge() !!}
-                        @if($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
+                        @if ($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
                             <a
                                 href="{{ $task->model->getUrl() }}"
                                 wire:navigate
@@ -34,7 +48,7 @@
                             </a>
                         @endif
 
-                        @if($task->due_date)
+                        @if ($task->due_date)
                             <span
                                 class="{{ $task->due_date->isPast() ? 'text-red-500' : '' }}"
                             >
@@ -42,7 +56,7 @@
                             </span>
                         @endif
 
-                        @foreach($task->users as $user)
+                        @foreach ($task->users as $user)
                             <span
                                 class="{{ $user->getKey() === auth()->id() ? 'font-medium text-indigo-500' : '' }}"
                             >
@@ -83,7 +97,7 @@
                 {{ __('No tasks found') }}
             </div>
         @endforelse
-        @if($hasMore)
+        @if ($hasMore)
             <div class="flex justify-center pt-2">
                 <x-button
                     color="secondary"

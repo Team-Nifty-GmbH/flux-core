@@ -15,7 +15,7 @@
                     x-text="comment.created_by ?? '{{ __('Unknown') }}'"
                     class="font-medium text-gray-500"
                 ></div>
-                @if($this->isPublic === true)
+                @if ($this->isPublic === true)
                     <x-badge
                         flat
                         x-cloak
@@ -24,7 +24,7 @@
                     />
                 @endif
             </div>
-            @if(auth()->check())
+            @if (auth()->check())
                 <x-dropdown icon="ellipsis-vertical" static>
                     @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
                         <x-dropdown.items

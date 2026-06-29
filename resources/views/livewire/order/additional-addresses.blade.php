@@ -49,7 +49,7 @@
             />
         </x-slot:footer>
     </x-modal>
-    @foreach($form->addresses as $address)
+    @foreach ($form->addresses as $address)
         <x-card :header="$address['address_type']">
             <div class="text-sm">
                 {!! implode('<br>', $address['address']) !!}

@@ -13,7 +13,9 @@ import sort from '@alpinejs/sort';
 import collapse from '@alpinejs/collapse';
 import navigationSpinner from './navigation-spinner.js';
 import wireNavigation from './wire-navigation.js';
+import teleportRestore from './teleport-restore.js';
 import comments from './comments.js';
+import pillbox from './pillbox.js';
 import familyTree from './family-tree.js';
 import documentScanner from './document-scanner.js';
 import validationErrors from './validation-errors.js';
@@ -62,19 +64,24 @@ if (window.Alpine?.version) {
     window.Alpine.plugin(sort);
     window.Alpine.plugin(collapse);
     window.Alpine.plugin(nuxbe);
+    window.Alpine.directive('template-outlet', templateOutlet);
+    window.Alpine.data('folder_tree', folders);
+    window.Alpine.data('comments', comments);
+    window.Alpine.data('pillbox', pillbox);
 } else {
     window.addEventListener('alpine:init', () => {
         window.Alpine.plugin(sort);
         window.Alpine.plugin(collapse);
         window.Alpine.plugin(nuxbe);
+        window.Alpine.directive('template-outlet', templateOutlet);
+        window.Alpine.data('folder_tree', folders);
+        window.Alpine.data('comments', comments);
+        window.Alpine.data('pillbox', pillbox);
     });
 }
 
-Alpine.directive('template-outlet', templateOutlet);
-Alpine.data('folder_tree', folders);
-Alpine.data('comments', comments);
-
 document.addEventListener('livewire:navigated', wireNavigation, { once: true });
+document.addEventListener('livewire:navigated', teleportRestore);
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();
@@ -89,49 +96,49 @@ document.addEventListener('livewire:init', () => {
             }
         });
     });
-});
 
-Livewire.directive('flux-confirm', ({ el, directive, component }) => {
-    let type = directive.modifiers.includes('type')
-        ? directive.modifiers[directive.modifiers.indexOf('type') + 1]
-        : 'info';
+    Livewire.directive('flux-confirm', ({ el, directive, component }) => {
+        let type = directive.modifiers.includes('type')
+            ? directive.modifiers[directive.modifiers.indexOf('type') + 1]
+            : 'info';
 
-    if (!['success', 'error', 'warning', 'info'].includes(type)) {
-        type = 'info';
-    }
+        if (!['success', 'error', 'warning', 'info'].includes(type)) {
+            type = 'info';
+        }
 
-    let promptAppend = directive.modifiers.includes('prompt')
-        ? '<div>\n' +
-          '    <div class="relative mt-1 rounded-md shadow-xs">\n' +
-          '    <div class="focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-dark-600 dark:text-dark-300 text-gray-600 ring-gray-300 dark:bg-dark-800 bg-white">\n' +
-          '        <input id="prompt-value" class="dark:placeholder-dark-400 w-full rounded-md border-0 bg-transparent py-1.5 ring-0 placeholder:text-gray-400 focus:outline-hidden focus:ring-transparent sm:text-sm sm:leading-6">\n' +
-          '    </div>\n' +
-          '    </div>\n' +
-          '</div>'
-        : directive.modifiers.includes('id')
-          ? directive.modifiers[directive.modifiers.indexOf('id') + 1]
-          : null;
+        let promptAppend = directive.modifiers.includes('prompt')
+            ? '<div>\n' +
+              '    <div class="relative mt-1 rounded-md shadow-xs">\n' +
+              '    <div class="focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-dark-600 dark:text-dark-300 text-gray-600 ring-gray-300 dark:bg-dark-800 bg-white">\n' +
+              '        <input id="prompt-value" class="dark:placeholder-dark-400 w-full rounded-md border-0 bg-transparent py-1.5 ring-0 placeholder:text-gray-400 focus:outline-hidden focus:ring-transparent sm:text-sm sm:leading-6">\n' +
+              '    </div>\n' +
+              '    </div>\n' +
+              '</div>'
+            : directive.modifiers.includes('id')
+              ? directive.modifiers[directive.modifiers.indexOf('id') + 1]
+              : null;
 
-    // Convert sanitized linebreaks ("\n") to real line breaks...
-    let message = directive.expression.replaceAll('\\n', '\n').split('|');
-    let title = message.shift();
-    let description =
-        (message[0] ? '<div>' + message[0] + '</div>' : '') +
-        (promptAppend ? '<div>' + promptAppend + '</div>' : '');
-    let cancelLabel = message[1] ?? 'Cancel';
-    let confirmLabel = message[2] ?? 'Confirm';
+        // Convert sanitized linebreaks ("\n") to real line breaks...
+        let message = directive.expression.replaceAll('\\n', '\n').split('|');
+        let title = message.shift();
+        let description =
+            (message[0] ? '<div>' + message[0] + '</div>' : '') +
+            (promptAppend ? '<div>' + promptAppend + '</div>' : '');
+        let cancelLabel = message[1] ?? 'Cancel';
+        let confirmLabel = message[2] ?? 'Confirm';
 
-    if (title === '') title = 'Are you sure?';
+        if (title === '') title = 'Are you sure?';
 
-    el.__livewire_confirm = (action) => {
-        $tsui
-            .interaction('dialog')
-            .wireable(component.id)
-            [type](title, description)
-            .confirm(confirmLabel, () => {
-                action();
-            })
-            .cancel(cancelLabel)
-            .send();
-    };
+        el.__livewire_confirm = (action) => {
+            $tsui
+                .interaction('dialog')
+                .wireable(component.id)
+                [type](title, description)
+                .confirm(confirmLabel, () => {
+                    action();
+                })
+                .cancel(cancelLabel)
+                .send();
+        };
+    });
 });

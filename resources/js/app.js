@@ -1,13 +1,25 @@
 import axios from 'axios';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
-import nuxbeAppBridge from './nuxbe-bridge.js';
+import {
+    browserSupportsWebAuthn,
+    startAuthentication,
+    startRegistration,
+} from '@simplewebauthn/browser';
+import nuxbeAppBridge, {
+    loadSharedFiles,
+    clearSharedFiles,
+} from './nuxbe-bridge.js';
 
 // Import all modules into single bundle
 import './components/alpine.js';
 import './components/apex-charts.js';
 
 window.nuxbeAppBridge = nuxbeAppBridge;
+window.nuxbeShareTarget = { loadSharedFiles, clearSharedFiles };
+window.browserSupportsWebAuthn = browserSupportsWebAuthn;
+window.startAuthentication = startAuthentication;
+window.startRegistration = startRegistration;
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests

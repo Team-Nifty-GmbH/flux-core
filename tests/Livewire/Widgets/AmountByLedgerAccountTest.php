@@ -114,6 +114,12 @@ test('calculate chart returns right numbers timeframe today', function (): void 
         ])
         ->assertSet('series', [
             round(
+                $this->orders[2]
+                    ->orderPositions()
+                    ->sum('total_gross_price'),
+                2
+            ),
+            round(
                 $this->orders[0]
                     ->orderPositions()
                     ->sum('total_gross_price'),
@@ -121,12 +127,6 @@ test('calculate chart returns right numbers timeframe today', function (): void 
             ),
             round(
                 $this->orders[1]
-                    ->orderPositions()
-                    ->sum('total_gross_price'),
-                2
-            ),
-            round(
-                $this->orders[2]
                     ->orderPositions()
                     ->sum('total_gross_price'),
                 2
@@ -179,6 +179,12 @@ test('net orders get successfully ignored', function (): void {
         ])
         ->assertSet('series', [
             round(
+                $this->orders[2]
+                    ->orderPositions()
+                    ->sum('total_gross_price'),
+                2
+            ),
+            round(
                 $this->orders[0]
                     ->orderPositions()
                     ->sum('total_gross_price'),
@@ -186,12 +192,6 @@ test('net orders get successfully ignored', function (): void {
             ),
             round(
                 $this->orders[1]
-                    ->orderPositions()
-                    ->sum('total_gross_price'),
-                2
-            ),
-            round(
-                $this->orders[2]
                     ->orderPositions()
                     ->sum('total_gross_price'),
                 2

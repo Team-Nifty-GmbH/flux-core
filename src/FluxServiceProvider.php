@@ -2,21 +2,26 @@
 
 namespace FluxErp;
 
+use FluxErp\Actions\Passkey\StorePasskeyAction;
 use FluxErp\Assets\AssetManager;
 use FluxErp\Facades\ProductType;
 use FluxErp\Helpers\Composer;
 use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
+use FluxErp\Http\Controllers\AuthenticateUsingPasskeyController;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
+use FluxErp\Http\Middleware\EnsureTwoFactorSetup;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Product\Product;
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Models\User;
 use FluxErp\Providers\ActionServiceProvider;
 use FluxErp\Providers\AuthServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
@@ -49,6 +54,7 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Spatie\LaravelPasskeys\Http\Controllers\AuthenticateUsingPasskeyController as BaseAuthenticateUsingPasskeyController;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\Finder\Finder;
@@ -117,8 +123,10 @@ class FluxServiceProvider extends ServiceProvider
 
         app('livewire')->componentHook(SupportFormObjects::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);
+        $this->app->bind(BaseAuthenticateUsingPasskeyController::class, AuthenticateUsingPasskeyController::class);
 
         $this->app->singleton(AssetManager::class);
+        $this->app->singleton(MailDriverManager::class);
         $this->app->singleton(ProductTypeManager::class);
 
         // Register core providers in correct order
@@ -240,6 +248,9 @@ class FluxServiceProvider extends ServiceProvider
             config(['permission.display_permission_in_exception' => true]);
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
+            config(['two-factor.recovery.enabled' => false]);
+            config(['passkeys.models.authenticatable' => resolve_static(User::class, 'class')]);
+            config(['passkeys.actions.store_passkey' => resolve_static(StorePasskeyAction::class, 'class')]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
@@ -275,11 +286,12 @@ class FluxServiceProvider extends ServiceProvider
         $kernel->appendMiddlewareToGroup('web', Localization::class);
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
 
+        $this->app['router']->aliasMiddleware('2fa.setup', EnsureTwoFactorSetup::class);
         $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
+        $this->app['router']->aliasMiddleware('localization', Localization::class);
+        $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
-        $this->app['router']->aliasMiddleware('permission', Permissions::class);
-        $this->app['router']->aliasMiddleware('localization', Localization::class);
 
         Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }

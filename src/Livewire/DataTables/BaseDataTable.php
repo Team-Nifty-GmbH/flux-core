@@ -30,13 +30,6 @@ abstract class BaseDataTable extends DataTable
             $formatted,
         );
 
-        $this->toast()
-            ->success(
-                __('Export started'),
-                __('Your export is being processed. You will be notified when it is ready.')
-            )
-            ->send();
-
         return response()->noContent();
     }
 

@@ -15,9 +15,9 @@
 @endsection
 
 @section('positions.positions')
-    @foreach($model->orderPositions as $position)
+    @foreach ($model->orderPositions as $position)
         <tbody>
-            <tr @if($loop->odd) style="background: #f2f4f7" @endif>
+            <tr @if ($loop->odd) style="background: #f2f4f7" @endif>
                 <td
                     class="pos"
                     style="
@@ -32,7 +32,7 @@
                 <td
                     style="padding-top: 16px; padding-bottom: 16px; padding-right: 32px; vertical-align: top; padding-left: {{ $position->depth * 15 }}px"
                 >
-                    @if($position->is_alternative)
+                    @if ($position->is_alternative)
                         <x-badge
                             color="amber"
                             style="margin-bottom: 8px"

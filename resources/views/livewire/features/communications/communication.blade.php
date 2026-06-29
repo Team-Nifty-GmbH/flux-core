@@ -439,7 +439,7 @@
             <div class="text-sm font-semibold">{{ __('Print') }}</div>
             <div class="text-sm font-semibold">{{ __('Email') }}</div>
             <div class="text-sm font-semibold">{{ __('Download') }}</div>
-            @foreach($printLayouts as $printLayout)
+            @foreach ($printLayouts as $printLayout)
                 <x-checkbox
                     wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}"
                     :label="__($printLayout)"

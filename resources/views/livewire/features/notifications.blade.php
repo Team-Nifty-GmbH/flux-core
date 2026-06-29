@@ -1,16 +1,5 @@
 <div
-    x-data="{
-        addToast(event) {
-            Alpine.$data(
-                $el.querySelector('#toasts').querySelector('[x-data]'),
-            ).add(event);
-        },
-        removeAll() {
-            Alpine.$data(
-                $el.querySelector('#toasts').querySelector('[x-data]'),
-            ).toasts = [];
-        },
-    }"
+    x-data
     x-init.once="
         window.Echo.private(
             '{{ auth()->user()->receivesBroadcastNotificationsOn() }}',
@@ -38,19 +27,33 @@
         <x-slide
             id="notifications-slide"
             scope="notifications"
-            x-on:close="$wire.closeNotifications()"
+            x-on:close="
+                $wire
+                    .closeNotifications()
+                    .then(() => $dispatch('notifications:clear'))
+            "
         >
-            <div class="flex h-full flex-col justify-between">
-                <div
-                    x-on:ts-ui:toast-list.window="addToast($event)"
-                    x-on:ts-ui:toast.window="event.stopPropagation()"
-                >
-                    <div class="space-y-3 p-0" id="toasts">
-                        <x-toast scope="relative" />
-                        <div
-                            x-intersect="show && $wire.showNotifications()"
-                        ></div>
-                    </div>
+            <div
+                x-data="{
+                    addToast(event) {
+                        Alpine.$data(
+                            $refs.toasts.querySelector('[x-data]'),
+                        ).add(event);
+                    },
+                    removeAll() {
+                        Alpine.$data(
+                            $refs.toasts.querySelector('[x-data]'),
+                        ).toasts = [];
+                    },
+                }"
+                class="flex h-full flex-col justify-between"
+                x-on:ts-ui:toast-list.window="addToast($event)"
+                x-on:ts-ui:toast.window="event.stopPropagation()"
+                x-on:notifications:clear.window="removeAll()"
+            >
+                <div class="space-y-3 p-0" x-ref="toasts">
+                    <x-toast scope="relative" />
+                    <div x-intersect="show && $wire.showNotifications()"></div>
                 </div>
             </div>
             <x-slot:footer>
@@ -60,7 +63,9 @@
                         class="w-full"
                         :text="__('Mark all as read')"
                         x-on:click.prevent="
-                            $wire.markAllAsRead().then(() => removeAll())
+                            $wire
+                                .markAllAsRead()
+                                .then(() => $dispatch('notifications:clear'))
                         "
                     />
                 </div>

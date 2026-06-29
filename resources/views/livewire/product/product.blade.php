@@ -40,7 +40,7 @@
                     :options="$languages"
                 />
             </div>
-            @if(resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
+            @if (resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
                 <x-button
                     x-on:click="
                         $wire.$dispatch('cart:add', {

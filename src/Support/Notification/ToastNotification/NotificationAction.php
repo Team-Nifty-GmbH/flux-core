@@ -17,6 +17,8 @@ class NotificationAction implements Arrayable
 
     protected mixed $params = null;
 
+    protected ?string $routeName = null;
+
     protected ?bool $solid = null;
 
     protected ?string $style = null;
@@ -87,6 +89,8 @@ class NotificationAction implements Arrayable
 
     public function route(string $route, array $params = []): static
     {
+        $this->routeName = $route;
+
         return $this->url(route($route, $params));
     }
 
@@ -111,6 +115,7 @@ class NotificationAction implements Arrayable
             'style' => $this->style,
             'solid' => $this->solid,
             'url' => $this->url,
+            'route' => $this->routeName,
             'download' => $this->download,
             'execute' => $this->execute,
             'method' => $this->method,
