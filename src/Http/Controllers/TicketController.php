@@ -15,7 +15,7 @@ class TicketController extends Controller
     {
         $tickets = $request->user()
             ->tickets()
-            ->whereNotIn('state', TicketState::endStateNames())
+            ->whereNotIn('state', TicketState::endStateKeys())
             ->orderByRaw('state = ? DESC', [Escalated::$name])
             ->orderBy('created_at')
             ->get(['id', 'ticket_number', 'title', 'state'])

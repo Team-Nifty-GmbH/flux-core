@@ -75,7 +75,7 @@ class MyTasks extends Component implements HasWidgetOptions
     public function showInTaskList(): void
     {
         $userId = auth()->id();
-        $endStates = $this->getEndStates();
+        $endStates = TaskState::endStateKeys();
 
         SessionFilter::make(
             Livewire::new(resolve_static(TaskList::class, 'class'))->getCacheKey(),
@@ -100,7 +100,7 @@ class MyTasks extends Component implements HasWidgetOptions
             ->user()
             ->tasks()
             ->with(['project:id,name', 'model'])
-            ->whereNotIn('state', $this->getEndStates())
+            ->whereNotIn('state', TaskState::endStateKeys())
             ->orderByDesc('priority')
             ->orderByRaw('ISNULL(due_date), due_date ASC')
             ->limit($this->limit + 1)
@@ -116,13 +116,5 @@ class MyTasks extends Component implements HasWidgetOptions
                 'model_type',
                 'model_id',
             ]);
-    }
-
-    protected function getEndStates(): array
-    {
-        return TaskState::all()
-            ->filter(fn (string $state): bool => $state::$isEndState)
-            ->keys()
-            ->toArray();
     }
 }

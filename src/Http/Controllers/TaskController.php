@@ -20,14 +20,16 @@ class TaskController extends Controller
                 $query->where('responsible_user_id', $userId)
                     ->orWhereRelation('users', 'users.id', $userId);
             })
-            ->whereNotIn('state', TaskState::endStateNames())
+            ->whereNotIn('state', TaskState::endStateKeys())
             ->orderByDesc('priority')
             ->orderByRaw('ISNULL(due_date), due_date ASC')
-            ->get(['id', 'name', 'state'])
+            ->get(['id', 'name', 'state', 'priority', 'due_date'])
             ->map(fn (Task $task): array => [
                 'id' => $task->getKey(),
                 'name' => $task->name,
                 'state' => $task->state::$name,
+                'priority' => $task->priority,
+                'due_date' => $task->due_date?->format('Y-m-d'),
                 'url' => $task->getUrl(),
             ]);
 
