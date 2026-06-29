@@ -31,8 +31,6 @@ class PaymentReminderRun extends Component
     /** Editable recipient email per group, keyed by group key. */
     public array $recipientEmails = [];
 
-    public ?int $filterTenantId = null;
-
     public ?string $filterLevel = null;
 
     public ?string $search = null;
@@ -58,9 +56,15 @@ class PaymentReminderRun extends Component
 
     public function updated(string $property): void
     {
-        if (in_array($property, ['filterTenantId', 'filterLevel', 'search', 'minOverdueDays', 'sort'], true)) {
+        if (in_array($property, ['filterLevel', 'search', 'minOverdueDays', 'sort'], true)) {
             $this->loadData();
         }
+    }
+
+    #[Computed]
+    public function isEmpty(): bool
+    {
+        return blank($this->groups);
     }
 
     public function loadData(): void
@@ -69,10 +73,6 @@ class PaymentReminderRun extends Component
 
         $orders = resolve_static(Order::class, 'query')
             ->wherePaymentReminderDue()
-            ->when(
-                $this->filterTenantId,
-                fn (Builder $query) => $query->where('tenant_id', $this->filterTenantId)
-            )
             ->when(
                 filled($this->filterLevel),
                 fn (Builder $query) => $query->where(
@@ -100,11 +100,8 @@ class PaymentReminderRun extends Component
                         )
                 )
             )
-            ->with(['contact:id,customer_number', 'orderType:id,order_type_enum'])
-            ->get()
-            ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
-                && bccomp($order->orderType->order_type_enum->multiplier(), '1') === 0
-            );
+            ->with(['contact:id,customer_number'])
+            ->get();
 
         $groups = $orders
             ->groupBy(fn (Order $order) => $order->contact_id . '-' . ((int) $order->payment_reminder_current_level + 1))
@@ -153,28 +150,6 @@ class PaymentReminderRun extends Component
         $this->recipientEmails = collect($this->groups)
             ->mapWithKeys(fn (array $group) => [$group['key'] => $group['recipient_email']])
             ->all();
-    }
-
-    #[Computed]
-    public function isEmpty(): bool
-    {
-        return blank($this->groups);
-    }
-
-    public function toggleGroup(string $key): void
-    {
-        $group = collect($this->groups)->firstWhere('key', $key);
-
-        if (! $group) {
-            return;
-        }
-
-        $groupIds = array_map('strval', array_column($group['orders'], 'id'));
-        $allSelected = empty(array_diff($groupIds, $this->selectedOrders));
-
-        $this->selectedOrders = $allSelected
-            ? array_values(array_diff($this->selectedOrders, $groupIds))
-            : array_values(array_unique(array_merge($this->selectedOrders, $groupIds)));
     }
 
     public function preview(int $orderId): void
@@ -230,15 +205,20 @@ class PaymentReminderRun extends Component
         $this->loadData();
     }
 
-    protected function sortGroups(Collection $groups): Collection
+    public function toggleGroup(string $key): void
     {
-        return match ($this->sort) {
-            'overdue_days_asc' => $groups->sortBy('max_overdue_days')->values(),
-            'balance_desc' => $groups->sortByDesc(fn (array $g) => (float) $g['total_balance'])->values(),
-            'balance_asc' => $groups->sortBy(fn (array $g) => (float) $g['total_balance'])->values(),
-            'contact_asc' => $groups->sortBy('contact_name')->values(),
-            default => $groups->sortByDesc('max_overdue_days')->values(),
-        };
+        $group = collect($this->groups)->firstWhere('key', $key);
+
+        if (! $group) {
+            return;
+        }
+
+        $groupIds = array_map('strval', array_column($group['orders'], 'id'));
+        $allSelected = empty(array_diff($groupIds, $this->selectedOrders));
+
+        $this->selectedOrders = $allSelected
+            ? array_values(array_diff($this->selectedOrders, $groupIds))
+            : array_values(array_unique(array_merge($this->selectedOrders, $groupIds)));
     }
 
     protected function sendBundle(array $orderIds): void
@@ -247,7 +227,21 @@ class PaymentReminderRun extends Component
             return;
         }
 
-        $recipients = array_filter($this->recipientEmails, fn ($email) => filled($email));
+        // Map every order to its group's editable recipient so the action can look
+        // up overrides by order id, matching the order_ids it already receives.
+        $recipients = [];
+
+        foreach ($this->groups as $group) {
+            $email = data_get($this->recipientEmails, $group['key']);
+
+            if (! filled($email)) {
+                continue;
+            }
+
+            foreach ($group['orders'] as $order) {
+                $recipients[$order['id']] = $email;
+            }
+        }
 
         try {
             // Fans the sends out as a monitored batch; the batch progress toast
@@ -262,5 +256,17 @@ class PaymentReminderRun extends Component
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }
+    }
+
+    protected function sortGroups(Collection $groups): Collection
+    {
+        return match ($this->sort) {
+            'overdue_days_asc' => $groups->sortBy('max_overdue_days')->values(),
+            'balance_desc' => $groups->sortByDesc(fn (array $group) => (float) $group['total_balance'])->values(),
+            'balance_asc' => $groups->sortBy(fn (array $group) => (float) $group['total_balance'])->values(),
+            'contact_asc' => $groups->sortBy('contact_name')->values(),
+            'contact_desc' => $groups->sortByDesc('contact_name')->values(),
+            default => $groups->sortByDesc('max_overdue_days')->values(),
+        };
     }
 }

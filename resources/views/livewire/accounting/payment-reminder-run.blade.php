@@ -54,7 +54,8 @@
                     ['label' => __('Days overdue (asc)'), 'value' => 'overdue_days_asc'],
                     ['label' => __('Balance (desc)'), 'value' => 'balance_desc'],
                     ['label' => __('Balance (asc)'), 'value' => 'balance_asc'],
-                    ['label' => __('Customer'), 'value' => 'contact_asc'],
+                    ['label' => __('Customer (asc)'), 'value' => 'contact_asc'],
+                    ['label' => __('Customer (desc)'), 'value' => 'contact_desc'],
                 ]"
                 select="label:label|value:value"
                 size="sm"
@@ -68,7 +69,7 @@
             </div>
         @else
             @php
-                $totalBalance = collect($groups)->sum(fn ($g) => (float) $g['total_balance']);
+                $totalBalance = collect($groups)->sum(fn ($group) => (float) $group['total_balance']);
             @endphp
             <div class="text-secondary-500 mt-4 mb-2 text-xs">
                 {{ count($groups) }} {{ __('Groups') }} &middot; {{ collect($groups)->sum('order_count') }} {{ __('invoice(s)') }} &middot; {{ __('Total') }}: {{ Number::currency($totalBalance, locale: app()->getLocale()) }}

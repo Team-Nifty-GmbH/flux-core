@@ -25,23 +25,19 @@ class BundlePaymentReminders extends FluxAction
     {
         $orders = resolve_static(Order::class, 'query')
             ->whereIntegerInRaw('id', $this->getData('order_ids'))
-            ->with(['orderType:id,order_type_enum'])
             ->wherePaymentReminderEligible()
-            ->get()
-            ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
-                && bccomp($order->orderType->order_type_enum->multiplier(), '1') === 0
-            );
+            ->get();
 
         $recipients = $this->getData('recipients') ?? [];
 
         // One mail per invoice. All sends run as a single monitored batch (even a
         // batch of one) so the user gets the same progress toast as bulk mailing.
+        // Recipient overrides are keyed by order id to match the order_ids input.
         $jobs = $orders
-            ->map(function (Order $order) use ($recipients): SendPaymentReminderJob {
-                $key = $order->contact_id . '-' . ((int) $order->payment_reminder_current_level + 1);
-
-                return new SendPaymentReminderJob($order->getKey(), data_get($recipients, $key));
-            })
+            ->map(fn (Order $order): SendPaymentReminderJob => app(SendPaymentReminderJob::class, [
+                'orderId' => $order->getKey(),
+                'recipientOverride' => data_get($recipients, $order->getKey()),
+            ]))
             ->all();
 
         if ($jobs) {

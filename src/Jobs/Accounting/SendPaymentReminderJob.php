@@ -28,14 +28,11 @@ class SendPaymentReminderJob implements ShouldQueue
     {
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->orderId)
-            ->with(['contact', 'orderType:id,order_type_enum'])
+            ->with(['contact'])
             ->wherePaymentReminderEligible()
             ->first();
 
-        if (! $order
-            || $order->orderType->order_type_enum->isPurchase()
-            || bccomp($order->orderType->order_type_enum->multiplier(), '1') !== 0
-        ) {
+        if (! $order) {
             return;
         }
 
@@ -54,13 +51,13 @@ class SendPaymentReminderJob implements ShouldQueue
             ->first();
 
         if (! $text) {
-            $this->abort($reminder, $order, 'No payment reminder text for level ' . $reminder->reminder_level);
+            $this->skip($reminder, $order, 'No payment reminder text for level ' . $reminder->reminder_level);
 
             return;
         }
 
         if (! $text->emailTemplate) {
-            $this->abort($reminder, $order, 'Missing payment reminder template');
+            $this->skip($reminder, $order, 'Missing payment reminder template');
 
             return;
         }
@@ -137,16 +134,45 @@ class SendPaymentReminderJob implements ShouldQueue
 
     protected function abort(PaymentReminder $reminder, Order $order, ?string $reason, ?array $to = null): void
     {
+        $this->cleanup(
+            $reminder,
+            $order,
+            'payment_reminder_send_failed',
+            'Payment reminder send failed',
+            $reason,
+            $to,
+        );
+    }
+
+    protected function cleanup(
+        PaymentReminder $reminder,
+        Order $order,
+        string $event,
+        string $message,
+        ?string $reason,
+        ?array $to = null
+    ): void {
         PaymentReminder::withoutEvents(fn () => $reminder->forceDelete());
 
         activity()
-            ->event('payment_reminder_send_failed')
+            ->event($event)
             ->byAnonymous()
             ->performedOn($order)
             ->withProperties(array_filter([
                 'error' => $reason,
                 'to' => $to,
             ]))
-            ->log('Payment reminder send failed');
+            ->log($message);
+    }
+
+    protected function skip(PaymentReminder $reminder, Order $order, ?string $reason): void
+    {
+        $this->cleanup(
+            $reminder,
+            $order,
+            'payment_reminder_skipped',
+            'Payment reminder skipped',
+            $reason,
+        );
     }
 }

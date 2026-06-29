@@ -71,7 +71,7 @@ test('passes the recipient override to the job', function (): void {
 
     BundlePaymentReminders::make([
         'order_ids' => [$this->order->getKey()],
-        'recipients' => [$this->order->contact_id . '-1' => 'override@example.com'],
+        'recipients' => [$this->order->getKey() => 'override@example.com'],
     ])
         ->validate()
         ->execute();

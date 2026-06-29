@@ -47,7 +47,7 @@ beforeEach(function (): void {
     $this->order->update(['balance' => 100]);
 });
 
-test('aborts without sending and logs activity when no reminder text exists for the level', function (): void {
+test('skips without sending and logs a skip when no reminder text exists for the level', function (): void {
     $orderId = $this->order->getKey();
 
     (new SendPaymentReminderJob($orderId))->handle();
@@ -60,10 +60,11 @@ test('aborts without sending and logs activity when no reminder text exists for 
         ->and($order->payment_reminder_next_date?->toDateString())
         ->toBe(now()->subDay()->toDateString());
 
+    // A missing reminder text is a configuration gap, not a delivery failure.
     $logged = Activity::query()
         ->where('subject_type', morph_alias(Order::class))
         ->where('subject_id', $orderId)
-        ->where('event', 'payment_reminder_send_failed')
+        ->where('event', 'payment_reminder_skipped')
         ->exists();
 
     expect($logged)->toBeTrue();
