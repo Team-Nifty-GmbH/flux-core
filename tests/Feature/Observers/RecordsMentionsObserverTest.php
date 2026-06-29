@@ -39,7 +39,8 @@ test('persists a user mention when a source model is saved', function (): void {
     expect(Mention::count())->toBe(1);
     expect(Mention::first()->user_id)->toBe($u->id);
     expect(Mention::first()->mention_type_enum->value)->toBe(MentionTypeEnum::User);
-    expect(Mention::first()->mention_target_type)->toBeNull();
+    expect(Mention::first()->mention_target_type)->toBe(morph_alias(User::class));
+    expect(Mention::first()->mention_target_id)->toBe($u->id);
 });
 
 test('persists a record mention when a source model is saved', function (): void {

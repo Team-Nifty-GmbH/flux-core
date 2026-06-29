@@ -4,6 +4,7 @@ namespace FluxErp\Support\Mentions;
 
 use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Facades\MentionableType;
+use FluxErp\Models\User;
 use Illuminate\Support\Collection;
 
 class MentionParser
@@ -21,7 +22,8 @@ class MentionParser
         $consumed = [];
 
         $recordTypes = MentionableType::getRecordMentionableTypes();
-        $userKeys = MentionableType::getUserMentionableTypes(keysOnly: true);
+        $userTypes = MentionableType::getUserMentionableTypes();
+        $userKeys = array_keys($userTypes);
 
         preg_match_all(
             '/(?<!\\\\)(?<![A-Za-z0-9._-])#([a-z][a-z0-9_]*):(\d+)/i',
@@ -29,8 +31,8 @@ class MentionParser
             $matches,
             PREG_OFFSET_CAPTURE,
         );
-        foreach ($matches[0] as $i => $fullMatch) {
-            $key = strtolower($matches[1][$i][0]);
+        foreach ($matches[0] as $index => $fullMatch) {
+            $key = strtolower($matches[1][$index][0]);
             if (! array_key_exists($key, $recordTypes)) {
                 continue;
             }
@@ -39,7 +41,7 @@ class MentionParser
                 'type' => MentionTypeEnum::Record,
                 'user_id' => null,
                 'mentionable_type' => $key,
-                'mentionable_id' => (int) $matches[2][$i][0],
+                'mentionable_id' => (int) $matches[2][$index][0],
                 'raw' => $fullMatch[0],
             ];
             $consumed[] = [$fullMatch[1], $fullMatch[1] + strlen($fullMatch[0])];
@@ -57,12 +59,15 @@ class MentionParser
                 $matches,
                 PREG_OFFSET_CAPTURE,
             );
-            foreach ($matches[0] as $i => $fullMatch) {
+            foreach ($matches[0] as $index => $fullMatch) {
+                $key = strtolower($matches[1][$index][0]);
+                $id = (int) $matches[2][$index][0];
+
                 $out[] = [
                     'type' => MentionTypeEnum::User,
-                    'user_id' => (int) $matches[2][$i][0],
-                    'mentionable_type' => null,
-                    'mentionable_id' => null,
+                    'user_id' => ($userTypes[$key] ?? null) === User::class ? $id : null,
+                    'mentionable_type' => $key,
+                    'mentionable_id' => $id,
                     'raw' => $fullMatch[0],
                 ];
                 $consumed[] = [$fullMatch[1], $fullMatch[1] + strlen($fullMatch[0])];
@@ -76,11 +81,11 @@ class MentionParser
             PREG_OFFSET_CAPTURE,
         );
 
-        $byFirstname = $members->groupBy(fn ($u) => strtolower((string) ($u->firstname ?? '')))->all();
-        $byCode = $members->keyBy(fn ($u) => strtolower((string) ($u->user_code ?? '')))->all();
+        $byFirstname = $members->groupBy(fn ($member) => strtolower((string) ($member->firstname ?? '')))->all();
+        $byCode = $members->keyBy(fn ($member) => strtolower((string) ($member->user_code ?? '')))->all();
 
-        foreach ($matches[1] as $i => $tokenMatch) {
-            $rawOffset = $matches[0][$i][1];
+        foreach ($matches[1] as $index => $tokenMatch) {
+            $rawOffset = $matches[0][$index][1];
             if ($this->offsetConsumed($rawOffset, $consumed)) {
                 continue;
             }
@@ -89,8 +94,8 @@ class MentionParser
             $raw = '@' . $tokenMatch[0];
 
             if (isset($byFirstname[$token])) {
-                foreach ($byFirstname[$token] as $u) {
-                    $out[] = $this->plain(MentionTypeEnum::User, (int) $u->id, $raw);
+                foreach ($byFirstname[$token] as $member) {
+                    $out[] = $this->plain(MentionTypeEnum::User, (int) $member->id, $raw);
                 }
 
                 continue;
@@ -126,8 +131,8 @@ class MentionParser
         return [
             'type' => $type,
             'user_id' => $userId,
-            'mentionable_type' => null,
-            'mentionable_id' => null,
+            'mentionable_type' => $type === MentionTypeEnum::User ? morph_alias(User::class) : null,
+            'mentionable_id' => $userId,
             'raw' => $raw,
         ];
     }

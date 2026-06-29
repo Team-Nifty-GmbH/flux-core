@@ -4,6 +4,7 @@ namespace FluxErp\Support\Mentions;
 
 use FluxErp\Facades\MentionableType;
 use FluxErp\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class MentionRenderer
@@ -27,10 +28,10 @@ class MentionRenderer
         }
 
         $idsByKey = [];
-        foreach ($matches[1] as $i => $rawKey) {
+        foreach ($matches[1] as $index => $rawKey) {
             $key = strtolower($rawKey);
             if (array_key_exists($key, $types)) {
-                $idsByKey[$key][] = (int) $matches[2][$i];
+                $idsByKey[$key][] = (int) $matches[2][$index];
             }
         }
 
@@ -88,14 +89,14 @@ class MentionRenderer
 
     protected function renderExplicitUserTokens(string $text): string
     {
-        $userKeys = MentionableType::getUserMentionableTypes(keysOnly: true);
-        if ($userKeys === []) {
+        $userTypes = MentionableType::getUserMentionableTypes();
+        if ($userTypes === []) {
             return $text;
         }
 
         $userAlternation = implode(
             '|',
-            array_map(fn (string $key): string => preg_quote($key, '/'), $userKeys),
+            array_map(fn (string $key): string => preg_quote($key, '/'), array_keys($userTypes)),
         );
         $pattern = '/(?<!\\\\)(?<![A-Za-z0-9._-])@(' . $userAlternation . '):(\d+)/i';
 
@@ -103,20 +104,29 @@ class MentionRenderer
             return $text;
         }
 
-        $users = User::query()
-            ->whereKey(array_unique(array_map('intval', $matches[2])))
-            ->get()
-            ->keyBy(fn ($user) => $user->getKey());
+        $idsByKey = [];
+        foreach ($matches[1] as $index => $rawKey) {
+            $idsByKey[strtolower($rawKey)][] = (int) $matches[2][$index];
+        }
+
+        $usersByKey = [];
+        foreach ($idsByKey as $key => $ids) {
+            $usersByKey[$key] = resolve_static($userTypes[$key], 'query')
+                ->whereKey(array_unique($ids))
+                ->get()
+                ->keyBy(fn ($user) => $user->getKey());
+        }
 
         return preg_replace_callback(
             $pattern,
-            function (array $matches) use ($users): string {
-                $user = $users[(int) $matches[2]] ?? null;
+            function (array $matches) use ($usersByKey): string {
+                $key = strtolower($matches[1]);
+                $user = $usersByKey[$key][(int) $matches[2]] ?? null;
                 if ($user === null) {
                     return '<span class="mention mention--missing">' . e(__('@deleted entry')) . '</span>';
                 }
 
-                return $this->renderUserPill($user);
+                return $this->renderUserPill($user, $key);
             },
             $text,
         ) ?? $text;
@@ -128,25 +138,26 @@ class MentionRenderer
             return $text;
         }
 
-        $byFirstname = $members->keyBy(fn ($u) => strtolower((string) ($u->firstname ?? '')))->all();
-        $byCode = $members->keyBy(fn ($u) => strtolower((string) ($u->user_code ?? '')))->all();
+        $byFirstname = $members->keyBy(fn ($member) => strtolower((string) ($member->firstname ?? '')))->all();
+        $byCode = $members->keyBy(fn ($member) => strtolower((string) ($member->user_code ?? '')))->all();
+        $userKey = morph_alias(User::class);
 
         return preg_replace_callback(
             '/(?<!\\\\)(?<![A-Za-z0-9._-])@([A-Za-z0-9._-]+)/',
-            function (array $m) use ($byFirstname, $byCode): string {
-                $token = strtolower($m[1]);
+            function (array $matches) use ($byFirstname, $byCode, $userKey): string {
+                $token = strtolower($matches[1]);
                 $user = $byFirstname[$token] ?? $byCode[$token] ?? null;
                 if ($user === null) {
-                    return $m[0];
+                    return $matches[0];
                 }
 
-                return $this->renderUserPill($user);
+                return $this->renderUserPill($user, $userKey);
             },
             $text,
         ) ?? $text;
     }
 
-    protected function renderUserPill(User $user): string
+    protected function renderUserPill(Model $user, string $key): string
     {
         $id = (int) $user->getKey();
         $label = e($user->getMentionLabel());
@@ -154,7 +165,8 @@ class MentionRenderer
 
         if ($url === null) {
             return sprintf(
-                '<span class="mention mention--user" data-mention="user:%d" data-user-id="%d">%s</span>',
+                '<span class="mention mention--user" data-mention="%s:%d" data-user-id="%d">%s</span>',
+                e($key),
                 $id,
                 $id,
                 $label,
@@ -162,8 +174,9 @@ class MentionRenderer
         }
 
         return sprintf(
-            '<a class="mention mention--user" href="%s" data-mention="user:%d" data-user-id="%d">%s</a>',
+            '<a class="mention mention--user" href="%s" data-mention="%s:%d" data-user-id="%d">%s</a>',
             e($url),
+            e($key),
             $id,
             $id,
             $label,

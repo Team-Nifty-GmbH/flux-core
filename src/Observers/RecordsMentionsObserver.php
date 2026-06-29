@@ -39,22 +39,26 @@ class RecordsMentionsObserver
     {
         $type = $row['mention_type_enum'];
 
-        if ($type === MentionTypeEnum::User && $row['user_id']) {
-            $notification = $source instanceof ProvidesMentionNotification
-                ? $source->mentionNotification()
-                : new MentionNotification($source);
+        if ($type === MentionTypeEnum::User) {
+            $notifiable = $this->resolveTarget($row)
+                ?? ($row['user_id'] ? User::query()->whereKey($row['user_id'])->first() : null);
 
-            User::query()->whereKey($row['user_id'])->first()?->notify($notification);
+            if ($notifiable && method_exists($notifiable, 'notify')) {
+                $notification = $source instanceof ProvidesMentionNotification
+                    ? $source->mentionNotification()
+                    : new MentionNotification($source);
+
+                $notifiable->notify($notification);
+            }
 
             return;
         }
 
-        if ($type !== MentionTypeEnum::Record || ! $row['mention_target_type']) {
+        if ($type !== MentionTypeEnum::Record) {
             return;
         }
 
-        $cls = function_exists('morphed_model') ? morphed_model($row['mention_target_type']) : null;
-        $target = $cls ? $cls::query()->whereKey($row['mention_target_id'])->first() : null;
+        $target = $this->resolveTarget($row);
         if (! $target) {
             return;
         }
@@ -76,5 +80,21 @@ class RecordsMentionsObserver
                 event: 'eloquent.created: ' . $source::class,
             );
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    protected function resolveTarget(array $row): ?Model
+    {
+        if (! $row['mention_target_type']) {
+            return null;
+        }
+
+        $targetClass = function_exists('morphed_model') ? morphed_model($row['mention_target_type']) : null;
+
+        return $targetClass
+            ? $targetClass::query()->whereKey($row['mention_target_id'])->first()
+            : null;
     }
 }

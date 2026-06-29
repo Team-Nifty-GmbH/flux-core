@@ -3,6 +3,7 @@
 use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Support\Mentions\MentionParser;
 use FluxErp\Tests\Fixtures\MentionableFixture;
+use FluxErp\Tests\Fixtures\UserMentionableFixture;
 
 beforeEach(function (): void {
     $this->parser = new MentionParser();
@@ -36,7 +37,23 @@ test('parses @user:id as an explicit user mention', function (): void {
     expect($out)->toHaveCount(1);
     expect($out[0]['type'])->toBe(MentionTypeEnum::User);
     expect($out[0]['user_id'])->toBe(42);
-    expect($out[0]['mentionable_type'])->toBeNull();
+    expect($out[0]['mentionable_type'])->toBe('user');
+    expect($out[0]['mentionable_id'])->toBe(42);
+});
+
+test('parses multiple registered user types under their own keys', function (): void {
+    UserMentionableFixture::register('agent');
+
+    $out = $this->parser->parse('hi @user:42 and @agent:7', collect());
+
+    $agent = collect($out)->firstWhere('mentionable_type', 'agent');
+    expect($agent)->not->toBeNull();
+    expect($agent['type'])->toBe(MentionTypeEnum::User);
+    expect($agent['mentionable_id'])->toBe(7);
+    expect($agent['user_id'])->toBeNull();
+
+    $user = collect($out)->firstWhere('mentionable_type', 'user');
+    expect($user['user_id'])->toBe(42);
 });
 
 test('ignores #user:id (users are @, not #)', function (): void {

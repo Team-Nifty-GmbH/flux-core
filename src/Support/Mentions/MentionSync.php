@@ -29,12 +29,12 @@ class MentionSync
             ->where('mention_source_id', $source->getKey())
             ->get();
 
-        $existingKeys = $existing->map(fn (Mention $m) => $this->keyForExisting($m))->all();
-        $parsedKeys = array_map(fn (array $p) => $this->keyForParsed($p), $parsed);
+        $existingKeys = $existing->map(fn (Mention $mention) => $this->keyForExisting($mention))->all();
+        $parsedKeys = array_map(fn (array $parsedRow) => $this->keyForParsed($parsedRow), $parsed);
 
         $toCreate = [];
-        foreach ($parsed as $i => $row) {
-            if (in_array($parsedKeys[$i], $existingKeys, true)) {
+        foreach ($parsed as $index => $row) {
+            if (in_array($parsedKeys[$index], $existingKeys, true)) {
                 continue;
             }
 
@@ -51,7 +51,7 @@ class MentionSync
         }
 
         $toDelete = $existing->reject(
-            fn (Mention $m) => in_array($this->keyForExisting($m), $parsedKeys, true)
+            fn (Mention $mention) => in_array($this->keyForExisting($mention), $parsedKeys, true)
         );
 
         if ($toDelete->isNotEmpty()) {
@@ -64,17 +64,17 @@ class MentionSync
         return (object) ['added' => $toCreate, 'removed' => $toDelete];
     }
 
-    protected function keyForExisting(Mention $m): string
+    protected function keyForExisting(Mention $mention): string
     {
-        $type = is_object($m->mention_type_enum)
-            ? $m->mention_type_enum->value
-            : (string) ($m->mention_type_enum ?? '');
+        $type = is_object($mention->mention_type_enum)
+            ? $mention->mention_type_enum->value
+            : (string) ($mention->mention_type_enum ?? '');
 
         return implode('|', [
             $type,
-            (string) ($m->mention_target_type ?? ''),
-            (string) ($m->mention_target_id ?? ''),
-            (string) ($m->user_id ?? ''),
+            (string) ($mention->mention_target_type ?? ''),
+            (string) ($mention->mention_target_id ?? ''),
+            (string) ($mention->user_id ?? ''),
         ]);
     }
 
