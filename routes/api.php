@@ -310,6 +310,8 @@ use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
+use FluxErp\Http\Controllers\TaskController;
+use FluxErp\Http\Controllers\TicketController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
 use FluxErp\Models\AbsencePolicy;
@@ -1115,6 +1117,7 @@ Route::prefix('api')
                 Route::put('/tasks', UpdateTask::class);
                 Route::delete('/tasks/{id}', DeleteTask::class);
                 Route::post('/tasks/{id}/replicate', ReplicateTask::class);
+                Route::get('/user/tasks', [TaskController::class, 'userIndex']);
 
                 // Tenants
                 Route::get('/tenants/{id}', [BaseController::class, 'show'])->defaults('model', Tenant::class);
@@ -1130,6 +1133,7 @@ Route::prefix('api')
                 Route::post('/tickets', CreateTicket::class);
                 Route::put('/tickets', UpdateTicket::class);
                 Route::delete('/tickets/{id}', DeleteTicket::class);
+                Route::get('/user/tickets', [TicketController::class, 'userIndex']);
 
                 // TicketTypes
                 Route::get('/ticket-types/{id}', [BaseController::class, 'show'])->defaults('model', TicketType::class);

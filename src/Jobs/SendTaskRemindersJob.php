@@ -51,10 +51,7 @@ class SendTaskRemindersJob implements Repeatable, ShouldQueue
 
     public function handle(): void
     {
-        $endStates = TaskState::all()
-            ->filter(fn ($state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = TaskState::endStateKeys();
 
         $this->sendStartReminders($endStates);
         $this->sendDueReminders($endStates);
