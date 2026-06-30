@@ -100,6 +100,7 @@ use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\RecordOrigins;
 use FluxErp\Livewire\Settings\ReminderSettings;
 use FluxErp\Livewire\Settings\Scheduling;
+use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
@@ -328,6 +329,7 @@ Route::middleware('web')
                         Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
+                        Route::get('/search-settings', SearchSettings::class)->name('search-settings');
                         Route::get('/security-settings', SecuritySettings::class)->name('security-settings');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
