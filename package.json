@@ -34,7 +34,7 @@
         "@tiptap/starter-kit": "^3.27.1",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
         "alpinejs": "^3.15.12",
-        "apexcharts": "^5.14.0",
+        "apexcharts": "^5.15.2",
         "axios": "^1.17.0",
         "dayjs": "^1.11.21",
         "filepond": "^4.31.3",
@@ -44,8 +44,8 @@
         "laravel-vite-plugin": "^3.1.0",
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
-        "playwright": "^1.60.0",
-        "prettier": "^3.8.4",
+        "playwright": "^1.61.1",
+        "prettier": "^3.9.4",
         "prettier-plugin-blade": "^3.1.6",
         "prettier-plugin-tailwindcss": "^0.7.4",
         "pusher-js": "^8.4.0-rc2",
@@ -53,7 +53,7 @@
         "signature_pad": "^5.0.1",
         "tailwindcss": "^4.3.1",
         "uuid": "^14.0.1",
-        "vite": "^8.0.16"
+        "vite": "^8.1.2"
     },
     "dependencies": {
         "@simplewebauthn/browser": "^13.3.0",
