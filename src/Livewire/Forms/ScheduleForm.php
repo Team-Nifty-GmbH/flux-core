@@ -8,6 +8,8 @@ use FluxErp\Actions\Schedule\DeleteSchedule;
 use FluxErp\Actions\Schedule\UpdateSchedule;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Facades\Repeatable;
+use FluxErp\Models\Order;
+use FluxErp\Models\Schedule as ScheduleModel;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
@@ -162,22 +164,6 @@ class ScheduleForm extends FluxForm
             ? Carbon::parse($this->ends_at)
             : null;
 
-        $dates = [];
-
-        if ($dueAt && $dueAt->isFuture()) {
-            if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
-                $dates[] = $dueAt->toDateTimeString();
-            }
-        }
-
-        $maxDates = $remainingRecurrences !== null
-            ? min($count, $remainingRecurrences - count($dates))
-            : $count;
-
-        if ($maxDates <= 0) {
-            return $dates;
-        }
-
         $basicParams = data_get($this->cron, 'parameters.basic', []);
 
         $parameters = match ($method) {
@@ -208,19 +194,42 @@ class ScheduleForm extends FluxForm
             $event = $event->{$method}();
         }
 
+        // Chain the performance period from the order's real current state, using the same
+        // computation the actual run applies, so the preview is a promise, not an estimate.
+        $expression = $event->expression;
+        $periodStart = $this->resolvePerformancePeriodStart();
+
+        $dates = [];
+
+        if ($dueAt && $dueAt->isFuture()) {
+            if (! $endsAt || $dueAt->lessThanOrEqualTo($endsAt)) {
+                $dates[] = $this->buildExecutionEntry($dueAt, $periodStart, $expression);
+            }
+        }
+
+        $maxDates = $remainingRecurrences !== null
+            ? min($count, $remainingRecurrences - count($dates))
+            : $count;
+
+        if ($maxDates <= 0) {
+            return $dates;
+        }
+
         $from = $dueAt && $dueAt->isFuture() ? $dueAt : now();
 
         try {
             if ($method === FrequenciesEnum::LastDayOfMonth->value) {
-                $parts = explode(' ', $event->expression);
+                $parts = explode(' ', $expression);
                 $current = $from;
 
                 for ($i = 0; $i < $maxDates; $i++) {
-                    $next = $current->endOfMonth()
+                    // copy() because Carbon is mutable: without it $next would alias $current,
+                    // the <= check would always be true and every other month would be skipped.
+                    $next = $current->copy()->endOfMonth()
                         ->setTime((int) $parts[1], (int) $parts[0]);
 
                     if ($next->lessThanOrEqualTo($current)) {
-                        $next = $current->addMonthNoOverflow()->endOfMonth()
+                        $next = $current->copy()->addMonthNoOverflow()->endOfMonth()
                             ->setTime((int) $parts[1], (int) $parts[0]);
                     }
 
@@ -228,11 +237,11 @@ class ScheduleForm extends FluxForm
                         break;
                     }
 
-                    $dates[] = $next->toDateTimeString();
-                    $current = $next->addDay();
+                    $dates[] = $this->buildExecutionEntry($next, $periodStart, $expression);
+                    $current = $next->copy()->addDay();
                 }
             } else {
-                $cron = new CronExpression($event->expression);
+                $cron = new CronExpression($expression);
                 $current = $from;
 
                 for ($i = 0; $i < $maxDates; $i++) {
@@ -242,7 +251,7 @@ class ScheduleForm extends FluxForm
                         break;
                     }
 
-                    $dates[] = $next->toDateTimeString();
+                    $dates[] = $this->buildExecutionEntry($next, $periodStart, $expression);
                     $current = $next;
                 }
             }
@@ -251,6 +260,43 @@ class ScheduleForm extends FluxForm
         }
 
         return $dates;
+    }
+
+    protected function buildExecutionEntry(Carbon $runDate, ?Carbon &$periodStart, ?string $cronExpression): array
+    {
+        $entry = ['date' => $runDate->toDateTimeString()];
+
+        if ($periodStart) {
+            $periodEnd = ScheduleModel::performancePeriodEnd($periodStart, $this->cron, $cronExpression);
+            $entry['system_delivery_date'] = $periodStart->toDateString();
+            $entry['system_delivery_date_end'] = $periodEnd->toDateString();
+            $periodStart = $periodEnd->copy()->addDay();
+        }
+
+        return $entry;
+    }
+
+    protected function resolvePerformancePeriodStart(): ?Carbon
+    {
+        $orderId = $this->orders[0] ?? null;
+
+        if (! $orderId) {
+            return null;
+        }
+
+        $order = Order::query()->whereKey($orderId)->first();
+
+        if (! $order) {
+            return null;
+        }
+
+        $latestChild = $order->createdOrders()
+            ->orderByDesc('system_delivery_date_end')
+            ->first();
+
+        return $latestChild?->system_delivery_date_end?->copy()->addDay()
+            ?? $order->system_delivery_date?->copy()
+            ?? $order->order_date?->copy();
     }
 
     protected function getActions(): array

@@ -2,17 +2,16 @@
 
 namespace FluxErp\Invokable;
 
-use Carbon\Carbon;
 use Cron\CronExpression;
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Printing;
 use FluxErp\Console\Scheduling\Repeatable;
-use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Events\Order\SubscriptionOrderFailedEvent;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\Schedule;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Throwable;
@@ -62,19 +61,9 @@ class ProcessSubscriptionOrder implements Repeatable
             ->where('is_active', true)
             ->first();
 
-        if (data_get($schedule?->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
-            // lastDayOfMonth bakes a fixed day (e.g. 30) into cron_expression, which skips short
-            // months. Use the real end of the current month, mirroring ScheduleRunCommand.
-            $order->system_delivery_date_end = $order->system_delivery_date->copy()->endOfMonth();
-        } elseif ($schedule?->cron_expression) {
-            $cronExpression = new CronExpression($schedule->cron_expression);
-            $nextRunDate = $cronExpression->getNextRunDate(
-                $order->system_delivery_date->copy()->endOfDay()->toDateTime()
-            );
-            $order->system_delivery_date_end = Carbon::instance($nextRunDate)->subDay();
-        } else {
-            $order->system_delivery_date_end = $order->system_delivery_date;
-        }
+        $order->system_delivery_date_end = $schedule
+            ? Schedule::performancePeriodEnd($order->system_delivery_date, $schedule->cron, $schedule->cron_expression)
+            : $order->system_delivery_date;
 
         try {
             $newOrder = ReplicateOrder::make($order)
