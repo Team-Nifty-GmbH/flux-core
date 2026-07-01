@@ -228,7 +228,10 @@
                         <li
                             class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
                         >
-                            <x-icon name="chevron-right" class="mt-1 h-3 w-3 shrink-0" />
+                            <x-icon
+                                name="chevron-right"
+                                class="mt-1 h-3 w-3 shrink-0"
+                            />
                             <span class="flex flex-col">
                                 <span
                                     x-text="
