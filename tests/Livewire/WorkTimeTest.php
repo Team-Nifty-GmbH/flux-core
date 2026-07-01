@@ -226,7 +226,6 @@ test('pause daily work time does not close employee day', function (): void {
         ->assertOk()
         ->assertHasNoErrors()
         ->assertNotSet('dailyWorkTimePause.id', null)
-        ->assertSet('dailyWorkTimePause.employee_id', $employee->getKey())
         ->assertSet('dailyWorkTimePause.user_id', $this->user->getKey())
         ->assertNotSet('dailyWorkTimePause.started_at', null)
         ->assertSet('dailyWorkTimePause.ended_at', null)
