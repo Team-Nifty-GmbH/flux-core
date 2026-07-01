@@ -248,6 +248,64 @@ test('process subscription order sets correct performance period for monthly sch
         ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe($orderDate->copy()->endOfMonth()->format('Y-m-d'));
 });
 
+test('process subscription order uses real month-end for lastDayOfMonth schedule', function (): void {
+    // Laravel's lastDayOfMonth() bakes a fixed day (e.g. 30) into the stored cron_expression.
+    // Relying on that string breaks in short months: getNextRunDate('0 0 30 * *') skips February
+    // and rolls into March. The period end must be the real end of the current month instead.
+    $orderDate = Carbon\Carbon::create(2026, 2, 1);
+
+    $this->subscriptionOrder->update([
+        'order_date' => $orderDate,
+        'system_delivery_date' => $orderDate,
+        'system_delivery_date_end' => null,
+    ]);
+
+    $schedule = Schedule::create([
+        'uuid' => Illuminate\Support\Str::uuid(),
+        'name' => 'ProcessSubscriptionOrder',
+        'class' => ProcessSubscriptionOrder::class,
+        'type' => RepeatableTypeEnum::Invokable,
+        'cron' => [
+            'methods' => [
+                'basic' => 'lastDayOfMonth',
+                'dayConstraint' => null,
+                'timeConstraint' => null,
+            ],
+            'parameters' => [
+                'basic' => ['00:00'],
+                'dayConstraint' => [],
+                'timeConstraint' => [],
+            ],
+        ],
+        // Baked in a 30-day month, exactly as it appears in production.
+        'cron_expression' => '0 0 30 * *',
+        'is_active' => true,
+        'parameters' => [
+            'orderId' => $this->subscriptionOrder->getKey(),
+            'orderTypeId' => $this->targetOrderType->getKey(),
+        ],
+    ]);
+
+    $this->subscriptionOrder->schedules()->attach($schedule->getKey());
+
+    $processor = new ProcessSubscriptionOrder();
+
+    $result = $processor(
+        orderId: $this->subscriptionOrder->getKey(),
+        orderTypeId: $this->targetOrderType->getKey()
+    );
+
+    expect($result)->toBeTrue();
+
+    $newOrder = Order::query()
+        ->where('created_from_id', $this->subscriptionOrder->getKey())
+        ->first();
+
+    expect($newOrder)->not->toBeNull()
+        ->and($newOrder->system_delivery_date->format('Y-m-d'))->toBe('2026-02-01')
+        ->and($newOrder->system_delivery_date_end->format('Y-m-d'))->toBe('2026-02-28');
+});
+
 test('process subscription order sets correct performance period for quarterly schedule', function (): void {
     $orderDate = now()->startOfQuarter();
 
