@@ -3,7 +3,7 @@
 use FluxErp\Models\Country;
 use FluxErp\Settings\SearchSettings;
 
-test('injects meilisearch embedder when semantic search enabled', function (): void {
+test('provides meilisearch embedders when semantic search enabled', function (): void {
     config(['scout.driver' => 'meilisearch']);
 
     SearchSettings::fake([
@@ -15,7 +15,7 @@ test('injects meilisearch embedder when semantic search enabled', function (): v
         'semantic_ratio' => 0.5,
     ]);
 
-    $embedder = data_get(Country::scoutIndexSettings(), 'embedders.default');
+    $embedder = data_get(Country::scoutEmbedders(), 'default');
 
     expect($embedder)->toMatchArray([
         'source' => 'rest',
@@ -26,7 +26,7 @@ test('injects meilisearch embedder when semantic search enabled', function (): v
     expect(data_get($embedder, 'request.model'))->toBe('text-embedding-3-small');
 });
 
-test('resets embedder to null when semantic search disabled', function (): void {
+test('provides no embedders when semantic search disabled', function (): void {
     config(['scout.driver' => 'meilisearch']);
 
     SearchSettings::fake([
@@ -34,7 +34,15 @@ test('resets embedder to null when semantic search disabled', function (): void 
         'embedder_url' => 'https://litellm.test/v1/embeddings',
     ]);
 
-    expect(data_get(Country::scoutIndexSettings(), 'embedders'))->toBeNull();
+    expect(Country::scoutEmbedders())->toBeNull();
+});
+
+test('returns null index settings when nothing is configured', function (): void {
+    config(['scout.driver' => 'meilisearch']);
+
+    SearchSettings::fake(['semantic_search_enabled' => false]);
+
+    expect(Country::scoutIndexSettings())->toBeNull();
 });
 
 test('adds hybrid search options when semantic search enabled', function (): void {
