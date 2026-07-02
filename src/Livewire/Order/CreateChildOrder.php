@@ -241,6 +241,7 @@ class CreateChildOrder extends Component
                 'discount_percentage',
                 'is_net',
                 'is_free_text',
+                'is_alternative',
             ])
             ->whereKey(array_merge($realPositionIds, $freeTextIds))
             ->get();
@@ -259,6 +260,7 @@ class CreateChildOrder extends Component
                     'discount_percentage' => 0,
                     'is_net' => $orderPosition->is_net,
                     'is_free_text' => true,
+                    'is_alternative' => $orderPosition->is_alternative,
                     'unit_abbreviation' => null,
                 ];
 
@@ -286,6 +288,7 @@ class CreateChildOrder extends Component
                     'total_gross_price' => $orderPosition->total_gross_price,
                     'discount_percentage' => $orderPosition->discount_percentage,
                     'is_net' => $orderPosition->is_net,
+                    'is_alternative' => $orderPosition->is_alternative,
                     'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
                 ];
             }
