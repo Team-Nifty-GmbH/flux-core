@@ -14,6 +14,25 @@ trait Searchable
         BaseSearchable::search as protected baseScoutSearch;
     }
 
+    /**
+     * The Meilisearch embedders derived from SearchSettings, or null when semantic search is off.
+     */
+    public static function scoutEmbedders(): ?array
+    {
+        if (config('scout.driver') !== 'meilisearch') {
+            return null;
+        }
+
+        return ($search = static::activeSearchSettings())
+            ? ['default' => static::embedderDefinition($search)]
+            : null;
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return config('scout.' . config('scout.driver') . '.index-settings.' . static::class) ?: null;
+    }
+
     public static function search($query = '', $callback = null): Builder
     {
         $builder = static::baseScoutSearch($query, $callback);
@@ -30,25 +49,6 @@ trait Searchable
         }
 
         return $builder;
-    }
-
-    public static function scoutIndexSettings(): ?array
-    {
-        return config('scout.' . config('scout.driver') . '.index-settings.' . static::class) ?: null;
-    }
-
-    /**
-     * The Meilisearch embedders derived from SearchSettings, or null when semantic search is off.
-     */
-    public static function scoutEmbedders(): ?array
-    {
-        if (config('scout.driver') !== 'meilisearch') {
-            return null;
-        }
-
-        return ($search = static::activeSearchSettings())
-            ? ['default' => static::embedderDefinition($search)]
-            : null;
     }
 
     /**

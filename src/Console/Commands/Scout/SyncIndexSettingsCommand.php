@@ -70,9 +70,9 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
 
             if (Arr::except($settings, 'embedders')) {
                 $engine->updateIndexSettings($indexName, $settings);
-            } else {
+            } elseif (! empty($embedders)) {
                 // Meilisearch rejects an empty settings payload, sync the embedders directly.
-                $engine->index($indexName)->updateEmbedders($settings['embedders']);
+                $engine->index($indexName)->updateEmbedders($embedders);
             }
 
             $this->info('Settings for the [' . $indexName . '] index synced successfully.');
