@@ -62,7 +62,11 @@ class ProcessSubscriptionOrder implements Repeatable
             ->first();
 
         $order->system_delivery_date_end = $schedule
-            ? Schedule::performancePeriodEnd($order->system_delivery_date, $schedule->cron, $schedule->cron_expression)
+            ? resolve_static(
+                Schedule::class,
+                'performancePeriodEnd',
+                [$order->system_delivery_date, $schedule->cron, $schedule->cron_expression]
+            )
             : $order->system_delivery_date;
 
         try {

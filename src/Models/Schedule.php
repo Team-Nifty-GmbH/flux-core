@@ -19,29 +19,30 @@ class Schedule extends FluxModel
     use HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     /**
-     * The end of the performance period that starts on $start, based on the schedule frequency.
+     * The end of the period that starts on $start, based on the schedule frequency.
      *
-     * Single source of truth shared by the actual subscription run (ProcessSubscriptionOrder)
-     * and the schedule preview, so both always agree. lastDayOfMonth is handled explicitly
-     * because Laravel bakes a fixed day-of-month into the cron expression, which is unreliable
-     * in short months.
+     * Single source of truth for consumers that derive a period from a schedule
+     * (e.g. the subscription performance period and the schedule preview), so all
+     * always agree. lastDayOfMonth is handled explicitly because Laravel bakes a
+     * fixed day-of-month into the cron expression, which is unreliable in short months.
      */
     public static function performancePeriodEnd(CarbonInterface $start, ?array $cron, ?string $cronExpression): Carbon
     {
         $start = Carbon::instance($start);
 
         if (data_get($cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
-            return $start->copy()->endOfMonth();
+            return $start->endOfMonth();
         }
 
         if ($cronExpression) {
             return Carbon::instance(
                 (new CronExpression($cronExpression))
-                    ->getNextRunDate($start->copy()->endOfDay()->toDateTime())
-            )->subDay();
+                    ->getNextRunDate($start->endOfDay()->toDateTime())
+            )
+                ->subDay();
         }
 
-        return $start->copy();
+        return $start;
     }
 
     protected function casts(): array

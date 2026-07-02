@@ -267,7 +267,11 @@ class ScheduleForm extends FluxForm
         $entry = ['date' => $runDate->toDateTimeString()];
 
         if ($periodStart) {
-            $periodEnd = ScheduleModel::performancePeriodEnd($periodStart, $this->cron, $cronExpression);
+            $periodEnd = resolve_static(
+                ScheduleModel::class,
+                'performancePeriodEnd',
+                [$periodStart, $this->cron, $cronExpression]
+            );
             $entry['system_delivery_date'] = $periodStart->toDateString();
             $entry['system_delivery_date_end'] = $periodEnd->toDateString();
             $periodStart = $periodEnd->copy()->addDay();
@@ -276,15 +280,24 @@ class ScheduleForm extends FluxForm
         return $entry;
     }
 
+    protected function getActions(): array
+    {
+        return [
+            'delete' => DeleteSchedule::class,
+        ];
+    }
+
     protected function resolvePerformancePeriodStart(): ?Carbon
     {
-        $orderId = $this->orders[0] ?? null;
+        $orderId = array_first($this->orders ?? []);
 
         if (! $orderId) {
             return null;
         }
 
-        $order = Order::query()->whereKey($orderId)->first();
+        $order = resolve_static(Order::class, 'query')
+            ->whereKey($orderId)
+            ->first();
 
         if (! $order) {
             return null;
@@ -297,12 +310,5 @@ class ScheduleForm extends FluxForm
         return $latestChild?->system_delivery_date_end?->copy()->addDay()
             ?? $order->system_delivery_date?->copy()
             ?? $order->order_date?->copy();
-    }
-
-    protected function getActions(): array
-    {
-        return [
-            'delete' => DeleteSchedule::class,
-        ];
     }
 }
