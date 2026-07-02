@@ -34,16 +34,21 @@ trait Searchable
 
     public static function scoutIndexSettings(): ?array
     {
-        $settings = config('scout.' . config('scout.driver') . '.index-settings.' . static::class) ?? [];
+        return config('scout.' . config('scout.driver') . '.index-settings.' . static::class) ?: null;
+    }
 
-        // Semantic search: inject (or reset via null) the Meilisearch embedder from SearchSettings.
-        if (config('scout.driver') === 'meilisearch') {
-            $settings['embedders'] = ($search = static::activeSearchSettings())
-                ? ['default' => static::embedderDefinition($search)]
-                : null;
+    /**
+     * The Meilisearch embedders derived from SearchSettings, or null when semantic search is off.
+     */
+    public static function scoutEmbedders(): ?array
+    {
+        if (config('scout.driver') !== 'meilisearch') {
+            return null;
         }
 
-        return $settings ?: null;
+        return ($search = static::activeSearchSettings())
+            ? ['default' => static::embedderDefinition($search)]
+            : null;
     }
 
     /**

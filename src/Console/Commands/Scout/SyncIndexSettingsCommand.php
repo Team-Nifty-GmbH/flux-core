@@ -5,6 +5,7 @@ namespace FluxErp\Console\Commands\Scout;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Laravel\Scout\Console\SyncIndexSettingsCommand as BaseSyncIndexSettingsCommand;
 use Laravel\Scout\EngineManager;
@@ -45,13 +46,8 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
             ->toArray();
 
         foreach ($searchableModels as $model) {
-            if (! method_exists($model, 'scoutIndexSettings')) {
-                $this->error('The model [' . $model . '] does not have a "scoutIndexSettings" method.');
+            $settings = $model::scoutIndexSettings() ?? [];
 
-                continue;
-            }
-
-            $settings = $model::scoutIndexSettings();
             if (
                 config('scout.soft_delete', false)
                 && in_array(SoftDeletes::class, class_uses_recursive($model))
@@ -60,13 +56,26 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
                 $settings['filterableAttributes'][] = '__soft_deleted';
             }
 
-            if (is_array($settings) && count($settings)) {
-                $engine->updateIndexSettings($indexName = $this->indexName($model), $settings);
-
-                $this->info('Settings for the [' . $indexName . '] index synced successfully.');
-            } else {
-                $this->info('No settings found for the [' . $model . '] model.');
+            if ($embedders = $model::scoutEmbedders()) {
+                $settings['embedders'] = $embedders;
             }
+
+            if (! $settings) {
+                $this->info('No settings found for the [' . $model . '] model.');
+
+                continue;
+            }
+
+            $indexName = $this->indexName($model);
+
+            if (Arr::except($settings, 'embedders')) {
+                $engine->updateIndexSettings($indexName, $settings);
+            } else {
+                // Meilisearch rejects an empty settings payload, sync the embedders directly.
+                $engine->index($indexName)->updateEmbedders($settings['embedders']);
+            }
+
+            $this->info('Settings for the [' . $indexName . '] index synced successfully.');
         }
     }
 }
