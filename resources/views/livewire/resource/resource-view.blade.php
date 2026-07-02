@@ -1,6 +1,8 @@
 <div class="flex flex-col gap-6 dark:text-white" x-data="{}">
     <!-- Page header -->
-    <div class="mx-auto w-full px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8">
+    <div
+        class="mx-auto w-full px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8"
+    >
         <div class="flex items-center space-x-5">
             <div>
                 <x-avatar
@@ -19,7 +21,9 @@
                 </h1>
             </div>
         </div>
-        <div class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
+        <div
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+        >
             @can('action.resource.update')
                 <template x-if="$wire.resourceForm.id && $wire.edit === false">
                     <x-button
@@ -115,13 +119,23 @@
             @endcan
         </x-slot:action>
 
-        <div x-on:data-table-row-clicked="$wire.editBooking($event.detail.id ?? $event.detail.record.id)">
-            <livewire:data-tables.resource-booking-list :resource-id="$resourceForm->id" />
+        <div
+            x-on:data-table-row-clicked="
+                $wire.editBooking($event.detail.id ?? $event.detail.record.id)
+            "
+        >
+            <livewire:data-tables.resource-booking-list
+                :resource-id="$resourceForm->id"
+            />
         </div>
     </x-card>
 
     <!-- Booking form modal -->
-    <x-modal :id="$resourceBookingForm->modalName()" size="xl" :title="__('Booking')">
+    <x-modal
+        :id="$resourceBookingForm->modalName()"
+        size="xl"
+        :title="__('Booking')"
+    >
         <div class="flex flex-col gap-4">
             <x-input
                 wire:model="resourceBookingForm.resource_id"
@@ -152,7 +166,10 @@
                 ]"
             />
 
-            <x-select.native wire:model.live="resourceBookingForm.assignable_type" :label="__('Assignee Type')">
+            <x-select.native
+                wire:model.live="resourceBookingForm.assignable_type"
+                :label="__('Assignee Type')"
+            >
                 <option value="">{{ __('None') }}</option>
                 <option value="user">{{ __('User') }}</option>
                 <option value="employee">{{ __('Employee') }}</option>
