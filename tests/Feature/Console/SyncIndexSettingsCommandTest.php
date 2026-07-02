@@ -66,6 +66,9 @@ test('syncs keyword settings and embedders together through the engine', functio
     SearchSettings::fake([
         'semantic_search_enabled' => true,
         'embedder_url' => 'https://litellm.test/v1/embeddings',
+        'embedder_api_key' => 'sk-test',
+        'embedder_model' => 'text-embedding-3-small',
+        'embedder_dimensions' => 1536,
     ]);
 
     $engine = mockScoutEngine();
