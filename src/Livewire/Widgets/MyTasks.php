@@ -83,10 +83,7 @@ class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(TaskList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->where(fn (Builder $query) => $query
-                    ->where('responsible_user_id', $userId)
-                    ->orWhereRelation('users', 'users.id', $userId)
-                )
+                ->assignedOrResponsible($userId)
                 ->whereNotIn('state', $endStates),
             static::getLabel()
         )
@@ -117,13 +114,8 @@ class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
 
     protected function getTasks(): Collection
     {
-        $userId = auth()->id();
-
         return resolve_static(Task::class, 'query')
-            ->where(function (Builder $query) use ($userId): void {
-                $query->where('responsible_user_id', $userId)
-                    ->orWhereRelation('users', 'users.id', $userId);
-            })
+            ->assignedOrResponsible(auth()->id())
             ->with(['project:id,name', 'model'])
             ->whereNotIn('state', TaskState::endStateKeys())
             ->orderByDesc('priority')
