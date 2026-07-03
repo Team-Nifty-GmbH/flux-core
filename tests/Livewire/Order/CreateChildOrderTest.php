@@ -688,21 +688,31 @@ test('shows correct title for split order', function (): void {
     expect($component->instance()->getTitle())->toEqual(__('Create Split-Order'));
 });
 
-test('takeOrderPositions marks alternative positions in payload', function (): void {
-    $alternativePosition = OrderPosition::factory()->create([
-        'order_id' => $this->parentOrder->id,
-        'tenant_id' => $this->dbTenant->getKey(),
+function createChildOrderTestPosition(int $orderId, int $tenantId, array $attributes = []): OrderPosition
+{
+    return OrderPosition::factory()->create(array_merge([
+        'order_id' => $orderId,
+        'tenant_id' => $tenantId,
         'vat_rate_id' => VatRate::query()->first()->getKey(),
+        'discount_percentage' => null,
         'amount' => 5,
         'signed_amount' => 5,
         'unit_net_price' => 20,
         'unit_gross_price' => 23.8,
         'total_net_price' => 100,
         'total_gross_price' => 119,
-        'is_net' => true,
+        'is_alternative' => false,
         'is_free_text' => false,
-        'is_alternative' => true,
-    ]);
+        'is_net' => true,
+    ], $attributes));
+}
+
+test('takeOrderPositions marks alternative positions in payload', function (): void {
+    $alternativePosition = createChildOrderTestPosition(
+        $this->parentOrder->id,
+        $this->dbTenant->getKey(),
+        ['is_alternative' => true]
+    );
 
     $component = Livewire::test(CreateChildOrder::class, [
         'orderId' => $this->parentOrder->id,
@@ -725,35 +735,24 @@ test('saved retoure keeps alternative flag and excludes it from totals', functio
         'shipping_costs_net_price' => 0,
     ]);
 
-    $orderPosition = OrderPosition::factory()->create([
-        'order_id' => $this->parentOrder->id,
-        'tenant_id' => $this->dbTenant->getKey(),
-        'vat_rate_id' => VatRate::query()->first()->getKey(),
-        'amount' => 10,
-        'signed_amount' => 10,
-        'unit_net_price' => 100,
-        'unit_gross_price' => 119,
-        'total_net_price' => 1000,
-        'total_gross_price' => 1190,
-        'is_net' => true,
-        'is_free_text' => false,
-        'is_alternative' => false,
-    ]);
+    $orderPosition = createChildOrderTestPosition(
+        $this->parentOrder->id,
+        $this->dbTenant->getKey(),
+        [
+            'amount' => 10,
+            'signed_amount' => 10,
+            'unit_net_price' => 100,
+            'unit_gross_price' => 119,
+            'total_net_price' => 1000,
+            'total_gross_price' => 1190,
+        ]
+    );
 
-    $alternativePosition = OrderPosition::factory()->create([
-        'order_id' => $this->parentOrder->id,
-        'tenant_id' => $this->dbTenant->getKey(),
-        'vat_rate_id' => VatRate::query()->first()->getKey(),
-        'amount' => 5,
-        'signed_amount' => 5,
-        'unit_net_price' => 20,
-        'unit_gross_price' => 23.8,
-        'total_net_price' => 100,
-        'total_gross_price' => 119,
-        'is_net' => true,
-        'is_free_text' => false,
-        'is_alternative' => true,
-    ]);
+    $alternativePosition = createChildOrderTestPosition(
+        $this->parentOrder->id,
+        $this->dbTenant->getKey(),
+        ['is_alternative' => true]
+    );
 
     $component = Livewire::test(CreateChildOrder::class, [
         'orderId' => $this->parentOrder->id,
