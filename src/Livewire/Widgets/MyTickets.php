@@ -2,18 +2,24 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Models\Address;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
 use FluxErp\States\Ticket\TicketState;
+use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Livewire\Component;
 
-class MyTickets extends Component
+class MyTickets extends Component implements HasApiResponse
 {
-    use Widgetable;
+    use RespondsToApiRequests, Widgetable;
 
     public int $limit = 25;
 
@@ -68,18 +74,45 @@ class MyTickets extends Component
         return view('flux::livewire.placeholders.horizontal-bar');
     }
 
+    public function toApiResponse(): array
+    {
+        return $this->getTickets()
+            ->take($this->limit)
+            ->map(fn (Ticket $ticket): array => [
+                'id' => $ticket->getKey(),
+                'ticket_number' => $ticket->ticket_number,
+                'title' => $ticket->title,
+                'state' => $ticket->state::$name,
+                'url' => $ticket->getUrl(),
+                'creator' => $ticket->getCreatorLabel(),
+            ])
+            ->toArray();
+    }
+
     protected function getTickets(): Collection
     {
         return auth()
             ->user()
             ->tickets()
-            ->with('authenticatable:id,name')
+            ->with([
+                'authenticatable' => fn (MorphTo $morphTo): MorphTo => $morphTo
+                    ->constrain([
+                        Address::class => fn (Builder $query) => $query
+                            ->select(['id', 'name', 'company', 'contact_id']),
+                        User::class => fn (Builder $query) => $query
+                            ->select(['id', 'name']),
+                    ])
+                    ->morphWith([
+                        Address::class => ['contact:id,main_address_id', 'contact.mainAddress:id,company'],
+                    ]),
+            ])
             ->whereNotIn('state', TicketState::endStateKeys())
             ->orderByRaw("state = 'escalated' DESC")
             ->orderBy('created_at')
             ->limit($this->limit + 1)
             ->get([
                 'id',
+                'ticket_number',
                 'title',
                 'description',
                 'state',

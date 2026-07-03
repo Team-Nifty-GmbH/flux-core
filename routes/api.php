@@ -310,10 +310,11 @@ use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
-use FluxErp\Http\Controllers\TaskController;
-use FluxErp\Http\Controllers\TicketController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
+use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
+use FluxErp\Livewire\Widgets\MyTasks;
+use FluxErp\Livewire\Widgets\MyTickets;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
@@ -1117,7 +1118,6 @@ Route::prefix('api')
                 Route::put('/tasks', UpdateTask::class);
                 Route::delete('/tasks/{id}', DeleteTask::class);
                 Route::post('/tasks/{id}/replicate', ReplicateTask::class);
-                Route::get('/user/tasks', [TaskController::class, 'userIndex']);
 
                 // Tenants
                 Route::get('/tenants/{id}', [BaseController::class, 'show'])->defaults('model', Tenant::class);
@@ -1133,7 +1133,6 @@ Route::prefix('api')
                 Route::post('/tickets', CreateTicket::class);
                 Route::put('/tickets', UpdateTicket::class);
                 Route::delete('/tickets/{id}', DeleteTicket::class);
-                Route::get('/user/tickets', [TicketController::class, 'userIndex']);
 
                 // TicketTypes
                 Route::get('/ticket-types/{id}', [BaseController::class, 'show'])->defaults('model', TicketType::class);
@@ -1229,6 +1228,9 @@ Route::prefix('api')
 
                 // Widgets
                 Route::get('/widgets/current-work-time-model', CurrentWorkTimeModel::class);
+                Route::get('/widgets/my-tasks', MyTasks::class);
+                Route::get('/widgets/my-tickets', MyTickets::class);
+                Route::get('/widgets/overtime-balance-box', OvertimeBalanceBox::class);
 
                 // WorkTimeModels
                 Route::get('/work-time-models/{id}', [BaseController::class, 'show'])

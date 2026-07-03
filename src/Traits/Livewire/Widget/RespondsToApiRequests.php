@@ -10,7 +10,9 @@ trait RespondsToApiRequests
             $this->{$parameter} = $value;
         }
 
-        $this->mount();
+        if (method_exists($this, 'mount')) {
+            $this->mount();
+        }
 
         return response()->json(['data' => $this->toApiResponse()]);
     }

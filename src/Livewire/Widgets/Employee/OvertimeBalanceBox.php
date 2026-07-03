@@ -2,16 +2,23 @@
 
 namespace FluxErp\Livewire\Widgets\Employee;
 
+use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Employee\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Employee;
+use FluxErp\Rules\ModelExists;
+use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;
 
-class OvertimeBalanceBox extends ValueBox
+class OvertimeBalanceBox extends ValueBox implements HasApiResponse
 {
+    use RespondsToApiRequests;
+
     #[Locked]
     public ?int $employeeId = null;
+
+    public ?float $overtimeHours = null;
 
     public static function getCategory(): ?string
     {
@@ -40,11 +47,33 @@ class OvertimeBalanceBox extends ValueBox
             ->whereKey($this->employeeId)
             ->first();
 
-        $this->sum = Number::format($employee->getCurrentOvertimeBalance(), 2) . 'h';
+        $overtimeBalance = $employee->getCurrentOvertimeBalance();
+
+        $this->sum = Number::format($overtimeBalance, 2) . 'h';
+        $this->overtimeHours = (float) $overtimeBalance;
         $this->previousSum = null;
         $this->growthRate = null;
 
         $this->shouldBePositive = true;
+    }
+
+    protected function apiRules(): array
+    {
+        return [
+            'employeeId' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Employee::class]),
+            ],
+        ];
+    }
+
+    protected function apiResponseProperties(): array
+    {
+        return [
+            'sum',
+            'overtimeHours',
+        ];
     }
 
     protected function icon(): string
