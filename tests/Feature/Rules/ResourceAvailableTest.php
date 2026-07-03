@@ -55,3 +55,11 @@ test('booking can be updated without conflicting with itself', function (): void
     $booking = ResourceBooking::query()->where('resource_id', $this->resource->getKey())->first();
     expect(availabilityFails($this->resource->getKey(), '2026-07-01 10:30:00', '2026-07-01 11:30:00', $booking->getKey()))->toBeFalse();
 });
+
+test('touching boundary before does not conflict', function (): void {
+    expect(availabilityFails($this->resource->getKey(), '2026-07-01 09:00:00', '2026-07-01 10:00:00'))->toBeFalse();
+});
+
+test('identical interval conflicts', function (): void {
+    expect(availabilityFails($this->resource->getKey(), '2026-07-01 10:00:00', '2026-07-01 12:00:00'))->toBeTrue();
+});

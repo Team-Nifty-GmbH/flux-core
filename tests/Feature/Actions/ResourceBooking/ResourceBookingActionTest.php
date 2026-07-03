@@ -95,3 +95,42 @@ test('delete booking soft deletes', function (): void {
     expect(ResourceBooking::query()->whereKey($booking->getKey())->exists())->toBeFalse()
         ->and(ResourceBooking::withTrashed()->whereKey($booking->getKey())->exists())->toBeTrue();
 });
+
+test('update booking onto another bookings slot is rejected', function (): void {
+    CreateResourceBooking::make([
+        'resource_id' => $this->resource->getKey(),
+        'start' => '2026-07-01 09:00:00',
+        'end' => '2026-07-01 11:00:00',
+    ])->validate()->execute();
+
+    $second = CreateResourceBooking::make([
+        'resource_id' => $this->resource->getKey(),
+        'start' => '2026-07-01 12:00:00',
+        'end' => '2026-07-01 14:00:00',
+    ])->validate()->execute();
+
+    expect(fn () => UpdateResourceBooking::make([
+        'id' => $second->getKey(),
+        'start' => '2026-07-01 10:00:00',
+        'end' => '2026-07-01 11:00:00',
+    ])->validate())->toThrow(ValidationException::class);
+});
+
+test('partial update with only start is checked against existing end', function (): void {
+    CreateResourceBooking::make([
+        'resource_id' => $this->resource->getKey(),
+        'start' => '2026-07-01 09:00:00',
+        'end' => '2026-07-01 11:00:00',
+    ])->validate()->execute();
+
+    $second = CreateResourceBooking::make([
+        'resource_id' => $this->resource->getKey(),
+        'start' => '2026-07-01 12:00:00',
+        'end' => '2026-07-01 14:00:00',
+    ])->validate()->execute();
+
+    expect(fn () => UpdateResourceBooking::make([
+        'id' => $second->getKey(),
+        'start' => '2026-07-01 10:00:00',
+    ])->validate())->toThrow(ValidationException::class);
+});

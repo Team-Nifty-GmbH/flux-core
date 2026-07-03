@@ -4,9 +4,11 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\ResourceBooking;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 
 class ResourceBookingList extends BaseDataTable
 {
+    #[Locked]
     public ?int $resourceId = null;
 
     public array $enabledCols = [
@@ -23,6 +25,6 @@ class ResourceBookingList extends BaseDataTable
     {
         return $builder
             ->with(['resource:id,name', 'order:id,order_number'])
-            ->when($this->resourceId, fn (Builder $q) => $q->where('resource_id', $this->resourceId));
+            ->when($this->resourceId, fn (Builder $query) => $query->where('resource_id', $this->resourceId));
     }
 }

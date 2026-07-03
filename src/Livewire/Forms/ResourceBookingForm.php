@@ -12,22 +12,22 @@ class ResourceBookingForm extends FluxForm
 {
     use SupportsAutoRender;
 
-    #[Locked]
-    public ?int $id = null;
-
-    public ?int $resource_id = null;
+    public ?int $assignable_id = null;
 
     public ?string $assignable_type = null;
 
-    public ?int $assignable_id = null;
-
-    public ?int $order_id = null;
-
-    public ?string $start = null;
+    public ?string $description = null;
 
     public ?string $end = null;
 
-    public ?string $description = null;
+    #[Locked]
+    public ?int $id = null;
+
+    public ?int $order_id = null;
+
+    public ?int $resource_id = null;
+
+    public ?string $start = null;
 
     protected function getActions(): array
     {

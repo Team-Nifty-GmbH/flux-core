@@ -3,7 +3,7 @@
 use FluxErp\Livewire\DataTables\ResourceBookingList;
 use Livewire\Livewire;
 
-test('resource booking list renders', function (): void {
+test('renders successfully', function (): void {
     Livewire::test(ResourceBookingList::class)
         ->assertOk();
 });

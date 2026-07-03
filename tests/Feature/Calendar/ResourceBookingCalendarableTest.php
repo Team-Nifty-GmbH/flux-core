@@ -121,3 +121,19 @@ test('fromCalendarEvent with create action returns CreateResourceBooking', funct
 
     expect($action)->toBeInstanceOf(CreateResourceBooking::class);
 });
+
+test('scopeInTimeframe returns booking spanning the whole window', function (): void {
+    $resource = Resource::factory()->create();
+
+    $spanning = ResourceBooking::factory()->create([
+        'resource_id' => $resource->getKey(),
+        'start' => '2026-06-30 00:00:00',
+        'end' => '2026-08-02 00:00:00',
+    ]);
+
+    $results = ResourceBooking::query()
+        ->inTimeframe('2026-07-01 00:00:00', '2026-07-31 23:59:59')
+        ->get();
+
+    expect($results->contains($spanning))->toBeTrue();
+});

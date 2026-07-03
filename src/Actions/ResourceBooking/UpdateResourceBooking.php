@@ -35,16 +35,20 @@ class UpdateResourceBooking extends FluxAction
     protected function prepareForValidation(): void
     {
         $booking = resolve_static(ResourceBooking::class, 'query')
-            ->whereKey(data_get($this->data, 'id'))
+            ->whereKey($this->getData('id'))
             ->first();
+
+        $this->data['resource_id'] ??= $booking?->resource_id;
+        $this->data['start'] ??= $booking?->start?->toDateTimeString();
+        $this->data['end'] ??= $booking?->end?->toDateTimeString();
 
         $this->addRules([
             'start' => [
                 app(ResourceAvailable::class, [
-                    'resourceId' => data_get($this->data, 'resource_id', $booking?->resource_id),
-                    'start' => data_get($this->data, 'start', $booking?->start?->toDateTimeString()),
-                    'end' => data_get($this->data, 'end', $booking?->end?->toDateTimeString()),
-                    'ignoreId' => data_get($this->data, 'id'),
+                    'resourceId' => $this->getData('resource_id'),
+                    'start' => $this->getData('start'),
+                    'end' => $this->getData('end'),
+                    'ignoreId' => $this->getData('id'),
                 ]),
             ],
         ]);

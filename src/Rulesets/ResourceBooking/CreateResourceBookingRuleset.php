@@ -18,10 +18,16 @@ class CreateResourceBookingRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:resource_bookings,uuid',
+            'order_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
             'resource_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Resource::class]),
+                app(ModelExists::class, ['model' => Resource::class])
+                    ->where('is_active', true),
             ],
             'assignable_type' => [
                 'required_with:assignable_id',
@@ -34,11 +40,6 @@ class CreateResourceBookingRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'assignable_type']),
-            ],
-            'order_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Order::class]),
             ],
             'start' => ['required', 'date'],
             'end' => ['required', 'date', 'after:start'],

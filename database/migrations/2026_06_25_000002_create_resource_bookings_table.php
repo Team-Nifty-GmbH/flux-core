@@ -11,9 +11,9 @@ return new class() extends Migration
         Schema::create('resource_bookings', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('resource_id');
+            $table->foreignId('order_id')->nullable()->constrained('orders')->nullOnDelete();
+            $table->foreignId('resource_id')->constrained('resources')->cascadeOnDelete();
             $table->nullableMorphs('assignable');
-            $table->unsignedBigInteger('order_id')->nullable();
             $table->dateTimeTz('start');
             $table->dateTimeTz('end');
             $table->text('description')->nullable();
@@ -23,15 +23,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('resource_id')
-                ->references('id')
-                ->on('resources')
-                ->cascadeOnDelete();
-            $table->foreign('order_id')
-                ->references('id')
-                ->on('orders')
-                ->nullOnDelete();
 
             $table->index(['resource_id', 'start', 'end']);
         });

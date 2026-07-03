@@ -3,9 +3,11 @@
 namespace FluxErp\Livewire\Resource;
 
 use Exception;
+use FluxErp\Livewire\DataTables\ResourceBookingList;
 use FluxErp\Livewire\Forms\ResourceBookingForm;
 use FluxErp\Livewire\Forms\ResourceForm;
 use FluxErp\Models\Resource;
+use FluxErp\Models\ResourceBooking;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -17,9 +19,9 @@ class ResourceView extends Component
 {
     use Actions;
 
-    public bool $edit = false;
-
     public ?string $avatarUrl = '';
+
+    public bool $edit = false;
 
     public ResourceBookingForm $resourceBookingForm;
 
@@ -27,9 +29,8 @@ class ResourceView extends Component
 
     public function mount(int $id): void
     {
-        $resource = Resource::query()
+        $resource = resolve_static(Resource::class, 'query')
             ->whereKey($id)
-            ->with(['product:id,name'])
             ->firstOrFail();
 
         $this->resourceForm->fill($resource);
@@ -39,6 +40,35 @@ class ResourceView extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.resource.resource-view');
+    }
+
+    public function cancel(): void
+    {
+        $id = $this->resourceForm->id;
+        $this->resourceForm->reset();
+        $this->mount($id);
+        $this->edit = false;
+    }
+
+    public function editBooking(int $id): void
+    {
+        $booking = resolve_static(ResourceBooking::class, 'query')
+            ->whereKey($id)
+            ->firstOrFail();
+
+        $this->resourceBookingForm->fill($booking);
+        $this->resourceBookingForm->start = $booking->start?->format('Y-m-d\TH:i');
+        $this->resourceBookingForm->end = $booking->end?->format('Y-m-d\TH:i');
+
+        $this->modalOpen($this->resourceBookingForm->modalName());
+    }
+
+    public function newBooking(): void
+    {
+        $this->resourceBookingForm->reset();
+        $this->resourceBookingForm->resource_id = $this->resourceForm->id;
+
+        $this->modalOpen($this->resourceBookingForm->modalName());
     }
 
     public function save(): bool
@@ -59,20 +89,6 @@ class ResourceView extends Component
         return true;
     }
 
-    public function cancel(): void
-    {
-        $id = $this->resourceForm->id;
-        $this->resourceForm->reset();
-        $this->mount($id);
-        $this->edit = false;
-    }
-
-    #[Renderless]
-    public function startEdit(): void
-    {
-        $this->edit = true;
-    }
-
     public function saveBooking(): bool
     {
         try {
@@ -87,24 +103,14 @@ class ResourceView extends Component
             ->success(__(':model saved', ['model' => __('Resource Booking')]))
             ->send();
         $this->resourceBookingForm->reset();
+        $this->dispatch('dataTableReload')->to(ResourceBookingList::class);
 
         return true;
     }
 
-    public function editBooking(int $id): void
+    #[Renderless]
+    public function startEdit(): void
     {
-        $this->resourceBookingForm->fill(
-            \FluxErp\Models\ResourceBooking::query()->whereKey($id)->firstOrFail()
-        );
-
-        $this->modalOpen($this->resourceBookingForm->modalName());
-    }
-
-    public function newBooking(): void
-    {
-        $this->resourceBookingForm->reset();
-        $this->resourceBookingForm->resource_id = $this->resourceForm->id;
-
-        $this->modalOpen($this->resourceBookingForm->modalName());
+        $this->edit = true;
     }
 }

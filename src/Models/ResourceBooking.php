@@ -40,16 +40,6 @@ class ResourceBooking extends FluxModel implements Calendarable, InteractsWithDa
         };
     }
 
-    public static function fromResourceBooking(array $data, string $action): ?FluxAction
-    {
-        return match ($action) {
-            'create' => CreateResourceBooking::make($data),
-            'update' => UpdateResourceBooking::make($data),
-            'delete' => DeleteResourceBooking::make($data),
-            default => null,
-        };
-    }
-
     public static function toCalendar(): array
     {
         return [
@@ -75,11 +65,6 @@ class ResourceBooking extends FluxModel implements Calendarable, InteractsWithDa
         ];
     }
 
-    public function resource(): BelongsTo
-    {
-        return $this->belongsTo(Resource::class);
-    }
-
     public function assignable(): MorphTo
     {
         return $this->morphTo('assignable');
@@ -90,22 +75,29 @@ class ResourceBooking extends FluxModel implements Calendarable, InteractsWithDa
         return $this->belongsTo(Order::class);
     }
 
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string $start,
-        Carbon|string $end,
-        ?array $info = null
-    ): void {
-        $builder->with('resource:id,name');
-        $builder->where(function (Builder $query) use ($start, $end): void {
-            $query
-                ->whereBetween('start', [$start, $end])
-                ->orWhereBetween('end', [$start, $end])
-                ->orWhere(function (Builder $query) use ($start, $end): void {
-                    $query->where('start', '<=', $end)
-                        ->where('end', '>=', $start);
-                });
-        });
+    public function resource(): BelongsTo
+    {
+        return $this->belongsTo(Resource::class);
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->start?->toDateTimeString() . ' – ' . $this->end?->toDateTimeString();
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->resource?->name;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->resource?->getUrl();
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -128,23 +120,21 @@ class ResourceBooking extends FluxModel implements Calendarable, InteractsWithDa
         ];
     }
 
-    public function getLabel(): ?string
-    {
-        return $this->resource?->name;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->start?->toDateTimeString() . ' – ' . $this->end?->toDateTimeString();
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->resource_id ? route('resources.id?', $this->resource_id) : null;
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return null;
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string $start,
+        Carbon|string $end,
+        ?array $info = null
+    ): void {
+        $builder->with('resource:id,name');
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query
+                ->whereBetween('start', [$start, $end])
+                ->orWhereBetween('end', [$start, $end])
+                ->orWhere(function (Builder $query) use ($start, $end): void {
+                    $query->where('start', '<=', $end)
+                        ->where('end', '>=', $start);
+                });
+        });
     }
 }

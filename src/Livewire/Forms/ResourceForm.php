@@ -14,8 +14,6 @@ class ResourceForm extends FluxForm
 
     public bool $allow_overbooking = false;
 
-    public ?array $categories = [];
-
     public ?string $description = null;
 
     #[Locked]

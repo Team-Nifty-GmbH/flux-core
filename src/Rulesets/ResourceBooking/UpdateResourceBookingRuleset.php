@@ -22,11 +22,18 @@ class UpdateResourceBookingRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => ResourceBooking::class]),
             ],
+            'order_id' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
             'resource_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Resource::class]),
+                app(ModelExists::class, ['model' => Resource::class])
+                    ->where('is_active', true),
             ],
             'assignable_type' => [
                 'sometimes',
@@ -39,12 +46,6 @@ class UpdateResourceBookingRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'assignable_type']),
-            ],
-            'order_id' => [
-                'sometimes',
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Order::class]),
             ],
             'start' => ['sometimes', 'required', 'date'],
             'end' => ['sometimes', 'required', 'date', 'after:start'],

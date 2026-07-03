@@ -11,6 +11,14 @@ class CreateResourceRuleset extends FluxRuleset
 {
     protected static ?string $model = Resource::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(CategoryRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -22,11 +30,9 @@ class CreateResourceRuleset extends FluxRuleset
             ],
             'name' => 'required|string|max:255',
             'resource_number' => 'nullable|string|max:255|unique:resources,resource_number',
+            'description' => 'nullable|string',
             'allow_overbooking' => 'boolean',
             'is_active' => 'boolean',
-            'description' => 'nullable|string',
-            'categories' => 'array|nullable',
-            'categories.*' => 'integer',
         ];
     }
 }

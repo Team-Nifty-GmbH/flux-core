@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-6 dark:text-white" x-data="{}">
+<div class="flex flex-col gap-6 dark:text-white">
     <!-- Page header -->
     <div
         class="mx-auto w-full px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8"
@@ -54,21 +54,17 @@
     <!-- Master data card -->
     <x-card :title="__('Master Data')">
         <div class="flex flex-col gap-4">
-            <div x-bind:class="!$wire.edit && 'pointer-events-none'">
-                <x-input
-                    wire:model="resourceForm.name"
-                    :label="__('Name')"
-                    x-bind:disabled="!$wire.edit"
-                />
-            </div>
+            <x-input
+                wire:model="resourceForm.name"
+                :label="__('Name')"
+                x-bind:disabled="!$wire.edit"
+            />
 
-            <div x-bind:class="!$wire.edit && 'pointer-events-none'">
-                <x-input
-                    wire:model="resourceForm.resource_number"
-                    :label="__('Resource Number')"
-                    x-bind:disabled="!$wire.edit"
-                />
-            </div>
+            <x-input
+                wire:model="resourceForm.resource_number"
+                :label="__('Resource Number')"
+                x-bind:disabled="!$wire.edit"
+            />
 
             <div x-bind:class="!$wire.edit && 'pointer-events-none'">
                 <x-select.styled
@@ -96,20 +92,18 @@
                 x-bind:disabled="!$wire.edit"
             />
 
-            <div x-bind:class="!$wire.edit && 'pointer-events-none'">
-                <x-textarea
-                    wire:model="resourceForm.description"
-                    :label="__('Description')"
-                    x-bind:disabled="!$wire.edit"
-                />
-            </div>
+            <x-textarea
+                wire:model="resourceForm.description"
+                :label="__('Description')"
+                x-bind:disabled="!$wire.edit"
+            />
         </div>
     </x-card>
 
     <!-- Bookings section -->
     <x-card :title="__('Bookings')">
         <x-slot:action>
-            @can('action.resource-booking.create')
+            @can('action.resource_booking.create')
                 <x-button
                     color="indigo"
                     icon="plus"
@@ -137,11 +131,6 @@
         :title="__('Booking')"
     >
         <div class="flex flex-col gap-4">
-            <x-input
-                wire:model="resourceBookingForm.resource_id"
-                type="hidden"
-            />
-
             <x-input
                 wire:model="resourceBookingForm.start"
                 type="datetime-local"
@@ -171,18 +160,27 @@
                 :label="__('Assignee Type')"
             >
                 <option value="">{{ __('None') }}</option>
-                <option value="user">{{ __('User') }}</option>
-                <option value="employee">{{ __('Employee') }}</option>
-                <option value="contact">{{ __('Contact') }}</option>
+                <option value="{{ morph_alias(\FluxErp\Models\User::class) }}">
+                    {{ __('User') }}
+                </option>
+                <option
+                    value="{{ morph_alias(\FluxErp\Models\Employee::class) }}"
+                >
+                    {{ __('Employee') }}
+                </option>
+                <option
+                    value="{{ morph_alias(\FluxErp\Models\Contact::class) }}"
+                >
+                    {{ __('Contact') }}
+                </option>
             </x-select.native>
 
             @php
-                $assignableModel = match ($resourceBookingForm->assignable_type) {
-                    'user' => \FluxErp\Models\User::class,
-                    'employee' => \FluxErp\Models\Employee::class,
-                    'contact' => \FluxErp\Models\Contact::class,
-                    default => null,
-                };
+                $assignableModel = $resourceBookingForm->assignable_type
+                    ? \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel(
+                        $resourceBookingForm->assignable_type
+                    )
+                    : null;
             @endphp
 
             @if ($assignableModel)

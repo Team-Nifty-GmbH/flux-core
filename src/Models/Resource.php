@@ -2,10 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Actions\FluxAction;
-use FluxErp\Actions\Resource\CreateResource;
-use FluxErp\Actions\Resource\DeleteResource;
-use FluxErp\Actions\Resource\UpdateResource;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasFrontendAttributes;
@@ -18,6 +14,7 @@ use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\File;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -29,16 +26,6 @@ class Resource extends FluxModel implements HasMedia, InteractsWithDataTables
     public static string $iconName = 'cube';
 
     protected ?string $detailRouteName = 'resources.id?';
-
-    public static function fromResource(array $data, string $action): ?FluxAction
-    {
-        return match ($action) {
-            'create' => CreateResource::make($data),
-            'update' => UpdateResource::make($data),
-            'delete' => DeleteResource::make($data),
-            default => null,
-        };
-    }
 
     protected function casts(): array
     {
@@ -58,9 +45,9 @@ class Resource extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(Product::class);
     }
 
-    public function getLabel(): ?string
+    public function getAvatarUrl(): ?string
     {
-        return $this->name;
+        return $this->getFirstMediaUrl('avatar') ?: static::icon()->getUrl();
     }
 
     public function getDescription(): ?string
@@ -68,13 +55,23 @@ class Resource extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->resource_number;
     }
 
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
     public function getUrl(): ?string
     {
         return $this->detailRoute();
     }
 
-    public function getAvatarUrl(): ?string
+    public function registerMediaCollections(): void
     {
-        return $this->getFirstMediaUrl('avatar') ?: static::icon()->getUrl();
+        $this->addMediaCollection('avatar')
+            ->acceptsFile(function (File $file) {
+                return str_starts_with($file->mimeType, 'image/');
+            })
+            ->useDisk('public')
+            ->singleFile();
     }
 }
