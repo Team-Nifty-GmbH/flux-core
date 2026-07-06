@@ -121,8 +121,9 @@ class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
 
     protected function getTasks(): Collection
     {
-        return resolve_static(Task::class, 'query')
-            ->assignedTo(auth()->id())
+        return auth()
+            ->user()
+            ->tasks()
             ->with(['project:id,name', 'model'])
             ->whereNotIn('state', TaskState::endStateKeys())
             ->orderByDesc('priority')
