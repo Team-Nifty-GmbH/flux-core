@@ -42,7 +42,7 @@ const calendar = () => {
             }
 
             let calendarObj = JSON.parse(
-                JSON.stringify(this.$wire.calendarObject),
+                JSON.stringify(await this.$wire.calendarToCalendarObject()),
             );
             calendarObj.parentId ??= 'my-calendars';
 
@@ -62,8 +62,6 @@ const calendar = () => {
             } else {
                 this.getFolderTree().updateNode(calendarObj);
             }
-
-            this.$wire.$set('calendarObject', calendarObj);
 
             return true;
         },

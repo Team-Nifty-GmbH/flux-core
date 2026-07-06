@@ -151,7 +151,7 @@ describe('Package Manifest Registration', function (): void {
 
 describe('SupportAutoInjectedAssets', function (): void {
     test('injects assets into html response', function (): void {
-        $html = '<html><head></head><body></body></html>';
+        $html = '<html lang="en"><head></head><body></body></html>';
         $assetsHead = '<link rel="stylesheet" href="/test.css">';
         $assetsBody = '<script src="/test.js"></script>';
 
@@ -162,17 +162,17 @@ describe('SupportAutoInjectedAssets', function (): void {
     });
 
     test('injects assets before closing tags', function (): void {
-        $html = '<html><head><title>Test</title></head><body><p>Content</p></body></html>';
+        $html = '<html lang="en"><head><title>Test</title></head><body><p>Content</p></body></html>';
         $assetsHead = '<!-- HEAD -->';
         $assetsBody = '<!-- BODY -->';
 
         $result = SupportAutoInjectedAssets::injectAssets($html, $assetsHead, $assetsBody);
 
-        expect($result)->toBe('<html><head><title>Test</title><!-- HEAD --></head><body><p>Content</p><!-- BODY --></body></html>');
+        expect($result)->toBe('<html lang="en"><head><title>Test</title><!-- HEAD --></head><body><p>Content</p><!-- BODY --></body></html>');
     });
 
     test('handles html without head/body tags', function (): void {
-        $html = '<html><p>Simple</p></html>';
+        $html = '<html lang="en"><p>Simple</p></html>';
         $assetsHead = '<!-- HEAD -->';
         $assetsBody = '<!-- BODY -->';
 

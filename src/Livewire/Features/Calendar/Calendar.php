@@ -80,6 +80,15 @@ class Calendar extends Component
     }
 
     #[Renderless]
+    public function calendarToCalendarObject(): array
+    {
+        return resolve_static(CalendarModel::class, 'query')
+            ->whereKey($this->calendar->id)
+            ->first()
+            ?->toCalendarObject(['isNew' => $this->calendar->is_new]) ?? [];
+    }
+
+    #[Renderless]
     public function changeCalendar(array $calendar = []): void
     {
         $this->calendar->reset();
@@ -162,6 +171,18 @@ class Calendar extends Component
         if ($trigger === 'event-change') {
             $this->skipRender();
             CalendarEventEdit::$skipNextRender = true;
+
+            if ($this->event->was_repeatable) {
+                $this->js(<<<'JS'
+                    window.dispatchEvent(new CustomEvent('sync-calendar-event', {
+                        detail: JSON.parse(JSON.stringify($wire.event))
+                    }));
+                    window.dispatchEvent(new CustomEvent('calendar-event-set-confirm-dialog-type', { detail: 'save' }));
+                    $tsui.open.modal('confirm-dialog');
+                JS);
+
+                return;
+            }
 
             try {
                 $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
@@ -374,7 +395,6 @@ class Calendar extends Component
     #[Renderless]
     public function saveCalendar(): bool
     {
-        $isNew = ! $this->calendar->id;
         try {
             $this->calendar->save();
         } catch (ValidationException|UnauthorizedException $e) {
@@ -383,22 +403,11 @@ class Calendar extends Component
             return false;
         }
 
-        $this->calendarObject = $this->calendar
-            ->getActionResult()
-            ->toCalendarObject(['isNew' => $isNew]);
-
         $this->toast()
             ->success(__(':model saved', ['model' => __('Calendar')]))
             ->send();
 
         return true;
-    }
-
-    #[Renderless]
-    #[On('calendar-view-did-mount')]
-    public function viewChanged(array $view): void
-    {
-        $this->storeViewSettings($view);
     }
 
     #[Renderless]
@@ -432,6 +441,13 @@ class Calendar extends Component
             'is_repeatable' => $this->calendar->has_repeatable_events,
             'has_repeats' => false,
         ]);
+    }
+
+    #[Renderless]
+    #[On('calendar-view-did-mount')]
+    public function viewChanged(array $view): void
+    {
+        $this->storeViewSettings($view);
     }
 
     protected function calculateRepeatableEvents($calendar, Collection $calendarEvents): Collection

@@ -1,6 +1,8 @@
 <?php
 
 use FluxErp\Livewire\WorkTime;
+use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeDay;
 use FluxErp\Models\Task;
 use FluxErp\Models\WorkTime as WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
@@ -190,6 +192,71 @@ test('pause daily work time', function (): void {
     expect($dbPauseWorkTime->total_time_ms)->toBeLessThan(0);
 
     expect($dbPauseWorkTime->total_time_ms)->toEqual(Carbon::parse($pauseEndedAt)->diffInMilliseconds($pauseStartedAt));
+});
+
+test('pause daily work time does not close employee day', function (): void {
+    $employee = app(Employee::class)->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'user_id' => $this->user->getKey(),
+        'firstname' => 'Test',
+        'lastname' => 'Employee',
+        'is_active' => true,
+    ]);
+
+    $this->travelTo(now()->startOfDay()->addHours(8));
+    $workTime = WorkTimeModel::factory()->create([
+        'employee_id' => $employee->getKey(),
+        'user_id' => $this->user->getKey(),
+        'started_at' => $startedAt = now(),
+        'ended_at' => null,
+        'is_daily_work_time' => true,
+        'is_pause' => false,
+        'is_locked' => false,
+    ]);
+
+    $this->travel(4)->hours();
+    $component = Livewire::test(WorkTime::class)
+        ->assertOk()
+        ->assertSet('dailyWorkTime.id', $workTime->getKey())
+        ->assertSet('dailyWorkTime.user_id', $this->user->getKey())
+        ->assertSet('dailyWorkTime.started_at', $startedAt->toISOString())
+        ->assertSet('dailyWorkTime.ended_at', null)
+        ->assertSet('dailyWorkTime.is_daily_work_time', true)
+        ->call('togglePauseWorkDay', true)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertNotSet('dailyWorkTimePause.id', null)
+        ->assertSet('dailyWorkTimePause.user_id', $this->user->getKey())
+        ->assertNotSet('dailyWorkTimePause.started_at', null)
+        ->assertSet('dailyWorkTimePause.ended_at', null)
+        ->assertSet('dailyWorkTimePause.is_daily_work_time', true)
+        ->assertSet('dailyWorkTimePause.is_pause', true);
+
+    $pauseStartedAt = $component->get('dailyWorkTimePause.started_at');
+    $dbPauseWorkTimeId = $component->get('dailyWorkTimePause.id');
+
+    $this->travel(1)->hour();
+    $pauseEndedAt = now()->toDateTimeString();
+    $component->call('togglePauseWorkDay', false)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('dailyWorkTimePause.id', null);
+
+    $dbPauseWorkTime = WorkTimeModel::query()
+        ->whereKey($dbPauseWorkTimeId)
+        ->first();
+
+    expect($dbPauseWorkTime)->not->toBeNull();
+    expect($dbPauseWorkTime->employee_id)->toEqual($employee->getKey());
+    expect($dbPauseWorkTime->user_id)->toEqual($this->user->getKey());
+    expect($dbPauseWorkTime->started_at)->toEqual(Carbon::parse($pauseStartedAt));
+    expect($dbPauseWorkTime->ended_at)->toEqual($pauseEndedAt);
+    expect($dbPauseWorkTime->is_locked)->toBeTrue();
+    expect($dbPauseWorkTime->is_daily_work_time)->toBeTrue();
+    expect($dbPauseWorkTime->is_pause)->toBeTrue();
+    expect($dbPauseWorkTime->total_time_ms)->toBeLessThan(0);
+    expect($dbPauseWorkTime->total_time_ms)->toEqual(Carbon::parse($pauseEndedAt)->diffInMilliseconds($pauseStartedAt));
+    expect(EmployeeDay::query()->where('employee_id', $employee->getKey())->exists())->toBeFalse();
 });
 
 test('renders successfully', function (): void {

@@ -80,14 +80,21 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
                 && $workTime->is_daily_work_time
                 && $workTime->is_locked
             ) {
-                try {
-                    CloseEmployeeDay::make([
-                        'employee_id' => $workTime->employee_id,
-                        'date' => $workTime->started_at,
-                    ])
-                        ->validate()
-                        ->execute();
-                } catch (Throwable) {
+                if (! $workTime->is_pause
+                    || resolve_static(EmployeeDay::class, 'query')
+                        ->where('employee_id', $workTime->employee_id)
+                        ->where('date', $workTime->started_at->toDateString())
+                        ->exists()
+                ) {
+                    try {
+                        CloseEmployeeDay::make([
+                            'employee_id' => $workTime->employee_id,
+                            'date' => $workTime->started_at,
+                        ])
+                            ->validate()
+                            ->execute();
+                    } catch (Throwable) {
+                    }
                 }
 
                 if ($workTime->wasChanged('started_at')
