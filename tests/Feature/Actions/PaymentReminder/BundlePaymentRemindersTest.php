@@ -47,14 +47,18 @@ beforeEach(function (): void {
     $this->order->update(['balance' => 100]);
 });
 
-test('bundle requires order_ids', function (): void {
-    BundlePaymentReminders::assertValidationErrors([], 'order_ids');
+test('bundle requires orders', function (): void {
+    BundlePaymentReminders::assertValidationErrors([], 'orders');
 });
 
 test('dispatches a send job per eligible order', function (): void {
     Queue::fake();
 
-    $result = BundlePaymentReminders::make(['order_ids' => [$this->order->getKey()]])
+    $result = BundlePaymentReminders::make([
+        'orders' => [
+            ['id' => $this->order->getKey(), 'recipient' => null],
+        ],
+    ])
         ->validate()
         ->execute();
 
@@ -70,8 +74,9 @@ test('passes the recipient override to the job', function (): void {
     Queue::fake();
 
     BundlePaymentReminders::make([
-        'order_ids' => [$this->order->getKey()],
-        'recipients' => [$this->order->getKey() => 'override@example.com'],
+        'orders' => [
+            ['id' => $this->order->getKey(), 'recipient' => 'override@example.com'],
+        ],
     ])
         ->validate()
         ->execute();

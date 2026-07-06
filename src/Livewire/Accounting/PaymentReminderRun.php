@@ -227,29 +227,29 @@ class PaymentReminderRun extends Component
             return;
         }
 
-        // Map every order to its group's editable recipient so the action can look
-        // up overrides by order id, matching the order_ids it already receives.
-        $recipients = [];
+        // Pair every order with its group's editable recipient so validation
+        // ties the recipient to its invoice instead of a separate keyed map.
+        $emailByOrderId = [];
 
         foreach ($this->groups as $group) {
             $email = data_get($this->recipientEmails, $group['key']);
 
-            if (! filled($email)) {
-                continue;
-            }
-
             foreach ($group['orders'] as $order) {
-                $recipients[$order['id']] = $email;
+                $emailByOrderId[$order['id']] = filled($email) ? $email : null;
             }
         }
+
+        $orders = collect($orderIds)
+            ->map(fn ($orderId): array => [
+                'id' => (int) $orderId,
+                'recipient' => data_get($emailByOrderId, (int) $orderId),
+            ])
+            ->all();
 
         try {
             // Fans the sends out as a monitored batch; the batch progress toast
             // gives the user feedback, so no extra toast is raised here.
-            BundlePaymentReminders::make([
-                'order_ids' => $orderIds,
-                'recipients' => $recipients ?: null,
-            ])
+            BundlePaymentReminders::make(['orders' => $orders])
                 ->checkPermission()
                 ->validate()
                 ->execute();
