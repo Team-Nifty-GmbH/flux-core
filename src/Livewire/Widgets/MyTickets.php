@@ -2,18 +2,20 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Ticket;
 use FluxErp\States\Ticket\TicketState;
+use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
-class MyTickets extends Component
+class MyTickets extends Component implements HasApiResponse
 {
-    use Widgetable;
+    use RespondsToApiRequests, Widgetable;
 
     public int $limit = 25;
 
@@ -68,6 +70,28 @@ class MyTickets extends Component
         return view('flux::livewire.placeholders.horizontal-bar');
     }
 
+    public function toApiResponse(): array
+    {
+        return $this->getTickets()
+            ->take($this->limit)
+            ->map(fn (Ticket $ticket): array => [
+                'id' => $ticket->getKey(),
+                'ticket_number' => $ticket->ticket_number,
+                'title' => $ticket->title,
+                'state' => $ticket->state::$name,
+                'url' => $ticket->getUrl(),
+                'authenticatable' => $ticket->authenticatable?->getLabel(),
+            ])
+            ->toArray();
+    }
+
+    protected function apiRules(): array
+    {
+        return [
+            'limit' => ['integer', 'min:1'],
+        ];
+    }
+
     protected function getTickets(): Collection
     {
         return auth()
@@ -80,6 +104,7 @@ class MyTickets extends Component
             ->limit($this->limit + 1)
             ->get([
                 'id',
+                'ticket_number',
                 'title',
                 'description',
                 'state',
