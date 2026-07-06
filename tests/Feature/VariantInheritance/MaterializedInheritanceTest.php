@@ -18,10 +18,12 @@ test('variant column holds the real inherited value in the database', function (
 
 test('editing a parent field propagates to non-overridden variants at the SQL level', function (): void {
     $parent = Product::factory()->create(['weight_gram' => 100]);
-    $variant = Product::factory()->create(['parent_id' => $parent->getKey(), 'weight_gram' => 100]);
+    // weight_gram must be listed before parent_id: InheritsFromParent::setAttribute()
+    // auto-marks a field as overridden once isVariant() is true, so setting parent_id
+    // first would falsely override weight_gram on creation.
+    $variant = Product::factory()->create(['weight_gram' => 100, 'parent_id' => $parent->getKey()]);
 
     $parent->update(['weight_gram' => 250]);
-    FluxErp\Jobs\SyncVariantInheritanceJob::dispatchSync($parent->getKey(), ['weight_gram']);
 
     expect((int) DB::table('products')->where('id', $variant->getKey())->value('weight_gram'))
         ->toBe(250);

@@ -7,12 +7,14 @@ use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
+use FluxErp\Jobs\SyncVariantInheritanceJob;
 use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Support\Collection\ProductOptionCollection;
+use FluxErp\Support\VariantInheritance\InheritanceSync;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Filterable;
@@ -104,6 +106,20 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
                     ->whereKey($product->parent_id)
                     ->update(['was_parent' => true]);
             }
+        });
+
+        static::updated(function (Product $product): void {
+            if (! $product->inheritanceEnabled() || $product->isVariant()) {
+                return;
+            }
+
+            $fields = InheritanceSync::changedInheritableFields($product);
+
+            if ($fields === [] || ! $product->children()->exists()) {
+                return;
+            }
+
+            SyncVariantInheritanceJob::dispatch($product->getKey(), $fields)->afterCommit();
         });
     }
 
