@@ -83,7 +83,7 @@ class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(TaskList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->assignedOrResponsible($userId)
+                ->assignedTo($userId)
                 ->whereNotIn('state', $endStates),
             static::getLabel()
         )
@@ -112,10 +112,17 @@ class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
             ->toArray();
     }
 
+    protected function apiRules(): array
+    {
+        return [
+            'limit' => ['integer', 'min:1'],
+        ];
+    }
+
     protected function getTasks(): Collection
     {
         return resolve_static(Task::class, 'query')
-            ->assignedOrResponsible(auth()->id())
+            ->assignedTo(auth()->id())
             ->with(['project:id,name', 'model'])
             ->whereNotIn('state', TaskState::endStateKeys())
             ->orderByDesc('priority')

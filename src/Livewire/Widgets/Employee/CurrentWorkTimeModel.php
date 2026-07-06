@@ -59,6 +59,16 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
         $this->weeklyTarget = (float) $workTimeModel->weekly_hours;
     }
 
+    protected function apiResponseProperties(): array
+    {
+        return [
+            'sum',
+            'subValue',
+            'dailyTarget',
+            'weeklyTarget',
+        ];
+    }
+
     protected function apiRules(): array
     {
         return [
@@ -67,16 +77,6 @@ class CurrentWorkTimeModel extends ValueBox implements HasApiResponse
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
             ],
-        ];
-    }
-
-    protected function apiResponseProperties(): array
-    {
-        return [
-            'sum',
-            'subValue',
-            'dailyTarget',
-            'weeklyTarget',
         ];
     }
 

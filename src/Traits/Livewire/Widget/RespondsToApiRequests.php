@@ -28,12 +28,12 @@ trait RespondsToApiRequests
         return $data;
     }
 
-    protected function apiRules(): array
+    protected function apiResponseProperties(): array
     {
         return [];
     }
 
-    protected function apiResponseProperties(): array
+    protected function apiRules(): array
     {
         return [];
     }

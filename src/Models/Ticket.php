@@ -136,19 +136,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsS
             : null;
     }
 
-    public function getCreatorLabel(): ?string
-    {
-        $creator = $this->authenticatable;
-
-        if ($creator instanceof Address) {
-            return filled($creator->company)
-                ? $creator->company
-                : ($creator->contact?->mainAddress?->company ?: $creator->name);
-        }
-
-        return $creator?->name;
-    }
-
     public function getDescription(): ?string
     {
         return Str::limit($this->description, 200);

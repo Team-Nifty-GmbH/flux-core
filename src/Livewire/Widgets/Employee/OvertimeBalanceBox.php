@@ -57,6 +57,14 @@ class OvertimeBalanceBox extends ValueBox implements HasApiResponse
         $this->shouldBePositive = true;
     }
 
+    protected function apiResponseProperties(): array
+    {
+        return [
+            'sum',
+            'overtimeHours',
+        ];
+    }
+
     protected function apiRules(): array
     {
         return [
@@ -65,14 +73,6 @@ class OvertimeBalanceBox extends ValueBox implements HasApiResponse
                 'integer',
                 app(ModelExists::class, ['model' => Employee::class]),
             ],
-        ];
-    }
-
-    protected function apiResponseProperties(): array
-    {
-        return [
-            'sum',
-            'overtimeHours',
         ];
     }
 

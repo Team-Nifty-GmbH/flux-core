@@ -13,18 +13,20 @@ beforeEach(function (): void {
     $this->permission = Permission::findOrCreate('api.widgets.my-tasks.get', 'sanctum');
 });
 
-test('the my tasks widget api returns assigned and responsible open tasks', function (): void {
+test('the my tasks widget api returns only assigned open tasks', function (): void {
     $assignedTask = Task::factory()->create(['state' => TaskOpen::class, 'priority' => 1]);
     $assignedTask->users()->attach($this->user->getKey());
-    $responsibleTask = Task::factory()->create([
+    $highPriorityAssignedTask = Task::factory()->create([
         'state' => TaskInProgress::class,
         'priority' => 5,
+    ]);
+    $highPriorityAssignedTask->users()->attach($this->user->getKey());
+    $responsibleOnlyTask = Task::factory()->create([
+        'state' => TaskInProgress::class,
         'responsible_user_id' => $this->user->getKey(),
     ]);
-    $doneTask = Task::factory()->create([
-        'state' => TaskDone::class,
-        'responsible_user_id' => $this->user->getKey(),
-    ]);
+    $doneTask = Task::factory()->create(['state' => TaskDone::class]);
+    $doneTask->users()->attach($this->user->getKey());
     $someoneElsesTask = Task::factory()->create(['state' => TaskOpen::class]);
 
     $this->user->givePermissionTo($this->permission);
@@ -33,10 +35,32 @@ test('the my tasks widget api returns assigned and responsible open tasks', func
     $response = $this->getJson('/api/widgets/my-tasks')->assertOk();
 
     $data = collect($response->json('data'));
-    expect($data->pluck('id'))->toContain($assignedTask->getKey(), $responsibleTask->getKey())
-        ->and($data->pluck('id'))->not->toContain($doneTask->getKey(), $someoneElsesTask->getKey())
-        ->and($data->first()['id'])->toEqual($responsibleTask->getKey())
+    expect($data->pluck('id'))->toContain($assignedTask->getKey(), $highPriorityAssignedTask->getKey())
+        ->and($data->pluck('id'))->not->toContain(
+            $responsibleOnlyTask->getKey(),
+            $doneTask->getKey(),
+            $someoneElsesTask->getKey()
+        )
+        ->and($data->first()['id'])->toEqual($highPriorityAssignedTask->getKey())
         ->and($data->first())->toHaveKeys(['id', 'name', 'state', 'priority', 'due_date', 'url']);
+});
+
+test('the my tasks widget api respects the limit parameter', function (): void {
+    Task::factory()
+        ->count(3)
+        ->create(['state' => TaskOpen::class])
+        ->each(fn (Task $task) => $task->users()->attach($this->user->getKey()));
+
+    $this->user->givePermissionTo($this->permission);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->getJson('/api/widgets/my-tasks?limit=2')->assertOk();
+
+    expect($response->json('data'))->toHaveCount(2);
+
+    $this->getJson('/api/widgets/my-tasks?limit=0')
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('limit');
 });
 
 test('the my tasks widget api forbids users without the permission', function (): void {

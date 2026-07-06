@@ -15,7 +15,7 @@ beforeEach(function (): void {
     $this->permission = Permission::findOrCreate('api.widgets.my-tickets.get', 'sanctum');
 });
 
-test('the my tickets widget api returns open tickets with a creator company', function (): void {
+test('the my tickets widget api returns open tickets with the authenticatable label', function (): void {
     $createUserTicket = function (array $attributes): Ticket {
         $ticket = Ticket::factory()->create($attributes);
         $ticket->users()->attach($this->user->getKey());
@@ -24,11 +24,6 @@ test('the my tickets widget api returns open tickets with a creator company', fu
     };
 
     $contact = Contact::factory()->create();
-    $mainAddress = Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'company' => 'Main Address GmbH',
-        'is_main_address' => true,
-    ]);
     $addressWithCompany = Address::factory()->create([
         'contact_id' => $contact->getKey(),
         'company' => 'Own Company AG',
@@ -44,12 +39,12 @@ test('the my tickets widget api returns open tickets with a creator company', fu
         'is_main_address' => false,
     ]);
 
-    $ownCompanyTicket = $createUserTicket([
+    $companyAddressTicket = $createUserTicket([
         'state' => TicketInProgress::class,
         'authenticatable_type' => $addressWithCompany->getMorphClass(),
         'authenticatable_id' => $addressWithCompany->getKey(),
     ]);
-    $mainAddressCompanyTicket = $createUserTicket([
+    $addressTicket = $createUserTicket([
         'state' => TicketInProgress::class,
         'authenticatable_type' => $addressWithoutCompany->getMorphClass(),
         'authenticatable_id' => $addressWithoutCompany->getKey(),
@@ -73,47 +68,33 @@ test('the my tickets widget api returns open tickets with a creator company', fu
     $data = collect($response->json('data'));
     expect($data->pluck('id'))->not->toContain($closedTicket->getKey())
         ->and($data->first()['id'])->toEqual($userTicket->getKey())
-        ->and($data->firstWhere('id', $ownCompanyTicket->getKey())['creator'])->toEqual('Own Company AG')
-        ->and($data->firstWhere('id', $mainAddressCompanyTicket->getKey())['creator'])->toEqual('Main Address GmbH')
-        ->and($data->firstWhere('id', $userTicket->getKey())['creator'])->toEqual($this->user->name)
-        ->and($data->first())->toHaveKeys(['id', 'ticket_number', 'title', 'state', 'url', 'creator']);
+        ->and($data->firstWhere('id', $companyAddressTicket->getKey())['authenticatable'])
+        ->toEqual('Own Company AG, Erika Muster')
+        ->and($data->firstWhere('id', $addressTicket->getKey())['authenticatable'])->toEqual('Max Muster')
+        ->and($data->firstWhere('id', $userTicket->getKey())['authenticatable'])->toEqual($this->user->name)
+        ->and($data->first())->toHaveKeys(['id', 'ticket_number', 'title', 'state', 'url', 'authenticatable']);
 });
 
-test('the my tickets widget api falls back to the main address company when the creator company is an empty string', function (): void {
-    $createUserTicket = function (array $attributes): Ticket {
-        $ticket = Ticket::factory()->create($attributes);
-        $ticket->users()->attach($this->user->getKey());
-
-        return $ticket;
-    };
-
-    $contact = Contact::factory()->create();
-    $mainAddress = Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'company' => 'Main Address GmbH',
-        'is_main_address' => true,
-    ]);
-    $addressWithEmptyCompany = Address::factory()->create([
-        'contact_id' => $contact->getKey(),
-        'company' => '',
-        'firstname' => 'Erika',
-        'lastname' => 'Muster',
-        'is_main_address' => false,
-    ]);
-
-    $ticket = $createUserTicket([
-        'state' => TicketInProgress::class,
-        'authenticatable_type' => $addressWithEmptyCompany->getMorphClass(),
-        'authenticatable_id' => $addressWithEmptyCompany->getKey(),
-    ]);
+test('the my tickets widget api respects the limit parameter', function (): void {
+    Ticket::factory()
+        ->count(3)
+        ->create([
+            'state' => TicketInProgress::class,
+            'authenticatable_type' => $this->user->getMorphClass(),
+            'authenticatable_id' => $this->user->getKey(),
+        ])
+        ->each(fn (Ticket $ticket) => $ticket->users()->attach($this->user->getKey()));
 
     $this->user->givePermissionTo($this->permission);
     Sanctum::actingAs($this->user, ['user']);
 
-    $response = $this->getJson('/api/widgets/my-tickets')->assertOk();
+    $response = $this->getJson('/api/widgets/my-tickets?limit=2')->assertOk();
 
-    $data = collect($response->json('data'));
-    expect($data->firstWhere('id', $ticket->getKey())['creator'])->toEqual('Main Address GmbH');
+    expect($response->json('data'))->toHaveCount(2);
+
+    $this->getJson('/api/widgets/my-tickets?limit=0')
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('limit');
 });
 
 test('the my tickets widget api forbids users without the permission', function (): void {

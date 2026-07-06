@@ -4,17 +4,13 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasApiResponse;
 use FluxErp\Livewire\Dashboard\Dashboard;
-use FluxErp\Models\Address;
 use FluxErp\Models\Ticket;
-use FluxErp\Models\User;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Livewire\Component;
 
 class MyTickets extends Component implements HasApiResponse
@@ -84,9 +80,16 @@ class MyTickets extends Component implements HasApiResponse
                 'title' => $ticket->title,
                 'state' => $ticket->state::$name,
                 'url' => $ticket->getUrl(),
-                'creator' => $ticket->getCreatorLabel(),
+                'authenticatable' => $ticket->authenticatable?->getLabel(),
             ])
             ->toArray();
+    }
+
+    protected function apiRules(): array
+    {
+        return [
+            'limit' => ['integer', 'min:1'],
+        ];
     }
 
     protected function getTickets(): Collection
@@ -94,18 +97,7 @@ class MyTickets extends Component implements HasApiResponse
         return auth()
             ->user()
             ->tickets()
-            ->with([
-                'authenticatable' => fn (MorphTo $morphTo): MorphTo => $morphTo
-                    ->constrain([
-                        Address::class => fn (Builder $query) => $query
-                            ->select(['id', 'name', 'company', 'contact_id']),
-                        User::class => fn (Builder $query) => $query
-                            ->select(['id', 'name']),
-                    ])
-                    ->morphWith([
-                        Address::class => ['contact:id,main_address_id', 'contact.mainAddress:id,company'],
-                    ]),
-            ])
+            ->with('authenticatable:id,name')
             ->whereNotIn('state', TicketState::endStateKeys())
             ->orderByRaw("state = 'escalated' DESC")
             ->orderBy('created_at')
