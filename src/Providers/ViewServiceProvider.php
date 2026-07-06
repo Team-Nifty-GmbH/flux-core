@@ -95,8 +95,7 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::customize()
             ->scope('calendar')
             ->dropdown()
-            ->block('wrapper.second', 'relative inline-block text-left w-full')
-            ->block('floating.class', 'w-full');
+            ->block('wrapper.second', 'relative inline-block text-left w-full');
 
         TallStackUi::customize()
             ->badge()
