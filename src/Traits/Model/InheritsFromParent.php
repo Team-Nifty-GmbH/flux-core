@@ -34,7 +34,7 @@ trait InheritsFromParent
 
     public function inheritanceEnabled(): bool
     {
-        return (bool) app(ProductSettings::class)->variant_inheritance_enabled;
+        return ProductSettings::variantInheritanceEnabled();
     }
 
     public function isInheritableField(string $field): bool

@@ -47,7 +47,7 @@ class MigrateProductVariantInheritanceCommand extends Command implements Repeata
 
     public function handle(): int
     {
-        if (! app(ProductSettings::class)->variant_inheritance_enabled) {
+        if (! ProductSettings::variantInheritanceEnabled()) {
             $this->error('Product variant inheritance is disabled (see ProductSettings).');
 
             return self::FAILURE;

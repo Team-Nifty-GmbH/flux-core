@@ -32,7 +32,7 @@ class SyncVariantInheritanceJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (! app(ProductSettings::class)->variant_inheritance_enabled) {
+        if (! ProductSettings::variantInheritanceEnabled()) {
             return;
         }
 

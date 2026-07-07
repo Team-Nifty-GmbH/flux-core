@@ -141,7 +141,7 @@ class Price extends FluxModel
      */
     protected static function inheritableChildIdsForParentPrice(Price $price): array
     {
-        if ($price->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
+        if ($price->is_inherited || ! ProductSettings::variantInheritanceEnabled()) {
             return [];
         }
 
