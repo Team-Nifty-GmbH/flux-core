@@ -108,6 +108,12 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             }
         });
 
+        static::saving(function (Product $product): void {
+            if ($product->isVariant() && $product->inheritanceEnabled()) {
+                $product->markOverridesForDirtyFields();
+            }
+        });
+
         static::updated(function (Product $product): void {
             if (! $product->inheritanceEnabled() || $product->isVariant()) {
                 return;

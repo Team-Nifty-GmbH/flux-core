@@ -6,11 +6,18 @@ use Illuminate\Validation\ValidationException;
 
 it('removes a field from variant overridden_fields', function (): void {
     $parent = Product::factory()->create(['name' => 'Parent']);
-    $variant = Product::factory()->create([
+    // Match every other inheritable field to the parent so the saving hook (value-diff
+    // based overrides) only marks 'name' — Product::factory() otherwise randomizes fields
+    // like description/seo_keywords independently for parent and variant.
+    $matchingParent = collect($parent->getInheritableFields())
+        ->mapWithKeys(fn (string $field): array => [$field => $parent->{$field}])
+        ->reject(fn (mixed $value): bool => is_null($value))
+        ->all();
+    $variant = Product::factory()->create(array_merge($matchingParent, [
         'parent_id' => $parent->getKey(),
         'overridden_fields' => ['name'],
         'name' => 'override',
-    ]);
+    ]));
 
     ResetProductField::make([
         'id' => $variant->getKey(),

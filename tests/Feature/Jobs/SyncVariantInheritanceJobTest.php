@@ -9,17 +9,17 @@ beforeEach(fn () => app(ProductSettings::class)->fill(['variant_inheritance_enab
 
 test('job copies the parent current value into non-overridden variants', function (): void {
     $parent = Product::factory()->create(['weight_gram' => 100]);
-    // weight_gram must be set before parent_id: InheritsFromParent::setAttribute() marks a
-    // field as overridden the moment it's assigned while parent_id is already present, so the
-    // reverse order would make v1 look overridden before the job even runs.
     $v1 = Product::factory()->create(['weight_gram' => 100, 'parent_id' => $parent->getKey()]);
-    $v2 = Product::factory()->create(['parent_id' => $parent->getKey(), 'weight_gram' => 100, 'overridden_fields' => ['weight_gram']]);
+    // v2's weight_gram must genuinely differ from the parent's: InheritsFromParent's saving
+    // hook marks/clears 'overridden_fields' by value-diff on every save, so an explicit
+    // override flag on a value that already equals the parent would be auto-cleared on create.
+    $v2 = Product::factory()->create(['parent_id' => $parent->getKey(), 'weight_gram' => 999, 'overridden_fields' => ['weight_gram']]);
 
     Product::query()->whereKey($parent->getKey())->update(['weight_gram' => 250]); // parent already new in DB
     (new SyncVariantInheritanceJob($parent->getKey(), ['weight_gram']))->handle();
 
     expect((int) DB::table('products')->where('id', $v1->getKey())->value('weight_gram'))->toBe(250)
-        ->and((int) DB::table('products')->where('id', $v2->getKey())->value('weight_gram'))->toBe(100);
+        ->and((int) DB::table('products')->where('id', $v2->getKey())->value('weight_gram'))->toBe(999);
 });
 
 test('job is a no-op when inheritance is disabled', function (): void {
@@ -38,9 +38,10 @@ test('job mirrors parent attribute translations into non-overriding variants and
     $languageA = Language::factory()->create();
     $languageB = Language::factory()->create();
 
-    // weight_gram-style ordering trap applies to overridden_fields too: set it explicitly
-    // so InheritsFromParent::setAttribute doesn't mark 'name' as overridden on v1.
-    $v1 = Product::factory()->create(['parent_id' => $parent->getKey(), 'overridden_fields' => null]);
+    // v1's own 'name' column must match the parent's: InheritsFromParent's saving hook marks
+    // 'name' overridden by value-diff, and Product::factory() otherwise randomizes 'name'
+    // independently for parent and variant, which would falsely exclude v1 from the sync.
+    $v1 = Product::factory()->create(['parent_id' => $parent->getKey(), 'name' => 'Parent EN', 'overridden_fields' => null]);
     $v2 = Product::factory()->create(['parent_id' => $parent->getKey(), 'overridden_fields' => ['name']]);
 
     $insertTranslation = fn (Product $model, Language $language, string $value) => DB::table('attribute_translations')->insert([

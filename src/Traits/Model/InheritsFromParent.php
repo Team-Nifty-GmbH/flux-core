@@ -64,40 +64,39 @@ trait InheritsFromParent
         return in_array($field, $list, strict: true);
     }
 
-    public function getAttribute($key)
+    public function markOverridesForDirtyFields(): void
     {
-        if (
-            $this->isInheritableField($key)
-            && $this->isVariant()
-            && ! $this->overrides($key)
-            && $this->inheritanceEnabled()
-        ) {
-            $parent = $this->relationLoaded('parent') ? $this->parent : $this->parent()->first();
+        if (! $this->isVariant() || ! $this->inheritanceEnabled()) {
+            return;
+        }
 
-            if ($parent) {
-                return $parent->getAttribute($key);
+        $parent = $this->relationLoaded('parent') ? $this->parent : $this->parent()->first();
+        if (! $parent) {
+            return;
+        }
+
+        $list = $this->overridden_fields ?? [];
+
+        foreach ($this->getInheritableFields() as $field) {
+            if (! $this->isDirty($field)) {
+                continue;
+            }
+
+            // Loose comparison: uncast decimal columns (e.g. weight_gram) come back from a
+            // fresh DB load as numeric strings ("100.0000000000") while the in-memory,
+            // just-assigned value is a plain int/float — strict !== would false-positive
+            // on every write to those fields even when the value is unchanged.
+            $differs = $this->getAttribute($field) != $parent->getAttribute($field);
+            $isMarked = in_array($field, $list, strict: true);
+
+            if ($differs && ! $isMarked) {
+                $list[] = $field;
+            } elseif (! $differs && $isMarked) {
+                $list = array_values(array_filter($list, fn (string $f): bool => $f !== $field));
             }
         }
 
-        return parent::getAttribute($key);
-    }
-
-    public function setAttribute($key, $value)
-    {
-        if (
-            $this->isInheritableField($key)
-            && $this->isVariant()
-            && $this->inheritanceEnabled()
-        ) {
-            $list = $this->overridden_fields ?? [];
-
-            if (! in_array($key, $list, strict: true)) {
-                $list[] = $key;
-                parent::setAttribute('overridden_fields', $list);
-            }
-        }
-
-        return parent::setAttribute($key, $value);
+        $this->overridden_fields = $list ?: null;
     }
 
     public function resetField(string $field): static

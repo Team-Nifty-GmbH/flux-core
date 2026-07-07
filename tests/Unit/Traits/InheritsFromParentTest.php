@@ -14,6 +14,29 @@ beforeEach(function (): void {
     app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
 });
 
+/**
+ * Builds a variant whose inheritable fields default to the parent's current values
+ * (simulating a materialized variant that starts as a copy of its parent), then applies
+ * $attributes on top. Without this, Product::factory() randomizes every inheritable field
+ * independently for parent and variant, so the new value-diff override hook would mark
+ * unrelated fields as overridden on creation and shadow the assertion under test.
+ */
+function variantOf(Product $parent, array $attributes = []): Product
+{
+    // Skip fields the factory leaves unset (null in-memory, DB-default at insert) — passing
+    // an explicit null would override that column default and can violate NOT NULL constraints.
+    $matchingParent = collect($parent->getInheritableFields())
+        ->mapWithKeys(fn (string $field): array => [$field => $parent->{$field}])
+        ->reject(fn (mixed $value): bool => is_null($value))
+        ->all();
+
+    return Product::factory()->create(array_merge(
+        $matchingParent,
+        ['parent_id' => $parent->getKey()],
+        $attributes
+    ));
+}
+
 it('isVariant returns true when parent_id is set', function (): void {
     $parent = Product::factory()->create();
     $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
@@ -53,8 +76,8 @@ it('isInheritableRelation returns true for relations in inheritableRelations whi
 
 it('overrides returns true when field is in overridden_fields', function (): void {
     $parent = Product::factory()->create();
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
+    $variant = variantOf($parent, [
+        'name' => $parent->name . ' variant',
         'overridden_fields' => ['name'],
     ]);
 
@@ -80,7 +103,7 @@ it('getInheritableRelations returns the configured whitelist', function (): void
         ->not->toContain('orderPositions', 'crossSellings', 'tags', 'media');
 });
 
-it('returns parent value for inheritable field when not overridden', function (): void {
+it('returns the variant own column value even when not overridden (materialized, no read-time redirect)', function (): void {
     $parent = Product::factory()->create(['name' => 'Parent Name']);
     $variant = Product::factory()->create([
         'parent_id' => $parent->getKey(),
@@ -88,7 +111,7 @@ it('returns parent value for inheritable field when not overridden', function ()
         'overridden_fields' => null,
     ]);
 
-    expect($variant->name)->toBe('Parent Name');
+    expect($variant->name)->toBe('stale variant value');
 });
 
 it('returns own value for inheritable field when overridden', function (): void {
@@ -135,12 +158,9 @@ it('falls back to own column when feature toggle is off', function (): void {
     expect($variant->name)->toBe('raw variant value');
 });
 
-it('setAttribute on inheritable field adds it to overridden_fields', function (): void {
+it('saving a differing inheritable field adds it to overridden_fields', function (): void {
     $parent = Product::factory()->create(['name' => 'Parent Name']);
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    $variant = variantOf($parent);
 
     $variant->name = 'New Name';
     $variant->save();
@@ -149,10 +169,10 @@ it('setAttribute on inheritable field adds it to overridden_fields', function ()
     expect($variant->fresh()->name)->toBe('New Name');
 });
 
-it('setAttribute is idempotent — does not duplicate field in overridden_fields', function (): void {
+it('saving a differing field twice is idempotent — does not duplicate field in overridden_fields', function (): void {
     $parent = Product::factory()->create();
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
+    $variant = variantOf($parent, [
+        'name' => 'Override Name',
         'overridden_fields' => ['name'],
     ]);
 
@@ -162,12 +182,9 @@ it('setAttribute is idempotent — does not duplicate field in overridden_fields
     expect($variant->fresh()->overridden_fields)->toBe(['name']);
 });
 
-it('setAttribute on non-inheritable field does not touch overridden_fields', function (): void {
+it('saving a non-inheritable field does not touch overridden_fields', function (): void {
     $parent = Product::factory()->create();
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    $variant = variantOf($parent);
 
     $variant->product_number = 'NEW-NUM';
     $variant->save();
@@ -175,7 +192,7 @@ it('setAttribute on non-inheritable field does not touch overridden_fields', fun
     expect($variant->fresh()->overridden_fields)->toBeNull();
 });
 
-it('setAttribute on non-variant does not touch overridden_fields', function (): void {
+it('saving on a non-variant does not touch overridden_fields', function (): void {
     $product = Product::factory()->create(['parent_id' => null]);
 
     $product->name = 'Updated';
@@ -184,38 +201,58 @@ it('setAttribute on non-variant does not touch overridden_fields', function (): 
     expect($product->fresh()->overridden_fields)->toBeNull();
 });
 
-it('setting same value as parent does NOT auto-link — stays overridden', function (): void {
+test('saving a variant field equal to the parent does not mark it overridden', function (): void {
+    $parent = Product::factory()->create(['weight_gram' => 100]);
+    $variant = variantOf($parent, ['weight_gram' => 100]);
+
+    $variant->update(['weight_gram' => 100]);
+
+    expect($variant->fresh()->overridden_fields)->toBeNull();
+});
+
+test('saving a differing value marks the field overridden', function (): void {
+    $parent = Product::factory()->create(['weight_gram' => 100]);
+    $variant = variantOf($parent, ['weight_gram' => 100]);
+
+    $variant->update(['weight_gram' => 250]);
+
+    expect($variant->fresh()->overridden_fields)->toBe(['weight_gram']);
+});
+
+it('setting same value as parent auto-clears an existing override (value-diff, not write-time)', function (): void {
     $parent = Product::factory()->create(['name' => 'Same']);
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
+    $variant = variantOf($parent, [
+        'name' => 'Different',
+        'overridden_fields' => ['name'],
     ]);
 
     $variant->name = 'Same';
     $variant->save();
 
-    expect($variant->fresh()->overridden_fields)->toBe(['name']);
+    expect($variant->fresh()->overridden_fields)->toBeNull();
 });
 
 it('resetField removes a field from overridden_fields', function (): void {
     $parent = Product::factory()->create(['name' => 'Parent Name']);
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name', 'description'],
+    $variant = variantOf($parent, [
         'name' => 'override',
+        'description' => 'override description',
+        'overridden_fields' => ['name', 'description'],
     ]);
 
     $variant->resetField('name');
     $variant->save();
 
+    // Materialized contract: resetField only clears the flag, it does not resync the
+    // column back to the parent's value — that requires a separate sync (see task-5 report).
     expect($variant->fresh()->overridden_fields)->toBe(['description']);
-    expect($variant->fresh()->name)->toBe('Parent Name');
+    expect($variant->fresh()->name)->toBe('override');
 });
 
 it('resetField on a field that is not overridden is a no-op', function (): void {
     $parent = Product::factory()->create();
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
+    $variant = variantOf($parent, [
+        'description' => 'override description',
         'overridden_fields' => ['description'],
     ]);
 
@@ -227,8 +264,8 @@ it('resetField on a field that is not overridden is a no-op', function (): void 
 
 it('resetField sets overridden_fields to null when last entry is removed', function (): void {
     $parent = Product::factory()->create();
-    $variant = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
+    $variant = variantOf($parent, [
+        'name' => 'override',
         'overridden_fields' => ['name'],
     ]);
 
@@ -247,18 +284,16 @@ it('resetField on non-inheritable field throws InvalidArgumentException', functi
 
 it('resetFieldOnAllVariants clears the field across every variant', function (): void {
     $parent = Product::factory()->create(['name' => 'Parent']);
-    $variantA = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
+    $variantA = variantOf($parent, [
+        'name' => 'override A',
+        'description' => 'override description A',
         'overridden_fields' => ['name', 'description'],
     ]);
-    $variantB = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
+    $variantB = variantOf($parent, [
+        'name' => 'override B',
         'overridden_fields' => ['name'],
     ]);
-    $variantC = Product::factory()->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => null,
-    ]);
+    $variantC = variantOf($parent);
 
     $touched = $parent->resetFieldOnAllVariants('name');
 
