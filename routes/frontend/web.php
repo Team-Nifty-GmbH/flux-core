@@ -382,8 +382,9 @@ Route::middleware('web')
                 ->defaults('html', false);
         });
 
-        Route::middleware('signed')->group(function (): void {
+        Route::group([], function (): void {
             Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
+                ->middleware('media.signed')
                 ->name('media.private');
 
             Route::get('/media/{media}', function (Media $media) {
@@ -413,6 +414,7 @@ Route::middleware('web')
                     ['Content-Disposition' => $disposition],
                 );
             })
+                ->middleware('media.signed')
                 ->name('media.show');
 
             Route::get('/media-collection-download/{token}', function (string $token) {
@@ -429,6 +431,7 @@ Route::middleware('web')
                     ['Content-Type' => 'application/zip'],
                 );
             })
+                ->middleware('signed')
                 ->name('media-collection.download');
         });
     });
