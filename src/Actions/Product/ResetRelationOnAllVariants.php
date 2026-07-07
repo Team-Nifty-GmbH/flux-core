@@ -24,9 +24,17 @@ class ResetRelationOnAllVariants extends FluxAction
             ->whereKey($this->getData('parent_id'))
             ->firstOrFail();
 
-        return $parent->resetRelationOnAllVariants(
-            $this->getData('relation'),
-            $this->getData('key')
-        );
+        $relation = $this->getData('relation');
+        $key = $this->getData('key');
+
+        $touched = $parent->resetRelationOnAllVariants($relation, $key);
+
+        if ($touched > 0) {
+            // Re-copy the parent's current relation row(s) back onto the now
+            // non-owning variants — see ResetProductRelation::propagateFromParent().
+            ResetProductRelation::propagateFromParent($parent, $relation, $key);
+        }
+
+        return $touched;
     }
 }
