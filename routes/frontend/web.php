@@ -366,7 +366,7 @@ Route::middleware('web')
             })->name('media');
         });
 
-        Route::group(['middleware' => ['auth:web']], function (): void {
+        Route::middleware('auth:web')->group(function (): void {
             Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
@@ -382,9 +382,8 @@ Route::middleware('web')
                 ->defaults('html', false);
         });
 
-        Route::group([], function (): void {
+        Route::middleware('media.signed')->group(function (): void {
             Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
-                ->middleware('media.signed')
                 ->name('media.private');
 
             Route::get('/media/{media}', function (Media $media) {
@@ -414,9 +413,10 @@ Route::middleware('web')
                     ['Content-Disposition' => $disposition],
                 );
             })
-                ->middleware('media.signed')
                 ->name('media.show');
+        });
 
+        Route::middleware('signed')->group(function (): void {
             Route::get('/media-collection-download/{token}', function (string $token) {
                 $payload = Crypt::decrypt($token);
 
@@ -431,7 +431,6 @@ Route::middleware('web')
                     ['Content-Type' => 'application/zip'],
                 );
             })
-                ->middleware('signed')
                 ->name('media-collection.download');
         });
     });
