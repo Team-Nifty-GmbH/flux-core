@@ -3,6 +3,8 @@
 namespace FluxErp\Jobs;
 
 use FluxErp\Models\Product;
+use FluxErp\Settings\ProductSettings;
+use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -10,6 +12,15 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * One-time backfill: materializes existing variants under the new (Approach B) model.
+ *
+ * For every parent product, copies the parent's current inheritable field values (+
+ * translations) into non-overriding child columns and seeds `is_inherited = true`
+ * relation rows (prices + categories/suppliers/productProperties) for non-owning
+ * children. Reuses the same propagation helpers the live write path uses, so this is
+ * idempotent — running it again is a no-op for already-materialized data.
+ */
 class MigrateProductVariantInheritanceJob implements ShouldQueue
 {
     use Dispatchable;
@@ -23,116 +34,45 @@ class MigrateProductVariantInheritanceJob implements ShouldQueue
 
     public function handle(): void
     {
+        if (! app(ProductSettings::class)->variant_inheritance_enabled) {
+            return;
+        }
+
         $query = resolve_static(Product::class, 'query')
-            ->whereNotNull('parent_id')
-            ->with([
-                'parent.ownPrices',
-                'parent.ownCategories',
-                'parent.ownProductProperties',
-                'parent.ownSuppliers',
-                'ownPrices',
-                'ownCategories',
-                'ownProductProperties',
-                'ownSuppliers',
-            ]);
+            ->whereNull('parent_id')
+            ->has('children')
+            ->with('ownPrices');
 
         if ($this->parentId !== null) {
-            $query->where('parent_id', $this->parentId);
+            $query->whereKey($this->parentId);
         }
 
         $processed = 0;
 
-        $query->chunkById($this->batchSize, function ($variants) use (&$processed): void {
-            foreach ($variants as $variant) {
-                $this->reconcileFields($variant);
-                $this->reconcilePivotRelations($variant);
+        $query->chunkById($this->batchSize, function ($parents) use (&$processed): void {
+            foreach ($parents as $parent) {
+                $this->materialize($parent);
                 $processed++;
             }
         });
 
-        Log::info('MigrateProductVariantInheritanceJob processed variants', [
+        Log::info('MigrateProductVariantInheritanceJob materialized parents', [
             'parent_id' => $this->parentId,
             'processed' => $processed,
         ]);
     }
 
-    protected function reconcileFields(Product $variant): void
+    protected function materialize(Product $parent): void
     {
-        if (! $variant->parent) {
-            return;
-        }
+        // Copies parent field values (+ translations) into non-overriding children and
+        // reindexes them in Scout.
+        (new SyncVariantInheritanceJob($parent->getKey()))->handle();
 
-        $overridden = [];
+        // Seeds/refreshes is_inherited=true pivot rows for non-owning children.
+        PivotInheritanceSync::propagateToChildren($parent);
 
-        foreach ($variant->getInheritableFields() as $field) {
-            $variantRaw = $variant->getAttributes()[$field] ?? null;
-            $parentRaw = $variant->parent->getAttributes()[$field] ?? null;
-
-            if ($variantRaw !== $parentRaw) {
-                $overridden[] = $field;
-            }
-        }
-
-        $variant->overridden_fields = $overridden ?: null;
-        $variant->saveQuietly();
-    }
-
-    protected function reconcilePivotRelations(Product $variant): void
-    {
-        $parent = $variant->parent;
-        if (! $parent) {
-            return;
-        }
-
-        $this->reconcilePrices($variant, $parent);
-        $this->reconcileCategories($variant, $parent);
-        $this->reconcileProductProperties($variant, $parent);
-        $this->reconcileSuppliers($variant, $parent);
-    }
-
-    protected function reconcilePrices(Product $variant, Product $parent): void
-    {
-        $parentPriceIndex = $parent->ownPrices->keyBy('price_list_id');
-
-        foreach ($variant->ownPrices as $variantPrice) {
-            $parentPrice = $parentPriceIndex->get($variantPrice->price_list_id);
-            if ($parentPrice && bccomp((string) $parentPrice->price, (string) $variantPrice->price, 4) === 0) {
-                $variantPrice->delete();
-            }
-        }
-    }
-
-    protected function reconcileCategories(Product $variant, Product $parent): void
-    {
-        $parentCategoryIds = $parent->ownCategories()->pluck('categories.id')->all();
-
-        if (empty($parentCategoryIds)) {
-            return;
-        }
-
-        $variant->ownCategories()->detach($parentCategoryIds);
-    }
-
-    protected function reconcileProductProperties(Product $variant, Product $parent): void
-    {
-        $parentProps = $parent->ownProductProperties()->get()->keyBy('id');
-
-        foreach ($variant->ownProductProperties()->get() as $vp) {
-            $pp = $parentProps->get($vp->getKey());
-            if ($pp && (string) $pp->pivot->value === (string) $vp->pivot->value) {
-                $variant->ownProductProperties()->detach($vp->getKey());
-            }
-        }
-    }
-
-    protected function reconcileSuppliers(Product $variant, Product $parent): void
-    {
-        $parentSupplierIds = $parent->ownSuppliers()->pluck('contacts.id')->all();
-
-        if (empty($parentSupplierIds)) {
-            return;
-        }
-
-        $variant->ownSuppliers()->detach($parentSupplierIds);
+        // Re-saving the parent's own prices retriggers Price::booted()'s saved-event
+        // propagation, which materializes missing/stale inherited child price rows.
+        $parent->ownPrices->each->save();
     }
 }
