@@ -186,6 +186,38 @@ test('a variant setting its own supplier takes ownership of the inherited copy w
         ->and((bool) $untouchedRow->is_inherited)->toBeTrue();
 });
 
+test('a parent keeps its suppliers across successive updates', function (): void {
+    $contact = Contact::factory()->create();
+    $otherContact = Contact::factory()->create();
+
+    $this->parent->ownSuppliers()->attach([$contact->getKey(), $otherContact->getKey()]);
+
+    // an unrelated field update must not touch suppliers, since the payload omits the key entirely
+    UpdateProduct::make([
+        'id' => $this->parent->getKey(),
+        'name' => 'renamed parent',
+    ])->validate()->execute();
+
+    expect(
+        DB::table('product_supplier')->where('product_id', $this->parent->getKey())->pluck('contact_id')->sort()->values()->all()
+    )->toBe([$contact->getKey(), $otherContact->getKey()]);
+
+    // re-sending the full existing set must not wipe or duplicate rows (regression for the
+    // sync() list-index-vs-contact_id keying bug)
+    UpdateProduct::make([
+        'id' => $this->parent->getKey(),
+        'suppliers' => [
+            ['contact_id' => $contact->getKey()],
+            ['contact_id' => $otherContact->getKey()],
+        ],
+    ])->validate()->execute();
+
+    $rows = DB::table('product_supplier')->where('product_id', $this->parent->getKey())->get();
+
+    expect($rows)->toHaveCount(2)
+        ->and($rows->pluck('contact_id')->sort()->values()->all())->toBe([$contact->getKey(), $otherContact->getKey()]);
+});
+
 test('a variant setting its own category takes ownership of the inherited copy', function (): void {
     $category = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
 
