@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\Variant\CreateVariantsRuleset;
+use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -42,14 +43,19 @@ class CreateVariants extends FluxAction
         );
         $product['parent_id'] = $parentProduct->id;
         $product['tenants'] = $parentProduct->tenants->pluck('id')->toArray();
+        // Tags have no is_inherited concept (no such column on the taggables table), so
+        // they are always plainly copied as owned, regardless of the inheritance toggle.
+        $product['tags'] = $parentProduct->tags?->pluck('id')->toArray();
 
         $inheritanceEnabled = app(Product::class)->inheritanceEnabled();
 
         if ($inheritanceEnabled) {
-            unset($product['categories'], $product['tags'], $product['prices']);
+            // Categories/prices are not seeded here — they are materialized onto the new
+            // variant as real is_inherited=true copies via the existing parent -> children
+            // propagation helpers below, right after the variant exists as a child.
+            unset($product['categories'], $product['prices']);
         } else {
             $product['categories'] = $parentProduct->categories?->pluck('id')->toArray();
-            $product['tags'] = $parentProduct->tags?->pluck('id')->toArray();
             $product['prices'] = $parentProduct->ownPrices
                 ->map(fn ($price) => [
                     'id' => $price->getKey(),
@@ -58,6 +64,8 @@ class CreateVariants extends FluxAction
                 ])
                 ->toArray();
         }
+
+        $createdAny = false;
 
         foreach (data_get($this->data, 'product_options') as $variantCreate) {
             if ($this->variantExists($variantCreate)) {
@@ -84,6 +92,19 @@ class CreateVariants extends FluxAction
                 ->checkPermission()
                 ->validate()
                 ->execute();
+
+            $createdAny = true;
+        }
+
+        if ($inheritanceEnabled && $createdAny) {
+            // Categories/suppliers/productProperties: reuse the same propagation helper
+            // UpdateProduct uses after a parent's own pivots change.
+            PivotInheritanceSync::propagateToChildren($parentProduct);
+
+            // Prices propagate via Price::booted()'s `saved` hook, keyed off the parent's
+            // children — re-saving (a no-op write, since nothing changed) fires that hook
+            // so the newly created variant receives inherited price copies too.
+            $parentProduct->ownPrices()->get()->each(fn ($price) => $price->save());
         }
 
         return $parentProduct->children()->get();
