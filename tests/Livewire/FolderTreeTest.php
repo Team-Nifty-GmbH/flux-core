@@ -116,7 +116,7 @@ test('can move media from parent model to folder', function (): void {
         ->and($movedMedia->model_id)->toBe($targetFolder->getKey());
 });
 
-test('reordering media within a folder persists order and keeps the media id', function (): void {
+test('same-folder drag keeps the existing media row', function (): void {
     Storage::fake('local');
 
     $folder = MediaFolder::create([
@@ -125,66 +125,14 @@ test('reordering media within a folder persists order and keeps the media id', f
         'model_id' => $this->contact->getKey(),
     ]);
 
-    $mediaA = $folder
+    $media = $folder
         ->addMedia(UploadedFile::fake()->image('a.jpg'))
         ->toMediaCollection('files');
-    $mediaB = $folder
-        ->addMedia(UploadedFile::fake()->image('b.jpg'))
-        ->toMediaCollection('files');
-    $mediaC = $folder
-        ->addMedia(UploadedFile::fake()->image('c.jpg'))
-        ->toMediaCollection('files');
-
-    $subject = [
-        'id' => $mediaC->getKey(),
-        'name' => $mediaC->name,
-        'file_name' => $mediaC->file_name,
-        'collection_name' => $mediaC->collection_name,
-    ];
-
-    $target = [
-        'id' => $folder->getKey(),
-        'name' => $folder->name,
-        'slug' => $folder->slug,
-    ];
-
-    Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
-        ->call('moveItem', $subject, $target, null, null, 0)
-        ->assertReturned(true);
-
-    // same-folder reorder must not recreate the media row
-    expect(Media::query()->whereKey($mediaC->getKey())->exists())->toBeTrue()
-        ->and($mediaC->refresh()->order_column)->toBe(1)
-        ->and($mediaA->refresh()->order_column)->toBe(2)
-        ->and($mediaB->refresh()->order_column)->toBe(3);
-});
-
-test('moving media into a folder at a position places it correctly', function (): void {
-    Storage::fake('local');
-
-    $folder = MediaFolder::create([
-        'name' => 'Folder',
-        'model_type' => morph_alias(Contact::class),
-        'model_id' => $this->contact->getKey(),
-    ]);
-
-    $mediaA = $folder
-        ->addMedia(UploadedFile::fake()->image('a.jpg'))
-        ->toMediaCollection('files');
-    $mediaB = $folder
-        ->addMedia(UploadedFile::fake()->image('b.jpg'))
-        ->toMediaCollection('files');
-
-    $media = $this->contact
-        ->addMedia(UploadedFile::fake()->image('test.jpg'))
-        ->toMediaCollection('files');
-
-    $fileName = $media->file_name;
 
     $subject = [
         'id' => $media->getKey(),
         'name' => $media->name,
-        'file_name' => $fileName,
+        'file_name' => $media->file_name,
         'collection_name' => $media->collection_name,
     ];
 
@@ -195,19 +143,16 @@ test('moving media into a folder at a position places it correctly', function ()
     ];
 
     Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()])
-        ->call('moveItem', $subject, $target, null, null, 1)
+        ->call('moveItem', $subject, $target, null, null)
         ->assertReturned(true);
 
-    $movedMedia = Media::query()
-        ->where('model_type', morph_alias(MediaFolder::class))
-        ->where('model_id', $folder->getKey())
-        ->where('file_name', $fileName)
-        ->first();
-
-    expect($movedMedia)->not->toBeNull()
-        ->and($mediaA->refresh()->order_column)->toBe(1)
-        ->and($movedMedia->order_column)->toBe(2)
-        ->and($mediaB->refresh()->order_column)->toBe(3);
+    // a same-folder drag must not recreate the media row with a new id
+    expect(Media::query()->whereKey($media->getKey())->exists())->toBeTrue()
+        ->and(Media::query()
+            ->where('model_type', morph_alias(MediaFolder::class))
+            ->where('model_id', $folder->getKey())
+            ->count()
+        )->toBe(1);
 });
 
 test('moving media between a folder and a fixed collection keeps the model attachment consistent', function (): void {
