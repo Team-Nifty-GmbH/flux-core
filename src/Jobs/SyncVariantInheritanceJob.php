@@ -21,8 +21,9 @@ class SyncVariantInheritanceJob implements ShouldQueue
 
     /**
      * @param  array<int, string>  $fields
+     * @param  array<int, int>|null  $variantIds  restrict the sync to these child ids; null syncs all children
      */
-    public function __construct(public int $parentId, public array $fields = []) {}
+    public function __construct(public int $parentId, public array $fields = [], public ?array $variantIds = null) {}
 
     public function middleware(): array
     {
@@ -46,6 +47,7 @@ class SyncVariantInheritanceJob implements ShouldQueue
         foreach ($fields as $field) {
             resolve_static(Product::class, 'query')
                 ->where('parent_id', $this->parentId)
+                ->when($this->variantIds, fn ($q) => $q->whereIn('id', $this->variantIds))
                 ->where(fn ($q) => $q->whereNull('overridden_fields')
                     ->orWhereJsonDoesntContain('overridden_fields', $field))
                 ->update([$field => $parent->getRawOriginal($field)]);
@@ -56,6 +58,7 @@ class SyncVariantInheritanceJob implements ShouldQueue
         // Query-builder updates bypass Scout's ModelObserver — reindex explicitly.
         resolve_static(Product::class, 'query')
             ->where('parent_id', $this->parentId)
+            ->when($this->variantIds, fn ($q) => $q->whereIn('id', $this->variantIds))
             ->searchable();
     }
 
@@ -72,6 +75,7 @@ class SyncVariantInheritanceJob implements ShouldQueue
         foreach ($fields as $field) {
             $childIds = resolve_static(Product::class, 'query')
                 ->where('parent_id', $parent->getKey())
+                ->when($this->variantIds, fn ($q) => $q->whereIn('id', $this->variantIds))
                 ->where(fn ($q) => $q->whereNull('overridden_fields')
                     ->orWhereJsonDoesntContain('overridden_fields', $field))
                 ->pluck('id');

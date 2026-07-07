@@ -32,7 +32,7 @@ class ResetProductField extends FluxAction
 
         // Re-copy the parent's current value (and translations) onto the variant now
         // that it's no longer flagged as overriding — otherwise the column stays stale.
-        SyncVariantInheritanceJob::dispatchSync($variant->parent_id, [$field]);
+        SyncVariantInheritanceJob::dispatchSync($variant->parent_id, [$field], [$variant->getKey()]);
 
         return $variant->refresh();
     }

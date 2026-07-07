@@ -59,6 +59,54 @@ it('re-copies the parents current value into every affected variants column', fu
         ->toBe(250);
 });
 
+it('re-copies the parents current translation into every affected variants attribute_translations', function (): void {
+    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
+
+    $parent = Product::factory()->create(['name' => 'Parent Name']);
+    $matchingParent = collect($parent->getInheritableFields())
+        ->mapWithKeys(fn (string $field): array => [$field => $parent->{$field}])
+        ->reject(fn (mixed $value): bool => is_null($value))
+        ->all();
+    $overridden = Product::factory()->create(array_merge($matchingParent, [
+        'parent_id' => $parent->getKey(),
+        'overridden_fields' => ['name'],
+        'name' => 'Variant Override Name',
+    ]));
+    $nonOverridden = Product::factory()->create(array_merge($matchingParent, [
+        'parent_id' => $parent->getKey(),
+        'name' => 'Parent Name',
+    ]));
+
+    $language = FluxErp\Models\Language::factory()->create(['language_code' => 'fr']);
+    DB::table('attribute_translations')->insert([
+        'model_type' => $parent->getMorphClass(),
+        'model_id' => $parent->getKey(),
+        'attribute' => 'name',
+        'language_id' => $language->getKey(),
+        'value' => 'Nom Parent',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $touched = ResetFieldOnAllVariants::make([
+        'parent_id' => $parent->getKey(),
+        'field' => 'name',
+    ])->validate()->execute();
+
+    expect($touched)->toBe(1);
+
+    $fetch = fn (Product $model) => DB::table('attribute_translations')
+        ->where('model_type', $model->getMorphClass())
+        ->where('model_id', $model->getKey())
+        ->where('attribute', 'name')
+        ->where('language_id', $language->getKey())
+        ->whereNull('deleted_at')
+        ->value('value');
+
+    expect($fetch($overridden))->toBe('Nom Parent')
+        ->and($fetch($nonOverridden))->toBe('Nom Parent');
+});
+
 it('throws when resetting a field on a non-existent parent', function (): void {
     // Bypasses ->validate() on purpose: this exercises the firstOrFail() guard in
     // performAction() itself, not the ModelExists validation rule.
