@@ -4,6 +4,7 @@ namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Category;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +31,22 @@ trait Categorizable
         static::saved(function (Model $model): void {
             // after saving attach the attributes
             if (! is_null($model->pendingCategoryIds)) {
-                $model->categories()->sync($model->pendingCategoryIds);
+                $ids = (array) $model->pendingCategoryIds;
+
+                // A variant (only Product currently has isVariant()/inheritanceEnabled())
+                // setting its own category must take ownership (is_inherited = false)
+                // and must not have its inherited copies silently dropped just because
+                // they're absent from this payload; PivotInheritanceSync::syncOwned()
+                // is a no-op passthrough to plain sync() for every other model.
+                $takesOwnership = method_exists($model, 'isVariant') && method_exists($model, 'inheritanceEnabled')
+                    && $model->isVariant() && $model->inheritanceEnabled();
+
+                PivotInheritanceSync::syncOwned(
+                    $model->categories(),
+                    collect($ids)->mapWithKeys(fn ($id) => [$id => []])->all(),
+                    $takesOwnership
+                );
+
                 $model->pendingCategoryIds = null;
             }
         });

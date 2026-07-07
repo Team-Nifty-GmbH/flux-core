@@ -56,6 +56,12 @@ class UpdateProduct extends FluxAction
 
         $product->save();
 
+        // A variant editing its own relation entry must take ownership (is_inherited = false),
+        // otherwise the edit would either get overwritten by the next parent propagation or
+        // sit alongside a duplicate inherited copy. Parents never own an inherited copy of
+        // their own, so this is a no-op for them.
+        $takesOwnership = $product->isVariant() && $product->inheritanceEnabled();
+
         if (! is_null($tags)) {
             $product->syncTags(resolve_static(Tag::class, 'query')->whereKey($tags)->get());
         }
@@ -65,13 +71,24 @@ class UpdateProduct extends FluxAction
         }
 
         if (! is_null($productProperties)) {
-            $product->ownProductProperties()->sync(
-                Arr::mapWithKeys($productProperties, fn ($item) => [$item['id'] => ['value' => $item['value']]])
+            PivotInheritanceSync::syncOwned(
+                $product->ownProductProperties(),
+                Arr::mapWithKeys($productProperties, fn ($item) => [$item['id'] => ['value' => $item['value']]]),
+                $takesOwnership
             );
         }
 
         if (! is_null($suppliers)) {
-            $product->ownSuppliers()->sync($suppliers);
+            // Key by contact_id instead of passing the raw payload list straight to sync():
+            // sync() keys unkeyed array items by their list index, so it would compare those
+            // indexes against the real contact_ids already attached and detach everything.
+            PivotInheritanceSync::syncOwned(
+                $product->ownSuppliers(),
+                collect($suppliers)
+                    ->mapWithKeys(fn (array $item) => [$item['contact_id'] => Arr::except($item, 'contact_id')])
+                    ->all(),
+                $takesOwnership
+            );
         }
 
         PivotInheritanceSync::propagateToChildren($product);
@@ -83,16 +100,30 @@ class UpdateProduct extends FluxAction
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');
             $product->ownPrices
-                ?->each(function ($price) use ($priceCollection): void {
+                ?->each(function ($price) use ($priceCollection, $takesOwnership): void {
                     if ($priceCollection->has($price->price_list_id)) {
-                        $price->update($priceCollection->get($price->price_list_id));
+                        $data = $priceCollection->get($price->price_list_id);
+
+                        if ($takesOwnership) {
+                            $data['is_inherited'] = false;
+                        }
+
+                        $price->update($data);
                         $priceCollection->forget($price->price_list_id);
-                    } else {
+                    } elseif (! $takesOwnership || ! $price->is_inherited) {
+                        // Inherited copies absent from the payload are managed by parent
+                        // propagation and the reset actions, not by payload omission.
                         $price->delete();
                     }
                 });
 
-            $priceCollection->each(fn ($item) => $product->ownPrices()->create($item));
+            $priceCollection->each(function ($item) use ($product, $takesOwnership): void {
+                if ($takesOwnership) {
+                    $item['is_inherited'] = false;
+                }
+
+                $product->ownPrices()->create($item);
+            });
         }
 
         if ($product->is_bundle && $bundleProducts) {

@@ -22,6 +22,38 @@ class PivotInheritanceSync
 {
     protected const RELATIONS = ['categories', 'suppliers', 'productProperties'];
 
+    /**
+     * Sync a product's "own" pivot relation (categories/suppliers/productProperties),
+     * keyed by the related id => extra pivot attributes.
+     *
+     * A non-variant (or non-inheriting) product keeps the plain sync() behavior: the
+     * payload is the full desired set, anything absent gets detached.
+     *
+     * A variant taking ownership must not let payload omission delete its inherited
+     * copies — those are materialized by parent propagation and removed only by the
+     * reset actions, never by omission. So only rows the variant already owns and no
+     * longer lists get detached; every listed entry becomes owned (is_inherited =
+     * false), flipping an existing inherited copy in place instead of duplicating it.
+     */
+    public static function syncOwned(BelongsToMany $relation, array $desired, bool $takesOwnership): void
+    {
+        if (! $takesOwnership) {
+            $relation->sync($desired);
+
+            return;
+        }
+
+        $relation->sync(
+            collect($desired)->map(fn (array $attributes) => $attributes + ['is_inherited' => false])->all(),
+            false
+        );
+
+        $relation->newPivotQuery()
+            ->where('is_inherited', false)
+            ->whereNotIn($relation->getRelatedPivotKeyName(), array_keys($desired))
+            ->delete();
+    }
+
     public static function propagateToChildren(Product $parent): void
     {
         if (! is_null($parent->parent_id) || ! $parent->inheritanceEnabled()) {
