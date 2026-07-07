@@ -22,7 +22,7 @@
                         </div>
                     @show
 
-                    @if(is_null($method))
+                    @if (is_null($method))
                         @section('force-two-factor-setup.choice')
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <button
@@ -70,7 +70,7 @@
                                 />
                             </div>
                         @show
-                    @elseif($method === \FluxErp\Enums\TwoFactorMethodEnum::Totp)
+                    @elseif ($method === \FluxErp\Enums\TwoFactorMethodEnum::Totp)
                         @section('force-two-factor-setup.totp')
                             <div class="space-y-4">
                                 <h3 class="text-lg font-semibold text-gray-900">
@@ -137,11 +137,11 @@
                                 </form>
                             </div>
                         @show
-                    @elseif($method === \FluxErp\Enums\TwoFactorMethodEnum::Passkey)
+                    @elseif ($method === \FluxErp\Enums\TwoFactorMethodEnum::Passkey)
                         @section('force-two-factor-setup.passkey')
                             <div
                                 class="space-y-4"
-                                x-show="browserSupportsWebAuthn"
+                                x-show="browserSupportsWebAuthn()"
                                 x-cloak
                             >
                                 <h3 class="text-lg font-semibold text-gray-900">
@@ -160,7 +160,20 @@
                                         {{ __('Once the passkey is registered the page reloads and you can continue.') }}
                                     </li>
                                 </ol>
-                                <livewire:passkeys />
+                                <div
+                                    x-show="
+                                        !window.nuxbeAppBridge?.isNative?.()
+                                    "
+                                    x-cloak
+                                >
+                                    <livewire:passkeys />
+                                </div>
+                                <div
+                                    x-show="window.nuxbeAppBridge?.isNative?.()"
+                                    x-cloak
+                                >
+                                    <x-flux::passkey-bridge-register />
+                                </div>
                                 <div class="flex justify-between gap-2 pt-2">
                                     <x-button
                                         :text="__('Back')"

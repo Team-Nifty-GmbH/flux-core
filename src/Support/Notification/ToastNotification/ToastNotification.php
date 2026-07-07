@@ -28,6 +28,8 @@ class ToastNotification extends Toast implements Arrayable
 
     protected bool $markAsRead = false;
 
+    protected bool $menuIndicator = true;
+
     protected ?string $method = null;
 
     protected ?object $notifiable = null;
@@ -141,6 +143,18 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
+    public function menuIndicator(bool $menuIndicator = true): static
+    {
+        $this->menuIndicator = $menuIndicator;
+
+        return $this;
+    }
+
+    public function hideFromMenu(): static
+    {
+        return $this->menuIndicator(false);
+    }
+
     public function method(string $method): static
     {
         $this->method = $method;
@@ -222,6 +236,7 @@ class ToastNotification extends Toast implements Arrayable
                 'progressbar' => $this->progressbar,
                 'params' => $this->params,
                 'markAsRead' => $this->markAsRead,
+                'menu_indicator' => $this->menuIndicator,
                 'method' => $this->method,
                 'emit' => $this->emit,
                 'to' => $this->to,

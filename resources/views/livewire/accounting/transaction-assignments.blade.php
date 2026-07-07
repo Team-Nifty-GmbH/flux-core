@@ -46,7 +46,11 @@
                 "
             />
             @stack('transaction-assign-orders-modal-footer')
-            <x-button :text="__('Assign')" wire:click="assignOrders" />
+            <x-button
+                :text="__('Assign')"
+                wire:click="assignOrders()"
+                loading="assignOrders()"
+            />
         </x-slot:footer>
     </x-modal>
 
@@ -100,14 +104,96 @@
         x-on:open="$tsui.focus('order-transaction-amount')"
     >
         <div class="flex flex-col gap-4">
-            <x-number
-                id="order-transaction-amount"
-                :label="__('Amount')"
-                wire:model="orderTransactionForm.amount"
-                step="0.01"
-                :corner-hint="__('Amount')"
-                placeholder="0.00"
-            />
+            <div class="flex flex-col gap-2">
+                <x-number
+                    id="order-transaction-amount"
+                    :label="__('Amount')"
+                    wire:model="orderTransactionForm.amount"
+                    step="0.01"
+                    :corner-hint="__('Amount')"
+                    placeholder="0.00"
+                />
+                <div class="flex flex-wrap gap-2">
+                    <x-button
+                        sm
+                        color="secondary"
+                        x-cloak
+                        x-show="
+                            $wire.orderTransactionForm.orderGrossTotal !== null
+                        "
+                        x-on:click="
+                            $wire.orderTransactionForm.amount =
+                                $wire.orderTransactionForm.orderGrossTotal
+                        "
+                    >
+                        <x-slot:text>
+                            {{ __('Apply Gross Total') }} (<span
+                                x-html="
+                                    $nuxbe.format.money(
+                                        $wire.orderTransactionForm
+                                            .orderGrossTotal,
+                                    )
+                                "
+                            ></span
+                            >)
+                        </x-slot:text>
+                    </x-button>
+                    <x-button
+                        sm
+                        color="secondary"
+                        x-cloak
+                        x-show="
+                            $wire.orderTransactionForm.orderBalance !== null &&
+                            $wire.orderTransactionForm.orderBalance !==
+                                $wire.orderTransactionForm.orderGrossTotal
+                        "
+                        x-on:click="
+                            $wire.orderTransactionForm.amount =
+                                $wire.orderTransactionForm.orderBalance
+                        "
+                    >
+                        <x-slot:text>
+                            {{ __('Apply Balance Amount') }} (<span
+                                x-html="
+                                    $nuxbe.format.money(
+                                        $wire.orderTransactionForm.orderBalance,
+                                    )
+                                "
+                            ></span
+                            >)
+                        </x-slot:text>
+                    </x-button>
+                    <x-button
+                        sm
+                        color="secondary"
+                        x-cloak
+                        x-show="
+                            $wire.orderTransactionForm.transactionAmount !==
+                                null &&
+                            $wire.orderTransactionForm.transactionAmount !==
+                                $wire.orderTransactionForm.orderGrossTotal &&
+                            $wire.orderTransactionForm.transactionAmount !==
+                                $wire.orderTransactionForm.orderBalance
+                        "
+                        x-on:click="
+                            $wire.orderTransactionForm.amount =
+                                $wire.orderTransactionForm.transactionAmount
+                        "
+                    >
+                        <x-slot:text>
+                            {{ __('Apply Payment Amount') }} (<span
+                                x-html="
+                                    $nuxbe.format.money(
+                                        $wire.orderTransactionForm
+                                            .transactionAmount,
+                                    )
+                                "
+                            ></span
+                            >)
+                        </x-slot:text>
+                    </x-button>
+                </div>
+            </div>
             <div
                 x-cloak
                 x-show="$wire.orderTransactionForm.orderCurrencyIso"
@@ -156,7 +242,7 @@
                 <x-tab.items :tab="__('All')" />
                 <x-tab.items :tab="__('Assignment suggestions')">
                     <x-slot:right>
-                        <x-badge round="full">
+                        <x-badge round>
                             <x-slot:text>
                                 <span
                                     x-text="$wire.suggestionCount ?? 0"
@@ -167,7 +253,7 @@
                 </x-tab.items>
                 <x-tab.items :tab="__('Open transactions')">
                     <x-slot:right>
-                        <x-badge round="full">
+                        <x-badge round>
                             <x-slot:text>
                                 <span
                                     x-text="$wire.unassignedCount ?? 0"
@@ -364,9 +450,7 @@
                                             class="flex w-full justify-between rounded bg-slate-100 p-2 font-semibold"
                                         >
                                             <div class="flex gap-2">
-                                                <div
-                                                    class="hidden overflow-hidden transition-all duration-200 group-hover:block"
-                                                >
+                                                <div class="block">
                                                     <x-button
                                                         class="h-full"
                                                         color="secondary"
@@ -438,9 +522,7 @@
                                                         ></span>
                                                     </div>
                                                 </div>
-                                                <div
-                                                    class="hidden overflow-hidden transition-all duration-200 group-hover:block"
-                                                >
+                                                <div class="block">
                                                     <x-button
                                                         class="h-full"
                                                         color="secondary"
@@ -456,9 +538,11 @@
                                 <div class="px-2 pt-2">
                                     <div class="flex flex-col">
                                         <div
-                                            class="flex flex-row items-center justify-between border-t border-slate-200 pt-2"
+                                            class="flex flex-col-reverse gap-2 border-t border-slate-200 pt-2 lg:flex-row lg:items-center lg:justify-between"
                                         >
-                                            <div class="flex flex-row gap-2">
+                                            <div
+                                                class="flex flex-row flex-wrap gap-2"
+                                            >
                                                 <x-button
                                                     sm
                                                     x-cloak
@@ -533,19 +617,49 @@
                                                 />
                                             </div>
                                             <div
-                                                class="flex flex-row gap-2 pr-2"
+                                                class="flex flex-col items-end gap-y-1 lg:pr-2"
                                             >
-                                                <span class="font-semibold">
-                                                    {{ __('Open') }}:
-                                                </span>
-                                                <span
-                                                    x-html="
-                                                        $nuxbe.format.money(
-                                                            transaction.balance,
-                                                            { colored: true },
-                                                        )
+                                                <div
+                                                    x-cloak
+                                                    x-show="
+                                                        parseFloat(
+                                                            transaction.unassigned_amount ??
+                                                                0,
+                                                        ) !== 0
                                                     "
-                                                ></span>
+                                                    class="flex flex-row gap-2"
+                                                >
+                                                    <span class="font-semibold">
+                                                        {{ __('Suggested') }}:
+                                                    </span>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                transaction.unassigned_amount,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
+                                                <div
+                                                    class="flex flex-row gap-2"
+                                                >
+                                                    <span class="font-semibold">
+                                                        {{ __('Open') }}:
+                                                    </span>
+                                                    <span
+                                                        x-html="
+                                                            $nuxbe.format.money(
+                                                                transaction.balance,
+                                                                {
+                                                                    colored: true,
+                                                                },
+                                                            )
+                                                        "
+                                                    ></span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -559,12 +673,153 @@
                             color="emerald"
                             wire:flux-confirm.type.warning="{{ __('Accept all assignments|All suggested transaction assignments will be accepted') }}"
                             wire:click="acceptAll()"
+                            loading="acceptAll()"
                             :text="__('Accept all')"
                             x-cloak
                             x-show="$wire.tab === '{{ __('Assignment suggestions') }}' && data.data?.length > 0"
                         />
                     </div>
-                    <x-tall-datatables::pagination />
+                    <div
+                        x-cloak
+                        x-show="
+                            (data.last_page ?? 1) > 1 || (data.total ?? 0) > 0
+                        "
+                        class="dark:border-secondary-700/50 flex items-center justify-between border-t border-gray-100 px-3 py-2.5"
+                    >
+                        <div class="flex flex-1 justify-between sm:hidden">
+                            <x-button
+                                color="secondary"
+                                flat
+                                sm
+                                :text="__('Previous')"
+                                x-bind:disabled="(data.current_page ?? 1) <= 1"
+                                x-on:click="
+                                    $wire.gotoPage((data.current_page ?? 1) - 1)
+                                "
+                            />
+                            <x-button
+                                color="secondary"
+                                flat
+                                sm
+                                :text="__('Next')"
+                                x-bind:disabled="
+                                    (data.current_page ?? 1) >=
+                                    (data.last_page ?? 1)
+                                "
+                                x-on:click="
+                                    $wire.gotoPage((data.current_page ?? 1) + 1)
+                                "
+                            />
+                        </div>
+                        <div
+                            class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between"
+                        >
+                            <div
+                                class="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                {{ __('Showing') }}
+                                <span
+                                    class="font-medium"
+                                    x-text="data.from ?? 0"
+                                ></span>
+                                {{ __('to') }}
+                                <span
+                                    class="font-medium"
+                                    x-text="data.to ?? 0"
+                                ></span>
+                                {{ __('of') }}
+                                <span
+                                    class="font-medium"
+                                    x-text="data.total ?? 0"
+                                ></span>
+                                {{ __('results') }}
+                                <x-select.native
+                                    class="ml-1 border-0 bg-transparent py-0 pr-6 pl-1 text-sm text-gray-600 focus:ring-0 dark:text-gray-300"
+                                    wire:model.live="perPage"
+                                >
+                                    <option value="15">
+                                        15 {{ __('per page') }}
+                                    </option>
+                                    <option value="25">
+                                        25 {{ __('per page') }}
+                                    </option>
+                                    <option value="50">
+                                        50 {{ __('per page') }}
+                                    </option>
+                                    <option value="100">
+                                        100 {{ __('per page') }}
+                                    </option>
+                                </x-select.native>
+                            </div>
+                            <nav
+                                class="isolate inline-flex space-x-1 rounded-md"
+                                aria-label="Pagination"
+                            >
+                                <x-button
+                                    color="secondary"
+                                    flat
+                                    sm
+                                    icon="chevron-left"
+                                    x-bind:disabled="
+                                        (data.current_page ?? 1) <= 1
+                                    "
+                                    x-on:click="
+                                        $wire.gotoPage(
+                                            (data.current_page ?? 1) - 1,
+                                        )
+                                    "
+                                />
+                                <template
+                                    x-for="
+                                        link in
+                                        (data.links ?? []).filter(
+                                            (l) =>
+                                                /^\d+$/.test(l.label) ||
+                                                l.label === '...',
+                                        )
+                                    "
+                                    :key="link.label + '-' + (link.url ?? '')"
+                                >
+                                    <x-button
+                                        color="secondary"
+                                        flat
+                                        sm
+                                        x-bind:disabled="
+                                            link.active || link.url === null
+                                        "
+                                        x-text="link.label"
+                                        x-bind:class="
+                                            link.active
+                                                ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                                                : ''
+                                        "
+                                        x-on:click="
+                                            link.url !== null &&
+                                                !link.active &&
+                                                $wire.gotoPage(
+                                                    parseInt(link.label),
+                                                )
+                                        "
+                                    />
+                                </template>
+                                <x-button
+                                    color="secondary"
+                                    flat
+                                    sm
+                                    icon="chevron-right"
+                                    x-bind:disabled="
+                                        (data.current_page ?? 1) >=
+                                        (data.last_page ?? 1)
+                                    "
+                                    x-on:click="
+                                        $wire.gotoPage(
+                                            (data.current_page ?? 1) + 1,
+                                        )
+                                    "
+                                />
+                            </nav>
+                        </div>
+                    </div>
                 </div>
             </x-tab>
         </div>

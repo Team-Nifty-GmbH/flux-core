@@ -3,6 +3,8 @@
 use FluxErp\Mechanisms\FrontendAssets\FrontendAssets;
 use FluxErp\Mechanisms\FrontendAssets\SupportAutoInjectedAssets;
 use Illuminate\Support\Facades\Route;
+use Laravel\SerializableClosure\SerializableClosure;
+use Laravel\SerializableClosure\Support\ReflectionClosure;
 
 beforeEach(function (): void {
     $this->frontendAssets = app(FrontendAssets::class);
@@ -149,7 +151,7 @@ describe('Package Manifest Registration', function (): void {
 
 describe('SupportAutoInjectedAssets', function (): void {
     test('injects assets into html response', function (): void {
-        $html = '<html><head></head><body></body></html>';
+        $html = '<html lang="en"><head></head><body></body></html>';
         $assetsHead = '<link rel="stylesheet" href="/test.css">';
         $assetsBody = '<script src="/test.js"></script>';
 
@@ -160,17 +162,17 @@ describe('SupportAutoInjectedAssets', function (): void {
     });
 
     test('injects assets before closing tags', function (): void {
-        $html = '<html><head><title>Test</title></head><body><p>Content</p></body></html>';
+        $html = '<html lang="en"><head><title>Test</title></head><body><p>Content</p></body></html>';
         $assetsHead = '<!-- HEAD -->';
         $assetsBody = '<!-- BODY -->';
 
         $result = SupportAutoInjectedAssets::injectAssets($html, $assetsHead, $assetsBody);
 
-        expect($result)->toBe('<html><head><title>Test</title><!-- HEAD --></head><body><p>Content</p><!-- BODY --></body></html>');
+        expect($result)->toBe('<html lang="en"><head><title>Test</title><!-- HEAD --></head><body><p>Content</p><!-- BODY --></body></html>');
     });
 
     test('handles html without head/body tags', function (): void {
-        $html = '<html><p>Simple</p></html>';
+        $html = '<html lang="en"><p>Simple</p></html>';
         $assetsHead = '<!-- HEAD -->';
         $assetsBody = '<!-- BODY -->';
 
@@ -275,6 +277,32 @@ describe('Octane Compatibility', function (): void {
         $response2 = $this->actingAsGuest()->get(route('login'));
         $response2->assertOk();
         expect($response2->getContent())->toContain('<link rel="stylesheet"');
+    });
+});
+
+describe('Route Cache Compatibility', function (): void {
+    test('asset route closures do not capture the frontend assets instance', function (string $routeName): void {
+        $closure = Route::getRoutes()->getByName($routeName)->getAction('uses');
+
+        $reflection = new ReflectionClosure($closure);
+
+        expect($reflection->isBindingRequired())->toBeFalse();
+    })->with([
+        'flux.assets.css',
+        'flux.assets.js',
+        'flux.assets.package',
+        'flux.assets.file',
+    ]);
+
+    test('asset route closures survive serialization round-trip', function (): void {
+        $closure = Route::getRoutes()->getByName('flux.assets.css')->getAction('uses');
+
+        $rehydrated = unserialize(serialize(new SerializableClosure($closure)))
+            ->getClosure();
+
+        $response = $rehydrated();
+
+        expect($response->headers->get('Content-Type'))->toBe('text/css; charset=utf-8');
     });
 });
 

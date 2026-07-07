@@ -436,24 +436,40 @@
                 <x-label :label="__('Preview next executions')" />
                 <ul class="mt-1 space-y-1">
                     <template
-                        x-for="date in $wire.schedule.nextExecutionDates"
-                        x-bind:key="date"
+                        x-for="entry in $wire.schedule.nextExecutionDates"
+                        x-bind:key="entry.date"
                     >
                         <li
-                            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+                            class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
                         >
-                            <x-icon name="chevron-right" class="h-3 w-3" />
-                            <span
-                                x-text="
-                                    new Date(date + 'Z').toLocaleString('{{ app()->getLocale() }}', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                    })
-                                "
-                            ></span>
+                            <x-icon
+                                name="chevron-right"
+                                class="mt-1 h-3 w-3 shrink-0"
+                            />
+                            <span class="flex flex-col">
+                                <span
+                                    x-text="
+                                        new Date(entry.date + 'Z').toLocaleString('{{ app()->getLocale() }}', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })
+                                    "
+                                ></span>
+                                <span
+                                    x-cloak
+                                    x-show="entry.system_delivery_date"
+                                    class="text-xs text-gray-400 dark:text-gray-500"
+                                    x-text="
+                                        '{{ __('Performance period') }}: ' +
+                                        new Date(entry.system_delivery_date + 'T00:00:00').toLocaleDateString('{{ app()->getLocale() }}') +
+                                        ' – ' +
+                                        new Date(entry.system_delivery_date_end + 'T00:00:00').toLocaleDateString('{{ app()->getLocale() }}')
+                                    "
+                                ></span>
+                            </span>
                         </li>
                     </template>
                 </ul>

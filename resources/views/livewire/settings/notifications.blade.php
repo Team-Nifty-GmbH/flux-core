@@ -69,7 +69,12 @@
                     $tsui.close.modal('edit-notification-settings-modal')
                 "
             />
-            <x-button color="indigo" :text="__('Save')" wire:click="save()" />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save()"
+                loading="save()"
+            />
         </x-slot:footer>
     </x-modal>
     <div class="px-4 sm:px-6 lg:px-8">

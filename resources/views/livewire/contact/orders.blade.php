@@ -126,6 +126,7 @@
                         :options="$languages"
                     />
                 </div>
+                @stack('contact-order-create-modal-content')
             </div>
         </section>
         <x-slot:footer>
@@ -137,10 +138,10 @@
                 x-on:click="$tsui.close.modal('create-order-modal')"
             />
             <x-button
-                loading
                 color="indigo"
                 :text="__('Save')"
                 wire:click="save()"
+                loading="save()"
             />
         </x-slot:footer>
     </x-modal>

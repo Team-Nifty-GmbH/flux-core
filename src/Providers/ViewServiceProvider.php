@@ -95,7 +95,8 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::customize()
             ->scope('calendar')
             ->dropdown()
-            ->block('wrapper.second', 'relative inline-block text-left w-full');
+            ->block('wrapper.second', 'relative inline-block text-left w-full')
+            ->block('floating.widths.md', 'w-full');
 
         TallStackUi::customize()
             ->badge()
@@ -145,8 +146,8 @@ class ViewServiceProvider extends ServiceProvider
 
         TallStackUi::customize()
             ->modal('fullscreen')
-            ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex w-full transform flex-col rounded-xl bg-white text-left shadow-xl transition-all min-h-screen')
-            ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');
+            ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex h-screen w-full transform flex-col overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all')
+            ->block('body', 'dark:text-dark-300 min-h-0 flex-1 rounded-b-xl py-5 text-gray-700 px-4');
 
         TallStackUi::customize()
             ->modal('headless')

@@ -698,3 +698,17 @@ if (! function_exists('render_editor_blade')) {
         return new Illuminate\Support\HtmlString(Illuminate\Support\Facades\Blade::render($converted, $data));
     }
 }
+
+if (! function_exists('split_html_for_print')) {
+    /**
+     * Splits rendered HTML into top-level chunks so the PDF renderer can
+     * insert page breaks between them - dompdf cannot break a single table
+     * row across pages.
+     *
+     * @return array<int, string>
+     */
+    function split_html_for_print(?string $html): array
+    {
+        return app(FluxErp\Printing\HtmlPrintChunker::class)->chunk($html);
+    }
+}

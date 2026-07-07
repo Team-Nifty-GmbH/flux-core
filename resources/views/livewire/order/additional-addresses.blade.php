@@ -49,7 +49,7 @@
             />
         </x-slot:footer>
     </x-modal>
-    @foreach($form->addresses as $address)
+    @foreach ($form->addresses as $address)
         <x-card :header="$address['address_type']">
             <div class="text-sm">
                 {!! implode('<br>', $address['address']) !!}
@@ -67,6 +67,7 @@
                     <x-button.circle
                         icon="trash"
                         wire:click="delete({{ data_get($address, 'address_id') }})"
+                        loading="delete({{ data_get($address, 'address_id') }})"
                         color="red"
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address assignment')]) }}"
                     />

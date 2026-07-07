@@ -1,16 +1,19 @@
 <?php
 
+use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Actions\Printing;
 use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CalendarSearchController;
+use FluxErp\Http\Controllers\PrivateMediaController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\PaymentReminderRun;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
@@ -42,6 +45,7 @@ use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
+use FluxErp\Livewire\Mobile\ShareTarget;
 use FluxErp\Livewire\MyEmployeeProfile\MyAbsenceRequest;
 use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeDay;
 use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeProfile;
@@ -96,6 +100,7 @@ use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\RecordOrigins;
 use FluxErp\Livewire\Settings\ReminderSettings;
 use FluxErp\Livewire\Settings\Scheduling;
+use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
@@ -121,9 +126,13 @@ use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
+use FluxErp\Support\MediaLibrary\ContentDisposition;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
 /*
@@ -159,6 +168,8 @@ Route::middleware('web')
 
         Route::middleware(['auth:web', '2fa.setup', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
+
+            Route::get('/mobile/share-target', ShareTarget::class)->name('mobile.share-target');
 
             Route::get('/private-storage/{path}', function (string $path) {
                 return response()
@@ -262,6 +273,7 @@ Route::middleware('web')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
+                        Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
                         Route::get('/transaction-assignments', TransactionAssignments::class)
@@ -317,6 +329,7 @@ Route::middleware('web')
                         Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
+                        Route::get('/search-settings', SearchSettings::class)->name('search-settings');
                         Route::get('/security-settings', SecuritySettings::class)->name('security-settings');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
@@ -370,8 +383,52 @@ Route::middleware('web')
         });
 
         Route::middleware('signed')->group(function (): void {
-            Route::get('/media-private/{media}/{filename}', function (Media $media) {
-                return $media;
-            })->name('media.private');
+            Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
+                ->name('media.private');
+
+            Route::get('/media/{media}', function (Media $media) {
+                $disposition = ContentDisposition::make(
+                    request()->boolean('download')
+                        ? HeaderUtils::DISPOSITION_ATTACHMENT
+                        : HeaderUtils::DISPOSITION_INLINE,
+                    $media->file_name,
+                );
+
+                $disk = Storage::disk($media->disk);
+                $path = $media->getPathRelativeToRoot();
+
+                if ($disk->providesTemporaryUrls()) {
+                    return redirect()->away(
+                        $disk->temporaryUrl(
+                            $path,
+                            now()->addMinutes(5),
+                            ['ResponseContentDisposition' => $disposition],
+                        )
+                    );
+                }
+
+                return $disk->response(
+                    $path,
+                    $media->file_name,
+                    ['Content-Disposition' => $disposition],
+                );
+            })
+                ->name('media.show');
+
+            Route::get('/media-collection-download/{token}', function (string $token) {
+                $payload = Crypt::decrypt($token);
+
+                $stream = DownloadMultipleMedia::make(data_get($payload, 'data') ?? [])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+
+                return response()->streamDownload(
+                    fn () => $stream->getZipStream(),
+                    Str::finish((string) (data_get($payload, 'name') ?? 'media'), '.zip'),
+                    ['Content-Type' => 'application/zip'],
+                );
+            })
+                ->name('media-collection.download');
         });
     });

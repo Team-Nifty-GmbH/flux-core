@@ -22,6 +22,7 @@
                         <x-slot:footer>
                             <x-button
                                 wire:click="resetPassword()"
+                                loading="resetPassword()"
                                 color="indigo"
                                 class="w-full"
                                 :text="__('Reset password')"
@@ -137,7 +138,7 @@
                                     dusk="login-button"
                                 ></x-button>
                             </div>
-                            @if(app(\FluxErp\Settings\SecuritySettings::class)->magic_login_links_enabled)
+                            @if (app(\FluxErp\Settings\SecuritySettings::class)->magic_login_links_enabled)
                                 <div x-transition x-cloak x-show="$wire.email">
                                     <x-button
                                         loading
@@ -149,12 +150,14 @@
                                     ></x-button>
                                 </div>
                             @endif
+
+                            @stack('auth-login-actions')
                         </form>
                         @section('passkey-login')
-                            @if(Route::hasMacro('passkeys'))
+                            @if (Route::hasMacro('passkeys'))
                                 <div
                                     class="mt-6"
-                                    x-show="browserSupportsWebAuthn"
+                                    x-show="browserSupportsWebAuthn()"
                                     x-cloak
                                 >
                                     <div class="relative">

@@ -16,7 +16,7 @@
             />
         @show
         <div
-            @if($collapsed) x-collapse x-show="expanded" x-cloak @endif
+            @if ($collapsed) x-collapse x-show="expanded" x-cloak @endif
             class="space-y-2.5 p-0.5"
         >
             <div
@@ -166,7 +166,7 @@
                 />
             @show
         </div>
-        @if($collapsed)
+        @if ($collapsed)
             <x-badge
                 outline
                 md

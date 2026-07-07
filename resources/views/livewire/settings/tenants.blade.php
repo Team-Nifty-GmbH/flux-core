@@ -21,7 +21,7 @@
         <x-slot:footer>
             <div class="w-full">
                 <div class="flex justify-between gap-x-4">
-                    @if(resolve_static(\FluxErp\Actions\Tenant\DeleteTenant::class, 'canPerformAction', [false]))
+                    @if (resolve_static(\FluxErp\Actions\Tenant\DeleteTenant::class, 'canPerformAction', [false]))
                         <x-button
                             light
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Tenant')]) }}"

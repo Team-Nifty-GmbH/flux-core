@@ -32,8 +32,6 @@ class Calendar extends Component
 
     public CalendarForm $calendar;
 
-    public ?array $calendarObject = null;
-
     #[Locked]
     public array $calendarPeriod = [
         'start' => null,
@@ -82,6 +80,22 @@ class Calendar extends Component
     }
 
     #[Renderless]
+    public function calendarToCalendarObject(): array
+    {
+        return resolve_static(CalendarModel::class, 'query')
+            ->whereKey($this->calendar->id)
+            ->first()
+            ?->toCalendarObject(['isNew' => $this->calendar->is_new]) ?? [];
+    }
+
+    #[Renderless]
+    public function changeCalendar(array $calendar = []): void
+    {
+        $this->calendar->reset();
+        $this->calendar->fill($calendar);
+    }
+
+    #[Renderless]
     public function deleteCalendar(): bool
     {
         try {
@@ -106,6 +120,7 @@ class Calendar extends Component
         JS);
     }
 
+    #[Renderless]
     #[On('calendar-event-click')]
     #[On('calendar-event-change')]
     public function editEvent(array $event, ?string $trigger = null): void
@@ -157,6 +172,18 @@ class Calendar extends Component
             $this->skipRender();
             CalendarEventEdit::$skipNextRender = true;
 
+            if ($this->event->was_repeatable) {
+                $this->js(<<<'JS'
+                    window.dispatchEvent(new CustomEvent('sync-calendar-event', {
+                        detail: JSON.parse(JSON.stringify($wire.event))
+                    }));
+                    window.dispatchEvent(new CustomEvent('calendar-event-set-confirm-dialog-type', { detail: 'save' }));
+                    $tsui.open.modal('confirm-dialog');
+                JS);
+
+                return;
+            }
+
             try {
                 $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
                     ?? resolve_static(CalendarEvent::class, 'class');
@@ -186,6 +213,8 @@ class Calendar extends Component
                 $tsui.open.modal('edit-event-modal');
             JS);
         }
+
+        $this->renderIsland('calendar-event');
     }
 
     #[Renderless]
@@ -366,7 +395,6 @@ class Calendar extends Component
     #[Renderless]
     public function saveCalendar(): bool
     {
-        $isNew = ! $this->calendar->id;
         try {
             $this->calendar->save();
         } catch (ValidationException|UnauthorizedException $e) {
@@ -375,22 +403,11 @@ class Calendar extends Component
             return false;
         }
 
-        $this->calendarObject = $this->calendar
-            ->getActionResult()
-            ->toCalendarObject(['isNew' => $isNew]);
-
         $this->toast()
             ->success(__(':model saved', ['model' => __('Calendar')]))
             ->send();
 
         return true;
-    }
-
-    #[Renderless]
-    #[On('calendar-view-did-mount')]
-    public function viewChanged(array $view): void
-    {
-        $this->storeViewSettings($view);
     }
 
     #[Renderless]
@@ -426,10 +443,11 @@ class Calendar extends Component
         ]);
     }
 
-    public function updatedCalendarObject(): void
+    #[Renderless]
+    #[On('calendar-view-did-mount')]
+    public function viewChanged(array $view): void
     {
-        $this->calendar->reset();
-        $this->calendar->fill($this->calendarObject ?? []);
+        $this->storeViewSettings($view);
     }
 
     protected function calculateRepeatableEvents($calendar, Collection $calendarEvents): Collection
