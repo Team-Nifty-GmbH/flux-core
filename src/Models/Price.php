@@ -58,23 +58,13 @@ class Price extends FluxModel
     protected static function booted(): void
     {
         static::saved(function (Price $price): void {
-            if ($price->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
+            $childIds = static::inheritableChildIdsForParentPrice($price);
+
+            if (empty($childIds)) {
                 return;
             }
 
-            $product = resolve_static(Product::class, 'query')
-                ->whereKey($price->product_id)
-                ->first();
-
-            if (! $product || ! is_null($product->parent_id)) {
-                return;
-            }
-
-            $childIds = $product->children()->pluck('id');
-
-            if ($childIds->isEmpty()) {
-                return;
-            }
+            $childIds = collect($childIds);
 
             $rawPrice = $price->getAttributes()['price'];
 
@@ -130,21 +120,9 @@ class Price extends FluxModel
         });
 
         static::deleted(function (Price $price): void {
-            if ($price->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
-                return;
-            }
+            $childIds = static::inheritableChildIdsForParentPrice($price);
 
-            $product = resolve_static(Product::class, 'query')
-                ->whereKey($price->product_id)
-                ->first();
-
-            if (! $product || ! is_null($product->parent_id)) {
-                return;
-            }
-
-            $childIds = $product->children()->pluck('id');
-
-            if ($childIds->isEmpty()) {
+            if (empty($childIds)) {
                 return;
             }
 
@@ -155,6 +133,33 @@ class Price extends FluxModel
                 ->whereIn('product_id', $childIds)
                 ->update(['deleted_at' => now()]);
         });
+    }
+
+    /**
+     * Resolve the child product ids that should receive inherited-price propagation
+     * for the given parent price, or an empty array if any guard fails.
+     */
+    protected static function inheritableChildIdsForParentPrice(Price $price): array
+    {
+        if ($price->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
+            return [];
+        }
+
+        $product = resolve_static(Product::class, 'query')
+            ->whereKey($price->product_id)
+            ->first();
+
+        if (! $product || ! is_null($product->parent_id)) {
+            return [];
+        }
+
+        $childIds = $product->children()->pluck('id');
+
+        if ($childIds->isEmpty()) {
+            return [];
+        }
+
+        return $childIds->all();
     }
 
     protected function casts(): array

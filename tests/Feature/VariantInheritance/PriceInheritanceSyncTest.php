@@ -97,3 +97,30 @@ test('parent price deletion soft-deletes inherited copies', function (): void {
         expect($trashedRow)->not->toBeNull();
     }
 });
+
+test('parent price deletion leaves a child\'s owned price untouched', function (): void {
+    Price::factory()->create([
+        'product_id' => $this->child2->getKey(),
+        'price_list_id' => $this->list->getKey(),
+        'price' => '42.0000',
+        'is_inherited' => false,
+    ]);
+
+    $price = Price::factory()->create([
+        'product_id' => $this->parent->getKey(),
+        'price_list_id' => $this->list->getKey(),
+        'price' => '100.0000',
+    ]);
+
+    $price->delete();
+
+    $child2Row = DB::table('prices')
+        ->where('product_id', $this->child2->getKey())
+        ->where('price_list_id', $this->list->getKey())
+        ->whereNull('deleted_at')
+        ->first();
+
+    expect($child2Row)->not->toBeNull()
+        ->and((bool) $child2Row->is_inherited)->toBeFalse()
+        ->and((float) $child2Row->price)->toBe(42.0);
+});
