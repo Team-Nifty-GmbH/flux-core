@@ -2,15 +2,48 @@
 
 namespace FluxErp\Console\Commands;
 
+use Cron\CronExpression;
+use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Jobs\MigrateProductVariantInheritanceJob;
 use FluxErp\Settings\ProductSettings;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
-class MigrateProductVariantInheritanceCommand extends Command
+class MigrateProductVariantInheritanceCommand extends Command implements Repeatable
 {
-    protected $description = 'Auto-diff existing product variants vs their parents and write overridden_fields.';
+    protected $description = 'Reconcile/materialize product variant inheritance: copies parent values to non-overriding children.';
 
     protected $signature = 'flux:product-variants:migrate-inheritance {--parent-id= : Limit to a single parent product}';
+
+    public static function defaultCron(): ?CronExpression
+    {
+        return new CronExpression('0 0 * * *');
+    }
+
+    public static function description(): ?string
+    {
+        return 'Nightly repair: materialize product variant inheritance for all parents.';
+    }
+
+    public static function isRepeatable(): bool
+    {
+        return true;
+    }
+
+    public static function name(): string
+    {
+        return Str::headline(class_basename(static::class));
+    }
+
+    public static function parameters(): array
+    {
+        return [];
+    }
+
+    public static function withoutOverlapping(): bool
+    {
+        return true;
+    }
 
     public function handle(): int
     {
