@@ -38,10 +38,7 @@ class UpdateProduct extends FluxAction
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
         $tenants = Arr::pull($this->data, 'tenants');
 
-        $productProperties = Arr::mapWithKeys(
-            Arr::pull($this->data, 'product_properties', []),
-            fn ($item, $key) => [$item['id'] => ['value' => $item['value']]]
-        );
+        $productProperties = Arr::pull($this->data, 'product_properties');
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', false);
         $suppliers = Arr::pull($this->data, 'suppliers');
@@ -68,7 +65,9 @@ class UpdateProduct extends FluxAction
         }
 
         if (! is_null($productProperties)) {
-            $product->ownProductProperties()->sync($productProperties);
+            $product->ownProductProperties()->sync(
+                Arr::mapWithKeys($productProperties, fn ($item) => [$item['id'] => ['value' => $item['value']]])
+            );
         }
 
         if (! is_null($suppliers)) {

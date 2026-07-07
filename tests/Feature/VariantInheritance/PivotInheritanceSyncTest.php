@@ -225,6 +225,35 @@ test('parent removing a product property removes the inherited child copies', fu
     }
 });
 
+test('updating an unrelated field without product_properties in the payload leaves parent and child properties intact', function (): void {
+    $property = ProductProperty::factory()->create();
+
+    UpdateProduct::make([
+        'id' => $this->parent->getKey(),
+        'product_properties' => [['id' => $property->getKey(), 'value' => 'red']],
+    ])->validate()->execute();
+
+    UpdateProduct::make([
+        'id' => $this->parent->getKey(),
+        'name' => 'renamed parent',
+    ])->validate()->execute();
+
+    $parentRow = DB::table('product_product_property')
+        ->where('product_id', $this->parent->getKey())
+        ->where('product_property_id', $property->getKey())
+        ->first();
+
+    expect($parentRow)->not->toBeNull();
+
+    $childRow = DB::table('product_product_property')
+        ->where('product_id', $this->child1->getKey())
+        ->where('product_property_id', $property->getKey())
+        ->first();
+
+    expect($childRow)->not->toBeNull()
+        ->and((bool) $childRow->is_inherited)->toBeTrue();
+});
+
 test('a child\'s own product property value is left untouched by parent propagation', function (): void {
     $property = ProductProperty::factory()->create();
 
