@@ -14,6 +14,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Product\UpdateProductRuleset;
+use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -73,6 +74,8 @@ class UpdateProduct extends FluxAction
         if (! is_null($suppliers)) {
             $product->ownSuppliers()->sync($suppliers);
         }
+
+        PivotInheritanceSync::propagateToChildren($product);
 
         if ($tenants) {
             $product->tenants()->sync($tenants);
