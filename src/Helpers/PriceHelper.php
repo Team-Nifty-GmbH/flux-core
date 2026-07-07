@@ -86,7 +86,7 @@ class PriceHelper
             $this->price = $this->calculatePriceFromPriceList($this->priceList, []);
 
             if ($this->price) {
-                $this->price->isInherited = true;
+                $this->price->is_inherited = true;
                 unset($this->price->id, $this->price->uuid);
             }
         }
@@ -100,7 +100,7 @@ class PriceHelper
             $this->price = $this->defaultPriceForProduct($this->product);
 
             if ($this->price) {
-                $this->price->isInherited = true;
+                $this->price->is_inherited = true;
                 unset($this->price->id, $this->price->uuid);
             }
         } else {
@@ -111,7 +111,7 @@ class PriceHelper
             return null;
         }
 
-        if ($this->price->isInherited) {
+        if ($this->price->is_inherited) {
             $productCategoriesDiscounts = $this->price->priceList->categoryDiscounts()
                 ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())
                 ->get();

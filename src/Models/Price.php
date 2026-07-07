@@ -25,8 +25,6 @@ class Price extends FluxModel
 
     public ?string $discountPercentage = null;
 
-    public bool $isInherited = false;
-
     public ?string $rootDiscountFlat = null;
 
     public ?string $rootDiscountPercentage = null;
@@ -46,7 +44,6 @@ class Price extends FluxModel
         'discount_percentage',
         'root_discount_flat',
         'root_discount_percentage',
-        'is_inherited',
     ];
 
     protected $with = [
@@ -137,13 +134,6 @@ class Price extends FluxModel
     {
         return Attribute::get(
             fn () => $this->getGross(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
-        );
-    }
-
-    protected function isInherited(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->isInherited
         );
     }
 
