@@ -432,9 +432,7 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        $collectionName = $targetType === 'folder'
-            ? $targetPath
-            : data_get($subject, 'collection_name', $targetPath);
+        $collectionName = $targetPath;
 
         $isAlreadyInTarget = $targetType === 'folder'
             ? $media->model_type === morph_alias(MediaFolder::class)

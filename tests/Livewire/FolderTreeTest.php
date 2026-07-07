@@ -8,6 +8,7 @@ use FluxErp\Tests\Livewire\FolderTreeReadonlyTestClass;
 use FluxErp\Tests\Livewire\FolderTreeTestClass;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -207,6 +208,91 @@ test('moving media into a folder at a position places it correctly', function ()
         ->and($mediaA->refresh()->order_column)->toBe(1)
         ->and($movedMedia->order_column)->toBe(2)
         ->and($mediaB->refresh()->order_column)->toBe(3);
+});
+
+test('moving media between a folder and a fixed collection keeps the model attachment consistent', function (): void {
+    Storage::fake('local');
+
+    $folder = MediaFolder::create([
+        'name' => 'Source Folder',
+        'model_type' => morph_alias(Contact::class),
+        'model_id' => $this->contact->getKey(),
+    ]);
+    $this->contact->mediaFolders()->attach($folder->getKey());
+
+    $media = $folder
+        ->addMedia(UploadedFile::fake()->image('test.jpg'))
+        ->toMediaCollection($folder->slug);
+
+    $fileName = $media->file_name;
+
+    $component = Livewire::test(FolderTreeTestClass::class, ['modelId' => $this->contact->getKey()]);
+
+    // folder -> fixed collection on the owner model
+    $component
+        ->call(
+            'moveItem',
+            [
+                'id' => $media->getKey(),
+                'name' => $media->name,
+                'file_name' => $fileName,
+                'collection_name' => $media->collection_name,
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'name' => 'Files',
+                'slug' => 'files',
+            ],
+            null,
+            null
+        )
+        ->assertReturned(true);
+
+    $movedMedia = Media::query()
+        ->where('file_name', $fileName)
+        ->firstOrFail();
+
+    expect($movedMedia->model_type)->toBe(morph_alias(Contact::class))
+        ->and($movedMedia->model_id)->toBe($this->contact->getKey())
+        ->and($movedMedia->collection_name)->toBe('files');
+
+    $collectionNode = collect($this->contact->refresh()->getMediaAsTree())
+        ->firstWhere('slug', 'files');
+
+    expect(data_get($collectionNode, 'children.*.id'))->toContain($movedMedia->getKey());
+
+    // fixed collection -> back into the folder
+    $component
+        ->call(
+            'moveItem',
+            [
+                'id' => $movedMedia->getKey(),
+                'name' => $movedMedia->name,
+                'file_name' => $fileName,
+                'collection_name' => $movedMedia->collection_name,
+            ],
+            [
+                'id' => $folder->getKey(),
+                'name' => $folder->name,
+                'slug' => $folder->slug,
+            ],
+            null,
+            null
+        )
+        ->assertReturned(true);
+
+    $returnedMedia = Media::query()
+        ->where('file_name', $fileName)
+        ->firstOrFail();
+
+    expect($returnedMedia->model_type)->toBe(morph_alias(MediaFolder::class))
+        ->and($returnedMedia->model_id)->toBe($folder->getKey())
+        ->and($returnedMedia->collection_name)->toBe($folder->slug);
+
+    $folderNode = collect($this->contact->refresh()->getMediaAsTree())
+        ->firstWhere('id', $folder->getKey());
+
+    expect(data_get($folderNode, 'children.*.id'))->toContain($returnedMedia->getKey());
 });
 
 test('can move folder to another folder', function (): void {
