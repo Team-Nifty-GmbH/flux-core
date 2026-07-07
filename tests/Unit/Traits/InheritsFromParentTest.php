@@ -219,6 +219,15 @@ test('saving a differing value marks the field overridden', function (): void {
     expect($variant->fresh()->overridden_fields)->toBe(['weight_gram']);
 });
 
+it('clearing a field to empty string is marked overridden even when parent value is null', function (): void {
+    $parent = Product::factory()->create(['description' => null]);
+    $variant = variantOf($parent, ['description' => 'own description']);
+
+    $variant->update(['description' => '']);
+
+    expect($variant->fresh()->overridden_fields)->toBe(['description']);
+});
+
 it('setting same value as parent auto-clears an existing override (value-diff, not write-time)', function (): void {
     $parent = Product::factory()->create(['name' => 'Same']);
     $variant = variantOf($parent, [
@@ -244,7 +253,8 @@ it('resetField removes a field from overridden_fields', function (): void {
     $variant->save();
 
     // Materialized contract: resetField only clears the flag, it does not resync the
-    // column back to the parent's value — that requires a separate sync (see task-5 report).
+    // column back to the parent's value — that requires a separate sync (see plan Phase 5 /
+    // Task 11: reset re-copies the parent value).
     expect($variant->fresh()->overridden_fields)->toBe(['description']);
     expect($variant->fresh()->name)->toBe('override');
 });

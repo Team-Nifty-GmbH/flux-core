@@ -86,7 +86,12 @@ trait InheritsFromParent
             // fresh DB load as numeric strings ("100.0000000000") while the in-memory,
             // just-assigned value is a plain int/float — strict !== would false-positive
             // on every write to those fields even when the value is unchanged.
-            $differs = $this->getAttribute($field) != $parent->getAttribute($field);
+            // The explicit null check guards against PHP's loose equality treating
+            // null as equal to '' or 0 — without it, clearing a field to '' while the
+            // parent is null would collapse to "not different" and silently drop the override.
+            $new = $this->getAttribute($field);
+            $old = $parent->getAttribute($field);
+            $differs = (is_null($new) !== is_null($old)) || $new != $old;
             $isMarked = in_array($field, $list, strict: true);
 
             if ($differs && ! $isMarked) {
