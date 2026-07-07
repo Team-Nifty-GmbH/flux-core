@@ -16,6 +16,7 @@ use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -175,8 +176,13 @@ abstract class FolderTree extends Component
     }
 
     #[Renderless]
-    public function moveItem(array $subject, array $target, ?string $subjectPath, ?string $targetPath): bool
-    {
+    public function moveItem(
+        array $subject,
+        array $target,
+        ?string $subjectPath,
+        ?string $targetPath,
+        ?int $fileIndex = null
+    ): bool {
         $subjectPath = $this->resolveSubjectPath($subject, $subjectPath);
         $targetPath = $this->resolveTargetPath($target, $targetPath);
 
@@ -198,7 +204,7 @@ abstract class FolderTree extends Component
         return match (true) {
             $subjectType === 'folder' => $this->moveFolder($subject, $target),
             $subjectType === 'collection' => $this->moveCollection($subject, $subjectPath, $targetPath),
-            default => $this->moveMedia($subject, $target, $targetPath, $targetType),
+            default => $this->moveMedia($subject, $target, $targetPath, $targetType, $fileIndex),
         };
     }
 
@@ -405,8 +411,13 @@ abstract class FolderTree extends Component
         return true;
     }
 
-    protected function moveMedia(array $subject, array $target, string $targetPath, string $targetType): bool
-    {
+    protected function moveMedia(
+        array $subject,
+        array $target,
+        string $targetPath,
+        string $targetType,
+        ?int $fileIndex = null
+    ): bool {
         $targetModel = $targetType === 'collection'
             ? resolve_static($this->modelType, 'query')->whereKey($this->modelId)->first()
             : resolve_static(MediaFolder::class, 'query')->whereKey(data_get($target, 'id'))->first();
@@ -425,7 +436,40 @@ abstract class FolderTree extends Component
             ? $targetPath
             : data_get($subject, 'collection_name', $targetPath);
 
-        $media->move($targetModel, $collectionName);
+        $isAlreadyInTarget = $targetType === 'folder'
+            ? $media->model_type === morph_alias(MediaFolder::class)
+                && (int) $media->model_id === (int) data_get($target, 'id')
+            : $media->model_type === morph_alias($this->modelType)
+                && (int) $media->model_id === (int) $this->modelId
+                && $media->collection_name === $collectionName;
+
+        if (! $isAlreadyInTarget) {
+            $media = $media->move($targetModel, $collectionName);
+        }
+
+        if (! is_null($fileIndex)) {
+            $siblingIds = resolve_static(MediaModel::class, 'query')
+                ->when(
+                    $targetType === 'folder',
+                    fn (Builder $query) => $query
+                        ->where('model_type', morph_alias(MediaFolder::class))
+                        ->where('model_id', data_get($target, 'id')),
+                    fn (Builder $query) => $query
+                        ->where('model_type', morph_alias($this->modelType))
+                        ->where('model_id', $this->modelId)
+                        ->where('collection_name', $collectionName)
+                )
+                ->orderBy('order_column')
+                ->orderBy('name')
+                ->pluck('id')
+                ->reject(fn ($id) => (int) $id === (int) $media->getKey())
+                ->values()
+                ->all();
+
+            array_splice($siblingIds, min($fileIndex, count($siblingIds)), 0, [$media->getKey()]);
+
+            resolve_static(MediaModel::class, 'setNewOrder', [$siblingIds]);
+        }
 
         $this->toast()
             ->success(__('Moved successfully'))

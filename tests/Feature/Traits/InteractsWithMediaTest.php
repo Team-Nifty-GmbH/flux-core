@@ -42,3 +42,36 @@ test('getMediaAsTree keeps all sibling branches under a shared dotted prefix', f
         'Berater.Nextcloud.Gamma',
     ]);
 });
+
+test('getMediaAsTree orders files by order column', function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
+
+    $mediaA = Media::factory()->create([
+        'model_type' => $address->getMorphClass(),
+        'model_id' => $address->getKey(),
+        'collection_name' => 'files',
+        'name' => 'a.png',
+        'file_name' => 'a.png',
+        'order_column' => 2,
+    ]);
+
+    $mediaB = Media::factory()->create([
+        'model_type' => $address->getMorphClass(),
+        'model_id' => $address->getKey(),
+        'collection_name' => 'files',
+        'name' => 'b.png',
+        'file_name' => 'b.png',
+        'order_column' => 1,
+    ]);
+
+    $tree = $address->getMediaAsTree();
+
+    $files = collect($tree)->firstWhere('slug', 'files');
+    expect($files)->not->toBeNull();
+
+    expect(data_get($files, 'children.*.id'))->toBe([
+        $mediaB->getKey(),
+        $mediaA->getKey(),
+    ]);
+});

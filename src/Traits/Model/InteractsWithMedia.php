@@ -192,6 +192,7 @@ trait InteractsWithMedia
                                 ->where('model_id', $this->getKey())
                                 ->where('collection_name', $slug)
                         )
+                        ->orderBy('order_column')
                         ->orderBy('name', 'ASC')
                         ->get([
                             'id',

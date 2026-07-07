@@ -5,7 +5,7 @@
                 tree="$wire.getTree()"
                 name-attribute="name"
                 :search-attributes="['name', 'file_name', 'collection_name']"
-                moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'))"
+                moved="$wire.moveItem(item, node, item.slug ?? item.collection_name ?? getNodePath(item, 'slug'), node.slug ?? node.collection_name ?? getNodePath(node, 'slug'), (search?.length || !item.file_name) ? null : Math.max(0, position - 1 - (node.children ?? []).filter(c => !c.file_name).length))"
                 sortable
                 with-search
                 x-sort:item="childNode"
