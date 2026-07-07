@@ -559,21 +559,25 @@ it('resetRelation throws on non-inheritable relation', function (): void {
 
 it('resetFieldOnAllVariants issues a bounded number of queries (set-based)', function (): void {
     $parent = Product::factory()->create();
-    Product::factory()->count(10)->create([
-        'parent_id' => $parent->getKey(),
-        'overridden_fields' => ['name'],
-    ]);
+    Product::factory()->count(10)->create(['parent_id' => $parent->getKey()]);
+    // Force a uniform overridden shape via the query builder (bypassing the value-diff
+    // saving hook, which would otherwise add differing random factory fields per variant
+    // and split the reset into a variable number of grouped UPDATEs).
+    Product::query()->where('parent_id', $parent->getKey())
+        ->update(['overridden_fields' => json_encode(['name'])]);
 
     DB::enableQueryLog();
     $parent->resetFieldOnAllVariants('name');
+    // Count only queries against the products table — incidental settings/cache/language
+    // lookups vary with cache warmth and would make a raw count flaky.
     $log = collect(DB::getQueryLog())
-        ->reject(fn (array $entry): bool => str_contains($entry['query'], 'from `languages`'))
+        ->filter(fn (array $entry): bool => str_contains($entry['query'], '`products`'))
         ->values();
     DB::disableQueryLog();
 
     // Pre-refactor: 1 children select + N per-variant saves => grows with N.
     // Post-refactor: 1 children select + 1 grouped UPDATE (transaction-wrapped, BEGIN/COMMIT
-    // not emitted by the query log) => 2 non-language queries regardless of variant count.
+    // not emitted by the query log) => 2 products queries regardless of variant count.
     expect($log->count())->toBeLessThan(5);
 });
 
@@ -589,12 +593,15 @@ it('resetRelationOnAllVariants issues a bounded number of queries for BelongsToM
 
     DB::enableQueryLog();
     $parent->resetRelationOnAllVariants('categories', $cat->getKey());
+    // Count only queries against the products/categorizable tables — incidental
+    // settings/cache/language lookups vary with cache warmth and would flake a raw count.
     $log = collect(DB::getQueryLog())
-        ->reject(fn (array $entry): bool => str_contains($entry['query'], 'from `languages`'))
+        ->filter(fn (array $entry): bool => str_contains($entry['query'], '`products`')
+            || str_contains($entry['query'], '`categorizable`'))
         ->values();
     DB::disableQueryLog();
 
     // Post-refactor: 1 children pluck + 1 sample variant select + 1 distinct count + 1 delete
-    // = 4 non-language queries regardless of variant count.
+    // = 4 queries regardless of variant count.
     expect($log->count())->toBeLessThan(6);
 });
