@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Settings\ProductSettings;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -12,6 +13,8 @@ use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class Price extends FluxModel
 {
@@ -51,6 +54,108 @@ class Price extends FluxModel
         'product:id,vat_rate_id',
         'product.vatRate:id,rate_percentage',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (Price $price): void {
+            if ($price->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
+                return;
+            }
+
+            $product = resolve_static(Product::class, 'query')
+                ->whereKey($price->product_id)
+                ->first();
+
+            if (! $product || ! is_null($product->parent_id)) {
+                return;
+            }
+
+            $childIds = $product->children()->pluck('id');
+
+            if ($childIds->isEmpty()) {
+                return;
+            }
+
+            $rawPrice = $price->getAttributes()['price'];
+
+            $owningChildIds = DB::table('prices')
+                ->where('price_list_id', $price->price_list_id)
+                ->where('is_inherited', false)
+                ->whereNull('deleted_at')
+                ->whereIn('product_id', $childIds)
+                ->pluck('product_id');
+
+            $targetChildIds = $childIds->diff($owningChildIds)->values();
+
+            if ($targetChildIds->isEmpty()) {
+                return;
+            }
+
+            $existingInheritedChildIds = DB::table('prices')
+                ->where('price_list_id', $price->price_list_id)
+                ->where('is_inherited', true)
+                ->whereNull('deleted_at')
+                ->whereIn('product_id', $targetChildIds)
+                ->pluck('product_id');
+
+            $now = now();
+
+            if ($existingInheritedChildIds->isNotEmpty()) {
+                DB::table('prices')
+                    ->where('price_list_id', $price->price_list_id)
+                    ->where('is_inherited', true)
+                    ->whereNull('deleted_at')
+                    ->whereIn('product_id', $existingInheritedChildIds)
+                    ->update([
+                        'price' => $rawPrice,
+                        'updated_at' => $now,
+                    ]);
+            }
+
+            $missingChildIds = $targetChildIds->diff($existingInheritedChildIds);
+
+            if ($missingChildIds->isNotEmpty()) {
+                DB::table('prices')->insert(
+                    $missingChildIds->map(fn ($childId) => [
+                        'uuid' => Str::uuid()->toString(),
+                        'product_id' => $childId,
+                        'price_list_id' => $price->price_list_id,
+                        'price' => $rawPrice,
+                        'is_inherited' => true,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ])->all()
+                );
+            }
+        });
+
+        static::deleted(function (Price $price): void {
+            if ($price->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
+                return;
+            }
+
+            $product = resolve_static(Product::class, 'query')
+                ->whereKey($price->product_id)
+                ->first();
+
+            if (! $product || ! is_null($product->parent_id)) {
+                return;
+            }
+
+            $childIds = $product->children()->pluck('id');
+
+            if ($childIds->isEmpty()) {
+                return;
+            }
+
+            DB::table('prices')
+                ->where('price_list_id', $price->price_list_id)
+                ->where('is_inherited', true)
+                ->whereNull('deleted_at')
+                ->whereIn('product_id', $childIds)
+                ->update(['deleted_at' => now()]);
+        });
+    }
 
     protected function casts(): array
     {
