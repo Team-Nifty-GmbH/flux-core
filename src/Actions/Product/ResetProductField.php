@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Jobs\SyncVariantInheritanceJob;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ResetProductFieldRuleset;
 
@@ -24,8 +25,14 @@ class ResetProductField extends FluxAction
             ->whereKey($this->getData('id'))
             ->firstOrFail();
 
-        $variant->resetField($this->getData('field'));
+        $field = $this->getData('field');
+
+        $variant->resetField($field);
         $variant->save();
+
+        // Re-copy the parent's current value (and translations) onto the variant now
+        // that it's no longer flagged as overriding — otherwise the column stays stale.
+        SyncVariantInheritanceJob::dispatchSync($variant->parent_id, [$field]);
 
         return $variant->refresh();
     }
