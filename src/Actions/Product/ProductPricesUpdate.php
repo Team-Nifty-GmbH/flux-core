@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Product;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\Price\UpdatePrice;
 use FluxErp\Enums\RoundingMethodEnum;
@@ -11,10 +11,13 @@ use FluxErp\Models\Discount;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ProductPricesUpdateRuleset;
+use FluxErp\Traits\IsMonitored;
 use Illuminate\Database\Eloquent\Collection;
 
-class ProductPricesUpdate extends FluxAction
+class ProductPricesUpdate extends DispatchableFluxAction
 {
+    use IsMonitored;
+
     public static function models(): array
     {
         return [Product::class];
@@ -23,6 +26,11 @@ class ProductPricesUpdate extends FluxAction
     protected function getRulesets(): string|array
     {
         return ProductPricesUpdateRuleset::class;
+    }
+
+    public function getName(): string
+    {
+        return __('Updating prices');
     }
 
     public function performAction(): Collection
@@ -46,7 +54,14 @@ class ProductPricesUpdate extends FluxAction
             ),
         ]]);
 
-        foreach ($products as $product) {
+        $total = $products->count();
+        $this->message(__(':count products', ['count' => $total]));
+
+        foreach ($products as $index => $product) {
+            if ($total > 0) {
+                $this->queueProgress(min(99, (int) (($index + 1) / $total * 100)));
+            }
+
             $price = PriceHelper::make($product)
                 ->addDiscount($discount)
                 ->setPriceList($basePriceList ?? $priceList)
