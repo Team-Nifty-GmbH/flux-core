@@ -497,13 +497,13 @@
     <x-modal
         id="cancel-subscription"
         :title="__('Cancel Subscription')"
-        x-on:close="cancellationType = '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}'; generateDocument = true; sendEmail = false"
+        x-on:close="cancellationType = '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}'; generateDocument = {{ $canCreateCancellationConfirmation ? 'true' : 'false' }}; sendEmail = false"
     >
         <div
             x-data="{
                 cancellationType:
                     '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}',
-                generateDocument: true,
+                generateDocument: {{ $canCreateCancellationConfirmation ? 'true' : 'false' }},
                 sendEmail: false,
                 get effectiveEndDate() {
                     const schedule = $wire.schedule
@@ -643,19 +643,19 @@
                 </p>
             </div>
 
-            <div class="flex flex-col gap-2 border-t pt-4">
-                <x-label :label="__('Options')" />
-                <x-toggle
-                    x-model="generateDocument"
-                    :label="__('Generate cancellation confirmation')"
-                />
-                <div x-cloak x-show="generateDocument" class="ml-6">
+            @if ($canCreateCancellationConfirmation)
+                <div class="flex flex-col gap-2 border-t pt-4">
+                    <x-label :label="__('Options')" />
+                    <x-toggle
+                        x-model="generateDocument"
+                        :label="__('Generate cancellation confirmation')"
+                    />
                     <x-toggle
                         x-model="sendEmail"
                         :label="__('Send confirmation by email')"
                     />
                 </div>
-            </div>
+            @endif
             <div class="flex justify-end gap-2 border-t pt-4">
                 <x-button
                     color="secondary"

@@ -2684,6 +2684,7 @@
     "The given route does not exist.": "Die angegebene Route existiert nicht.",
     "The given route is missing required parameters.": "Der angegebenen Route fehlen erforderliche Parameter.",
     "The login link is invalid or has expired.": "Der Anmeldelink ist ungültig oder abgelaufen.",
+    "The mail data is no longer available, please try again.": "Die E-Mail-Daten sind nicht mehr verfügbar, bitte versuche es erneut.",
     "The main record must not be in the merge records.": "Der Hauptdatensatz darf nicht in den zusammenzuführenden Datensätzen sein.",
     "The media collection is read-only and cannot be modified.": "Die Mediensammlung ist schreibgeschützt und kann nicht geändert werden.",
     "The number has already been taken for this type.": "Die Nummer wurde bereits für diesen Typ vergeben.",
