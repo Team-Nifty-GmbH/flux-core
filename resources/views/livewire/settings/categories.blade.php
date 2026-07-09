@@ -37,9 +37,9 @@
                         ></x-toggle>
                     </div>
                     <div
-                        x-bind:class="
-                            $wire.category.id && 'pointer-events-none'
-                        "
+                        x-bind:class="{
+                            'pointer-events-none': $wire.category.id,
+                        }"
                     >
                         <x-select.styled
                             x-bind:disabled="$wire.category.id"

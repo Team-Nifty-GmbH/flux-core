@@ -16,7 +16,7 @@
                 :label="__('Description')"
                 wire:model="leadForm.description"
             />
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Commission Agent')"
                     wire:model="leadForm.user_id"
@@ -31,7 +31,7 @@
                     ]"
                 />
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     x-bind:readonly="!isEditing"
                     wire:model="leadForm.address_id"
@@ -62,7 +62,7 @@
                     </x-slot:label>
                 </x-select.styled>
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     x-on:select="$wire.isLost = $event.detail.select.is_lost"
                     wire:model="leadForm.lead_state_id"
@@ -82,7 +82,7 @@
                 />
             </div>
             <div
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
                 x-cloak
                 x-show="$wire.isLost"
             >
@@ -120,7 +120,7 @@
                     :label="__('Loss Reason')"
                 />
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     x-bind:readonly="!isEditing"
                     wire:model="leadForm.recommended_by_address_id"
@@ -150,7 +150,7 @@
                     </x-slot:label>
                 </x-select.styled>
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Origin')"
                     wire:model="leadForm.record_origin_id"
@@ -189,7 +189,7 @@
                 :label="__('Expected Gross Profit')"
                 wire:model="leadForm.expected_gross_profit"
             />
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-rating
                     x-bind:readonly="!isEditing"
                     wire:model.number="leadForm.score"
@@ -198,7 +198,7 @@
                     position="right"
                 />
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-range
                     x-bind:readonly="!isEditing"
                     wire:model.number="leadForm.probability_percentage"
@@ -220,7 +220,7 @@
                 </x-range>
             </div>
             <div
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
                 class="flex gap-4"
             >
                 <x-date
@@ -234,7 +234,7 @@
                     x-bind:readonly="!isEditing"
                 />
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Categories')"
                     wire:model="leadForm.categories"
@@ -257,7 +257,7 @@
                     ]"
                 />
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     multiple
                     wire:model.number="leadForm.tags"

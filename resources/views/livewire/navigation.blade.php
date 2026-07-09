@@ -158,9 +158,9 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="
-                                        frequentlyVisitedOpen && '-rotate-90'
-                                    "
+                                    x-bind:class="{
+                                        '-rotate-90': frequentlyVisitedOpen,
+                                    }"
                                 />
                             </span>
                         </div>
@@ -214,7 +214,9 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="favoritesOpen && '-rotate-90'"
+                                    x-bind:class="{
+                                        '-rotate-90': favoritesOpen,
+                                    }"
                                 />
                             </span>
                         </div>
@@ -266,7 +268,7 @@
                             @endforeach
 
                             <x-button
-                                x-bind:class="!menuOpen && 'invisible'"
+                                x-bind:class="{ invisible: !menuOpen }"
                                 color="emerald"
                                 class="w-full"
                                 icon="plus"

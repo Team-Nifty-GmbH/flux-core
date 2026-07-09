@@ -105,11 +105,10 @@
                 >
                     <template x-for="assignment in $wire.assignments">
                         <tr
-                            x-bind:class="
-                                assignment.is_current
-                                    ? 'bg-green-50 dark:bg-green-900/20'
-                                    : ''
-                            "
+                            x-bind:class="{
+                                'bg-green-50 dark:bg-green-900/20':
+                                    assignment.is_current,
+                            }"
                         >
                             <td
                                 class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"

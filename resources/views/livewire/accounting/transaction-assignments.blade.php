@@ -788,11 +788,10 @@
                                             link.active || link.url === null
                                         "
                                         x-text="link.label"
-                                        x-bind:class="
-                                            link.active
-                                                ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
-                                                : ''
-                                        "
+                                        x-bind:class="{
+                                            'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400':
+                                                link.active,
+                                        }"
                                         x-on:click="
                                             link.url !== null &&
                                                 !link.active &&
