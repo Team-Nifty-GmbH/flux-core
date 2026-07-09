@@ -39,5 +39,11 @@ test('update prices dispatches a monitored job instead of running synchronously'
         ->assertHasNoErrors()
         ->assertSet('selected', []);
 
-    Bus::assertDispatched(ProductPricesUpdate::class);
+    Bus::assertDispatched(
+        ProductPricesUpdate::class,
+        fn (ProductPricesUpdate $action): bool => $action->getData('products') === $products->pluck('id')->toArray()
+            && $action->getData('price_list_id') === $priceList->getKey()
+            && $action->getData('base_price_list_id') === $priceList->getKey()
+            && $action->getData('is_percent') === false
+    );
 });

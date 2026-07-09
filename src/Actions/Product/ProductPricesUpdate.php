@@ -57,9 +57,10 @@ class ProductPricesUpdate extends DispatchableFluxAction
         $total = $products->count();
         $this->message(__(':count products', ['count' => $total]));
 
-        foreach ($products as $index => $product) {
+        $processed = 0;
+        foreach ($products as $product) {
             if ($total > 0) {
-                $this->queueProgress(min(99, (int) (($index + 1) / $total * 100)));
+                $this->queueProgress(min(99, (int) (++$processed / $total * 100)));
             }
 
             $price = PriceHelper::make($product)
