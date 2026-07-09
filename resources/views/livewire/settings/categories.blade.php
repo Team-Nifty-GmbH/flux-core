@@ -58,25 +58,26 @@
                             select="label:label|value:id"
                             unfiltered
                             :request="[
-                        'url' => route('search', \FluxErp\Models\Category::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'where' => [
-                                [
-                                    'model_type',
-                                    '=',
-                                    $category->model_type,
+                                'url' => route('search', \FluxErp\Models\Category::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            $category->model_type,
+                                        ],
+                                        [
+                                            'id',
+                                            '!=',
+                                            $category->id,
+                                        ],
+                                    ],
                                 ],
-                                [
-                                    'id',
-                                    '!=',
-                                    $category->id,
-                                ],
-                            ],
-                        ],
-                    ]"
+                            ]"
                         />
                     </div>
+                    @stack('settings-category-form')
                 @show
             </div>
             <x-slot:footer>
