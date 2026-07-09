@@ -77,6 +77,7 @@
                     ]"
                         />
                     </div>
+                    @stack('settings-category-form')
                 @show
             </div>
             <x-slot:footer>

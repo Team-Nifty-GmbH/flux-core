@@ -84,6 +84,10 @@ class Categories extends CategoryList
         $this->category->reset();
         $this->category->fill($category);
 
+        // Let extensions (e.g. packages pushing into 'settings-category-form')
+        // load their own per-category data.
+        $this->dispatch('category-editing', categoryId: $category->getKey());
+
         $this->js(<<<'JS'
             $tsui.open.modal('edit-category-modal');
         JS);
@@ -99,6 +103,9 @@ class Categories extends CategoryList
 
             return false;
         }
+
+        // Let extensions persist their own per-category data after the core save.
+        $this->dispatch('category-saved', categoryId: $this->category->id);
 
         $this->loadData();
 
