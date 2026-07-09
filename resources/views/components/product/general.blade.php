@@ -80,7 +80,7 @@
             />
             <div
                 class="grid grid-cols-1 gap-4 sm:grid-cols-4"
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
                 <x-number
                     x-bind:readonly="!isEditing"
