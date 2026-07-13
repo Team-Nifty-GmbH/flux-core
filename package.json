@@ -10,7 +10,7 @@
     "devDependencies": {
         "@alpinejs/collapse": "^3.15.12",
         "@alpinejs/sort": "^3.15.12",
-        "@floating-ui/dom": "^1.7.4",
+        "@floating-ui/dom": "^1.8.0",
         "@fontsource/inter": "^5.0.18",
         "@fullcalendar/core": "^6.1.21",
         "@fullcalendar/daygrid": "^6.1.21",
