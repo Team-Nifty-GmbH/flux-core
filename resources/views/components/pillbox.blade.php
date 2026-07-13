@@ -68,10 +68,10 @@
                     <li
                         dusk="flux_pillbox_option"
                         class="dark:hover:bg-dark-600 flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-100"
-                        x-bind:class="
-                            highlighted === index &&
-                            'dark:bg-dark-600 bg-gray-100'
-                        "
+                        x-bind:class="{
+                            'dark:bg-dark-600 bg-gray-100':
+                                highlighted === index,
+                        }"
                         x-on:mouseenter="highlighted = index"
                         x-on:click="add(item.value)"
                     >

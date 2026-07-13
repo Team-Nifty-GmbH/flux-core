@@ -101,6 +101,7 @@ use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\RecordOrigins;
 use FluxErp\Livewire\Settings\ReminderSettings;
 use FluxErp\Livewire\Settings\Scheduling;
+use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
@@ -329,6 +330,7 @@ Route::middleware('web')
                         Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
+                        Route::get('/search-settings', SearchSettings::class)->name('search-settings');
                         Route::get('/security-settings', SecuritySettings::class)->name('security-settings');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/subscription-settings', SubscriptionSettings::class)->name('subscription-settings');
@@ -365,7 +367,7 @@ Route::middleware('web')
             })->name('media');
         });
 
-        Route::group(['middleware' => ['auth:web']], function (): void {
+        Route::middleware('auth:web')->group(function (): void {
             Route::post('/search/mentionable', MentionableSearchController::class)
                 ->name('search.mentionable');
             Route::any('/search/{model?}', SearchController::class)
@@ -383,7 +385,7 @@ Route::middleware('web')
                 ->defaults('html', false);
         });
 
-        Route::middleware('signed')->group(function (): void {
+        Route::middleware('media.signed')->group(function (): void {
             Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
                 ->name('media.private');
 
@@ -415,7 +417,9 @@ Route::middleware('web')
                 );
             })
                 ->name('media.show');
+        });
 
+        Route::middleware('signed')->group(function (): void {
             Route::get('/media-collection-download/{token}', function (string $token) {
                 $payload = Crypt::decrypt($token);
 

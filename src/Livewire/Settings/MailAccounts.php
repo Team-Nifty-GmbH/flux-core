@@ -213,20 +213,6 @@ class MailAccounts extends MailAccountList
         }
     }
 
-    #[Renderless]
-    public function testSmtpConnection(): void
-    {
-        try {
-            $this->mailAccount->testSmtpConnection();
-
-            $this->toast()
-                ->success(__('Connection successful'))
-                ->send();
-        } catch (ValidationException|TransportExceptionInterface $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
     protected function loadFolders(): void
     {
         $this->folders = resolve_static(MailFolder::class, 'familyTree')

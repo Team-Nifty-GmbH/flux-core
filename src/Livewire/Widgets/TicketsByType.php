@@ -38,10 +38,7 @@ class TicketsByType extends CircleChart implements HasWidgetOptions
 
     public function calculateChart(): void
     {
-        $endStates = TicketState::all()
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = TicketState::endStateKeys();
 
         $data = resolve_static(Ticket::class, 'query')
             ->whereNotIn('state', $endStates)
@@ -81,10 +78,7 @@ class TicketsByType extends CircleChart implements HasWidgetOptions
     {
         $ticketTypeId = data_get($params, 'ticket_type_id');
 
-        $endStates = TicketState::all()
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = TicketState::endStateKeys();
 
         SessionFilter::make(
             Livewire::new(resolve_static(TicketList::class, 'class'))->getCacheKey(),

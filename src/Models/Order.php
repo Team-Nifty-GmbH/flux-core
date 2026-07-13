@@ -1449,7 +1449,8 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $query
             ->whereNotNull('invoice_number')
             ->where('is_locked', true)
-            ->where('balance', '!=', 0)
+            ->whereNotState('payment_state', Paid::class)
+            ->where('balance', '>', 0)
             ->whereHasMailablePaymentReminderAddress();
     }
 

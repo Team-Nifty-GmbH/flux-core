@@ -14,6 +14,7 @@ use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Settings\AccountingSettings;
+use FluxErp\States\Order\PaymentState\Paid;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -162,6 +163,64 @@ test('does not send payment reminders for orders with zero balance', function ()
     $job->handle();
 
     expect(PaymentReminder::query()->where('order_id', $paidOrder->id)->exists())->toBeFalse();
+});
+
+test('does not send payment reminders for paid orders', function (): void {
+    $paidOrder = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $this->address->id,
+            'invoice_number' => Str::uuid(),
+            'is_locked' => true,
+            'balance' => 100.00,
+            'payment_reminder_current_level' => 0,
+            'payment_reminder_next_date' => now()->subDay()->toDateString(),
+        ])
+        ->create();
+
+    // Paid order with stale open balance must not be reminded
+    $paidOrder->update([
+        'balance' => 100.00,
+        'payment_state' => Paid::class,
+    ]);
+
+    $job = new AutoSendPaymentRemindersJob();
+    $job->handle();
+
+    expect(PaymentReminder::query()->where('order_id', $paidOrder->id)->exists())->toBeFalse();
+});
+
+test('does not send payment reminders for overpaid orders', function (): void {
+    $overpaidOrder = Order::factory()
+        ->for(Currency::factory(), 'currency')
+        ->for(Language::factory(), 'language')
+        ->for(PriceList::factory(), 'priceList')
+        ->for(PaymentType::factory(), 'paymentType')
+        ->for($this->orderType, 'orderType')
+        ->state([
+            'tenant_id' => $this->dbTenant->getKey(),
+            'contact_id' => $this->contact->id,
+            'address_invoice_id' => $this->address->id,
+            'invoice_number' => Str::uuid(),
+            'is_locked' => true,
+            'balance' => -100.00,
+            'payment_reminder_current_level' => 0,
+            'payment_reminder_next_date' => now()->subDay()->toDateString(),
+        ])
+        ->create();
+
+    $overpaidOrder->update(['balance' => -100.00]);
+
+    $job = new AutoSendPaymentRemindersJob();
+    $job->handle();
+
+    expect(PaymentReminder::query()->where('order_id', $overpaidOrder->id)->exists())->toBeFalse();
 });
 
 test('does not send payment reminders for not yet due orders', function (): void {

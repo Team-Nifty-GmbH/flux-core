@@ -312,6 +312,9 @@ use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
+use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
+use FluxErp\Livewire\Widgets\MyTasks;
+use FluxErp\Livewire\Widgets\MyTickets;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
@@ -1225,6 +1228,9 @@ Route::prefix('api')
 
                 // Widgets
                 Route::get('/widgets/current-work-time-model', CurrentWorkTimeModel::class);
+                Route::get('/widgets/my-tasks', MyTasks::class);
+                Route::get('/widgets/my-tickets', MyTickets::class);
+                Route::get('/widgets/overtime-balance-box', OvertimeBalanceBox::class);
 
                 // WorkTimeModels
                 Route::get('/work-time-models/{id}', [BaseController::class, 'show'])

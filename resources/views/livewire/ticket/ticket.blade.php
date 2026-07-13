@@ -205,14 +205,14 @@
                                             outline
                                             icon="eye"
                                             wire:navigate
-                                            x-bind:class="
-                                                ($wire.get(
-                                                    'authorTypeContact',
-                                                ) !== true ||
+                                            x-bind:class="{
+                                                'cursor-not-allowed':
+                                                    $wire.get(
+                                                        'authorTypeContact',
+                                                    ) !== true ||
                                                     !$wire.ticket
-                                                        .authenticatable_id) &&
-                                                'cursor-not-allowed'
-                                            "
+                                                        .authenticatable_id,
+                                            }"
                                             x-bind:href="($wire.get('authorTypeContact') === true && $wire.ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', $wire.ticket.authenticatable.contact_id) + '?address=' + $wire.ticket.authenticatable_id"
                                         ></x-button>
                                     </div>

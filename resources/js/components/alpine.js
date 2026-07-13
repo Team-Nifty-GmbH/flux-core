@@ -73,8 +73,13 @@ const resolveModelId = (el) => () => {
         .find((name) => name.startsWith('wire:model'));
     const binding = bindingAttr ? root.getAttribute(bindingAttr) : null;
 
-    if (binding?.startsWith('$parent.') && wire?.$parent) {
-        const value = wire.$parent.get(binding.slice('$parent.'.length));
+    if (binding && wire?.$parent) {
+        // wire:model on a child component is evaluated in the parent's scope,
+        // whether or not it carries an explicit "$parent." prefix.
+        const prop = binding.startsWith('$parent.')
+            ? binding.slice('$parent.'.length)
+            : binding;
+        const value = wire.$parent.get(prop);
 
         if (value !== undefined && value !== null) {
             return value;

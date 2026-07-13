@@ -10,9 +10,11 @@ use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Controllers\AuthenticateUsingPasskeyController;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
+use FluxErp\Http\Middleware\AuthenticatedUserMediaOrSignature;
 use FluxErp\Http\Middleware\EnsureTwoFactorSetup;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
+use FluxErp\Http\Middleware\SanitizeSocketId;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Mail\MailDriverManager;
@@ -287,9 +289,11 @@ class FluxServiceProvider extends ServiceProvider
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
+        $kernel->appendMiddlewareToGroup('web', SanitizeSocketId::class);
 
         $this->app['router']->aliasMiddleware('2fa.setup', EnsureTwoFactorSetup::class);
         $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
+        $this->app['router']->aliasMiddleware('media.signed', AuthenticatedUserMediaOrSignature::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
