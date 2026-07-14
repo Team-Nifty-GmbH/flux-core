@@ -304,12 +304,17 @@ use FluxErp\Http\Controllers\BaseController;
 use FluxErp\Http\Controllers\CommentController;
 use FluxErp\Http\Controllers\EventSubscriptionController;
 use FluxErp\Http\Controllers\MobileController;
+use FluxErp\Http\Controllers\NotificationController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\RoleController;
+use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use FluxErp\Livewire\Widgets\Employee\CurrentWorkTimeModel;
+use FluxErp\Livewire\Widgets\Employee\OvertimeBalanceBox;
+use FluxErp\Livewire\Widgets\MyTasks;
+use FluxErp\Livewire\Widgets\MyTickets;
 use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\AbsenceType;
@@ -1043,6 +1048,10 @@ Route::prefix('api')
                 Route::put('/schedules', UpdateSchedule::class);
                 Route::delete('/schedules/{id}', DeleteSchedule::class);
 
+                // Search
+                Route::get('/search/{model}', SearchController::class)
+                    ->where('model', '[A-Za-z0-9._-]+');
+
                 // SepaMandates
                 Route::get('/sepa-mandates/{id}', [BaseController::class, 'show'])
                     ->defaults('model', SepaMandate::class);
@@ -1174,6 +1183,10 @@ Route::prefix('api')
 
                     return ResponseHelper::createResponseFromBase(statusCode: 200, data: $user);
                 });
+                Route::post('/user/login-url', [AuthController::class, 'loginUrl'])
+                    ->middleware('ability:user');
+                Route::get('/user/notifications', [NotificationController::class, 'userIndex']);
+                Route::post('/user/notifications/read', [NotificationController::class, 'markRead']);
 
                 Route::get('/users/{id}', [BaseController::class, 'show'])->defaults('model', User::class);
                 Route::get('/users', [BaseController::class, 'index'])->defaults('model', User::class);
@@ -1215,6 +1228,9 @@ Route::prefix('api')
 
                 // Widgets
                 Route::get('/widgets/current-work-time-model', CurrentWorkTimeModel::class);
+                Route::get('/widgets/my-tasks', MyTasks::class);
+                Route::get('/widgets/my-tickets', MyTickets::class);
+                Route::get('/widgets/overtime-balance-box', OvertimeBalanceBox::class);
 
                 // WorkTimeModels
                 Route::get('/work-time-models/{id}', [BaseController::class, 'show'])

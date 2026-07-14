@@ -121,7 +121,8 @@
                                             <span class="truncate">
                                                 {{ __($child["label"]) }}
                                             </span>
-                                            @if ($childNotificationCount = data_get($childNotificationCounts, data_get($child, 'route_name')))
+                                            {{-- plain array access: route names contain dots, data_get() would treat them as path segments --}}
+                                            @if ($childNotificationCount = $childNotificationCounts[data_get($child, 'route_name')] ?? null)
                                                 <span
                                                     class="ml-auto flex h-4 min-w-4 flex-none items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-none font-semibold text-white"
                                                 >
@@ -157,9 +158,9 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="
-                                        frequentlyVisitedOpen && '-rotate-90'
-                                    "
+                                    x-bind:class="{
+                                        '-rotate-90': frequentlyVisitedOpen,
+                                    }"
                                 />
                             </span>
                         </div>
@@ -213,7 +214,9 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="favoritesOpen && '-rotate-90'"
+                                    x-bind:class="{
+                                        '-rotate-90': favoritesOpen,
+                                    }"
                                 />
                             </span>
                         </div>
@@ -257,6 +260,7 @@
                                             color="red"
                                             icon="trash"
                                             wire:click="deleteFavorite({{ $favorite['id'] }})"
+                                            loading="deleteFavorite({{ $favorite['id'] }})"
                                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
                                         />
                                     </div>
@@ -264,7 +268,7 @@
                             @endforeach
 
                             <x-button
-                                x-bind:class="!menuOpen && 'invisible'"
+                                x-bind:class="{ invisible: !menuOpen }"
                                 color="emerald"
                                 class="w-full"
                                 icon="plus"

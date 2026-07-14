@@ -329,7 +329,7 @@
             <div
                 x-cloak
                 x-show="$wire.communication.communication_type_enum === 'mail'"
-                x-bind:class="$wire.communication.id && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': $wire.communication.id }"
             >
                 <x-select.styled
                     required

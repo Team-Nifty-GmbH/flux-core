@@ -411,9 +411,9 @@
                                         <x-icon
                                             name="chevron-down"
                                             class="h-4 w-4 transition-transform"
-                                            x-bind:class="
-                                                showAdvanced && 'rotate-180'
-                                            "
+                                            x-bind:class="{
+                                                'rotate-180': showAdvanced,
+                                            }"
                                         />
                                     </button>
                                     <div
@@ -566,6 +566,7 @@
                                     $tsui.close.modal('edit-order-position');
                             })
                         "
+                        loading="changedProductId"
                         x-cloak
                         x-show="!$wire.order.is_locked"
                         :text="__('Save')"

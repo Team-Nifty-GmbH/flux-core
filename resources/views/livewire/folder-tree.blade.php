@@ -129,7 +129,29 @@
                             this.selection = {}
                             this.setCollection(null)
                         },
+                        destroy() {
+                            this.$el._refreshTreeObserver?.disconnect()
+                        },
                     }"
+                    x-init="
+                        $el._refreshTreeObserver = new IntersectionObserver(
+                            (entries) => {
+                                if (
+                                    entries.some(
+                                        (entry) => entry.isIntersecting,
+                                    ) &&
+                                    $resolveModelId() !== $wire.modelId
+                                ) {
+                                    window.dispatchEvent(
+                                        new CustomEvent('refresh-tree', {
+                                            detail: { id: $resolveModelId() },
+                                        }),
+                                    );
+                                }
+                            },
+                        );
+                        $el._refreshTreeObserver.observe($el);
+                    "
                     x-on:folder-tree-select.window="treeSelect($event.detail)"
                     x-on:refresh-tree.window="
                         $wire.modelId = $event.detail.id;

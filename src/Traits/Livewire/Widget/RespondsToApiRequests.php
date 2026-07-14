@@ -10,7 +10,9 @@ trait RespondsToApiRequests
             $this->{$parameter} = $value;
         }
 
-        $this->mount();
+        if (method_exists($this, 'mount')) {
+            $this->mount();
+        }
 
         return response()->json(['data' => $this->toApiResponse()]);
     }
@@ -26,12 +28,12 @@ trait RespondsToApiRequests
         return $data;
     }
 
-    protected function apiRules(): array
+    protected function apiResponseProperties(): array
     {
         return [];
     }
 
-    protected function apiResponseProperties(): array
+    protected function apiRules(): array
     {
         return [];
     }

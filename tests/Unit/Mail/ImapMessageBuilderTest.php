@@ -88,15 +88,81 @@ test('reports progress for each stored message', function (): void {
     expect($progress)->toBe([[1, 2], [2, 2]]);
 });
 
+test('syncReadStatus reconciles db read status against the server unseen uids', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $base = [
+        'mail_account_id' => $mailAccount->getKey(),
+        'mail_folder_id' => $folder->getKey(),
+        'communication_type_enum' => 'mail',
+    ];
+
+    // seen in db, not unseen on server -> stays seen
+    $staysSeen = Communication::factory()->create($base + ['message_uid' => '41', 'is_seen' => true]);
+    // seen in db, unseen on server -> becomes unseen
+    $becomesUnseen = Communication::factory()->create($base + ['message_uid' => '42', 'is_seen' => true]);
+    // unseen in db, no longer unseen on server -> becomes seen
+    $becomesSeen = Communication::factory()->create($base + ['message_uid' => '43', 'is_seen' => false]);
+
+    makeTestableBuilder($folder)
+        ->setUnseenUids([42])
+        ->syncReadStatus();
+
+    expect($staysSeen->refresh()->is_seen)->toBeTrue()
+        ->and($becomesUnseen->refresh()->is_seen)->toBeFalse()
+        ->and($becomesSeen->refresh()->is_seen)->toBeTrue();
+});
+
+test('syncReadStatus leaves read status untouched when the unseen uids cannot be determined', function (): void {
+    $mailAccount = MailAccount::factory()
+        ->has(MailFolder::factory())
+        ->create();
+    $folder = $mailAccount->mailFolders->first();
+
+    $base = [
+        'mail_account_id' => $mailAccount->getKey(),
+        'mail_folder_id' => $folder->getKey(),
+        'communication_type_enum' => 'mail',
+    ];
+
+    $seen = Communication::factory()->create($base + ['message_uid' => '41', 'is_seen' => true]);
+    $unseen = Communication::factory()->create($base + ['message_uid' => '42', 'is_seen' => false]);
+
+    makeTestableBuilder($folder)
+        ->setUnseenUids(null)
+        ->syncReadStatus();
+
+    expect($seen->refresh()->is_seen)->toBeTrue()
+        ->and($unseen->refresh()->is_seen)->toBeFalse();
+});
+
 function makeTestableBuilder(MailFolder $folder): ImapMessageBuilder
 {
     return new class($folder) extends ImapMessageBuilder
     {
+        /** @var array<int, int>|null */
+        public ?array $unseenUids = [];
+
         public function pushMessage(ImapMessage $message): static
         {
             $this->messages->push($message);
 
             return $this;
+        }
+
+        public function setUnseenUids(?array $uids): static
+        {
+            $this->unseenUids = $uids;
+
+            return $this;
+        }
+
+        protected function resolveUnseenUids(): ?array
+        {
+            return $this->unseenUids;
         }
     };
 }

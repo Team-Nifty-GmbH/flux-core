@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Http\Requests\LoginUrlRequest;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -73,6 +74,20 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => __('auth.failed'),
         ])->onlyInput('email');
+    }
+
+    public function loginUrl(LoginUrlRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $intended = blank($validated['redirect'] ?? null)
+            ? null
+            : route($validated['redirect'], $validated['redirect_params'] ?? []);
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: ['url' => $request->user()->generateLoginLink($intended)],
+        );
     }
 
     public function logout(Request $request): JsonResponse

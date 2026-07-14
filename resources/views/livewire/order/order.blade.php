@@ -36,10 +36,10 @@
             >
                 <div
                     class="divide-secondary-200 space-y-2.5 divide-y"
-                    x-bind:class="
-                        $wire.disableReplicateModalInputs &&
-                        'pointer-events-none'
-                    "
+                    x-bind:class="{
+                        'pointer-events-none':
+                            $wire.disableReplicateModalInputs,
+                    }"
                 >
                     <x-select.styled
                         :label="__('Order type')"
@@ -391,6 +391,7 @@
                     color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
+                    loading="delete()"
                 />
             @endif
 
@@ -643,11 +644,11 @@
                                 </div>
                                 <div
                                     class="text-sm"
-                                    x-bind:class="
-                                        $wire.order.address_delivery_id ===
-                                            $wire.order.address_invoice_id &&
-                                        'hidden'
-                                    "
+                                    x-bind:class="{
+                                        hidden:
+                                            $wire.order.address_delivery_id ===
+                                            $wire.order.address_invoice_id,
+                                    }"
                                 >
                                     <p
                                         class="truncate first-line:font-semibold"

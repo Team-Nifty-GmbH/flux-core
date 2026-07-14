@@ -51,6 +51,33 @@ test('search controller returns multiple selected records including soft deleted
     $response->assertJsonFragment(['id' => $softDeletedAddress->getKey()]);
 });
 
+test('search controller applies where filter to selected records', function (): void {
+    $contact = Contact::factory()->create();
+
+    $mainAddress = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => true,
+    ]);
+
+    Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'is_main_address' => false,
+    ]);
+
+    $response = $this->post(
+        route('search', Address::class),
+        [
+            'option-value' => 'contact_id',
+            'selected' => [$contact->getKey()],
+            'where' => [['is_main_address', '=', true]],
+        ]
+    );
+
+    $response->assertOk();
+    $response->assertJsonCount(1);
+    $response->assertJsonFragment(['id' => $mainAddress->getKey()]);
+});
+
 test('search controller maps response keys to the requested mapping', function (): void {
     $contact = Contact::factory()->create();
     $address = Address::factory()->create([

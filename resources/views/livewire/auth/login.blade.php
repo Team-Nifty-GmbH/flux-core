@@ -22,6 +22,7 @@
                         <x-slot:footer>
                             <x-button
                                 wire:click="resetPassword()"
+                                loading="resetPassword()"
                                 color="indigo"
                                 class="w-full"
                                 :text="__('Reset password')"
