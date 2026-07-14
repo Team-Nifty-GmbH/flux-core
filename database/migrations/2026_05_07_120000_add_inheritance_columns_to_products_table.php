@@ -14,9 +14,6 @@ return new class() extends Migration
             $table->boolean('is_variant_parent')->default(false)->after('is_shipping_free')->index();
         });
 
-        // INNER JOIN derives the parent id set; MySQL forbids referencing
-        // `products` in an `UPDATE ... WHERE id IN (SELECT … FROM products …)`,
-        // so the JOIN form is the portable shape.
         DB::statement('
             UPDATE products
             INNER JOIN (
