@@ -113,6 +113,8 @@ class ContactForm extends FluxForm
 
     public ?string $company = null;
 
+    public ?string $department = null;
+
     #[RenderAs(
         type: RenderAs::SELECT,
         options: [
@@ -212,6 +214,7 @@ class ContactForm extends FluxForm
             'country_id',
             'language_id',
             'company',
+            'department',
             'title',
             'salutation',
             'firstname',
