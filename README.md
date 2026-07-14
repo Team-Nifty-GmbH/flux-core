@@ -96,7 +96,7 @@ traffic reaches it on port 443.
 Only needed to override defaults:
 
 | Tag                 | Publishes                                      |
-|---------------------|------------------------------------------------|
+| ------------------- | ---------------------------------------------- |
 | `flux-config`       | `config/flux.php`                              |
 | `flux-views`        | Blade views into `resources/views/vendor/flux` |
 | `flux-translations` | Language files                                 |
