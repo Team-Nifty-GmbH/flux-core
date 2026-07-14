@@ -1,13 +1,12 @@
 <?php
 
-use FluxErp\Jobs\SyncVariantInheritanceJob;
+use FluxErp\Actions\Product\SyncVariantInheritance;
 use FluxErp\Models\Language;
 use FluxErp\Models\Product;
 use FluxErp\Settings\ProductSettings;
+use Illuminate\Support\Facades\DB;
 
-beforeEach(fn () => app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save());
-
-test('job copies the parent current value into non-overridden variants', function (): void {
+test('copies the parent current value into non-overridden variants', function (): void {
     $parent = Product::factory()->create(['weight_gram' => 100]);
     $v1 = Product::factory()->create(['weight_gram' => 100, 'parent_id' => $parent->getKey()]);
     // v2's weight_gram must genuinely differ from the parent's: InheritsFromParent's saving
@@ -16,24 +15,34 @@ test('job copies the parent current value into non-overridden variants', functio
     $v2 = Product::factory()->create(['parent_id' => $parent->getKey(), 'weight_gram' => 999, 'overridden_fields' => ['weight_gram']]);
 
     Product::query()->whereKey($parent->getKey())->update(['weight_gram' => 250]); // parent already new in DB
-    (new SyncVariantInheritanceJob($parent->getKey(), ['weight_gram']))->handle();
+    SyncVariantInheritance::make([
+        'parent_id' => $parent->getKey(),
+        'fields' => ['weight_gram'],
+    ])
+        ->validate()
+        ->execute();
 
     expect((int) DB::table('products')->where('id', $v1->getKey())->value('weight_gram'))->toBe(250)
         ->and((int) DB::table('products')->where('id', $v2->getKey())->value('weight_gram'))->toBe(999);
 });
 
-test('job is a no-op when inheritance is disabled', function (): void {
+test('is a no-op when inheritance is disabled', function (): void {
     app(ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
     $parent = Product::factory()->create(['weight_gram' => 100]);
     $v = Product::factory()->create(['parent_id' => $parent->getKey(), 'weight_gram' => 100]);
     Product::query()->whereKey($parent->getKey())->update(['weight_gram' => 250]);
 
-    (new SyncVariantInheritanceJob($parent->getKey(), ['weight_gram']))->handle();
+    SyncVariantInheritance::make([
+        'parent_id' => $parent->getKey(),
+        'fields' => ['weight_gram'],
+    ])
+        ->validate()
+        ->execute();
 
     expect((int) DB::table('products')->where('id', $v->getKey())->value('weight_gram'))->toBe(100);
 });
 
-test('job mirrors parent attribute translations into non-overriding variants and deletes stale locales', function (): void {
+test('mirrors parent attribute translations into non-overriding variants and deletes stale locales', function (): void {
     $parent = Product::factory()->create(['name' => 'Parent EN']);
     $languageA = Language::factory()->create();
     $languageB = Language::factory()->create();
@@ -72,7 +81,12 @@ test('job mirrors parent attribute translations into non-overriding variants and
         ->whereNull('deleted_at')
         ->value('value');
 
-    (new SyncVariantInheritanceJob($parent->getKey(), ['name']))->handle();
+    SyncVariantInheritance::make([
+        'parent_id' => $parent->getKey(),
+        'fields' => ['name'],
+    ])
+        ->validate()
+        ->execute();
 
     expect($fetch($v1, $languageA))->toBe('Parent A')
         ->and($fetch($v1, $languageB))->toBe('Parent B')
@@ -86,7 +100,12 @@ test('job mirrors parent attribute translations into non-overriding variants and
         ->where('language_id', $languageB->getKey())
         ->update(['deleted_at' => now()]);
 
-    (new SyncVariantInheritanceJob($parent->getKey(), ['name']))->handle();
+    SyncVariantInheritance::make([
+        'parent_id' => $parent->getKey(),
+        'fields' => ['name'],
+    ])
+        ->validate()
+        ->execute();
 
     expect($fetch($v1, $languageA))->toBe('Parent A')
         ->and($fetch($v1, $languageB))->toBeNull()

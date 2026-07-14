@@ -6,7 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\Variant\CreateVariantsRuleset;
-use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -47,7 +47,7 @@ class CreateVariants extends FluxAction
         // they are always plainly copied as owned, regardless of the inheritance toggle.
         $product['tags'] = $parentProduct->tags?->pluck('id')->toArray();
 
-        $inheritanceEnabled = app(Product::class)->inheritanceEnabled();
+        $inheritanceEnabled = app(ProductSettings::class)->variant_inheritance_enabled;
 
         if ($inheritanceEnabled) {
             // Categories/prices are not seeded here — they are materialized onto the new
@@ -64,8 +64,6 @@ class CreateVariants extends FluxAction
                 ])
                 ->toArray();
         }
-
-        $createdAny = false;
 
         foreach (data_get($this->data, 'product_options') as $variantCreate) {
             if ($this->variantExists($variantCreate)) {
@@ -92,19 +90,6 @@ class CreateVariants extends FluxAction
                 ->checkPermission()
                 ->validate()
                 ->execute();
-
-            $createdAny = true;
-        }
-
-        if ($inheritanceEnabled && $createdAny) {
-            // Categories/suppliers/productProperties: reuse the same propagation helper
-            // UpdateProduct uses after a parent's own pivots change.
-            PivotInheritanceSync::propagateToChildren($parentProduct);
-
-            // Prices propagate via Price::booted()'s `saved` hook, keyed off the parent's
-            // children — re-saving (a no-op write, since nothing changed) fires that hook
-            // so the newly created variant receives inherited price copies too.
-            $parentProduct->ownPrices()->get()->each(fn ($price) => $price->save());
         }
 
         return $parentProduct->children()->get();

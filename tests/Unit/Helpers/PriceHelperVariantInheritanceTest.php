@@ -7,8 +7,6 @@ use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 
 beforeEach(function (): void {
-    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-
     $this->vatRate = VatRate::default() ?? VatRate::factory()->create(['is_default' => true]);
 });
 

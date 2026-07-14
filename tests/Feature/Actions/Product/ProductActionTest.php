@@ -63,9 +63,7 @@ test('delete product with children fails', function (): void {
     )->toThrow(Illuminate\Validation\ValidationException::class);
 });
 
-it('does not copy parent prices into variant when inheritance is enabled', function (): void {
-    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-
+test('does not copy parent prices into variant when inheritance is enabled', function (): void {
     $listA = PriceList::factory()->create();
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
     $parent->tenants()->attach(Tenant::default()->getKey());
@@ -86,7 +84,7 @@ it('does not copy parent prices into variant when inheritance is enabled', funct
     expect($variant->prices->where('price_list_id', $listA->getKey())->first()->price)->toEqual(100);
 });
 
-it('still copies parent prices into variant when inheritance is disabled', function (): void {
+test('still copies parent prices into variant when inheritance is disabled', function (): void {
     app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $listA = PriceList::factory()->create();

@@ -6,11 +6,8 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
-use FluxErp\Settings\ProductSettings;
 
 beforeEach(function (): void {
-    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-
     $this->list = PriceList::factory()->create(['is_default' => false]);
     $this->parent = Product::factory()->create();
     $this->child1 = Product::factory()->create(['parent_id' => $this->parent->getKey()]);

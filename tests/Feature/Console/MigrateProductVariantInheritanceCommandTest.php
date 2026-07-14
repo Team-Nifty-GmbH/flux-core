@@ -2,10 +2,6 @@
 
 use FluxErp\Models\Product;
 
-beforeEach(function (): void {
-    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-});
-
 test('runs the migration for the default tenant when feature toggle is on', function (): void {
     $parent = Product::factory()->create(['name' => 'Same']);
     Product::factory()->create([

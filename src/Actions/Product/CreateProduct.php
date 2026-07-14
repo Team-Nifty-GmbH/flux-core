@@ -13,6 +13,7 @@ use FluxErp\Models\Tag;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
+use FluxErp\Settings\ProductSettings;
 use Illuminate\Support\Arr;
 
 class CreateProduct extends FluxAction
@@ -99,7 +100,7 @@ class CreateProduct extends FluxAction
             $this->data['bundle_type_enum'] = null;
         }
 
-        $inheritanceEnabled = app(Product::class)->inheritanceEnabled();
+        $inheritanceEnabled = app(ProductSettings::class)->variant_inheritance_enabled;
 
         if (
             ! $inheritanceEnabled

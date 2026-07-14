@@ -41,11 +41,11 @@ trait Categorizable
                 $takesOwnership = method_exists($model, 'isVariant') && method_exists($model, 'inheritanceEnabled')
                     && $model->isVariant() && $model->inheritanceEnabled();
 
-                PivotInheritanceSync::syncOwned(
-                    $model->categories(),
-                    collect($ids)->mapWithKeys(fn ($id) => [$id => []])->all(),
-                    $takesOwnership
-                );
+                resolve_static(PivotInheritanceSync::class, 'syncOwned', [
+                    'relation' => $model->categories(),
+                    'desired' => collect($ids)->mapWithKeys(fn (int|string $id) => [$id => []])->all(),
+                    'takesOwnership' => $takesOwnership,
+                ]);
 
                 $model->pendingCategoryIds = null;
             }

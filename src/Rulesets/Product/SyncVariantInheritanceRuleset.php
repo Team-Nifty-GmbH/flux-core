@@ -7,7 +7,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
 
-class ResetFieldOnAllVariantsRuleset extends FluxRuleset
+class SyncVariantInheritanceRuleset extends FluxRuleset
 {
     protected static ?string $model = Product::class;
 
@@ -17,13 +17,19 @@ class ResetFieldOnAllVariantsRuleset extends FluxRuleset
             'parent_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
-                Rule::exists('products', 'id')->whereNull('parent_id'),
+                app(ModelExists::class, ['model' => Product::class])->whereNull('parent_id'),
             ],
-            'field' => [
+            'fields' => 'array|nullable',
+            'fields.*' => [
                 'required',
                 'string',
                 Rule::in(app(Product::class)->getInheritableFields()),
+            ],
+            'variant_ids' => 'array|nullable',
+            'variant_ids.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Product::class])->whereNotNull('parent_id'),
             ],
         ];
     }

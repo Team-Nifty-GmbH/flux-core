@@ -9,10 +9,6 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Settings\ProductSettings;
 
-beforeEach(function (): void {
-    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-});
-
 test('materializes a stale non-overriding child column to the parent value', function (): void {
     // Simulate legacy data written before materialization existed: create with
     // inheritance OFF so the value-diff "saving" hook never marks an override, leaving

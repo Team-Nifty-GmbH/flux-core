@@ -5,11 +5,8 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
-use FluxErp\Settings\ProductSettings;
 
 beforeEach(function (): void {
-    app(ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-
     $this->parent = Product::factory()->create();
     $this->child1 = Product::factory()->create(['parent_id' => $this->parent->getKey()]);
     $this->child2 = Product::factory()->create(['parent_id' => $this->parent->getKey()]);

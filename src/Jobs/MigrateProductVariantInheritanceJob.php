@@ -2,6 +2,7 @@
 
 namespace FluxErp\Jobs;
 
+use FluxErp\Actions\Product\SyncVariantInheritance;
 use FluxErp\Models\Product;
 use FluxErp\Settings\ProductSettings;
 use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
@@ -34,7 +35,7 @@ class MigrateProductVariantInheritanceJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (! ProductSettings::variantInheritanceEnabled()) {
+        if (! app(ProductSettings::class)->variant_inheritance_enabled) {
             return;
         }
 
@@ -66,10 +67,12 @@ class MigrateProductVariantInheritanceJob implements ShouldQueue
     {
         // Copies parent field values (+ translations) into non-overriding children and
         // reindexes them in Scout.
-        (new SyncVariantInheritanceJob($parent->getKey()))->handle();
+        SyncVariantInheritance::make(['parent_id' => $parent->getKey()])
+            ->validate()
+            ->execute();
 
         // Seeds/refreshes is_inherited=true pivot rows for non-owning children.
-        PivotInheritanceSync::propagateToChildren($parent);
+        resolve_static(PivotInheritanceSync::class, 'propagateToChildren', ['parent' => $parent]);
 
         // Re-saving the parent's own prices retriggers Price::booted()'s saved-event
         // propagation, which materializes missing/stale inherited child price rows.

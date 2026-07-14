@@ -5,13 +5,13 @@ namespace FluxErp\Support\VariantInheritance;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use LogicException;
 
 /**
- * Materializes parent -> child propagation for Product's inheritable pivot relations
- * (categories, suppliers, productProperties) as is_inherited=true pivot rows.
+ * Materializes parent -> child propagation for the product's inheritable pivot
+ * relations as is_inherited=true pivot rows.
  *
  * Pivot sync()/attach() does not reliably fire per-row pivot model events, so this can't
  * hook into pivot model booted() the way Price does. Instead it must be invoked explicitly
@@ -20,8 +20,6 @@ use LogicException;
  */
 class PivotInheritanceSync
 {
-    protected const RELATIONS = ['categories', 'suppliers', 'productProperties'];
-
     /**
      * Sync a product's "own" pivot relation (categories/suppliers/productProperties),
      * keyed by the related id => extra pivot attributes.
@@ -44,7 +42,9 @@ class PivotInheritanceSync
         }
 
         $relation->sync(
-            collect($desired)->map(fn (array $attributes) => $attributes + ['is_inherited' => false])->all(),
+            collect($desired)
+                ->map(fn (array $attributes) => array_merge($attributes, ['is_inherited' => false]))
+                ->all(),
             false
         );
 
@@ -66,8 +66,10 @@ class PivotInheritanceSync
             return;
         }
 
-        foreach (self::RELATIONS as $relation) {
-            if ($parent->isInheritableRelation($relation)) {
+        // Every inheritable pivot relation (prices are HasMany and propagate through
+        // the saved()/deleted() hooks on the price model instead).
+        foreach ($parent->getInheritableRelations() as $relation) {
+            if ($parent->{'own' . ucfirst($relation)}() instanceof BelongsToMany) {
                 static::propagateRelation($parent, $relation, $childIds);
             }
         }
@@ -75,22 +77,18 @@ class PivotInheritanceSync
 
     protected static function propagateRelation(Product $parent, string $relation, Collection $childIds): void
     {
-        $rel = $parent->{'own' . ucfirst($relation)}();
+        $relationInstance = $parent->{'own' . ucfirst($relation)}();
 
-        if (! $rel instanceof BelongsToMany) {
-            throw new LogicException("Unsupported pivot relation type for propagation: [$relation].");
-        }
-
-        $pivotTable = $rel->getTable();
-        $foreignPivotKey = $rel->getForeignPivotKeyName();
-        $relatedPivotKey = $rel->getRelatedPivotKeyName();
-        $extraColumns = $rel->getPivotColumns();
-        $isMorph = $rel instanceof MorphToMany;
-        $morphType = $isMorph ? $rel->getMorphType() : null;
-        $morphClass = $isMorph ? $rel->getMorphClass() : null;
+        $pivotTable = $relationInstance->getTable();
+        $foreignPivotKey = $relationInstance->getForeignPivotKeyName();
+        $relatedPivotKey = $relationInstance->getRelatedPivotKeyName();
+        $extraColumns = $relationInstance->getPivotColumns();
+        $isMorph = $relationInstance instanceof MorphToMany;
+        $morphType = $isMorph ? $relationInstance->getMorphType() : null;
+        $morphClass = $isMorph ? $relationInstance->getMorphClass() : null;
 
         $scoped = fn () => DB::table($pivotTable)
-            ->when($isMorph, fn ($query) => $query->where($morphType, $morphClass));
+            ->when($isMorph, fn (QueryBuilder $query) => $query->where($morphType, $morphClass));
 
         // The parent only ever owns rows (it has no parent of its own to inherit from).
         $parentRows = $scoped()
@@ -102,11 +100,11 @@ class PivotInheritanceSync
 
         // Drop inherited child copies for related keys the parent no longer owns.
         $scoped()
-            ->whereIn($foreignPivotKey, $childIds)
+            ->whereIntegerInRaw($foreignPivotKey, $childIds)
             ->where('is_inherited', true)
             ->when(
                 $parentKeys->isNotEmpty(),
-                fn ($query) => $query->whereNotIn($relatedPivotKey, $parentKeys),
+                fn (QueryBuilder $query) => $query->whereNotIn($relatedPivotKey, $parentKeys),
             )
             ->delete();
 
@@ -115,20 +113,20 @@ class PivotInheritanceSync
         }
 
         $ownedByKey = $scoped()
-            ->whereIn($foreignPivotKey, $childIds)
+            ->whereIntegerInRaw($foreignPivotKey, $childIds)
             ->where('is_inherited', false)
-            ->whereIn($relatedPivotKey, $parentKeys)
+            ->whereIntegerInRaw($relatedPivotKey, $parentKeys)
             ->get([$foreignPivotKey, $relatedPivotKey])
             ->groupBy($relatedPivotKey)
-            ->map(fn ($rows) => $rows->pluck($foreignPivotKey));
+            ->map(fn (Collection $rows) => $rows->pluck($foreignPivotKey));
 
         $existingByKey = $scoped()
-            ->whereIn($foreignPivotKey, $childIds)
+            ->whereIntegerInRaw($foreignPivotKey, $childIds)
             ->where('is_inherited', true)
-            ->whereIn($relatedPivotKey, $parentKeys)
+            ->whereIntegerInRaw($relatedPivotKey, $parentKeys)
             ->get([$foreignPivotKey, $relatedPivotKey])
             ->groupBy($relatedPivotKey)
-            ->map(fn ($rows) => $rows->pluck($foreignPivotKey));
+            ->map(fn (Collection $rows) => $rows->pluck($foreignPivotKey));
 
         foreach ($parentRows as $key => $parentRow) {
             // Children that own their own entry for this key must never be touched.
@@ -144,11 +142,11 @@ class PivotInheritanceSync
 
             if ($extraColumns && $toUpdateIds->isNotEmpty()) {
                 $scoped()
-                    ->whereIn($foreignPivotKey, $toUpdateIds)
+                    ->whereIntegerInRaw($foreignPivotKey, $toUpdateIds)
                     ->where($relatedPivotKey, $key)
                     ->where('is_inherited', true)
                     ->update(collect($extraColumns)
-                        ->mapWithKeys(fn ($column) => [$column => $parentRow->{$column}])
+                        ->mapWithKeys(fn (string $column) => [$column => $parentRow->{$column}])
                         ->all());
             }
 

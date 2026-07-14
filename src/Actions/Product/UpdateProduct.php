@@ -71,27 +71,30 @@ class UpdateProduct extends FluxAction
         }
 
         if (! is_null($productProperties)) {
-            PivotInheritanceSync::syncOwned(
-                $product->ownProductProperties(),
-                Arr::mapWithKeys($productProperties, fn ($item) => [$item['id'] => ['value' => $item['value']]]),
-                $takesOwnership
-            );
+            resolve_static(PivotInheritanceSync::class, 'syncOwned', [
+                'relation' => $product->productProperties(),
+                'desired' => Arr::mapWithKeys(
+                    $productProperties,
+                    fn (array $item) => [$item['id'] => ['value' => $item['value']]]
+                ),
+                'takesOwnership' => $takesOwnership,
+            ]);
         }
 
         if (! is_null($suppliers)) {
             // Key by contact_id instead of passing the raw payload list straight to sync():
             // sync() keys unkeyed array items by their list index, so it would compare those
             // indexes against the real contact_ids already attached and detach everything.
-            PivotInheritanceSync::syncOwned(
-                $product->ownSuppliers(),
-                collect($suppliers)
+            resolve_static(PivotInheritanceSync::class, 'syncOwned', [
+                'relation' => $product->suppliers(),
+                'desired' => collect($suppliers)
                     ->mapWithKeys(fn (array $item) => [$item['contact_id'] => Arr::except($item, 'contact_id')])
                     ->all(),
-                $takesOwnership
-            );
+                'takesOwnership' => $takesOwnership,
+            ]);
         }
 
-        PivotInheritanceSync::propagateToChildren($product);
+        resolve_static(PivotInheritanceSync::class, 'propagateToChildren', ['parent' => $product]);
 
         if ($tenants) {
             $product->tenants()->sync($tenants);
@@ -99,7 +102,7 @@ class UpdateProduct extends FluxAction
 
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');
-            $product->ownPrices
+            $product->prices
                 ?->each(function ($price) use ($priceCollection, $takesOwnership): void {
                     if ($priceCollection->has($price->price_list_id)) {
                         $data = $priceCollection->get($price->price_list_id);
@@ -122,7 +125,7 @@ class UpdateProduct extends FluxAction
                     $item['is_inherited'] = false;
                 }
 
-                $product->ownPrices()->create($item);
+                $product->prices()->create($item);
             });
         }
 
@@ -139,7 +142,7 @@ class UpdateProduct extends FluxAction
         if ($product->is_bundle && $product->bundle_type_enum === BundleTypeEnum::Group) {
             // when the bundle type is group we need to remove all prices form the product as the price
             // is calculated by the prices of the group items
-            foreach ($product->ownPrices()->get('id') as $price) {
+            foreach ($product->prices()->get('id') as $price) {
                 DeletePrice::make([
                     'id' => $price->getKey(),
                 ])
@@ -196,8 +199,11 @@ class UpdateProduct extends FluxAction
 
             if ($product?->children()->exists()) {
                 throw ValidationException::withMessages([
-                    'parent_id' => [__('A product with existing variants cannot itself become a variant.')],
-                ])->errorBag('updateProduct');
+                    'parent_id' => [
+                        __('A product with existing variants cannot itself become a variant.'),
+                    ],
+                ])
+                    ->errorBag('updateProduct');
             }
         }
     }

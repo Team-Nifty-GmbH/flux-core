@@ -10,9 +10,7 @@ use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 
-it('materializes an inherited category copy on a new variant when inheritance is enabled', function (): void {
-    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-
+test('materializes an inherited category copy on a new variant when inheritance is enabled', function (): void {
     $cat = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
     $parent = Product::factory()->create(['vat_rate_id' => VatRate::default()?->getKey()]);
     $parent->tenants()->attach(Tenant::default()->getKey());
@@ -29,7 +27,9 @@ it('materializes an inherited category copy on a new variant when inheritance is
 
     $variant = $parent->children()->first();
 
-    expect($variant->ownCategories()->count())->toBe(1);
+    // The materialized copy is inherited, not owned.
+    expect($variant->ownCategories()->count())->toBe(0)
+        ->and($variant->categories()->count())->toBe(1);
     expect((bool) DB::table('categorizable')
         ->where('categorizable_id', $variant->getKey())
         ->where('categorizable_type', morph_alias(Product::class))
@@ -38,7 +38,7 @@ it('materializes an inherited category copy on a new variant when inheritance is
     expect($variant->categories->pluck('id')->all())->toBe([$cat->getKey()]);
 });
 
-it('still attaches parent categories to a new variant when inheritance is disabled', function (): void {
+test('still attaches parent categories to a new variant when inheritance is disabled', function (): void {
     app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => false])->save();
 
     $cat = Category::factory()->create(['model_type' => morph_alias(Product::class)]);
@@ -60,9 +60,7 @@ it('still attaches parent categories to a new variant when inheritance is disabl
     expect($variant->ownCategories()->pluck('id')->all())->toBe([$cat->getKey()]);
 });
 
-it('seeds a new variant with the parent\'s materialized scalar values, real relation copies and an overridden computed name', function (): void {
-    app(FluxErp\Settings\ProductSettings::class)->fill(['variant_inheritance_enabled' => true])->save();
-
+test('seeds a new variant with the parent\'s materialized scalar values, real relation copies and an overridden computed name', function (): void {
     $parent = Product::factory()->create([
         'vat_rate_id' => VatRate::default()?->getKey(),
         'weight_gram' => 500,

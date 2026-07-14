@@ -3,18 +3,18 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Actions\Product\SyncVariantInheritance;
 use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
-use FluxErp\Jobs\SyncVariantInheritanceJob;
 use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Support\Collection\ProductOptionCollection;
-use FluxErp\Support\VariantInheritance\InheritanceSync;
+use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Filterable;
@@ -104,7 +104,25 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             if (! is_null($product->parent_id)) {
                 static::query()
                     ->whereKey($product->parent_id)
-                    ->update(['was_parent' => true]);
+                    ->update(['is_variant_parent' => true]);
+
+                if ($product->inheritanceEnabled() && ($parent = $product->parent()->first())) {
+                    // Materialize the parent's current field values, translations and
+                    // is_inherited relation copies onto the freshly created variant.
+                    SyncVariantInheritance::make([
+                        'parent_id' => $parent->getKey(),
+                        'variant_ids' => [$product->getKey()],
+                    ])
+                        ->validate()
+                        ->execute();
+
+                    resolve_static(PivotInheritanceSync::class, 'propagateToChildren', ['parent' => $parent]);
+
+                    $parent->ownPrices()
+                        ->get()
+                        ->each
+                        ->save();
+                }
             }
         });
 
@@ -119,13 +137,20 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
                 return;
             }
 
-            $fields = InheritanceSync::changedInheritableFields($product);
+            $fields = array_values(array_intersect(
+                array_keys($product->getDirty()),
+                $product->getInheritableFields()
+            ));
 
             if ($fields === [] || ! $product->children()->exists()) {
                 return;
             }
 
-            SyncVariantInheritanceJob::dispatch($product->getKey(), $fields)->afterCommit();
+            SyncVariantInheritance::dispatch([
+                'parent_id' => $product->getKey(),
+                'fields' => $fields,
+            ])
+                ->afterCommit();
         });
     }
 
@@ -178,7 +203,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'is_nos' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
-            'was_parent' => 'boolean',
+            'is_variant_parent' => 'boolean',
         ];
     }
 
@@ -212,13 +237,17 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 
     public function ownCategories(): MorphToMany
     {
-        return $this->morphToMany(Category::class, 'categorizable', 'categorizable')
-            ->using(Pivots\Categorizable::class);
+        return $this->categories()->wherePivot('is_inherited', false);
+    }
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(Price::class);
     }
 
     public function ownPrices(): HasMany
     {
-        return $this->hasMany(Price::class);
+        return $this->prices()->where('is_inherited', false);
     }
 
     public function productCrossSellings(): HasMany
@@ -232,7 +261,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->using(ProductProductOption::class);
     }
 
-    public function ownProductProperties(): BelongsToMany
+    public function productProperties(): BelongsToMany
     {
         return $this->belongsToMany(
             ProductProperty::class,
@@ -244,15 +273,25 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->withPivot('value');
     }
 
+    public function ownProductProperties(): BelongsToMany
+    {
+        return $this->productProperties()->wherePivot('is_inherited', false);
+    }
+
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
     }
 
-    public function ownSuppliers(): BelongsToMany
+    public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier')
             ->using(ProductSupplier::class);
+    }
+
+    public function ownSuppliers(): BelongsToMany
+    {
+        return $this->suppliers()->wherePivot('is_inherited', false);
     }
 
     public function tenants(): BelongsToMany
@@ -339,42 +378,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     }
 
     // Attributes
-    public function getCategoriesAttribute(): Collection
-    {
-        return $this->resolveInheritedCollection(
-            ownRelationMethod: 'ownCategories',
-            resolvedRelation: 'categories',
-            foreignKeyOnRelated: 'id'
-        );
-    }
-
-    public function getPricesAttribute(): Collection
-    {
-        return $this->resolveInheritedCollection(
-            ownRelationMethod: 'ownPrices',
-            resolvedRelation: 'prices',
-            foreignKeyOnRelated: 'price_list_id'
-        );
-    }
-
-    public function getProductPropertiesAttribute(): Collection
-    {
-        return $this->resolveInheritedCollection(
-            ownRelationMethod: 'ownProductProperties',
-            resolvedRelation: 'productProperties',
-            foreignKeyOnRelated: 'id'
-        );
-    }
-
-    public function getSuppliersAttribute(): Collection
-    {
-        return $this->resolveInheritedCollection(
-            ownRelationMethod: 'ownSuppliers',
-            resolvedRelation: 'suppliers',
-            foreignKeyOnRelated: 'id'
-        );
-    }
-
     protected function price(): Attribute
     {
         return Attribute::get(function () {

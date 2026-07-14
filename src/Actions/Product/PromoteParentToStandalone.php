@@ -24,7 +24,7 @@ class PromoteParentToStandalone extends FluxAction
             ->whereKey($this->getData('id'))
             ->firstOrFail();
 
-        $product->was_parent = false;
+        $product->is_variant_parent = false;
         $product->save();
 
         return $product->refresh();

@@ -78,7 +78,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Product::class])
-                    ->where('was_parent', false)
+                    ->where('is_variant_parent', false)
                     ->whereDoesntHave(
                         'children',
                         fn (Builder $query) => $query->where('is_active', true)
