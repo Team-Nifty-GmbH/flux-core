@@ -227,24 +227,24 @@ class PaymentReminderRun extends Component
             return;
         }
 
+        $orderIds = array_map('intval', $orderIds);
+
         // Pair every order with its group's editable recipient so validation
         // ties the recipient to its invoice instead of a separate keyed map.
-        $emailByOrderId = [];
+        $orders = [];
 
         foreach ($this->groups as $group) {
             $email = data_get($this->recipientEmails, $group['key']);
 
             foreach ($group['orders'] as $order) {
-                $emailByOrderId[$order['id']] = filled($email) ? $email : null;
+                if (in_array($order['id'], $orderIds, true)) {
+                    $orders[] = [
+                        'id' => $order['id'],
+                        'recipient' => filled($email) ? $email : null,
+                    ];
+                }
             }
         }
-
-        $orders = collect($orderIds)
-            ->map(fn ($orderId): array => [
-                'id' => (int) $orderId,
-                'recipient' => data_get($emailByOrderId, (int) $orderId),
-            ])
-            ->all();
 
         try {
             // Fans the sends out as a monitored batch; the batch progress toast
