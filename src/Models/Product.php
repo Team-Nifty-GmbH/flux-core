@@ -106,7 +106,10 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
                     ->whereKey($product->parent_id)
                     ->update(['is_variant_parent' => true]);
 
-                if ($product->inheritanceEnabled() && ($parent = $product->parent()->first(['id']))) {
+                $parent = $product->parent()->first(['id', 'parent_id']);
+
+                // Inheritance is single-level: only top-level parents propagate.
+                if ($product->inheritanceEnabled() && $parent && is_null($parent->parent_id)) {
                     // Materialize the parent's current field values, translations and
                     // is_inherited relation copies onto the freshly created variant.
                     SyncVariantInheritance::make([
