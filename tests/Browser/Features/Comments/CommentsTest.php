@@ -46,6 +46,10 @@ test('comment editor initializes with tiptap', function (): void {
 });
 
 test('comment attachment preview opens the lightbox', function (): void {
+    // The preview button only renders once the preview conversion exists; run
+    // conversions synchronously as no queue worker is available in tests.
+    config(['media-library.queue_conversions_by_default' => false]);
+
     $comment = Comment::factory()->create([
         'model_type' => morph_alias(Order::class),
         'model_id' => $this->order->getKey(),
