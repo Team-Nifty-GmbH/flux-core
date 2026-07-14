@@ -84,36 +84,36 @@ class SyncVariantInheritance extends DispatchableFluxAction
             }
 
             $parentTranslations = resolve_static(AttributeTranslation::class, 'query')
-                ->whereIntegerInRaw('model_id', [$parent->getKey()])
                 ->where('model_type', $modelType)
+                ->whereIntegerInRaw('model_id', [$parent->getKey()])
                 ->where('attribute', $field)
                 ->pluck('value', 'language_id');
 
             // Drop variant rows for locales the parent no longer has (all of them, if none are left).
             resolve_static(AttributeTranslation::class, 'query')
-                ->whereIntegerInRaw('model_id', $variantIds)
-                ->where('model_type', $modelType)
-                ->where('attribute', $field)
                 ->when(
                     $parentTranslations->isNotEmpty(),
                     fn (Builder $query) => $query
                         ->whereIntegerNotInRaw('language_id', $parentTranslations->keys())
                 )
+                ->where('model_type', $modelType)
+                ->whereIntegerInRaw('model_id', $variantIds)
+                ->where('attribute', $field)
                 ->delete();
 
             foreach ($parentTranslations as $languageId => $value) {
                 $existingVariantIds = resolve_static(AttributeTranslation::class, 'query')
                     ->where('language_id', $languageId)
-                    ->whereIntegerInRaw('model_id', $variantIds)
                     ->where('model_type', $modelType)
+                    ->whereIntegerInRaw('model_id', $variantIds)
                     ->where('attribute', $field)
                     ->pluck('model_id');
 
                 if ($existingVariantIds->isNotEmpty()) {
                     resolve_static(AttributeTranslation::class, 'query')
                         ->where('language_id', $languageId)
-                        ->whereIntegerInRaw('model_id', $existingVariantIds)
                         ->where('model_type', $modelType)
+                        ->whereIntegerInRaw('model_id', $existingVariantIds)
                         ->where('attribute', $field)
                         ->update(['value' => $value]);
                 }

@@ -2,7 +2,7 @@
 
 use FluxErp\Models\Product;
 
-it('parent.is_variant_parent flips to true when its first child is saved', function (): void {
+test('parent.is_variant_parent flips to true when its first child is saved', function (): void {
     $parent = Product::factory()->create(['parent_id' => null]);
     expect($parent->fresh()->is_variant_parent)->toBeFalse();
 
@@ -11,7 +11,7 @@ it('parent.is_variant_parent flips to true when its first child is saved', funct
     expect($parent->fresh()->is_variant_parent)->toBeTrue();
 });
 
-it('is_variant_parent stays true after the last variant is deactivated', function (): void {
+test('is_variant_parent stays true after the last variant is deactivated', function (): void {
     $parent = Product::factory()->create(['parent_id' => null]);
     $variant = Product::factory()->create([
         'parent_id' => $parent->getKey(),
@@ -25,7 +25,7 @@ it('is_variant_parent stays true after the last variant is deactivated', functio
     expect($parent->fresh()->is_variant_parent)->toBeTrue();
 });
 
-it('is_variant_parent stays true after the last variant is deleted', function (): void {
+test('is_variant_parent stays true after the last variant is deleted', function (): void {
     $parent = Product::factory()->create(['parent_id' => null]);
     $variant = Product::factory()->create(['parent_id' => $parent->getKey()]);
 
@@ -34,7 +34,7 @@ it('is_variant_parent stays true after the last variant is deleted', function ()
     expect($parent->fresh()->is_variant_parent)->toBeTrue();
 });
 
-it('is_variant_parent does not flip on standalone products', function (): void {
+test('is_variant_parent does not flip on standalone products', function (): void {
     $product = Product::factory()->create(['parent_id' => null]);
     expect($product->fresh()->is_variant_parent)->toBeFalse();
 });
