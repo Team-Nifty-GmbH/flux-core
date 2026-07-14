@@ -31,18 +31,24 @@ cd flux-app
 # 2. Require Flux (service provider, migrations, routes and assets auto-register)
 composer require team-nifty-gmbh/flux-erp
 
-# 3. Migrate the database
-php artisan migrate
+# 3. Require the license package (provides the install wizard)
+composer require team-nifty-gmbh/flux-license
 
-# 4. Set up roles and permissions
-php artisan init:permissions
+# 4. Run the interactive install wizard
+php artisan flux:install
 
 # 5. Link storage for uploaded media
 php artisan storage:link
 ```
 
-Configure your database, Meilisearch and mail credentials in `.env` before migrating,
-and remove the default welcome route from `routes/web.php` (Flux registers its own).
+Configure your database, Meilisearch and mail credentials in `.env` before running the
+wizard, and remove the default welcome route from `routes/web.php` (Flux registers its
+own).
+
+The `php artisan flux:install` wizard guides you through the remaining setup
+(migrations, roles and permissions, base data, payment types, and so on). If you
+prefer to run the steps manually instead, use `php artisan migrate` and
+`php artisan init:permissions`.
 
 ### Seeding base data
 
