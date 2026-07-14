@@ -40,6 +40,7 @@ class MigrateProductVariantInheritanceJob implements ShouldQueue
         }
 
         $query = resolve_static(Product::class, 'query')
+            ->select(['id'])
             ->whereNull('parent_id')
             ->has('children')
             ->with('ownPrices');

@@ -29,7 +29,7 @@ class ResetProductRelations extends FluxAction
     {
         $parent = resolve_static(Product::class, 'query')
             ->whereKey($this->getData('parent_id'))
-            ->firstOrFail();
+            ->firstOrFail(['id']);
 
         $variantIds = $parent->children()
             ->when(
@@ -72,7 +72,7 @@ class ResetProductRelations extends FluxAction
     {
         $relationInstance = resolve_static(Product::class, 'query')
             ->whereKey($variantIds[0])
-            ->first()
+            ->first(['id'])
             ->{'own' . ucfirst($relation)}();
 
         if ($relationInstance instanceof BelongsToMany) {

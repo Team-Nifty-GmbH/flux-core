@@ -24,7 +24,7 @@ class ResetProductFields extends FluxAction
     {
         $parent = resolve_static(Product::class, 'query')
             ->whereKey($this->getData('parent_id'))
-            ->firstOrFail();
+            ->firstOrFail(['id']);
 
         $fields = $this->getData('fields');
         $variantIds = $this->getData('variant_ids');

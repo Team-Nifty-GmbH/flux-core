@@ -33,16 +33,16 @@ class SyncVariantInheritance extends DispatchableFluxAction
             return null;
         }
 
+        $fields = $this->getData('fields') ?: app(Product::class)->getInheritableFields();
+
         /** @var Product|null $parent */
         $parent = resolve_static(Product::class, 'query')
             ->whereKey($this->getData('parent_id'))
-            ->first();
+            ->first(array_merge(['id'], $fields));
 
         if (! $parent) {
             return null;
         }
-
-        $fields = $this->getData('fields') ?: $parent->getInheritableFields();
 
         foreach ($fields as $field) {
             $this->variantQuery($parent)
