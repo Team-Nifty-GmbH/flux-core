@@ -104,3 +104,35 @@ test('still copies parent prices into variant when inheritance is disabled', fun
 
     expect($variant->ownPrices()->count())->toBe(1);
 });
+
+test('demoting a variant parent to standalone via update product', function (): void {
+    $parent = Product::factory()->create();
+    Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => false,
+    ]);
+
+    UpdateProduct::make([
+        'id' => $parent->getKey(),
+        'is_variant_parent' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    expect($parent->fresh()->is_variant_parent)->toBeFalse();
+});
+
+test('rejects demoting a variant parent while active variants exist', function (): void {
+    $parent = Product::factory()->create();
+    Product::factory()->create([
+        'parent_id' => $parent->getKey(),
+        'is_active' => true,
+    ]);
+
+    UpdateProduct::make([
+        'id' => $parent->getKey(),
+        'is_variant_parent' => false,
+    ])
+        ->validate()
+        ->execute();
+})->throws(Illuminate\Validation\ValidationException::class);

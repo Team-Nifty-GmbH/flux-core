@@ -11,6 +11,7 @@ use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\Notifications\EloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\Order\OrderStockSubscriber;
+use FluxErp\Listeners\Product\DispatchVariantInheritanceMigration;
 use FluxErp\Listeners\RegisterMobilePushToken;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
@@ -40,6 +41,7 @@ use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Queue\QueueManager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use Spatie\LaravelSettings\Events\SavingSettings;
 use TallStackUi\Components\Form\Date;
 use Throwable;
 
@@ -55,6 +57,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         KeyWritten::class => [
             CacheKeyWrittenListener::class,
+        ],
+        SavingSettings::class => [
+            DispatchVariantInheritanceMigration::class,
         ],
     ];
 

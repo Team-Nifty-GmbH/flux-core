@@ -550,6 +550,7 @@
     "Cancellation Type": "Kündigungsart",
     "cancellation-confirmation": "Kündigungsbestätigung",
     "Cannot delete a calendar that has children.": "Ein Kalender mit untergeordneten Kalendern kann nicht gelöscht werden.",
+    "Cannot demote to standalone: active variants still exist.": "Rückstufung zu eigenständigem Produkt nicht möglich: Es existieren noch aktive Varianten.",
     "Cannot select 'Time' on given absence type.": "'Uhrzeit' kann bei dem angegebenen Abwesenheitstyp nicht ausgewählt werden.",
     "Carryover": "Übertrag",
     "Cart": "Warenkorb",

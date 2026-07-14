@@ -15,6 +15,7 @@ use FluxErp\Models\Tag;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Product\UpdateProductRuleset;
 use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -185,6 +186,19 @@ class UpdateProduct extends FluxAction
     protected function validateData(): void
     {
         parent::validateData();
+
+        if (array_key_exists('is_variant_parent', $this->data)
+            && ! $this->getData('is_variant_parent')
+            && resolve_static(Product::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->whereHas('children', fn (Builder $query) => $query->where('is_active', true))
+                ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'is_variant_parent' => [__('Cannot demote to standalone: active variants still exist.')],
+            ])
+                ->errorBag('updateProduct');
+        }
 
         if ($this->data['parent_id'] ?? false) {
             $product = resolve_static(Product::class, 'query')

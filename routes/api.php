@@ -193,7 +193,6 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
-use FluxErp\Actions\Product\PromoteParentToStandalone;
 use FluxErp\Actions\Product\ResetProductFields;
 use FluxErp\Actions\Product\ResetProductRelations;
 use FluxErp\Actions\Product\RestoreProduct;
@@ -947,7 +946,6 @@ Route::prefix('api')
                 Route::put('/products', UpdateProduct::class);
                 Route::delete('/products/{id}', DeleteProduct::class);
                 Route::post('/products/{id}/restore', RestoreProduct::class);
-                Route::post('/products/{id}/promote-to-standalone', PromoteParentToStandalone::class);
                 Route::post('/products/variants/reset-fields', ResetProductFields::class);
                 Route::post('/products/variants/reset-relations', ResetProductRelations::class);
 
