@@ -169,6 +169,7 @@ class TransactionAssignments extends Component
     {
         $this->ledgerAccountTransactionForm->reset();
         $this->ledgerAccountTransactionForm->transaction_id = $transaction->getKey();
+        $this->ledgerAccountTransactionForm->transactionBalance = (float) $transaction->balance;
         $this->ledgerAccountTransactionForm->amount = (float) $transaction->balance;
 
         $this->js(<<<'JS'
@@ -215,6 +216,14 @@ class TransactionAssignments extends Component
     {
         $this->ledgerAccountTransactionForm->reset();
         $this->ledgerAccountTransactionForm->fill($ledgerAccountTransaction);
+
+        // Remaining balance the transaction would have without this assignment,
+        // so "apply transaction amount" targets the full open amount again.
+        $this->ledgerAccountTransactionForm->transactionBalance = bcadd(
+            $ledgerAccountTransaction->transaction->balance,
+            $ledgerAccountTransaction->is_accepted ? $ledgerAccountTransaction->amount : '0',
+            2
+        );
 
         $this->js(<<<'JS'
             $tsui.open.modal('ledger-account-transaction-modal');

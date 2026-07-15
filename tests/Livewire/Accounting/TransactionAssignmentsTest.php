@@ -168,3 +168,17 @@ test('assign ledger account through the modal', function (): void {
     )->toBeTrue()
         ->and((float) $transaction->fresh()->balance)->toBe(0.0);
 });
+
+test('assignLedgerAccountModal prefills the transaction balance for the apply button', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => -4250,
+        'balance' => -4250,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignLedgerAccountModal', $transaction)
+        ->assertSet('ledgerAccountTransactionForm.amount', -4250.0)
+        ->assertSet('ledgerAccountTransactionForm.transactionBalance', -4250.0);
+});

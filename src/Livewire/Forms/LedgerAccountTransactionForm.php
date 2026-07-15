@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\LedgerAccountTransaction\CreateLedgerAccountTransaction;
 use FluxErp\Actions\LedgerAccountTransaction\DeleteLedgerAccountTransaction;
 use FluxErp\Actions\LedgerAccountTransaction\UpdateLedgerAccountTransaction;
+use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Livewire\Attributes\Locked;
 
 class LedgerAccountTransactionForm extends FluxForm
@@ -22,6 +23,10 @@ class LedgerAccountTransactionForm extends FluxForm
 
     #[Locked]
     public ?int $transaction_id = null;
+
+    #[Locked]
+    #[ExcludeFromActionData]
+    public ?float $transactionBalance = null;
 
     protected function getActions(): array
     {

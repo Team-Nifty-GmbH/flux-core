@@ -251,12 +251,44 @@
                     'method' => 'POST',
                 ]"
             />
-            <x-number
-                :label="__('Amount')"
-                wire:model="ledgerAccountTransactionForm.amount"
-                step="0.01"
-                placeholder="0.00"
-            />
+            <div class="flex flex-col gap-2">
+                <x-number
+                    :label="__('Amount')"
+                    wire:model="ledgerAccountTransactionForm.amount"
+                    step="0.01"
+                    placeholder="0.00"
+                />
+                <div>
+                    <x-button
+                        sm
+                        color="secondary"
+                        x-cloak
+                        x-show="
+                            $wire.ledgerAccountTransactionForm
+                                .transactionBalance !== null &&
+                            $wire.ledgerAccountTransactionForm.amount !==
+                                $wire.ledgerAccountTransactionForm
+                                    .transactionBalance
+                        "
+                        x-on:click="
+                            $wire.ledgerAccountTransactionForm.amount =
+                                $wire.ledgerAccountTransactionForm.transactionBalance
+                        "
+                    >
+                        <x-slot:text>
+                            {{ __('Apply transaction amount') }} (<span
+                                x-html="
+                                    $nuxbe.format.money(
+                                        $wire.ledgerAccountTransactionForm
+                                            .transactionBalance,
+                                    )
+                                "
+                            ></span
+                            >)
+                        </x-slot:text>
+                    </x-button>
+                </div>
+            </div>
             <x-input
                 :label="__('Note')"
                 wire:model="ledgerAccountTransactionForm.note"
