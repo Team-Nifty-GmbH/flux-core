@@ -86,6 +86,7 @@ use FluxErp\Models\Pivots\EmployeeVacationBlackout;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Models\Pivots\JobBatchable;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\LocationVacationBlackout;
 use FluxErp\Models\Pivots\MailAccountUser;
 use FluxErp\Models\Pivots\MediaFolderModel;
@@ -286,6 +287,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'employee_work_time_model' => EmployeeWorkTimeModel::class,
             'holiday_location' => HolidayLocation::class,
             'job_batchable' => JobBatchable::class,
+            'ledger_account_transaction' => LedgerAccountTransaction::class,
             'location_vacation_blackout' => LocationVacationBlackout::class,
             'mail_account_user' => MailAccountUser::class,
             'media_folder_model' => MediaFolderModel::class,
