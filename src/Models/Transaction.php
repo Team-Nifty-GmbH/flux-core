@@ -95,10 +95,9 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
                         $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
                         9
                     ),
-                    $this->ledgerAccounts()
-                        ->withPivot('amount')
-                        ->wherePivot('is_accepted', true)
-                        ->sum('ledger_account_transaction.amount'),
+                    $this->ledgerAccountTransactions()
+                        ->where('is_accepted', true)
+                        ->sum('amount'),
                     9
                 ),
                 2

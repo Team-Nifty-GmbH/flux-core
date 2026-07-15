@@ -182,3 +182,18 @@ test('assignLedgerAccountModal prefills the transaction balance for the apply bu
         ->assertSet('ledgerAccountTransactionForm.amount', -4250.0)
         ->assertSet('ledgerAccountTransactionForm.transactionBalance', -4250.0);
 });
+
+test('opening the ledger account modal resets a previous validation error', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => 100,
+        'balance' => 100,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('saveLedgerAccountTransaction')
+        ->assertHasErrors()
+        ->call('assignLedgerAccountModal', $transaction)
+        ->assertHasNoErrors();
+});
