@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
@@ -59,6 +60,17 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         return $this->belongsTo(Currency::class);
     }
 
+    public function ledgerAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(LedgerAccount::class)
+            ->using(LedgerAccountTransaction::class);
+    }
+
+    public function ledgerAccountTransactions(): HasMany
+    {
+        return $this->hasMany(LedgerAccountTransaction::class);
+    }
+
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class)
@@ -78,8 +90,15 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         } else {
             $this->balance = bcround(
                 bcsub(
-                    $this->amount,
-                    $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                    bcsub(
+                        $this->amount,
+                        $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                        9
+                    ),
+                    $this->ledgerAccounts()
+                        ->withPivot('amount')
+                        ->wherePivot('is_accepted', true)
+                        ->sum('ledger_account_transaction.amount'),
                     9
                 ),
                 2

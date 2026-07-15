@@ -405,6 +405,7 @@
     "Asset": "Anlage",
     "Assign": "Zuordnen",
     "Assign leads to the agent stored in the contact. If no agent is set, leads will be assigned to you.": "Leads dem im Kontakt hinterlegten Vertreter zuordnen. Wenn kein Vertreter hinterlegt ist, werden die Leads Ihnen zugeordnet.",
+    "Assign ledger account": "Sachkonto zuordnen",
     "Assign order": "Auftrag zuweisen",
     "Assign product": "Produkt zuordnen",
     "Assign serial number": "Seriennummer zuordnen",

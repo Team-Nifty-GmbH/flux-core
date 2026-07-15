@@ -139,3 +139,32 @@ test('editOrderTransaction populates the transaction payment amount', function (
         ->call('editOrderTransaction', $orderTransaction->getAttribute('pivot_id'))
         ->assertSet('orderTransactionForm.transactionAmount', 175.5);
 });
+
+test('assign ledger account through the modal', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => 3000,
+        'balance' => 3000,
+    ]);
+    $ledgerAccount = FluxErp\Models\LedgerAccount::factory()->create([
+        'tenant_id' => Tenant::default()->getKey(),
+        'ledger_account_type_enum' => FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignLedgerAccountModal', $transaction)
+        ->assertSet('ledgerAccountTransactionForm.transaction_id', $transaction->getKey())
+        ->assertSet('ledgerAccountTransactionForm.amount', 3000.0)
+        ->set('ledgerAccountTransactionForm.ledger_account_id', $ledgerAccount->getKey())
+        ->call('saveLedgerAccountTransaction')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect(FluxErp\Models\Pivots\LedgerAccountTransaction::query()
+        ->where('ledger_account_id', $ledgerAccount->getKey())
+        ->where('transaction_id', $transaction->getKey())
+        ->exists()
+    )->toBeTrue()
+        ->and((float) $transaction->fresh()->balance)->toBe(0.0);
+});

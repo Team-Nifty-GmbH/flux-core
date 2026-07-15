@@ -4,11 +4,13 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\UpdateOrderTransaction;
+use FluxErp\Livewire\Forms\LedgerAccountTransactionForm;
 use FluxErp\Livewire\Forms\OrderTransactionForm;
 use FluxErp\Livewire\Forms\TransactionForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Transaction;
 use FluxErp\Traits\Livewire\Actions;
@@ -27,6 +29,8 @@ class TransactionAssignments extends Component
     use Actions, WithPagination;
 
     public ?array $bankAccounts = null;
+
+    public LedgerAccountTransactionForm $ledgerAccountTransactionForm;
 
     public OrderTransactionForm $orderTransactionForm;
 
@@ -161,6 +165,35 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function assignLedgerAccountModal(Transaction $transaction): void
+    {
+        $this->ledgerAccountTransactionForm->reset();
+        $this->ledgerAccountTransactionForm->transaction_id = $transaction->getKey();
+        $this->ledgerAccountTransactionForm->amount = (float) $transaction->balance;
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('ledger-account-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function deleteLedgerAccountTransaction(LedgerAccountTransaction $ledgerAccountTransaction): void
+    {
+        $this->ledgerAccountTransactionForm->reset();
+        $this->ledgerAccountTransactionForm->fill($ledgerAccountTransaction);
+
+        try {
+            $this->ledgerAccountTransactionForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+    }
+
+    #[Renderless]
     public function deleteOrderTransaction(OrderTransaction $orderTransaction): void
     {
         $this->orderTransactionForm->reset();
@@ -175,6 +208,17 @@ class TransactionAssignments extends Component
         }
 
         $this->refreshTransactions();
+    }
+
+    #[Renderless]
+    public function editLedgerAccountTransaction(LedgerAccountTransaction $ledgerAccountTransaction): void
+    {
+        $this->ledgerAccountTransactionForm->reset();
+        $this->ledgerAccountTransactionForm->fill($ledgerAccountTransaction);
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('ledger-account-transaction-modal');
+        JS);
     }
 
     #[Renderless]
@@ -222,6 +266,7 @@ class TransactionAssignments extends Component
             )
             ->withCount([
                 'orderTransactions',
+                'ledgerAccountTransactions',
                 'comments',
                 'orderTransactions as suggestions' => fn ($query) => $query->where('is_accepted', false),
             ])
@@ -247,6 +292,7 @@ class TransactionAssignments extends Component
                     ])
                         ->withPivot(['pivot_id', 'amount', 'exchange_rate', 'order_currency_amount', 'is_accepted']);
                 },
+                'ledgerAccountTransactions.ledgerAccount:id,name,number',
                 'orders.addressInvoice:id,name',
                 'orders.currency:id,iso,symbol',
                 'bankConnection:id,name,bank_name,iban',
@@ -265,6 +311,23 @@ class TransactionAssignments extends Component
                 return $transaction->toArray();
             })
             ->toArray();
+    }
+
+    #[Renderless]
+    public function saveLedgerAccountTransaction(): void
+    {
+        try {
+            $this->ledgerAccountTransactionForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+        $this->js(<<<'JS'
+            $tsui.close.modal('ledger-account-transaction-modal');
+        JS);
     }
 
     #[Renderless]
