@@ -136,13 +136,17 @@
                                 x-text="file.name"
                             ></span>
                         </div>
-                        <div x-cloak x-show="file.id">
-                            <x-button
-                                color="indigo"
-                                icon="arrow-down-tray"
-                                wire:click="download(file.id)"
-                            />
-                        </div>
+                        <template x-if="file.id">
+                            <div>
+                                <x-button
+                                    color="indigo"
+                                    icon="arrow-down-tray"
+                                    x-on:click="
+                                        file?.id && $wire.download(file.id)
+                                    "
+                                />
+                            </div>
+                        </template>
                         <div class="flex shrink-0 px-4">
                             <x-button
                                 color="red"
