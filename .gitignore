@@ -12,4 +12,3 @@ reports
 /dist
 /workbench
 .playwright-mcp/
-/build
