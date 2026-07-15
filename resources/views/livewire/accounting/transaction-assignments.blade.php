@@ -232,6 +232,7 @@
             <x-button
                 :text="__('Save')"
                 x-on:click="$wire.saveOrderTransaction()"
+                loading="saveOrderTransaction()"
             />
         </x-slot:footer>
     </x-modal>
@@ -305,7 +306,7 @@
             @stack('ledger-account-transaction-modal-footer')
             <x-button
                 :text="__('Save')"
-                wire:click="saveLedgerAccountTransaction()"
+                x-on:click="$wire.saveLedgerAccountTransaction()"
                 loading="saveLedgerAccountTransaction()"
             />
         </x-slot:footer>
