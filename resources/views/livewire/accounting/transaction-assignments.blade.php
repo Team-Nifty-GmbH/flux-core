@@ -99,6 +99,32 @@
         </x-slot:footer>
     </x-modal>
 
+    <x-modal id="transaction-attachment-modal" :title="__('Attachment')">
+        <x-flux::features.media.upload-form-object
+            wire:model="attachment"
+            :multiple="false"
+            accept="application/pdf, image/jpeg, image/png, image/svg+xml"
+        />
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                :text="__('Cancel')"
+                x-on:click="$tsui.close.modal('transaction-attachment-modal')"
+            />
+            @stack('transaction-attachment-modal-footer')
+            <x-button
+                :text="__('Save')"
+                x-on:click="
+                    $wire.saveAttachment().then((success) => {
+                        if (success)
+                            $tsui.close.modal('transaction-attachment-modal');
+                    })
+                "
+                loading="saveAttachment()"
+            />
+        </x-slot:footer>
+    </x-modal>
+
     <x-modal
         id="order-transaction-modal"
         x-on:open="$tsui.focus('order-transaction-amount')"
@@ -728,6 +754,24 @@
                                                                 "
                                                             ></span>
                                                         </div>
+                                                    </x-slot:text>
+                                                </x-button>
+                                                <x-button
+                                                    sm
+                                                    light
+                                                    color="gray"
+                                                    icon="paper-clip"
+                                                    wire:click="attachmentModal(transaction.id)"
+                                                >
+                                                    <x-slot:text>
+                                                        <span
+                                                            x-text="
+                                                                transaction
+                                                                    .media?.[0]
+                                                                    ?.file_name ??
+                                                                '{{ __('Attachment') }}'
+                                                            "
+                                                        ></span>
                                                     </x-slot:text>
                                                 </x-button>
                                                 <x-button
