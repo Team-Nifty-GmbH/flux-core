@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\DataTable\ShareFilter;
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\HasWidgetGeneration;
 use Illuminate\Http\Response;
 use Livewire\Attributes\Renderless;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -14,7 +15,7 @@ use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 abstract class BaseDataTable extends DataTable
 {
-    use Actions, HasEloquentListeners;
+    use Actions, HasEloquentListeners, HasWidgetGeneration;
 
     #[Renderless]
     public function export(array $columns = [], string $format = 'xlsx', bool $formatted = true): Response|BinaryFileResponse|StreamedResponse
