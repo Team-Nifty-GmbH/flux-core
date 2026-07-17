@@ -590,6 +590,11 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return $this->hasOne(PurchaseInvoice::class);
     }
 
+    public function rebateAgreement(): HasOne
+    {
+        return $this->hasOne(RebateAgreement::class, 'rebate_order_id');
+    }
+
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
