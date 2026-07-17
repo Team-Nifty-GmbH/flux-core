@@ -28,6 +28,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\GenerateWidgetWizard;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
@@ -168,7 +169,7 @@ Route::middleware('web')
 
         Route::middleware(['auth:web', '2fa.setup', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
-            Route::get('/widgets/create', \FluxErp\Livewire\DataTables\GenerateWidgetWizard::class)->name('widgets.create');
+            Route::get('/widgets/create', GenerateWidgetWizard::class)->name('widgets.create');
 
             Route::get('/mobile/share-target', ShareTarget::class)->name('mobile.share-target');
 

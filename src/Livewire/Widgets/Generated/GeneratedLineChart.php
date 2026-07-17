@@ -62,11 +62,11 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
             return;
         }
 
-        if ($this->isTimeframeAware() && $dateColumn) {
+        if ($this->isTimeframeAware()) {
             $query->whereBetween($dateColumn, [$this->getStart(), $this->getEnd()]);
         }
 
-        $unit = $this->getUnit() ?? 'month';
+        $unit = $this->getConfigValue('time_grouping') ?? $this->getUnit() ?? 'month';
         $dateFormat = match ($unit) {
             'day' => '%Y-%m-%d',
             'month' => '%Y-%m',
@@ -74,17 +74,14 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
             default => '%Y-%m',
         };
 
-        $aggregateExpression = match ($aggregate) {
-            'sum' => "SUM(`{$valueColumn}`) as aggregate_value",
-            'avg' => "AVG(`{$valueColumn}`) as aggregate_value",
-            'min' => "MIN(`{$valueColumn}`) as aggregate_value",
-            'max' => "MAX(`{$valueColumn}`) as aggregate_value",
-            default => 'COUNT(*) as aggregate_value',
-        };
+        $quotedDateColumn = '`' . str_replace('.', '`.`', $dateColumn) . '`';
 
         $results = $query
             ->reorder()
-            ->selectRaw("DATE_FORMAT(`{$dateColumn}`, '{$dateFormat}') as period, {$aggregateExpression}")
+            ->selectRaw(
+                "DATE_FORMAT({$quotedDateColumn}, '{$dateFormat}') as period, "
+                . $this->buildAggregateExpression($aggregate, $valueColumn)
+            )
             ->groupBy('period')
             ->orderBy('period')
             ->get();
@@ -92,7 +89,9 @@ class GeneratedLineChart extends LineChart implements HasWidgetOptions
         $this->series = [
             [
                 'name' => $this->title() ?? static::getLabel(),
-                'data' => $results->pluck('aggregate_value')->map(fn ($value) => round((float) $value, 2))->toArray(),
+                'data' => $results->pluck('aggregate_value')
+                    ->map(fn (mixed $value) => round((float) $value, 2))
+                    ->toArray(),
             ],
         ];
 

@@ -6,6 +6,7 @@ use FluxErp\Traits\Livewire\DataTable\HasWidgetGeneration;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Livewire\Component;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 use TeamNiftyGmbH\DataTable\Formatters\BooleanFormatter;
@@ -30,7 +31,7 @@ trait HasGeneratedWidgetConfig
 
     public ?string $configErrorMessage = null;
 
-    protected mixed $resolvedDataTable = null;
+    protected ?Component $resolvedDataTable = null;
 
     public static function dashboardComponent(): array
     {
@@ -51,9 +52,19 @@ trait HasGeneratedWidgetConfig
         return __(Str::headline(class_basename(static::class)));
     }
 
-    protected function title(): ?string
+    protected function buildAggregateExpression(string $aggregate, ?string $valueColumn): string
     {
-        return data_get($this->config, 'name') ?? static::getLabel();
+        $column = ! is_null($valueColumn)
+            ? '`' . str_replace('.', '`.`', $valueColumn) . '`'
+            : null;
+
+        return match ($aggregate) {
+            'sum' => "SUM({$column}) as aggregate_value",
+            'avg' => "AVG({$column}) as aggregate_value",
+            'min' => "MIN({$column}) as aggregate_value",
+            'max' => "MAX({$column}) as aggregate_value",
+            default => 'COUNT(*) as aggregate_value',
+        };
     }
 
     protected function buildFilteredQuery(): ?Builder
@@ -76,7 +87,32 @@ trait HasGeneratedWidgetConfig
         }
     }
 
-    protected function getDataTableInstance(): mixed
+    protected function formatColumnValue(string $column, mixed $value): string
+    {
+        $formatter = $this->resolveFormatter($column);
+
+        if (is_null($formatter)) {
+            return (string) $value;
+        }
+
+        try {
+            return $formatter->format($value, []);
+        } catch (Throwable) {
+            return (string) $value;
+        }
+    }
+
+    protected function getAggregate(): ?string
+    {
+        return $this->getConfigValue('aggregate', 'count');
+    }
+
+    protected function getConfigValue(string $key, mixed $default = null): mixed
+    {
+        return data_get($this->config, $key, $default);
+    }
+
+    protected function getDataTableInstance(): ?Component
     {
         $datatableClass = data_get($this->config, 'datatable');
 
@@ -94,7 +130,7 @@ trait HasGeneratedWidgetConfig
             return null;
         }
 
-        if (! isset($this->resolvedDataTable)) {
+        if (is_null($this->resolvedDataTable)) {
             try {
                 $this->resolvedDataTable = Livewire::new($datatableClass);
             } catch (Throwable) {
@@ -108,19 +144,9 @@ trait HasGeneratedWidgetConfig
         return $this->resolvedDataTable;
     }
 
-    protected function getConfigValue(string $key, mixed $default = null): mixed
+    protected function getDateColumn(): ?string
     {
-        return data_get($this->config, $key, $default);
-    }
-
-    protected function getAggregate(): ?string
-    {
-        return $this->getConfigValue('aggregate', 'count');
-    }
-
-    protected function getValueColumn(): ?string
-    {
-        return $this->getConfigValue('value_column');
+        return $this->getConfigValue('date_column');
     }
 
     protected function getGroupColumn(): ?string
@@ -128,9 +154,9 @@ trait HasGeneratedWidgetConfig
         return $this->getConfigValue('group_column');
     }
 
-    protected function getDateColumn(): ?string
+    protected function getValueColumn(): ?string
     {
-        return $this->getConfigValue('date_column');
+        return $this->getConfigValue('value_column');
     }
 
     protected function isTimeframeAware(): bool
@@ -138,91 +164,64 @@ trait HasGeneratedWidgetConfig
         return (bool) $this->getConfigValue('timeframe_aware', false);
     }
 
-    protected function validateColumnName(?string $column): ?string
+    protected function renderWithErrorCheck(View $defaultView): View
     {
-        if (is_null($column)) {
-            return null;
+        if ($this->configError) {
+            return view('flux::livewire.widgets.generated-widget-error', [
+                'message' => $this->configErrorMessage,
+            ]);
         }
 
-        if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/', $column)) {
-            $this->configError = true;
-            $this->configErrorMessage = __('Invalid column name in configuration.');
-
-            return null;
-        }
-
-        return $column;
+        return $defaultView;
     }
 
-    protected function formatColumnValue(string $column, mixed $value): string
+    protected function resolveFormatter(string $column): ?object
     {
-        $formatter = $this->resolveFormatter($column);
-
-        if (is_null($formatter)) {
-            return (string) $value;
-        }
-
-        try {
-            return $formatter->format($value, []);
-        } catch (Throwable) {
-            return (string) $value;
-        }
-    }
-
-    protected function resolveLabelsForGroup(string $column, iterable $values): array
-    {
-        $collected = collect($values)->filter(fn ($v) => ! is_null($v))->unique()->values();
-
-        if (! str_ends_with($column, '_id') || $column === 'id') {
-            return $collected
-                ->mapWithKeys(fn ($value) => [(string) $value => strip_tags($this->formatColumnValue($column, $value))])
-                ->all();
-        }
-
         $datatable = $this->getDataTableInstance();
+        $datatableClass = data_get($this->config, 'datatable');
 
-        if (is_null($datatable)) {
-            return $collected
-                ->mapWithKeys(fn ($value) => [(string) $value => (string) $value])
-                ->all();
+        if (! $datatable || ! $datatableClass) {
+            return null;
         }
 
         try {
-            $model = app($datatable::getWidgetModel());
-            $relationName = Str::camel(Str::beforeLast($column, '_id'));
+            $registry = app(FormatterRegistry::class);
+            $customFormatters = $datatable->getFormatters();
+            $model = app($datatableClass::getWidgetModel());
+            $modelCasts = $model->getCasts();
+            $baseCol = str_contains($column, '.') ? last(explode('.', $column)) : $column;
+            $customFormatter = data_get($customFormatters, $column);
 
-            if (! method_exists($model, $relationName)) {
-                return $collected
-                    ->mapWithKeys(fn ($value) => [(string) $value => strip_tags($this->formatColumnValue($column, $value))])
-                    ->all();
+            if (is_string($customFormatter)) {
+                return $registry->resolve($customFormatter);
             }
 
-            $relation = $model->{$relationName}();
-            $related = $relation->getRelated();
-            $ownerKey = method_exists($relation, 'getOwnerKeyName') ? $relation->getOwnerKeyName() : $related->getKeyName();
+            if (is_array($customFormatter)) {
+                return $registry->resolveWithOptions(
+                    data_get($customFormatter, 0, 'string'),
+                    data_get($customFormatter, 1, [])
+                );
+            }
 
-            $records = $related->newQuery()
-                ->whereIn($ownerKey, $collected->all())
-                ->get()
-                ->keyBy($ownerKey);
+            $stringCasts = array_filter($modelCasts, 'is_string');
+            $resolvedCasts = array_map(
+                function (string $cast): string {
+                    $castClass = str_contains($cast, ':') ? substr($cast, 0, strpos($cast, ':')) : $cast;
 
-            return $collected
-                ->mapWithKeys(function ($value) use ($records) {
-                    $record = $records->get($value);
+                    if (class_exists($castClass) && is_subclass_of($castClass, HasFrontendFormatter::class)) {
+                        $formatter = $castClass::getFrontendFormatter();
 
-                    if (! $record) {
-                        return [(string) $value => (string) $value];
+                        return is_string($formatter) ? $formatter : $cast;
                     }
 
-                    $label = $this->resolveRelatedRecordLabel($record);
+                    return $cast;
+                },
+                $stringCasts
+            );
 
-                    return [(string) $value => (string) ($label ?? $record->getKey())];
-                })
-                ->all();
+            return $registry->resolveForColumn($baseCol, $resolvedCasts);
         } catch (Throwable) {
-            return $collected
-                ->mapWithKeys(fn ($value) => [(string) $value => (string) $value])
-                ->all();
+            return null;
         }
     }
 
@@ -253,6 +252,63 @@ trait HasGeneratedWidgetConfig
         };
     }
 
+    protected function resolveLabelsForGroup(string $column, iterable $values): array
+    {
+        $collected = collect($values)->filter(fn (mixed $value) => ! is_null($value))->unique()->values();
+
+        if (! str_ends_with($column, '_id') || $column === 'id') {
+            return $collected
+                ->mapWithKeys(fn (mixed $value) => [(string) $value => strip_tags($this->formatColumnValue($column, $value))])
+                ->all();
+        }
+
+        $datatable = $this->getDataTableInstance();
+
+        if (is_null($datatable)) {
+            return $collected
+                ->mapWithKeys(fn (mixed $value) => [(string) $value => (string) $value])
+                ->all();
+        }
+
+        try {
+            $model = app($datatable::getWidgetModel());
+            $relationName = Str::camel(Str::beforeLast($column, '_id'));
+
+            if (! method_exists($model, $relationName)) {
+                return $collected
+                    ->mapWithKeys(fn (mixed $value) => [(string) $value => strip_tags($this->formatColumnValue($column, $value))])
+                    ->all();
+            }
+
+            $relation = $model->{$relationName}();
+            $related = $relation->getRelated();
+            $ownerKey = method_exists($relation, 'getOwnerKeyName') ? $relation->getOwnerKeyName() : $related->getKeyName();
+
+            $records = $related->newQuery()
+                ->whereIn($ownerKey, $collected->all())
+                ->get()
+                ->keyBy($ownerKey);
+
+            return $collected
+                ->mapWithKeys(function (mixed $value) use ($records) {
+                    $record = $records->get($value);
+
+                    if (! $record) {
+                        return [(string) $value => (string) $value];
+                    }
+
+                    $label = $this->resolveRelatedRecordLabel($record);
+
+                    return [(string) $value => (string) ($label ?? $record->getKey())];
+                })
+                ->all();
+        } catch (Throwable) {
+            return $collected
+                ->mapWithKeys(fn (mixed $value) => [(string) $value => (string) $value])
+                ->all();
+        }
+    }
+
     protected function resolveRelatedRecordLabel(mixed $record): ?string
     {
         foreach (['detailLabel', 'getLabel'] as $method) {
@@ -276,63 +332,24 @@ trait HasGeneratedWidgetConfig
         return null;
     }
 
-    protected function resolveFormatter(string $column): mixed
+    protected function title(): ?string
     {
-        $datatable = $this->getDataTableInstance();
-        $datatableClass = data_get($this->config, 'datatable');
-
-        if (! $datatable || ! $datatableClass) {
-            return null;
-        }
-
-        try {
-            $registry = app(FormatterRegistry::class);
-            $customFormatters = $datatable->getFormatters();
-            $model = app($datatableClass::getWidgetModel());
-            $modelCasts = $model->getCasts();
-            $baseCol = str_contains($column, '.') ? last(explode('.', $column)) : $column;
-
-            if (isset($customFormatters[$column]) && is_string($customFormatters[$column])) {
-                return $registry->resolve($customFormatters[$column]);
-            }
-
-            if (isset($customFormatters[$column]) && is_array($customFormatters[$column])) {
-                return $registry->resolveWithOptions(
-                    $customFormatters[$column][0] ?? 'string',
-                    $customFormatters[$column][1] ?? []
-                );
-            }
-
-            $stringCasts = array_filter($modelCasts, 'is_string');
-            $resolvedCasts = array_map(
-                function (string $cast): string {
-                    $castClass = str_contains($cast, ':') ? substr($cast, 0, strpos($cast, ':')) : $cast;
-
-                    if (class_exists($castClass) && is_subclass_of($castClass, HasFrontendFormatter::class)) {
-                        $formatter = $castClass::getFrontendFormatter();
-
-                        return is_string($formatter) ? $formatter : $cast;
-                    }
-
-                    return $cast;
-                },
-                $stringCasts
-            );
-
-            return $registry->resolveForColumn($baseCol, $resolvedCasts);
-        } catch (Throwable) {
-            return null;
-        }
+        return data_get($this->config, 'name') ?? static::getLabel();
     }
 
-    protected function renderWithErrorCheck(View $defaultView): View
+    protected function validateColumnName(?string $column): ?string
     {
-        if ($this->configError) {
-            return view('flux::livewire.widgets.generated-widget-error', [
-                'message' => $this->configErrorMessage,
-            ]);
+        if (is_null($column)) {
+            return null;
         }
 
-        return $defaultView;
+        if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/', $column)) {
+            $this->configError = true;
+            $this->configErrorMessage = __('Invalid column name in configuration.');
+
+            return null;
+        }
+
+        return $column;
     }
 }

@@ -22,6 +22,40 @@ trait HasWidgetGeneration
         }
     }
 
+    public function buildAvailableColumns(): array
+    {
+        $numericTypes = ['integer', 'bigint', 'smallint', 'tinyint', 'mediumint', 'decimal', 'float', 'double'];
+        $dateTypes = ['date', 'datetime', 'timestamp'];
+
+        return AttributeFinder::forModel($this->getModel())
+            ->filter(fn (Attribute $attribute) => ! $attribute->virtual && ! $attribute->appended)
+            ->map(function (Attribute $attribute) use ($numericTypes, $dateTypes) {
+                $dbType = strtolower($attribute->type ?? '');
+                $cast = strtolower($attribute->cast ?? '');
+
+                $isNumeric = collect($numericTypes)->contains(fn (string $type) => str_starts_with($dbType, $type));
+                $isDate = collect($dateTypes)->contains(fn (string $type) => str_starts_with($dbType, $type));
+                $isBoolean = $attribute->phpType === 'bool' || in_array($cast, ['bool', 'boolean'], true);
+                $isForeignKey = $attribute->name === 'id' || str_ends_with($attribute->name, '_id');
+
+                if ($isNumeric && ! $isBoolean && ! $isForeignKey) {
+                    $type = 'numeric';
+                } elseif ($isDate) {
+                    $type = 'date';
+                } else {
+                    $type = 'string';
+                }
+
+                return [
+                    'name' => $attribute->name,
+                    'label' => __(str($attribute->name)->headline()->toString()),
+                    'type' => $type,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
     public function buildWidgetQuery(array $userFilters): Builder
     {
         $originalUserFilters = $this->userFilters;
@@ -49,47 +83,6 @@ trait HasWidgetGeneration
         return $query;
     }
 
-    public function openWidgetWizard(): void
-    {
-        session()->put('widget-wizard-filters', $this->userFilters);
-
-        $this->redirectRoute('widgets.create', ['datatable' => static::class], navigate: true);
-    }
-
-    public function buildAvailableColumns(): array
-    {
-        $numericTypes = ['integer', 'bigint', 'smallint', 'tinyint', 'mediumint', 'decimal', 'float', 'double'];
-        $dateTypes = ['date', 'datetime', 'timestamp'];
-
-        return AttributeFinder::forModel($this->getModel())
-            ->filter(fn (Attribute $attribute) => ! $attribute->virtual && ! $attribute->appended)
-            ->map(function (Attribute $attribute) use ($numericTypes, $dateTypes) {
-                $dbType = strtolower($attribute->type ?? '');
-                $cast = strtolower($attribute->cast ?? '');
-
-                $isNumeric = collect($numericTypes)->contains(fn (string $t) => str_starts_with($dbType, $t));
-                $isDate = collect($dateTypes)->contains(fn (string $t) => str_starts_with($dbType, $t));
-                $isBoolean = $attribute->phpType === 'bool' || in_array($cast, ['bool', 'boolean'], true);
-                $isForeignKey = $attribute->name === 'id' || str_ends_with($attribute->name, '_id');
-
-                if ($isNumeric && ! $isBoolean && ! $isForeignKey) {
-                    $type = 'numeric';
-                } elseif ($isDate) {
-                    $type = 'date';
-                } else {
-                    $type = 'string';
-                }
-
-                return [
-                    'name' => $attribute->name,
-                    'label' => __(str($attribute->name)->headline()->toString()),
-                    'type' => $type,
-                ];
-            })
-            ->values()
-            ->all();
-    }
-
     public function getSidebarTabs(): array
     {
         $tabs = parent::getSidebarTabs();
@@ -113,5 +106,12 @@ trait HasWidgetGeneration
         array_splice($tabs, $insertAt, 0, [$widgetTab]);
 
         return $tabs;
+    }
+
+    public function openWidgetWizard(): void
+    {
+        session()->put('widget-wizard-filters', $this->userFilters);
+
+        $this->redirectRoute('widgets.create', ['datatable' => static::class], navigate: true);
     }
 }

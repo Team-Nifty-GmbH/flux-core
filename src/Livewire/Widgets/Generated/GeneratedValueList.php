@@ -7,6 +7,7 @@ use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Traits\Livewire\Widget\HasGeneratedWidgetConfig;
 use FluxErp\Traits\Livewire\Widget\IsTimeFrameAwareWidget;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Renderless;
 
 class GeneratedValueList extends ValueList implements HasWidgetOptions
@@ -38,22 +39,25 @@ class GeneratedValueList extends ValueList implements HasWidgetOptions
             return;
         }
 
-        $columns = $this->getConfigValue('columns', []);
+        $columns = array_values(array_filter(
+            $this->getConfigValue('columns', []),
+            fn (mixed $column) => is_string($column) && ! is_null($this->validateColumnName($column))
+        ));
         $sortColumn = $this->getConfigValue('sort_column');
         $sortDirection = $this->getConfigValue('sort_direction', 'desc');
-        $limit = $this->getConfigValue('limit', $this->limit);
-        $dateColumn = $this->getDateColumn();
+        $limit = max(1, min(100, (int) $this->getConfigValue('limit', $this->limit)));
+        $dateColumn = $this->validateColumnName($this->getDateColumn());
 
         if ($this->isTimeframeAware() && $dateColumn) {
             $query->whereBetween($dateColumn, [$this->getStart(), $this->getEnd()]);
         }
 
         $model = $query->getModel();
-        $selectColumns = array_merge([$model->getKeyName()], $columns);
 
-        $query->select($selectColumns);
+        $query->select(array_merge([$model->getKeyName()], $columns));
 
         $sortColumn = $this->validateColumnName($sortColumn);
+
         if ($sortColumn && in_array($sortDirection, ['asc', 'desc'])) {
             $query->orderBy($sortColumn, $sortDirection);
         }
@@ -63,14 +67,12 @@ class GeneratedValueList extends ValueList implements HasWidgetOptions
         $hasColumns = count($columns) > 0;
         $lastColumn = last($columns);
 
-        $this->items = $results->map(function ($item) use ($columns, $hasColumns, $lastColumn) {
-            return [
-                'label' => $hasColumns ? strip_tags($this->formatColumnValue($columns[0], $item->{$columns[0]})) : '',
-                'subLabel' => count($columns) > 2 ? strip_tags($this->formatColumnValue($columns[1], $item->{$columns[1]})) : null,
-                'value' => $hasColumns ? strip_tags($this->formatColumnValue($lastColumn, $item->{$lastColumn})) : '',
-                'growthRate' => null,
-            ];
-        })->toArray();
+        $this->items = $results->map(fn (Model $item) => [
+            'label' => $hasColumns ? strip_tags($this->formatColumnValue($columns[0], $item->{$columns[0]})) : '',
+            'subLabel' => count($columns) > 2 ? strip_tags($this->formatColumnValue($columns[1], $item->{$columns[1]})) : null,
+            'value' => $hasColumns ? strip_tags($this->formatColumnValue($lastColumn, $item->{$lastColumn})) : '',
+            'growthRate' => null,
+        ])->toArray();
     }
 
     public function options(): array

@@ -8,6 +8,7 @@ use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Widget as WidgetModel;
 use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -238,8 +239,8 @@ trait RendersWidgets
         return resolve_static(WidgetModel::class, 'query')
             ->where('component_name', 'like', $generatedPrefix . '%')
             ->where('dashboard_component', static::class)
-            ->where(function ($query) use ($userMorphClass, $userId): void {
-                $query->where(function ($query) use ($userMorphClass, $userId): void {
+            ->where(function (Builder $query) use ($userMorphClass, $userId): void {
+                $query->where(function (Builder $query) use ($userMorphClass, $userId): void {
                     $query->where('widgetable_type', $userMorphClass)
                         ->where('widgetable_id', $userId);
                 })->orWhere('config->is_shared', true);

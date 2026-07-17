@@ -16,8 +16,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Livewire\Livewire;
 use ReflectionClass;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Symfony\Component\Finder\Finder;
 use Throwable;
 
@@ -75,19 +75,12 @@ class GenerateWidgetWizard extends Component
 
     public bool $isShared = false;
 
-    public array $previewData = [];
-
     public function mount(): void
     {
-        if (! $this->datatable || ! class_exists($this->datatable)) {
-            session()->forget('widget-wizard-state');
-
-            $this->redirectRoute('dashboard', navigate: true);
-
-            return;
-        }
-
-        if (! in_array(HasWidgetGeneration::class, class_uses_recursive($this->datatable))) {
+        if (! $this->datatable
+            || ! class_exists($this->datatable)
+            || ! in_array(HasWidgetGeneration::class, class_uses_recursive($this->datatable))
+        ) {
             session()->forget('widget-wizard-state');
 
             $this->redirectRoute('dashboard', navigate: true);
@@ -125,183 +118,11 @@ class GenerateWidgetWizard extends Component
         return view('flux::livewire.datatables.generate-widget-wizard');
     }
 
-    public function generatePreview(): void
-    {
-        $config = $this->getPreviewConfig();
-        $className = match ($this->widgetType) {
-            'value_box' => GeneratedValueBox::class,
-            'bar_chart', 'pie_chart' => GeneratedBarChart::class,
-            'line_chart', 'area_chart' => GeneratedLineChart::class,
-            'value_list' => GeneratedValueList::class,
-            default => null,
-        };
-
-        if (is_null($className)) {
-            return;
-        }
-
-        try {
-            $widget = Livewire::new($className, ['config' => $config]);
-
-            $this->previewData = match ($this->widgetType) {
-                'value_box' => [
-                    'type' => 'value_box',
-                    'sum' => $widget->sum,
-                    'previousSum' => $widget->previousSum,
-                    'growthRate' => $widget->growthRate,
-                ],
-                'bar_chart', 'pie_chart', 'line_chart', 'area_chart' => [
-                    'type' => $this->widgetType,
-                    'series' => $widget->series ?? [],
-                    'categories' => data_get($widget->xaxis, 'categories', []),
-                ],
-                'value_list' => [
-                    'type' => 'value_list',
-                    'items' => $widget->items ?? [],
-                ],
-                default => [],
-            };
-        } catch (Throwable $e) {
-            $this->previewData = ['type' => 'error', 'message' => $e->getMessage()];
-        }
-    }
-
-    public function nextStep(): void
-    {
-        match ($this->step) {
-            2 => $this->validate(['widgetType' => 'required|in:value_box,bar_chart,line_chart,area_chart,pie_chart,value_list']),
-            3 => $this->validateStepThree(),
-            4 => $this->validate([
-                'name' => 'required|string|max:255',
-                'targetDashboard' => ['required', 'string', 'in:' . implode(',', array_keys($this->getAvailableDashboards()))],
-            ]),
-            default => null,
-        };
-
-        $this->step = min($this->step + 1, 5);
-
-        if ($this->step === 5) {
-            session()->put('widget-preview-config', [
-                'component' => $this->resolveComponentName(),
-                'config' => $this->getPreviewConfig(),
-            ]);
-        }
-
-        $this->persistWizardState();
-    }
-
-    public function previousStep(): void
-    {
-        $this->step = max($this->step - 1, $this->minStep());
-        $this->persistWizardState();
-    }
-
-    public function getPreviewConfig(): array
-    {
-        return array_filter([
-            'type' => $this->widgetType,
-            'datatable' => $this->datatable,
-            'name' => $this->name,
-            'filters' => $this->userFilters,
-            'value_column' => $this->valueColumn,
-            'aggregate' => $this->aggregate,
-            'group_column' => $this->groupColumn,
-            'date_column' => in_array($this->widgetType, ['line_chart', 'area_chart'])
-                ? $this->dateColumn
-                : ($this->timeframeAware ? $this->timeframeDateColumn : null),
-            'timeframe_aware' => $this->timeframeAware,
-            'show_totals' => $this->showTotals,
-            'horizontal_bars' => $this->horizontalBars,
-            'curve_style' => $this->curveStyle,
-            'time_grouping' => $this->timeGrouping,
-            'pie_style' => $this->pieStyle,
-            'columns' => $this->selectedColumns ?: null,
-            'sort_column' => $this->sortColumn,
-            'sort_direction' => $this->sortDirection,
-            'limit' => $this->widgetType === 'value_list' ? $this->limit : null,
-            'is_shared' => $this->isShared,
-        ], fn ($v) => ! is_null($v));
-    }
-
     public function cancel(): void
     {
         session()->forget('widget-wizard-state');
 
         $this->redirectRoute('dashboard', navigate: true);
-    }
-
-    public function resetWizard(): void
-    {
-        session()->forget('widget-wizard-state');
-
-        $this->reset([
-            'widgetType',
-            'showTotals',
-            'horizontalBars',
-            'curveStyle',
-            'timeGrouping',
-            'pieStyle',
-            'valueColumn',
-            'aggregate',
-            'groupColumn',
-            'dateColumn',
-            'selectedColumns',
-            'sortColumn',
-            'sortDirection',
-            'limit',
-            'name',
-            'targetDashboard',
-            'timeframeAware',
-            'timeframeDateColumn',
-            'isShared',
-            'previewData',
-        ]);
-
-        $this->step = $this->minStep();
-    }
-
-    public function save(): void
-    {
-        $this->validate([
-            'widgetType' => 'required|in:value_box,bar_chart,line_chart,area_chart,pie_chart,value_list',
-            'name' => 'required|string|max:255',
-            'targetDashboard' => ['required', 'string', 'in:' . implode(',', array_keys($this->getAvailableDashboards()))],
-        ]);
-
-        auth()->user()->widgets()->create([
-            'component_name' => $this->resolveComponentName(),
-            'dashboard_component' => $this->targetDashboard,
-            'name' => $this->name,
-            'config' => $this->getPreviewConfig(),
-            'width' => 2,
-            'height' => 2,
-            'order_column' => 0,
-            'order_row' => 0,
-        ]);
-
-        session()->forget('widget-wizard-state');
-
-        $this->toast()
-            ->success(__('Widget created successfully.'))
-            ->send();
-
-        $this->redirectRoute('dashboard', navigate: true);
-    }
-
-    public function getNumericColumns(): array
-    {
-        return array_values(array_filter(
-            $this->availableColumns,
-            fn (array $column) => data_get($column, 'type') === 'numeric'
-        ));
-    }
-
-    public function getDateColumns(): array
-    {
-        return array_values(array_filter(
-            $this->availableColumns,
-            fn (array $column) => data_get($column, 'type') === 'date'
-        ));
     }
 
     #[Computed]
@@ -347,15 +168,109 @@ class GenerateWidgetWizard extends Component
                     }
                 }
             } catch (Throwable) {
-                // Fallback
             }
         }
 
-        if (empty($dashboards)) {
+        if (! $dashboards) {
             $dashboards[\FluxErp\Livewire\Dashboard\Dashboard::class] = __('Dashboard');
         }
 
         return $dashboards;
+    }
+
+    public function getDateColumns(): array
+    {
+        return array_values(array_filter(
+            $this->availableColumns,
+            fn (array $column) => data_get($column, 'type') === 'date'
+        ));
+    }
+
+    public function getNumericColumns(): array
+    {
+        return array_values(array_filter(
+            $this->availableColumns,
+            fn (array $column) => data_get($column, 'type') === 'numeric'
+        ));
+    }
+
+    public function getPreviewConfig(): array
+    {
+        return array_filter([
+            'type' => $this->widgetType,
+            'datatable' => $this->datatable,
+            'name' => $this->name,
+            'filters' => $this->userFilters,
+            'value_column' => $this->valueColumn,
+            'aggregate' => $this->aggregate,
+            'group_column' => $this->groupColumn,
+            'date_column' => in_array($this->widgetType, ['line_chart', 'area_chart'])
+                ? ($this->dateColumn ?? $this->groupColumn)
+                : ($this->timeframeAware ? $this->timeframeDateColumn : null),
+            'timeframe_aware' => $this->timeframeAware,
+            'show_totals' => $this->showTotals,
+            'horizontal_bars' => $this->horizontalBars,
+            'curve_style' => $this->curveStyle,
+            'time_grouping' => $this->timeGrouping,
+            'pie_style' => $this->pieStyle,
+            'columns' => $this->selectedColumns ?: null,
+            'sort_column' => $this->sortColumn,
+            'sort_direction' => $this->sortDirection,
+            'limit' => $this->widgetType === 'value_list' ? $this->limit : null,
+            'is_shared' => $this->isShared && $this->canShareWidgets(),
+        ], fn (mixed $value) => ! is_null($value));
+    }
+
+    public function nextStep(): void
+    {
+        match ($this->step) {
+            2 => $this->validate(['widgetType' => 'required|in:value_box,bar_chart,line_chart,area_chart,pie_chart,value_list']),
+            3 => $this->validateStepThree(),
+            4 => $this->validate([
+                'name' => 'required|string|max:255',
+                'targetDashboard' => ['required', 'string', 'in:' . implode(',', array_keys($this->getAvailableDashboards()))],
+            ]),
+            default => null,
+        };
+
+        $this->step = min($this->step + 1, 5);
+
+        $this->persistWizardState();
+    }
+
+    public function previousStep(): void
+    {
+        $this->step = max($this->step - 1, $this->minStep());
+        $this->persistWizardState();
+    }
+
+    public function resetWizard(): void
+    {
+        session()->forget('widget-wizard-state');
+
+        $this->reset([
+            'widgetType',
+            'showTotals',
+            'horizontalBars',
+            'curveStyle',
+            'timeGrouping',
+            'pieStyle',
+            'valueColumn',
+            'aggregate',
+            'groupColumn',
+            'dateColumn',
+            'selectedColumns',
+            'sortColumn',
+            'sortDirection',
+            'limit',
+            'name',
+            'targetDashboard',
+            'timeframeAware',
+            'timeframeDateColumn',
+            'isShared',
+        ]);
+
+        $this->step = $this->minStep();
     }
 
     public function resolveComponentName(): string
@@ -369,32 +284,52 @@ class GenerateWidgetWizard extends Component
             'value_list' => GeneratedValueList::class,
         ];
 
-        $class = $classMap[$this->widgetType] ?? throw new InvalidArgumentException("Unknown widget type: {$this->widgetType}");
+        $class = data_get($classMap, $this->widgetType)
+            ?? throw new InvalidArgumentException("Unknown widget type: {$this->widgetType}");
 
         return app('livewire.finder')->normalizeName($class);
+    }
+
+    public function save(): void
+    {
+        $this->validate([
+            'widgetType' => 'required|in:value_box,bar_chart,line_chart,area_chart,pie_chart,value_list',
+            'name' => 'required|string|max:255',
+            'targetDashboard' => ['required', 'string', 'in:' . implode(',', array_keys($this->getAvailableDashboards()))],
+        ]);
+
+        auth()->user()->widgets()->create([
+            'component_name' => $this->resolveComponentName(),
+            'dashboard_component' => $this->targetDashboard,
+            'name' => $this->name,
+            'config' => $this->getPreviewConfig(),
+            'width' => 2,
+            'height' => 2,
+            'order_column' => 0,
+            'order_row' => 0,
+        ]);
+
+        session()->forget('widget-wizard-state');
+
+        $this->toast()
+            ->success(__('Widget created successfully.'))
+            ->send();
+
+        $this->redirectRoute('dashboard', navigate: true);
+    }
+
+    protected function canShareWidgets(): bool
+    {
+        try {
+            return auth()->user()->hasPermissionTo('widget.generate-share');
+        } catch (PermissionDoesNotExist) {
+            return true;
+        }
     }
 
     protected function minStep(): int
     {
         return empty($this->userFilters) ? 2 : 1;
-    }
-
-    protected function validationAttributes(): array
-    {
-        return [
-            'valueColumn' => __('Value Column'),
-            'aggregate' => __('Aggregate Function'),
-            'groupColumn' => __('X-Axis'),
-            'dateColumn' => __('Date Column'),
-            'selectedColumns' => __('Columns'),
-            'sortColumn' => __('Sort Column'),
-            'sortDirection' => __('Sort Direction'),
-            'limit' => __('Limit'),
-            'name' => __('Name'),
-            'targetDashboard' => __('Target Dashboard'),
-            'timeframeDateColumn' => __('Date Column for Timeframe'),
-            'widgetType' => __('Widget Type'),
-        ];
     }
 
     protected function persistWizardState(): void
@@ -433,5 +368,23 @@ class GenerateWidgetWizard extends Component
         };
 
         $this->validate($rules);
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'valueColumn' => __('Value Column'),
+            'aggregate' => __('Aggregate Function'),
+            'groupColumn' => __('X-Axis'),
+            'dateColumn' => __('Date Column'),
+            'selectedColumns' => __('Columns'),
+            'sortColumn' => __('Sort Column'),
+            'sortDirection' => __('Sort Direction'),
+            'limit' => __('Limit'),
+            'name' => __('Name'),
+            'targetDashboard' => __('Target Dashboard'),
+            'timeframeDateColumn' => __('Date Column for Timeframe'),
+            'widgetType' => __('Widget Type'),
+        ];
     }
 }

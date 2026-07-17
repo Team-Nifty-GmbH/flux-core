@@ -21,7 +21,7 @@
             unset($stepLabels[1]);
         }
     @endphp
-    <nav class="mb-6" aria-label="Progress">
+    <nav class="mb-6">
         <ol class="flex items-center">
             @foreach($stepLabels as $stepNumber => $stepLabel)
                 @php
@@ -281,19 +281,26 @@
                             $isDateColumn = data_get($selectedXColumn, 'type') === 'date';
                         @endphp
                         @if($isDateColumn)
-                            <x-select.styled
-                                searchable
-                                wire:model="timeGrouping"
-                                :label="__('Group by')"
-                                :options="[
-                                    ['value' => 'day', 'label' => __('Day')],
-                                    ['value' => 'week', 'label' => __('Week')],
-                                    ['value' => 'month', 'label' => __('Month')],
-                                    ['value' => 'quarter', 'label' => __('Quarter')],
-                                    ['value' => 'year', 'label' => __('Year')],
-                                ]"
-                                select="label:label|value:value"
-                            />
+                            <div
+                                x-show="
+                                    ['line_chart', 'area_chart'].includes(
+                                        $wire.widgetType,
+                                    )
+                                "
+                                x-cloak
+                            >
+                                <x-select.styled
+                                    searchable
+                                    wire:model="timeGrouping"
+                                    :label="__('Group by')"
+                                    :options="[
+                                        ['value' => 'day', 'label' => __('Day')],
+                                        ['value' => 'month', 'label' => __('Month')],
+                                        ['value' => 'year', 'label' => __('Year')],
+                                    ]"
+                                    select="label:label|value:value"
+                                />
+                            </div>
                         @endif
                         <x-select.styled
                             searchable

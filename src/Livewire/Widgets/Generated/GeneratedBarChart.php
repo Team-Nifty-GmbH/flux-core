@@ -27,6 +27,14 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
     }
 
     #[Renderless]
+    public function calculateByTimeFrame(): void
+    {
+        $this->skipRender();
+        $this->calculateChart();
+        $this->updateData();
+    }
+
+    #[Renderless]
     public function calculateChart(): void
     {
         $query = $this->buildFilteredQuery();
@@ -52,18 +60,10 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
             $query->whereBetween($dateColumn, [$this->getStart(), $this->getEnd()]);
         }
 
-        $aggregateExpression = match ($aggregate) {
-            'sum' => "SUM(`{$valueColumn}`) as aggregate_value",
-            'avg' => "AVG(`{$valueColumn}`) as aggregate_value",
-            'min' => "MIN(`{$valueColumn}`) as aggregate_value",
-            'max' => "MAX(`{$valueColumn}`) as aggregate_value",
-            default => 'COUNT(*) as aggregate_value',
-        };
-
         $results = $query
             ->reorder()
             ->select($groupColumn)
-            ->selectRaw($aggregateExpression)
+            ->selectRaw($this->buildAggregateExpression($aggregate, $valueColumn))
             ->groupBy($groupColumn)
             ->orderByDesc('aggregate_value')
             ->get();
@@ -73,20 +73,24 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
         $rawGroupValues = $results->pluck($groupColumn);
         $labelMap = $this->resolveLabelsForGroup($groupColumn, $rawGroupValues);
         $categories = $rawGroupValues
-            ->map(fn ($value) => $labelMap[(string) $value] ?? (string) $value)
+            ->map(fn (mixed $value) => $labelMap[(string) $value] ?? (string) $value)
             ->toArray();
 
         if ($isPie) {
             $pieStyle = $this->getConfigValue('pie_style', 'pie');
             $this->chart = ['type' => $pieStyle];
-            $this->series = $results->pluck('aggregate_value')->map(fn ($v) => round((float) $v, 2))->toArray();
+            $this->series = $results->pluck('aggregate_value')
+                ->map(fn (mixed $value) => round((float) $value, 2))
+                ->toArray();
             $this->labels = $categories;
             $this->showTotals = false;
         } else {
             $this->series = [
                 [
                     'name' => $this->title() ?? static::getLabel(),
-                    'data' => $results->pluck('aggregate_value')->map(fn ($v) => round((float) $v, 2))->toArray(),
+                    'data' => $results->pluck('aggregate_value')
+                        ->map(fn (mixed $value) => round((float) $value, 2))
+                        ->toArray(),
                 ],
             ];
 
@@ -111,14 +115,6 @@ class GeneratedBarChart extends BarChart implements HasWidgetOptions
         $this->xAxisFormatterType = str_ends_with($groupColumn, '_id') || $groupColumn === 'id'
             ? 'string'
             : $this->resolveJsFormatterName($groupColumn);
-    }
-
-    #[Renderless]
-    public function calculateByTimeFrame(): void
-    {
-        $this->skipRender();
-        $this->calculateChart();
-        $this->updateData();
     }
 
     public function options(): array

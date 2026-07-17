@@ -23,6 +23,12 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
     }
 
     #[Renderless]
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateSum();
+    }
+
+    #[Renderless]
     public function calculateSum(): void
     {
         $query = $this->buildFilteredQuery();
@@ -32,9 +38,13 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
         }
 
         $aggregate = $this->getAggregate();
-        $column = $this->getValueColumn();
-        $dateColumn = $this->getDateColumn();
+        $column = $this->validateColumnName($this->getValueColumn());
+        $dateColumn = $this->validateColumnName($this->getDateColumn());
         $isTimeframeAware = $this->isTimeframeAware() && $dateColumn;
+
+        if ($aggregate !== 'count' && is_null($column)) {
+            return;
+        }
 
         if ($isTimeframeAware) {
             $previousQuery = $query->clone();
@@ -60,16 +70,10 @@ class GeneratedValueBox extends ValueBox implements HasWidgetOptions
                 ? strip_tags($this->formatColumnValue($column, $rawPrevious))
                 : $rawPrevious;
 
-            $this->growthRate = $rawPrevious !== 0
-                ? round((($rawSum - $rawPrevious) / abs($rawPrevious)) * 100, 2)
+            $this->growthRate = (float) $rawPrevious !== 0.0
+                ? round((((float) $rawSum - (float) $rawPrevious) / abs((float) $rawPrevious)) * 100, 2)
                 : null;
         }
-    }
-
-    #[Renderless]
-    public function calculateByTimeFrame(): void
-    {
-        $this->calculateSum();
     }
 
     public function options(): array
