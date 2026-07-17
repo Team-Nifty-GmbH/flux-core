@@ -5,6 +5,7 @@ namespace FluxErp\Jobs\Accounting;
 use Cron\CronExpression;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Console\Scheduling\Repeatable;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\ContactBankConnection;
@@ -90,6 +91,12 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
 
     protected function findMatchingOrders(Transaction $transaction, Collection $invoiceNumberPatterns): Collection
     {
+        $profileChild = $this->findOrderBySubscriptionProfile($transaction);
+
+        if ($profileChild) {
+            return collect([$profileChild]);
+        }
+
         $contactId = resolve_static(ContactBankConnection::class, 'query')
             ->latest()
             ->where('iban', $transaction->counterpart_iban)
@@ -250,6 +257,54 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
                 fn (Order $order) => $contactId && $order->contact_id == $contactId ? 0 : 1,
             ])
             ->values();
+    }
+
+    protected function findOrderBySubscriptionProfile(Transaction $transaction): ?Order
+    {
+        $normalizedIban = str_replace(' ', '', strtoupper($transaction->counterpart_iban ?? ''));
+        $purpose = strtolower($transaction->purpose ?? '');
+
+        $contracts = resolve_static(Order::class, 'query')
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query
+                    ->where('is_active', true)
+                    ->whereIn('order_type_enum', [
+                        OrderTypeEnum::Subscription->value,
+                        OrderTypeEnum::PurchaseSubscription->value,
+                    ])
+            )
+            ->where(function (Builder $query): void {
+                $query->whereNotNull('iban')
+                    ->orWhereNotNull('payment_purpose_pattern');
+            })
+            ->get(['id', 'iban', 'payment_purpose_pattern']);
+
+        $matching = $contracts->filter(function (Order $contract) use ($normalizedIban, $purpose): bool {
+            $ibanMatches = $contract->iban
+                && $normalizedIban
+                && str_replace(' ', '', strtoupper($contract->iban)) === $normalizedIban;
+            $patternMatches = $contract->payment_purpose_pattern
+                && $purpose
+                && str_contains($purpose, strtolower($contract->payment_purpose_pattern));
+
+            if ($contract->iban && $contract->payment_purpose_pattern) {
+                return $ibanMatches && $patternMatches;
+            }
+
+            return $contract->iban ? $ibanMatches : $patternMatches;
+        });
+
+        // prefer a purpose-pattern hit when several contracts share the creditor iban
+        $contract = $matching->sortByDesc(
+            fn (Order $contract) => $contract->payment_purpose_pattern ? 1 : 0
+        )->first();
+
+        return $contract
+            ?->createdOrders()
+            ->whereNot('balance', 0)
+            ->orderBy('invoice_date')
+            ->first();
     }
 
     protected function loadInvoiceNumberPatterns(): Collection
