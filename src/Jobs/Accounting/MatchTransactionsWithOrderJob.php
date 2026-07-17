@@ -29,6 +29,8 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable;
 
+    protected ?Collection $subscriptionContracts = null;
+
     public function __construct(
         public ?array $transactionIds = null
     ) {}
@@ -264,7 +266,7 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
         $normalizedIban = str_replace(' ', '', strtoupper($transaction->counterpart_iban ?? ''));
         $purpose = strtolower($transaction->purpose ?? '');
 
-        $contracts = resolve_static(Order::class, 'query')
+        $contracts = $this->subscriptionContracts ??= resolve_static(Order::class, 'query')
             ->whereHas(
                 'orderType',
                 fn (Builder $query) => $query
