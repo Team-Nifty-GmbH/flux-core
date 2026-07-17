@@ -16,6 +16,7 @@
                         :text="__('Approve')"
                         color="emerald"
                         wire:click="approve()"
+                        loading="approve()"
                         icon="check"
                     />
                 @endcanAction
@@ -27,6 +28,7 @@
                         :text="__('Reject')"
                         color="red"
                         wire:click="reject()"
+                        loading="reject()"
                         icon="x-mark"
                         x-bind:disabled="!$wire.absenceRequestForm.comment"
                     />
@@ -39,6 +41,7 @@
                         :text="__('Revoke')"
                         color="secondary"
                         wire:click="revoke()"
+                        loading="revoke()"
                         icon="no-symbol"
                         x-bind:disabled="!$wire.absenceRequestForm.comment"
                     />

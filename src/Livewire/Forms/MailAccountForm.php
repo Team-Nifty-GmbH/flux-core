@@ -16,7 +16,7 @@ class MailAccountForm extends FluxForm
 {
     public ?string $email = null;
 
-    public string $encryption = 'ssl';
+    public ?string $encryption = 'ssl';
 
     public bool $has_valid_certificate = true;
 
@@ -33,7 +33,7 @@ class MailAccountForm extends FluxForm
 
     public ?string $password = null;
 
-    public int $port = 993;
+    public ?int $port = 993;
 
     public ?string $protocol = 'imap';
 

@@ -51,7 +51,7 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
     public function calculateChart(): void
     {
         $allStates = TicketState::all();
-        $endStates = $this->getEndStates($allStates);
+        $endStates = TicketState::endStateKeys();
 
         $topCustomers = resolve_static(Address::class, 'query')
             ->join('tickets', function (JoinClause $join): void {
@@ -183,19 +183,11 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
             fn (Builder $query) => $query
                 ->where('authenticatable_type', $authenticatableType)
                 ->whereIntegerInRaw('authenticatable_id', $authenticatableIds)
-                ->whereNotIn('state', $this->getEndStates()),
+                ->whereNotIn('state', TicketState::endStateKeys()),
             __('Tickets by :customer', ['customer' => $name]),
         )
             ->store();
 
         $this->redirectRoute('tickets', navigate: true);
-    }
-
-    protected function getEndStates(?Collection $allStates = null): array
-    {
-        return ($allStates ?? TicketState::all())
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
     }
 }

@@ -6,27 +6,66 @@ use Exception;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
+use FluxErp\Contracts\HandlesSharedFiles;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Tenant;
 use FluxErp\Rulesets\PurchaseInvoice\CreatePurchaseInvoiceRuleset;
+use FluxErp\Traits\Action\HasSharedFileDefaults;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use SplFileInfo;
 
-class CreatePurchaseInvoice extends FluxAction
+class CreatePurchaseInvoice extends FluxAction implements HandlesSharedFiles
 {
+    use HasSharedFileDefaults;
+
     public static function models(): array
     {
         return [PurchaseInvoice::class];
     }
 
+    protected static function acceptedMimeTypes(): array
+    {
+        return [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'application/xml',
+            'text/xml',
+        ];
+    }
+
     protected function getRulesets(): string|array
     {
         return CreatePurchaseInvoiceRuleset::class;
+    }
+
+    public function handleSharedFiles(array $files): ?string
+    {
+        $exceptions = [];
+        $created = 0;
+
+        foreach ($files as $file) {
+            try {
+                static::make(['media' => $file])
+                    ->validate()
+                    ->execute();
+
+                $created++;
+            } catch (ValidationException $e) {
+                $exceptions[] = $e;
+            }
+        }
+
+        if (! $created && $exceptions) {
+            throw $exceptions[0];
+        }
+
+        return route('accounting.purchase-invoices', absolute: false);
     }
 
     public function performAction(): PurchaseInvoice

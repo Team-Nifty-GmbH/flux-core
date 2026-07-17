@@ -35,13 +35,7 @@ class UnassignedTickets extends MyTickets
         return resolve_static(Ticket::class, 'query')
             ->whereDoesntHave('users')
             ->with('authenticatable:id,name')
-            ->whereNotIn(
-                'state',
-                TicketState::all()
-                    ->filter(fn (string $state): bool => $state::$isEndState)
-                    ->keys()
-                    ->toArray()
-            )
+            ->whereNotIn('state', TicketState::endStateKeys())
             ->orderByRaw("state = 'escalated' DESC")
             ->orderBy('created_at')
             ->limit($this->limit + 1)

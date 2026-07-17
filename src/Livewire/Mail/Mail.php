@@ -53,6 +53,12 @@ class Mail extends CommunicationList
     }
 
     #[Renderless]
+    public function composeMail(): void
+    {
+        $this->dispatch('create', values: [])->to('edit-mail');
+    }
+
+    #[Renderless]
     public function createLead(Communication $communication): void
     {
         resolve_static(CreateLead::class, 'canPerformAction');

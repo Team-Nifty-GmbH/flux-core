@@ -2,17 +2,26 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasApiResponse;
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Task\TaskList;
+use FluxErp\Models\Task;
 use FluxErp\States\Task\TaskState;
+use FluxErp\Traits\Livewire\Widget\RespondsToApiRequests;
 use FluxErp\Traits\Livewire\Widget\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class MyTasks extends Component
+class MyTasks extends Component implements HasApiResponse, HasWidgetOptions
 {
-    use Widgetable;
+    use RespondsToApiRequests, Widgetable;
 
     public int $limit = 25;
 
@@ -54,9 +63,60 @@ class MyTasks extends Component
         $this->limit += 25;
     }
 
+    #[Renderless]
+    public function options(): array
+    {
+        return [
+            [
+                'label' => __('Show'),
+                'method' => 'showInTaskList',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function showInTaskList(): void
+    {
+        $userId = auth()->id();
+        $endStates = TaskState::endStateKeys();
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(TaskList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->assignedTo($userId)
+                ->whereNotIn('state', $endStates),
+            static::getLabel()
+        )
+            ->store();
+
+        $this->redirectRoute('tasks', navigate: true);
+    }
+
     public function placeholder(): View|Factory
     {
         return view('flux::livewire.placeholders.horizontal-bar');
+    }
+
+    public function toApiResponse(): array
+    {
+        return $this->getTasks()
+            ->take($this->limit)
+            ->map(fn (Task $task): array => [
+                'id' => $task->getKey(),
+                'name' => $task->name,
+                'state' => $task->state::$name,
+                'priority' => $task->priority,
+                'due_date' => $task->due_date?->format('Y-m-d'),
+                'url' => $task->getUrl(),
+            ])
+            ->toArray();
+    }
+
+    protected function apiRules(): array
+    {
+        return [
+            'limit' => ['integer', 'min:1'],
+        ];
     }
 
     protected function getTasks(): Collection
@@ -65,7 +125,7 @@ class MyTasks extends Component
             ->user()
             ->tasks()
             ->with(['project:id,name', 'model'])
-            ->whereNotIn('state', $this->getEndStates())
+            ->whereNotIn('state', TaskState::endStateKeys())
             ->orderByDesc('priority')
             ->orderByRaw('ISNULL(due_date), due_date ASC')
             ->limit($this->limit + 1)
@@ -81,13 +141,5 @@ class MyTasks extends Component
                 'model_type',
                 'model_id',
             ]);
-    }
-
-    protected function getEndStates(): array
-    {
-        return TaskState::all()
-            ->filter(fn (string $state): bool => $state::$isEndState)
-            ->keys()
-            ->toArray();
     }
 }

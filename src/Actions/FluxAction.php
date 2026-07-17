@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions;
 
+use FluxErp\Contracts\SupportsBulkExecution;
 use FluxErp\Models\Permission;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
@@ -203,15 +204,19 @@ abstract class FluxAction
             }
         }
 
+        $isBulk = $this instanceof SupportsBulkExecution
+            && count($this->data) > 0
+            && array_is_list($this->data);
+
         // Only wrap in a transaction if not already inside one. Nested actions
         // (e.g. CreateOrder calling CreateOrderPosition) would otherwise create
         // deeply nested savepoints whose retry logic can desynchronize Laravel's
         // transaction counter — breaking RefreshDatabase rollback in tests and
         // risking inconsistent state on deadlock retry in production.
         if (DB::transactionLevel() === 0) {
-            DB::transaction(fn () => $this->result = $this->performAction(), 5);
+            DB::transaction(fn () => $this->bulkPerformAction($isBulk), 5);
         } else {
-            $this->result = $this->performAction();
+            $this->bulkPerformAction($isBulk);
         }
 
         if ($current) {
@@ -300,13 +305,38 @@ abstract class FluxAction
             $this->setRulesFromRulesets();
         }
 
-        $this->fireActionEvent(event: 'preparingForValidation');
-        $this->prepareForValidation();
+        if ($this instanceof SupportsBulkExecution
+            && count($this->data) > 0
+            && array_is_list($this->data)
+        ) {
+            $bulk = $this->data;
+            $data = [];
 
-        if ($this->fireActionEvent(event: 'validating') !== false) {
-            $this->validateData();
+            foreach ($bulk as $item) {
+                $this->data = $item;
 
-            $this->fireActionEvent(event: 'validated', halt: false);
+                $this->fireActionEvent(event: 'preparingForValidation');
+                $this->prepareForValidation();
+
+                if ($this->fireActionEvent(event: 'validating') !== false) {
+                    $this->validateData();
+
+                    $this->fireActionEvent(event: 'validated', halt: false);
+                }
+
+                $data[] = $this->data;
+            }
+
+            $this->data = $data;
+        } else {
+            $this->fireActionEvent(event: 'preparingForValidation');
+            $this->prepareForValidation();
+
+            if ($this->fireActionEvent(event: 'validating') !== false) {
+                $this->validateData();
+
+                $this->fireActionEvent(event: 'validated', halt: false);
+            }
         }
 
         return $this;
@@ -338,5 +368,22 @@ abstract class FluxAction
     protected function validateData(): void
     {
         $this->data = Validator::validate($this->getData(), $this->getRules());
+    }
+
+    final protected function bulkPerformAction(bool $isBulk): void
+    {
+        if ($isBulk) {
+            $bulk = $this->data;
+            $this->result = [];
+
+            foreach ($bulk as $data) {
+                $this->data = $data;
+                $this->result[] = $this->performAction();
+            }
+
+            $this->data = $bulk;
+        } else {
+            $this->result = $this->performAction();
+        }
     }
 }

@@ -22,6 +22,7 @@
                         <x-slot:footer>
                             <x-button
                                 wire:click="resetPassword()"
+                                loading="resetPassword()"
                                 color="indigo"
                                 class="w-full"
                                 :text="__('Reset password')"
@@ -149,6 +150,8 @@
                                     ></x-button>
                                 </div>
                             @endif
+
+                            @stack('auth-login-actions')
                         </form>
                         @section('passkey-login')
                             @if (Route::hasMacro('passkeys'))

@@ -3,15 +3,55 @@
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Facades\Menu;
 use FluxErp\Livewire\Navigation;
+use FluxErp\Models\Notification;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
+function createNavigationNotification(?string $route): Notification
+{
+    return test()->user->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => 'test',
+        'data' => is_null($route) ? [] : ['accept' => ['route' => $route]],
+    ]);
+}
+
 test('renders successfully', function (): void {
     Livewire::test(Navigation::class)
         ->assertOk();
+});
+
+test('passes unread notification counts per menu area to the view', function (): void {
+    createNavigationNotification('tickets');
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertViewHas('notificationCounts', fn (array $counts): bool => ($counts['tickets'] ?? 0) === 1);
+});
+
+test('passes unread notification counts per sub menu route to the view', function (): void {
+    createNavigationNotification('accounting.payment-reminders');
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertViewHas(
+            'childNotificationCounts',
+            fn (array $counts): bool => ($counts['accounting.payment-reminders'] ?? 0) === 1
+        );
+});
+
+test('counts a sub menu detail notification on its closest sub menu route', function (): void {
+    createNavigationNotification('accounting.payment-reminders.show');
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertViewHas(
+            'childNotificationCounts',
+            fn (array $counts): bool => ($counts['accounting.payment-reminders'] ?? 0) === 1
+        );
 });
 
 test('shows order types', function (): void {
@@ -55,4 +95,12 @@ test('navigation cache is invalidated when user permissions change', function ()
     Livewire::actingAs($this->user)
         ->test(Navigation::class)
         ->assertSee('Cache Probe Page');
+});
+
+test('renders the sub menu notification badge for dotted route names', function (): void {
+    createNavigationNotification('accounting.payment-reminders');
+
+    Livewire::actingAs($this->user)
+        ->test(Navigation::class)
+        ->assertSeeHtml('ml-auto flex h-4 min-w-4 flex-none items-center justify-center rounded-full bg-red-500');
 });

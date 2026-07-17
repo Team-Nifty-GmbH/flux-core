@@ -69,6 +69,7 @@
                             :text="__('Delete') "
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
                             wire:click="delete()"
+                            loading="delete()"
                         />
                     @endcanAction
                     @stack('contact-detail-header-actions')

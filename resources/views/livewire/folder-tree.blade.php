@@ -27,7 +27,7 @@
                                 x-on:click="$wire.saveFolder({name: '{{ __('New folder') }}'}).then((folder) => { if (folder) addFolder(null, folder); })"
                             />
                         @endcanAction
-
+                        @stack('folder-tree-tree-actions')
                     @show
                 </x-slot:afterTree>
                 <div
@@ -129,7 +129,29 @@
                             this.selection = {}
                             this.setCollection(null)
                         },
+                        destroy() {
+                            this.$el._refreshTreeObserver?.disconnect()
+                        },
                     }"
+                    x-init="
+                        $el._refreshTreeObserver = new IntersectionObserver(
+                            (entries) => {
+                                if (
+                                    entries.some(
+                                        (entry) => entry.isIntersecting,
+                                    ) &&
+                                    $resolveModelId() !== $wire.modelId
+                                ) {
+                                    window.dispatchEvent(
+                                        new CustomEvent('refresh-tree', {
+                                            detail: { id: $resolveModelId() },
+                                        }),
+                                    );
+                                }
+                            },
+                        );
+                        $el._refreshTreeObserver.observe($el);
+                    "
                     x-on:folder-tree-select.window="treeSelect($event.detail)"
                     x-on:refresh-tree.window="
                         $wire.modelId = $event.detail.id;
@@ -183,12 +205,20 @@
                                         color="secondary"
                                         light
                                         :text="__('Add folder')"
-                                        wire:click="saveFolder({
-                                        parent_id: selection.id,
-                                        name: '{{ __('New folder') }}',
-                                        is_new: true,
-                                        children: []
-                                    }).then((folder) => { if (folder) addFolder(selectionProxy, folder); })"
+                                        x-on:click="
+                                            $wire
+                                                .saveFolder({
+                                                    parent_id: selection.id,
+                                                    name: '{{ __('New folder') }}',
+                                                    is_new: true,
+                                                    children: [],
+                                                })
+                                                .then((folder) => {
+                                                    if (folder) {
+                                                        addFolder(selectionProxy, folder)
+                                                    }
+                                                })
+                                        "
                                     />
                                 @endcanAction
                                 @canAction(\FluxErp\Actions\Media\DownloadMultipleMedia::class)
@@ -202,6 +232,7 @@
                                 @endcanAction
 
                             @show
+                            @stack('folder-tree-selection-actions')
                         </div>
                         @section('folder-tree.upload.attributes')
                             @canAction(\FluxErp\Actions\MediaFolder\UpdateMediaFolder::class)
@@ -432,6 +463,9 @@
                                             })
                                     "
                                 />
+
+                                @stack('folder-tree-file-actions')
+
                                 @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                                     <div
                                         x-cloak

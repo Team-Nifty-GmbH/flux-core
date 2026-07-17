@@ -5,6 +5,10 @@
                 return 0;
             }
 
+            if (position.is_alternative) {
+                return 0;
+            }
+
             const unitPrice = position.is_net
                 ? position.unit_net_price
                 : position.unit_gross_price;
@@ -139,6 +143,7 @@
                                         icon="trash"
                                         sm
                                         wire:click="removePosition({{ $index }})"
+                                        loading="removePosition({{ $index }})"
                                     />
                                 </div>
                             @else
@@ -151,6 +156,12 @@
                                                 <span>
                                                     {{ data_get($position, "name") }}
                                                 </span>
+                                                @if (data_get($position, "is_alternative"))
+                                                    <x-badge
+                                                        :text="__('Alternative')"
+                                                        color="red"
+                                                    />
+                                                @endif
                                                 <div
                                                     class="text-sm text-gray-600 dark:text-gray-400"
                                                 >
@@ -192,6 +203,7 @@
                                             color="red"
                                             icon="trash"
                                             wire:click="removePosition({{ $index }})"
+                                            loading="removePosition({{ $index }})"
                                         />
                                     </x-slot:actions>
                                 </x-flux::list-item>
@@ -262,7 +274,7 @@
                     color="indigo"
                     :text="$this->getTitle()"
                     wire:click="save()"
-                    loading
+                    loading="save()"
                     x-bind:disabled="
                         !$wire.replicateOrder.order_type_id ||
                         !$wire.replicateOrder.order_positions.length

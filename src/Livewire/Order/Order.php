@@ -162,6 +162,9 @@ class Order extends Component
                     ->where('is_tax_exemption', true)
                     ->get(['id', 'name'])
                     ->toArray(),
+                'canCreateCancellationConfirmation' => $this->view === 'flux::livewire.order.'
+                        . OrderTypeEnum::Subscription->value
+                    && array_key_exists('cancellation-confirmation', $this->getPrintLayouts()),
             ]
         );
     }
@@ -862,12 +865,12 @@ class Order extends Component
                 ->validate()
                 ->execute();
 
-            if ($generateDocument) {
+            if ($generateDocument || $sendEmail) {
                 $this->selectedPrintLayouts = [
                     'print' => [],
                     'email' => $sendEmail ? ['cancellation-confirmation'] : [],
                     'download' => [],
-                    'force' => ['cancellation-confirmation'],
+                    'force' => $generateDocument ? ['cancellation-confirmation'] : [],
                 ];
 
                 $this->createDocumentFromItems($order);

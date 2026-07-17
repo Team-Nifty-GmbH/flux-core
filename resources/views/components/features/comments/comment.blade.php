@@ -93,8 +93,11 @@
                                 x-cloak
                                 x-show="file.preview_url !== ''"
                                 class="h-full"
+                                data-testid="comment-attachment-preview"
                                 x-on:click="
-                                    $nuxbe.openDetailModal(file.original_url)
+                                    $nuxbe.openLightbox(file.original_url, {
+                                        title: file.name,
+                                    })
                                 "
                                 icon="eye"
                             />

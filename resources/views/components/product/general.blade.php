@@ -80,7 +80,7 @@
             />
             <div
                 class="grid grid-cols-1 gap-4 sm:grid-cols-4"
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
                 <x-number
                     x-bind:readonly="!isEditing"
@@ -157,17 +157,17 @@
                     </x-slot:label>
                 </x-number>
             </div>
-        @show
-    </x-card>
-    <x-card class="flex flex-col gap-4" :header="__('Assignment')">
-        <x-select.styled
-            multiple
-            x-bind:disabled="!isEditing"
-            wire:model.number="product.categories"
-            :label="__('Categories')"
-            select="label:label|value:id"
-            unfiltered
-            :request="[
+            @show
+            </x-card>
+            <x-card class="flex flex-col gap-4" :header="__('Assignment')">
+                <x-select.styled
+                    multiple
+                    x-bind:disabled="!isEditing"
+                    wire:model.number="product.categories"
+                    :label="__('Categories')"
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
                 'url' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',
                 'params' => [
@@ -180,27 +180,27 @@
                     ],
                 ],
             ]"
-        />
-        <x-select.styled
-            multiple
-            x-bind:disabled="!isEditing"
-            wire:model.number="product.tenants"
-            :label="__('Tenants')"
-            select="label:name|value:id"
-            :src="'logo_small_url'"
-            unfiltered
-            :request="[
+                />
+                <x-select.styled
+                    multiple
+                    x-bind:disabled="!isEditing"
+                    wire:model.number="product.tenants"
+                    :label="__('Tenants')"
+                    select="label:name|value:id"
+                    :src="'logo_small_url'"
+                    unfiltered
+                    :request="[
                 'url' => route('search', \FluxErp\Models\Tenant::class),
                 'method' => 'POST',
             ]"
-        />
-        <x-select.styled
-            multiple
-            x-bind:disabled="!isEditing"
-            wire:model.number="product.tags"
-            select="label:label|value:id"
-            unfiltered
-            :request="[
+                />
+                <x-select.styled
+                    multiple
+                    x-bind:disabled="!isEditing"
+                    wire:model.number="product.tags"
+                    select="label:label|value:id"
+                    unfiltered
+                    :request="[
                 'url' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
                 'params' => [
@@ -213,256 +213,264 @@
                     ],
                 ],
             ]"
-        >
-            <x-slot:label>
-                <div class="flex items-center gap-2">
-                    <x-label :label="__('Tags')" />
-                    @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                        <x-button.circle
-                            sm
-                            icon="plus"
-                            color="emerald"
-                            wire:click="addTag($nuxbe.promptValue())"
-                            wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
-                        />
-                    @endcanAction
-                </div>
-            </x-slot:label>
-        </x-select.styled>
-        <x-tag
-            :label="__('Search Aliases')"
-            wire:model="product.search_aliases"
-        />
-    </x-card>
-    <x-card
-        class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
-        :header="__('Product Properties')"
-        x-data="{ productPropertyGroup: null }"
-    >
-        @section('product-properties')
-            <x-modal
-                id="edit-product-properties-modal"
-                size="6xl"
-                :title="__('Edit Product Properties')"
-            >
-                <div
-                    class="flex gap-4"
-                    x-on:data-table-row-clicked="
-                        $wire.loadProductProperties(
-                            $event.detail.id ?? $event.detail.record.id,
-                        );
-                        productPropertyGroup =
-                            $event.detail.record ?? $event.detail;
-                    "
                 >
-                    <div class="grow">
-                        <livewire:product.product-property-group-list />
-                    </div>
+                    <x-slot:label>
+                        <div class="flex items-center gap-2">
+                            <x-label :label="__('Tags')" />
+                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                            <x-button.circle
+                                sm
+                                icon="plus"
+                                color="emerald"
+                                wire:click="addTag($nuxbe.promptValue())"
+                                wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
+                            />
+                            @endcanAction
+                        </div>
+                    </x-slot:label>
+                </x-select.styled>
+                <x-tag
+                    :label="__('Search Aliases')"
+                    wire:model="product.search_aliases"
+                />
+            </x-card>
+            <x-card
+                class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
+                :header="__('Product Properties')"
+                x-data="{ productPropertyGroup: null }"
+            >
+                @section('product-properties')
+                <x-modal
+                    id="edit-product-properties-modal"
+                    size="6xl"
+                    :title="__('Edit Product Properties')"
+                >
                     <div
-                        x-collapse
-                        x-show="
-                            Object.values($wire.productProperties).length > 0
+                        class="flex gap-4"
+                        x-on:data-table-row-clicked="
+                            $wire.loadProductProperties(
+                                $event.detail.id ?? $event.detail.record.id,
+                            );
+                            productPropertyGroup =
+                                $event.detail.record ?? $event.detail;
                         "
-                        x-cloak
-                        class="w-1/2"
                     >
-                        <x-card>
-                            <x-slot:header>
-                                <span
-                                    x-text="productPropertyGroup?.name"
-                                ></span>
-                            </x-slot:header>
-                            <template
-                                x-for="
-                                    productProperty in $wire.productProperties
-                                "
-                                :key="productProperty.id"
-                            >
-                                <div class="flex gap-1.5">
-                                    <x-checkbox
-                                        x-bind:id="
-                                            'product-property' +
-                                            productProperty.id
-                                        "
-                                        x-bind:value="productProperty.id"
-                                        x-model.number="
-                                            $wire.selectedProductProperties[
+                        <div class="grow">
+                            <livewire:product.product-property-group-list />
+                        </div>
+                        <div
+                            x-collapse
+                            x-show="
+                                Object.values($wire.productProperties).length >
+                                0
+                            "
+                            x-cloak
+                            class="w-1/2"
+                        >
+                            <x-card>
+                                <x-slot:header>
+                                    <span
+                                        x-text="productPropertyGroup?.name"
+                                    ></span>
+                                </x-slot:header>
+                                <template
+                                    x-for="
+                                        productProperty in
+                                        $wire.productProperties
+                                    "
+                                    :key="productProperty.id"
+                                >
+                                    <div class="flex gap-1.5">
+                                        <x-checkbox
+                                            x-bind:id="
+                                                'product-property' +
                                                 productProperty.id
-                                            ]
-                                        "
-                                    />
-                                    <label
-                                        x-text="productProperty.name"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-50"
-                                        x-bind:for="
-                                            'product-property' +
-                                            productProperty.id
-                                        "
-                                    ></label>
-                                </div>
-                            </template>
-                        </x-card>
+                                            "
+                                            x-bind:value="productProperty.id"
+                                            x-model.number="
+                                                $wire.selectedProductProperties[
+                                                    productProperty.id
+                                                ]
+                                            "
+                                        />
+                                        <label
+                                            x-text="productProperty.name"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-50"
+                                            x-bind:for="
+                                                'product-property' +
+                                                productProperty.id
+                                            "
+                                        ></label>
+                                    </div>
+                                </template>
+                            </x-card>
+                        </div>
                     </div>
-                </div>
-                <x-slot:footer>
-                    <x-button
-                        color="secondary"
-                        light
-                        flat
-                        :text="__('Cancel')"
-                        x-on:click="
-                            $tsui.close.modal('edit-product-properties-modal')
-                        "
-                    />
-                    <x-button
-                        color="indigo"
-                        :text="__('Save')"
-                        x-on:click="
-                            $wire.addProductProperties().then(() => {
+                    <x-slot:footer>
+                        <x-button
+                            color="secondary"
+                            light
+                            flat
+                            :text="__('Cancel')"
+                            x-on:click="
                                 $tsui.close.modal(
                                     'edit-product-properties-modal',
-                                );
-                            })
+                                )
+                            "
+                        />
+                        <x-button
+                            color="indigo"
+                            :text="__('Save')"
+                            x-on:click="
+                                $wire.addProductProperties().then(() => {
+                                    $tsui.close.modal(
+                                        'edit-product-properties-modal',
+                                    );
+                                })
+                            "
+                        />
+                    </x-slot:footer>
+                </x-modal>
+                <x-button
+                    color="indigo"
+                    x-show="isEditing"
+                    x-cloak
+                    :text="__('Edit')"
+                    wire:click="showProductPropertiesModal()"
+                />
+                <div class="grid grid-cols-3 gap-x-4">
+                    <template
+                        x-for="
+                            (propertyTypes, group) in
+                            $wire.displayedProductProperties
                         "
-                    />
-                </x-slot:footer>
-            </x-modal>
-            <x-button
-                color="indigo"
-                x-show="isEditing"
-                x-cloak
-                :text="__('Edit')"
-                wire:click="showProductPropertiesModal()"
-            />
-            <div class="grid grid-cols-3 gap-x-4">
-                <template
-                    x-for="
-                        (propertyTypes, group) in
-                        $wire.displayedProductProperties
-                    "
-                    :key="group"
-                >
-                    <div class="col-span-1 space-y-2">
-                        <x-card>
-                            <x-slot:title>
-                                <span x-text="group"></span>
-                            </x-slot:title>
-                            <template
-                                x-for="
-                                    (displayedProperties, propertyType) in
-                                    propertyTypes
-                                "
-                            >
-                                <div>
-                                    <div
-                                        class="flex flex-wrap gap-1.5"
-                                        x-cloak
-                                        x-show="propertyType === 'option'"
-                                    >
-                                        <template
-                                            x-for="
-                                                displayedProperty in
-                                                displayedProperties
-                                            "
+                        :key="group"
+                    >
+                        <div class="col-span-1 space-y-2">
+                            <x-card>
+                                <x-slot:title>
+                                    <span x-text="group"></span>
+                                </x-slot:title>
+                                <template
+                                    x-for="
+                                        (displayedProperties, propertyType) in
+                                        propertyTypes
+                                    "
+                                >
+                                    <div>
+                                        <div
+                                            class="flex flex-wrap gap-1.5"
+                                            x-cloak
+                                            x-show="propertyType === 'option'"
                                         >
-                                            <x-badge
-                                                x-text="displayedProperty.name"
-                                            />
-                                        </template>
-                                    </div>
-                                    <div
-                                        class="space-y-2.5"
-                                        x-cloak
-                                        x-show="propertyType !== 'option'"
-                                    >
-                                        <template
-                                            x-for="
-                                                displayedProperty in
-                                                displayedProperties
-                                            "
+                                            <template
+                                                x-for="
+                                                    displayedProperty in
+                                                    displayedProperties
+                                                "
+                                            >
+                                                <x-badge
+                                                    x-text="
+                                                        displayedProperty.name
+                                                    "
+                                                />
+                                            </template>
+                                        </div>
+                                        <div
+                                            class="space-y-2.5"
+                                            x-cloak
+                                            x-show="propertyType !== 'option'"
                                         >
-                                            <div>
-                                                <div class="mb-1">
-                                                    <x-label
-                                                        x-bind:for="
+                                            <template
+                                                x-for="
+                                                    displayedProperty in
+                                                    displayedProperties
+                                                "
+                                            >
+                                                <div>
+                                                    <div class="mb-1">
+                                                        <x-label
+                                                            x-bind:for="
+                                                                'displayed-property-' +
+                                                                displayedProperty.id
+                                                            "
+                                                            x-text="
+                                                                displayedProperty.name
+                                                            "
+                                                        />
+                                                    </div>
+                                                    <x-input
+                                                        x-model="
+                                                            displayedProperty.value
+                                                        "
+                                                        x-bind:id="
                                                             'displayed-property-' +
                                                             displayedProperty.id
                                                         "
-                                                        x-text="
-                                                            displayedProperty.name
+                                                        x-bind:disabled="
+                                                            !isEditing
                                                         "
                                                     />
                                                 </div>
-                                                <x-input
-                                                    x-model="
-                                                        displayedProperty.value
-                                                    "
-                                                    x-bind:id="
-                                                        'displayed-property-' +
-                                                        displayedProperty.id
-                                                    "
-                                                    x-bind:disabled="!isEditing"
-                                                />
-                                            </div>
-                                        </template>
+                                            </template>
+                                        </div>
                                     </div>
-                                </div>
-                            </template>
-                        </x-card>
-                    </div>
-                </template>
-            </div>
-        @show
-    </x-card>
+                                </template>
+                            </x-card>
+                        </div>
+                    </template>
+                </div>
+                @show
+            </x-card>
 
-    <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
-        @section('suppliers')
-            <template x-for="(supplier, index) in $wire.product.suppliers">
-                <x-flux::list-item :item="[]">
-                    <x-slot:value>
-                        <span x-text="supplier.main_address.name"></span>
-                    </x-slot:value>
-                    <x-slot:sub-value>
-                        <div class="flex gap-2">
-                            <span>{{ __('Customer Number') . ':' }}</span>
-                            <span x-text="supplier.customer_number"></span>
-                        </div>
-                    </x-slot:sub-value>
-                    <x-slot:actions>
-                        <x-input
-                            x-bind:disabled="!isEditing"
-                            x-model="supplier.manufacturer_product_number"
-                            :label="__('Manufacturer product number')"
-                        />
-                        <x-number
-                            x-bind:disabled="!isEditing"
-                            x-model="supplier.purchase_price"
-                            :label="__('Purchase Price')"
-                            step="0.01"
-                        />
-                        <div class="mt-6">
-                            <x-button
-                                color="red"
-                                icon="trash"
+            <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
+                @section('suppliers')
+                <template x-for="(supplier, index) in $wire.product.suppliers">
+                    <x-flux::list-item :item="[]">
+                        <x-slot:value>
+                            <span x-text="supplier.main_address.name"></span>
+                        </x-slot:value>
+                        <x-slot:sub-value>
+                            <div class="flex gap-2">
+                                <span>{{ __('Customer Number') . ':' }}</span>
+                                <span x-text="supplier.customer_number"></span>
+                            </div>
+                        </x-slot:sub-value>
+                        <x-slot:actions>
+                            <x-input
                                 x-bind:disabled="!isEditing"
-                                x-on:click="
-                                    $wire.product.suppliers.splice(index, 1)
-                                "
+                                x-model="supplier.manufacturer_product_number"
+                                :label="__('Manufacturer product number')"
                             />
-                        </div>
-                    </x-slot:actions>
-                </x-flux::list-item>
-            </template>
-            <div x-show="isEditing" x-cloak x-transition>
-                <x-select.styled
-                    :label="__('Contact')"
-                    select="label:label|value:contact_id"
-                    x-on:select="
-                        $wire.addSupplier($event.detail.select.contact_id);
-                        clear();
-                    "
-                    unfiltered
-                    :request="[
+                            <x-number
+                                x-bind:disabled="!isEditing"
+                                x-model="supplier.purchase_price"
+                                :label="__('Purchase Price')"
+                                step="0.01"
+                            />
+                            <div class="mt-6">
+                                <x-button
+                                    color="red"
+                                    icon="trash"
+                                    x-bind:disabled="!isEditing"
+                                    x-on:click="
+                                        $wire.product.suppliers.splice(index, 1)
+                                    "
+                                />
+                            </div>
+                        </x-slot:actions>
+                    </x-flux::list-item>
+                </template>
+                <div x-show="isEditing" x-cloak x-transition>
+                    <x-select.styled
+                        :label="__('Contact')"
+                        select="label:label|value:contact_id"
+                        x-on:select="
+                            $wire.addSupplier($event.detail.select.contact_id);
+                            clear();
+                        "
+                        unfiltered
+                        :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
                     'params' => [
@@ -481,8 +489,8 @@
                         'with' => 'contact.media',
                     ],
                 ]"
-                />
+                    />
+                </div>
+                @show
+            </x-card>
             </div>
-        @show
-    </x-card>
-</div>

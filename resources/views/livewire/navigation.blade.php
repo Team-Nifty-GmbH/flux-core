@@ -67,7 +67,7 @@
                                 @endif
                                 class="dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-gray-500 transition-colors hover:bg-gray-800/50"
                             >
-                                <div class="w-16 flex-none">
+                                <div class="relative w-16 flex-none">
                                     <div
                                         class="flex w-full justify-center text-white"
                                     >
@@ -76,6 +76,13 @@
                                             class="h-4 w-4"
                                         />
                                     </div>
+                                    @if ($notificationCount = data_get($notificationCounts, $key))
+                                        <span
+                                            class="absolute top-1/2 left-3 flex h-4 min-w-4 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-none font-semibold text-white"
+                                        >
+                                            {{ $notificationCount }}
+                                        </span>
+                                    @endif
                                 </div>
                                 <span class="truncate text-sm text-white">
                                     {{ __($navigation["label"] ?? $key) }}
@@ -109,9 +116,19 @@
                                                 wire:current="rounded-md bg-indigo-600/50 dark:bg-indigo-700/5 hover:bg-indigo-600/10"
                                             @endif
                                             href="{{ $child["uri"] }}"
-                                            class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50"
+                                            class="dark:hover:text-light flex items-center gap-2 rounded-md p-2 pr-3 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50"
                                         >
-                                            {{ __($child["label"]) }}
+                                            <span class="truncate">
+                                                {{ __($child["label"]) }}
+                                            </span>
+                                            {{-- plain array access: route names contain dots, data_get() would treat them as path segments --}}
+                                            @if ($childNotificationCount = $childNotificationCounts[data_get($child, 'route_name')] ?? null)
+                                                <span
+                                                    class="ml-auto flex h-4 min-w-4 flex-none items-center justify-center rounded-full bg-red-500 px-1 text-[10px] leading-none font-semibold text-white"
+                                                >
+                                                    {{ $childNotificationCount }}
+                                                </span>
+                                            @endif
                                         </a>
                                     @endforeach
                                 </div>
@@ -141,9 +158,9 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="
-                                        frequentlyVisitedOpen && '-rotate-90'
-                                    "
+                                    x-bind:class="{
+                                        '-rotate-90': frequentlyVisitedOpen,
+                                    }"
                                 />
                             </span>
                         </div>
@@ -197,7 +214,9 @@
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
-                                    x-bind:class="favoritesOpen && '-rotate-90'"
+                                    x-bind:class="{
+                                        '-rotate-90': favoritesOpen,
+                                    }"
                                 />
                             </span>
                         </div>
@@ -241,6 +260,7 @@
                                             color="red"
                                             icon="trash"
                                             wire:click="deleteFavorite({{ $favorite['id'] }})"
+                                            loading="deleteFavorite({{ $favorite['id'] }})"
                                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
                                         />
                                     </div>
@@ -248,7 +268,7 @@
                             @endforeach
 
                             <x-button
-                                x-bind:class="!menuOpen && 'invisible'"
+                                x-bind:class="{ invisible: !menuOpen }"
                                 color="emerald"
                                 class="w-full"
                                 icon="plus"
