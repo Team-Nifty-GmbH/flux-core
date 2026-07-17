@@ -230,6 +230,13 @@
             />
             @stack('order-transaction-modal-footer')
             <x-button
+                :text="__('Adjust order to payment')"
+                color="amber"
+                wire:flux-confirm.type.warning="{{ __('The order total will be changed to the payment amount. Continue?') }}"
+                x-on:click="$wire.adjustOrderToPayment()"
+                loading="adjustOrderToPayment()"
+            />
+            <x-button
                 :text="__('Save')"
                 x-on:click="$wire.saveOrderTransaction()"
                 loading="saveOrderTransaction()"
