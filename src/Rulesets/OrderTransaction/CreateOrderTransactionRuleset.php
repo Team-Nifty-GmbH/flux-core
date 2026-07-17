@@ -2,6 +2,8 @@
 
 namespace FluxErp\Rulesets\OrderTransaction;
 
+use Closure;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
 use FluxErp\Rules\ModelExists;
@@ -22,6 +24,17 @@ class CreateOrderTransactionRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Order::class]),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    $orderTypeEnum = resolve_static(Order::class, 'query')
+                        ->whereKey($value)
+                        ->first(['id', 'order_type_id'])
+                        ?->orderType
+                        ?->order_type_enum;
+
+                    if ($orderTypeEnum instanceof OrderTypeEnum && $orderTypeEnum->isSubscription()) {
+                        $fail(__('Transactions cannot be assigned to subscription orders.'));
+                    }
+                },
             ],
             'amount' => [
                 'required',
