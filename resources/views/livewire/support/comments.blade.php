@@ -14,7 +14,7 @@
                 <template x-ref="textarea">
                     <x-flux::features.comments.input />
                 </template>
-                @if(resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
+                @if (resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
                     <x-flux::features.comments.input />
                 @endcan
 
@@ -58,10 +58,10 @@
                             <template>
                                 <ul>
                                     <li
-                                        x-bind:class="
-                                            comment.is_sticky &&
-                                            'bg-emerald-50 dark:bg-emerald-900'
-                                        "
+                                        x-bind:class="{
+                                            'bg-emerald-50 dark:bg-emerald-900':
+                                                comment.is_sticky,
+                                        }"
                                         class="px-4 py-6 sm:px-6"
                                     >
                                         <x-flux::features.comments.comment

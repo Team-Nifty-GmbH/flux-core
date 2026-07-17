@@ -93,7 +93,7 @@
                             x-bind:disabled="isLoadingFiles.length > 0"
                             :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
                         />
-                        @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
+                        @if (auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
                             <x-button
                                 color="indigo"
                                 x-on:click="

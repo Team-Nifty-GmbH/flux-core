@@ -11,6 +11,7 @@ use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Filterable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasSerialNumberRange;
@@ -29,7 +30,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable
 {

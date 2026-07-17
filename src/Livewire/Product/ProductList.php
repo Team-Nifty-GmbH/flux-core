@@ -185,7 +185,7 @@ class ProductList extends BaseProductList
             ))
                 ->checkPermission()
                 ->validate()
-                ->execute();
+                ->executeAsync();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -194,7 +194,6 @@ class ProductList extends BaseProductList
 
         $this->reset('selected');
         $this->productPricesUpdate->reset();
-        $this->loadData();
 
         return true;
     }

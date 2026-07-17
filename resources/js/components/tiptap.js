@@ -252,6 +252,10 @@ export default function (
 
                 this.proxy = Alpine.raw(_editor);
 
+                if (!showTooltipDropdown) {
+                    Alpine.initTree(controlPanel);
+                }
+
                 element.dataset.tiptapInitialized = 'true';
 
                 this.$watch('editable', (editable) => {

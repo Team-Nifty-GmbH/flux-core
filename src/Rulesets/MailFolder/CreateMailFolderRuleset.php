@@ -14,7 +14,7 @@ class CreateMailFolderRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'nullable|string|uuid|unique:mail_accounts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:mail_folders,uuid',
             'mail_account_id' => [
                 'required',
                 'integer',
@@ -25,8 +25,10 @@ class CreateMailFolderRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => MailFolder::class]),
             ],
+            'remote_id' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
+            'delta_link' => 'nullable|string',
             'can_create_ticket' => 'boolean',
             'can_create_purchase_invoice' => 'boolean',
             'can_create_lead' => 'boolean',

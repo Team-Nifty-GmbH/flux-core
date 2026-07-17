@@ -3,6 +3,7 @@
 namespace FluxErp\Notifications\QueueMonitor\Batch;
 
 use FluxErp\Contracts\HasToastNotification;
+use FluxErp\Enums\ToastType;
 use FluxErp\Models\JobBatch;
 use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\BroadcastNowChannel;
@@ -32,20 +33,34 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
 
     public function toToastNotification(object $notifiable): ToastNotification
     {
+        $failed = $this->model->failed_jobs;
+        $total = $this->model->total_jobs;
+
         return ToastNotification::make()
             ->id($this->id)
             ->notifiable($notifiable)
+            ->type(match (true) {
+                $failed === 0 => ToastType::SUCCESS,
+                $failed === $total => ToastType::ERROR,
+                default => ToastType::WARNING,
+            })
             ->title(__(':job_name is finished', ['job_name' => __($this->model->name)]))
-            ->description(
-                $this->model->failed_jobs === 0
-                    ? __('All jobs have been processed successfully')
-                    : ($this->model->failed_jobs === $this->model->total_jobs
-                        ? __('All jobs have failed')
-                        : __(':count jobs have failed', ['count' => $this->model->failed_jobs])
-                    )
-            )
+            ->description(match (true) {
+                $failed === 0 => __(':count jobs succeeded', ['count' => $total]),
+                $failed === $total => __('All jobs have failed'),
+                default => __(':success of :total jobs succeeded, :failed failed', [
+                    'success' => $total - $failed,
+                    'total' => $total,
+                    'failed' => $failed,
+                ]),
+            })
             ->persistent()
-            ->progress($this->model->getProgress());
+            ->progress($this->model->getProgress())
+            ->attributes([
+                'progressMeta' => __(':time elapsed', [
+                    'time' => $this->model->getElapsedInterval(),
+                ]),
+            ]);
     }
 
     public function toWebPush(object $notifiable): ?WebPushMessage

@@ -6,7 +6,6 @@ use Exception;
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\EmailTemplate;
-use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
@@ -14,12 +13,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Bus;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 class EditMail extends Component
@@ -145,6 +144,14 @@ class EditMail extends Component
     public function createFromSession(string $key): void
     {
         $data = session()->get($key);
+
+        if (blank($data)) {
+            $this->toast()
+                ->error(__('The mail data is no longer available, please try again.'))
+                ->send();
+
+            return;
+        }
 
         if (Arr::isAssoc($data) || count($data) === 1) {
             $data = count($data) === 1 && Arr::isList($data) ? $data[0] : $data;
@@ -348,12 +355,6 @@ class EditMail extends Component
     }
 
     #[Renderless]
-    public function downloadAttachment(Media $media): BinaryFileResponse
-    {
-        return response()->download($media->getPath());
-    }
-
-    #[Renderless]
     public function send(): bool
     {
         if ($this->isMultiGroup()) {
@@ -527,8 +528,6 @@ class EditMail extends Component
             'sessionKey',
         ]);
 
-        $this->showSendResultToast($totalSuccess, $totalFailed);
-
         return $totalFailed === 0;
     }
 
@@ -542,6 +541,7 @@ class EditMail extends Component
     ): array {
         $successCount = 0;
         $failedCount = 0;
+        $batchJobs = [];
 
         foreach ($mailMessages as $mailMessage) {
             try {
@@ -577,10 +577,9 @@ class EditMail extends Component
                     ? null
                     : data_get($data, 'mail_account_id');
 
-                SendMail::make($data)
+                $batchJobs[] = SendMail::make($data)
                     ->checkPermission()
-                    ->validate()
-                    ->executeAsync();
+                    ->validate();
 
                 $successCount++;
             } catch (Throwable $e) {
@@ -591,6 +590,13 @@ class EditMail extends Component
                     description: data_get($mailMessage, 'subject')
                 );
             }
+        }
+
+        if ($batchJobs) {
+            Bus::monitoredBatch($batchJobs)
+                ->name(__('Email send'))
+                ->allowFailures()
+                ->dispatch();
         }
 
         return ['success' => $successCount, 'failed' => $failedCount];
@@ -615,6 +621,7 @@ class EditMail extends Component
         $single = count($mailMessages) === 1;
         $successCount = 0;
         $failedCount = 0;
+        $batchJobs = [];
 
         foreach ($mailMessages as $mailMessage) {
             try {
@@ -654,31 +661,33 @@ class EditMail extends Component
                     ? null
                     : data_get($data, 'mail_account_id');
 
-                $result = SendMail::make($data)
+                $action = SendMail::make($data)
                     ->checkPermission()
-                    ->validate()
-                    ->when(
-                        data_get($data, 'queue'),
-                        fn (SendMail $action) => $action->executeAsync(),
-                        fn (SendMail $action) => $action->execute()
-                    );
+                    ->validate();
 
-                if (data_get($result, 'success') || data_get($data, 'queue')) {
+                if (! $single) {
+                    $batchJobs[] = $action;
+                    $successCount++;
+
+                    continue;
+                }
+
+                $result = $action->execute();
+
+                if (data_get($result, 'success')) {
                     $successCount++;
                 } else {
                     $failedCount++;
 
-                    if ($single) {
-                        exception_to_notifications(
-                            exception: new Exception(
-                                data_get($result, 'error') ?? data_get($result, 'message')
-                            ),
-                            component: $this,
-                            description: data_get($data, 'subject')
-                        );
+                    exception_to_notifications(
+                        exception: new Exception(
+                            data_get($result, 'error') ?? data_get($result, 'message')
+                        ),
+                        component: $this,
+                        description: data_get($data, 'subject')
+                    );
 
-                        return false;
-                    }
+                    return false;
                 }
             } catch (Throwable $e) {
                 $failedCount++;
@@ -694,7 +703,14 @@ class EditMail extends Component
             }
         }
 
-        $this->showSendResultToast($successCount, $failedCount);
+        if ($batchJobs) {
+            Bus::monitoredBatch($batchJobs)
+                ->name(__('Email send'))
+                ->allowFailures()
+                ->dispatch();
+        } else {
+            $this->showSendResultToast($successCount, $failedCount);
+        }
 
         return $failedCount === 0;
     }

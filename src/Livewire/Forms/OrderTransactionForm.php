@@ -27,6 +27,15 @@ class OrderTransactionForm extends FluxForm
     #[ExcludeFromActionData]
     public ?string $orderCurrencyIso = null;
 
+    #[ExcludeFromActionData]
+    public ?float $orderGrossTotal = null;
+
+    #[ExcludeFromActionData]
+    public ?float $orderBalance = null;
+
+    #[ExcludeFromActionData]
+    public ?float $transactionAmount = null;
+
     #[Locked]
     public ?int $pivot_id = null;
 
@@ -52,18 +61,30 @@ class OrderTransactionForm extends FluxForm
         parent::fill($values);
 
         if ($this->order_id && $this->transaction_id) {
-            $orderCurrencyId = resolve_static(Order::class, 'query')
+            $order = resolve_static(Order::class, 'query')
                 ->whereKey($this->order_id)
-                ->value('currency_id');
-            $transactionCurrencyId = resolve_static(Transaction::class, 'query')
+                ->first(['id', 'currency_id', 'total_gross_price', 'balance']);
+            $transaction = resolve_static(Transaction::class, 'query')
                 ->whereKey($this->transaction_id)
-                ->value('currency_id');
+                ->first(['currency_id', 'amount']);
 
-            $this->orderCurrencyIso = $orderCurrencyId !== $transactionCurrencyId
-                ? resolve_static(Currency::class, 'query')->whereKey($orderCurrencyId)->value('iso')
+            $this->orderCurrencyIso = $order?->currency_id !== $transaction?->currency_id
+                ? resolve_static(Currency::class, 'query')->whereKey($order?->currency_id)->value('iso')
+                : null;
+            $this->orderGrossTotal = ! is_null($order?->total_gross_price)
+                ? (float) $order->total_gross_price
+                : null;
+            $this->orderBalance = ! is_null($order?->balance)
+                ? (float) $order->balance
+                : null;
+            $this->transactionAmount = ! is_null($transaction?->amount)
+                ? (float) $transaction->amount
                 : null;
         } else {
             $this->orderCurrencyIso = null;
+            $this->orderGrossTotal = null;
+            $this->orderBalance = null;
+            $this->transactionAmount = null;
         }
     }
 

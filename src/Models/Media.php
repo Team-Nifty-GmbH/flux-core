@@ -16,6 +16,8 @@ class Media extends BaseMedia
 {
     use HasPackageFactory, LogsActivity, ResolvesRelationsThroughContainer;
 
+    public const int PRIVATE_URL_TTL_MINUTES = 5;
+
     public bool $isTemporary = false;
 
     public ?string $path = null;
@@ -33,6 +35,19 @@ class Media extends BaseMedia
         'responsive_images',
         'order_column',
     ];
+
+    protected $appends = [
+        'original_url',
+        'preview_url',
+        'thumb_url',
+    ];
+
+    public function getThumbUrlAttribute(): string
+    {
+        return $this->hasGeneratedConversion('thumb_400x400')
+            ? $this->getUrl('thumb_400x400')
+            : '';
+    }
 
     // Relations
     public function category(): MorphToMany

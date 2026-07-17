@@ -4,9 +4,11 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
+use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasTags;
@@ -20,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscribable
 {
@@ -59,6 +60,17 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         return $this->belongsTo(Currency::class);
     }
 
+    public function ledgerAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(LedgerAccount::class)
+            ->using(LedgerAccountTransaction::class);
+    }
+
+    public function ledgerAccountTransactions(): HasMany
+    {
+        return $this->hasMany(LedgerAccountTransaction::class);
+    }
+
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class)
@@ -78,8 +90,14 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         } else {
             $this->balance = bcround(
                 bcsub(
-                    $this->amount,
-                    $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                    bcsub(
+                        $this->amount,
+                        $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                        9
+                    ),
+                    $this->ledgerAccountTransactions()
+                        ->where('is_accepted', true)
+                        ->sum('amount'),
                     9
                 ),
                 2

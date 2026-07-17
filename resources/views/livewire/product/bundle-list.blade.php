@@ -64,6 +64,7 @@
                 :label="__('Count')"
                 :min="0.01"
             />
+            @stack('product-bundle-modal-fields')
         </div>
         <x-slot:footer>
             <x-button
@@ -91,7 +92,7 @@
         x-cloak
         x-show="$wire.product.bundle_products?.length > 0"
     >
-        @foreach(\FluxErp\Enums\BundleTypeEnum::valuesLocalized() as $bundleType)
+        @foreach (\FluxErp\Enums\BundleTypeEnum::valuesLocalized() as $bundleType)
             <x-radio
                 :id="'bundle-type-enum-' . data_get($bundleType, 'value') . '-radio'"
                 name="bundle-type-enum-radio"

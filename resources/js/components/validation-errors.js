@@ -1,3 +1,7 @@
+// Forces Alpine to re-evaluate vendor x-show/x-text bindings on
+// $wire.$errors inside teleported modal/slide-over subtrees, where
+// commit-driven reactivity doesn't propagate. Also drives the red ring
+// state and the toast fallback for errors with no visible input.
 const ERROR_RING = [
     'ring-red-300',
     'focus-within:ring-red-500',
@@ -5,8 +9,13 @@ const ERROR_RING = [
     'dark:focus-within:ring-red-500',
 ];
 
-const ERROR_TEXT = 'mt-1 block text-sm font-medium text-red-500';
-const ERROR_ATTR = 'data-validation-error';
+// Property extraction patterns for TallStackUI's form/error.blade.php span,
+// which carries `x-show="...$errors.has('prop')..."` and
+// `x-text="...$errors.first('prop')..."`. Other $errors helpers
+// (count/any/get) are intentionally not handled — we only ship the
+// has/first shape today.
+const ERROR_PROPERTY_FROM_HAS = /has\(['"]([^'"]+)['"]\)/;
+const ERROR_PROPERTY_FROM_FIRST = /first\(['"]([^'"]+)['"]\)/;
 
 function toggleRing(wrapper, add) {
     if (!wrapper) return;
@@ -14,27 +23,6 @@ function toggleRing(wrapper, add) {
     ERROR_RING.forEach((cls) =>
         add ? wrapper.classList.add(cls) : wrapper.classList.remove(cls),
     );
-}
-
-function toggleError(container, property, message) {
-    if (!container) return;
-
-    let span = container.querySelector(`[${ERROR_ATTR}="${property}"]`);
-
-    if (message) {
-        if (!span) {
-            span = document.createElement('span');
-            span.setAttribute(ERROR_ATTR, property);
-            span.className = ERROR_TEXT;
-            container.appendChild(span);
-        }
-
-        span.textContent = message;
-        span.style.display = '';
-    } else if (span) {
-        span.style.display = 'none';
-        span.textContent = '';
-    }
 }
 
 function findWrapper(input) {
@@ -54,6 +42,14 @@ function getWireModel(el) {
     }
 
     return null;
+}
+
+function getErrorProperty(node) {
+    return (
+        node.getAttribute('x-show')?.match(ERROR_PROPERTY_FROM_HAS)?.[1] ||
+        node.getAttribute('x-text')?.match(ERROR_PROPERTY_FROM_FIRST)?.[1] ||
+        null
+    );
 }
 
 function isVisible(el) {
@@ -111,33 +107,8 @@ function processComponent(component) {
     const keys = Object.keys(errors);
     const matched = new Set();
 
-    // Resolve teleported roots once so we don't scan the entire document
-    // for each selector below.
     const roots = getScopeRoots(el);
 
-    // Clear all previous error states first
-    queryAllScoped(roots, `[${ERROR_ATTR}]`).forEach((span) => {
-        span.style.display = 'none';
-        span.textContent = '';
-    });
-
-    queryAllScoped(
-        roots,
-        '[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.blur], [wire\\:model\\.defer]',
-    ).forEach((input) => {
-        toggleRing(findWrapper(input), false);
-    });
-
-    queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach(
-        (select) => {
-            const button = select.querySelector(
-                '[dusk="tallstackui_select_open_close"]',
-            );
-            toggleRing(findWrapper(button || select), false);
-        },
-    );
-
-    // Inputs with wire:model (x-input, x-number, x-textarea, x-select.native)
     queryAllScoped(
         roots,
         '[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.blur], [wire\\:model\\.defer]',
@@ -155,7 +126,6 @@ function processComponent(component) {
         }
     });
 
-    // Styled selects (wire:model is consumed by Alpine, not in DOM)
     queryAllScoped(roots, '[x-data*="tallstackui_select"]').forEach(
         (select) => {
             const prop = Alpine.$data(select)?.property;
@@ -168,7 +138,6 @@ function processComponent(component) {
             );
 
             toggleRing(findWrapper(button || select), hasError);
-            toggleError(select, prop, hasError ? errors[prop][0] : null);
 
             if (hasError && isVisible(select)) {
                 matched.add(prop);
@@ -176,34 +145,36 @@ function processComponent(component) {
         },
     );
 
-    // Force Alpine to re-evaluate x-show/x-text for published error views
+    // Update vendor-rendered error spans inside teleported subtrees, where
+    // reactive bindings on $wire.$errors don't trigger automatically.
+    // We read the bound property name out of the directive and consult the
+    // commit's errors map directly instead of invoking Alpine.evaluate —
+    // every Alpine.evaluate call goes through getUtilities which pushes a
+    // cleanup onto el._x_cleanups that never runs while the element stays
+    // mounted, leaking closures on every commit. matched.add() only fires
+    // for the x-show branch to mirror the old behaviour: spans that were
+    // shown count as "matched" so the toast fallback below skips them.
     queryAllScoped(roots, '[x-show*="$errors"], [x-text*="$errors"]').forEach(
         (node) => {
-            try {
-                const xshow = node.getAttribute('x-show');
-                const xtext = node.getAttribute('x-text');
+            const prop = getErrorProperty(node);
 
-                if (xshow) {
-                    const visible = Alpine.evaluate(node, xshow);
-                    node.style.display = visible ? '' : 'none';
+            if (!prop) return;
 
-                    if (visible) {
-                        const prop = xshow.match(/has\('([^']+)'\)/)?.[1];
+            const messages = errors[prop];
+            const visible = messages?.length > 0;
 
-                        if (prop) matched.add(prop);
-                    }
-                }
+            if (node.hasAttribute('x-show')) {
+                node.style.display = visible ? '' : 'none';
 
-                if (xtext) {
-                    node.textContent = Alpine.evaluate(node, xtext) || '';
-                }
-            } catch (e) {
-                console.warn('[validation-errors]', e);
+                if (visible) matched.add(prop);
+            }
+
+            if (node.hasAttribute('x-text')) {
+                node.textContent = visible ? messages[0] : '';
             }
         },
     );
 
-    // Toast fallback for errors without a visible matching input
     if (typeof $tsui !== 'undefined') {
         keys.forEach((key) => {
             if (!matched.has(key) && errors[key]?.length > 0) {

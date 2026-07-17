@@ -152,6 +152,14 @@ abstract class Comments extends Component
             return [];
         }
 
+        $recordExists = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->exists();
+
+        if (! $recordExists) {
+            return [];
+        }
+
         return resolve_static(Comment::class, 'withTemporaryGlobalScopes', [
             'scopes' => [
                 'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),

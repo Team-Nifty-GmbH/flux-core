@@ -136,7 +136,7 @@
                         light
                         icon="paper-clip"
                         x-on:click="file.id && $wire.download(file.id)"
-                        x-bind:class="! file.id && 'pointer-events-none opacity-50'"
+                        x-bind:class="{ 'pointer-events-none opacity-50': ! file.id }"
                         rounded
                     >
                         <x-slot:text>
@@ -162,10 +162,19 @@
                 :with-search="true"
             >
                 <x-slot:afterTree>
-                    <div class="pt-4">
+                    <div
+                        x-show="$wire.mailAccounts"
+                        x-cloak
+                        class="flex flex-col gap-2 pt-4"
+                    >
                         <x-button
-                            x-show="$wire.mailAccounts"
-                            x-cloak
+                            class="w-full"
+                            :text="__('New Email')"
+                            icon="pencil-square"
+                            x-on:click="$wire.composeMail()"
+                            color="indigo"
+                        />
+                        <x-button
                             spinner="getNewMessages()"
                             class="w-full"
                             :text="__('Get new messages')"

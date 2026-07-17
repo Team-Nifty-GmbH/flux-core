@@ -18,6 +18,8 @@ use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Throwable;
 
 class ScheduleRunCommand extends BaseScheduleRunCommand
 {
@@ -68,6 +70,29 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $event->withoutOverlapping();
             }
 
+            // Guard against duplicate execution by an overlapping schedule:run process.
+            // withoutOverlapping only protects DURING execution; once the per-event
+            // mutex is released a second scheduler tick (whose in-memory $repeatable
+            // still has the past due_at) can pick the same row up and run it again.
+            // Re-fetch from the DB and skip when last_run already covers the cron's
+            // most recent past occurrence.
+            $event->skip(function () use ($repeatable): bool {
+                if (! $repeatable->refresh()->last_run || ! $repeatable->cron_expression) {
+                    return false;
+                }
+
+                try {
+                    $previousOccurrence = Carbon::instance(
+                        (new CronExpression($repeatable->cron_expression))
+                            ->getPreviousRunDate(now()->toDateTime(), 0, true)
+                    );
+                } catch (Throwable) {
+                    return false;
+                }
+
+                return $repeatable->last_run->greaterThanOrEqualTo($previousOccurrence);
+            });
+
             foreach ($repeatable->cron['methods'] as $key => $method) {
                 if (! $method) {
                     continue;
@@ -95,12 +120,29 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             ) {
                 $overdueEvents[] = $event;
 
-                if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
-                    $parts = explode(' ', $event->expression);
-                    $nextRunDate = $nextRunDate->copy()->addMonthNoOverflow()->endOfMonth()
-                        ->setTime((int) $parts[1], (int) $parts[0]);
-                } else {
-                    $nextRunDate = (new CronExpression($event->expression))->getNextRunDate($nextRunDate);
+                // Only skip past the natural next occurrence when due_at was NOT a
+                // valid cron tick AND the next tick falls on the same day - that's the
+                // legacy/migration case (e.g. yearlyOn at 06:00 with due_at at midnight)
+                // where letting the regular scheduler fire would double-run today. For
+                // schedules whose due_at IS a valid cron tick (hourly, everyTwoHours,
+                // monthly, ...), the next future tick is a NEW occurrence and must not
+                // be skipped.
+                $dueAtMatchesCron = false;
+                try {
+                    $dueAtMatchesCron = (new CronExpression($event->expression))
+                        ->isDue($repeatable->due_at);
+                } catch (Throwable) {
+                    // ignore - treat as no match
+                }
+
+                if (! $dueAtMatchesCron && Carbon::instance($nextRunDate)->isSameDay(now())) {
+                    if (data_get($repeatable->cron, 'methods.basic') === FrequenciesEnum::LastDayOfMonth->value) {
+                        $parts = explode(' ', $event->expression);
+                        $nextRunDate = $nextRunDate->copy()->addMonthNoOverflow()->endOfMonth()
+                            ->setTime((int) $parts[1], (int) $parts[0]);
+                    } else {
+                        $nextRunDate = (new CronExpression($event->expression))->getNextRunDate($nextRunDate);
+                    }
                 }
             }
 
@@ -112,20 +154,23 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $repeatable->save();
             });
 
-            $event->onSuccess(function () use ($repeatable): void {
-                if ($repeatable->type === RepeatableTypeEnum::Job) {
-                    return;
+            $event->onSuccess(function () use ($repeatable, $nextRunDate): void {
+                // Jobs track recurrence/last_success async via the JobProcessed listener
+                // in EventServiceProvider, since schedule "success" for a Job means it was
+                // dispatched, not completed.
+                if ($repeatable->type !== RepeatableTypeEnum::Job) {
+                    if ($repeatable->recurrences) {
+                        $repeatable->current_recurrence++;
+                    }
+
+                    $repeatable->last_success = now();
                 }
 
-                if ($repeatable->recurrences) {
-                    $repeatable->current_recurrence++;
-                }
-
-                $repeatable->last_success = now();
+                $repeatable->due_at = $nextRunDate;
                 $repeatable->save();
             });
 
-            $event->after(function () use ($repeatable, $nextRunDate): void {
+            $event->onFailure(function () use ($repeatable, $nextRunDate): void {
                 $repeatable->due_at = $nextRunDate;
                 $repeatable->save();
             });

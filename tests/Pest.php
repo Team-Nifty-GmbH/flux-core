@@ -8,6 +8,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Settings\CoreSettings;
+use FluxErp\Settings\SecuritySettings;
 use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
@@ -37,6 +38,11 @@ pest()
             'install_done' => false,
             'license_key' => null,
             'formal_salutation' => false,
+        ]);
+
+        SecuritySettings::fake([
+            'force_two_factor' => false,
+            'magic_login_links_enabled' => true,
         ]);
 
         PriceList::default() ?? PriceList::factory()->create([

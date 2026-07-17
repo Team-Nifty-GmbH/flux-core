@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Support\Relations\MorphTo;
 use FluxErp\Traits\Model\BroadcastsEvents;
 use FluxErp\Traits\Model\HasModelPermission;
 use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
@@ -48,5 +49,20 @@ abstract class FluxModel extends Model
         }
 
         return parent::resolveCollectionFromAttribute();
+    }
+
+    protected function newMorphTo(Builder $query, Model $parent, $foreignKey, $ownerKey, $type, $relation): MorphTo
+    {
+        return app(
+            MorphTo::class,
+            [
+                'query' => $query,
+                'parent' => $parent,
+                'foreignKey' => $foreignKey,
+                'ownerKey' => $ownerKey,
+                'type' => $type,
+                'relation' => $relation,
+            ]
+        );
     }
 }

@@ -3,24 +3,42 @@
 namespace FluxErp\Livewire;
 
 use FluxErp\Facades\Menu;
+use FluxErp\Models\Notification;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Navigation extends Component
 {
+    public function mount(): void
+    {
+        $this->markAreaRead(Route::currentRouteName());
+    }
+
     public function render(): View|Factory|Application
     {
+        $navigations = $this->getMenu();
+
         return view('flux::livewire.navigation', [
-            'navigations' => $this->getMenu(),
+            'navigations' => $navigations,
             'visits' => $this->getVisits(),
             'favorites' => $this->getFavorites(),
+            'notificationCounts' => $this->getNotificationCounts(),
+            'childNotificationCounts' => $this->getChildNotificationCounts($navigations),
         ]);
+    }
+
+    #[On('notifications-changed')]
+    public function refreshNotificationCounts(): void
+    {
+        // Re-render so the per-area badges pick up the latest unread counts.
     }
 
     public function addFavorite(string $url, ?string $name = null): void
@@ -49,6 +67,103 @@ class Navigation extends Component
             ->delete();
     }
 
+    protected function markAreaRead(?string $routeName): void
+    {
+        $user = auth()->user();
+
+        if (! method_exists($user, 'unreadNotifications')) {
+            return;
+        }
+
+        $area = Str::before($routeName ?? '', '.') ?: null;
+
+        if (blank($area)) {
+            return;
+        }
+
+        $ids = $user->unreadNotifications
+            ->filter(fn (Notification $notification): bool => $notification->menuArea() === $area)
+            ->modelKeys();
+
+        if (blank($ids)) {
+            return;
+        }
+
+        $user->unreadNotifications()
+            ->whereKey($ids)
+            ->update(['read_at' => now()]);
+
+        $this->dispatch('notifications-changed');
+    }
+
+    protected function getNotificationCounts(): array
+    {
+        $user = auth()->user();
+
+        if (! method_exists($user, 'unreadNotifications')) {
+            return [];
+        }
+
+        return $user->unreadNotifications
+            ->countBy(fn (Notification $notification): ?string => $notification->menuArea())
+            ->forget('')
+            ->all();
+    }
+
+    protected function getChildNotificationCounts(Collection $navigations): array
+    {
+        $user = auth()->user();
+
+        if (! method_exists($user, 'unreadNotifications')) {
+            return [];
+        }
+
+        $childRouteNames = $navigations
+            ->flatMap(fn (array $navigation): array => data_get($navigation, 'children') ?? [])
+            ->pluck('route_name')
+            ->filter()
+            ->all();
+
+        if (blank($childRouteNames)) {
+            return [];
+        }
+
+        $counts = [];
+
+        foreach ($user->unreadNotifications as $notification) {
+            $route = $notification->menuRoute();
+
+            if (blank($route)) {
+                continue;
+            }
+
+            if ($match = $this->matchClosestRoute($route, $childRouteNames)) {
+                $counts[$match] = ($counts[$match] ?? 0) + 1;
+            }
+        }
+
+        return $counts;
+    }
+
+    protected function matchClosestRoute(string $route, array $routeNames): ?string
+    {
+        $match = null;
+
+        foreach ($routeNames as $routeName) {
+            if ($route !== $routeName && ! str_starts_with($route, $routeName . '.')) {
+                continue;
+            }
+
+            // Among the matching ancestors the deepest one (most route segments)
+            // is the most specific menu entry the notification belongs to.
+            if (is_null($match) || substr_count($routeName, '.') > substr_count($match, '.')) {
+                $match = $routeName;
+            }
+        }
+
+        return $match;
+    }
+
     protected function getFavorites(): ?array
     {
         if (! method_exists(auth()->user(), 'favorites')) {
@@ -65,7 +180,7 @@ class Navigation extends Component
     {
         $menuAll = Menu::all();
         data_forget($menuAll, 'settings.children');
-        $menuHash = md5(serialize($menuAll));
+        $menuHash = md5(serialize($menuAll) . '|' . $this->authFingerprint());
 
         $cached = Session::get('navigations.' . $menuHash);
         if (is_array($cached)) {
@@ -100,6 +215,21 @@ class Navigation extends Component
         Session::put('navigations.' . $menuHash, $navigations);
 
         return collect($navigations);
+    }
+
+    protected function authFingerprint(): string
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return 'guest';
+        }
+
+        $permissionIds = method_exists($user, 'getAllPermissions')
+            ? $user->getAllPermissions()->pluck('id')->sort()->implode(',')
+            : '';
+
+        return $user->getAuthIdentifier() . ':' . $permissionIds;
     }
 
     protected function getVisits(): ?array

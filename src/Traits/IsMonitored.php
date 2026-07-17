@@ -20,7 +20,11 @@ trait IsMonitored
 
     public function accept(NotificationAction $action): void
     {
-        $this->getQueueMonitor()->update([
+        if (! $monitor = $this->getQueueMonitor()) {
+            return;
+        }
+
+        $monitor->update([
             'accept' => serialize($action),
         ]);
     }
@@ -32,7 +36,11 @@ trait IsMonitored
 
     public function message(HtmlString|string $message): void
     {
-        $this->getQueueMonitor()->update([
+        if (! $monitor = $this->getQueueMonitor()) {
+            return;
+        }
+
+        $monitor->update([
             'message' => is_a($message, HtmlString::class, true)
                 ? $message->toHtml()
                 : $message,
@@ -42,6 +50,16 @@ trait IsMonitored
     public function progressCooldown(): int
     {
         return 0;
+    }
+
+    public function toastPersistent(bool $persistent = true): void
+    {
+        $this->queueData(['toast_persistent' => $persistent], merge: true);
+    }
+
+    public function toastTimeout(int $seconds = 30): void
+    {
+        $this->queueData(['toast_timeout' => $seconds], merge: true);
     }
 
     public function queueData(array $data, bool $merge = false): void
@@ -108,7 +126,11 @@ trait IsMonitored
 
     public function reject(NotificationAction $reject): void
     {
-        $this->getQueueMonitor()->update([
+        if (! $monitor = $this->getQueueMonitor()) {
+            return;
+        }
+
+        $monitor->update([
             'reject' => serialize($reject),
         ]);
     }

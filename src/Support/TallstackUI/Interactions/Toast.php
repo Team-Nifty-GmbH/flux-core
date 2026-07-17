@@ -14,7 +14,7 @@ class Toast extends BaseToast
 
     protected int|string|null $id = null;
 
-    protected ?int $progress = null;
+    protected ?float $progress = null;
 
     public function id(int|string|null $id): static
     {
@@ -23,9 +23,9 @@ class Toast extends BaseToast
         return $this;
     }
 
-    public function progress(?int $progress): static
+    public function progress(float|int|string|null $progress): static
     {
-        $this->progress = $progress ?? 0;
+        $this->progress = $progress === null ? 0.0 : (float) $progress;
 
         return $this;
     }

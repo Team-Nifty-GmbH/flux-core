@@ -36,10 +36,10 @@
             >
                 <div
                     class="divide-secondary-200 space-y-2.5 divide-y"
-                    x-bind:class="
-                        $wire.disableReplicateModalInputs &&
-                        'pointer-events-none'
-                    "
+                    x-bind:class="{
+                        'pointer-events-none':
+                            $wire.disableReplicateModalInputs,
+                    }"
                 >
                     <x-select.styled
                         :label="__('Order type')"
@@ -311,15 +311,15 @@
                                 ></span>
                             </div>
                         </div>
-                        @if($order->payment_reminder_current_level)
-                            @switch($order->payment_reminder_current_level)
-                                @case(1)
+                        @if ($order->payment_reminder_current_level)
+                            @switch ($order->payment_reminder_current_level)
+                                @case (1)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
                                         color="amber"
                                     />
                                     @break
-                                @case(2)
+                                @case (2)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
                                         color="orange"
@@ -333,7 +333,7 @@
                             @endswitch
                         @endif
 
-                        @if($order->hasContactDeliveryLock)
+                        @if ($order->hasContactDeliveryLock)
                             <x-badge
                                 :text="__('Has Delivery Lock')"
                                 color="red"
@@ -372,7 +372,7 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
-            @if(resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
+            @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
                     color="secondary"
                     light
@@ -383,7 +383,7 @@
                 />
             @endif
 
-            @if(resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
+            @if (resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
                 <x-button
                     color="secondary"
                     light
@@ -391,10 +391,11 @@
                     color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
+                    loading="delete()"
                 />
             @endif
 
-            @if((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, 'canPerformAction', [false]))
+            @if ((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, 'canPerformAction', [false]))
                 <x-button
                     color="indigo"
                     loading="save"
@@ -503,7 +504,7 @@
                                         class="flex w-full items-center justify-between gap-4"
                                     >
                                         <div>{{ __('Invoice Address') }}</div>
-                                        @if($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
+                                        @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
                                             <div class="flex gap-1">
                                                 <x-button
                                                     x-cloak
@@ -594,7 +595,7 @@
                                         class="flex w-full items-center justify-between gap-4"
                                     >
                                         <div>{{ __('Delivery Address') }}</div>
-                                        @if($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
+                                        @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
                                             <div class="flex gap-1">
                                                 <x-button
                                                     x-cloak
@@ -643,11 +644,11 @@
                                 </div>
                                 <div
                                     class="text-sm"
-                                    x-bind:class="
-                                        $wire.order.address_delivery_id ===
-                                            $wire.order.address_invoice_id &&
-                                        'hidden'
-                                    "
+                                    x-bind:class="{
+                                        hidden:
+                                            $wire.order.address_delivery_id ===
+                                            $wire.order.address_invoice_id,
+                                    }"
                                 >
                                     <p
                                         class="truncate first-line:font-semibold"
@@ -703,7 +704,7 @@
                                 minimize="mount"
                             >
                                 <div class="space-y-3 px-2 py-5">
-                                    @if(count($tenants) > 1)
+                                    @if (count($tenants) > 1)
                                         <x-select.styled
                                             disabled
                                             :label="__('Tenant')"
@@ -786,7 +787,7 @@
                                         select="label:name|value:id"
                                         :options="$paymentTypes"
                                     />
-                                    @if($contactBankConnections)
+                                    @if ($contactBankConnections)
                                         <x-select.styled
                                             wire:model="order.contact_bank_connection_id"
                                             :label="__('Bank connection')"
@@ -833,7 +834,7 @@
                                         </x-slot:label>
                                     </x-select.styled>
 
-                                    @if(count($languages) > 1)
+                                    @if (count($languages) > 1)
                                         <x-select.styled
                                             :label="__('Language')"
                                             required
@@ -864,7 +865,7 @@
                                         formatters="formatter.payment_state"
                                         available="availableStates.payment_state"
                                     />
-                                    @if($activePaymentRun)
+                                    @if ($activePaymentRun)
                                         <a
                                             href="{{ route('accounting.payment-runs') }}"
                                             wire:navigate
@@ -916,7 +917,7 @@
                             <x-card>
                                 <div class="space-y-4">
                                     @section('actions')
-                                        @if($printLayouts)
+                                        @if ($printLayouts)
                                             <x-button
                                                 color="indigo"
                                                 class="w-full"
@@ -961,10 +962,10 @@
                                                 wire:model="order.id"
                                             />
                                         @endif
-                                        @foreach($additionalModelActions as $modelAction)
+                                        @foreach ($additionalModelActions as $modelAction)
                                             {{ $modelAction }}
                                         @endforeach
-
+                                        @stack('order-detail-action-card-actions')
                                     @show
                                 </div>
                             </x-card>
@@ -1095,7 +1096,7 @@
                                                         <div
                                                             class="flex items-center gap-1.5"
                                                         >
-                                                            @if(! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
+                                                            @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
                                                                 <div>
                                                                     <x-button.circle
                                                                         color="red"
@@ -1141,7 +1142,7 @@
                                                 </template>
                                             </div>
                                         </div>
-                                        @if(! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
+                                        @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
                                             <div class="w-full">
                                                 <x-button
                                                     color="secondary"

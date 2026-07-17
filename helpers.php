@@ -86,6 +86,58 @@ if (! function_exists('user_can')) {
     }
 }
 
+if (! function_exists('user_can_access_route')) {
+    function user_can_access_route(?string $routeName): bool
+    {
+        if (blank($routeName)) {
+            return false;
+        }
+
+        $route = Illuminate\Support\Facades\Route::getRoutes()->getByName($routeName);
+
+        if (is_null($route)) {
+            return false;
+        }
+
+        $permission = route_to_permission($route, false);
+
+        if (is_null($permission)) {
+            return true;
+        }
+
+        $user = auth()->user();
+
+        if (
+            $user
+            && in_array(Spatie\Permission\Traits\HasRoles::class, class_uses_recursive($user))
+            && $user->hasRole('Super Admin')
+        ) {
+            return true;
+        }
+
+        try {
+            return $user?->hasPermissionTo($permission) ?? false;
+        } catch (Spatie\Permission\Exceptions\PermissionDoesNotExist) {
+            return true;
+        }
+    }
+}
+
+if (! function_exists('user_can_view_model_detail')) {
+    function user_can_view_model_detail(?string $model): bool
+    {
+        if (
+            blank($model)
+            || ! class_exists($model)
+            || ! method_exists($model, 'getDetailRouteName')
+        ) {
+            return false;
+        }
+
+        return user_can_access_route(app($model)->getDetailRouteName());
+    }
+}
+
 if (! function_exists('get_subclasses_of')) {
     function get_subclasses_of(string $extendingClass, array|string $namespace): array
     {
@@ -644,5 +696,19 @@ if (! function_exists('render_editor_blade')) {
         );
 
         return new Illuminate\Support\HtmlString(Illuminate\Support\Facades\Blade::render($converted, $data));
+    }
+}
+
+if (! function_exists('split_html_for_print')) {
+    /**
+     * Splits rendered HTML into top-level chunks so the PDF renderer can
+     * insert page breaks between them - dompdf cannot break a single table
+     * row across pages.
+     *
+     * @return array<int, string>
+     */
+    function split_html_for_print(?string $html): array
+    {
+        return app(FluxErp\Printing\HtmlPrintChunker::class)->chunk($html);
     }
 }

@@ -50,7 +50,6 @@
                         <div class="p-4" x-collapse x-cloak x-show="showDetail">
                             <x-card>
                                 <x-flux::table> <x-slot:header>
-
                     <th class="text-left">{{ __('Type') }}</th>
                     <th class="text-left">{{ __('Name') }}</th>
                     <th class="text-left">{{ __('Discount') }}</th>

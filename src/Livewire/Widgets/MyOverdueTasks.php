@@ -65,7 +65,7 @@ class MyOverdueTasks extends Component
             ->user()
             ->tasks()
             ->with(['project:id,name', 'model'])
-            ->whereNotIn('state', $this->getEndStates())
+            ->whereNotIn('state', TaskState::endStateKeys())
             ->where('due_date', '<', now())
             ->orderBy('due_date', 'ASC')
             ->limit($this->limit + 1)
@@ -81,13 +81,5 @@ class MyOverdueTasks extends Component
                 'model_type',
                 'model_id',
             ]);
-    }
-
-    protected function getEndStates(): array
-    {
-        return TaskState::all()
-            ->filter(fn (string $state): bool => $state::$isEndState)
-            ->keys()
-            ->toArray();
     }
 }

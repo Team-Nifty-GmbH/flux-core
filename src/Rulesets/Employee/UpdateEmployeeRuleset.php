@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Employee;
 
+use FluxErp\Enums\SalaryTypeEnum;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Country;
 use FluxErp\Models\Employee;
@@ -79,7 +80,11 @@ class UpdateEmployeeRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class, ['min' => 0]),
             ],
-            'salary_type' => 'nullable|string|in:hourly,monthly,annual',
+            'salary_type' => [
+                'nullable',
+                'string',
+                app(EnumRule::class, ['type' => SalaryTypeEnum::class]),
+            ],
             'payment_interval' => 'nullable|string|in:weekly,biweekly,monthly,quarterly,annual',
             'hourly_rate' => [
                 'nullable',

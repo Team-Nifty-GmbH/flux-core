@@ -436,24 +436,40 @@
                 <x-label :label="__('Preview next executions')" />
                 <ul class="mt-1 space-y-1">
                     <template
-                        x-for="date in $wire.schedule.nextExecutionDates"
-                        x-bind:key="date"
+                        x-for="entry in $wire.schedule.nextExecutionDates"
+                        x-bind:key="entry.date"
                     >
                         <li
-                            class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+                            class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
                         >
-                            <x-icon name="chevron-right" class="h-3 w-3" />
-                            <span
-                                x-text="
-                                    new Date(date + 'Z').toLocaleString('{{ app()->getLocale() }}', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                    })
-                                "
-                            ></span>
+                            <x-icon
+                                name="chevron-right"
+                                class="mt-1 h-3 w-3 shrink-0"
+                            />
+                            <span class="flex flex-col">
+                                <span
+                                    x-text="
+                                        new Date(entry.date + 'Z').toLocaleString('{{ app()->getLocale() }}', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })
+                                    "
+                                ></span>
+                                <span
+                                    x-cloak
+                                    x-show="entry.system_delivery_date"
+                                    class="text-xs text-gray-400 dark:text-gray-500"
+                                    x-text="
+                                        '{{ __('Performance period') }}: ' +
+                                        new Date(entry.system_delivery_date + 'T00:00:00').toLocaleDateString('{{ app()->getLocale() }}') +
+                                        ' – ' +
+                                        new Date(entry.system_delivery_date_end + 'T00:00:00').toLocaleDateString('{{ app()->getLocale() }}')
+                                    "
+                                ></span>
+                            </span>
                         </li>
                     </template>
                 </ul>
@@ -481,13 +497,13 @@
     <x-modal
         id="cancel-subscription"
         :title="__('Cancel Subscription')"
-        x-on:close="cancellationType = '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}'; generateDocument = true; sendEmail = false"
+        x-on:close="cancellationType = '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}'; generateDocument = {{ $canCreateCancellationConfirmation ? 'true' : 'false' }}; sendEmail = false"
     >
         <div
             x-data="{
                 cancellationType:
                     '{{ \FluxErp\Enums\SubscriptionCancellationTypeEnum::NextPeriod->value }}',
-                generateDocument: true,
+                generateDocument: {{ $canCreateCancellationConfirmation ? 'true' : 'false' }},
                 sendEmail: false,
                 get effectiveEndDate() {
                     const schedule = $wire.schedule
@@ -627,19 +643,19 @@
                 </p>
             </div>
 
-            <div class="flex flex-col gap-2 border-t pt-4">
-                <x-label :label="__('Options')" />
-                <x-toggle
-                    x-model="generateDocument"
-                    :label="__('Generate cancellation confirmation')"
-                />
-                <div x-cloak x-show="generateDocument" class="ml-6">
+            @if ($canCreateCancellationConfirmation)
+                <div class="flex flex-col gap-2 border-t pt-4">
+                    <x-label :label="__('Options')" />
+                    <x-toggle
+                        x-model="generateDocument"
+                        :label="__('Generate cancellation confirmation')"
+                    />
                     <x-toggle
                         x-model="sendEmail"
                         :label="__('Send confirmation by email')"
                     />
                 </div>
-            </div>
+            @endif
             <div class="flex justify-end gap-2 border-t pt-4">
                 <x-button
                     color="secondary"
