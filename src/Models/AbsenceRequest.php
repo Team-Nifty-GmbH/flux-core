@@ -8,6 +8,7 @@ use FluxErp\Enums\AbsenceRequestDayPartEnum;
 use FluxErp\Enums\AbsenceRequestStateEnum;
 use FluxErp\Enums\DayPartEnum;
 use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
+use FluxErp\Models\Pivots\AbsenceRequestSubstitute;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
@@ -111,6 +112,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         ];
     }
 
+    // Relations
     public function absenceType(): BelongsTo
     {
         return $this->belongsTo(AbsenceType::class);
@@ -121,6 +123,29 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         return $this->belongsTo(User::class, 'approved_by_id');
     }
 
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function employeeDays(): BelongsToMany
+    {
+        return $this->belongsToMany(EmployeeDay::class, 'absence_request_employee_day')
+            ->using(AbsenceRequestEmployeeDay::class);
+    }
+
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_id');
+    }
+
+    public function substitutes(): BelongsToMany
+    {
+        return $this->belongsToMany(Employee::class, 'absence_request_substitute')
+            ->using(AbsenceRequestSubstitute::class);
+    }
+
+    // Public methods
     public function calculateWorkDaysAffected(?Carbon $date = null): string|float
     {
         $deductionRate = $this->absenceType->percentage_deduction ?? 1;
@@ -179,17 +204,6 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
         }
 
         return $totalHours;
-    }
-
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class);
-    }
-
-    public function employeeDays(): BelongsToMany
-    {
-        return $this->belongsToMany(EmployeeDay::class)
-            ->using(AbsenceRequestEmployeeDay::class);
     }
 
     public function failsAbsencePolicies(): ?array
@@ -277,16 +291,7 @@ class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTab
             ->exists();
     }
 
-    public function rejectedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'rejected_by_id');
-    }
-
-    public function substitutes(): BelongsToMany
-    {
-        return $this->belongsToMany(Employee::class, 'absence_request_substitute');
-    }
-
+    // Protected methods
     protected function getDayPartFractionByTime(Carbon $date): ?string
     {
         if ($this->day_part?->value === AbsenceRequestDayPartEnum::Time) {

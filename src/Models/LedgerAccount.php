@@ -3,12 +3,14 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\LedgerAccountTypeEnum;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LedgerAccount extends FluxModel
@@ -18,6 +20,7 @@ class LedgerAccount extends FluxModel
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
 
+    // Public static methods
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -36,8 +39,15 @@ class LedgerAccount extends FluxModel
         ];
     }
 
+    // Relations
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
+    }
+
+    public function transactions(): BelongsToMany
+    {
+        return $this->belongsToMany(Transaction::class)
+            ->using(LedgerAccountTransaction::class);
     }
 }

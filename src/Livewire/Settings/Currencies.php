@@ -6,15 +6,12 @@ use FluxErp\Actions\Currency\DeleteCurrency;
 use FluxErp\Livewire\DataTables\CurrencyList;
 use FluxErp\Livewire\Forms\CurrencyForm;
 use FluxErp\Models\Currency;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Currencies extends CurrencyList
 {
-    use Actions;
-
     public bool $editModal = false;
 
     public CurrencyForm $selectedCurrency;

@@ -30,6 +30,7 @@
                         :text="__('Cancel') "
                         x-on:click="$tsui.close.modal('assign-agent-modal')"
                     />
+                    @stack('contact-list-assign-agent-modal-footer')
                     <x-button
                         color="indigo"
                         :text="__('Assign')"
@@ -47,6 +48,6 @@
             </x-modal>
         @endcanAction
         {!! $createContactForm->autoRender($__data) !!}
-
+        @stack('contact-list-modals')
     @show
 </div>

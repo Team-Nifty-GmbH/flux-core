@@ -53,6 +53,15 @@ class Target extends FluxModel
         ];
     }
 
+    // Relations
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'target_user')
+            ->using(TargetUser::class)
+            ->withPivot(['target_share', 'is_percentage']);
+    }
+
+    // Public methods
     public function calculateCurrentValue(User|int $user): string
     {
         $userId = $user instanceof User ? $user->getKey() : $user;
@@ -67,12 +76,5 @@ class Target extends FluxModel
                 }
             )
             ->{$this->aggregate_type}($this->aggregate_column);
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'target_user')
-            ->withPivot(['target_share', 'is_percentage'])
-            ->using(TargetUser::class);
     }
 }

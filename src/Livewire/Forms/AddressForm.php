@@ -47,6 +47,8 @@ class AddressForm extends FluxForm
 
     public bool $is_main_address = false;
 
+    public bool $is_payment_reminder_address = false;
+
     public ?int $language_id = null;
 
     public ?string $lastname = null;

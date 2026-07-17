@@ -42,10 +42,7 @@ class TicketsByState extends CircleChart implements HasWidgetOptions
     {
         $allStates = TicketState::all();
 
-        $endStates = $allStates
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
+        $endStates = TicketState::endStateKeys();
 
         $data = resolve_static(Ticket::class, 'query')
             ->whereNotIn('state', $endStates)
@@ -57,13 +54,16 @@ class TicketsByState extends CircleChart implements HasWidgetOptions
         $this->labels = $data
             ->map(fn (Ticket $ticket) => __(Str::headline((string) $ticket->state)))
             ->toArray();
+
         $this->series = $data->pluck('total')->toArray();
+
         $this->optionData = $data
             ->map(fn (Ticket $ticket) => [
                 'label' => __(Str::headline((string) $ticket->state)),
                 'state' => (string) $ticket->state,
             ])
             ->toArray();
+
         $this->colors = $data->map(function (Ticket $ticket) use ($allStates) {
             $stateClass = $allStates->get((string) $ticket->state);
 

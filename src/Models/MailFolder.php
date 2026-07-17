@@ -13,6 +13,7 @@ class MailFolder extends FluxModel
 {
     use HasPackageFactory, HasParentChildRelations, HasUuid;
 
+    // Relations
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class);
@@ -23,6 +24,7 @@ class MailFolder extends FluxModel
         return $this->hasMany(Communication::class);
     }
 
+    // Public methods
     public function messages(): ImapMessageBuilder
     {
         return app(ImapMessageBuilder::class, ['folder' => $this]);

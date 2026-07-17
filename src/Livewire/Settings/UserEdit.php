@@ -105,6 +105,21 @@ class UserEdit extends Component
     }
 
     #[Renderless]
+    public function resetTwoFactor(): void
+    {
+        $user = resolve_static(User::class, 'query')
+            ->whereKey($this->userForm->id)
+            ->first();
+
+        if ($user && method_exists($user, 'disableTwoFactorAuth')) {
+            $user->disableTwoFactorAuth();
+            $this->toast()
+                ->success(__('Two-factor authentication reset'))
+                ->send();
+        }
+    }
+
+    #[Renderless]
     public function delete(): void
     {
         try {
@@ -120,6 +135,8 @@ class UserEdit extends Component
 
     public function save(): void
     {
+        $this->resetValidation();
+
         try {
             if (
                 in_array(

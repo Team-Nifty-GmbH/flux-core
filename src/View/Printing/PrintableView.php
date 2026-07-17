@@ -12,6 +12,7 @@ use FluxErp\Contracts\SignablePrintView;
 use FluxErp\Models\Tenant;
 use FluxErp\Printing\Printable;
 use FluxErp\Traits\Makeable;
+use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
@@ -23,7 +24,7 @@ use Imagick;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-abstract class PrintableView extends Component
+abstract class PrintableView extends Component implements Responsable
 {
     use Makeable;
 
@@ -226,6 +227,11 @@ abstract class PrintableView extends Component
         return $this->pdf->stream(Str::finish($fileName ?? $this->getFileName(), '.pdf'));
     }
 
+    public function toResponse($request): Response
+    {
+        return $this->streamPDF();
+    }
+
     protected function getCollectionName(): string
     {
         return Str::kebab(class_basename($this));
@@ -250,15 +256,17 @@ abstract class PrintableView extends Component
     {
         $model = $this->getModel();
 
-        $tenant = $model?->tenant ?? Tenant::query()->first();
+        $tenant = $model?->tenant
+            ?? resolve_static(Tenant::class, 'default')
+            ?? resolve_static(Tenant::class, 'query')->first();
 
-        if (($logo = $tenant->getFirstMedia('logo')) && file_exists($logo->getPath())) {
+        if (($logo = $tenant?->getFirstMedia('logo')) && file_exists($logo->getPath())) {
             $tenant->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
                 ? $logo->getUrl('png')
                 : $logo->getUrl();
         }
 
-        if (($logoSmall = $tenant->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
+        if (($logoSmall = $tenant?->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
             $tenant->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
                 ? $logoSmall->getUrl('png')
                 : $logoSmall->getUrl();

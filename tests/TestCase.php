@@ -9,12 +9,13 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\WithCachedConfig;
 use Illuminate\Foundation\Testing\WithCachedRoutes;
 use Illuminate\Support\Facades\File;
+use Laragear\TwoFactor\TwoFactorServiceProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
-use Maatwebsite\Excel\ExcelServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
+use Spatie\LaravelPasskeys\LaravelPasskeysServiceProvider;
 use Spatie\LaravelSettings\LaravelSettingsServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
@@ -44,10 +45,11 @@ abstract class TestCase extends BaseTestCase
             DataTableServiceProvider::class,
             ActivitylogServiceProvider::class,
             MediaLibraryServiceProvider::class,
+            LaravelPasskeysServiceProvider::class,
+            TwoFactorServiceProvider::class,
             FluxServiceProvider::class,
             WebPushServiceProvider::class,
             ServiceProvider::class,
-            ExcelServiceProvider::class,
         ];
     }
 

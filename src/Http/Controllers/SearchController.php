@@ -3,6 +3,8 @@
 namespace FluxErp\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -18,29 +20,33 @@ class SearchController extends Controller
         // check if $model is a morph alias
         $model = morphed_model($model) ?? $model;
         $model = qualify_model(str_replace('/', '\\', $model));
+
+        abort_unless(class_exists($model), 404);
+
         $isSearchable = in_array(
             Searchable::class,
             class_uses_recursive(resolve_static($model, 'class'))
         );
 
-        if (
-            ! class_exists($model)
-            || (! $isSearchable && ! $request->get('searchFields'))
-        ) {
-            abort(404);
-        }
+        abort_if(! $isSearchable && ! $request->input('searchFields'), 404);
 
         Event::dispatch('tall-datatables-searching', $request);
 
-        if (! blank($request->get('selected')) && blank($request->get('search'))) {
-            $selected = $request->get('selected');
-            $optionValue = $request->get('option-value') ?: (app($model))->getKeyName();
+        if (! blank($request->input('selected')) && blank($request->input('search'))) {
+            $selected = $request->input('selected');
+            $optionValue = $request->input('option-value') ?: (app($model))->getKeyName();
 
-            $query = resolve_static($model, 'query');
+            $query = resolve_static($model, 'query')
+                ->withoutGlobalScopes([SoftDeletingScope::class]);
+
             is_array($selected)
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
-        } elseif ($request->has('search') && $isSearchable && ! $request->get('searchFields')) {
+
+            $this->applyRequestConstraints($query, $request, $model);
+
+            return $this->formatAndDispatch($query->get(), $model, $request);
+        } elseif ($request->has('search') && $isSearchable && ! $request->input('searchFields')) {
             /** @var Builder $perPageSearch */
             $perPageSearch = count(Arr::except(
                 app($model)->getGlobalScopes(),
@@ -50,15 +56,15 @@ class SearchController extends Controller
                 ]
             )) === 0 ? 20 : 1000;
 
-            $query = ! is_string($request->get('search'))
+            $query = ! is_string($request->input('search'))
                 ? resolve_static($model, 'query')->limit(20)
-                : resolve_static($model, 'search', ['query' => $request->get('search')])
-                    ->toEloquentBuilder(perPage: $perPageSearch);
+                : resolve_static($model, 'search', ['query' => $request->input('search')])
+                    ->toEloquentBuilder(highlight: [], perPage: $perPageSearch);
         } elseif ($request->has('search')) {
             $query = resolve_static($model, 'query');
             $query->where(function (Builder $query) use ($request): void {
-                foreach (Arr::wrap($request->get('searchFields')) as $field) {
-                    $query->orWhere($field, 'like', '%' . $request->get('search') . '%');
+                foreach (Arr::wrap($request->input('searchFields')) as $field) {
+                    $query->orWhere($field, 'like', '%' . $request->input('search') . '%');
                 }
             });
         } else {
@@ -67,78 +73,93 @@ class SearchController extends Controller
         }
 
         if ($request->has('with')) {
-            $query->with($request->get('with'));
+            $query->with($request->input('with'));
         }
 
         if ($request->has('limit')) {
-            $query->limit($request->get('limit'));
+            $query->limit($request->input('limit'));
         } else {
             $query->limit(10);
         }
 
         if ($request->has('orderBy')) {
-            $query->orderBy($request->get('orderBy'), $request->get('orderDirection', 'asc'));
+            $query->orderBy($request->input('orderBy'), $request->input('orderDirection', 'asc'));
         }
 
+        $this->applyRequestConstraints($query, $request, $model);
+
+        $result = $query->latest()->get();
+
+        if ($request->has('appends')) {
+            $result->each(function ($item) use ($request): void {
+                $item->append(array_intersect($item->getAppends(), $request->input('appends')));
+            });
+        }
+
+        return $this->formatAndDispatch($result, $model, $request);
+    }
+
+    protected function applyRequestConstraints(Builder $query, Request $request, string $model): void
+    {
         if ($request->has('where')) {
-            $query->where($request->get('where'));
+            $query->where($request->input('where'));
         }
 
         if ($request->has('whereIn')) {
-            foreach ($request->get('whereIn') as $whereIn) {
+            foreach ($request->input('whereIn') as $whereIn) {
                 $whereIn[1] = Arr::wrap($whereIn[1]);
                 $query->whereIn(...$whereIn);
             }
         }
 
         if ($request->has('whereNotIn')) {
-            foreach ($request->get('whereNotIn') as $whereNotIn) {
+            foreach ($request->input('whereNotIn') as $whereNotIn) {
                 $query->whereNotIn(...$whereNotIn);
             }
         }
 
         if ($request->has('whereNull')) {
-            $query->whereNull(...$request->get('whereNull'));
+            $query->whereNull(...$request->input('whereNull'));
         }
 
         if ($request->has('whereNotNull')) {
-            $query->whereNotNull(...$request->get('whereNotNull'));
+            $query->whereNotNull(...$request->input('whereNotNull'));
         }
 
         if ($request->has('whereBetween')) {
-            $query->whereBetween(...$request->get('whereBetween'));
+            $query->whereBetween(...$request->input('whereBetween'));
         }
 
         if ($request->has('whereNotBetween')) {
-            $query->whereNotBetween(...$request->get('whereNotBetween'));
+            $query->whereNotBetween(...$request->input('whereNotBetween'));
         }
 
         if ($request->has('whereDate')) {
-            $query->whereDate(...$request->get('whereDate'));
+            $query->whereDate(...$request->input('whereDate'));
         }
 
         if ($request->has('whereMonth')) {
-            $query->whereMonth(...$request->get('whereMonth'));
+            $query->whereMonth(...$request->input('whereMonth'));
         }
 
         if ($request->has('whereDay')) {
-            $query->whereDay(...$request->get('whereDay'));
+            $query->whereDay(...$request->input('whereDay'));
         }
 
         if ($request->has('whereYear')) {
-            $query->whereYear(...$request->get('whereYear'));
+            $query->whereYear(...$request->input('whereYear'));
         }
 
         if ($request->has('whereTime')) {
-            $query->whereTime(...$request->get('whereTime'));
+            $query->whereTime(...$request->input('whereTime'));
         }
 
         if ($request->has('select')) {
-            $query->select($request->get('select'));
+            $query->select($request->input('select'));
         }
 
         if ($request->has('whereDoesntHave')) {
-            $whereDoesntHave = $request->get('whereDoesntHave');
+            $whereDoesntHave = $request->input('whereDoesntHave');
             if (is_array($whereDoesntHave) && array_is_list($whereDoesntHave)) {
                 foreach ($whereDoesntHave as $relation) {
                     $query->whereDoesntHave($relation);
@@ -149,7 +170,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereHas')) {
-            $whereHas = $request->get('whereHas');
+            $whereHas = $request->input('whereHas');
             if (is_array($whereHas) && array_is_list($whereHas)) {
                 foreach ($whereHas as $relation) {
                     $query->whereHas($relation);
@@ -160,37 +181,55 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereRelation')) {
-            $query->whereRelation(...$request->get('whereRelation'));
+            $query->whereRelation(...$request->input('whereRelation'));
         }
 
         if ($request->has('whereDoesntHaveRelation')) {
-            $query->whereDoesntHaveRelation(...$request->get('whereDoesntHaveRelation'));
+            $query->whereDoesntHaveRelation(...$request->input('whereDoesntHaveRelation'));
         }
 
         if ($request->has('doesntHave')) {
-            $query->doesntHave(...$request->get('doesntHave'));
+            $query->doesntHave(...$request->input('doesntHave'));
         }
 
-        $result = $query->latest()->get();
-
-        if ($request->has('appends')) {
-            $result->each(function ($item) use ($request): void {
-                $item->append(array_intersect($item->getAppends(), $request->get('appends')));
-            });
+        // Add local scopes to query
+        $scopes = $request->input('scopes');
+        if (is_array($scopes) && $scopes) {
+            /** @var Model $modelInstance */
+            $modelInstance = app($model);
+            foreach ($scopes as $scope => $params) {
+                if ($modelInstance->hasNamedScope($scope)) {
+                    if (is_array($params)) {
+                        $query->{$scope}(...$params);
+                    } else {
+                        $query->{$scope}($params);
+                    }
+                }
+            }
         }
+    }
 
+    protected function formatAndDispatch(Collection $result, string $model, Request $request)
+    {
         if (is_a(app($model), InteractsWithDataTables::class)) {
-            $result = $result->map(function ($item) use ($request) {
-                return array_merge(
+            $result = $result->map(function ($item) use ($request): array {
+                $formatted = array_merge(
                     [
                         'id' => $item->getKey(),
                         'label' => $item->getLabel() ?? '-',
                         'description' => $item->getDescription(),
                         'image' => $item->getAvatarUrl(),
                     ],
-                    $item->only($request->get('fields', [])),
-                    $item->only($request->get('appends', [])),
+                    $item->only($request->input('fields', [])),
+                    $item->only($request->input('appends', [])),
                 );
+
+                // mapping sources are limited to keys already exposed above
+                foreach (Arr::wrap($request->input('mapping', [])) as $target => $source) {
+                    data_set($formatted, $target, data_get($formatted, $source));
+                }
+
+                return $formatted;
             });
         }
 

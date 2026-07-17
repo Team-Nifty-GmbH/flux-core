@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Livewire\DataTables\ActivityLogList;
 use FluxErp\Models\Activity;
+use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ActivityLogs extends ActivityLogList
@@ -23,13 +24,12 @@ class ActivityLogs extends ActivityLogList
         ];
     }
 
+    #[Renderless]
     public function edit(Activity $activity): void
     {
         $this->activity = $activity->toArray();
         $this->activity['causer'] = $activity->causer?->name;
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('activity-log-detail');
-        JS);
+        $this->modalOpen('activity-log-detail');
     }
 }

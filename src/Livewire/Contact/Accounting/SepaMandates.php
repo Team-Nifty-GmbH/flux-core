@@ -13,7 +13,6 @@ use FluxErp\Livewire\Forms\SepaMandateForm;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\Tenant;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,7 +24,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class SepaMandates extends SepaMandateList
 {
-    use Actions, CreatesDocuments, WithFileUploads;
+    use CreatesDocuments, WithFileUploads;
 
     #[Modelable]
     public ContactForm $contact;
@@ -119,6 +118,7 @@ class SepaMandates extends SepaMandateList
         $this->loadData();
     }
 
+    #[Renderless]
     public function edit(?SepaMandate $sepaMandate = null): void
     {
         $this->sepaMandate->reset();
@@ -126,9 +126,7 @@ class SepaMandates extends SepaMandateList
             $this->sepaMandate->fill($sepaMandate);
         }
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-sepa-mandate-modal');
-        JS);
+        $this->modalOpen('edit-sepa-mandate-modal');
     }
 
     public function save(): bool

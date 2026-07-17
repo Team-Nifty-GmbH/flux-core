@@ -129,6 +129,7 @@
                 :text="__('Cancel')"
                 x-on:click="$tsui.close.modal('create-task-modal')"
             />
+            @stack('create-task-modal-footer')
             <x-button
                 color="indigo"
                 :text="__('Save')"

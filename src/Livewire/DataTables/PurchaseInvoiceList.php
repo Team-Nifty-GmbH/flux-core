@@ -10,7 +10,6 @@ use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Media;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
@@ -27,7 +26,6 @@ use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PurchaseInvoiceList extends BaseDataTable
@@ -35,6 +33,8 @@ class PurchaseInvoiceList extends BaseDataTable
     use WithDocumentScanning, WithFilePond, WithFileUploads;
 
     public bool $positiveEmptyState = true;
+
+    public bool $autoOpenEditModal = false;
 
     public array $enabledCols = [
         'url',
@@ -77,6 +77,27 @@ class PurchaseInvoiceList extends BaseDataTable
 
     protected string $model = PurchaseInvoice::class;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        $id = session()->pull('open_purchase_invoice_id');
+        if (! $id) {
+            return;
+        }
+
+        $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
+            ->whereKey($id)
+            ->first();
+
+        if (! $purchaseInvoice) {
+            return;
+        }
+
+        $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
+        $this->autoOpenEditModal = true;
+    }
+
     protected function getTableActions(): array
     {
         return [
@@ -109,36 +130,26 @@ class PurchaseInvoiceList extends BaseDataTable
     }
 
     #[Renderless]
-    public function downloadMedia(Media $media): false|BinaryFileResponse
-    {
-        if (! file_exists($media->getPath())) {
-            $this->toast()
-                ->error(__('The file does not exist anymore.'))
-                ->send();
-
-            return false;
-        }
-
-        return response()->download($media->getPath(), $media->file_name);
-    }
-
-    #[Renderless]
     public function edit(?PurchaseInvoice $purchaseInvoice = null): void
     {
         $this->purchaseInvoiceForm->reset();
         $this->mediaForm->reset();
 
         if ($purchaseInvoice?->exists) {
-            $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
-            $this->purchaseInvoiceForm->fill($purchaseInvoice);
-            $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
-                ?: $purchaseInvoice->invoice->getUrl();
-            $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+            $this->fillEditFormFromPurchaseInvoice($purchaseInvoice);
         }
 
         $this->js(<<<'JS'
             $tsui.open.modal('edit-purchase-invoice-modal');
         JS);
+    }
+
+    #[Renderless]
+    public function resetEditForm(): void
+    {
+        $this->resetErrorBag();
+        $this->purchaseInvoiceForm->reset();
+        $this->mediaForm->reset();
     }
 
     #[Renderless]
@@ -294,6 +305,15 @@ class PurchaseInvoiceList extends BaseDataTable
         return true;
     }
 
+    protected function fillEditFormFromPurchaseInvoice(PurchaseInvoice $purchaseInvoice): void
+    {
+        $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
+        $this->purchaseInvoiceForm->fill($purchaseInvoice);
+        $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
+            ?: $purchaseInvoice->invoice->getUrl();
+        $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+    }
+
     protected function getScannedDocumentAction(): string
     {
         return CreatePurchaseInvoice::class;
@@ -337,6 +357,7 @@ class PurchaseInvoiceList extends BaseDataTable
                     ->toArray(),
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->whereIn('order_type_enum', $purchaseOrderTypes)
+                    ->ordered()
                     ->get(['id', 'name'])
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')

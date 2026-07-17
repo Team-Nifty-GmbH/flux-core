@@ -1,40 +1,77 @@
 @use(Illuminate\Support\Facades\Blade; use Illuminate\Support\Number)
-<tbody class="bg-uneven">
-    <tr>
-        <td class="pos py-2 pr-8 align-top">
+@php
+    $descriptionChunks = split_html_for_print(
+        render_editor_blade($position->description, ['position' => $position])->toHtml()
+    );
+    $rowBackground = ($loop ?? false) && $loop->odd ? 'background: #f2f4f7;' : '';
+    $rowBottomPadding = $descriptionChunks === [] ? 'padding-bottom: 8px;' : '';
+@endphp
+<tbody>
+    <tr
+        @if ($rowBackground)
+            style="{{ $rowBackground }}"
+        @endif
+    >
+        <td
+            class="pos"
+            style="
+                padding-top: 8px;
+                padding-right: 32px;
+                vertical-align: top;
+                {{ $rowBottomPadding }}
+            "
+        >
             {{ $position->total_net_price ? $position->slug_position : '' }}
         </td>
         <td
-            class="py-2 pr-8 align-top"
-            style="padding-left: {{ $position->depth * 15 }}px"
+            style="padding-top: 8px; padding-right: 32px; vertical-align: top; {{ $rowBottomPadding }} padding-left: {{ $position->depth * 15 }}px;"
         >
-            @if($position->is_alternative)
+            @if ($position->is_alternative)
                 <x-badge
                     color="amber"
-                    class="mb-2"
+                    style="margin-bottom: 8px"
                     :text="__('Alternative')"
                     position="right"
                 />
             @endif
 
-            <p class="font-italic text-xs">{{ $position->product_number }}</p>
-            <p class="font-semibold">
+            <p
+                style="
+                    font-style: italic;
+                    font-size: 12px;
+                    margin: 0;
+                    padding: 0;
+                "
+            >{{ $position->product_number }}</p>
+            <p style="font-weight: 600; margin: 0; padding: 0">
                 {{ render_editor_blade($position->name, ['position' => $position]) }}
             </p>
-            <div class="prose-xs">
-                {{ render_editor_blade($position->description, ['position' => $position]) }}
-            </div>
         </td>
-        <td class="py-2 pr-8 text-center align-top">
-            @if(! $position->is_free_text && ! $position->is_bundle_position)
+        <td
+            style="
+                padding-top: 8px;
+                padding-right: 32px;
+                text-align: center;
+                vertical-align: top;
+                {{ $rowBottomPadding }}
+            "
+        >
+            @if (! $position->is_free_text && ! $position->is_bundle_position)
                 {{ Number::format($position->amount) }}
                 {{ data_get($position, 'product.unit.abbreviation') }}
             @endif
         </td>
-        <td class="py-2 text-right align-top">
-            @if(bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) === 1)
-                <div class="text-xs whitespace-nowrap">
-                    <div class="line-through">
+        <td
+            style="
+                padding-top: 8px;
+                text-align: right;
+                vertical-align: top;
+                {{ $rowBottomPadding }}
+            "
+        >
+            @if (bccomp($position->total_base_net_price ?? 0, $position->total_net_price ?? 0, 2) === 1)
+                <div style="font-size: 12px; white-space: nowrap">
+                    <div style="text-decoration: line-through">
                         {{ Number::currency($isNet ? $position->total_base_net_price : $position->total_base_gross_price) }}
                     </div>
                     <div>
@@ -46,4 +83,20 @@
             {{ $position->total_net_price ? Number::currency($isNet ? $position->total_net_price : $position->total_gross_price) : null }}
         </td>
     </tr>
+    @foreach ($descriptionChunks as $chunk)
+        <tr
+            @if ($rowBackground)
+                style="{{ $rowBackground }}"
+            @endif
+        >
+            <td class="pos"></td>
+            <td
+                style="font-size: 12px; line-height: 16px; vertical-align: top; padding-right: 32px; {{ $loop->last ? 'padding-bottom: 8px;' : '' }} padding-left: {{ $position->depth * 15 }}px;"
+            >
+                {!! $chunk !!}
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+    @endforeach
 </tbody>

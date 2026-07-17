@@ -5,19 +5,18 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
-use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\SupportsFileDownloads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class MediaList extends BaseDataTable
 {
-    use Actions;
+    use SupportsFileDownloads;
 
     public array $enabledCols = [
         'file_name',
@@ -41,7 +40,7 @@ class MediaList extends BaseDataTable
                 ->icon('arrow-down-tray')
                 ->text(__('Download'))
                 ->attributes([
-                    'x-on:click' => 'show = false; $wire.downloadMedia(record.id)',
+                    'x-on:click' => 'show = false; $wire.download(record.id)',
                 ]),
             DataTableButton::make()
                 ->icon('pencil')
@@ -65,19 +64,6 @@ class MediaList extends BaseDataTable
                     'wire:click' => 'deleteMedia(record.id).then(() => show = false)',
                 ]),
         ];
-    }
-
-    public function downloadMedia(Media $media): false|BinaryFileResponse
-    {
-        if (! file_exists($media->getPath())) {
-            $this->toast()
-                ->error(__('The file does not exist anymore.'))
-                ->send();
-
-            return false;
-        }
-
-        return response()->download($media->getPath(), $media->file_name);
     }
 
     #[Renderless]
@@ -136,8 +122,8 @@ class MediaList extends BaseDataTable
         $itemArray['url'] = $item->hasGeneratedConversion('thumb')
             ? $item->getUrl('thumb')
             : (
-                Str::startsWith($item->mime_type, 'image/')
-                    ? $item->getUrl('thumb')
+                Str::startsWith((string) $item->mime_type, 'image/')
+                    ? $item->getUrl()
                     : route('icons', ['name' => 'document'])
             );
         $itemArray['original_url'] = $item->original_url;

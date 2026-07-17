@@ -2,16 +2,34 @@
 @section('first-page-right-block.rows')
     @parent
     <tr>
-        <td class="py-0 text-left font-semibold">{{ __('Refund Date') }}:</td>
-        <td class="py-0 text-right">
+        <td
+            style="
+                padding-top: 0;
+                padding-bottom: 0;
+                text-align: left;
+                font-weight: 600;
+            "
+        >
+            {{ __('Refund Date') }}:
+        </td>
+        <td style="padding-top: 0; padding-bottom: 0; text-align: right">
             {{ ($model->invoice_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
         </td>
     </tr>
     <tr>
-        <td class="py-0 text-left font-semibold">
+        <td
+            style="
+                padding-top: 0;
+                padding-bottom: 0;
+                text-align: left;
+                font-weight: 600;
+            "
+        >
             {{ __('Related Invoice Number') }}:
         </td>
-        <td class="py-0 text-right">{{ $model->parent?->invoice_number }}</td>
+        <td style="padding-top: 0; padding-bottom: 0; text-align: right">
+            {{ $model->parent?->invoice_number }}
+        </td>
     </tr>
 @endsection
 

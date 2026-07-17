@@ -6,7 +6,7 @@ use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
-use Spatie\Activitylog\Facades\CauserResolver;
+use Spatie\Activitylog\Support\CauserResolver;
 
 class FluxSeeder extends Seeder
 {
@@ -16,7 +16,7 @@ class FluxSeeder extends Seeder
         Artisan::call(InitPermissions::class);
         Role::findOrCreate('Super Admin');
         $this->call(UserTableSeeder::class);
-        CauserResolver::resolveUsing(function () {
+        app(CauserResolver::class)->resolveUsing(function () {
             return \FluxErp\Models\User::query()->inRandomOrder()->first();
         });
 

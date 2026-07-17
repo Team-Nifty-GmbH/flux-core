@@ -1,6 +1,6 @@
 <x-flux::map.fullscreen-container>
     <x-slot:controls>
-        @if($this->getOrdersWithoutCoordinatesCount() > 0)
+        @if ($this->getOrdersWithoutCoordinatesCount() > 0)
             <x-badge
                 color="amber"
                 :text="__(':count orders without coordinates', ['count' => $this->getOrdersWithoutCoordinatesCount()])"
@@ -25,7 +25,7 @@
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
             <div class="divide-secondary-200 space-y-2.5 divide-y">
-                @if(! $orderType ?? true)
+                @if (! $orderType ?? true)
                     <x-select.styled
                         :label="__('Order type')"
                         required
@@ -152,6 +152,7 @@
                         :options="$languages"
                     />
                 </div>
+                @stack('order-create-modal-content')
             </div>
         </section>
         <x-errors />
@@ -182,6 +183,7 @@
                 :options="resolve_static(\FluxErp\Models\OrderType::class, 'query')
                     ->where('order_type_enum', \FluxErp\Enums\OrderTypeEnum::CollectiveOrder->value)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name'])
                     ->toArray()
                 "
@@ -194,6 +196,7 @@
                 :options="resolve_static(\FluxErp\Models\OrderType::class, 'query')
                     ->where('order_type_enum', \FluxErp\Enums\OrderTypeEnum::SplitOrder->value)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name'])
                     ->toArray()
                 "

@@ -2,17 +2,28 @@
 
 namespace FluxErp\Livewire\Project;
 
-use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\HumanResources\WorkTimes as HumanResourcesWorkTimes;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 
-class WorkTimes extends WorkTimeList
+class WorkTimes extends HumanResourcesWorkTimes
 {
     #[Modelable]
     public int $projectId;
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $project = resolve_static(Project::class, 'query')
+            ->whereKey($this->projectId)
+            ->first(['id', 'order_id']);
+
+        $this->createOrdersFromWorkTimes->order_id = $project?->order_id;
+    }
 
     #[Renderless]
     public function getCacheKey(): string

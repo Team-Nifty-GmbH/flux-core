@@ -39,10 +39,18 @@
 
     @show
     @persist('notifications')
-        @if(auth()->check() && auth()->id())
-            <x-toast z-index="z-50" />
+        @if (auth()->check() && auth()->id())
+            <div
+                id="{{ \Illuminate\Support\Str::uuid() }}"
+                x-on:ts-ui:toast-upsert.window="
+                    $tallstackuiToast($el.id).upsertToast($event)
+                "
+            >
+                <x-toast />
+            </div>
         @endif
-        <x-dialog z-index="z-40" blur="md" align="center" />
+        <x-dialog />
+        <x-nuxbe-lightbox />
     @endpersist
 
     @auth('web')
@@ -100,7 +108,13 @@
     @endauth
 
     <x-flux::layout>
-        @if(! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
+        @if (
+            ! $navigation
+            && auth()->check()
+            && auth()->id()
+            && ! request()->routeIs('logout')
+            && ! request()->routeIs('two-factor.setup')
+        )
             <x-slot:header>
                 <x-layout.header without-mobile-button>
                     <x-button
@@ -132,7 +146,17 @@
                             </div>
                         @endauth
 
-                        @if(resolve_static(\FluxErp\Models\PriceList::class, 'default'))
+                        <x-button
+                            x-data
+                            x-show="$nuxbe.isAppMode()"
+                            x-cloak
+                            flat
+                            icon="arrow-path"
+                            :title="__('Refresh')"
+                            x-on:click="window.location.reload()"
+                        />
+
+                        @if (resolve_static(\FluxErp\Models\PriceList::class, 'default'))
                             @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
                                     <livewire:cart.cart lazy />
@@ -156,7 +180,14 @@
             </x-slot:header>
         @endif
 
-        @if(auth()->check() && auth()->id() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
+        @if (
+            ! $navigation
+            && auth()->check()
+            && auth()->id()
+            && ! request()->routeIs('logout')
+            && ! request()->routeIs('two-factor.setup')
+            && method_exists(auth()->guard(), 'getName')
+        )
             <x-slot:menu>
                 @php($navigation = true)
                 @persist('navigation')

@@ -21,6 +21,7 @@ class JobBatchable extends FluxPivot
         ];
     }
 
+    // Relations
     public function jobBatch(): BelongsTo
     {
         return $this->belongsTo(JobBatch::class);

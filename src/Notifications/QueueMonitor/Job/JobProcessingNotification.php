@@ -27,14 +27,15 @@ class JobProcessingNotification extends Notification implements HasToastNotifica
             ->id($this->id)
             ->notifiable($notifiable)
             ->title(__(':job_name is processing', ['job_name' => __($this->model->getJobName())]))
-            ->description(__(':time remaining', ['time' => $this->model->getRemainingInterval()]) .
-                ($this->model->message ? '<br>' . $this->model->message : '')
-            )
+            ->description($this->model->message)
             ->persistent()
+            ->accept(unserialize($this->model->accept) ?: null)
+            ->reject(unserialize($this->model->reject) ?: null)
             ->progress($this->model->jobBatch?->progress ?? $this->model->progress)
             ->markAsRead()
             ->attributes([
                 'state' => $this->model->state,
+                'progressMeta' => __(':time remaining', ['time' => $this->model->getRemainingInterval()]),
             ]);
     }
 

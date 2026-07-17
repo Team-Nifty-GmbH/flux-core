@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Enums\SepaMandateTypeEnum;
+use FluxErp\Models\Pivots\OrderPaymentRun;
 use FluxErp\States\PaymentRun\PaymentRunState;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasUserModification;
@@ -27,6 +28,7 @@ class PaymentRun extends FluxModel
         ];
     }
 
+    // Relations
     public function bankConnection(): BelongsTo
     {
         return $this->belongsTo(BankConnection::class);
@@ -34,6 +36,7 @@ class PaymentRun extends FluxModel
 
     public function orders(): BelongsToMany
     {
-        return $this->belongsToMany(Order::class, 'order_payment_run');
+        return $this->belongsToMany(Order::class, 'order_payment_run')
+            ->using(OrderPaymentRun::class);
     }
 }

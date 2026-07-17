@@ -52,4 +52,5 @@
         </div>
     </div>
     <x-flux::tabs wire:model.live="tab" :$tabs />
+    @stack('employee-detail-after-tabs')
 </div>

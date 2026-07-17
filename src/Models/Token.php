@@ -31,6 +31,7 @@ class Token extends FluxAuthenticatable
         ];
     }
 
+    // Public methods
     public function hasExceededMaxUsage(): bool
     {
         $maxUsageLimit = $this->max_uses;
@@ -73,7 +74,21 @@ class Token extends FluxAuthenticatable
         return static::query()->invalid();
     }
 
-    public function scopeInvalid(Builder $query): Builder
+    public function use(): bool
+    {
+        return static::withoutBroadcasting(function () {
+            if (is_null($this->uses)) {
+                $this->uses = 1;
+            } else {
+                $this->increment('uses');
+            }
+
+            return $this->save();
+        });
+    }
+
+    // Scopes
+    protected function scopeInvalid(Builder $query): Builder
     {
         return $query
             ->where(function ($query) {
@@ -88,7 +103,7 @@ class Token extends FluxAuthenticatable
             });
     }
 
-    public function scopeValid(Builder $query): Builder
+    protected function scopeValid(Builder $query): Builder
     {
         return $query
             ->where(function (Builder $query) {
@@ -101,18 +116,5 @@ class Token extends FluxAuthenticatable
                     ->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
             });
-    }
-
-    public function use(): bool
-    {
-        return static::withoutBroadcasting(function () {
-            if (is_null($this->uses)) {
-                $this->uses = 1;
-            } else {
-                $this->increment('uses');
-            }
-
-            return $this->save();
-        });
     }
 }

@@ -85,6 +85,73 @@ test('update address', function (): void {
     expect($updated->company)->toBe('Updated Corp');
 });
 
+test('create address does not set is_payment_reminder_address automatically', function (): void {
+    $address = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'Only Address',
+    ])->validate()->execute();
+
+    expect($address->is_payment_reminder_address)->toBeFalse();
+});
+
+test('setting is_payment_reminder_address unsets it on other addresses', function (): void {
+    $first = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'First',
+        'is_payment_reminder_address' => true,
+    ])->validate()->execute();
+
+    $second = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'Second',
+        'is_payment_reminder_address' => true,
+    ])->validate()->execute();
+
+    $first->refresh();
+
+    expect($second->is_payment_reminder_address)->toBeTrue()
+        ->and($first->is_payment_reminder_address)->toBeFalse();
+});
+
+test('update address to is_payment_reminder_address unsets others', function (): void {
+    $first = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'First',
+        'is_payment_reminder_address' => true,
+    ])->validate()->execute();
+
+    $second = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'Second',
+    ])->validate()->execute();
+
+    UpdateAddress::make([
+        'id' => $second->getKey(),
+        'is_payment_reminder_address' => true,
+    ])->validate()->execute();
+
+    $first->refresh();
+    $second->refresh();
+
+    expect($second->is_payment_reminder_address)->toBeTrue()
+        ->and($first->is_payment_reminder_address)->toBeFalse();
+});
+
+test('no address needs is_payment_reminder_address', function (): void {
+    $first = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'First',
+    ])->validate()->execute();
+
+    $second = CreateAddress::make([
+        'contact_id' => $this->contact->getKey(),
+        'company' => 'Second',
+    ])->validate()->execute();
+
+    expect($first->is_payment_reminder_address)->toBeFalse()
+        ->and($second->is_payment_reminder_address)->toBeFalse();
+});
+
 test('delete address', function (): void {
     $address = Address::factory()->create([
         'contact_id' => $this->contact->getKey(),

@@ -1,43 +1,20 @@
 <div
     x-data="{
-        addReceiver($event, type) {
-            let value = $event.target.value
-            if ($event instanceof KeyboardEvent && $event.which !== 13) {
-                value = value.slice(0, -1)
-            }
-
-            value = value.trim()
-
-            if (
-                value &&
-                ($event instanceof FocusEvent ||
-                    $event.code === 'Comma' ||
-                    $event.code === 'Enter' ||
-                    $event.code === 'Space')
-            ) {
-                const email = value.match(/<([^>]*)>/)
-                if (email && email[1]) {
-                    value = email[1]
-                }
-                $wire.mailMessage[type].push(value)
-                $event.target.value = null
-            }
-        },
         get isMultiGroup() {
-            return $wire.groupKeys.length > 1
+            return ($wire.groupKeys?.length ?? 0) > 1
         },
         get isLastGroup() {
-            return $wire.currentGroupIndex >= $wire.groupKeys.length - 1
+            return ($wire.currentGroupIndex ?? 0) >= ($wire.groupKeys?.length ?? 0) - 1
         },
         get isFirstGroup() {
-            return $wire.currentGroupIndex <= 0
+            return ($wire.currentGroupIndex ?? 0) <= 0
         },
     }"
 >
     <x-modal
         size="7xl"
         id="edit-mail"
-        x-on:close="$wire.clear()"
+        x-on:close.self="$wire.clear()"
         persistent
     >
         <x-slot:title>{{ __('Email') }}</x-slot>
@@ -57,99 +34,53 @@
                         <span x-text="$wire.currentGroupRecipientCount"></span> {{ __('recipient(s)') }}
                     </span>
                     <span class="text-gray-400">·</span>
-                    <span class="text-gray-500" x-text="'{{ __('Group') }} ' + ($wire.currentGroupIndex + 1) + '/' + $wire.groupKeys.length"></span>
+                    <span
+                        class="text-gray-500"
+                        x-text="$wire.groupKeys?.length > 0
+                            ? '{{ __('Group') }} ' + (($wire.currentGroupIndex ?? 0) + 1) + '/' + $wire.groupKeys.length
+                            : '-'"
+                    ></span>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-1.5">
-                <x-label :label="__('To')" />
-                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
-                    <template x-for="to in $wire.mailMessage.to || []">
-                        <x-badge flat color="indigo">
-                            <x-slot:text>
-                                <span x-text="to"></span>
-                            </x-slot>
-                            <x-slot
-                                name="right"
-                                class="relative flex h-2 w-2 items-center"
-                            >
-                                <button
-                                    type="button"
-                                    x-on:click="$wire.mailMessage.to.splice($wire.mailMessage.to.indexOf(to), 1)"
-                                    x-bind:disabled="$wire.multiple"
-                                >
-                                    <x-icon name="x-mark" class="h-4 w-4" />
-                                </button>
-                            </x-slot>
-                        </x-badge>
-                    </template>
-                </div>
-                <x-input
-                    :placeholder="__('Add a new to')"
-                    x-on:blur="addReceiver($event, 'to')"
-                    x-on:keyup="addReceiver($event, 'to')"
-                    class="w-full"
-                    x-bind:disabled="$wire.multiple"
-                />
-            </div>
-            <div class="flex flex-col gap-1.5">
-                <x-label :label="__('CC')" />
-                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
-                    <template x-for="cc in $wire.mailMessage.cc || []">
-                        <x-badge flat color="indigo">
-                            <x-slot:text>
-                                <span x-text="cc"></span>
-                            </x-slot>
-                            <x-slot
-                                name="right"
-                                class="relative flex h-2 w-2 items-center"
-                            >
-                                <button
-                                    type="button"
-                                    x-on:click="$wire.mailMessage.cc.splice($wire.mailMessage.cc.indexOf(cc), 1)"
-                                >
-                                    <x-icon name="x-mark" class="h-4 w-4" />
-                                </button>
-                            </x-slot>
-                        </x-badge>
-                    </template>
-                </div>
-                <x-input
-                    :placeholder="__('Add a new cc')"
-                    x-on:blur="addReceiver($event, 'cc')"
-                    x-on:keyup="addReceiver($event, 'cc')"
-                    class="w-full"
-                />
-            </div>
-            <div class="flex flex-col gap-1.5">
-                <x-label :label="__('BCC')" />
-                <div class="flex gap-1">
-                    <template x-for="bcc in $wire.mailMessage.bcc || []">
-                        <x-badge flat color="indigo">
-                            <x-slot:text>
-                                <span x-text="bcc"></span>
-                            </x-slot>
-                            <x-slot
-                                name="right"
-                                class="relative flex h-2 w-2 items-center"
-                            >
-                                <button
-                                    type="button"
-                                    x-on:click="$wire.mailMessage.bcc.splice($wire.mailMessage.bcc.indexOf(bcc), 1)"
-                                >
-                                    <x-icon name="x-mark" class="h-4 w-4" />
-                                </button>
-                            </x-slot>
-                        </x-badge>
-                    </template>
-                </div>
-                <x-input
-                    :placeholder="__('Add a new bcc')"
-                    x-on:blur="addReceiver($event, 'bcc')"
-                    x-on:keyup="addReceiver($event, 'bcc')"
-                    class="w-full"
-                />
-            </div>
+            @php
+                $receiverSearchRequest = [
+                    'url' => route('search', \FluxErp\Models\Address::class),
+                    'method' => 'post',
+                    'params' => [
+                        'searchFields' => ['email_primary', 'name'],
+                        'fields' => ['email_primary'],
+                        'mapping' => ['value' => 'email_primary', 'description' => 'label'],
+                        'whereNotNull' => ['email_primary'],
+                    ],
+                ];
+            @endphp
+
+            <x-flux::pillbox
+                wire:model="mailMessage.to"
+                class="flex flex-col gap-1.5"
+                x-bind:class="{ 'pointer-events-none opacity-50': $wire.multiple }"
+                :label="__('To')"
+                :placeholder="__('Add a new to')"
+                lazy="2"
+                :request="$receiverSearchRequest"
+            />
+            <x-flux::pillbox
+                wire:model="mailMessage.cc"
+                class="flex flex-col gap-1.5"
+                :label="__('CC')"
+                :placeholder="__('Add a new cc')"
+                lazy="2"
+                :request="$receiverSearchRequest"
+            />
+            <x-flux::pillbox
+                wire:model="mailMessage.bcc"
+                class="flex flex-col gap-1.5"
+                :label="__('BCC')"
+                :placeholder="__('Add a new bcc')"
+                lazy="2"
+                :request="$receiverSearchRequest"
+            />
             <div class="grow">
                 <x-input
                     wire:model="mailMessage.subject"
@@ -187,8 +118,8 @@
                                 </x-slot>
                                 <x-slot:text>
                                     <div
-                                        x-on:click.prevent="file.id && $wire.downloadAttachment(file.id)"
-                                        x-bind:class="file.id ? 'cursor-pointer' : ''"
+                                        x-on:click.prevent="file.id && $wire.download(file.id)"
+                                        x-bind:class="{ 'cursor-pointer': file.id }"
                                     >
                                         <span x-text="file.name"></span>
                                     </div>
@@ -257,6 +188,7 @@
                 class="ml-auto"
                 :text="__('Continue')"
             />
+            @stack('edit-mail-modal-footer')
             <x-button
                 x-cloak
                 x-show="! isMultiGroup || isLastGroup"

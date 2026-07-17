@@ -20,6 +20,7 @@ class DeviceToken extends FluxModel
         ];
     }
 
+    // Relations
     public function authenticatable(): MorphTo
     {
         return $this->morphTo('authenticatable');

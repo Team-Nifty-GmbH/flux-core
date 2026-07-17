@@ -40,6 +40,41 @@ test('calendar page loads without js errors', function (): void {
     visitCalendar()->assertNoJavascriptErrors();
 });
 
+test('event edit modal renders exactly one calendar-event component', function (): void {
+    createCalendarWithOwner();
+
+    $page = visitCalendar();
+
+    $count = $page->script(<<<'JS'
+        () => new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                const modal = document.querySelector('#edit-event-modal');
+                if (!modal) {
+                    resolve('no-modal');
+                    return;
+                }
+                resolve(modal.querySelectorAll('[wire\\:name="features.calendar.calendar-event"]').length);
+            }, 5000);
+            const check = () => {
+                const modal = document.querySelector('#edit-event-modal');
+                if (!modal) { setTimeout(check, 200); return; }
+                const count = modal.querySelectorAll('[wire\\:name="features.calendar.calendar-event"]').length;
+                if (count > 0) {
+                    clearTimeout(timeout);
+                    setTimeout(() => {
+                        resolve(modal.querySelectorAll('[wire\\:name="features.calendar.calendar-event"]').length);
+                    }, 1000);
+                } else {
+                    setTimeout(check, 200);
+                }
+            };
+            check();
+        })
+    JS);
+
+    expect($count)->toBe(1, 'edit-event-modal must contain exactly one features.calendar.calendar-event component, found: ' . $count);
+});
+
 test('saving a new calendar event works without js errors', function (): void {
     createCalendarWithOwner();
 
@@ -345,6 +380,108 @@ test('clicking different events shows correct data without one-behind lag', func
     JS);
 
     expect($titleB)->toBe('Event Beta', 'One-behind bug: modal shows previous event data instead of current');
+
+    $page->assertNoJavascriptErrors();
+});
+
+test('dragging a recurring calendar event opens confirm dialog with save options', function (): void {
+    $calendar = createCalendarWithOwner(['has_repeatable_events' => true]);
+
+    $start = Carbon::tomorrow()->setTime(10, 0);
+    $event = CalendarEvent::factory()->create([
+        'calendar_id' => $calendar->getKey(),
+        'title' => 'Recurring Event',
+        'start' => $start,
+        'end' => $start->copy()->addHour(),
+        'is_all_day' => false,
+    ]);
+
+    $page = visitCalendar();
+
+    $eventId = $event->getKey();
+    $calendarId = $calendar->getKey();
+    $newStart = $start->copy()->addDay();
+    $newEnd = $newStart->copy()->addHour();
+
+    // Simulate drag-drop of a recurring event instance: id "<id>|<repetition>"
+    // signals to the form that the dragged event was repeatable.
+    $page->script(<<<JS
+        () => {
+            window.Livewire.dispatch('calendar-event-change', {
+                event: {
+                    id: '{$eventId}|0',
+                    title: 'Recurring Event',
+                    start: '{$newStart->toIso8601String()}',
+                    end: '{$newEnd->toIso8601String()}',
+                    allDay: false,
+                    extendedProps: {
+                        is_editable: true,
+                        is_repeatable: true,
+                        has_repeats: true,
+                        calendar_type: null,
+                        calendar_id: {$calendarId}
+                    }
+                },
+                trigger: 'event-change'
+            });
+        }
+    JS);
+
+    waitForElement($page, '#confirm-dialog');
+    waitForElement($page, '#future-event-radio');
+    waitForElement($page, '#all-event-radio');
+
+    $page->assertNoJavascriptErrors();
+
+    expect($event->fresh()->start->toDateTimeString())
+        ->toBe($start->toDateTimeString(), 'Event must not be saved before user confirms which occurrences to update');
+});
+
+test('dragging a non-recurring calendar event saves immediately without confirm dialog', function (): void {
+    $calendar = createCalendarWithOwner();
+
+    $start = Carbon::tomorrow()->setTime(10, 0);
+    $event = CalendarEvent::factory()->create([
+        'calendar_id' => $calendar->getKey(),
+        'title' => 'Single Event',
+        'start' => $start,
+        'end' => $start->copy()->addHour(),
+        'is_all_day' => false,
+    ]);
+
+    $page = visitCalendar();
+
+    $eventId = $event->getKey();
+    $calendarId = $calendar->getKey();
+    $newStart = $start->copy()->addDay();
+    $newEnd = $newStart->copy()->addHour();
+
+    $page->script(<<<JS
+        () => {
+            window.Livewire.dispatch('calendar-event-change', {
+                event: {
+                    id: '{$eventId}',
+                    title: 'Single Event',
+                    start: '{$newStart->toIso8601String()}',
+                    end: '{$newEnd->toIso8601String()}',
+                    allDay: false,
+                    extendedProps: {
+                        is_editable: true,
+                        is_repeatable: false,
+                        has_repeats: false,
+                        calendar_type: null,
+                        calendar_id: {$calendarId}
+                    }
+                },
+                trigger: 'event-change'
+            });
+        }
+    JS);
+
+    $page->wait(2);
+
+    expect($event->fresh()->start->toDateTimeString())
+        ->toBe($newStart->toDateTimeString(), 'Non-recurring drag-drop must still save immediately');
 
     $page->assertNoJavascriptErrors();
 });

@@ -68,15 +68,14 @@ class StockPostingList extends BaseStockPostingList
         ];
     }
 
+    #[Renderless]
     public function create(): void
     {
         $this->stockPosting->reset();
         $this->stockPosting->warehouse_id =
             $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->getKey();
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('create-stock-posting-modal');
-        JS);
+        $this->modalOpen('create-stock-posting-modal');
     }
 
     public function save(): bool

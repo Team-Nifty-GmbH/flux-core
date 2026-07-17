@@ -20,6 +20,7 @@ class Categorizable extends MorphPivot
 
     protected $guarded = ['pivot_id'];
 
+    // Relations
     public function categorizable(): MorphTo
     {
         return $this->morphTo();

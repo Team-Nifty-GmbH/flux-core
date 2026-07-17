@@ -14,10 +14,12 @@ use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\SoftDeletes;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -25,6 +27,95 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
 {
     use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::creating(function (WorkTime $workTime): void {
+            $workTime->started_at = $workTime->started_at ?? now();
+            $workTime->user_id = $workTime->user_id ?? auth()->id();
+        });
+
+        static::saving(function (WorkTime $workTime): void {
+            if ($workTime->isDirty('user_id') && ! is_null($workTime->user_id)) {
+                $workTime->employee_id = resolve_static(Employee::class, 'query')
+                    ->where('user_id', $workTime->user_id)
+                    ->value('id');
+            }
+
+            if ($workTime->isDirty('employee_id')
+                && ! is_null($workTime->employee_id)
+                && is_null($workTime->user_id)
+            ) {
+                $workTime->user_id = resolve_static(User::class, 'query')
+                    ->whereRelation('employee', 'id', $workTime->employee_id)
+                    ->value('id');
+            }
+
+            // Calculate total_time_ms when started_at and ended_at are present
+            if ($workTime->started_at && $workTime->ended_at) {
+                $workTime->total_time_ms = bcsub(
+                    $workTime->started_at->diffInMilliseconds($workTime->ended_at),
+                    $workTime->paused_time_ms ?? 0,
+                    0
+                );
+
+                // For pause entries, make the time negative
+                if ($workTime->is_pause) {
+                    $workTime->total_time_ms = bcmul($workTime->total_time_ms, -1, 0);
+                }
+            }
+
+            if ($workTime->is_locked) {
+                $workTime->calculateTotalCost();
+            }
+        });
+
+        static::saved(function (WorkTime $workTime): void {
+            if ($workTime->is_daily_work_time) {
+                $workTime->broadcastEvent('dailyUpdated', toEveryone: true);
+            } else {
+                $workTime->broadcastEvent('taskUpdated', toEveryone: true);
+            }
+
+            if ($workTime->employee_id
+                && $workTime->is_daily_work_time
+                && $workTime->is_locked
+            ) {
+                if (! $workTime->is_pause
+                    || resolve_static(EmployeeDay::class, 'query')
+                        ->where('employee_id', $workTime->employee_id)
+                        ->where('date', $workTime->started_at->toDateString())
+                        ->exists()
+                ) {
+                    try {
+                        CloseEmployeeDay::make([
+                            'employee_id' => $workTime->employee_id,
+                            'date' => $workTime->started_at,
+                        ])
+                            ->validate()
+                            ->execute();
+                    } catch (Throwable) {
+                    }
+                }
+
+                if ($workTime->wasChanged('started_at')
+                    && Carbon::parse($workTime->started_at)
+                        ->diffInDays($originalStart = $workTime->getOriginal('started_at'), true) >= 1
+                ) {
+                    try {
+                        CloseEmployeeDay::make([
+                            'employee_id' => $workTime->employee_id,
+                            'date' => $originalStart,
+                        ])
+                            ->validate()
+                            ->execute();
+                    } catch (Throwable) {
+                    }
+                }
+            }
+        });
+    }
+
+    // Public static methods
     public static function aggregateColumns(string $type): array
     {
         return match ($type) {
@@ -145,87 +236,6 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::creating(function (WorkTime $workTime): void {
-            $workTime->started_at = $workTime->started_at ?? now();
-            $workTime->user_id = $workTime->user_id ?? auth()->id();
-        });
-
-        static::saving(function (WorkTime $workTime): void {
-            if ($workTime->isDirty('user_id') && ! is_null($workTime->user_id)) {
-                $workTime->employee_id = resolve_static(Employee::class, 'query')
-                    ->where('user_id', $workTime->user_id)
-                    ->value('id');
-            }
-
-            if ($workTime->isDirty('employee_id')
-                && ! is_null($workTime->employee_id)
-                && is_null($workTime->user_id)
-            ) {
-                $workTime->user_id = resolve_static(User::class, 'query')
-                    ->whereRelation('employee', 'id', $workTime->employee_id)
-                    ->value('id');
-            }
-
-            // Calculate total_time_ms when started_at and ended_at are present
-            if ($workTime->started_at && $workTime->ended_at) {
-                $workTime->total_time_ms = bcsub(
-                    $workTime->started_at->diffInMilliseconds($workTime->ended_at),
-                    $workTime->paused_time_ms ?? 0,
-                    0
-                );
-
-                // For pause entries, make the time negative
-                if ($workTime->is_pause) {
-                    $workTime->total_time_ms = bcmul($workTime->total_time_ms, -1, 0);
-                }
-            }
-
-            if ($workTime->is_locked) {
-                $workTime->calculateTotalCost();
-            }
-        });
-
-        static::saved(function (WorkTime $workTime): void {
-            if ($workTime->is_daily_work_time) {
-                $workTime->broadcastEvent('dailyUpdated', toEveryone: true);
-            } else {
-                $workTime->broadcastEvent('taskUpdated', toEveryone: true);
-            }
-
-            if ($workTime->employee_id
-                && $workTime->is_daily_work_time
-                && $workTime->is_locked
-            ) {
-                try {
-                    CloseEmployeeDay::make([
-                        'employee_id' => $workTime->employee_id,
-                        'date' => $workTime->started_at,
-                    ])
-                        ->validate()
-                        ->execute();
-                } catch (Throwable) {
-                }
-
-                if ($workTime->wasChanged('started_at')
-                    && Carbon::parse($workTime->started_at)
-                        ->diffInDays($originalStart = $workTime->getOriginal('started_at'), true) >= 1
-                ) {
-                    try {
-                        CloseEmployeeDay::make([
-                            'employee_id' => $workTime->employee_id,
-                            'date' => $originalStart,
-                        ])
-                            ->validate()
-                            ->execute();
-                    } catch (Throwable) {
-                    }
-                }
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -238,6 +248,59 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         ];
     }
 
+    // Relations
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function employeeDays(): BelongsToMany
+    {
+        return $this->belongsToMany(EmployeeDay::class, 'employee_day_work_time')
+            ->using(EmployeeDayWorkTime::class)
+            ->withPivot(['hours_contributed', 'break_minutes_contributed'])
+            ->withTimestamps();
+    }
+
+    public function broadcastOn(string $event): array
+    {
+        $channels = Arr::wrap(parent::broadcastOn($event));
+
+        if (! is_null($this->user_id)) {
+            $channels[] = new PrivateChannel(
+                morph_alias(User::class) . '.' . $this->user_id
+            );
+        }
+
+        return $channels;
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('trackable');
+    }
+
+    public function orderPosition(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function workTimeType(): BelongsTo
+    {
+        return $this->belongsTo(WorkTimeType::class);
+    }
+
+    // Public methods
     public function calculateTotalCost(): static
     {
         $this->total_cost = Rounding::round(
@@ -262,34 +325,25 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         return $this;
     }
 
-    public function contact(): BelongsTo
+    public function toCalendarEvent(?array $info = null): array
     {
-        return $this->belongsTo(Contact::class);
+        return [
+            'id' => $this->id,
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $this->user->name,
+            'start' => $this->started_at->toDateTimeString(),
+            'end' => $this->ended_at?->toDateTimeString(),
+            'color' => $this->user->color ?? '#0891b2',
+            'description' => $this->description,
+            'allDay' => false,
+            'editable' => ! $this->is_locked,
+            'is_editable' => ! $this->is_locked,
+            'is_public' => false,
+            'is_repeatable' => false,
+        ];
     }
 
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class);
-    }
-
-    public function employeeDays(): BelongsToMany
-    {
-        return $this->belongsToMany(EmployeeDay::class, 'employee_day_work_time')
-            ->using(EmployeeDayWorkTime::class)
-            ->withPivot(['hours_contributed', 'break_minutes_contributed'])
-            ->withTimestamps();
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('trackable');
-    }
-
-    public function orderPosition(): BelongsTo
-    {
-        return $this->belongsTo(OrderPosition::class);
-    }
-
+    // Scopes
     public function scopeInTimeframe(
         Builder $builder,
         Carbon|string $start,
@@ -324,38 +378,10 @@ class WorkTime extends FluxModel implements Calendarable, Targetable
         }
     }
 
-    public function scopeWorkTime(Builder $builder): void
+    protected function scopeWorkTime(Builder $builder): void
     {
         $builder->where('is_daily_work_time', true)
             ->where('is_locked', true)
             ->where('is_pause', false);
-    }
-
-    public function toCalendarEvent(?array $info = null): array
-    {
-        return [
-            'id' => $this->id,
-            'calendar_type' => $this->getMorphClass(),
-            'title' => $this->user->name,
-            'start' => $this->started_at->toDateTimeString(),
-            'end' => $this->ended_at?->toDateTimeString(),
-            'color' => $this->user->color ?? '#0891b2',
-            'description' => $this->description,
-            'allDay' => false,
-            'editable' => ! $this->is_locked,
-            'is_editable' => ! $this->is_locked,
-            'is_public' => false,
-            'is_repeatable' => false,
-        ];
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function workTimeType(): BelongsTo
-    {
-        return $this->belongsTo(WorkTimeType::class);
     }
 }

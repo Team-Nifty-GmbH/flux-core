@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -116,109 +117,117 @@ class MergeRecords extends FluxAction
             try {
                 $method = new ReflectionMethod($mainRecord, $relationItem->name);
                 $relation = $method->invoke($mainRecord);
+
+                // On MorphOne and HasOne relations if it is not from the main record,
+                // it must be updated accordingly, and the related record from the main record must be deleted.
+                // For now, related records from these relations are not replaced to avoid data loss.
+                // Update each related model separately to trigger the model events.
+                switch (true) {
+                    case $relation instanceof HasOne:
+                    case $relation instanceof HasMany:
+                    case $relation instanceof MorphOne:
+                    case $relation instanceof MorphMany:
+                        $relation->getRelated()
+                            ->newQuery()
+                            ->when(
+                                $relation instanceof MorphOne || $relation instanceof MorphMany,
+                                fn ($query) => $query->where(
+                                    $relation->getQualifiedMorphType(),
+                                    $mainRecord->getMorphClass()
+                                )
+                            )
+                            ->whereIn($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
+                            ->get()
+                            ->each(fn (Model $model) => $model
+                                ->fill([
+                                    $relation->getForeignKeyName() => $mainRecord->getKey(),
+                                ])
+                                ->save()
+                            );
+                        break;
+                    case $relation instanceof BelongsToMany:
+                        if ($relation->getParentKeyName() !== $mainRecord->getKeyName()) {
+                            break;
+                        }
+
+                        // If the relation has pivot columns, we assume that duplicate entries are allowed
+                        $pivotColumns = $relation->getPivotColumns();
+                        $columns = array_merge(
+                            [
+                                $relation->getForeignPivotKeyName(),
+                                $relation->getRelatedPivotKeyName(),
+                            ],
+                            $relation instanceof MorphToMany ? [$relation->getMorphType()] : [],
+                            $pivotColumns
+                        );
+                        $wheres = array_filter(
+                            $relation->toBase()->wheres,
+                            fn (array $where) => str_starts_with(
+                                data_get($where, 'column') ?? '',
+                                $relation->getTable() . '.'
+                            )
+                                && data_get($where, 'column') !== $relation->getQualifiedForeignPivotKeyName()
+                        );
+
+                        $existingRelatedIds = $relation->newPivotStatement()
+                            ->where($relation->getQualifiedForeignPivotKeyName(), $mainRecord->getKey())
+                            ->when($wheres, fn (Builder $query) => $this->addWheresToQuery($query, $wheres))
+                            ->when(
+                                $relation instanceof MorphToMany && $relation->getInverse() === false,
+                                fn (Builder $query) => $query->where(
+                                    $relation->getQualifiedMorphTypeName(),
+                                    $mainRecord->getMorphClass()
+                                )
+                            )
+                            ->pluck($relation->getQualifiedRelatedPivotKeyName())
+                            ->unique()
+                            ->toArray();
+
+                        $relation->newPivotStatement()
+                            ->insertUsing(
+                                $columns,
+                                $relation->newPivotStatement()
+                                    ->select(array_merge(
+                                        [DB::raw($mainRecord->getKey())],
+                                        array_diff($columns, [$relation->getForeignPivotKeyName()])
+                                    ))
+                                    ->when(
+                                        $relation instanceof MorphToMany && $relation->getInverse() === false,
+                                        fn ($query) => $query->where(
+                                            $relation->getQualifiedMorphTypeName(),
+                                            $mainRecord->getMorphClass()
+                                        )
+                                    )
+                                    ->whereIn(
+                                        $relation->getQualifiedForeignPivotKeyName(),
+                                        $this->getData('merge_records.*.id')
+                                    )
+                                    ->when($wheres, fn (Builder $query) => $this->addWheresToQuery($query, $wheres))
+                                    ->when(
+                                        ! $pivotColumns,
+                                        fn (Builder $query) => $query
+                                            ->whereNotIn(
+                                                $relation->getQualifiedRelatedPivotKeyName(),
+                                                $existingRelatedIds
+                                            )
+                                            ->groupBy(array_merge(
+                                                [$relation->getRelatedPivotKeyName()],
+                                                $relation instanceof MorphToMany ? [$relation->getMorphType()] : [],
+                                            ))
+                                    )
+                            );
+                        break;
+                }
             } catch (ReflectionException) {
                 continue;
-            }
+            } catch (QueryException $e) {
+                logger()->warning('MergeRecords: skipping relation due to query exception', [
+                    'relation' => $relationItem->name,
+                    'model' => $mainRecord::class,
+                    'message' => $e->getMessage(),
+                ]);
 
-            // On MorphOne and HasOne relations if it is not from the main record,
-            // it must be updated accordingly, and the related record from the main record must be deleted.
-            // For now, related records from these relations are not replaced to avoid data loss.
-            // Update each related model separately to trigger the model events.
-            switch (true) {
-                case $relation instanceof HasOne:
-                case $relation instanceof HasMany:
-                case $relation instanceof MorphOne:
-                case $relation instanceof MorphMany:
-                    $relation->getRelated()
-                        ->newQuery()
-                        ->when(
-                            $relation instanceof MorphOne || $relation instanceof MorphMany,
-                            fn ($query) => $query->where(
-                                $relation->getQualifiedMorphType(),
-                                $mainRecord->getMorphClass()
-                            )
-                        )
-                        ->whereIn($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
-                        ->get()
-                        ->each(fn (Model $model) => $model
-                            ->fill([
-                                $relation->getForeignKeyName() => $mainRecord->getKey(),
-                            ])
-                            ->save()
-                        );
-                    break;
-                case $relation instanceof BelongsToMany:
-                    if ($relation->getParentKeyName() !== $mainRecord->getKeyName()) {
-                        break;
-                    }
-
-                    // If the relation has pivot columns, we assume that duplicate entries are allowed
-                    $pivotColumns = $relation->getPivotColumns();
-                    $columns = array_merge(
-                        [
-                            $relation->getForeignPivotKeyName(),
-                            $relation->getRelatedPivotKeyName(),
-                        ],
-                        $relation instanceof MorphToMany ? [$relation->getMorphType()] : [],
-                        $pivotColumns
-                    );
-                    $wheres = array_filter(
-                        $relation->toBase()->wheres,
-                        fn (array $where) => str_starts_with(
-                            data_get($where, 'column') ?? '',
-                            $relation->getTable() . '.'
-                        )
-                            && data_get($where, 'column') !== $relation->getQualifiedForeignPivotKeyName()
-                    );
-
-                    $existingRelatedIds = $relation->newPivotStatement()
-                        ->where($relation->getQualifiedForeignPivotKeyName(), $mainRecord->getKey())
-                        ->when($wheres, fn (Builder $query) => $this->addWheresToQuery($query, $wheres))
-                        ->when(
-                            $relation instanceof MorphToMany && $relation->getInverse() === false,
-                            fn (Builder $query) => $query->where(
-                                $relation->getQualifiedMorphTypeName(),
-                                $mainRecord->getMorphClass()
-                            )
-                        )
-                        ->pluck($relation->getQualifiedRelatedPivotKeyName())
-                        ->unique()
-                        ->toArray();
-
-                    $relation->newPivotStatement()
-                        ->insertUsing(
-                            $columns,
-                            $relation->newPivotStatement()
-                                ->select(array_merge(
-                                    [DB::raw($mainRecord->getKey())],
-                                    array_diff($columns, [$relation->getForeignPivotKeyName()])
-                                ))
-                                ->when(
-                                    $relation instanceof MorphToMany && $relation->getInverse() === false,
-                                    fn ($query) => $query->where(
-                                        $relation->getQualifiedMorphTypeName(),
-                                        $mainRecord->getMorphClass()
-                                    )
-                                )
-                                ->whereIn(
-                                    $relation->getQualifiedForeignPivotKeyName(),
-                                    $this->getData('merge_records.*.id')
-                                )
-                                ->when($wheres, fn (Builder $query) => $this->addWheresToQuery($query, $wheres))
-                                ->when(
-                                    ! $pivotColumns,
-                                    fn (Builder $query) => $query
-                                        ->whereNotIn(
-                                            $relation->getQualifiedRelatedPivotKeyName(),
-                                            $existingRelatedIds
-                                        )
-                                        ->groupBy(array_merge(
-                                            [$relation->getRelatedPivotKeyName()],
-                                            $relation instanceof MorphToMany ? [$relation->getMorphType()] : [],
-                                        ))
-                                )
-                        );
-                    break;
+                continue;
             }
         }
 

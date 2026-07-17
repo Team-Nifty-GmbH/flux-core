@@ -23,6 +23,7 @@ class EmployeeBalanceAdjustment extends FluxModel
         ];
     }
 
+    // Relations
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);

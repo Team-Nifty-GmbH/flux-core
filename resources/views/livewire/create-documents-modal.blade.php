@@ -1,7 +1,7 @@
 @props([
     'supportsDocumentPreview' => false,
 ])
-@if($supportsDocumentPreview)
+@if ($supportsDocumentPreview)
     <div>
         <x-modal
             id="preview-{{ strtolower($this->getId()) }}"
@@ -26,11 +26,12 @@
                     :text="__('Cancel')"
                     x-on:click="$tsui.close.modal('preview-{{ strtolower($this->getId()) }}')"
                 />
+                @stack('create-documents-preview-modal-footer')
                 <x-button
-                    loading
                     color="indigo"
                     :text="__('Download')"
                     wire:click="downloadPreview()"
+                    loading="downloadPreview()"
                 />
             </x-slot:footer>
         </x-modal>
@@ -47,7 +48,7 @@
             class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 text-left text-sm"
         >
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
-                @if($printers ?? false)
+                @if ($printers ?? false)
                     <div
                         class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
                     >
@@ -66,7 +67,7 @@
             >
                 {{ __('Download') }}
             </div>
-            @if($supportsDocumentPreview)
+            @if ($supportsDocumentPreview)
                 <div
                     class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
                 >
@@ -86,7 +87,7 @@
                     class="{{ $supportsDocumentPreview ? 'grid-cols-5' : 'grid-cols-4' }} grid w-full gap-4 py-2"
                 >
                     @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
-                        @if($printers ?? false)
+                        @if ($printers ?? false)
                             <div
                                 class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                             >
@@ -156,7 +157,7 @@
                             x-text="printLayout.label"
                         ></span>
                     </div>
-                    @if($supportsDocumentPreview)
+                    @if ($supportsDocumentPreview)
                         <div
                             class="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap"
                         >
@@ -205,7 +206,7 @@
                     </div>
                 </div>
             </template>
-            @if($printers ?? false)
+            @if ($printers ?? false)
                 <div
                     class="flex flex-col gap-2 p-4"
                     x-collapse
@@ -260,6 +261,7 @@
             :text="__('Cancel')"
             x-on:click="$tsui.close.modal('create-documents-{{ strtolower($this->getId()) }}')"
         />
+        @stack('create-documents-modal-footer')
         <x-button
             color="indigo"
             :text="__('Continue')"

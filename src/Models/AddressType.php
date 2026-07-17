@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\AddressAddressType;
+use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\AddressTypeTenant;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasTenantAssignment;
@@ -24,18 +26,23 @@ class AddressType extends FluxModel
         ];
     }
 
+    // Relations
     public function addresses(): BelongsToMany
     {
-        return $this->belongsToMany(Address::class);
+        return $this->belongsToMany(Address::class, 'address_address_type')
+            ->using(AddressAddressType::class);
     }
 
     public function orders(): BelongsToMany
     {
-        return $this->belongsToMany(Order::class, 'address_address_type_order')->withPivot('address_id');
+        return $this->belongsToMany(Order::class, 'address_address_type_order')
+            ->using(AddressAddressTypeOrder::class)
+            ->withPivot('address_id');
     }
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'address_type_tenant')->using(AddressTypeTenant::class);
+        return $this->belongsToMany(Tenant::class, 'address_type_tenant')
+            ->using(AddressTypeTenant::class);
     }
 }

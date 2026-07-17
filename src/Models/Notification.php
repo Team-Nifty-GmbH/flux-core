@@ -8,11 +8,27 @@ use FluxErp\Traits\Model\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Notification extends DatabaseNotification
 {
     use MassPrunable, ResolvesRelationsThroughContainer;
+
+    // Public methods
+    public function menuArea(): ?string
+    {
+        return Str::before($this->menuRoute() ?? '', '.') ?: null;
+    }
+
+    public function menuRoute(): ?string
+    {
+        if (data_get($this->data, 'menu_indicator') === false) {
+            return null;
+        }
+
+        return data_get($this->data, 'accept.route') ?: null;
+    }
 
     public function prunable(): Builder
     {
@@ -43,16 +59,32 @@ class Notification extends DatabaseNotification
             </div>
         blade;
 
-        $description = strip_tags(data_get($this->data, 'description', ''));
+        $description = strip_tags(data_get($this->data, 'description', ''), '<br>');
 
-        if (data_get($this->data, 'progress')) {
+        if (! is_null(data_get($this->data, 'progress'))) {
+            $meta = strip_tags((string) data_get($this->data, 'progressMeta', ''));
+            $metaHtml = $meta !== ''
+                ? '<div class="text-xs opacity-70 mt-1">' . $meta . '</div>'
+                : '';
+
             $description = <<<blade
                 $description
                 <div class="flex gap-1.5 items-center h-6">
                     <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200 dark:bg-gray-700 w-full">
-                        <div x-bind:style="{width: toast.progress * 100 + '%'}" class="transition-all shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 dark:bg-indigo-700"></div>
+                        <div
+                            x-data="{
+                                w: (window._toastProgress?.[toast.id] ?? 0),
+                            }"
+                            x-init="requestAnimationFrame(() => requestAnimationFrame(() => {
+                                w = toast.progress * 100;
+                                (window._toastProgress = window._toastProgress || {})[toast.id] = w;
+                            }))"
+                            x-bind:style="`width: \${w}%; transition: width 700ms ease-out;`"
+                            class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 dark:bg-indigo-700"
+                        ></div>
                     </div>
                 </div>
+                $metaHtml
             blade;
         }
 
@@ -76,7 +108,7 @@ class Notification extends DatabaseNotification
             );
         }
 
-        if (data_get($this->data, 'progress')) {
+        if (! is_null(data_get($this->data, 'progress'))) {
             $toast->progress(data_get($this->data, 'progress'));
         }
 

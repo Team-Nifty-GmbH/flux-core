@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\RoundingMethodEnum;
+use FluxErp\Models\Pivots\CategoryPriceList;
 use FluxErp\Traits\Model\HasDefault;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
@@ -18,11 +19,6 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class PriceList extends FluxModel
 {
     use HasDefault, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
-
-    public static function hasPermission(): bool
-    {
-        return false;
-    }
 
     protected static function booted(): void
     {
@@ -44,6 +40,12 @@ class PriceList extends FluxModel
         );
     }
 
+    // Public static methods
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
+
     protected function casts(): array
     {
         return [
@@ -54,9 +56,11 @@ class PriceList extends FluxModel
         ];
     }
 
+    // Relations
     public function categoryDiscounts(): BelongsToMany
     {
-        return $this->belongsToMany(Discount::class, 'category_price_list');
+        return $this->belongsToMany(Discount::class, 'category_price_list')
+            ->using(CategoryPriceList::class);
     }
 
     public function contacts(): HasMany
@@ -71,7 +75,8 @@ class PriceList extends FluxModel
 
     public function discountedCategories(): BelongsToMany
     {
-        return $this->belongsToMany(Category::class, 'category_price_list');
+        return $this->belongsToMany(Category::class, 'category_price_list')
+            ->using(CategoryPriceList::class);
     }
 
     public function prices(): HasMany

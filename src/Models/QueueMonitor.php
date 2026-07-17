@@ -12,6 +12,7 @@ use FluxErp\Notifications\QueueMonitor\Job\JobStartedNotification;
 use FluxErp\States\QueueMonitor\Failed;
 use FluxErp\States\QueueMonitor\QueueMonitorState;
 use FluxErp\States\QueueMonitor\Succeeded;
+use FluxErp\Traits\HasStates;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\MonitorsQueue;
@@ -23,14 +24,13 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
-use Spatie\ModelStates\HasStates;
 use Throwable;
 
 class QueueMonitor extends FluxModel
 {
     use HasFrontendAttributes, HasPackageFactory, HasStates, MassPrunable;
 
-    public static function booted(): void
+    protected static function booted(): void
     {
         static::created(function (QueueMonitor $monitor): void {
             $user = auth()->user();
@@ -83,11 +83,28 @@ class QueueMonitor extends FluxModel
         ];
     }
 
+    // Relations
     public function addresses(): MorphToMany
     {
         return $this->morphedByMany(Address::class, 'queue_monitorable', 'queue_monitorable');
     }
 
+    public function jobBatch(): BelongsTo
+    {
+        return $this->belongsTo(JobBatch::class);
+    }
+
+    public function queueMonitorables(): HasMany
+    {
+        return $this->hasMany(QueueMonitorable::class);
+    }
+
+    public function users(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'queue_monitorable', 'queue_monitorable');
+    }
+
+    // Public methods
     public function broadcastWith(): array
     {
         // This ensures the payload doesnt get too large
@@ -217,11 +234,6 @@ class QueueMonitor extends FluxModel
         return ! is_null($this->finished_at);
     }
 
-    public function jobBatch(): BelongsTo
-    {
-        return $this->belongsTo(JobBatch::class);
-    }
-
     public function prunable(): Builder
     {
         return static::query()
@@ -230,11 +242,6 @@ class QueueMonitor extends FluxModel
                 '<',
                 now()->subDays(30)
             );
-    }
-
-    public function queueMonitorables(): HasMany
-    {
-        return $this->hasMany(QueueMonitorable::class);
     }
 
     public function retry(): void
@@ -249,35 +256,31 @@ class QueueMonitor extends FluxModel
         }
     }
 
-    public function scopeFailed(Builder $query): void
+    // Scopes
+    protected function scopeFailed(Builder $query): void
     {
         $query->whereState('state', Failed::class);
     }
 
-    public function scopeLastHour(Builder $query): void
+    protected function scopeLastHour(Builder $query): void
     {
         $query->where('started_at', '>', now()->subHours(1));
     }
 
-    public function scopeOrdered(Builder $query): void
+    protected function scopeOrdered(Builder $query): void
     {
         $query
             ->orderBy('started_at', 'desc')
             ->orderBy('started_at_exact', 'desc');
     }
 
-    public function scopeSucceeded(Builder $query): void
+    protected function scopeSucceeded(Builder $query): void
     {
         $query->whereState('state', Succeeded::class);
     }
 
-    public function scopeToday(Builder $query): void
+    protected function scopeToday(Builder $query): void
     {
         $query->whereRaw('DATE(started_at) = ?', [now()->subHour()->format('Y-m-d')]);
-    }
-
-    public function users(): MorphToMany
-    {
-        return $this->morphedByMany(User::class, 'queue_monitorable', 'queue_monitorable');
     }
 }

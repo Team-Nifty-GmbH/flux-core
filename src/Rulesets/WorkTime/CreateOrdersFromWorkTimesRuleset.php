@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\WorkTime;
 
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tenant;
@@ -21,13 +22,20 @@ class CreateOrdersFromWorkTimesRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Product::class]),
             ],
+            'order_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
             'order_type_id' => [
-                'required',
+                'required_without:order_id',
+                'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => OrderType::class]),
             ],
             'tenant_id' => [
-                'required',
+                'required_without:order_id',
+                'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Tenant::class]),
             ],

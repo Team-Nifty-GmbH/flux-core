@@ -45,6 +45,7 @@ class StockPosting extends FluxModel
         ];
     }
 
+    // Relations
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');

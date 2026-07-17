@@ -329,7 +329,7 @@
             <div
                 x-cloak
                 x-show="$wire.communication.communication_type_enum === 'mail'"
-                x-bind:class="$wire.communication.id && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': $wire.communication.id }"
             >
                 <x-select.styled
                     required
@@ -376,7 +376,7 @@
                                 sm
                                 icon="plus"
                                 color="emerald"
-                                wire:click="addTag($promptValue())"
+                                wire:click="addTag($nuxbe.promptValue())"
                                 wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                             />
                         @endcanAction
@@ -439,7 +439,7 @@
             <div class="text-sm font-semibold">{{ __('Print') }}</div>
             <div class="text-sm font-semibold">{{ __('Email') }}</div>
             <div class="text-sm font-semibold">{{ __('Download') }}</div>
-            @foreach($printLayouts as $printLayout)
+            @foreach ($printLayouts as $printLayout)
                 <x-checkbox
                     wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}"
                     :label="__($printLayout)"

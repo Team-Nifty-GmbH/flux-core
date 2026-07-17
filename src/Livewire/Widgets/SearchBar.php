@@ -33,6 +33,13 @@ class SearchBar extends Component
             return;
         }
 
+        if (! user_can_view_model_detail($model)) {
+            $this->skipRender();
+            $this->show = false;
+
+            return;
+        }
+
         $component = method_exists($model, 'getLivewireComponentWidget')
             ? livewire_component_exists(resolve_static($model, 'getLivewireComponentWidget'))
                 ? resolve_static($model, 'getLivewireComponentWidget')
@@ -40,6 +47,13 @@ class SearchBar extends Component
             : null;
 
         if ($component === 'widgets.generic' || ! $component) {
+            $this->skipRender();
+            $this->show = false;
+
+            return;
+        }
+
+        if (! resolve_static($model, 'query')->whereKey($modelId)->exists()) {
             $this->skipRender();
             $this->show = false;
 

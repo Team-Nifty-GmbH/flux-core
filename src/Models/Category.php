@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\CategoryPriceList;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasAttributeTranslations;
@@ -37,15 +38,6 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         'pivot',
     ];
 
-    public static function scoutIndexSettings(): ?array
-    {
-        return static::baseScoutIndexSettings() ?? [
-            'filterableAttributes' => [
-                'model_type',
-            ],
-        ];
-    }
-
     protected static function booted(): void
     {
         collect(Relation::morphMap())
@@ -71,6 +63,16 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
             });
     }
 
+    // Public static methods
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'model_type',
+            ],
+        ];
+    }
+
     protected function casts(): array
     {
         return [
@@ -78,18 +80,31 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         ];
     }
 
-    public function assigned(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $this->model()?->count(),
-        );
-    }
-
+    // Relations
     public function discounts(): BelongsToMany
     {
-        return $this->belongsToMany(Discount::class, 'category_price_list');
+        return $this->belongsToMany(Discount::class, 'category_price_list')
+            ->using(CategoryPriceList::class);
     }
 
+    public function model(): MorphToMany
+    {
+        return $this->model_type
+            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable', 'categorizable')
+                ->using(Pivots\Categorizable::class)
+            : new MorphToMany(
+                static::query(),
+                $this,
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            );
+    }
+
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return null;
@@ -118,23 +133,15 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return null;
     }
 
-    public function model(): MorphToMany
+    // Attributes
+    protected function assigned(): Attribute
     {
-        return $this->model_type
-            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable', 'categorizable')
-                ->using(Pivots\Categorizable::class)
-            : new MorphToMany(
-                static::query(),
-                $this,
-                '',
-                '',
-                '',
-                '',
-                '',
-                ''
-            );
+        return Attribute::make(
+            get: fn ($value) => $this->model()?->count(),
+        );
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

@@ -46,7 +46,7 @@
         </div>
         <div
             class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
-            x-bind:class="!$wire.edit && 'pointer-events-none'"
+            x-bind:class="{ 'pointer-events-none': !$wire.edit }"
         >
             <x-label
                 :label="__('Salutation')"
@@ -120,7 +120,7 @@
         </div>
         <div
             class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
-            x-bind:class="!$wire.edit && 'pointer-events-none'"
+            x-bind:class="{ 'pointer-events-none': !$wire.edit }"
         >
             <x-label
                 :label="__('Country')"
@@ -163,7 +163,7 @@
         </div>
     @show
     @section('contact-channels')
-        @if(! $onlyPostal)
+        @if (! $onlyPostal)
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label
                     :label="__('Date Of Birth')"
@@ -281,7 +281,7 @@
                 </div>
             </div>
         @show
-        @if(! $onlyPostal)
+        @if (! $onlyPostal)
             @section('contact-channels.url')
                 <div
                     class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
@@ -325,7 +325,7 @@
             @show
             <div
                 class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
-                x-bind:class="!$wire.edit && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !$wire.edit }"
             >
                 <x-label
                     :label="__('Language')"
@@ -343,7 +343,7 @@
             </div>
             <div
                 class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
-                x-bind:class="!$wire.edit && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !$wire.edit }"
             >
                 <x-label
                     :label="__('Search Aliases')"
@@ -355,7 +355,7 @@
             </div>
             <div
                 class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
-                x-bind:class="!$wire.edit && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !$wire.edit }"
             >
                 <x-label :label="__('Tags')" for="{{ md5('address.tags') }}" />
                 <div class="col-span-2">
@@ -388,7 +388,7 @@
                                         sm
                                         icon="plus"
                                         color="emerald"
-                                        wire:click="addTag($promptValue())"
+                                        wire:click="addTag($nuxbe.promptValue())"
                                         wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                                     />
                                 @endcanAction
@@ -399,7 +399,7 @@
             </div>
             <div
                 class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
-                x-bind:class="!$wire.edit && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !$wire.edit }"
             >
                 <x-label
                     :label="__('Advertising State')"
@@ -407,7 +407,7 @@
                 />
                 <div class="col-span-2">
                     <x-flux::state
-                        x-bind:class="!$wire.edit && 'pointer-events-none'"
+                        x-bind:class="{ 'pointer-events-none': !$wire.edit }"
                         class="w-full"
                         align="bottom-start"
                         wire:model="address.advertising_state"
@@ -421,7 +421,7 @@
     @show
 </div>
 @section('attributes')
-    @if(! $onlyPostal)
+    @if (! $onlyPostal)
         <h3
             class="pt-12 text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
         >
@@ -455,6 +455,11 @@
                         !$wire.edit || $wire.address.is_invoice_address
                     "
                     wire:model="address.is_invoice_address"
+                />
+                <x-toggle
+                    :label="__('Payment Reminder Address')"
+                    x-bind:disabled="!$wire.edit"
+                    wire:model="address.is_payment_reminder_address"
                 />
             @show
         </div>
@@ -491,10 +496,10 @@
                         <div>
                             <x-select.native
                                 x-bind:readonly="!$wire.edit"
-                                x-bind:class="
-                                    !$wire.edit &&
-                                    'border-none bg-transparent shadow-none'
-                                "
+                                x-bind:class="{
+                                    'border-none bg-transparent shadow-none':
+                                        !$wire.edit,
+                                }"
                                 x-model="contactOption.type"
                                 :options="resolve_static(\FluxErp\Enums\ContactOptionTypeEnum::class, 'valuesLocalized')"
                                 required
@@ -504,10 +509,10 @@
                             x-model="contactOption.label"
                             :placeholder="__('Label')"
                             x-bind:disabled="!$wire.edit"
-                            x-bind:class="
-                                !$wire.edit &&
-                                'border-none bg-transparent shadow-none'
-                            "
+                            x-bind:class="{
+                                'border-none bg-transparent shadow-none':
+                                    !$wire.edit,
+                            }"
                         />
                         <x-input
                             x-cloak
@@ -515,10 +520,10 @@
                             x-model="contactOption.value"
                             :placeholder="__('Value')"
                             x-bind:disabled="!$wire.edit"
-                            x-bind:class="
-                                !$wire.edit &&
-                                'border-none bg-transparent shadow-none'
-                            "
+                            x-bind:class="{
+                                'border-none bg-transparent shadow-none':
+                                    !$wire.edit,
+                            }"
                         />
                         <div
                             class="block text-sm font-medium text-gray-700 sm:mt-px dark:text-gray-50"

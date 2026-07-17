@@ -11,6 +11,7 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
 {
     use Filterable;
 
+    // Public static methods
     public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
     {
         static::query()
@@ -27,6 +28,7 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
         ];
     }
 
+    // Relations
     public function media(): BelongsTo
     {
         return $this->belongsTo(Media::class);
@@ -42,6 +44,7 @@ class PrintJob extends FluxModel implements HasMediaForeignKey
         return $this->belongsTo(User::class);
     }
 
+    // Protected methods
     protected function broadcastToEveryone(): bool
     {
         return true;

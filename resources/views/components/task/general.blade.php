@@ -30,7 +30,7 @@
                 @section('task-content.selects.project')
                     <div
                         x-show="$wire.task.id"
-                        x-bind:class="!isEditing && 'pointer-events-none'"
+                        x-bind:class="{ 'pointer-events-none': !isEditing }"
                     >
                         <x-select.styled
                             wire:model="task.project_id"
@@ -56,7 +56,7 @@
                     </div>
                 @show
                 @section('task-content.selects.responsible-users')
-                    <div x-bind:class="!isEditing && 'pointer-events-none'">
+                    <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                         <x-select.styled
                             :label="__('Responsible User')"
                             autocomplete="off"
@@ -77,7 +77,7 @@
             @show
             <div
                 class="flex justify-between gap-x-4"
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
                 @section('task-content.dates')
                     @section('task-content.start')
@@ -99,9 +99,9 @@
                                 class="flex flex-col gap-2"
                                 x-cloak
                                 x-show="$wire.task.start_date"
-                                x-bind:class="
-                                    !isEditing && 'pointer-events-none'
-                                "
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
                             >
                                 <x-toggle
                                     :label="__('Start Reminder')"
@@ -142,9 +142,9 @@
                                 class="flex flex-col gap-2"
                                 x-cloak
                                 x-show="$wire.task.due_date"
-                                x-bind:class="
-                                    !isEditing && 'pointer-events-none'
-                                "
+                                x-bind:class="{
+                                    'pointer-events-none': !isEditing,
+                                }"
                             >
                                 <x-toggle
                                     :label="__('Due Reminder')"
@@ -170,7 +170,7 @@
             </div>
             @section('task-content.multi-selects')
                 <x-flux::state
-                    x-bind:class="!isEditing && 'pointer-events-none'"
+                    x-bind:class="{ 'pointer-events-none': !isEditing }"
                     class="w-full"
                     align="bottom-start"
                     :label="__('Task state')"
@@ -191,7 +191,7 @@
                 scope="task"
                 :label="__('Description')"
             />
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Categories')"
                     wire:model="task.categories"
@@ -214,7 +214,7 @@
                 ]"
                 />
             </div>
-            <div x-bind:class="!isEditing && 'pointer-events-none'">
+            <div x-bind:class="{ 'pointer-events-none': !isEditing }">
                 <x-select.styled
                     :label="__('Assigned')"
                     autocomplete="off"
@@ -234,7 +234,7 @@
             </div>
             <div
                 class="col-span-2"
-                x-bind:class="!isEditing && 'pointer-events-none'"
+                x-bind:class="{ 'pointer-events-none': !isEditing }"
             >
                 <x-select.styled
                     multiple
@@ -265,7 +265,7 @@
                                     sm
                                     icon="plus"
                                     color="emerald"
-                                    wire:click="addTag($promptValue())"
+                                    wire:click="addTag($nuxbe.promptValue())"
                                     wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                                 />
                             @endcanAction

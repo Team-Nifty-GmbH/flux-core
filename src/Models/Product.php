@@ -7,7 +7,10 @@ use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
+use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Models\Pivots\ProductProductProperty;
+use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Model\Categorizable;
@@ -49,6 +52,16 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 
     protected ?string $detailRouteName = 'products.id';
 
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product): void {
+            if (! $product->product_number) {
+                $product->getSerialNumber('product_number');
+            }
+        });
+    }
+
+    // Public static methods
     public static function calculateVariantName(
         ProductOptionCollection|Arrayable|array $productOptions,
         string $parentName
@@ -82,15 +95,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::creating(function (Product $product): void {
-            if (! $product->product_number) {
-                $product->getSerialNumber('product_number');
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -108,6 +112,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         ];
     }
 
+    // Relations
     public function bundleProducts(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -115,7 +120,9 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'bundle_product_product',
             'product_id',
             'bundle_product_id'
-        )->withPivot('count');
+        )
+            ->using(BundleProductProduct::class)
+            ->withPivot('count');
     }
 
     public function cartItems(): HasMany
@@ -128,6 +135,66 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->belongsTo(Media::class, 'cover_media_id');
     }
 
+    public function orderPositions(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class);
+    }
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(Price::class);
+    }
+
+    public function productCrossSellings(): HasMany
+    {
+        return $this->hasMany(ProductCrossSelling::class);
+    }
+
+    public function productOptions(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductOption::class, 'product_product_option')
+            ->using(ProductProductOption::class);
+    }
+
+    public function productProperties(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            ProductProperty::class,
+            'product_product_property',
+            'product_id',
+            'product_property_id'
+        )
+            ->using(ProductProductProperty::class);
+    }
+
+    public function stockPostings(): HasMany
+    {
+        return $this->hasMany(StockPosting::class);
+    }
+
+    public function suppliers(): BelongsToMany
+    {
+        return $this->belongsToMany(Contact::class, 'product_supplier')
+            ->using(ProductSupplier::class);
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'product_tenant')
+            ->using(ProductTenant::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
+    }
+
+    // Public methods
     /**
      * @throws Exception
      */
@@ -176,48 +243,6 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->detailRoute();
     }
 
-    public function orderPositions(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class);
-    }
-
-    public function price(): Attribute
-    {
-        return Attribute::get(function () {
-            return resolve_static(PriceHelper::class, 'make', ['product' => $this])
-                ->when(is_a(auth()->user(), Address::class), function (PriceHelper $priceHelper) {
-                    return $priceHelper->setContact(auth()->user()->contact);
-                })
-                ->price();
-        });
-    }
-
-    public function prices(): HasMany
-    {
-        return $this->hasMany(Price::class);
-    }
-
-    public function productCrossSellings(): HasMany
-    {
-        return $this->hasMany(ProductCrossSelling::class);
-    }
-
-    public function productOptions(): BelongsToMany
-    {
-        return $this->belongsToMany(ProductOption::class, 'product_product_option')
-            ->using(ProductProductOption::class);
-    }
-
-    public function productProperties(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            ProductProperty::class,
-            'product_product_property',
-            'product_id',
-            'product_property_id'
-        );
-    }
-
     public function purchasePrice(float|int|null $amount = 1): ?Price
     {
         return $amount
@@ -236,7 +261,20 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->useDisk('public');
     }
 
-    public function scopeWebshop(Builder $query): void
+    // Attributes
+    protected function price(): Attribute
+    {
+        return Attribute::get(function () {
+            return resolve_static(PriceHelper::class, 'make', ['product' => $this])
+                ->when(is_a(auth()->user(), Address::class), function (PriceHelper $priceHelper) {
+                    return $priceHelper->setContact(auth()->user()->contact);
+                })
+                ->price();
+        });
+    }
+
+    // Scopes
+    protected function scopeWebshop(Builder $query): void
     {
         $query->with('coverMedia')
             ->withCount('children')
@@ -270,31 +308,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ));
     }
 
-    public function stockPostings(): HasMany
-    {
-        return $this->hasMany(StockPosting::class);
-    }
-
-    public function suppliers(): BelongsToMany
-    {
-        return $this->belongsToMany(Contact::class, 'product_supplier');
-    }
-
-    public function tenants(): BelongsToMany
-    {
-        return $this->belongsToMany(Tenant::class, 'product_tenant')->using(ProductTenant::class);
-    }
-
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
-    }
-
-    public function vatRate(): BelongsTo
-    {
-        return $this->belongsTo(VatRate::class);
-    }
-
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

@@ -9,15 +9,13 @@ use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Livewire\DataTables\LedgerAccountList;
 use FluxErp\Livewire\Forms\LedgerAccountForm;
 use FluxErp\Models\LedgerAccount;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class LedgerAccounts extends LedgerAccountList
 {
-    use Actions;
-
     public LedgerAccountForm $ledgerAccount;
 
     protected ?string $includeBefore = 'flux::livewire.settings.ledger-accounts';
@@ -73,14 +71,13 @@ class LedgerAccounts extends LedgerAccountList
         return true;
     }
 
+    #[Renderless]
     public function edit(LedgerAccount $ledgerAccount): void
     {
         $this->ledgerAccount->reset();
         $this->ledgerAccount->fill($ledgerAccount);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-ledger-account-modal');
-        JS);
+        $this->modalOpen('edit-ledger-account-modal');
     }
 
     public function save(): bool

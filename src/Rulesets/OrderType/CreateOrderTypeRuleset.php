@@ -37,6 +37,7 @@ class CreateOrderTypeRuleset extends FluxRuleset
                 'required',
                 Rule::enum(OrderTypeEnum::class),
             ],
+            'order_column' => 'nullable|integer|min:1',
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
             'is_visible_in_sidebar' => 'boolean',

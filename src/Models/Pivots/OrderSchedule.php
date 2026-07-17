@@ -19,6 +19,7 @@ class OrderSchedule extends FluxPivot
         });
     }
 
+    // Relations
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

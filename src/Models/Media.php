@@ -16,6 +16,8 @@ class Media extends BaseMedia
 {
     use HasPackageFactory, LogsActivity, ResolvesRelationsThroughContainer;
 
+    public const int PRIVATE_URL_TTL_MINUTES = 5;
+
     public bool $isTemporary = false;
 
     public ?string $path = null;
@@ -34,12 +36,39 @@ class Media extends BaseMedia
         'order_column',
     ];
 
+    protected $appends = [
+        'original_url',
+        'preview_url',
+        'thumb_url',
+    ];
+
+    public function getThumbUrlAttribute(): string
+    {
+        return $this->hasGeneratedConversion('thumb_400x400')
+            ? $this->getUrl('thumb_400x400')
+            : '';
+    }
+
+    // Relations
     public function category(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable', 'categorizable')
             ->using(Categorizable::class);
     }
 
+    public function printJobs(): HasMany
+    {
+        return $this->hasMany(PrintJob::class);
+    }
+
+    public function temporaryUpload(): BelongsTo
+    {
+        // When using the base method from spatie media this method throws an exception.
+        // Thats why we override the method here and return an empty BelongsTo.
+        return new BelongsTo(static::query(), new static(), '', '', '');
+    }
+
+    // Public methods
     public function getCollection(): ?MediaCollection
     {
         return $this->model->getMediaCollection($this->collection_name);
@@ -48,11 +77,6 @@ class Media extends BaseMedia
     public function getPath(string $conversionName = ''): string
     {
         return $this->path ?? parent::getPath($conversionName);
-    }
-
-    public function printJobs(): HasMany
-    {
-        return $this->hasMany(PrintJob::class);
     }
 
     public function setIsTemporary(bool $isTemporary = true): static
@@ -76,12 +100,5 @@ class Media extends BaseMedia
         }
 
         return parent::stream($conversion);
-    }
-
-    public function temporaryUpload(): BelongsTo
-    {
-        // When using the base method from spatie media this method throws an exception.
-        // Thats why we override the method here and return an empty BelongsTo.
-        return new BelongsTo(static::query(), new static(), '', '', '');
     }
 }

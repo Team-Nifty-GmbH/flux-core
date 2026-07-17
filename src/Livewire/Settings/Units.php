@@ -8,15 +8,13 @@ use FluxErp\Actions\Unit\UpdateUnit;
 use FluxErp\Livewire\DataTables\UnitList;
 use FluxErp\Livewire\Forms\UnitForm;
 use FluxErp\Models\Unit;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Units extends UnitList
 {
-    use Actions;
-
     public UnitForm $unit;
 
     protected ?string $includeBefore = 'flux::livewire.settings.units';
@@ -72,14 +70,13 @@ class Units extends UnitList
         return true;
     }
 
+    #[Renderless]
     public function edit(Unit $unit): void
     {
         $this->unit->reset();
         $this->unit->fill($unit);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-unit-modal');
-        JS);
+        $this->modalOpen('edit-unit-modal');
     }
 
     public function save(): bool

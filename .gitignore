@@ -11,3 +11,4 @@ node_modules
 reports
 /dist
 /workbench
+.playwright-mcp/

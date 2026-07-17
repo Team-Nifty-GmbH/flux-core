@@ -10,7 +10,6 @@ use FluxErp\Facades\Repeatable;
 use FluxErp\Livewire\DataTables\ScheduleList;
 use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Schedule;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -20,8 +19,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Scheduling extends ScheduleList
 {
-    use Actions;
-
     public ?string $includeBefore = 'flux::livewire.settings.scheduling';
 
     public array $repeatable;

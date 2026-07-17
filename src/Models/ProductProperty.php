@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\PropertyTypeEnum;
+use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Traits\Model\Filterable;
 use FluxErp\Traits\Model\HasAttributeTranslations;
 use FluxErp\Traits\Model\HasPackageFactory;
@@ -29,6 +30,7 @@ class ProductProperty extends FluxModel
         ];
     }
 
+    // Relations
     public function productPropertyGroup(): BelongsTo
     {
         return $this->belongsTo(ProductPropertyGroup::class);
@@ -41,9 +43,11 @@ class ProductProperty extends FluxModel
             'product_product_property',
             'product_property_id',
             'product_id'
-        );
+        )
+            ->using(ProductProductProperty::class);
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

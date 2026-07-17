@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
@@ -10,22 +11,18 @@ use FluxErp\Jobs\SyncMailAccountJob;
 use FluxErp\Livewire\DataTables\MailAccountList;
 use FluxErp\Livewire\Forms\MailAccountForm;
 use FluxErp\Livewire\Forms\MailFolderForm;
+use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use Webklex\PHPIMAP\Exceptions\AuthFailedException;
-use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
-use Webklex\PHPIMAP\Exceptions\ImapBadRequestException;
-use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
-use Webklex\PHPIMAP\Exceptions\ResponseException;
-use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
-#[Renderless]
 class MailAccounts extends MailAccountList
 {
     public array $folders = [];
@@ -99,16 +96,16 @@ class MailAccounts extends MailAccountList
         return true;
     }
 
+    #[Renderless]
     public function edit(MailAccount $mailAccount): void
     {
         $this->mailAccount->reset();
         $this->mailAccount->fill($mailAccount);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-mail-account');
-        JS);
+        $this->modalOpen('edit-mail-account');
     }
 
+    #[Renderless]
     public function editFolders(MailAccount $mailAccount): void
     {
         $this->mailAccount->reset();
@@ -116,11 +113,10 @@ class MailAccounts extends MailAccountList
 
         $this->loadFolders();
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-mail-folders');
-        JS);
+        $this->modalOpen('edit-mail-folders');
     }
 
+    #[Renderless]
     public function editMailFolder(MailFolder $mailFolder): void
     {
         $this->mailFolder->reset();
@@ -180,38 +176,39 @@ class MailAccounts extends MailAccountList
         $this->editFolders($mailAccount);
     }
 
-    #[Renderless]
-    public function testImapConnection(): void
+    #[Computed]
+    public function protocolOptions(): array
     {
-        try {
-            $this->mailAccount->testImapConnection();
+        $manager = app(MailDriverManager::class);
+        $imapFamily = $manager->imapFamilyDriverNames();
 
-            $this->toast()
-                ->success(__('Connection successful'))
-                ->send();
-        } catch (
-            ValidationException
-            |ImapBadRequestException
-            |RuntimeException
-            |ResponseException
-            |ConnectionFailedException
-            |AuthFailedException
-            |ImapServerErrorException $e
-        ) {
-            exception_to_notifications($e, $this);
-        }
+        return array_map(
+            fn (string $name) => [
+                'value' => $name,
+                'label' => in_array($name, $imapFamily, true)
+                    ? Str::upper($name)
+                    : __(Str::headline($name)),
+            ],
+            $manager->driverNames(),
+        );
+    }
+
+    #[Computed]
+    public function imapProtocols(): array
+    {
+        return app(MailDriverManager::class)->imapFamilyDriverNames();
     }
 
     #[Renderless]
-    public function testSmtpConnection(): void
+    public function testConnection(): void
     {
         try {
-            $this->mailAccount->testSmtpConnection();
+            $this->mailAccount->testConnection();
 
             $this->toast()
                 ->success(__('Connection successful'))
                 ->send();
-        } catch (ValidationException|TransportExceptionInterface $e) {
+        } catch (ValidationException|Exception $e) {
             exception_to_notifications($e, $this);
         }
     }

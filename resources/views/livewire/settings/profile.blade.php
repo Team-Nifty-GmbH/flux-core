@@ -73,6 +73,11 @@
                 />
             </form>
         @show
+        @section('profile.security')
+            <div class="space-y-6 pt-8">
+                <livewire:settings.two-factor-setup />
+            </div>
+        @show
         @section('profile.web-push')
             <div class="space-y-6 pt-8">
                 <x-card>
@@ -530,6 +535,7 @@
                                 :text="__('Send Test')"
                                 color="secondary"
                                 wire:click="sendTestNotification()"
+                                loading="sendTestNotification()"
                                 icon="paper-airplane"
                             />
                         </div>
@@ -616,6 +622,7 @@
                                 :text="__('Send Test')"
                                 color="secondary"
                                 wire:click="sendFcmTestNotification()"
+                                loading="sendFcmTestNotification()"
                                 icon="paper-airplane"
                             />
                         </div>
@@ -679,7 +686,13 @@
                 :text="__('Cancel')"
                 x-on:click="window.history.back()"
             />
-            <x-button color="indigo" :text="__('Save')" wire:click="save()" />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save()"
+                loading="save()"
+            />
         </div>
+        @stack('profile-integration-sections')
     @show
 </div>

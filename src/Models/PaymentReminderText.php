@@ -19,11 +19,13 @@ class PaymentReminderText extends FluxModel
         ];
     }
 
+    // Relations
     public function emailTemplate(): BelongsTo
     {
         return $this->belongsTo(EmailTemplate::class);
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

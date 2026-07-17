@@ -81,6 +81,7 @@ class CreateChildOrder extends Component
                 $this->type === OrderTypeEnum::SplitOrder->value,
                 fn (Builder $query) => $query->where('is_hidden', false)
             )
+            ->ordered()
             ->get(['id', 'name'])
             ->toArray();
 
@@ -238,8 +239,9 @@ class CreateChildOrder extends Component
                 'total_net_price',
                 'total_gross_price',
                 'discount_percentage',
-                'is_net',
+                'is_alternative',
                 'is_free_text',
+                'is_net',
             ])
             ->whereKey(array_merge($realPositionIds, $freeTextIds))
             ->get();
@@ -256,8 +258,9 @@ class CreateChildOrder extends Component
                     'total_net_price' => 0,
                     'total_gross_price' => 0,
                     'discount_percentage' => 0,
-                    'is_net' => $orderPosition->is_net,
+                    'is_alternative' => $orderPosition->is_alternative,
                     'is_free_text' => true,
+                    'is_net' => $orderPosition->is_net,
                     'unit_abbreviation' => null,
                 ];
 
@@ -284,6 +287,7 @@ class CreateChildOrder extends Component
                     'total_net_price' => $orderPosition->total_net_price,
                     'total_gross_price' => $orderPosition->total_gross_price,
                     'discount_percentage' => $orderPosition->discount_percentage,
+                    'is_alternative' => $orderPosition->is_alternative,
                     'is_net' => $orderPosition->is_net,
                     'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
                 ];

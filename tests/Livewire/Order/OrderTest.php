@@ -166,7 +166,7 @@ test('create documents', function (): void {
         ->call('openCreateDocumentsModal')
         ->assertExecutesJs("\$tsui.open.modal('create-documents-$componentId')")
         ->assertSet('printLayouts', [
-            ['layout' => 'invoice', 'label' => 'invoice'],
+            ['layout' => 'invoice', 'label' => 'Invoice'],
         ])
         ->set([
             'selectedPrintLayouts' => [
@@ -197,7 +197,7 @@ test('create documents with delivery lock fails', function (): void {
         ->call('createDocuments')
         ->assertOk()
         ->assertReturned(null)
-        ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
+        ->assertHasErrors(['has_contact_delivery_lock', 'order.balance'])
         ->assertSet('order.invoice_number', null);
 
     expect($this->order->refresh()->invoice_number)->toBeNull();
@@ -210,7 +210,7 @@ test('delete locked order fails', function (): void {
         ->call('delete')
         ->assertOk()
         ->assertNoRedirect()
-        ->assertHasErrors(['is_locked']);
+        ->assertHasErrors(['order.is_locked']);
 });
 
 test('delete order successful', function (): void {
@@ -574,7 +574,24 @@ test('renders subscription order view', function (): void {
 
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->assertOk()
-        ->assertViewIs('flux::livewire.order.subscription');
+        ->assertViewIs('flux::livewire.order.subscription')
+        ->assertViewHas('canCreateCancellationConfirmation', false);
+});
+
+test('subscription view offers cancellation confirmation when print layout is enabled', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+        'print_layouts' => ['cancellation-confirmation'],
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->assertOk()
+        ->assertViewIs('flux::livewire.order.subscription')
+        ->assertViewHas('canCreateCancellationConfirmation', true);
 });
 
 test('renders successfully', function (): void {
@@ -798,6 +815,74 @@ test('cancel subscription next period sets ends_at to due date', function (): vo
     expect($schedule)
         ->is_active->toBeTrue()
         ->and($schedule->ends_at->toDateTimeString())->toBe($dueAt->toDateTimeString());
+});
+
+test('cancel subscription with send email opens the mail dialog', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+        'print_layouts' => ['cancellation-confirmation'],
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true);
+
+    $component
+        ->call('cancelSubscription', 'immediate', true, true)
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertDispatched('createFromSession');
+});
+
+test('cancel subscription generating document only does not open the mail dialog', function (): void {
+    $subscriptionOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Subscription,
+        'is_active' => true,
+        'is_hidden' => false,
+        'print_layouts' => ['cancellation-confirmation'],
+    ]);
+
+    $targetOrderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+        'is_hidden' => false,
+    ]);
+
+    $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
+
+    $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        ->set([
+            'schedule.parameters.orderTypeId' => $targetOrderType->id,
+            'schedule.parameters.orderId' => $this->order->id,
+            'schedule.cron.methods.basic' => 'monthlyOn',
+            'schedule.cron.parameters.basic' => ['1', '00:00', null],
+        ])
+        ->call('saveSchedule')
+        ->assertReturned(true);
+
+    $component
+        ->call('cancelSubscription', 'immediate', true, false)
+        ->assertReturned(true)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertNotDispatched('createFromSession');
 });
 
 test('switch tabs', function (): void {

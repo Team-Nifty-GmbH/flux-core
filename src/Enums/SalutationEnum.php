@@ -29,7 +29,7 @@ class SalutationEnum extends FluxEnum
         };
     }
 
-    public static function salutation(string $case, object|array $address): string
+    public static function salutation(string $case, object|array $address, ?string $locale = null): string
     {
         $parameter = [
             'firstname' => data_get($address, 'firstname'),
@@ -37,23 +37,16 @@ class SalutationEnum extends FluxEnum
             'company' => data_get($address, 'company'),
         ];
 
-        if (data_get($address, 'has_formal_salutation')) {
-            return match ($case) {
-                SalutationEnum::Mrs => __('salutation.formal.mrs', $parameter),
-                SalutationEnum::Mr => __('salutation.formal.mr', $parameter),
-                SalutationEnum::Company => __('salutation.formal.company', $parameter),
-                SalutationEnum::Family => __('salutation.formal.family', $parameter),
-                default => __('salutation.formal.no_salutation', $parameter),
-            };
-        } else {
-            return match ($case) {
-                SalutationEnum::Mrs => __('salutation.informal.mrs', $parameter),
-                SalutationEnum::Mr => __('salutation.informal.mr', $parameter),
-                SalutationEnum::Company => __('salutation.informal.company', $parameter),
-                SalutationEnum::Family => __('salutation.informal.family', $parameter),
-                default => __('salutation.informal.no_salutation', $parameter),
-            };
-        }
+        $form = data_get($address, 'has_formal_salutation') ? 'formal' : 'informal';
+        $suffix = match ($case) {
+            SalutationEnum::Mrs => 'mrs',
+            SalutationEnum::Mr => 'mr',
+            SalutationEnum::Company => 'company',
+            SalutationEnum::Family => 'family',
+            default => 'no_salutation',
+        };
+
+        return __('salutation.' . $form . '.' . $suffix, $parameter, $locale);
     }
 
     public function get(Model $model, string $key, mixed $value, array $attributes): ?object

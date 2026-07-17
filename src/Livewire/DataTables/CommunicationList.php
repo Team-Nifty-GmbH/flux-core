@@ -18,7 +18,7 @@ class CommunicationList extends BaseDataTable
     ];
 
     public array $formatters = [
-        'total_time_ms' => 'time',
+        'total_time_ms' => 'duration',
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
     ];

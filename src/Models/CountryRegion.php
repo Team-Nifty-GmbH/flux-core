@@ -14,6 +14,7 @@ class CountryRegion extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
+    // Relations
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);

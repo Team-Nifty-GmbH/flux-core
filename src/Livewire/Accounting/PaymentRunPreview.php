@@ -30,7 +30,10 @@ class PaymentRunPreview extends Component
     public function mount(): void
     {
         $orderIds = session()->pull('payment_run_preview_orders', []);
-        $this->paymentRunTypeEnum = session()->pull('payment_run_type_enum')?->value;
+        $paymentRunTypeEnum = session()->pull('payment_run_type_enum');
+        $this->paymentRunTypeEnum = $paymentRunTypeEnum instanceof PaymentRunTypeEnum
+            ? $paymentRunTypeEnum->value
+            : $paymentRunTypeEnum;
 
         if (! $orderIds || ! $this->paymentRunTypeEnum) {
             $this->redirectRoute('accounting.money-transfer', navigate: true);

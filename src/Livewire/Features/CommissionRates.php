@@ -5,13 +5,12 @@ namespace FluxErp\Livewire\Features;
 use FluxErp\Livewire\DataTables\CommissionRateList;
 use FluxErp\Livewire\Forms\CommissionRateForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Livewire\Attributes\Locked;
 
 class CommissionRates extends CommissionRateList
 {
-    use Actions, DataTableHasFormEdit {
+    use DataTableHasFormEdit {
         DataTableHasFormEdit::save as parentSave;
     }
 

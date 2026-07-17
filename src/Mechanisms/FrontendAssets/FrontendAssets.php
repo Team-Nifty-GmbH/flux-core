@@ -2,6 +2,7 @@
 
 namespace FluxErp\Mechanisms\FrontendAssets;
 
+use FluxErp\Http\Controllers\AssetController;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
@@ -293,17 +294,30 @@ class FrontendAssets
 
     protected function registerRoutes(): void
     {
-        Route::get('/flux/flux.css', fn () => $this->returnCssAsFile())
+        // Closures must not capture $this — route:cache serializes them and a
+        // stale bound instance unserializes as __PHP_Incomplete_Class after deploys.
+        Route::get('/flux/flux.css', static fn () => app(static::class)->returnCssAsFile())
             ->name('flux.assets.css');
 
-        Route::get('/flux/flux.js', fn () => $this->returnJsAsFile())
+        Route::get('/flux/flux.js', static fn () => app(static::class)->returnJsAsFile())
             ->name('flux.assets.js');
 
-        Route::get('/flux/packages/{package}/{file}', fn (string $package, string $file) => $this->returnPackageAssetFile($package, $file))
+        Route::get(
+            '/flux/packages/{package}/{file}',
+            static fn (string $package, string $file) => app(static::class)->returnPackageAssetFile($package, $file)
+        )
             ->where('file', '.+')
             ->name('flux.assets.package');
 
-        Route::get('/flux/{file}', fn (string $file) => $this->returnAssetFile($file))
+        // Registered before the /flux/{file} catch-all so the catch-all does not
+        // shadow it and return a 404 for a file that is not in the build path.
+        // No etag in the cache headers: the favicon is a BinaryFileResponse and
+        // the etag middleware would call getContent() on it and fail.
+        Route::get('/flux/favicon.svg', [AssetController::class, 'favicon'])
+            ->middleware('cache.headers:public;max_age=31536000')
+            ->name('favicon');
+
+        Route::get('/flux/{file}', static fn (string $file) => app(static::class)->returnAssetFile($file))
             ->where('file', '.+')
             ->name('flux.assets.file');
     }
@@ -316,6 +330,19 @@ class FrontendAssets
 
     protected function pretendResponseIsFile(string $path, string $contentType)
     {
-        return Utils::pretendResponseIsFile($path, $contentType);
+        $response = Utils::pretendResponseIsFile($path, $contentType);
+
+        // FrankenPHP / Caddy `encode zstd br gzip` mis-frames brotli responses
+        // for PHP-generated bodies (HEAD returns content-length: 1, GET drops
+        // it entirely). Some clients — notably iOS WKWebView used by Capacitor
+        // — hang the import indefinitely. `no-transform` tells the encoder and
+        // any intermediary to leave the body untouched.
+        $existing = $response->headers->get('Cache-Control', '');
+        $response->headers->set(
+            'Cache-Control',
+            $existing === '' ? 'no-transform' : $existing . ', no-transform',
+        );
+
+        return $response;
     }
 }

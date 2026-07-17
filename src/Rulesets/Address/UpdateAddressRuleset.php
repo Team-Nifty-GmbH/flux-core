@@ -70,6 +70,7 @@ class UpdateAddressRuleset extends FluxRuleset
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',
+            'is_payment_reminder_address' => 'boolean',
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];

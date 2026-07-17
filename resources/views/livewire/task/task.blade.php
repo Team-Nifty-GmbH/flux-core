@@ -192,7 +192,7 @@
                                     sm
                                     icon="plus"
                                     color="emerald"
-                                    wire:click="addTag($promptValue())"
+                                    wire:click="addTag($nuxbe.promptValue())"
                                     wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                                 />
                             @endcanAction
@@ -219,9 +219,11 @@
                 x-on:click="$tsui.close.modal('replicate-task-modal')"
                 :text="__('Cancel')"
             />
+            @stack('task-replicate-modal-footer')
             <x-button
                 color="primary"
                 wire:click="replicate()"
+                loading="replicate()"
                 primary
                 :text="__('Save')"
             />
@@ -270,6 +272,7 @@
                     color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
+                    loading="delete()"
                 />
             @endcanAction
 
@@ -315,6 +318,7 @@
                     :text="__('Cancel')"
                 />
             @endcanAction
+            @stack('task-detail-header-actions')
         </div>
     </div>
     <x-flux::tabs
@@ -323,4 +327,5 @@
         wire:loading="taskTab"
         card
     />
+    @stack('task-detail-after-tabs')
 </div>

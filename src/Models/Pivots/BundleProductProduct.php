@@ -29,6 +29,7 @@ class BundleProductProduct extends FluxPivot
         });
     }
 
+    // Relations
     public function bundleProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'bundle_product_id');

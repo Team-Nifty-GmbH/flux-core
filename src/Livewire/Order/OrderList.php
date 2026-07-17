@@ -361,6 +361,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->where('is_hidden', false)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name'])
                     ->toArray(),
             ]

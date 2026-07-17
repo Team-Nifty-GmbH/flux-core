@@ -3,7 +3,6 @@
 namespace FluxErp\Traits\Model;
 
 use FluxErp\Models\Tenant;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -42,8 +41,7 @@ trait HasTenants
         return $tenants;
     }
 
-    #[Scope]
-    protected function whereHasTenant(Builder $query, array|int|string|Model|Collection|null $tenant): void
+    protected function scopeWhereHasTenant(Builder $query, array|int|string|Model|Collection|null $tenant): void
     {
         if (is_null($tenant)) {
             $query->whereDoesntHave('tenants');

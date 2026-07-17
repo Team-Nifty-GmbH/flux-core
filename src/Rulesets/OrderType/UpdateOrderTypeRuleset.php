@@ -35,6 +35,7 @@ class UpdateOrderTypeRuleset extends FluxRuleset
             'post_stock_print_layouts.*' => 'required|string',
             'reserve_stock_print_layouts' => 'array|nullable',
             'reserve_stock_print_layouts.*' => 'required|string',
+            'order_column' => 'sometimes|integer|min:1',
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
             'is_visible_in_sidebar' => 'boolean',

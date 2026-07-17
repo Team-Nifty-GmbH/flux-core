@@ -43,6 +43,7 @@ class MenuServiceProvider extends ServiceProvider
                 foreach (resolve_static(OrderType::class, 'query')
                     ->where('is_visible_in_sidebar', true)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name']) as $orderType
                 ) {
                     Menu::register(
@@ -79,6 +80,7 @@ class MenuServiceProvider extends ServiceProvider
             closure: function (): void {
                 Menu::register(route: 'accounting.commissions');
                 Menu::register(route: 'accounting.payment-reminders');
+                Menu::register(route: 'accounting.payment-reminder-run');
                 Menu::register(route: 'accounting.purchase-invoices');
                 Menu::register(route: 'accounting.transactions');
                 Menu::register(route: 'accounting.transaction-assignments');
@@ -137,6 +139,8 @@ class MenuServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.languages', path: 'settings.children.general.children.languages');
                 Menu::register(route: 'settings.mail-settings', path: 'settings.children.general.children.mail-settings');
                 Menu::register(route: 'settings.record-origins', path: 'settings.children.general.children.record-origins');
+                Menu::register(route: 'settings.search-settings', path: 'settings.children.general.children.search-settings');
+                Menu::register(route: 'settings.security-settings', path: 'settings.children.general.children.security-settings');
                 Menu::register(route: 'settings.serial-number-ranges', path: 'settings.children.general.children.serial-number-ranges');
                 Menu::register(route: 'settings.tags', path: 'settings.children.general.children.tags');
                 Menu::register(route: 'settings.tenants', path: 'settings.children.general.children.tenants');

@@ -9,15 +9,13 @@ use FluxErp\Livewire\DataTables\AddressTypeList;
 use FluxErp\Livewire\Forms\AddressTypeForm;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Tenant;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AddressTypes extends AddressTypeList
 {
-    use Actions;
-
     public AddressTypeForm $addressType;
 
     protected ?string $includeBefore = 'flux::livewire.settings.address-types';
@@ -73,14 +71,13 @@ class AddressTypes extends AddressTypeList
         return true;
     }
 
+    #[Renderless]
     public function edit(AddressType $addressType): void
     {
         $this->addressType->reset();
         $this->addressType->fill($addressType);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-address-type-modal');
-        JS);
+        $this->modalOpen('edit-address-type-modal');
     }
 
     public function save(): bool

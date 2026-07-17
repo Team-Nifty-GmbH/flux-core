@@ -34,6 +34,7 @@ class TotalUnassignedBillableHours extends ValueBox implements HasWidgetOptions
             ->whereNull('order_position_id')
             ->where('is_billable', true)
             ->where('is_daily_work_time', false)
+            ->where('total_time_ms', '>', 0)
             ->sum('total_time_ms');
 
         $interval = CarbonInterval::milliseconds($ms)->cascade();

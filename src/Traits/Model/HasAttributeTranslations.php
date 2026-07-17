@@ -10,6 +10,7 @@ use FluxErp\Support\Collection\TranslatableCollection;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 
@@ -27,11 +28,9 @@ trait HasAttributeTranslations
     protected static function bootHasAttributeTranslations(): void
     {
         static::retrieved(function (Model $model): void {
-            $languageId = Session::get('selectedLanguageId');
+            $languageId = static::resolveLanguageId();
 
-            if (is_null($languageId)
-                || $languageId === resolve_static(Language::class, 'default')?->id
-            ) {
+            if (is_null($languageId)) {
                 return;
             }
 
@@ -39,12 +38,9 @@ trait HasAttributeTranslations
         });
 
         static::saving(function (Model $model): void {
-            $languageId = Session::get('selectedLanguageId');
+            $languageId = static::resolveLanguageId();
 
-            if (is_null($languageId)
-                || $languageId === resolve_static(Language::class, 'default')?->id
-                || $model->translations !== null
-            ) {
+            if (is_null($languageId) || $model->translations !== null) {
                 return;
             }
 
@@ -113,6 +109,33 @@ trait HasAttributeTranslations
         });
     }
 
+    protected static function resolveLanguageId(): ?int
+    {
+        $languageId = Session::get('selectedLanguageId');
+        $default = resolve_static(Language::class, 'default');
+
+        if (is_null($languageId)) {
+            $locale = app()->getLocale();
+
+            if ($locale === $default?->language_code) {
+                return null;
+            }
+
+            $languageId = Cache::memo()->rememberForever(
+                'language_id_' . $locale,
+                fn () => resolve_static(Language::class, 'query')
+                    ->where('language_code', $locale)
+                    ->value('id')
+            );
+        }
+
+        if ($languageId === $default?->getKey()) {
+            return null;
+        }
+
+        return $languageId;
+    }
+
     public function attributeTranslationRules(): array
     {
         return [
@@ -133,7 +156,7 @@ trait HasAttributeTranslations
         return $this->morphMany(AttributeTranslation::class, 'model');
     }
 
-    public function getAttributeTranslation(string $attribute, int $languageId): string
+    public function getAttributeTranslation(string $attribute, int $languageId): ?string
     {
         return $this->attributeTranslations()
             ->where('language_id', $languageId)
@@ -148,7 +171,7 @@ trait HasAttributeTranslations
 
     public function localize(?int $languageId = null): static
     {
-        $languageId ??= Session::get('selectedLanguageId');
+        $languageId ??= static::resolveLanguageId();
 
         if (is_null($languageId)) {
             return $this;

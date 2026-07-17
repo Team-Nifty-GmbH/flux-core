@@ -69,12 +69,14 @@
                             :text="__('Delete') "
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
                             wire:click="delete()"
+                            loading="delete()"
                         />
                     @endcanAction
-
+                    @stack('contact-detail-header-actions')
                 @show
             </div>
         </div>
         <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
+        @stack('contact-detail-after-tabs')
     </main>
 </div>

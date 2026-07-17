@@ -14,7 +14,6 @@ use FluxErp\Livewire\Forms\PriceListForm;
 use FluxErp\Models\Category;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -22,8 +21,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PriceLists extends PriceListList
 {
-    use Actions;
-
     public array $discountedCategories = [];
 
     public array $newCategoryDiscount = [

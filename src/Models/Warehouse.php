@@ -23,6 +23,7 @@ class Warehouse extends FluxModel
         ];
     }
 
+    // Relations
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class, 'warehouse_id');

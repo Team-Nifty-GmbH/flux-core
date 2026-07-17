@@ -86,57 +86,61 @@
             </div>
         </x-card>
         <x-card
-            :header="__('IMAP Settings')"
+            :header="__('Inbound Settings')"
             footer-classes="flex justify-end gap-1.5"
         >
             <div class="flex flex-col gap-1.5">
                 <x-select.styled
                     :label="__('Protocol')"
                     wire:model="mailAccount.protocol"
-                    :options="[
-                        ['value' => 'imap', 'label' => __('IMAP')],
-                        ['value' => 'pop3', 'label' => __('POP3')],
-                        ['value' => 'nntp', 'label' => __('NNTP')],
-                    ]"
+                    :options="$this->protocolOptions"
                 />
                 <x-input
                     x-bind:disabled="$wire.mailAccount.id"
                     wire:model="mailAccount.email"
                     :label="__('Email')"
                 />
-                <x-password
-                    wire:model="mailAccount.password"
-                    :label="__('Password')"
-                />
-                <x-input wire:model="mailAccount.host" :label="__('Host')" />
-                <x-number wire:model="mailAccount.port" :label="__('Port')" />
-                <x-select.styled
-                    :label="__('Encryption')"
-                    wire:model="mailAccount.encryption"
-                    :options="[
-                        ['value' => 'ssl', 'label' => __('SSL')],
-                        ['value' => 'tls', 'label' => __('TLS')],
-                    ]"
-                />
-                <x-checkbox
-                    wire:model.boolean="mailAccount.has_valid_certificate"
-                    :label="__('Validate Certificate')"
-                />
-                <x-checkbox
-                    wire:model.boolean="mailAccount.has_o_auth"
-                    :label="__('oAuth')"
-                />
+                <div
+                    x-cloak
+                    x-show="@js($this->imapProtocols).includes($wire.mailAccount.protocol)"
+                    class="flex flex-col gap-1.5"
+                >
+                    <x-password
+                        wire:model="mailAccount.password"
+                        :label="__('Password')"
+                    />
+                    <x-input wire:model="mailAccount.host" :label="__('Host')" />
+                    <x-number wire:model="mailAccount.port" :label="__('Port')" />
+                    <x-select.styled
+                        :label="__('Encryption')"
+                        wire:model="mailAccount.encryption"
+                        :options="[
+                            ['value' => 'ssl', 'label' => __('SSL')],
+                            ['value' => 'tls', 'label' => __('TLS')],
+                        ]"
+                    />
+                    <x-checkbox
+                        wire:model.boolean="mailAccount.has_valid_certificate"
+                        :label="__('Validate Certificate')"
+                    />
+                    <x-checkbox
+                        wire:model.boolean="mailAccount.has_o_auth"
+                        :label="__('oAuth')"
+                    />
+                </div>
+                @stack('mail-account-form-inbound-extra')
                 <x-toggle
                     wire:model.boolean="mailAccount.has_auto_assign"
                     :label="__('Auto assign mails')"
                 />
             </div>
             <x-slot:footer>
+                @stack('mail-account-form-inbound-footer-actions')
                 <x-button
                     loading
                     color="indigo"
                     :text="__('Test Connection')"
-                    x-on:click="$wire.testImapConnection()"
+                    x-on:click="$wire.testConnection()"
                 />
             </x-slot>
         </x-card>
@@ -186,15 +190,17 @@
                         ['value' => 'tls', 'label' => __('TLS')],
                     ]"
                 />
+                @stack('mail-account-form-smtp-extra')
             </div>
             <x-slot:footer>
+                @stack('mail-account-form-smtp-footer-actions')
                 <x-button
                     color="secondary"
                     light
                     spinner
                     :text="__('Send test mail')"
                     wire:flux-confirm.prompt="{{  __('Send test mail to') }}||{{  __('Cancel') }}|{{  __('Send') }}"
-                    wire:click="sendTestMail($promptValue())"
+                    wire:click="sendTestMail($nuxbe.promptValue())"
                 />
             </x-slot>
         </x-card>

@@ -28,6 +28,7 @@ class AbsenceType extends FluxModel implements InteractsWithDataTables
         ];
     }
 
+    // Relations
     public function absencePolicies(): BelongsToMany
     {
         return $this->belongsToMany(AbsencePolicy::class, 'absence_policy_absence_type')
@@ -39,6 +40,7 @@ class AbsenceType extends FluxModel implements InteractsWithDataTables
         return $this->hasMany(AbsenceRequest::class);
     }
 
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return route('avatar', [

@@ -9,7 +9,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\Facades\CauserResolver;
+use Spatie\Activitylog\Support\CauserResolver;
 
 class CommentTableSeeder extends Seeder
 {
@@ -29,7 +29,7 @@ class CommentTableSeeder extends Seeder
 
             foreach ($records as $record) {
                 for ($i = 0; $i < rand(0, 10); $i++) {
-                    CauserResolver::setCauser($users->random());
+                    app(CauserResolver::class)->setCauser($users->random());
 
                     Comment::factory()->create([
                         'uuid' => Str::uuid(),

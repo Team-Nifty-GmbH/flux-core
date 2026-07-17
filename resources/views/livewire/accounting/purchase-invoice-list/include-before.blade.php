@@ -1,13 +1,26 @@
 <div>
+    <div
+        x-data
+        x-init="
+            if ($wire.autoOpenEditModal) {
+                $nextTick(() => {
+                    $tsui.open.modal('edit-purchase-invoice-modal');
+                    $wire.autoOpenEditModal = false;
+                });
+            }
+        "
+    ></div>
+
     <x-modal
         id="edit-purchase-invoice-modal"
         size="full"
         scope="fullscreen"
         scrollable
         persistent
+        x-on:close="$wire.resetEditForm()"
     >
         <div
-            class="grid h-full min-h-screen content-stretch gap-4 sm:grid-cols-2"
+            class="grid h-full min-h-0 content-stretch gap-4 overflow-hidden sm:grid-cols-2"
             x-data="{
                 showPayment: false,
                 showBank: false,
@@ -38,14 +51,14 @@
                 @show
             @show
 
-            <div class="flex flex-col gap-4 overflow-auto px-2">
+            <div class="flex min-h-0 flex-col gap-4 overflow-y-auto px-2">
                 @section('tenant')
-                    @if(count($tenants ?? []) > 1)
+                    @if (count($tenants ?? []) > 1)
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-select.styled
                                 x-bind:readonly="
@@ -64,10 +77,10 @@
                 @section('basic-info')
                     <div
                         class="flex items-end gap-2"
-                        x-bind:class="
-                            $wire.purchaseInvoiceForm.order_id &&
-                            'pointer-events-none'
-                        "
+                        x-bind:class="{
+                            'pointer-events-none':
+                                $wire.purchaseInvoiceForm.order_id,
+                        }"
                     >
                         <div class="flex-1">
                             <x-select.styled
@@ -107,10 +120,10 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-select.styled
                                 x-bind:readonly="
@@ -123,10 +136,10 @@
                             />
                         </div>
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-select.styled
                                 x-bind:readonly="
@@ -154,10 +167,10 @@
                             :label="__('Invoice Number')"
                         />
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-date
                                 x-bind:readonly="
@@ -171,10 +184,10 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-date
                                 x-bind:readonly="
@@ -186,10 +199,10 @@
                             />
                         </div>
                         <div
-                            x-bind:class="
-                                $wire.purchaseInvoiceForm.order_id &&
-                                'pointer-events-none'
-                            "
+                            x-bind:class="{
+                                'pointer-events-none':
+                                    $wire.purchaseInvoiceForm.order_id,
+                            }"
                         >
                             <x-date
                                 x-bind:readonly="
@@ -216,18 +229,18 @@
                             <x-icon
                                 name="chevron-down"
                                 class="h-4 w-4 transition-transform"
-                                x-bind:class="showPayment && 'rotate-180'"
+                                x-bind:class="{ 'rotate-180': showPayment }"
                             />
                         </button>
                         <div x-cloak x-show="showPayment" x-collapse>
                             <div class="grid grid-cols-2 gap-4 pt-2 pb-2">
-                                @if(count($currencies ?? []) > 1)
+                                @if (count($currencies ?? []) > 1)
                                     <div
-                                        x-bind:class="
-                                            $wire.purchaseInvoiceForm
-                                                .order_id &&
-                                            'pointer-events-none'
-                                        "
+                                        x-bind:class="{
+                                            'pointer-events-none':
+                                                $wire.purchaseInvoiceForm
+                                                    .order_id,
+                                        }"
                                     >
                                         <x-select.styled
                                             x-bind:readonly="
@@ -243,10 +256,10 @@
                                 @endif
 
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-select.styled
                                         :label="__('Approval User')"
@@ -261,10 +274,10 @@
                                     />
                                 </div>
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-date
                                         x-bind:readonly="
@@ -275,10 +288,10 @@
                                     />
                                 </div>
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-date
                                         x-bind:readonly="
@@ -289,10 +302,10 @@
                                     />
                                 </div>
                                 <div
-                                    x-bind:class="
-                                        $wire.purchaseInvoiceForm.order_id &&
-                                        'pointer-events-none'
-                                    "
+                                    x-bind:class="{
+                                        'pointer-events-none':
+                                            $wire.purchaseInvoiceForm.order_id,
+                                    }"
                                 >
                                     <x-number
                                         x-bind:readonly="
@@ -321,7 +334,7 @@
                             <x-icon
                                 name="chevron-down"
                                 class="h-4 w-4 transition-transform"
-                                x-bind:class="showBank && 'rotate-180'"
+                                x-bind:class="{ 'rotate-180': showBank }"
                             />
                         </button>
                         <div x-cloak x-show="showBank" x-collapse>
@@ -518,11 +531,11 @@
                                             :label="__('Name')"
                                         />
                                         <div
-                                            x-bind:class="
-                                                $wire.purchaseInvoiceForm
-                                                    .order_id &&
-                                                'pointer-events-none'
-                                            "
+                                            x-bind:class="{
+                                                'pointer-events-none':
+                                                    $wire.purchaseInvoiceForm
+                                                        .order_id,
+                                            }"
                                         >
                                             <x-select.styled
                                                 :label="__('Product')"
@@ -603,11 +616,11 @@
                                             :label="__('Total')"
                                         />
                                         <div
-                                            x-bind:class="
-                                                $wire.purchaseInvoiceForm
-                                                    .order_id &&
-                                                'pointer-events-none'
-                                            "
+                                            x-bind:class="{
+                                                'pointer-events-none':
+                                                    $wire.purchaseInvoiceForm
+                                                        .order_id,
+                                            }"
                                         >
                                             <x-select.styled
                                                 x-bind:readonly="
@@ -630,11 +643,11 @@
                                     </div>
 
                                     <div
-                                        x-bind:class="
-                                            $wire.purchaseInvoiceForm
-                                                .order_id &&
-                                            'pointer-events-none'
-                                        "
+                                        x-bind:class="{
+                                            'pointer-events-none':
+                                                $wire.purchaseInvoiceForm
+                                                    .order_id,
+                                        }"
                                     >
                                         <x-select.styled
                                             x-bind:readonly="
@@ -743,6 +756,7 @@
                                     )
                                 "
                             />
+                            @stack('purchase-invoice-edit-modal-footer-actions')
                             <x-button
                                 color="indigo"
                                 x-cloak
@@ -778,7 +792,6 @@
                                     "
                                 />
                             @endcanAction
-
                         @show
                     </div>
                 </div>
@@ -802,22 +815,6 @@
                 }
             "
         >
-            <input
-                x-ref="cameraInput"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                class="hidden"
-                x-on:change="handleFileSelect($event)"
-            />
-            <input
-                x-ref="fileInput"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                x-on:change="handleFileSelect($event)"
-            />
-
             <div class="space-y-6">
                 <div>
                     <h3
@@ -899,267 +896,13 @@
                             {{ __('Scan Documents') }}
                         </h3>
 
-                        <div class="flex justify-center gap-4">
-                            <x-button
-                                :text="__('Camera')"
-                                icon="camera"
-                                color="primary"
-                                x-on:click="captureFromCamera()"
-                            />
-                            <x-button
-                                :text="__('Gallery')"
-                                icon="photo"
-                                color="secondary"
-                                x-on:click="pickFromGallery()"
-                            />
-                        </div>
-
-                        <template x-if="hasDocuments">
-                            <div class="mt-4">
-                                <h4
-                                    class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ __('Scanned Documents') }} (
-                                    <span
-                                        x-text="scannedDocuments.length"
-                                    ></span>
-                                    )
-                                </h4>
-                                <div
-                                    class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
-                                >
-                                    <template
-                                        x-for="doc in scannedDocuments"
-                                        x-bind:key="doc.id"
-                                    >
-                                        <div
-                                            class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
-                                        >
-                                            <img
-                                                x-bind:src="doc.thumbnail"
-                                                alt=""
-                                                class="aspect-[3/4] w-full object-cover"
-                                            />
-                                            <div
-                                                class="flex items-center justify-center border-t border-gray-200 bg-gray-50 p-1.5 dark:border-gray-700 dark:bg-gray-800"
-                                            >
-                                                <x-button
-                                                    icon="trash"
-                                                    color="red"
-                                                    flat
-                                                    sm
-                                                    x-on:click="
-                                                        removeDocument(doc.id)
-                                                    "
-                                                />
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-
-                                <div class="mt-4">
-                                    <div
-                                        x-cloak
-                                        x-show="isUploading"
-                                        class="mb-3"
-                                    >
-                                        <div
-                                            class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400"
-                                        >
-                                            <span>
-                                                {{ __('Uploading documents...') }}
-                                            </span>
-                                            <span>
-                                                <span
-                                                    x-text="uploadProgress"
-                                                ></span>
-                                                /
-                                                <span
-                                                    x-text="uploadTotal"
-                                                ></span>
-                                            </span>
-                                        </div>
-                                        <div
-                                            class="mt-1 h-[2px] w-full bg-gray-200 dark:bg-gray-700"
-                                        >
-                                            <div
-                                                class="h-[2px] bg-blue-500"
-                                                style="transition: width 1s"
-                                                x-bind:style="
-                                                    'width: ' +
-                                                    (uploadTotal > 0
-                                                        ? Math.round(
-                                                              (uploadProgress /
-                                                                  uploadTotal) *
-                                                                  100,
-                                                          )
-                                                        : 0) +
-                                                    '%'
-                                                "
-                                            ></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-end">
-                                        <x-button
-                                            :text="__('Upload Documents')"
-                                            color="primary"
-                                            icon="cloud-arrow-up"
-                                            x-bind:disabled="isUploading"
-                                            x-on:click="uploadAll()"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
+                        <x-flux::document-scanner.controls />
                     </div>
                 @endcanAction
             </div>
 
             @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                <template x-teleport="body">
-                    <div
-                        x-cloak
-                        x-show="isEditing"
-                        class="fixed inset-0 z-[99] flex flex-col overflow-y-auto bg-white dark:bg-gray-900"
-                    >
-                        <div
-                            class="flex shrink-0 items-center justify-between border-b border-gray-200 p-3 dark:border-gray-700"
-                        >
-                            <h3
-                                class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                {{ __('Scan') }}
-                            </h3>
-                            <x-button
-                                icon="x-mark"
-                                color="secondary"
-                                flat
-                                sm
-                                x-on:click="closeEditor()"
-                            />
-                        </div>
-
-                        <template x-if="isProcessing">
-                            <div
-                                class="flex flex-1 items-center justify-center"
-                            >
-                                <div
-                                    class="text-center text-gray-700 dark:text-gray-300"
-                                >
-                                    <x-icon
-                                        name="arrow-path"
-                                        class="mx-auto mb-4 h-8 w-8 animate-spin"
-                                    />
-                                    <p>{{ __('Detecting document...') }}</p>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template x-if="!isProcessing && cornerPoints">
-                            <div class="flex min-h-0 flex-1 flex-col">
-                                <div
-                                    x-cloak
-                                    x-show="detectionFailed"
-                                    class="shrink-0 bg-amber-50 p-3 text-center text-sm text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                >
-                                    {{ __('Document edges could not be detected. Adjust the corners manually.') }}
-                                </div>
-
-                                <div
-                                    class="flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-gray-900"
-                                >
-                                    <div
-                                        class="relative"
-                                        x-ref="imageContainer"
-                                    >
-                                        <img
-                                            x-ref="originalImage"
-                                            x-bind:src="originalImage"
-                                            class="max-h-full max-w-full"
-                                            x-on:load="drawCorners()"
-                                        />
-                                        <canvas
-                                            x-ref="cornerCanvas"
-                                            class="absolute top-0 left-0"
-                                            style="touch-action: none"
-                                            x-on:mousedown="startDrag($event)"
-                                            x-on:mousemove="moveDrag($event)"
-                                            x-on:mouseup="stopDrag()"
-                                            x-on:mouseleave="stopDrag()"
-                                            x-on:touchstart="startDrag($event)"
-                                            x-on:touchmove="moveDrag($event)"
-                                            x-on:touchend="stopDrag()"
-                                        ></canvas>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex shrink-0 flex-col gap-3 bg-white p-4 dark:bg-gray-800"
-                                >
-                                    <p
-                                        class="text-center text-xs text-gray-500 dark:text-gray-400"
-                                    >
-                                        {{ __('Drag the corners to adjust the document area.') }}
-                                    </p>
-
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label
-                                                class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
-                                            >
-                                                {{ __('Brightness') }}:
-                                                <span
-                                                    x-text="brightness + '%'"
-                                                ></span>
-                                            </label>
-                                            <input
-                                                type="range"
-                                                min="50"
-                                                max="200"
-                                                x-model="brightness"
-                                                x-on:input="updateFilters()"
-                                                class="w-full"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label
-                                                class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
-                                            >
-                                                {{ __('Contrast') }}:
-                                                <span
-                                                    x-text="contrast + '%'"
-                                                ></span>
-                                            </label>
-                                            <input
-                                                type="range"
-                                                min="50"
-                                                max="200"
-                                                x-model="contrast"
-                                                x-on:input="updateFilters()"
-                                                class="w-full"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-end gap-2">
-                                        <x-button
-                                            :text="__('Cancel')"
-                                            color="secondary"
-                                            flat
-                                            x-on:click="closeEditor()"
-                                        />
-                                        <x-button
-                                            :text="__('Done')"
-                                            color="primary"
-                                            icon="check"
-                                            x-on:click="applyAndAddToQueue()"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </template>
+                <x-flux::document-scanner.editor />
             @endcanAction
         </div>
 
@@ -1170,6 +913,7 @@
                 :text="__('Close')"
                 x-on:click="$tsui.close.modal('bulk-pdf-upload-modal')"
             />
+            @stack('purchase-invoice-bulk-pdf-upload-modal-footer')
         </x-slot:footer>
     </x-modal>
 

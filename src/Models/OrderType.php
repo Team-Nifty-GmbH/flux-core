@@ -13,15 +13,22 @@ use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
+use FluxErp\Traits\Model\SortableTrait;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\EloquentSortable\Sortable;
 
-class OrderType extends FluxModel
+class OrderType extends FluxModel implements Sortable
 {
     use Filterable, HasAttributeTranslations, HasPackageFactory, HasTenantAssignment, HasTenants, HasUserModification,
-        HasUuid, LogsActivity, SoftDeletes;
+        HasUuid, LogsActivity, SoftDeletes, SortableTrait;
 
+    public array $sortable = [
+        'sort_when_creating' => true,
+    ];
+
+    // Public static methods
     public static function hasPermission(): bool
     {
         return false;
@@ -40,6 +47,7 @@ class OrderType extends FluxModel
         ];
     }
 
+    // Relations
     public function emailTemplate(): BelongsTo
     {
         return $this->belongsTo(EmailTemplate::class);
@@ -52,9 +60,11 @@ class OrderType extends FluxModel
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'order_type_tenant')->using(OrderTypeTenant::class);
+        return $this->belongsToMany(Tenant::class, 'order_type_tenant')
+            ->using(OrderTypeTenant::class);
     }
 
+    // Protected methods
     protected function translatableAttributes(): array
     {
         return [

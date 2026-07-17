@@ -8,6 +8,7 @@ use FluxErp\Models\Tenant;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Settings\CoreSettings;
+use FluxErp\Settings\SecuritySettings;
 use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
@@ -37,6 +38,11 @@ pest()
             'install_done' => false,
             'license_key' => null,
             'formal_salutation' => false,
+        ]);
+
+        SecuritySettings::fake([
+            'force_two_factor' => false,
+            'magic_login_links_enabled' => true,
         ]);
 
         PriceList::default() ?? PriceList::factory()->create([
@@ -194,6 +200,33 @@ function waitForElement(PendingAwaitablePage|AwaitableWebpage $page, string $sel
                 } else {
                     setTimeout(check, 200);
                 }
+            };
+            check();
+        })
+    JS);
+
+    return $page;
+}
+
+/**
+ * Wait until a JavaScript condition (an arrow function returning truthy/falsy)
+ * resolves to a truthy value. Use this instead of fixed `wait(N)` calls so
+ * tests don't sleep longer than necessary and don't flake on slower runs.
+ */
+function waitForCondition(PendingAwaitablePage|AwaitableWebpage $page, string $condition, int $timeout = 5000): PendingAwaitablePage|AwaitableWebpage
+{
+    $page->script(<<<JS
+        () => new Promise((resolve, reject) => {
+            const condition = {$condition};
+            const deadline = Date.now() + {$timeout};
+            const check = () => {
+                try {
+                    if (condition()) return resolve();
+                } catch (e) { /* keep retrying until deadline */ }
+                if (Date.now() > deadline) {
+                    return reject(new Error('Condition did not become truthy within {$timeout}ms'));
+                }
+                setTimeout(check, 100);
             };
             check();
         })

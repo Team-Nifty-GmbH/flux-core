@@ -28,6 +28,21 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
 {
     use HasDefaultTargetableColumns, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity;
 
+    protected static function booted(): void
+    {
+        static::updating(function (CalendarEvent $model): void {
+            if ($model->isDirty(['start', 'excluded'])) {
+                $model->excluded = array_values(array_unique(array_map(
+                    fn (string $item) => Carbon::parse($item)
+                        ->setTimeFromTimeString($model->start->toTimeString())
+                        ->toDateTimeString(),
+                    $model->excluded ?? []
+                ))) ?: null;
+            }
+        });
+    }
+
+    // Public static methods
     public static function fromCalendarEvent(array $event, string $action): ?FluxAction
     {
         return match ($action) {
@@ -50,20 +65,6 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::updating(function (CalendarEvent $model): void {
-            if ($model->isDirty(['start', 'excluded'])) {
-                $model->excluded = array_values(array_unique(array_map(
-                    fn (string $item) => Carbon::parse($item)
-                        ->setTimeFromTimeString($model->start->toTimeString())
-                        ->toDateTimeString(),
-                    $model->excluded ?? []
-                ))) ?: null;
-            }
-        });
-    }
-
     protected function casts(): array
     {
         return [
@@ -81,11 +82,18 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         ];
     }
 
+    // Relations
     public function calendar(): BelongsTo
     {
         return $this->belongsTo(Calendar::class);
     }
 
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
+    // Public methods
     public function fromCalendarEventObject(array $calendarEvent): static
     {
         $mappedArray = [];
@@ -140,11 +148,6 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         $this->fill($mappedArray);
 
         return $this;
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
     }
 
     public function toCalendarEventObject(array $attributes = []): array
@@ -214,9 +217,9 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
                 'recurrences' => $this->recurrences,
                 'allDay' => $this->is_all_day,
                 'has_taken_place' => $this->has_taken_place,
-                'editable' => ! $this->calendar->is_public && ! $this->isCancelled,
-                'is_editable' => ! $this->calendar->is_public && ! $this->isCancelled,
-                'is_public' => $this->calendar->is_public,
+                'editable' => ! $this->calendar?->is_public && ! $this->isCancelled,
+                'is_editable' => ! $this->calendar?->is_public && ! $this->isCancelled,
+                'is_public' => $this->calendar?->is_public ?? false,
                 'status' => $this->status ?: 'busy',
                 'interval' => $repeat['interval'] ?? null,
                 'unit' => $repeat['unit'] ?? null,
@@ -241,6 +244,7 @@ class CalendarEvent extends FluxModel implements HasMedia, Targetable
         return $calendarEventObject;
     }
 
+    // Attributes
     protected function baseDates(): Attribute
     {
         return Attribute::get(function (mixed $value, array $attributes) {

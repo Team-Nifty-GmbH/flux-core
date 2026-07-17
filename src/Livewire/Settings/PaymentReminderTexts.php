@@ -8,15 +8,15 @@ use FluxErp\Actions\PaymentReminderText\UpdatePaymentReminderText;
 use FluxErp\Livewire\DataTables\PaymentReminderTextList;
 use FluxErp\Livewire\Forms\PaymentReminderTextForm;
 use FluxErp\Models\PaymentReminderText;
-use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentReminderTexts extends PaymentReminderTextList
 {
-    use Actions, SupportsLocalization;
+    use SupportsLocalization;
 
     public PaymentReminderTextForm $paymentReminderTextForm;
 
@@ -78,14 +78,13 @@ class PaymentReminderTexts extends PaymentReminderTextList
         return true;
     }
 
+    #[Renderless]
     public function edit(PaymentReminderText $paymentReminderText): void
     {
         $this->paymentReminderTextForm->reset();
         $this->paymentReminderTextForm->fill($paymentReminderText);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-payment-reminder-text-modal');
-        JS);
+        $this->modalOpen('edit-payment-reminder-text-modal');
     }
 
     public function save(): bool

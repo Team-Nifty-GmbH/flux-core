@@ -201,6 +201,7 @@ class WorkTimes extends WorkTimeList
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->where('is_hidden', false)
                     ->where('is_active', true)
+                    ->ordered()
                     ->get(['id', 'name', 'order_type_enum'])
                     ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase())
                     ->toArray(),

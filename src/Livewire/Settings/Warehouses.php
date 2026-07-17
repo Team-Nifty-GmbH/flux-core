@@ -8,15 +8,13 @@ use FluxErp\Actions\Warehouse\UpdateWarehouse;
 use FluxErp\Livewire\DataTables\WarehouseList;
 use FluxErp\Livewire\Forms\WarehouseForm;
 use FluxErp\Models\Warehouse;
-use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Warehouses extends WarehouseList
 {
-    use Actions;
-
     public ?string $includeBefore = 'flux::livewire.settings.warehouses';
 
     public WarehouseForm $warehouse;
@@ -73,14 +71,13 @@ class Warehouses extends WarehouseList
         return true;
     }
 
+    #[Renderless]
     public function edit(Warehouse $warehouse): void
     {
         $this->warehouse->reset();
         $this->warehouse->fill($warehouse);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-warehouse-modal');
-        JS);
+        $this->modalOpen('edit-warehouse-modal');
     }
 
     public function save(): bool

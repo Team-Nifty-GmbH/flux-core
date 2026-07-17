@@ -20,6 +20,15 @@ return [
         'disk' => env('MEDIA_DISK', 'local'),
     ],
 
+    'file_uploads' => [
+        // Maximum size for chunked uploads. Accepts strings like "1G", "500M".
+        'max_size' => env('FLUX_FILE_UPLOAD_MAX_SIZE', '1G'),
+
+        // Validation rules applied to the assembled file at finalize time.
+        // Falls back to `livewire.temporary_file_upload.rules` when null.
+        'chunk_rules' => null,
+    ],
+
     'vite' => [
         'reverb_app_key' => env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY')),
         'reverb_host' => env(

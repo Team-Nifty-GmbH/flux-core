@@ -19,19 +19,16 @@ abstract class BaseDataTable extends DataTable
     #[Renderless]
     public function export(array $columns = [], string $format = 'xlsx', bool $formatted = true): Response|BinaryFileResponse|StreamedResponse
     {
+        $columns = array_filter($columns) ?: $this->enabledCols;
+
         ExportDataTableJob::dispatch(
             serialize($this),
             $this->getModel(),
             $columns,
-            auth()->user()->getMorphClass() . ':' . auth()->id()
+            auth()->user()->getMorphClass() . ':' . auth()->id(),
+            $format,
+            $formatted,
         );
-
-        $this->toast()
-            ->success(
-                __('Export started'),
-                __('Your export is being processed. You will be notified when it is ready.')
-            )
-            ->send();
 
         return response()->noContent();
     }

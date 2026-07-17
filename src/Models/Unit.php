@@ -14,6 +14,7 @@ class Unit extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
+    // Relations
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

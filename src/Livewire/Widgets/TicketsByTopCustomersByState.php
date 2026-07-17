@@ -51,7 +51,7 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
     public function calculateChart(): void
     {
         $allStates = TicketState::all();
-        $endStates = $this->getEndStates($allStates);
+        $endStates = TicketState::endStateKeys();
 
         $topCustomers = resolve_static(Address::class, 'query')
             ->join('tickets', function (JoinClause $join): void {
@@ -163,11 +163,11 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
                 'method' => 'show',
                 'params' => [
                     'authenticatable_type' => data_get($data, 'authenticatable_type'),
-                    'authenticatable_id' => data_get($data, 'authenticatable_id'),
+                    'authenticatable_ids' => data_get($data, 'authenticatable_ids'),
                     'name' => data_get($data, 'label'),
                 ],
             ],
-            $this->optionData
+            array_values($this->optionData)
         );
     }
 
@@ -175,27 +175,19 @@ class TicketsByTopCustomersByState extends Chart implements HasWidgetOptions
     public function show(array $params): void
     {
         $authenticatableType = data_get($params, 'authenticatable_type');
-        $authenticatableId = data_get($params, 'authenticatable_id');
+        $authenticatableIds = data_get($params, 'authenticatable_ids');
         $name = data_get($params, 'name');
 
         SessionFilter::make(
             Livewire::new(resolve_static(TicketList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('authenticatable_type', $authenticatableType)
-                ->where('authenticatable_id', $authenticatableId)
-                ->whereNotIn('state', $this->getEndStates()),
+                ->whereIntegerInRaw('authenticatable_id', $authenticatableIds)
+                ->whereNotIn('state', TicketState::endStateKeys()),
             __('Tickets by :customer', ['customer' => $name]),
         )
             ->store();
 
         $this->redirectRoute('tickets', navigate: true);
-    }
-
-    protected function getEndStates(?Collection $allStates = null): array
-    {
-        return ($allStates ?? TicketState::all())
-            ->filter(fn (string $state) => $state::$isEndState)
-            ->keys()
-            ->toArray();
     }
 }

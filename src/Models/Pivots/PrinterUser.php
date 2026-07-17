@@ -30,6 +30,7 @@ class PrinterUser extends FluxPivot
         ];
     }
 
+    // Relations
     public function printer(): BelongsTo
     {
         return $this->belongsTo(Printer::class);

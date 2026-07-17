@@ -12,6 +12,7 @@ use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Product;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -108,14 +109,13 @@ class BundleList extends ProductBundleProductList
         }
     }
 
+    #[Renderless]
     public function edit(BundleProductProduct $productBundleProduct): void
     {
         $this->productBundleProductForm->reset();
         $this->productBundleProductForm->fill($productBundleProduct);
 
-        $this->js(<<<'JS'
-            $tsui.open.modal('edit-bundle-product-modal');
-        JS);
+        $this->modalOpen('edit-bundle-product-modal');
     }
 
     public function save(): bool

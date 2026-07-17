@@ -26,6 +26,7 @@ class EmployeeDay extends FluxModel implements InteractsWithDataTables
         ];
     }
 
+    // Relations
     public function absenceRequests(): BelongsToMany
     {
         return $this->belongsToMany(AbsenceRequest::class, 'absence_request_employee_day')
@@ -37,6 +38,18 @@ class EmployeeDay extends FluxModel implements InteractsWithDataTables
         return $this->belongsTo(Employee::class);
     }
 
+    public function holiday(): BelongsTo
+    {
+        return $this->belongsTo(Holiday::class);
+    }
+
+    public function workTimes(): BelongsToMany
+    {
+        return $this->belongsToMany(WorkTime::class, 'employee_day_work_time')
+            ->using(EmployeeDayWorkTime::class);
+    }
+
+    // Public methods
     public function getAvatarUrl(): ?string
     {
         return $this->employee->getAvatarUrl();
@@ -65,16 +78,5 @@ class EmployeeDay extends FluxModel implements InteractsWithDataTables
     public function getUrl(): ?string
     {
         return route('human-resources.employee-days.show', $this->getKey());
-    }
-
-    public function holiday(): BelongsTo
-    {
-        return $this->belongsTo(Holiday::class);
-    }
-
-    public function workTimes(): BelongsToMany
-    {
-        return $this->belongsToMany(WorkTime::class, 'employee_day_work_time')
-            ->using(EmployeeDayWorkTime::class);
     }
 }

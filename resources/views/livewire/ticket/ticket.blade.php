@@ -62,10 +62,17 @@
                     color="red"
                     :text="__('Delete') "
                     wire:click="delete()"
+                    loading="delete()"
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Ticket')]) }}"
                 />
             @endcanAction
-            <x-button color="indigo" :text="__('Save')" wire:click="save()" />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save()"
+                loading="save()"
+            />
+            @stack('ticket-detail-header-actions')
         @show
     </div>
     <div class="w-full pt-6 lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
@@ -86,7 +93,7 @@
                                 />
                             </x-card>
                             @section('content.widget')
-                                @if($ticket->model_type &&
+                                @if ($ticket->model_type &&
                             ($widgetComponent = resolve_static(
                                 morphed_model($ticket->model_type),
                                 'getLivewireComponentWidget'
@@ -121,6 +128,7 @@
                                     wire:ignore
                                 />
                             </x-card>
+                            @stack('ticket-detail-content-after')
                         </div>
                     </div>
                 </div>
@@ -197,14 +205,14 @@
                                             outline
                                             icon="eye"
                                             wire:navigate
-                                            x-bind:class="
-                                                ($wire.get(
-                                                    'authorTypeContact',
-                                                ) !== true ||
+                                            x-bind:class="{
+                                                'cursor-not-allowed':
+                                                    $wire.get(
+                                                        'authorTypeContact',
+                                                    ) !== true ||
                                                     !$wire.ticket
-                                                        .authenticatable_id) &&
-                                                'cursor-not-allowed'
-                                            "
+                                                        .authenticatable_id,
+                                            }"
                                             x-bind:href="($wire.get('authorTypeContact') === true && $wire.ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', $wire.ticket.authenticatable.contact_id) + '?address=' + $wire.ticket.authenticatable_id"
                                         ></x-button>
                                     </div>
@@ -271,6 +279,7 @@
                         </div>
                     </x-card>
                 @show
+                @stack('ticket-detail-sidebar')
             </div>
         </section>
     </div>
