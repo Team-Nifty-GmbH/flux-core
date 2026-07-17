@@ -9,6 +9,8 @@ use FluxErp\Models\Rule;
 use FluxErp\Models\RuleCondition;
 use FluxErp\RuleEngine\ConditionRegistry;
 use FluxErp\Traits\Livewire\Actions;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -30,7 +32,7 @@ class RuleConditionBuilder extends Component
         $this->loadConditions();
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return view('flux::livewire.rule-condition-builder', [
             'conditionTypes' => app(ConditionRegistry::class)->grouped(),
@@ -39,7 +41,7 @@ class RuleConditionBuilder extends Component
 
     public function loadConditions(): void
     {
-        $rule = Rule::query()
+        $rule = resolve_static(Rule::class, 'query')
             ->with('rootConditions.children.children')
             ->whereKey($this->ruleId)
             ->first();
@@ -57,7 +59,7 @@ class RuleConditionBuilder extends Component
                 'rule_id' => $this->ruleId,
                 'parent_id' => $orContainer->getKey(),
                 'type' => 'and_container',
-                'position' => RuleCondition::query()
+                'position' => resolve_static(RuleCondition::class, 'query')
                     ->where('parent_id', $orContainer->getKey())
                     ->count(),
             ])->validate()->execute();
@@ -85,7 +87,7 @@ class RuleConditionBuilder extends Component
                 'parent_id' => $andContainerId,
                 'type' => $type,
                 'value' => [],
-                'position' => RuleCondition::query()
+                'position' => resolve_static(RuleCondition::class, 'query')
                     ->where('parent_id', $andContainerId)
                     ->count(),
             ])->validate()->execute();
@@ -143,7 +145,7 @@ class RuleConditionBuilder extends Component
 
     protected function getOrCreateRootContainer(): RuleCondition
     {
-        $root = RuleCondition::query()
+        $root = resolve_static(RuleCondition::class, 'query')
             ->where('rule_id', $this->ruleId)
             ->whereNull('parent_id')
             ->where('type', 'or_container')
@@ -160,7 +162,7 @@ class RuleConditionBuilder extends Component
         return $root;
     }
 
-    protected function buildTree(\Illuminate\Support\Collection $conditions): array
+    protected function buildTree(Collection $conditions): array
     {
         return $conditions->map(function (RuleCondition $condition) {
             return [

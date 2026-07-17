@@ -99,6 +99,7 @@ use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\RecordOrigins;
 use FluxErp\Livewire\Settings\ReminderSettings;
+use FluxErp\Livewire\Settings\Rules;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SearchSettings;
 use FluxErp\Livewire\Settings\SecuritySettings;
@@ -328,6 +329,7 @@ Route::middleware('web')
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
                         Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/reminder-settings', ReminderSettings::class)->name('reminder-settings');
+                        Route::get('/rules', Rules::class)->name('rules');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/search-settings', SearchSettings::class)->name('search-settings');
                         Route::get('/security-settings', SecuritySettings::class)->name('security-settings');

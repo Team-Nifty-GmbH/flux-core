@@ -60,11 +60,15 @@ class Rules extends RuleList
     }
 
     #[Renderless]
-    public function edit(?Rule $rule = null): void
+    public function edit(string|int|null $id = null): void
     {
         $this->ruleForm->reset();
 
-        if ($rule?->getKey()) {
+        if ($id) {
+            $rule = resolve_static(Rule::class, 'query')
+                ->whereKey($id)
+                ->firstOrFail();
+
             $this->ruleForm->fill($rule);
         }
 
@@ -90,10 +94,14 @@ class Rules extends RuleList
     }
 
     #[Renderless]
-    public function delete(Rule $rule): bool
+    public function delete(string|int $id): bool
     {
         try {
-            $this->ruleForm->fill($rule);
+            $this->ruleForm->fill(
+                resolve_static(Rule::class, 'query')
+                    ->whereKey($id)
+                    ->firstOrFail()
+            );
             $this->ruleForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);

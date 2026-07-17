@@ -14,6 +14,22 @@ use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
 use FluxErp\RuleEngine\ConditionRegistry;
+use FluxErp\RuleEngine\Conditions\AndContainerCondition;
+use FluxErp\RuleEngine\Conditions\CartAmountCondition;
+use FluxErp\RuleEngine\Conditions\CartHasCategoryCondition;
+use FluxErp\RuleEngine\Conditions\CartHasProductCondition;
+use FluxErp\RuleEngine\Conditions\CartLineItemCountCondition;
+use FluxErp\RuleEngine\Conditions\ContactCondition;
+use FluxErp\RuleEngine\Conditions\ContactCustomFieldCondition;
+use FluxErp\RuleEngine\Conditions\ContactDiscountGroupCondition;
+use FluxErp\RuleEngine\Conditions\DateRangeCondition;
+use FluxErp\RuleEngine\Conditions\DayOfWeekCondition;
+use FluxErp\RuleEngine\Conditions\LineItemQuantityCondition;
+use FluxErp\RuleEngine\Conditions\OrContainerCondition;
+use FluxErp\RuleEngine\Conditions\PriceListCondition;
+use FluxErp\RuleEngine\Conditions\ProductCategoryCondition;
+use FluxErp\RuleEngine\Conditions\ProductCustomFieldCondition;
+use FluxErp\RuleEngine\Conditions\TimeRangeCondition;
 use FluxErp\Support\MediaLibrary\UrlGenerator;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Support\DeferrableProvider;
@@ -63,25 +79,25 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
 
         $this->app->alias(Registry::class, 'datatype.registry');
 
-        $this->app->singleton(ConditionRegistry::class, function () {
+        $this->app->singleton(ConditionRegistry::class, function (): ConditionRegistry {
             $registry = new ConditionRegistry();
             $registry->register([
-                \FluxErp\RuleEngine\Conditions\OrContainerCondition::class,
-                \FluxErp\RuleEngine\Conditions\AndContainerCondition::class,
-                \FluxErp\RuleEngine\Conditions\DateRangeCondition::class,
-                \FluxErp\RuleEngine\Conditions\DayOfWeekCondition::class,
-                \FluxErp\RuleEngine\Conditions\TimeRangeCondition::class,
-                \FluxErp\RuleEngine\Conditions\ContactCondition::class,
-                \FluxErp\RuleEngine\Conditions\ContactDiscountGroupCondition::class,
-                \FluxErp\RuleEngine\Conditions\ContactCustomFieldCondition::class,
-                \FluxErp\RuleEngine\Conditions\CartAmountCondition::class,
-                \FluxErp\RuleEngine\Conditions\CartLineItemCountCondition::class,
-                \FluxErp\RuleEngine\Conditions\CartHasProductCondition::class,
-                \FluxErp\RuleEngine\Conditions\CartHasCategoryCondition::class,
-                \FluxErp\RuleEngine\Conditions\LineItemQuantityCondition::class,
-                \FluxErp\RuleEngine\Conditions\ProductCategoryCondition::class,
-                \FluxErp\RuleEngine\Conditions\ProductCustomFieldCondition::class,
-                \FluxErp\RuleEngine\Conditions\PriceListCondition::class,
+                AndContainerCondition::class,
+                CartAmountCondition::class,
+                CartHasCategoryCondition::class,
+                CartHasProductCondition::class,
+                CartLineItemCountCondition::class,
+                ContactCondition::class,
+                ContactCustomFieldCondition::class,
+                ContactDiscountGroupCondition::class,
+                DateRangeCondition::class,
+                DayOfWeekCondition::class,
+                LineItemQuantityCondition::class,
+                OrContainerCondition::class,
+                PriceListCondition::class,
+                ProductCategoryCondition::class,
+                ProductCustomFieldCondition::class,
+                TimeRangeCondition::class,
             ]);
 
             return $registry;

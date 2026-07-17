@@ -15,7 +15,9 @@ class RuleEvaluator
             return false;
         }
 
-        $rootConditions = $rule->rootConditions()->with('children.children')->get();
+        $rootConditions = $rule->relationLoaded('rootConditions')
+            ? $rule->rootConditions
+            : $rule->rootConditions()->with('children.children')->get();
 
         if ($rootConditions->isEmpty()) {
             return true;

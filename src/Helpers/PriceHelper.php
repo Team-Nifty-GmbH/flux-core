@@ -345,7 +345,7 @@ class PriceHelper
             return $unconditionalPrice;
         }
 
-        $conditionalPrices->load('rule.conditions.children.children');
+        $conditionalPrices->load('rule.rootConditions.children.children');
 
         $scope = new PriceScope(
             product: $this->product,
@@ -357,7 +357,7 @@ class PriceHelper
 
         $matchingPrice = $conditionalPrices
             ->filter(fn (Price $price) => $price->rule
-                && RuleEvaluator::evaluate($price->rule, $scope)
+                && resolve_static(RuleEvaluator::class, 'evaluate', [$price->rule, $scope])
             )
             ->sortByDesc(fn (Price $price) => $price->rule->priority)
             ->first();

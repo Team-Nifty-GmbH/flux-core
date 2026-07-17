@@ -42,14 +42,14 @@ class Discount extends FluxModel implements Sortable
             ->using(ContactDiscount::class);
     }
 
-    public function rule(): BelongsTo
-    {
-        return $this->belongsTo(Rule::class);
-    }
-
     public function model(): MorphTo
     {
         return $this->morphTo('model');
+    }
+
+    public function rule(): BelongsTo
+    {
+        return $this->belongsTo(Rule::class);
     }
 
     // Public methods

@@ -13,6 +13,6 @@ test('can edit a rule', function (): void {
     $rule = Rule::factory()->create();
 
     Livewire::test(Rules::class)
-        ->call('edit', $rule)
+        ->call('edit', $rule->getKey())
         ->assertOk();
 });

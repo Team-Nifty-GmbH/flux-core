@@ -1,4 +1,8 @@
 <div>
+    @php
+        $conditionRegistry = app(\FluxErp\RuleEngine\ConditionRegistry::class)->all();
+    @endphp
+
     @foreach($conditionTree as $root)
         @if($root['type'] === 'or_container')
             <div class="space-y-4">
@@ -38,12 +42,11 @@
                                 >
                                     <div class="flex-1">
                                         @php
-                                            $registry = app(\FluxErp\RuleEngine\ConditionRegistry::class);
-                                            $conditionClass = $registry->all()[$condition['type']] ?? null;
+                                            $conditionClass = data_get($conditionRegistry, $condition['type']);
                                             $schema = $conditionClass ? $conditionClass::schema() : [];
                                         @endphp
                                         <div class="mb-2 text-sm font-medium">
-                                            {{ $conditionClass ? $conditionClass::label() : $condition['type'] }}
+                                            {{ $conditionClass ? __($conditionClass::label()) : $condition['type'] }}
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             @foreach($schema as $fieldDef)
@@ -51,14 +54,14 @@
                                                 @if(data_get($fieldDef, 'type') === 'select')
                                                     <x-select.native
                                                         x-model="value.{{ $fieldName }}"
-                                                        :label="data_get($fieldDef, 'label', $fieldName)"
+                                                        :label="__(data_get($fieldDef, 'label', $fieldName))"
                                                         x-on:change="$wire.updateConditionValue({{ $condition['id'] }}, value)"
                                                     >
                                                         @foreach(data_get($fieldDef, 'options', []) as $option)
                                                             <option
                                                                 value="{{ data_get($option, 'value') }}"
                                                             >
-                                                                {{ data_get($option, 'label') }}
+                                                                {{ __(data_get($option, 'label')) }}
                                                             </option>
                                                         @endforeach
                                                     </x-select.native>
@@ -66,26 +69,26 @@
                                                     <x-input
                                                         type="date"
                                                         x-model="value.{{ $fieldName }}"
-                                                        :label="data_get($fieldDef, 'label', $fieldName)"
+                                                        :label="__(data_get($fieldDef, 'label', $fieldName))"
                                                         x-on:change="$wire.updateConditionValue({{ $condition['id'] }}, value)"
                                                     />
                                                 @elseif(data_get($fieldDef, 'type') === 'time')
                                                     <x-input
                                                         type="time"
                                                         x-model="value.{{ $fieldName }}"
-                                                        :label="data_get($fieldDef, 'label', $fieldName)"
+                                                        :label="__(data_get($fieldDef, 'label', $fieldName))"
                                                         x-on:change="$wire.updateConditionValue({{ $condition['id'] }}, value)"
                                                     />
                                                 @elseif(data_get($fieldDef, 'type') === 'number')
                                                     <x-number
                                                         x-model="value.{{ $fieldName }}"
-                                                        :label="data_get($fieldDef, 'label', $fieldName)"
+                                                        :label="__(data_get($fieldDef, 'label', $fieldName))"
                                                         x-on:change="$wire.updateConditionValue({{ $condition['id'] }}, value)"
                                                     />
                                                 @else
                                                     <x-input
                                                         x-model="value.{{ $fieldName }}"
-                                                        :label="data_get($fieldDef, 'label', $fieldName)"
+                                                        :label="__(data_get($fieldDef, 'label', $fieldName))"
                                                         x-on:change="$wire.updateConditionValue({{ $condition['id'] }}, value)"
                                                     />
                                                 @endif
@@ -120,7 +123,7 @@
                                         <div
                                             class="border-b px-3 py-1 text-xs font-semibold text-gray-400 uppercase dark:border-gray-600"
                                         >
-                                            {{ __($groupName) }}
+                                            {{ __(str($groupName)->headline()->toString()) }}
                                         </div>
                                         @foreach($types as $type => $class)
                                             <button
@@ -129,7 +132,7 @@
                                                 wire:click="addCondition({{ $andGroup['id'] }}, '{{ $type }}')"
                                                 x-on:click="open = false"
                                             >
-                                                {{ $class::label() }}
+                                                {{ __($class::label()) }}
                                             </button>
                                         @endforeach
                                     @endforeach
@@ -142,7 +145,7 @@
                 <button
                     type="button"
                     class="w-full rounded-lg border-2 border-dashed border-gray-300 p-3 text-center text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-gray-600 dark:text-gray-400"
-                    wire:click="addOrGroup"
+                    wire:click="addOrGroup()"
                 >
                     + {{ __('Add OR Group') }}
                 </button>
@@ -156,7 +159,7 @@
             <button
                 type="button"
                 class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
-                wire:click="addOrGroup"
+                wire:click="addOrGroup()"
             >
                 + {{ __('Add OR Group') }}
             </button>

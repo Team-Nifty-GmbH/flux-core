@@ -4,8 +4,10 @@ namespace FluxErp\Rulesets\RuleCondition;
 
 use FluxErp\Models\Rule;
 use FluxErp\Models\RuleCondition;
+use FluxErp\RuleEngine\ConditionRegistry;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule as ValidationRule;
 
 class CreateRuleConditionRuleset extends FluxRuleset
 {
@@ -15,17 +17,21 @@ class CreateRuleConditionRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:rule_conditions,uuid',
-            'rule_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Rule::class]),
-            ],
             'parent_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => RuleCondition::class]),
             ],
-            'type' => 'required|string|max:255',
+            'rule_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Rule::class]),
+            ],
+            'type' => [
+                'required',
+                'string',
+                ValidationRule::in(array_keys(app(ConditionRegistry::class)->all())),
+            ],
             'value' => 'nullable|array',
             'position' => 'nullable|integer',
         ];

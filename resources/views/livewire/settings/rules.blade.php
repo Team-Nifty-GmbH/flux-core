@@ -1,8 +1,9 @@
 <div>
-    <x-modal id="edit-rule-modal" size="xl">
-        <x-slot:title>
-            {{ $ruleForm->id ? __('Edit Rule') : __('New Rule') }}
-        </x-slot:title>
+    <x-modal
+        id="edit-rule-modal"
+        :title="$ruleForm->id ? __('Edit Rule') : __('New Rule')"
+        size="xl"
+    >
 
         <div class="flex flex-col gap-4">
             <x-input wire:model="ruleForm.name" :label="__('Name')" />
@@ -41,7 +42,7 @@
                 flat
                 x-on:click="$tsui.close.modal('edit-rule-modal')"
             />
-            <x-button :text="__('Save')" color="primary" wire:click="save" />
+            <x-button :text="__('Save')" color="primary" wire:click="save()" />
         </x-slot:footer>
     </x-modal>
 </div>

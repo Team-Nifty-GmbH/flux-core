@@ -3,8 +3,10 @@
 namespace FluxErp\Rulesets\RuleCondition;
 
 use FluxErp\Models\RuleCondition;
+use FluxErp\RuleEngine\ConditionRegistry;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule as ValidationRule;
 
 class UpdateRuleConditionRuleset extends FluxRuleset
 {
@@ -23,7 +25,12 @@ class UpdateRuleConditionRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => RuleCondition::class]),
             ],
-            'type' => 'sometimes|required|string|max:255',
+            'type' => [
+                'sometimes',
+                'required',
+                'string',
+                ValidationRule::in(array_keys(app(ConditionRegistry::class)->all())),
+            ],
             'value' => 'nullable|array',
             'position' => 'nullable|integer',
         ];
