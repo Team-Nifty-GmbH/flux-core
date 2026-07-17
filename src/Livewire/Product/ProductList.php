@@ -198,11 +198,6 @@ class ProductList extends BaseProductList
         return true;
     }
 
-    protected function inlineFormAttributeName(): string
-    {
-        return 'product';
-    }
-
     protected function getViewData(): array
     {
         return array_merge(
@@ -231,5 +226,10 @@ class ProductList extends BaseProductList
                 ],
             ]
         );
+    }
+
+    protected function inlineFormAttributeName(): string
+    {
+        return 'product';
     }
 }

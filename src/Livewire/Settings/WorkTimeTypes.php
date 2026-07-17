@@ -10,8 +10,7 @@ use FluxErp\Traits\Livewire\DataTable\DataTableHasInlineEdit;
 
 class WorkTimeTypes extends WorkTimeTypeList
 {
-    use DataTableHasFormEdit;
-    use DataTableHasInlineEdit;
+    use DataTableHasFormEdit, DataTableHasInlineEdit;
 
     #[DataTableForm]
     public WorkTimeTypeForm $workTimeTypeForm;

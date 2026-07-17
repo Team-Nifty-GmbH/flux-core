@@ -268,11 +268,6 @@ class AddressList extends BaseDataTable
         $this->dispatch('load-map');
     }
 
-    protected function inlineFormAttributeName(): string
-    {
-        return 'addressForm';
-    }
-
     protected function getBuilder(Builder $builder): Builder
     {
         // add contact_id to the select statement to ensure that the contact route is available
@@ -309,6 +304,11 @@ class AddressList extends BaseDataTable
     protected function getPreferredLanguageId(OffersPrinting $item): int
     {
         return $item->language_id;
+    }
+
+    protected function inlineFormAttributeName(): string
+    {
+        return 'addressForm';
     }
 
     protected function augmentItemArray(array &$itemArray, Model $item): void

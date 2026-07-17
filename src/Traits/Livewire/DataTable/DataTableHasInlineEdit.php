@@ -24,6 +24,14 @@ trait DataTableHasInlineEdit
         }
     }
 
+    public function cancelInline(): void
+    {
+        $this->{$this->inlineFormAttributeName()}->reset();
+        $this->inlineEditingId = null;
+        $this->islandsHaveMounted = false;
+        $this->loadData(true);
+    }
+
     public function inlineEdit(string|int $id): void
     {
         $this->{$this->inlineFormAttributeName()}->reset();
@@ -55,24 +63,11 @@ trait DataTableHasInlineEdit
         $this->islandsHaveMounted = false;
         $this->loadData(true);
 
-        if ($this->hasInlineSaveButton()) {
+        if ($this->supportInlineSaveButton()) {
             $this->inlineEditingId = null;
         }
 
         return true;
-    }
-
-    public function cancelInline(): void
-    {
-        $this->{$this->inlineFormAttributeName()}->reset();
-        $this->inlineEditingId = null;
-        $this->islandsHaveMounted = false;
-        $this->loadData(true);
-    }
-
-    public function hasInlineSaveButton(): bool
-    {
-        return false;
     }
 
     protected function augmentItemArrayDataTableHasInlineEdit(array &$itemArray, Model $item): void
@@ -85,7 +80,7 @@ trait DataTableHasInlineEdit
         $itemArray['href'] = null;
 
         $form = $this->{$this->inlineFormAttributeName()};
-        $saveOnChange = ! $this->hasInlineSaveButton();
+        $saveOnChange = ! $this->supportInlineSaveButton();
 
         foreach ($form->getInlineEditableFields() as $field) {
             if (! array_key_exists($field, $itemArray)) {
@@ -116,7 +111,7 @@ trait DataTableHasInlineEdit
                     'x-show' => '$wire.inlineEditingId !== record.' . $keyName,
                     'x-cloak' => '',
                 ]),
-            $this->hasInlineSaveButton()
+            $this->supportInlineSaveButton()
                 ? DataTableButton::make()
                     ->text(__('Save'))
                     ->icon('check')
@@ -148,12 +143,17 @@ trait DataTableHasInlineEdit
         }
 
         $attribute = $this->getAttributes()
-            ->first(fn ($attribute) => $attribute instanceof DataTableForm);
+            ->first(fn (object $attribute) => $attribute instanceof DataTableForm);
 
         if (is_null($attribute)) {
             throw new InvalidArgumentException('No #[DataTableForm] attribute found on ' . static::class);
         }
 
         return $attribute->getName();
+    }
+
+    protected function supportInlineSaveButton(): bool
+    {
+        return false;
     }
 }

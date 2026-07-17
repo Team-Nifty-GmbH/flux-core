@@ -52,6 +52,36 @@ trait SupportsAutoRender
         return new HtmlString(Blade::render($blade, $data));
     }
 
+    public function getInlineEditableFields(): array
+    {
+        $reflection = new ReflectionClass($this);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        $fields = [];
+
+        foreach ($properties as $property) {
+            if ($property->getAttributes(InlineEditable::class)) {
+                $fields[] = $property->getName();
+            }
+        }
+
+        return $fields;
+    }
+
+    public function modalName(): ?string
+    {
+        return Str::kebab(class_basename($this)) . '-modal';
+    }
+
+    public function openModal(): void
+    {
+        $modalName = $this->modalName();
+
+        $this->getComponent()
+            ->js(<<<JS
+                \$tsui.open.modal('$modalName');
+            JS);
+    }
+
     public function renderInlineField(string $property, bool $saveOnChange = false): string
     {
         $reflection = new ReflectionClass($this);
@@ -83,48 +113,21 @@ trait SupportsAutoRender
         return Blade::render($element);
     }
 
-    public function getInlineEditableFields(): array
-    {
-        $reflection = new ReflectionClass($this);
-        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
-        $fields = [];
-
-        foreach ($properties as $property) {
-            if ($property->getAttributes(InlineEditable::class)) {
-                $fields[] = $property->getName();
-            }
-        }
-
-        return $fields;
-    }
-
-    public function modalName(): ?string
-    {
-        return Str::kebab(class_basename($this)) . '-modal';
-    }
-
-    public function openModal(): void
-    {
-        $modalName = $this->modalName();
-
-        $this->getComponent()
-            ->js(<<<JS
-                \$tsui.open.modal('$modalName');
-            JS);
-    }
-
     protected function addInlineSaveTrigger(string $element, ReflectionProperty $property): string
     {
         $renderAs = $this->getAutoRenderAsAttribute($property);
-        $type = strtolower($renderAs?->type ?? $this->getPropertyTypeName($property));
+        $types = explode('|', strtolower($renderAs?->type ?? $this->getPropertyTypeName($property)));
 
         $immediateTypes = [
-            strtolower(RenderAs::TOGGLE), strtolower(RenderAs::CHECKBOX), strtolower(RenderAs::RADIO),
-            strtolower(RenderAs::SELECT), strtolower(RenderAs::SELECT_NATIVE),
+            strtolower(RenderAs::TOGGLE),
+            strtolower(RenderAs::CHECKBOX),
+            strtolower(RenderAs::RADIO),
+            strtolower(RenderAs::SELECT),
+            strtolower(RenderAs::SELECT_NATIVE),
             'bool',
         ];
 
-        if (in_array($type, $immediateTypes)) {
+        if (array_intersect($types, $immediateTypes)) {
             return preg_replace('/\s*\/>$/', ' wire:change="saveInline" />', $element);
         }
 

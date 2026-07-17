@@ -1,7 +1,9 @@
 <?php
 
+use FluxErp\Livewire\Forms\WorkTimeTypeForm;
 use FluxErp\Livewire\Settings\WorkTimeTypes;
 use FluxErp\Models\WorkTimeType;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -89,7 +91,7 @@ test('cancel resets form state', function (): void {
 test('inline edit nonexistent row throws', function (): void {
     Livewire::test(WorkTimeTypes::class)
         ->call('inlineEdit', 99999);
-})->throws(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+})->throws(ModelNotFoundException::class);
 
 test('inline editing id stays set after save without save button', function (): void {
     Livewire::test(WorkTimeTypes::class)
@@ -101,7 +103,7 @@ test('inline editing id stays set after save without save button', function (): 
 });
 
 test('get inline editable fields returns correct fields', function (): void {
-    $form = new FluxErp\Livewire\Forms\WorkTimeTypeForm(
+    $form = new WorkTimeTypeForm(
         Livewire::test(WorkTimeTypes::class)->instance(),
         'workTimeTypeForm'
     );
