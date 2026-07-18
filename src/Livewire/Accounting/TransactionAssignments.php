@@ -105,14 +105,21 @@ class TransactionAssignments extends Component
     {
         $this->resetErrorBag();
 
+        $amount = $this->orderTransactionForm->amount;
+
+        if (blank($amount)) {
+            return;
+        }
+
         try {
             AdjustOrderTotal::make([
                 'id' => $this->orderTransactionForm->order_id,
-                'total_gross_price' => bcabs($this->orderTransactionForm->amount),
+                'total_gross_price' => bcabs((string) $amount),
             ])
                 ->validate()
                 ->execute();
 
+            $this->orderTransactionForm->is_accepted = true;
             $this->orderTransactionForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);

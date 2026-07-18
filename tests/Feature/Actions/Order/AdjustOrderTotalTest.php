@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Actions\Order\AdjustOrderTotal;
+use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
@@ -115,6 +116,99 @@ test('adjust order total sets the gross total to the payment amount', function (
 test('adjust order total rejects orders that are not subscription children', function (): void {
     AdjustOrderTotal::make([
         'id' => $this->order->getKey(),
+        'total_gross_price' => 100,
+    ])
+        ->validate()
+        ->execute();
+})->throws(Illuminate\Validation\ValidationException::class);
+
+test('adjust order total rejects children of non-subscription parents', function (): void {
+    $orderOrderType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+        ]);
+
+    $splitOrderType = OrderType::factory()
+        ->hasAttached(factory: $this->tenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::SplitOrder,
+            'is_active' => true,
+        ]);
+
+    $parent = Order::factory()->create([
+        'tenant_id' => $this->tenant->getKey(),
+        'contact_id' => $this->contact->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $orderOrderType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $this->paymentType->getKey(),
+        'parent_id' => null,
+        'is_locked' => false,
+    ]);
+
+    CreateOrderPosition::make([
+        'order_id' => $parent->getKey(),
+        'name' => 'Product',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 100.00,
+        'is_net' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    $child = ReplicateOrder::make([
+        'id' => $parent->getKey(),
+        'address_invoice_id' => $this->address->getKey(),
+        'order_type_id' => $splitOrderType->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    AdjustOrderTotal::make([
+        'id' => $child->getKey(),
+        'total_gross_price' => 50,
+    ])
+        ->validate()
+        ->execute();
+})->throws(Illuminate\Validation\ValidationException::class);
+
+test('adjust order total rejects locked orders', function (): void {
+    (new ProcessSubscriptionOrder())($this->order->getKey(), $this->targetOrderType->getKey());
+
+    $child = $this->order->createdOrders()->latest('id')->first();
+    $child->update(['is_locked' => true]);
+
+    AdjustOrderTotal::make([
+        'id' => $child->getKey(),
+        'total_gross_price' => 100,
+    ])
+        ->validate()
+        ->execute();
+})->throws(Illuminate\Validation\ValidationException::class);
+
+test('adjust order total rejects orders with more than one position', function (): void {
+    (new ProcessSubscriptionOrder())($this->order->getKey(), $this->targetOrderType->getKey());
+
+    $child = $this->order->createdOrders()->latest('id')->first();
+
+    CreateOrderPosition::make([
+        'order_id' => $child->getKey(),
+        'name' => 'Extra Position',
+        'vat_rate_id' => $this->vatRate->getKey(),
+        'amount' => 1,
+        'unit_price' => 10.00,
+        'is_net' => false,
+    ])
+        ->validate()
+        ->execute();
+
+    AdjustOrderTotal::make([
+        'id' => $child->getKey(),
         'total_gross_price' => 100,
     ])
         ->validate()

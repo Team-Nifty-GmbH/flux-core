@@ -65,9 +65,13 @@ class AdjustOrderTotal extends FluxAction
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->getData('id'))
             ->withCount('orderPositions')
+            ->with('createdFrom.orderType:id,order_type_enum')
             ->first(['id', 'created_from_id', 'is_locked']);
 
-        if (is_null($order?->created_from_id)) {
+        if (
+            is_null($order?->created_from_id)
+            || ! $order->createdFrom?->orderType?->order_type_enum?->isSubscription()
+        ) {
             throw ValidationException::withMessages([
                 'id' => [__('Only generated subscription orders can be adjusted.')],
             ])->errorBag('adjustOrderTotal');

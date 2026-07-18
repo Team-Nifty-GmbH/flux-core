@@ -233,7 +233,7 @@
                 :text="__('Adjust order to payment')"
                 color="amber"
                 wire:flux-confirm.type.warning="{{ __('The order total will be changed to the payment amount. Continue?') }}"
-                x-on:click="$wire.adjustOrderToPayment()"
+                wire:click="adjustOrderToPayment()"
                 loading="adjustOrderToPayment()"
             />
             <x-button

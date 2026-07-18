@@ -123,5 +123,35 @@ test('adjust order to payment updates the order total', function (): void {
         ->call('adjustOrderToPayment')
         ->assertHasNoErrors();
 
-    expect(bcround($child->refresh()->total_gross_price, 2))->toBe('1512.38');
+    expect(bcround($child->refresh()->total_gross_price, 2))->toBe('1512.38')
+        ->and($assignment->refresh()->is_accepted)->toBeTrue();
+});
+
+test('adjust order to payment with null amount does nothing', function (): void {
+    (new ProcessSubscriptionOrder())($this->order->getKey(), $this->targetOrderType->getKey());
+
+    $child = $this->order->createdOrders()->latest('id')->first();
+    $originalTotal = $child->total_gross_price;
+
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => -1512.38,
+    ]);
+
+    $assignment = OrderTransaction::query()->create([
+        'transaction_id' => $transaction->getKey(),
+        'order_id' => $child->getKey(),
+        'amount' => -1512.38,
+        'is_accepted' => false,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('editOrderTransaction', $assignment->getAttribute('pivot_id'))
+        ->set('orderTransactionForm.amount', null)
+        ->call('adjustOrderToPayment')
+        ->assertHasNoErrors();
+
+    expect($child->refresh()->total_gross_price)->toBe($originalTotal)
+        ->and($assignment->refresh()->is_accepted)->toBeFalse();
 });
