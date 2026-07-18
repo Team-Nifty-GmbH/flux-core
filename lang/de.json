@@ -1814,6 +1814,7 @@
     "One or more of the given work times are invalid.": "Ein oder mehrere der angegebenen Arbeitszeiten sind ungültig.",
     "Only generated subscription orders can be adjusted.": "Nur generierte Abo-Aufträge können angepasst werden.",
     "Only order positions from given order allowed.": "Nur Aufragspositionen des gegebenen Auftrags sind erlaubt.",
+    "Only orders with a positive position amount can be adjusted.": "Nur Aufträge mit positiver Positionsmenge können angepasst werden.",
     "Only orders with exactly one position can be adjusted.": "Nur Aufträge mit genau einer Position können angepasst werden.",
     "Open": "Offen",
     "open": "offen",

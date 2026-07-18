@@ -214,3 +214,17 @@ test('adjust order total rejects orders with more than one position', function (
         ->validate()
         ->execute();
 })->throws(Illuminate\Validation\ValidationException::class);
+
+test('adjust order total rejects orders with a zero position amount', function (): void {
+    (new ProcessSubscriptionOrder())($this->order->getKey(), $this->targetOrderType->getKey());
+
+    $child = $this->order->createdOrders()->latest('id')->first();
+    $child->orderPositions()->sole()->update(['amount' => 0]);
+
+    AdjustOrderTotal::make([
+        'id' => $child->getKey(),
+        'total_gross_price' => 100,
+    ])
+        ->validate()
+        ->execute();
+})->throws(Illuminate\Validation\ValidationException::class);

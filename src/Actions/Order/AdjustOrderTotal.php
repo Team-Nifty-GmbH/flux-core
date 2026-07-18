@@ -42,7 +42,7 @@ class AdjustOrderTotal extends FluxAction
             'order_id' => $order->getKey(),
             'discount_percentage' => null,
             'unit_price' => gross_to_net(
-                bcdiv($signedTotal, $position->amount ?: 1, 9),
+                bcdiv($signedTotal, $position->amount, 9),
                 $position->vat_rate_percentage ?? 0
             ),
             'is_net' => true,
@@ -86,6 +86,12 @@ class AdjustOrderTotal extends FluxAction
         if ($order->order_positions_count !== 1) {
             throw ValidationException::withMessages([
                 'id' => [__('Only orders with exactly one position can be adjusted.')],
+            ])->errorBag('adjustOrderTotal');
+        }
+
+        if (bccomp($order->orderPositions()->value('amount') ?? 0, 0, 9) !== 1) {
+            throw ValidationException::withMessages([
+                'id' => [__('Only orders with a positive position amount can be adjusted.')],
             ])->errorBag('adjustOrderTotal');
         }
     }
