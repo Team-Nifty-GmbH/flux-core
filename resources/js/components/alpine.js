@@ -23,12 +23,13 @@ import selectComponent from './tallstackui/select.js';
 import toastComponent from './tallstackui/toast.js';
 import nuxbe from '../nuxbe.js';
 
-import { Calendar } from '@fullcalendar/core';
-import allLocales from '@fullcalendar/core/locales-all';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
+import { Calendar } from 'fullcalendar';
+import allLocales from 'fullcalendar/locales-all';
+import dayGridPlugin from 'fullcalendar/daygrid';
+import timeGridPlugin from 'fullcalendar/timegrid';
+import listPlugin from 'fullcalendar/list';
+import interactionPlugin from 'fullcalendar/interaction';
+import classicThemePlugin from 'fullcalendar/themes/classic';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -56,6 +57,7 @@ window.dayGridPlugin = dayGridPlugin;
 window.timeGridPlugin = timeGridPlugin;
 window.listPlugin = listPlugin;
 window.interactionPlugin = interactionPlugin;
+window.classicThemePlugin = classicThemePlugin;
 window.allLocales = allLocales;
 
 navigationSpinner();
