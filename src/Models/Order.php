@@ -1443,11 +1443,22 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     protected function scopeWherePaymentReminderEligible(Builder $query): Builder
     {
+        $remindableOrderTypes = collect(OrderTypeEnum::cases())
+            ->filter(fn (OrderTypeEnum $case) => ! $case->isPurchase()
+                && bccomp($case->multiplier(), '1') === 0
+            )
+            ->map(fn (OrderTypeEnum $case) => $case->value)
+            ->all();
+
         return $query
             ->whereNotNull('invoice_number')
             ->where('is_locked', true)
-            ->whereNotState('payment_state', Paid::class)
             ->where('balance', '>', 0)
+            ->whereNotState('payment_state', [Paid::class, InPayment::class, InOpenPaymentRun::class])
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query->whereIn('order_type_enum', $remindableOrderTypes)
+            )
             ->whereHasMailablePaymentReminderAddress();
     }
 
