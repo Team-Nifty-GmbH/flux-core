@@ -89,10 +89,22 @@
             "@test-feature",
             "@test-livewire"
         ],
-        "test-browser": "@testbench --parallel --testsuite Browser",
-        "test-feature": "@testbench --parallel --testsuite Feature",
-        "test-livewire": "@testbench --parallel --testsuite Livewire",
-        "test-unit": "@testbench --parallel --testsuite Unit",
+        "test-browser": [
+            "Composer\\Config::disableProcessTimeout",
+            "@testbench --parallel --testsuite Browser"
+        ],
+        "test-feature": [
+            "Composer\\Config::disableProcessTimeout",
+            "@testbench --parallel --testsuite Feature"
+        ],
+        "test-livewire": [
+            "Composer\\Config::disableProcessTimeout",
+            "@testbench --parallel --testsuite Livewire"
+        ],
+        "test-unit": [
+            "Composer\\Config::disableProcessTimeout",
+            "@testbench --parallel --testsuite Unit"
+        ],
         "test-coverage": "XDEBUG_MODE=coverage @testbench --parallel --coverage-html ./reports",
         "format": "vendor/bin/pint",
         "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",

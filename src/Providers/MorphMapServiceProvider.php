@@ -124,6 +124,7 @@ use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\PushSubscription;
 use FluxErp\Models\QueueMonitor;
+use FluxErp\Models\RebateAgreement;
 use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
@@ -234,6 +235,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'purchase_invoice_position' => PurchaseInvoicePosition::class,
             'push_subscription' => PushSubscription::class,
             'queue_monitor' => QueueMonitor::class,
+            'rebate_agreement' => RebateAgreement::class,
             'record_origin' => RecordOrigin::class,
             'role' => Role::class,
             'schedule' => Schedule::class,

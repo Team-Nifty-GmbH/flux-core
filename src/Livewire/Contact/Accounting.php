@@ -39,6 +39,10 @@ class Accounting extends Component
                 ->wireModel('contact.id'),
             TabButton::make('contact.accounting.discounts')
                 ->text(__('Discounts')),
+            TabButton::make('contact.accounting.rebate-agreements')
+                ->text(__('Rebate Agreements'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
             TabButton::make('contact.accounting.sepa-mandates')
                 ->text(__('Sepa Mandates'))
                 ->isLivewireComponent()
