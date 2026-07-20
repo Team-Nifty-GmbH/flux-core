@@ -178,6 +178,10 @@
                 :label="__('Account Holder')"
             />
             <x-input x-model="$wire.$parent.order.iban" :label="__('IBAN')" />
+            <x-input
+                x-model="$wire.$parent.order.payment_purpose_pattern"
+                :label="__('Payment purpose pattern')"
+            />
             <x-input x-model="$wire.$parent.order.bic" :label="__('BIC')" />
             <x-input
                 x-model="$wire.$parent.order.bank_name"

@@ -189,6 +189,7 @@ class CreateOrderRuleset extends FluxRuleset
 
             'order_number' => 'sometimes|required|string|max:255|unique:orders',
             'commission' => 'string|max:255|nullable',
+            'payment_purpose_pattern' => 'nullable|string|max:255',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',
             'logistic_note' => 'string|nullable',

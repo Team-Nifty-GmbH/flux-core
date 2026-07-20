@@ -651,7 +651,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         return $this->getFirstMedia('invoice')
             ?? $this->getFirstMedia('final-invoice')
-            ?? $this->getFirstMedia('refund');
+            ?? $this->getFirstMedia('refund')
+            ?? ($this->createdFrom?->orderType?->order_type_enum?->isSubscription()
+                ? $this->createdFrom->getFirstMedia('invoice')
+                : null);
     }
 
     public function refund(): ?Media

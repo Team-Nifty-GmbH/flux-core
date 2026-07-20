@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Actions\Order\AdjustOrderTotal;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\UpdateOrderTransaction;
 use FluxErp\Livewire\Forms\LedgerAccountTransactionForm;
@@ -102,6 +103,39 @@ class TransactionAssignments extends Component
             ->success(__('Accepted :count assignments', ['count' => $suggestions->count()]))
             ->send();
         $this->refreshTransactions();
+    }
+
+    #[Renderless]
+    public function adjustOrderToPayment(): void
+    {
+        $this->resetErrorBag();
+
+        $amount = $this->orderTransactionForm->amount;
+
+        if (blank($amount)) {
+            return;
+        }
+
+        try {
+            AdjustOrderTotal::make([
+                'id' => $this->orderTransactionForm->order_id,
+                'total_gross_price' => bcabs((string) $amount),
+            ])
+                ->validate()
+                ->execute();
+
+            $this->orderTransactionForm->is_accepted = true;
+            $this->orderTransactionForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+        $this->js(<<<'JS'
+            $tsui.close.modal('order-transaction-modal');
+        JS);
     }
 
     #[Renderless]

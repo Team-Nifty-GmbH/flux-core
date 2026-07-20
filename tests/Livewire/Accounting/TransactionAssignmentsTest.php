@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
@@ -29,7 +30,12 @@ test('assign orders from selectedOrders property', function (): void {
 
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create();
+    // The factory picks a random order type enum, and transactions cannot be assigned
+    // to subscription orders, so pin a regular order type here.
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
     $order = Order::factory()->create([
         'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
