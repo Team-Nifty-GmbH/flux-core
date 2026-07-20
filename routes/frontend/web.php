@@ -12,7 +12,6 @@ use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
-use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\PaymentReminderRun;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
@@ -272,7 +271,6 @@ Route::middleware('web')
                 Route::name('accounting.')->prefix('accounting')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
-                        Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
                         Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
@@ -366,7 +364,7 @@ Route::middleware('web')
             })->name('media');
         });
 
-        Route::group(['middleware' => ['auth:web']], function (): void {
+        Route::middleware('auth:web')->group(function (): void {
             Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
@@ -382,7 +380,7 @@ Route::middleware('web')
                 ->defaults('html', false);
         });
 
-        Route::middleware('signed')->group(function (): void {
+        Route::middleware('media.signed')->group(function (): void {
             Route::get('/media-private/{media}/{filename}', PrivateMediaController::class)
                 ->name('media.private');
 
@@ -414,7 +412,9 @@ Route::middleware('web')
                 );
             })
                 ->name('media.show');
+        });
 
+        Route::middleware('signed')->group(function (): void {
             Route::get('/media-collection-download/{token}', function (string $token) {
                 $payload = Crypt::decrypt($token);
 

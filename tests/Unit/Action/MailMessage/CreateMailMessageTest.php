@@ -7,7 +7,10 @@ use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Tenant;
 use FluxErp\Models\Ticket;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 
@@ -110,6 +113,65 @@ test('strips quoted conversation from comment created from mail reply', function
         ->and($comment->comment)->not->toContain('flux:comment')
         ->and($comment->comment)->not->toContain('[flux:quote]');
 });
+
+test('purchase invoice from mail message skips supplier on tenant domain', function (
+    array $tenantAttributes,
+    string $senderDomain,
+    bool $expectsContact
+): void {
+    Event::fake('action.executed: ' . CreateMailMessage::class);
+
+    $tenant = Tenant::factory()->create($tenantAttributes);
+
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'email_primary' => 'rechnung@' . $senderDomain,
+    ]);
+
+    $mailFolder = MailFolder::factory()->create([
+        'mail_account_id' => $this->mailAccount->getKey(),
+        'can_create_purchase_invoice' => true,
+    ]);
+
+    $action = CreateMailMessage::make([
+        'mail_account_id' => $this->mailAccount->getKey(),
+        'mail_folder_id' => $mailFolder->getKey(),
+        'from' => 'Tester McTestFace <' . $address->email_primary . '>',
+        'to' => [$this->mailAccount->email],
+        'subject' => Str::uuid()->toString(),
+        'text_body' => faker()->text(),
+        'html_body' => '<p>' . faker()->text() . '</p>',
+        'communication_type_enum' => 'mail',
+        'date' => now()->format('Y-m-d H:i:s'),
+        'tags' => [],
+    ]);
+    $message = $action->validate()->execute();
+
+    $message->addMedia(UploadedFile::fake()->create('invoice.pdf', 10, 'application/pdf'))
+        ->toMediaCollection('attachments');
+    $message->refresh();
+
+    (new CreateMailExecutedSubscriber())->handle($action);
+
+    $purchaseInvoice = PurchaseInvoice::query()->latest('id')->first();
+
+    expect($purchaseInvoice)->not->toBeNull()
+        ->and($purchaseInvoice->contact_id)->toBe($expectsContact ? $contact->getKey() : null);
+
+    if (! $expectsContact) {
+        // The matching tenant owns the invoice, not the default tenant.
+        expect($purchaseInvoice->tenant_id)->toBe($tenant->getKey())
+            ->and($tenant->refresh()->is_default)->toBeFalse();
+    }
+})->with([
+    'tenant email domain' => [['email' => 'buchhaltung@team-nifty.test'], 'team-nifty.test', false],
+    'tenant website domain' => [['website' => 'https://www.team-nifty.test/impressum'], 'team-nifty.test', false],
+    'tenant email subdomain' => [['email' => 'buchhaltung@team-nifty.test'], 'mail.team-nifty.test', false],
+    'foreign domain' => [['email' => 'buchhaltung@team-nifty.test'], 'supplier.test', true],
+    'domain suffix lookalike' => [['email' => 'buchhaltung@team-nifty.test'], 'notteam-nifty.test', true],
+    'tenant website without a dot' => [['website' => 'test'], 'supplier.test', true],
+]);
 
 test('create ticket from mail message', function (): void {
     Event::fake('action.executed: ' . CreateMailMessage::class);

@@ -56,6 +56,7 @@ use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
+use FluxErp\View\Printing\Order\ProformaInvoice;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
@@ -650,7 +651,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     {
         return $this->getFirstMedia('invoice')
             ?? $this->getFirstMedia('final-invoice')
-            ?? $this->getFirstMedia('refund');
+            ?? $this->getFirstMedia('refund')
+            ?? ($this->createdFrom?->orderType?->order_type_enum?->isSubscription()
+                ? $this->createdFrom->getFirstMedia('invoice')
+                : null);
     }
 
     public function refund(): ?Media
@@ -1048,6 +1052,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return [
             'invoice' => Invoice::class,
             'final-invoice' => FinalInvoice::class,
+            'proforma-invoice' => ProformaInvoice::class,
             'offer' => Offer::class,
             'order-confirmation' => OrderConfirmation::class,
             'retoure' => Retoure::class,
@@ -1206,6 +1211,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     [
                         'invoice' => Invoice::class,
                         'final-invoice' => FinalInvoice::class,
+                        'proforma-invoice' => ProformaInvoice::class,
                         'offer' => Offer::class,
                         'order-confirmation' => OrderConfirmation::class,
                         'retoure' => Retoure::class,
@@ -1440,11 +1446,22 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
 
     protected function scopeWherePaymentReminderEligible(Builder $query): Builder
     {
+        $remindableOrderTypes = collect(OrderTypeEnum::cases())
+            ->filter(fn (OrderTypeEnum $case) => ! $case->isPurchase()
+                && bccomp($case->multiplier(), '1') === 0
+            )
+            ->map(fn (OrderTypeEnum $case) => $case->value)
+            ->all();
+
         return $query
             ->whereNotNull('invoice_number')
             ->where('is_locked', true)
-            ->whereNotState('payment_state', Paid::class)
             ->where('balance', '>', 0)
+            ->whereNotState('payment_state', [Paid::class, InPayment::class, InOpenPaymentRun::class])
+            ->whereHas(
+                'orderType',
+                fn (Builder $query) => $query->whereIn('order_type_enum', $remindableOrderTypes)
+            )
             ->whereHasMailablePaymentReminderAddress();
     }
 

@@ -121,6 +121,9 @@ use FluxErp\Actions\LeadState\UpdateLeadState;
 use FluxErp\Actions\LedgerAccount\CreateLedgerAccount;
 use FluxErp\Actions\LedgerAccount\DeleteLedgerAccount;
 use FluxErp\Actions\LedgerAccount\UpdateLedgerAccount;
+use FluxErp\Actions\LedgerAccountTransaction\CreateLedgerAccountTransaction;
+use FluxErp\Actions\LedgerAccountTransaction\DeleteLedgerAccountTransaction;
+use FluxErp\Actions\LedgerAccountTransaction\UpdateLedgerAccountTransaction;
 use FluxErp\Actions\Location\CreateLocation;
 use FluxErp\Actions\Location\DeleteLocation;
 use FluxErp\Actions\Location\UpdateLocation;
@@ -367,6 +370,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\BundleProductProduct;
 use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Price;
@@ -844,6 +848,15 @@ Route::prefix('api')
                 Route::post('/order-transactions', CreateOrderTransaction::class);
                 Route::put('/order-transactions', UpdateOrderTransaction::class);
                 Route::delete('/order-transactions/{id}', DeleteOrderTransaction::class);
+
+                // LedgerAccountTransactions
+                Route::get('/ledger-account-transactions/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', LedgerAccountTransaction::class);
+                Route::get('/ledger-account-transactions', [BaseController::class, 'index'])
+                    ->defaults('model', LedgerAccountTransaction::class);
+                Route::post('/ledger-account-transactions', CreateLedgerAccountTransaction::class);
+                Route::put('/ledger-account-transactions', UpdateLedgerAccountTransaction::class);
+                Route::delete('/ledger-account-transactions/{id}', DeleteLedgerAccountTransaction::class);
 
                 // OrderTypes
                 Route::get('/order-types/{id}', [BaseController::class, 'show'])->defaults('model', OrderType::class);

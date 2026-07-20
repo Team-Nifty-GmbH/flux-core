@@ -121,6 +121,8 @@ class OrderForm extends FluxForm
 
     public ?string $payment_discount_target_date = null;
 
+    public ?string $payment_purpose_pattern = null;
+
     public ?int $payment_reminder_current_level = null;
 
     public ?int $payment_reminder_days_1 = null;

@@ -30,12 +30,7 @@ class ImapMailSyncDriver implements MailSyncDriver, ReportsSyncProgress
 
         $builder->fetchAndStore();
 
-        $builder
-            ->reset()
-            ->unseen()
-            ->withoutBody()
-            ->fetch()
-            ->syncReadStatus();
+        $builder->syncReadStatus();
     }
 
     public function testConnection(MailAccount $account): bool
