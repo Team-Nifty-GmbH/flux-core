@@ -261,6 +261,10 @@ class CreateMailExecutedSubscriber
     protected function matchesTenantDomain(Tenant $tenant, string $domain): bool
     {
         foreach ([$tenant->email, $tenant->website] as $value) {
+            if (blank($value)) {
+                continue;
+            }
+
             $tenantDomain = $this->normalizeDomain($value);
 
             // `website` is only validated as a string, so ignore anything without a dot
