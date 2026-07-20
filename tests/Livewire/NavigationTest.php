@@ -98,7 +98,7 @@ test('navigation cache is invalidated when user permissions change', function ()
 });
 
 test('renders the sub menu notification badge for dotted route names', function (): void {
-    createNavigationNotification('accounting.payment-reminders');
+    createNavigationNotification('accounting.payment-reminder-run');
 
     Livewire::actingAs($this->user)
         ->test(Navigation::class)
