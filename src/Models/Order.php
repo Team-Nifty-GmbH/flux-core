@@ -56,6 +56,7 @@ use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
+use FluxErp\View\Printing\Order\ProformaInvoice;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
@@ -1048,6 +1049,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
         return [
             'invoice' => Invoice::class,
             'final-invoice' => FinalInvoice::class,
+            'proforma-invoice' => ProformaInvoice::class,
             'offer' => Offer::class,
             'order-confirmation' => OrderConfirmation::class,
             'retoure' => Retoure::class,
@@ -1206,6 +1208,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                     [
                         'invoice' => Invoice::class,
                         'final-invoice' => FinalInvoice::class,
+                        'proforma-invoice' => ProformaInvoice::class,
                         'offer' => Offer::class,
                         'order-confirmation' => OrderConfirmation::class,
                         'retoure' => Retoure::class,
