@@ -114,45 +114,61 @@
             />
         </div>
         <div class="flex flex-col gap-4">
-            <template
-                x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles"
-            >
-                <x-card class="px-0! py-0!" x-show="!file.shouldDelete" x-cloak>
-                    <div class="flex items-center justify-between text-sm">
-                        <div class="flex w-0 flex-1 items-center gap-1.5">
-                            <div class="shrink-0 rounded-md object-contain">
-                                <img
-                                    x-bind:src="
-                                        file.preview_url
-                                            ? file.preview_url
-                                            : '#'
-                                    "
-                                    class="h-16 w-16 rounded-md object-cover"
-                                    alt=""
-                                />
+            <div class="flex flex-col gap-4" wire:ignore>
+                <template
+                    x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles"
+                    x-bind:key="file.id ?? file.temporary_filename ?? index"
+                >
+                    <div x-show="!file.shouldDelete" x-cloak>
+                        <x-card class="px-0! py-0!">
+                            <div
+                                class="flex items-center justify-between text-sm"
+                            >
+                                <div
+                                    class="flex w-0 flex-1 items-center gap-1.5"
+                                >
+                                    <div
+                                        class="shrink-0 rounded-md object-contain"
+                                    >
+                                        <img
+                                            x-bind:src="
+                                                file.preview_url
+                                                    ? file.preview_url
+                                                    : '#'
+                                            "
+                                            class="h-16 w-16 rounded-md object-cover"
+                                            alt=""
+                                        />
+                                    </div>
+                                    <span
+                                        class="w-0 flex-1 truncate pl-1"
+                                        x-text="file.name"
+                                    ></span>
+                                </div>
+                                <template x-if="file.id">
+                                    <div>
+                                        <x-button
+                                            color="indigo"
+                                            icon="arrow-down-tray"
+                                            x-on:click="
+                                                file?.id &&
+                                                    $wire.download(file.id)
+                                            "
+                                        />
+                                    </div>
+                                </template>
+                                <div class="flex shrink-0 px-4">
+                                    <x-button
+                                        color="red"
+                                        x-on:click="file.shouldDelete = true"
+                                        :text="__('Delete')"
+                                    />
+                                </div>
                             </div>
-                            <span
-                                class="w-0 flex-1 truncate pl-1"
-                                x-text="file.name"
-                            ></span>
-                        </div>
-                        <div x-cloak x-show="file.id">
-                            <x-button
-                                color="indigo"
-                                icon="arrow-down-tray"
-                                wire:click="download(file.id)"
-                            />
-                        </div>
-                        <div class="flex shrink-0 px-4">
-                            <x-button
-                                color="red"
-                                x-on:click="file.shouldDelete = true"
-                                :text="__('Delete')"
-                            />
-                        </div>
+                        </x-card>
                     </div>
-                </x-card>
-            </template>
+                </template>
+            </div>
             {{ $footer ?? '' }}
         </div>
     </div>

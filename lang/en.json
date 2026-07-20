@@ -166,6 +166,7 @@
     "products.serial-numbers.get": "View product serial numbers",
     "products.serial-numbers.{id?}.get": "View product serial number details",
     "products.{id}.get": "View product details",
+    "proforma-invoice": "Proforma invoice",
     "projects.get": "View projects",
     "projects.{id}.get": "View project details",
     "refund": "Refund",
