@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table): void {
-            $table->string('payment_purpose_pattern')->nullable()->after('iban');
+            $table->string('payment_purpose_pattern')->nullable()->after('bic');
         });
     }
 

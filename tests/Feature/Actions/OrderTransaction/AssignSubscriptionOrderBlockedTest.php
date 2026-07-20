@@ -30,11 +30,19 @@ test('transactions cannot be assigned to subscription orders', function (): void
     ]);
     $transaction = Transaction::factory()->create();
 
-    CreateOrderTransaction::make([
-        'transaction_id' => $transaction->getKey(),
-        'order_id' => $order->getKey(),
-        'amount' => 100,
-    ])
-        ->validate()
-        ->execute();
-})->throws(ValidationException::class);
+    try {
+        CreateOrderTransaction::make([
+            'transaction_id' => $transaction->getKey(),
+            'order_id' => $order->getKey(),
+            'amount' => 100,
+        ])
+            ->validate()
+            ->execute();
+
+        $this->fail('Expected the subscription order assignment to be rejected.');
+    } catch (ValidationException $e) {
+        expect($e->errors())->toHaveKey('order_id')
+            ->and($e->errors()['order_id'])
+            ->toContain('Transactions cannot be assigned to subscription orders.');
+    }
+});

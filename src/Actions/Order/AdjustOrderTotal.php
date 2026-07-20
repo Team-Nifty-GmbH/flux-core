@@ -73,26 +73,30 @@ class AdjustOrderTotal extends FluxAction
             || ! $order->createdFrom?->orderType?->order_type_enum?->isSubscription()
         ) {
             throw ValidationException::withMessages([
-                'id' => [__('Only generated subscription orders can be adjusted.')],
-            ])->errorBag('adjustOrderTotal');
+                'id' => ['Only generated subscription orders can be adjusted.'],
+            ])
+                ->errorBag('adjustOrderTotal');
         }
 
         if ($order->is_locked) {
             throw ValidationException::withMessages([
-                'id' => [__('Locked orders cannot be adjusted.')],
-            ])->errorBag('adjustOrderTotal');
+                'id' => ['Locked orders cannot be adjusted.'],
+            ])
+                ->errorBag('adjustOrderTotal');
         }
 
         if ($order->order_positions_count !== 1) {
             throw ValidationException::withMessages([
-                'id' => [__('Only orders with exactly one position can be adjusted.')],
-            ])->errorBag('adjustOrderTotal');
+                'id' => ['Only orders with exactly one position can be adjusted.'],
+            ])
+                ->errorBag('adjustOrderTotal');
         }
 
         if (bccomp($order->orderPositions()->value('amount') ?? 0, 0, 9) !== 1) {
             throw ValidationException::withMessages([
-                'id' => [__('Only orders with a positive position amount can be adjusted.')],
-            ])->errorBag('adjustOrderTotal');
+                'id' => ['Only orders with a positive position amount can be adjusted.'],
+            ])
+                ->errorBag('adjustOrderTotal');
         }
     }
 }

@@ -281,7 +281,8 @@ class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
         // prefer a purpose-pattern hit when several contracts share the creditor iban
         $contract = $matching->sortByDesc(
             fn (Order $contract) => $contract->payment_purpose_pattern ? 1 : 0
-        )->first();
+        )
+            ->first();
 
         return $contract
             ?->createdOrders()
