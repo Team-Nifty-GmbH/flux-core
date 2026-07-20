@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Accounting;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\UpdateOrderTransaction;
 use FluxErp\Livewire\Forms\LedgerAccountTransactionForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\OrderTransactionForm;
 use FluxErp\Livewire\Forms\TransactionForm;
 use FluxErp\Models\BankConnection;
@@ -14,9 +15,11 @@ use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Transaction;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -26,7 +29,9 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class TransactionAssignments extends Component
 {
-    use Actions, WithPagination;
+    use Actions, WithFileUploads, WithPagination;
+
+    public MediaUploadForm $attachment;
 
     public ?array $bankAccounts = null;
 
@@ -180,6 +185,21 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function attachmentModal(Transaction $transaction): void
+    {
+        $this->resetErrorBag();
+        $this->attachment->reset();
+        $this->attachment->fill($transaction->getFirstMedia('attachment') ?? []);
+        $this->attachment->model_type = $transaction->getMorphClass();
+        $this->attachment->model_id = $transaction->getKey();
+        $this->attachment->collection_name = 'attachment';
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('transaction-attachment-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function deleteLedgerAccountTransaction(LedgerAccountTransaction $ledgerAccountTransaction): void
     {
         $this->ledgerAccountTransactionForm->reset();
@@ -306,6 +326,7 @@ class TransactionAssignments extends Component
                         ->withPivot(['pivot_id', 'amount', 'exchange_rate', 'order_currency_amount', 'is_accepted']);
                 },
                 'ledgerAccountTransactions.ledgerAccount:id,name,number',
+                'media' => fn (MorphMany $query) => $query->where('collection_name', 'attachment'),
                 'orders.addressInvoice:id,name',
                 'orders.currency:id,iso,symbol',
                 'bankConnection:id,name,bank_name,iban',
@@ -324,6 +345,24 @@ class TransactionAssignments extends Component
                 return $transaction->toArray();
             })
             ->toArray();
+    }
+
+    #[Renderless]
+    public function saveAttachment(): bool
+    {
+        $this->resetErrorBag();
+
+        try {
+            $this->attachment->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->refreshTransactions();
+
+        return true;
     }
 
     #[Renderless]

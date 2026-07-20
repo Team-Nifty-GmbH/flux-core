@@ -13,6 +13,7 @@ use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Transaction;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -196,4 +197,58 @@ test('opening the ledger account modal resets a previous validation error', func
         ->assertHasErrors()
         ->call('assignLedgerAccountModal', $transaction)
         ->assertHasNoErrors();
+});
+
+test('saveAttachment stores a single attachment on the transaction', function (): void {
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('attachmentModal', $transaction)
+        ->set('attachment.file', [UploadedFile::fake()->image('receipt.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors();
+
+    expect($transaction->refresh()->getFirstMedia('attachment')?->file_name)->toBe('receipt.jpg');
+});
+
+test('uploading a second attachment replaces the first one', function (): void {
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('attachmentModal', $transaction)
+        ->set('attachment.file', [UploadedFile::fake()->image('first.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors()
+        ->call('attachmentModal', $transaction->refresh())
+        ->set('attachment.file', [UploadedFile::fake()->image('second.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors();
+
+    $media = $transaction->refresh()->getMedia('attachment');
+
+    expect($media)->toHaveCount(1)
+        ->and($media->first()->file_name)->toBe('second.jpg');
+});
+
+test('replacing a staged file before saving stores only the newly picked file', function (): void {
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('attachmentModal', $transaction)
+        ->set('attachment.file', [UploadedFile::fake()->image('wrong.jpg')])
+        ->set('attachment.stagedFiles.0.shouldDelete', true)
+        ->set('attachment.file', [UploadedFile::fake()->image('right.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors();
+
+    $media = $transaction->refresh()->getMedia('attachment');
+
+    expect($media)->toHaveCount(1)
+        ->and($media->first()->file_name)->toBe('right.jpg');
 });
