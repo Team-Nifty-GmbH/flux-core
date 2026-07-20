@@ -19,6 +19,7 @@
         'dark bg-secondary-800': darkTheme,
         'bg-slate-50': !darkTheme,
     }"
+    x-bind:data-color-scheme="darkTheme ? 'dark' : 'light'"
     class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
 >
     @section('wire.navigate.spinner')
