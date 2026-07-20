@@ -61,7 +61,8 @@ class CreateMailExecutedSubscriber
 
     public function createPurchaseInvoice(Communication $message): ?Collection
     {
-        $contact = $this->address?->contact;
+        // Mails from one of our own domains never originate from a supplier.
+        $contact = $this->isTenantDomain($message->from) ? null : $this->address?->contact;
 
         $created = [];
         foreach ($message->getMedia('attachments') as $attachment) {
@@ -238,6 +239,44 @@ class CreateMailExecutedSubscriber
         return [
             'action.executed: ' . resolve_static(CreateMailMessage::class, 'class') => 'handle',
         ];
+    }
+
+    protected function isTenantDomain(?string $from): bool
+    {
+        $domain = $this->normalizeDomain(Str::between($from ?? '', '<', '>'));
+
+        if (blank($domain)) {
+            return false;
+        }
+
+        return resolve_static(Tenant::class, 'query')
+            ->withoutEagerLoads()
+            ->get(['email', 'website'])
+            ->flatMap(fn (Tenant $tenant): array => [
+                $this->normalizeDomain($tenant->email),
+                $this->normalizeDomain($tenant->website),
+            ])
+            // `website` is only validated as a string, so drop anything without a dot
+            // to keep a stray value like "test" from matching every ".test" sender.
+            ->filter(fn (string $tenantDomain): bool => str_contains($tenantDomain, '.'))
+            ->contains(
+                fn (string $tenantDomain): bool => $domain === $tenantDomain
+                    || str_ends_with($domain, '.' . $tenantDomain)
+            );
+    }
+
+    protected function normalizeDomain(?string $value): string
+    {
+        return Str::of($value ?? '')
+            ->lower()
+            ->trim()
+            ->afterLast('@')
+            ->replaceMatches('#^[a-z][a-z\d+.-]*://#', '')
+            ->before('/')
+            ->before(':')
+            ->replaceMatches('#^www\.#', '')
+            ->trim('.')
+            ->value();
     }
 
     protected function stripQuotedReply(?string $body): ?string
