@@ -121,7 +121,7 @@ test('purchase invoice from mail message skips supplier on tenant domain', funct
 ): void {
     Event::fake('action.executed: ' . CreateMailMessage::class);
 
-    Tenant::factory()->create($tenantAttributes);
+    $tenant = Tenant::factory()->create($tenantAttributes);
 
     $contact = Contact::factory()->create();
     $address = Address::factory()->create([
@@ -158,6 +158,12 @@ test('purchase invoice from mail message skips supplier on tenant domain', funct
 
     expect($purchaseInvoice)->not->toBeNull()
         ->and($purchaseInvoice->contact_id)->toBe($expectsContact ? $contact->getKey() : null);
+
+    if (! $expectsContact) {
+        // The matching tenant owns the invoice, not the default tenant.
+        expect($purchaseInvoice->tenant_id)->toBe($tenant->getKey())
+            ->and($tenant->refresh()->is_default)->toBeFalse();
+    }
 })->with([
     'tenant email domain' => [['email' => 'buchhaltung@team-nifty.test'], 'team-nifty.test', false],
     'tenant website domain' => [['website' => 'https://www.team-nifty.test/impressum'], 'team-nifty.test', false],
