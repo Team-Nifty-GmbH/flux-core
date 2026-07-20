@@ -60,10 +60,10 @@ class Price extends FluxModel
             // materialized inherited copy for the same price list.
             if (! $price->is_inherited) {
                 resolve_static(static::class, 'query')
+                    ->whereKeyNot($price->getKey())
                     ->where('price_list_id', $price->price_list_id)
                     ->where('product_id', $price->product_id)
                     ->where('is_inherited', true)
-                    ->whereKeyNot($price->getKey())
                     ->get(['id'])
                     ->each
                     ->delete();
@@ -145,25 +145,6 @@ class Price extends FluxModel
         ];
     }
 
-    /**
-     * Resolve the child product ids that should receive inherited-price propagation
-     * for this price, or an empty array if any guard fails.
-     */
-    public function inheritableChildIds(): array
-    {
-        if ($this->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
-            return [];
-        }
-
-        $parent = resolve_static(Product::class, 'query')
-            ->whereKey($this->product_id)
-            ->whereNull('parent_id')
-            ->whereHas('children')
-            ->first(['id']);
-
-        return $parent?->children()->pluck('id')->all() ?? [];
-    }
-
     // Relations
     public function priceList(): BelongsTo
     {
@@ -192,6 +173,25 @@ class Price extends FluxModel
         }
 
         return $this->is_net ? $this->price : gross_to_net($this->price, $vat);
+    }
+
+    /**
+     * Resolve the child product ids that should receive inherited-price propagation
+     * for this price, or an empty array if any guard fails.
+     */
+    public function inheritableChildIds(): array
+    {
+        if ($this->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
+            return [];
+        }
+
+        $parent = resolve_static(Product::class, 'query')
+            ->whereKey($this->product_id)
+            ->whereNull('parent_id')
+            ->whereHas('children')
+            ->first(['id']);
+
+        return $parent?->children()->pluck('id')->all() ?? [];
     }
 
     // Attributes

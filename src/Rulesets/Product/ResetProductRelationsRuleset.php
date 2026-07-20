@@ -17,7 +17,8 @@ class ResetProductRelationsRuleset extends FluxRuleset
             'parent_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class])->whereNull('parent_id'),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'relations' => 'required|array|min:1',
             'relations.*.relation' => [
@@ -30,7 +31,8 @@ class ResetProductRelationsRuleset extends FluxRuleset
             'variant_ids.*' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class])->whereNotNull('parent_id'),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNotNull('parent_id'),
             ],
         ];
     }

@@ -17,7 +17,8 @@ class ResetProductFieldsRuleset extends FluxRuleset
             'parent_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class])->whereNull('parent_id'),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'fields' => 'required|array|min:1',
             'fields.*' => [
@@ -29,7 +30,8 @@ class ResetProductFieldsRuleset extends FluxRuleset
             'variant_ids.*' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class])->whereNotNull('parent_id'),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNotNull('parent_id'),
             ],
         ];
     }

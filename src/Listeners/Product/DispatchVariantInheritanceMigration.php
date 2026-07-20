@@ -21,11 +21,11 @@ class DispatchVariantInheritanceMigration
             return;
         }
 
-        $wasEnabled = (bool) data_get($event->originalValues, 'variant_inheritance_enabled', false);
+        $wasEnabled = (bool) data_get($event->originalValues, 'variant_inheritance_enabled');
         $isEnabled = (bool) $event->properties->get('variant_inheritance_enabled');
 
         if (! $wasEnabled && $isEnabled) {
-            MigrateProductVariantInheritanceJob::dispatch()
+            dispatch(app(MigrateProductVariantInheritanceJob::class))
                 ->afterCommit();
         }
     }

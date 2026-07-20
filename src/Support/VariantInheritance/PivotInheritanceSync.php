@@ -104,7 +104,7 @@ class PivotInheritanceSync
             ->where('is_inherited', true)
             ->when(
                 $parentKeys->isNotEmpty(),
-                fn (QueryBuilder $query) => $query->whereNotIn($relatedPivotKey, $parentKeys),
+                fn (QueryBuilder $query) => $query->whereIntegerNotInRaw($relatedPivotKey, $parentKeys),
             )
             ->delete();
 
@@ -114,16 +114,16 @@ class PivotInheritanceSync
 
         $ownedByKey = $scoped()
             ->whereIntegerInRaw($foreignPivotKey, $childIds)
-            ->where('is_inherited', false)
             ->whereIntegerInRaw($relatedPivotKey, $parentKeys)
+            ->where('is_inherited', false)
             ->get([$foreignPivotKey, $relatedPivotKey])
             ->groupBy($relatedPivotKey)
             ->map(fn (Collection $rows) => $rows->pluck($foreignPivotKey));
 
         $existingByKey = $scoped()
             ->whereIntegerInRaw($foreignPivotKey, $childIds)
-            ->where('is_inherited', true)
             ->whereIntegerInRaw($relatedPivotKey, $parentKeys)
+            ->where('is_inherited', true)
             ->get([$foreignPivotKey, $relatedPivotKey])
             ->groupBy($relatedPivotKey)
             ->map(fn (Collection $rows) => $rows->pluck($foreignPivotKey));
@@ -152,32 +152,34 @@ class PivotInheritanceSync
 
             if ($toInsertIds->isNotEmpty()) {
                 DB::table($pivotTable)->insert(
-                    $toInsertIds->map(function ($childId) use (
-                        $foreignPivotKey,
-                        $relatedPivotKey,
-                        $key,
-                        $extraColumns,
-                        $parentRow,
-                        $isMorph,
-                        $morphType,
-                        $morphClass
-                    ) {
-                        $row = [
-                            $foreignPivotKey => $childId,
-                            $relatedPivotKey => $key,
-                            'is_inherited' => true,
-                        ];
+                    $toInsertIds
+                        ->map(function ($childId) use (
+                            $foreignPivotKey,
+                            $relatedPivotKey,
+                            $key,
+                            $extraColumns,
+                            $parentRow,
+                            $isMorph,
+                            $morphType,
+                            $morphClass
+                        ) {
+                            $row = [
+                                $foreignPivotKey => $childId,
+                                $relatedPivotKey => $key,
+                                'is_inherited' => true,
+                            ];
 
-                        foreach ($extraColumns as $column) {
-                            $row[$column] = $parentRow->{$column};
-                        }
+                            foreach ($extraColumns as $column) {
+                                $row[$column] = $parentRow->{$column};
+                            }
 
-                        if ($isMorph) {
-                            $row[$morphType] = $morphClass;
-                        }
+                            if ($isMorph) {
+                                $row[$morphType] = $morphClass;
+                            }
 
-                        return $row;
-                    })->all()
+                            return $row;
+                        })
+                        ->all()
                 );
             }
         }

@@ -6,18 +6,32 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ResetProductRelationsRuleset;
 use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
+use FluxErp\Traits\Action\ValidatesVariantParentage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use LogicException;
+use Illuminate\Validation\ValidationException;
 
 class ResetProductRelations extends FluxAction
 {
+    use ValidatesVariantParentage;
+
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    /**
+     * Maps a HasMany relation to the column carrying the related id, so a reset can be
+     * narrowed down to a single related record.
+     */
+    protected static function relatedIdColumns(): array
+    {
+        return [
+            'prices' => 'price_list_id',
+        ];
     }
 
     protected function getRulesets(): string|array
@@ -70,15 +84,14 @@ class ResetProductRelations extends FluxAction
 
     protected function resetRelation(Product $parent, array $variantIds, string $relation, mixed $relatedId): int
     {
-        $relationInstance = resolve_static(Product::class, 'query')
-            ->whereKey($variantIds[0])
-            ->first(['id'])
-            ->{'own' . ucfirst($relation)}();
+        // The relation instance is only used for its metadata, so reuse the already
+        // loaded parent instead of querying a variant per relation.
+        $relationInstance = $parent->{'own' . ucfirst($relation)}();
 
         if ($relationInstance instanceof BelongsToMany) {
             $query = $relationInstance
                 ->newPivotStatement()
-                ->whereIn($relationInstance->getForeignPivotKeyName(), $variantIds)
+                ->whereIntegerInRaw($relationInstance->getForeignPivotKeyName(), $variantIds)
                 ->when(
                     $relationInstance instanceof MorphToMany,
                     fn (QueryBuilder $query) => $query
@@ -99,33 +112,63 @@ class ResetProductRelations extends FluxAction
             return $touched;
         }
 
-        if ($relationInstance instanceof HasMany) {
-            $query = $relationInstance->getRelated()::query()
-                ->whereIntegerInRaw($relationInstance->getForeignKeyName(), $variantIds)
-                ->when(
-                    ! is_null($relatedId),
-                    fn (Builder $query) => $query
-                        ->where($this->resolveRelatedIdColumn($relation), $relatedId)
-                );
+        // validateData() already rejected anything that is neither BelongsToMany nor HasMany.
+        $query = $relationInstance->getRelated()::query()
+            ->whereIntegerInRaw($relationInstance->getForeignKeyName(), $variantIds)
+            ->when(
+                ! is_null($relatedId),
+                fn (Builder $query) => $query
+                    ->where($this->resolveRelatedIdColumn($relation), $relatedId)
+            );
 
-            $touched = $query
-                ->clone()
-                ->distinct()
-                ->count($relationInstance->getForeignKeyName());
+        $touched = $query
+            ->clone()
+            ->distinct()
+            ->count($relationInstance->getForeignKeyName());
 
-            $query->delete();
+        $query->delete();
 
-            return $touched;
-        }
-
-        throw new LogicException('Unsupported relation type for reset: [' . $relation . '].');
+        return $touched;
     }
 
     protected function resolveRelatedIdColumn(string $relation): string
     {
-        return match ($relation) {
-            'prices' => 'price_list_id',
-            default => throw new LogicException('No related-id column mapping for [' . $relation . '].'),
-        };
+        return static::relatedIdColumns()[$relation];
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $this->validateVariantParentage('resetProductRelations');
+
+        $product = app(Product::class);
+
+        foreach ($this->getData('relations') as $index => $reset) {
+            $relation = data_get($reset, 'relation');
+            $relationInstance = $product->{'own' . ucfirst($relation)}();
+
+            if (! $relationInstance instanceof BelongsToMany && ! $relationInstance instanceof HasMany) {
+                throw ValidationException::withMessages([
+                    'relations.' . $index . '.relation' => [
+                        'Unsupported relation type for reset: [' . $relation . '].',
+                    ],
+                ])
+                    ->errorBag('resetProductRelations');
+            }
+
+            if (
+                ! is_null(data_get($reset, 'related_id'))
+                && $relationInstance instanceof HasMany
+                && ! array_key_exists($relation, static::relatedIdColumns())
+            ) {
+                throw ValidationException::withMessages([
+                    'relations.' . $index . '.related_id' => [
+                        'No related id column mapping for [' . $relation . '].',
+                    ],
+                ])
+                    ->errorBag('resetProductRelations');
+            }
+        }
     }
 }

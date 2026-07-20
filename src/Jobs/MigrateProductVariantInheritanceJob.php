@@ -24,10 +24,7 @@ use Illuminate\Support\Facades\Log;
  */
 class MigrateProductVariantInheritanceJob implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $batchSize = 500;
 

@@ -5,11 +5,13 @@ namespace FluxErp\Actions\Product;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ResetProductFieldsRuleset;
+use FluxErp\Traits\Action\ValidatesVariantParentage;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 class ResetProductFields extends FluxAction
 {
+    use ValidatesVariantParentage;
+
     public static function models(): array
     {
         return [Product::class];
@@ -32,7 +34,7 @@ class ResetProductFields extends FluxAction
         $variants = $parent->children()
             ->when(
                 $variantIds,
-                fn (Builder $query, array $ids) => $query->whereIntegerInRaw('id', $ids)
+                fn (Builder $query, array $ids) => $query->whereKey($ids)
             )
             ->where(function (Builder $query) use ($fields): void {
                 foreach ($fields as $field) {
@@ -49,15 +51,13 @@ class ResetProductFields extends FluxAction
                 return $remaining === [] ? '__null__' : json_encode($remaining);
             });
 
-            DB::transaction(function () use ($groups): void {
-                foreach ($groups as $shape => $rows) {
-                    resolve_static(Product::class, 'query')
-                        ->whereKey($rows->pluck('id')->all())
-                        ->update([
-                            'overridden_fields' => $shape === '__null__' ? null : json_decode($shape, true),
-                        ]);
-                }
-            });
+            foreach ($groups as $shape => $rows) {
+                resolve_static(Product::class, 'query')
+                    ->whereKey($rows->pluck('id')->all())
+                    ->update([
+                        'overridden_fields' => $shape === '__null__' ? null : json_decode($shape, true),
+                    ]);
+            }
 
             // Re-copy the parent's current values (and translations) onto the now
             // un-overridden variants so the materialized columns don't go stale.
@@ -71,5 +71,12 @@ class ResetProductFields extends FluxAction
         }
 
         return $variants->count();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $this->validateVariantParentage('resetProductFields');
     }
 }

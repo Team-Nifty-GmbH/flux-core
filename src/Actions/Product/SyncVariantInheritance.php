@@ -7,11 +7,18 @@ use FluxErp\Models\AttributeTranslation;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\SyncVariantInheritanceRuleset;
 use FluxErp\Settings\ProductSettings;
+use FluxErp\Traits\Action\ValidatesVariantParentage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 class SyncVariantInheritance extends DispatchableFluxAction
 {
+    use ValidatesVariantParentage;
+
+    // Internal propagation step, only reached through the actions, the model hooks and
+    // the migration job, which carry the user facing permission themselves.
+    protected static bool $hasPermission = false;
+
     public static function models(): array
     {
         return [Product::class];
@@ -136,13 +143,20 @@ class SyncVariantInheritance extends DispatchableFluxAction
         }
     }
 
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $this->validateVariantParentage('syncVariantInheritance');
+    }
+
     protected function variantQuery(Product $parent): Builder
     {
         return resolve_static(Product::class, 'query')
             ->where('parent_id', $parent->getKey())
             ->when(
                 $this->getData('variant_ids'),
-                fn (Builder $query, array $variantIds) => $query->whereIntegerInRaw('id', $variantIds)
+                fn (Builder $query, array $variantIds) => $query->whereKey($variantIds)
             );
     }
 }

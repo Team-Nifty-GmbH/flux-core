@@ -195,7 +195,7 @@ class UpdateProduct extends FluxAction
                 ->exists()
         ) {
             throw ValidationException::withMessages([
-                'is_variant_parent' => [__('Cannot demote to standalone: active variants still exist.')],
+                'is_variant_parent' => ['Cannot demote to standalone: active variants still exist.'],
             ])
                 ->errorBag('updateProduct');
         }
@@ -214,7 +214,7 @@ class UpdateProduct extends FluxAction
             if ($product?->children()->exists()) {
                 throw ValidationException::withMessages([
                     'parent_id' => [
-                        __('A product with existing variants cannot itself become a variant.'),
+                        'A product with existing variants cannot itself become a variant.',
                     ],
                 ])
                     ->errorBag('updateProduct');

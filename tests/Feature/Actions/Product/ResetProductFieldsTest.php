@@ -226,3 +226,31 @@ test('rejects when parent_id refers to a variant', function (): void {
         ->validate()
         ->execute();
 })->throws(ValidationException::class);
+
+test('rejects variant ids belonging to another parent', function (): void {
+    $parent = Product::factory()->create(['name' => 'Parent']);
+    $otherParent = Product::factory()->create(['name' => 'Other Parent']);
+    $foreignVariant = Product::factory()->create([
+        'parent_id' => $otherParent->getKey(),
+        'overridden_fields' => ['name'],
+    ]);
+    // The model recomputes overridden_fields on save, so capture what was persisted.
+    $overriddenBefore = $foreignVariant->fresh()->overridden_fields;
+
+    try {
+        ResetProductFields::make([
+            'parent_id' => $parent->getKey(),
+            'fields' => ['name'],
+            'variant_ids' => [$foreignVariant->getKey()],
+        ])
+            ->validate()
+            ->execute();
+
+        $this->fail('Expected the foreign variant to be rejected.');
+    } catch (ValidationException $e) {
+        expect($e->errors())->toHaveKey('variant_ids');
+    }
+
+    // The foreign variant must keep its overrides instead of being silently ignored.
+    expect($foreignVariant->fresh()->overridden_fields)->toBe($overriddenBefore);
+});

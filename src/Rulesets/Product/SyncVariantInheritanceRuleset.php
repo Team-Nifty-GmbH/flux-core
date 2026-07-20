@@ -17,7 +17,8 @@ class SyncVariantInheritanceRuleset extends FluxRuleset
             'parent_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class])->whereNull('parent_id'),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNull('parent_id'),
             ],
             'fields' => 'array|nullable',
             'fields.*' => [
@@ -29,7 +30,8 @@ class SyncVariantInheritanceRuleset extends FluxRuleset
             'variant_ids.*' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class])->whereNotNull('parent_id'),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->whereNotNull('parent_id'),
             ],
         ];
     }
