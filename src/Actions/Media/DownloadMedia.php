@@ -81,6 +81,14 @@ class DownloadMedia extends FluxAction
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);
         }
 
+        // A missing physical file otherwise surfaces as a 500 from response()->download().
+        if (! file_exists($media->getPath($this->getData('conversion') ?? ''))) {
+            throw ValidationException::withMessages([
+                'media' => 'File not found',
+            ])
+                ->status(404);
+        }
+
         parent::validateData();
 
         $this->data['id'] ??= $media?->getKey();
