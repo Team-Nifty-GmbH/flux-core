@@ -178,10 +178,48 @@
                 :label="__('Account Holder')"
             />
             <x-input x-model="$wire.$parent.order.iban" :label="__('IBAN')" />
-            <x-input
-                x-model="$wire.$parent.order.payment_purpose_pattern"
-                :label="__('Payment purpose pattern')"
-            />
+            <div x-data="{ patternMatches: [] }" class="flex flex-col gap-1.5">
+                <x-input
+                    x-model="$wire.$parent.order.payment_purpose_pattern"
+                    :label="__('Payment purpose contains')"
+                    :placeholder="__('e.g. Loan 0047123456')"
+                    :hint="__('Debits whose payment purpose contains this text are assigned to this contract. Case does not matter.')"
+                    x-on:input.debounce.500ms="
+                        const value = $event.target.value;
+                        const matches =
+                            await $wire.previewPaymentPurposePattern(value);
+
+                        // Only apply the response if the input has not changed since,
+                        // a slower earlier request must not override a newer one.
+                        if ($event.target.value === value) {
+                            patternMatches = matches;
+                        }
+                    "
+                />
+                <div x-cloak x-show="patternMatches.length > 0">
+                    <x-label :label="__('Matching recent debits')" />
+                    <div
+                        class="divide-y divide-gray-200 rounded-lg border border-gray-200 text-xs dark:divide-gray-700 dark:border-gray-700"
+                    >
+                        <template x-for="match in patternMatches">
+                            <div class="flex flex-col gap-0.5 p-2">
+                                <div class="flex justify-between font-medium">
+                                    <span
+                                        x-text="match.counterpart_name"
+                                    ></span>
+                                    <span x-text="match.amount"></span>
+                                </div>
+                                <div
+                                    class="flex justify-between text-gray-500 dark:text-gray-400"
+                                >
+                                    <span x-text="match.purpose"></span>
+                                    <span x-text="match.booking_date"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
             <x-input x-model="$wire.$parent.order.bic" :label="__('BIC')" />
             <x-input
                 x-model="$wire.$parent.order.bank_name"
