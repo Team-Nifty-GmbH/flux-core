@@ -4,6 +4,7 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Models\Product;
+use FluxErp\Models\VatRate;
 
 test('create product with defaults', function (): void {
     $product = CreateProduct::make([
@@ -57,4 +58,16 @@ test('delete product with children fails', function (): void {
     expect(fn () => DeleteProduct::make(['id' => $parent->getKey()])
         ->validate()->execute()
     )->toThrow(Illuminate\Validation\ValidationException::class);
+});
+
+test('create product rejects a purchase-only vat rate', function (): void {
+    $purchaseOnlyVatRate = VatRate::factory()->create([
+        'is_purchase' => true,
+        'is_sales' => false,
+    ]);
+
+    CreateProduct::assertValidationErrors([
+        'name' => 'Test Widget',
+        'vat_rate_id' => $purchaseOnlyVatRate->getKey(),
+    ], 'vat_rate_id');
 });

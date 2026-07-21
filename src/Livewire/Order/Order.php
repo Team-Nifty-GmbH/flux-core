@@ -159,6 +159,7 @@ class Order extends Component
                     ->get(['id', 'contact_id', 'iban'])
                     ?->toArray() ?? [],
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where($this->order->isPurchase ? 'is_purchase' : 'is_sales', true)
                     ->where('is_tax_exemption', true)
                     ->get(['id', 'name'])
                     ->toArray(),
