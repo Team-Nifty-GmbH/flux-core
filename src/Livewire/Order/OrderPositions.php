@@ -424,6 +424,7 @@ class OrderPositions extends OrderPositionList
             parent::getViewData(),
             [
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where($this->order->isPurchase ? 'is_purchase' : 'is_sales', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]

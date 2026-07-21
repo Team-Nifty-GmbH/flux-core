@@ -55,7 +55,8 @@ class CreateProductRuleset extends FluxRuleset
             'vat_rate_id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => VatRate::class]),
+                app(ModelExists::class, ['model' => VatRate::class])
+                    ->where('is_sales', true),
             ],
             'unit_id' => [
                 'integer',

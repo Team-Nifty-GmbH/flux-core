@@ -474,7 +474,10 @@ class Product extends Component
     #[Computed]
     public function vatRates(): array
     {
-        return app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
+        return resolve_static(VatRate::class, 'query')
+            ->where('is_sales', true)
+            ->get(['id', 'name', 'rate_percentage'])
+            ->toArray();
     }
 
     #[Computed(persist: true)]
