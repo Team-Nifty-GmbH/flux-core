@@ -15,6 +15,8 @@ use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTable\DataTableHasFormEdit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
@@ -93,6 +95,36 @@ class Accounting extends OrderTransactionList
         if (! $transaction) {
             $this->transactionForm->amount = $this->order->balance;
         }
+    }
+
+    #[Renderless]
+    public function previewPaymentPurposePattern(?string $pattern): array
+    {
+        if (blank($pattern)) {
+            return [];
+        }
+
+        // The matching job does a plain case-insensitive substring check, so the
+        // preview must treat LIKE wildcards in the input as literal characters.
+        $escaped = addcslashes(strtolower($pattern), '%_\\');
+
+        return resolve_static(Transaction::class, 'query')
+            ->whereRaw('LOWER(purpose) LIKE ?', ['%' . $escaped . '%'])
+            ->with('currency:id,iso')
+            ->latest('booking_date')
+            ->limit(5)
+            ->get(['id', 'currency_id', 'booking_date', 'amount', 'purpose', 'counterpart_name'])
+            ->map(fn (Transaction $transaction): array => [
+                'booking_date' => $transaction->booking_date?->format('d.m.Y'),
+                'amount' => Number::currency(
+                    (float) $transaction->amount,
+                    $transaction->currency?->iso ?? '',
+                    app()->getLocale()
+                ),
+                'counterpart_name' => $transaction->counterpart_name,
+                'purpose' => Str::limit((string) $transaction->purpose, 100),
+            ])
+            ->all();
     }
 
     #[Renderless]
