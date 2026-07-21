@@ -38,14 +38,8 @@
             value="ends_at"
             wire:model.live="schedule.end_radio"
         />
-        <div
-            x-cloak
-            x-show="$wire.schedule.end_radio === 'ends_at'"
-        >
-            <x-date
-                wire:model="schedule.ends_at"
-                timezone="UTC"
-            />
+        <div x-cloak x-show="$wire.schedule.end_radio === 'ends_at'">
+            <x-date wire:model="schedule.ends_at" timezone="UTC" />
         </div>
         <div class="flex items-end gap-1.5">
             <x-number
@@ -62,11 +56,14 @@
             />
         </div>
         @if (! is_null($order->balance) && ! is_null($order->contract_total_amount))
-            <x-alert color="indigo" :title="__('Remaining') . ': ' . \Illuminate\Support\Number::currency(
+            <x-alert
+                color="indigo"
+                :title="__('Remaining') . ': ' . \Illuminate\Support\Number::currency(
                 (float) $order->balance,
                 $order->currency?->iso ?? '',
                 app()->getLocale()
-            )" />
+            )"
+            />
         @endif
         <div class="flex items-center justify-between">
             <x-button
