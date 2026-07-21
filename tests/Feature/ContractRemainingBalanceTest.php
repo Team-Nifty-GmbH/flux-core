@@ -45,17 +45,21 @@ beforeEach(function (): void {
             'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
             'is_active' => true,
         ]);
+    // The auto created schedule resolves its target type via is_active + is_hidden,
+    // and the factory randomizes is_hidden, so pin it.
     $this->purchaseOrderType = OrderType::factory()
         ->hasAttached(factory: $this->tenant, relationship: 'tenants')
         ->create([
             'order_type_enum' => OrderTypeEnum::Purchase,
             'is_active' => true,
+            'is_hidden' => false,
         ]);
     $this->orderOrderType = OrderType::factory()
         ->hasAttached(factory: $this->tenant, relationship: 'tenants')
         ->create([
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
+            'is_hidden' => false,
         ]);
 
     $this->contract = Order::factory()->create([
