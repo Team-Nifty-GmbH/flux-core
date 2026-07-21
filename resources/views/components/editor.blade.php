@@ -66,9 +66,11 @@
                     @foreach ($buttonInstances as $buttonInstance)
                         @if ($buttonInstance instanceof \FluxErp\Contracts\EditorTooltipButton)
                             @if ($buttonInstance instanceof \Livewire\Component)
-                                <livewire:dynamic-component
-                                    :is="$buttonInstance::class"
-                                />
+                                @livewire(
+                                    $buttonInstance::class,
+                                    $buttonInstance instanceof \FluxErp\Contracts\HasEditorButtonCompanions ? ['editorId' => $id] : [],
+                                    key('editor-' . $id . '-tooltip-' . $loop->index)
+                                )
                             @else
                                 {!! $buttonInstance->render() !!}
                             @endif
@@ -87,7 +89,11 @@
         @foreach ($buttonInstances as $buttonInstance)
             @if ((! $tooltipDropdown || ! $buttonInstance instanceof \FluxErp\Contracts\EditorDropdownButton) && ! ($tooltipDropdown && $buttonInstance instanceof \FluxErp\Contracts\EditorTooltipButton))
                 @if ($buttonInstance instanceof \Livewire\Component)
-                    <livewire:dynamic-component :is="$buttonInstance::class" />
+                    @livewire(
+                        $buttonInstance::class,
+                        $buttonInstance instanceof \FluxErp\Contracts\HasEditorButtonCompanions ? ['editorId' => $id] : [],
+                        key('editor-' . $id . '-command-' . $loop->index)
+                    )
                 @else
                     {!! $buttonInstance->render() !!}
                 @endif
@@ -142,6 +148,18 @@
                     </div>
                 </template>
             @endif
+        @endif
+    @endforeach
+    @foreach ($buttonInstances as $buttonInstance)
+        @if ($buttonInstance instanceof \FluxErp\Contracts\HasEditorButtonCompanions)
+            @foreach ($buttonInstance->companions() as $companion)
+                @continue(! is_array($companion) || ! isset($companion['class']) || ! is_string($companion['class']))
+                @livewire(
+                    $companion['class'],
+                    is_array($companion['params'] ?? null) ? $companion['params'] : [],
+                    key('editor-' . $id . '-companion-' . $companion['class'] . '-' . $loop->parent->index . '-' . $loop->index)
+                )
+            @endforeach
         @endif
     @endforeach
 </div>
