@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Actions\Product\SyncVariantInheritance;
 use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
@@ -13,6 +14,7 @@ use FluxErp\Models\Pivots\ProductProductProperty;
 use FluxErp\Models\Pivots\ProductSupplier;
 use FluxErp\Models\Pivots\ProductTenant;
 use FluxErp\Support\Collection\ProductOptionCollection;
+use FluxErp\Support\VariantInheritance\PivotInheritanceSync;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
 use FluxErp\Traits\Model\Filterable;
@@ -25,6 +27,7 @@ use FluxErp\Traits\Model\HasTags;
 use FluxErp\Traits\Model\HasTenantAssignment;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InheritsFromParent;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
@@ -36,6 +39,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -43,7 +47,7 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 {
     use Categorizable, Commentable, Filterable, HasAttributeTranslations, HasFrontendAttributes, HasPackageFactory,
         HasParentChildRelations, HasSerialNumberRange, HasTags, HasTenantAssignment, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, SoftDeletes;
+        InheritsFromParent, InteractsWithMedia, LogsActivity, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -52,12 +56,104 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 
     protected ?string $detailRouteName = 'products.id';
 
+    protected array $inheritableFields = [
+        'cover_media_id',
+        'purchase_unit_id',
+        'reference_unit_id',
+        'unit_id',
+        'vat_rate_id',
+        'name',
+        'description',
+        'weight_gram',
+        'dimension_length_mm',
+        'dimension_width_mm',
+        'dimension_height_mm',
+        'selling_unit',
+        'basic_unit',
+        'time_unit_enum',
+        'customs_tariff_number',
+        'min_delivery_time',
+        'max_delivery_time',
+        'restock_time',
+        'seo_keywords',
+        'posting_account',
+        'has_serial_numbers',
+        'is_active_export_to_web_shop',
+        'is_highlight',
+        'is_nos',
+        'is_service',
+        'is_shipping_free',
+    ];
+
+    protected array $inheritableRelations = [
+        'categories',
+        'prices',
+        'productProperties',
+        'suppliers',
+    ];
+
     protected static function booted(): void
     {
         static::creating(function (Product $product): void {
             if (! $product->product_number) {
                 $product->getSerialNumber('product_number');
             }
+        });
+
+        static::created(function (Product $product): void {
+            if (! is_null($product->parent_id)) {
+                static::query()
+                    ->whereKey($product->parent_id)
+                    ->update(['is_variant_parent' => true]);
+
+                $parent = $product->parent()->first(['id', 'parent_id']);
+
+                // Inheritance is single-level: only top-level parents propagate.
+                if ($product->inheritanceEnabled() && $parent && is_null($parent->parent_id)) {
+                    // Materialize the parent's current field values, translations and
+                    // is_inherited relation copies onto the freshly created variant.
+                    SyncVariantInheritance::make([
+                        'parent_id' => $parent->getKey(),
+                        'variant_ids' => [$product->getKey()],
+                    ])
+                        ->validate()
+                        ->execute();
+
+                    resolve_static(PivotInheritanceSync::class, 'propagateToChildren', ['parent' => $parent]);
+
+                    $parent->ownPrices()
+                        ->get()
+                        ->each
+                        ->save();
+                }
+            }
+        });
+
+        static::saving(function (Product $product): void {
+            if ($product->isVariant() && $product->inheritanceEnabled()) {
+                $product->markOverridesForDirtyFields();
+            }
+        });
+
+        static::updated(function (Product $product): void {
+            if (! $product->inheritanceEnabled() || $product->isVariant()) {
+                return;
+            }
+
+            $fields = array_values(array_intersect(
+                array_keys($product->getDirty()),
+                $product->getInheritableFields()
+            ));
+
+            if ($fields === [] || ! $product->children()->exists()) {
+                return;
+            }
+
+            SyncVariantInheritance::dispatch([
+                'parent_id' => $product->getKey(),
+                'fields' => $fields,
+            ])
+                ->afterCommit();
         });
     }
 
@@ -101,14 +197,16 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'bundle_type_enum' => BundleTypeEnum::class,
             'time_unit_enum' => TimeUnitEnum::class,
             'search_aliases' => 'array',
+            'overridden_fields' => 'array',
+            'has_serial_numbers' => 'boolean',
             'is_active' => 'boolean',
-            'is_highlight' => 'boolean',
+            'is_active_export_to_web_shop' => 'boolean',
             'is_bundle' => 'boolean',
+            'is_highlight' => 'boolean',
+            'is_nos' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
-            'has_serial_numbers' => 'boolean',
-            'is_nos' => 'boolean',
-            'is_active_export_to_web_shop' => 'boolean',
+            'is_variant_parent' => 'boolean',
         ];
     }
 
@@ -140,9 +238,19 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         return $this->hasMany(OrderPosition::class);
     }
 
+    public function ownCategories(): MorphToMany
+    {
+        return $this->categories()->wherePivot('is_inherited', false);
+    }
+
     public function prices(): HasMany
     {
         return $this->hasMany(Price::class);
+    }
+
+    public function ownPrices(): HasMany
+    {
+        return $this->prices()->where('is_inherited', false);
     }
 
     public function productCrossSellings(): HasMany
@@ -164,7 +272,13 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             'product_id',
             'product_property_id'
         )
-            ->using(ProductProductProperty::class);
+            ->using(ProductProductProperty::class)
+            ->withPivot('value');
+    }
+
+    public function ownProductProperties(): BelongsToMany
+    {
+        return $this->productProperties()->wherePivot('is_inherited', false);
     }
 
     public function stockPostings(): HasMany
@@ -176,6 +290,11 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
     {
         return $this->belongsToMany(Contact::class, 'product_supplier')
             ->using(ProductSupplier::class);
+    }
+
+    public function ownSuppliers(): BelongsToMany
+    {
+        return $this->suppliers()->wherePivot('is_inherited', false);
     }
 
     public function tenants(): BelongsToMany

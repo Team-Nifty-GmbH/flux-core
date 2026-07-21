@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Settings\ProductSettings;
 use FluxErp\Traits\Model\HasFrontendAttributes;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasUserModification;
@@ -25,8 +26,6 @@ class Price extends FluxModel
 
     public ?string $discountPercentage = null;
 
-    public bool $isInherited = false;
-
     public ?string $rootDiscountFlat = null;
 
     public ?string $rootDiscountPercentage = null;
@@ -46,7 +45,6 @@ class Price extends FluxModel
         'discount_percentage',
         'root_discount_flat',
         'root_discount_percentage',
-        'is_inherited',
     ];
 
     protected $with = [
@@ -54,6 +52,86 @@ class Price extends FluxModel
         'product:id,vat_rate_id',
         'product.vatRate:id,rate_percentage',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (Price $price): void {
+            // A variant taking ownership through a direct price write supersedes its
+            // materialized inherited copy for the same price list.
+            if (! $price->is_inherited) {
+                resolve_static(static::class, 'query')
+                    ->whereKeyNot($price->getKey())
+                    ->where('price_list_id', $price->price_list_id)
+                    ->where('product_id', $price->product_id)
+                    ->where('is_inherited', true)
+                    ->get(['id'])
+                    ->each
+                    ->delete();
+            }
+
+            $childIds = $price->inheritableChildIds();
+
+            if (empty($childIds)) {
+                return;
+            }
+
+            $childIds = collect($childIds);
+
+            $rawPrice = $price->getAttributes()['price'];
+
+            $owningChildIds = resolve_static(static::class, 'query')
+                ->where('price_list_id', $price->price_list_id)
+                ->whereIntegerInRaw('product_id', $childIds)
+                ->where('is_inherited', false)
+                ->pluck('product_id');
+
+            $targetChildIds = $childIds->diff($owningChildIds)->values();
+
+            if ($targetChildIds->isEmpty()) {
+                return;
+            }
+
+            $existingInheritedChildIds = resolve_static(static::class, 'query')
+                ->where('price_list_id', $price->price_list_id)
+                ->whereIntegerInRaw('product_id', $targetChildIds)
+                ->where('is_inherited', true)
+                ->pluck('product_id');
+
+            if ($existingInheritedChildIds->isNotEmpty()) {
+                resolve_static(static::class, 'query')
+                    ->where('price_list_id', $price->price_list_id)
+                    ->whereIntegerInRaw('product_id', $existingInheritedChildIds)
+                    ->where('is_inherited', true)
+                    ->update(['price' => $rawPrice]);
+            }
+
+            $targetChildIds->diff($existingInheritedChildIds)
+                ->each(fn (int $childId) => resolve_static(static::class, 'query')
+                    ->create([
+                        'price_list_id' => $price->price_list_id,
+                        'product_id' => $childId,
+                        'price' => $rawPrice,
+                        'is_inherited' => true,
+                    ])
+                );
+        });
+
+        static::deleted(function (Price $price): void {
+            $childIds = $price->inheritableChildIds();
+
+            if (empty($childIds)) {
+                return;
+            }
+
+            resolve_static(static::class, 'query')
+                ->where('price_list_id', $price->price_list_id)
+                ->whereIntegerInRaw('product_id', $childIds)
+                ->where('is_inherited', true)
+                ->get(['id'])
+                ->each
+                ->delete();
+        });
+    }
 
     protected function casts(): array
     {
@@ -97,6 +175,25 @@ class Price extends FluxModel
         return $this->is_net ? $this->price : gross_to_net($this->price, $vat);
     }
 
+    /**
+     * Resolve the child product ids that should receive inherited-price propagation
+     * for this price, or an empty array if any guard fails.
+     */
+    public function inheritableChildIds(): array
+    {
+        if ($this->is_inherited || ! app(ProductSettings::class)->variant_inheritance_enabled) {
+            return [];
+        }
+
+        $parent = resolve_static(Product::class, 'query')
+            ->whereKey($this->product_id)
+            ->whereNull('parent_id')
+            ->whereHas('children')
+            ->first(['id']);
+
+        return $parent?->children()->pluck('id')->all() ?? [];
+    }
+
     // Attributes
     protected function appliedDiscounts(): Attribute
     {
@@ -137,13 +234,6 @@ class Price extends FluxModel
     {
         return Attribute::get(
             fn () => $this->getGross(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
-        );
-    }
-
-    protected function isInherited(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->isInherited
         );
     }
 

@@ -24,7 +24,7 @@ beforeEach(function (): void {
         ->for($this->vatRate)
         ->has(
             Price::factory()->state(['price_list_id' => $this->priceList->id]),
-            'prices'
+            'ownPrices'
         )
         ->create([
             'is_bundle' => false,

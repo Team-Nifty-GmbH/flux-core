@@ -17,6 +17,7 @@ use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
 
@@ -76,7 +77,12 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 ),
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class])
+                    ->where('is_variant_parent', false)
+                    ->whereDoesntHave(
+                        'children',
+                        fn (Builder $query) => $query->where('is_active', true)
+                    ),
             ],
             'supplier_contact_id' => [
                 'integer',
