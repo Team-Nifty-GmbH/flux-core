@@ -115,7 +115,7 @@ class Accounting extends OrderTransactionList
             ->limit(5)
             ->get(['id', 'currency_id', 'booking_date', 'amount', 'purpose', 'counterpart_name'])
             ->map(fn (Transaction $transaction): array => [
-                'booking_date' => $transaction->booking_date?->format('d.m.Y'),
+                'booking_date' => $transaction->booking_date?->isoFormat('L'),
                 'amount' => Number::currency(
                     (float) $transaction->amount,
                     $transaction->currency?->iso ?? '',

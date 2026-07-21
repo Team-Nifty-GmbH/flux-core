@@ -185,10 +185,15 @@
                     :placeholder="__('e.g. Loan 0047123456')"
                     :hint="__('Debits whose payment purpose contains this text are assigned to this contract. Case does not matter.')"
                     x-on:input.debounce.500ms="
-                        patternMatches =
-                            await $wire.previewPaymentPurposePattern(
-                                $event.target.value,
-                            )
+                        const value = $event.target.value;
+                        const matches =
+                            await $wire.previewPaymentPurposePattern(value);
+
+                        // Only apply the response if the input has not changed since,
+                        // a slower earlier request must not override a newer one.
+                        if ($event.target.value === value) {
+                            patternMatches = matches;
+                        }
                     "
                 />
                 <div x-cloak x-show="patternMatches.length > 0">
