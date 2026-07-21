@@ -806,8 +806,9 @@ class Order extends Component
         $cron = new CronExpression($schedule->cron_expression);
         $current = Carbon::parse($schedule->due_at ?? now());
         $cycles = $current->lessThanOrEqualTo($schedule->ends_at) ? 1 : 0;
+        $limit = 10000;
 
-        while ($cycles < 1200) {
+        while ($cycles < $limit) {
             $current = Carbon::instance($cron->getNextRunDate($current));
 
             if ($current->greaterThan($schedule->ends_at)) {
@@ -817,9 +818,18 @@ class Order extends Component
             $cycles++;
         }
 
-        $this->order->contract_total_amount = (float) bcmul(
+        if ($cycles >= $limit) {
+            $this->toast()
+                ->warning(__('Too many cycles until the end date, enter the total manually.'))
+                ->send();
+
+            return;
+        }
+
+        $this->order->contract_total_amount = bcmul(
             $cycles,
-            str_replace('-', '', (string) $this->order->total_gross_price ?: '0')
+            str_replace('-', '', (string) $this->order->total_gross_price ?: '0'),
+            2
         );
     }
 

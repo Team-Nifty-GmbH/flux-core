@@ -186,6 +186,44 @@ test('creating a subscription order auto creates a monthly schedule', function (
         ->and(data_get($schedule->cron, 'methods.basic'))->toBe('monthlyOn');
 });
 
+test('no schedule is created when the tenant has no matching target order type', function (): void {
+    $isolatedTenant = Tenant::factory()->create();
+    $isolatedSubscriptionType = OrderType::factory()
+        ->hasAttached(factory: $isolatedTenant, relationship: 'tenants')
+        ->create([
+            'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
+            'is_active' => true,
+        ]);
+    $isolatedContact = Contact::factory()
+        ->hasAttached(factory: $isolatedTenant, relationship: 'tenants')
+        ->create();
+    $isolatedAddress = Address::factory()->create([
+        'contact_id' => $isolatedContact->getKey(),
+        'is_main_address' => true,
+    ]);
+    $isolatedPaymentType = PaymentType::factory()
+        ->hasAttached(factory: $isolatedTenant, relationship: 'tenants')
+        ->create();
+
+    $order = CreateOrder::make([
+        'order_type_id' => $isolatedSubscriptionType->getKey(),
+        'contact_id' => $isolatedContact->getKey(),
+        'address_invoice_id' => $isolatedAddress->getKey(),
+        'tenant_id' => $isolatedTenant->getKey(),
+        'price_list_id' => $this->priceList->getKey(),
+        'payment_type_id' => $isolatedPaymentType->getKey(),
+        'currency_id' => $this->currency->getKey(),
+        'language_id' => $this->language->getKey(),
+    ])
+        ->validate()
+        ->execute();
+
+    expect(Schedule::query()
+        ->whereRelation('orders', 'orders.id', $order->getKey())
+        ->exists()
+    )->toBeFalse();
+});
+
 test('creating a non subscription order does not create a schedule', function (): void {
     $order = CreateOrder::make([
         'order_type_id' => $this->orderOrderType->getKey(),

@@ -83,6 +83,19 @@ class CreateOrder extends FluxAction
             ? OrderTypeEnum::Purchase->value
             : OrderTypeEnum::Order->value;
 
+        $generatedOrderTypeId = resolve_static(OrderType::class, 'query')
+            ->where('order_type_enum', $generatedOrderTypeEnum)
+            ->where('is_active', true)
+            ->where('is_hidden', false)
+            ->whereHasTenant($order->tenant_id)
+            ->value('id');
+
+        // Without a target type the schedule would run but never generate anything;
+        // leave it to the user in that case instead of creating a dead schedule.
+        if (is_null($generatedOrderTypeId)) {
+            return;
+        }
+
         CreateSchedule::make([
             'name' => ProcessSubscriptionOrder::name(),
             'cron' => [
@@ -102,12 +115,7 @@ class CreateOrder extends FluxAction
             'orders' => [$order->getKey()],
             'parameters' => [
                 'orderId' => $order->getKey(),
-                'orderTypeId' => resolve_static(OrderType::class, 'query')
-                    ->where('order_type_enum', $generatedOrderTypeEnum)
-                    ->where('is_active', true)
-                    ->where('is_hidden', false)
-                    ->whereHasTenant($order->tenant_id)
-                    ->value('id'),
+                'orderTypeId' => $generatedOrderTypeId,
             ],
         ])
             ->validate()
