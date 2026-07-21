@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\DownloadMediaRuleset;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
@@ -81,8 +82,11 @@ class DownloadMedia extends FluxAction
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);
         }
 
-        // A missing physical file otherwise surfaces as a 500 from response()->download().
-        if (! file_exists($media->getPath($this->getData('conversion') ?? ''))) {
+        // A missing file otherwise surfaces as a 500 from response()->download().
+        // Check through the disk, remote disks have no local path.
+        if (! Storage::disk($media->disk)->exists(
+            $media->getPathRelativeToRoot($this->getData('conversion') ?? '')
+        )) {
             throw ValidationException::withMessages([
                 'media' => 'File not found',
             ])
