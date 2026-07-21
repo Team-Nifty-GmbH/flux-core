@@ -152,6 +152,7 @@ class UpdateOrderRuleset extends FluxRuleset
             'header_discount' => 'numeric|min:0|nullable',
             'shipping_costs_net_price' => 'numeric|nullable',
             'margin' => 'sometimes|numeric|nullable',
+            'contract_total_amount' => 'numeric|nullable',
             'number_of_packages' => 'sometimes|integer|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|min:1',
             'payment_reminder_days_2' => 'sometimes|integer|min:1',

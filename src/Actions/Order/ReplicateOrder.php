@@ -79,6 +79,7 @@ class ReplicateOrder extends FluxAction
             $orderData['is_imported'],
             $orderData['is_confirmed'],
             $orderData['is_paid'],
+            $orderData['contract_total_amount'],
         );
 
         if (

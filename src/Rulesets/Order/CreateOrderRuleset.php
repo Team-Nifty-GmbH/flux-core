@@ -180,6 +180,7 @@ class CreateOrderRuleset extends FluxRuleset
             'header_discount' => 'numeric|min:0|nullable',
             'shipping_costs_net_price' => 'numeric|nullable',
             'margin' => 'numeric|nullable',
+            'contract_total_amount' => 'numeric|nullable',
             'number_of_packages' => 'integer|nullable',
             'payment_reminder_days_1' => 'integer|nullable|min:1',
             'payment_reminder_days_2' => 'integer|nullable|min:1',

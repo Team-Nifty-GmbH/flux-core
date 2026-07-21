@@ -49,6 +49,8 @@ class OrderForm extends FluxForm
 
     public ?int $contact_id = null;
 
+    public ?float $contract_total_amount = null;
+
     public ?string $created_at = null;
 
     public ?string $created_by = null;
