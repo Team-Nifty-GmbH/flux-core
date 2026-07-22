@@ -15,6 +15,7 @@ use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
@@ -31,6 +32,7 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\States\PaymentRun\NotSuccessful;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\Traits\HasStates;
@@ -1461,6 +1463,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->whereHas(
                 'orderType',
                 fn (Builder $query) => $query->whereIn('order_type_enum', $remindableOrderTypes)
+            )
+            // Direct debit invoices are collected by us, so they only become
+            // remindable once at least one debit run for them has failed.
+            ->where(fn (Builder $query) => $query
+                ->whereRelation('paymentType', 'is_direct_debit', false)
+                ->orWhereHas(
+                    'paymentRuns',
+                    fn (Builder $query) => $query
+                        ->where('payment_run_type_enum', PaymentRunTypeEnum::DirectDebit)
+                        ->where('state', NotSuccessful::$name)
+                )
             )
             ->whereHasMailablePaymentReminderAddress();
     }
