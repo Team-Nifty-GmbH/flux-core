@@ -6,6 +6,10 @@ use FluxErp\Actions\Language\UpdateLanguage;
 use FluxErp\Models\Language;
 
 test('create language', function (): void {
+    // The per-process seeded default language draws a random faker code and
+    // occasionally lands on 'fr', which the unique rule then rejects.
+    Language::query()->where('language_code', 'fr')->forceDelete();
+
     $language = CreateLanguage::make([
         'name' => 'Französisch',
         'iso_name' => 'French',
