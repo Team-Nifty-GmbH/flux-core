@@ -13,6 +13,7 @@ use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rules\UniqueInFieldDependence;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
@@ -152,7 +153,10 @@ class UpdateOrderRuleset extends FluxRuleset
             'header_discount' => 'numeric|min:0|nullable',
             'shipping_costs_net_price' => 'numeric|nullable',
             'margin' => 'sometimes|numeric|nullable',
-            'number_of_packages' => 'sometimes|integer|nullable',
+            'contract_total_amount' => [
+                'nullable',
+                app(Numeric::class),
+            ],
             'payment_reminder_days_1' => 'sometimes|integer|min:1',
             'payment_reminder_days_2' => 'sometimes|integer|min:1',
             'payment_reminder_days_3' => 'sometimes|integer|min:1',
