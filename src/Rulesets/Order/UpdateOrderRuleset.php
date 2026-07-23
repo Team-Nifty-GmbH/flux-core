@@ -157,7 +157,6 @@ class UpdateOrderRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class),
             ],
-            'number_of_packages' => 'sometimes|integer|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|min:1',
             'payment_reminder_days_2' => 'sometimes|integer|min:1',
             'payment_reminder_days_3' => 'sometimes|integer|min:1',

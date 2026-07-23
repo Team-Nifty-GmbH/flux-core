@@ -1,7 +1,6 @@
 <?php
 
 use FluxErp\Actions\Order\AdjustOrderTotal;
-use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
@@ -14,7 +13,6 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Models\Schedule;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\VatRate;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -45,8 +43,7 @@ beforeEach(function (): void {
             'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
             'is_active' => true,
         ]);
-    // The auto created schedule resolves its target type via is_active + is_hidden,
-    // and the factory randomizes is_hidden, so pin it.
+    // The factory randomizes is_hidden; pin it so the target type stays deterministic.
     $this->purchaseOrderType = OrderType::factory()
         ->hasAttached(factory: $this->tenant, relationship: 'tenants')
         ->create([
@@ -164,86 +161,4 @@ test('contract total amount is rejected on non subscription orders', function ()
     } catch (ValidationException $e) {
         expect($e->errors())->toHaveKey('contract_total_amount');
     }
-});
-
-test('creating a subscription order auto creates a monthly schedule', function (): void {
-    $order = CreateOrder::make([
-        'order_type_id' => $this->purchaseSubscriptionOrderType->getKey(),
-        'contact_id' => $this->contact->getKey(),
-        'address_invoice_id' => $this->address->getKey(),
-        'tenant_id' => $this->tenant->getKey(),
-        'price_list_id' => $this->priceList->getKey(),
-        'payment_type_id' => $this->paymentType->getKey(),
-        'currency_id' => $this->currency->getKey(),
-        'language_id' => $this->language->getKey(),
-    ])
-        ->validate()
-        ->execute();
-
-    $schedule = Schedule::query()
-        ->whereRelation('orders', 'orders.id', $order->getKey())
-        ->where('class', ProcessSubscriptionOrder::class)
-        ->first();
-
-    expect($schedule)->not->toBeNull()
-        ->and($schedule->is_active)->toBeTrue()
-        ->and(data_get($schedule->cron, 'methods.basic'))->toBe('monthlyOn');
-});
-
-test('no schedule is created when the tenant has no matching target order type', function (): void {
-    $isolatedTenant = Tenant::factory()->create();
-    $isolatedSubscriptionType = OrderType::factory()
-        ->hasAttached(factory: $isolatedTenant, relationship: 'tenants')
-        ->create([
-            'order_type_enum' => OrderTypeEnum::PurchaseSubscription,
-            'is_active' => true,
-        ]);
-    $isolatedContact = Contact::factory()
-        ->hasAttached(factory: $isolatedTenant, relationship: 'tenants')
-        ->create();
-    $isolatedAddress = Address::factory()->create([
-        'contact_id' => $isolatedContact->getKey(),
-        'is_main_address' => true,
-    ]);
-    $isolatedPaymentType = PaymentType::factory()
-        ->hasAttached(factory: $isolatedTenant, relationship: 'tenants')
-        ->create();
-
-    $order = CreateOrder::make([
-        'order_type_id' => $isolatedSubscriptionType->getKey(),
-        'contact_id' => $isolatedContact->getKey(),
-        'address_invoice_id' => $isolatedAddress->getKey(),
-        'tenant_id' => $isolatedTenant->getKey(),
-        'price_list_id' => $this->priceList->getKey(),
-        'payment_type_id' => $isolatedPaymentType->getKey(),
-        'currency_id' => $this->currency->getKey(),
-        'language_id' => $this->language->getKey(),
-    ])
-        ->validate()
-        ->execute();
-
-    expect(Schedule::query()
-        ->whereRelation('orders', 'orders.id', $order->getKey())
-        ->exists()
-    )->toBeFalse();
-});
-
-test('creating a non subscription order does not create a schedule', function (): void {
-    $order = CreateOrder::make([
-        'order_type_id' => $this->orderOrderType->getKey(),
-        'contact_id' => $this->contact->getKey(),
-        'address_invoice_id' => $this->address->getKey(),
-        'tenant_id' => $this->tenant->getKey(),
-        'price_list_id' => $this->priceList->getKey(),
-        'payment_type_id' => $this->paymentType->getKey(),
-        'currency_id' => $this->currency->getKey(),
-        'language_id' => $this->language->getKey(),
-    ])
-        ->validate()
-        ->execute();
-
-    expect(Schedule::query()
-        ->whereRelation('orders', 'orders.id', $order->getKey())
-        ->exists()
-    )->toBeFalse();
 });

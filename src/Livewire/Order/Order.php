@@ -796,7 +796,15 @@ class Order extends Component
             ->where('class', ProcessSubscriptionOrder::class)
             ->first();
 
-        if (! $schedule?->ends_at || ! $schedule->cron_expression) {
+        if (is_null($schedule)) {
+            $this->toast()
+                ->warning(__('Create a schedule with an end date first.'))
+                ->send();
+
+            return;
+        }
+
+        if (! $schedule->ends_at || ! $schedule->cron_expression) {
             $this->toast()
                 ->warning(__('Set an end date on the schedule first.'))
                 ->send();

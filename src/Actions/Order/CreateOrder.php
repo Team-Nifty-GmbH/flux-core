@@ -3,9 +3,7 @@
 namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Actions\Schedule\CreateSchedule;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Contact;
@@ -67,59 +65,7 @@ class CreateOrder extends FluxAction
             $order->users()->sync($users);
         }
 
-        // A subscription without a schedule never generates anything, which nobody
-        // expects. Create a sensible monthly default right away; the contract view
-        // exposes it for editing.
-        if ($order->orderType?->order_type_enum?->isSubscription()) {
-            $this->createDefaultSchedule($order);
-        }
-
         return $order->refresh();
-    }
-
-    protected function createDefaultSchedule(Order $order): void
-    {
-        $generatedOrderTypeEnum = $order->orderType->order_type_enum === OrderTypeEnum::PurchaseSubscription
-            ? OrderTypeEnum::Purchase->value
-            : OrderTypeEnum::Order->value;
-
-        $generatedOrderTypeId = resolve_static(OrderType::class, 'query')
-            ->where('order_type_enum', $generatedOrderTypeEnum)
-            ->where('is_active', true)
-            ->where('is_hidden', false)
-            ->whereHasTenant($order->tenant_id)
-            ->value('id');
-
-        // Without a target type the schedule would run but never generate anything;
-        // leave it to the user in that case instead of creating a dead schedule.
-        if (is_null($generatedOrderTypeId)) {
-            return;
-        }
-
-        CreateSchedule::make([
-            'name' => ProcessSubscriptionOrder::name(),
-            'cron' => [
-                'methods' => [
-                    'basic' => 'monthlyOn',
-                    'dayConstraint' => null,
-                    'timeConstraint' => null,
-                ],
-                'parameters' => [
-                    'basic' => [1, '00:00'],
-                    'dayConstraint' => [],
-                    'timeConstraint' => [],
-                ],
-            ],
-            'due_at' => now()->addMonthNoOverflow()->startOfMonth(),
-            'is_active' => true,
-            'orders' => [$order->getKey()],
-            'parameters' => [
-                'orderId' => $order->getKey(),
-                'orderTypeId' => $generatedOrderTypeId,
-            ],
-        ])
-            ->validate()
-            ->execute();
     }
 
     protected function prepareForValidation(): void

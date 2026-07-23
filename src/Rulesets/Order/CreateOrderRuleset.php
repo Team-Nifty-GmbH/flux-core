@@ -184,7 +184,6 @@ class CreateOrderRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class),
             ],
-            'number_of_packages' => 'integer|nullable',
             'payment_reminder_days_1' => 'integer|nullable|min:1',
             'payment_reminder_days_2' => 'integer|nullable|min:1',
             'payment_reminder_days_3' => 'integer|nullable|min:1',
