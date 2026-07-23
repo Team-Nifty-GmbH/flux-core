@@ -59,10 +59,10 @@
             <x-alert
                 color="indigo"
                 :title="__('Remaining') . ': ' . \Illuminate\Support\Number::currency(
-                (float) $order->balance,
-                $order->currency?->iso ?? '',
-                app()->getLocale()
-            )"
+                    (float) $order->balance,
+                    $order->currency?->iso ?? '',
+                    app()->getLocale()
+                )"
             />
         @endif
         <div class="flex items-center justify-between">

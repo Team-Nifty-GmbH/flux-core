@@ -69,6 +69,7 @@ class ReplicateOrder extends FluxAction
             $orderData['state'],
             $orderData['payment_state'],
             $orderData['delivery_state'],
+            $orderData['contract_total_amount'],
             $orderData['payment_reminder_current_level'],
             $orderData['payment_reminder_next_date'],
             $orderData['invoice_number'],
@@ -79,7 +80,6 @@ class ReplicateOrder extends FluxAction
             $orderData['is_imported'],
             $orderData['is_confirmed'],
             $orderData['is_paid'],
-            $orderData['contract_total_amount'],
         );
 
         if (
