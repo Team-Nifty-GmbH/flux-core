@@ -134,6 +134,7 @@ return [
     'required_with_all' => ':Attribute muss ausgefüllt werden, wenn :values ausgefüllt wurde.',
     'required_without' => ':Attribute muss ausgefüllt werden, wenn :values nicht ausgefüllt wurde.',
     'required_without_all' => ':Attribute muss ausgefüllt werden, wenn keines der Felder :values ausgefüllt wurde.',
+    'resource_unavailable' => 'Die ausgewählte Ressource ist im gewählten Zeitraum nicht verfügbar.',
     'same' => ':Attribute und :other müssen übereinstimmen.',
     'size' => [
         'array' => ':Attribute muss genau :size Elemente haben.',

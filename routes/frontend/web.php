@@ -58,6 +58,8 @@ use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumberList;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
+use FluxErp\Livewire\Resource\ResourceList;
+use FluxErp\Livewire\Resource\ResourceView;
 use FluxErp\Livewire\Settings\AbsencePolicies;
 use FluxErp\Livewire\Settings\AbsenceTypes;
 use FluxErp\Livewire\Settings\AccountingSettings;
@@ -236,6 +238,12 @@ Route::middleware('web')
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
                         Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
                         Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
+                    });
+
+                Route::name('resources.')->prefix('resources')
+                    ->group(function (): void {
+                        Route::get('/', ResourceList::class)->name('resources');
+                        Route::get('/{id?}', ResourceView::class)->where('id', '[0-9]+')->name('id?');
                     });
 
                 Route::name('human-resources.')->prefix('human-resources')
