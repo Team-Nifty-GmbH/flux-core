@@ -83,7 +83,7 @@ class PaymentReminderRun extends Component
             ->wherePaymentReminderDue()
             ->when(
                 $this->sentOrderIds,
-                fn (Builder $query, array $sentOrderIds) => $query->whereIntegerNotInRaw('id', $sentOrderIds)
+                fn (Builder $query, array $sentOrderIds) => $query->whereKeyNot($sentOrderIds)
             )
             ->when(
                 filled($this->filterLevel),
