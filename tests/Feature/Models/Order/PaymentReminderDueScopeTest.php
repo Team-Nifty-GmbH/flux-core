@@ -6,6 +6,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 
@@ -24,7 +25,9 @@ beforeEach(function (): void {
     ]);
     $this->paymentType = PaymentType::factory()
         ->hasAttached($this->dbTenant, relationship: 'tenants')
-        ->create();
+        ->create([
+            'is_direct_debit' => false,
+        ]);
     $this->contact = $contact;
 
     $this->makeDueOrder = function (string $paymentState): Order {
@@ -87,4 +90,55 @@ test('open and partial paid orders remain in the dunning run', function (): void
 
     expect($dueIds)->toContain($open->getKey())
         ->and($dueIds)->toContain($partial->getKey());
+});
+
+test('direct debit orders are excluded until a debit has failed', function (): void {
+    $directDebitPaymentType = PaymentType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create([
+            'is_direct_debit' => true,
+        ]);
+
+    $order = ($this->makeDueOrder)('open');
+    $order->update(['payment_type_id' => $directDebitPaymentType->getKey()]);
+
+    expect(Order::query()->wherePaymentReminderDue()->whereKey($order->getKey())->exists())->toBeFalse();
+});
+
+test('direct debit orders with a failed debit run are included', function (): void {
+    $directDebitPaymentType = PaymentType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create([
+            'is_direct_debit' => true,
+        ]);
+
+    $order = ($this->makeDueOrder)('open');
+    $order->update(['payment_type_id' => $directDebitPaymentType->getKey()]);
+
+    $failedRun = PaymentRun::query()->create([
+        'payment_run_type_enum' => 'direct_debit',
+        'state' => 'not_successful',
+    ]);
+    $order->paymentRuns()->attach($failedRun->getKey(), ['amount' => 100]);
+
+    expect(Order::query()->wherePaymentReminderDue()->whereKey($order->getKey())->exists())->toBeTrue();
+});
+
+test('direct debit orders with only successful debit runs stay excluded', function (): void {
+    $directDebitPaymentType = PaymentType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create([
+            'is_direct_debit' => true,
+        ]);
+
+    $order = ($this->makeDueOrder)('open');
+    $order->update(['payment_type_id' => $directDebitPaymentType->getKey()]);
+
+    $successfulRun = PaymentRun::query()->create([
+        'payment_run_type_enum' => 'direct_debit',
+        'state' => 'successful',
+    ]);
+    $order->paymentRuns()->attach($successfulRun->getKey(), ['amount' => 100]);
+
+    expect(Order::query()->wherePaymentReminderDue()->whereKey($order->getKey())->exists())->toBeFalse();
 });

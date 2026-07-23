@@ -31,6 +31,14 @@ class PaymentReminderRun extends Component
     /** Editable recipient email per group, keyed by group key. */
     public array $recipientEmails = [];
 
+    /**
+     * Orders whose reminders were dispatched in this session. The sends run as a
+     * queued batch, so the database still lists them as due when the component
+     * reloads; hide them optimistically instead of forcing a manual reload.
+     */
+    #[Locked]
+    public array $sentOrderIds = [];
+
     public ?string $filterLevel = null;
 
     public ?string $search = null;
@@ -73,6 +81,10 @@ class PaymentReminderRun extends Component
 
         $orders = resolve_static(Order::class, 'query')
             ->wherePaymentReminderDue()
+            ->when(
+                $this->sentOrderIds,
+                fn (Builder $query, array $sentOrderIds) => $query->whereKeyNot($sentOrderIds)
+            )
             ->when(
                 filled($this->filterLevel),
                 fn (Builder $query) => $query->where(
@@ -191,7 +203,10 @@ class PaymentReminderRun extends Component
         $groupIds = array_column($group['orders'], 'id');
         $orderIds = array_values(array_intersect($groupIds, $this->selectedOrders)) ?: $groupIds;
 
-        $this->sendBundle($orderIds);
+        if ($this->sendBundle($orderIds)) {
+            $this->markAsSent($orderIds);
+        }
+
         $this->loadData();
     }
 
@@ -201,7 +216,10 @@ class PaymentReminderRun extends Component
             return;
         }
 
-        $this->sendBundle($this->selectedOrders);
+        if ($this->sendBundle($this->selectedOrders)) {
+            $this->markAsSent($this->selectedOrders);
+        }
+
         $this->loadData();
     }
 
@@ -221,10 +239,23 @@ class PaymentReminderRun extends Component
             : array_values(array_unique(array_merge($this->selectedOrders, $groupIds)));
     }
 
-    protected function sendBundle(array $orderIds): void
+    protected function markAsSent(array $orderIds): void
+    {
+        $this->sentOrderIds = array_values(array_unique(array_merge(
+            $this->sentOrderIds,
+            array_map('intval', $orderIds)
+        )));
+
+        $this->selectedOrders = array_values(array_diff(
+            $this->selectedOrders,
+            array_map('strval', $orderIds)
+        ));
+    }
+
+    protected function sendBundle(array $orderIds): bool
     {
         if (! $orderIds) {
-            return;
+            return false;
         }
 
         $orderIds = array_map('intval', $orderIds);
@@ -255,7 +286,11 @@ class PaymentReminderRun extends Component
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
+
+            return false;
         }
+
+        return true;
     }
 
     protected function sortGroups(Collection $groups): Collection
