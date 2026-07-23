@@ -13,6 +13,23 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
+use FluxErp\RuleEngine\ConditionRegistry;
+use FluxErp\RuleEngine\Conditions\AndContainerCondition;
+use FluxErp\RuleEngine\Conditions\CartAmountCondition;
+use FluxErp\RuleEngine\Conditions\CartHasCategoryCondition;
+use FluxErp\RuleEngine\Conditions\CartHasProductCondition;
+use FluxErp\RuleEngine\Conditions\CartLineItemCountCondition;
+use FluxErp\RuleEngine\Conditions\ContactCondition;
+use FluxErp\RuleEngine\Conditions\ContactCustomFieldCondition;
+use FluxErp\RuleEngine\Conditions\ContactDiscountGroupCondition;
+use FluxErp\RuleEngine\Conditions\DateRangeCondition;
+use FluxErp\RuleEngine\Conditions\DayOfWeekCondition;
+use FluxErp\RuleEngine\Conditions\LineItemQuantityCondition;
+use FluxErp\RuleEngine\Conditions\OrContainerCondition;
+use FluxErp\RuleEngine\Conditions\PriceListCondition;
+use FluxErp\RuleEngine\Conditions\ProductCategoryCondition;
+use FluxErp\RuleEngine\Conditions\ProductCustomFieldCondition;
+use FluxErp\RuleEngine\Conditions\TimeRangeCondition;
 use FluxErp\Support\MediaLibrary\UrlGenerator;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Support\DeferrableProvider;
@@ -29,6 +46,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
             'datatype.registry',
             DefaultUrlGenerator::class,
             StatefulGuard::class,
+            ConditionRegistry::class,
         ];
     }
 
@@ -60,5 +78,29 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
         });
 
         $this->app->alias(Registry::class, 'datatype.registry');
+
+        $this->app->singleton(ConditionRegistry::class, function (): ConditionRegistry {
+            $registry = new ConditionRegistry();
+            $registry->register([
+                AndContainerCondition::class,
+                CartAmountCondition::class,
+                CartHasCategoryCondition::class,
+                CartHasProductCondition::class,
+                CartLineItemCountCondition::class,
+                ContactCondition::class,
+                ContactCustomFieldCondition::class,
+                ContactDiscountGroupCondition::class,
+                DateRangeCondition::class,
+                DayOfWeekCondition::class,
+                LineItemQuantityCondition::class,
+                OrContainerCondition::class,
+                PriceListCondition::class,
+                ProductCategoryCondition::class,
+                ProductCustomFieldCondition::class,
+                TimeRangeCondition::class,
+            ]);
+
+            return $registry;
+        });
     }
 }

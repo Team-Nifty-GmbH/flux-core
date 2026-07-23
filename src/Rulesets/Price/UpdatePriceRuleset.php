@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Price;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Rule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -23,6 +24,11 @@ class UpdatePriceRuleset extends FluxRuleset
             'product_id' => [
                 'integer',
                 app(ModelExists::class, ['model' => Product::class]),
+            ],
+            'rule_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Rule::class]),
             ],
             'price_list_id' => [
                 'integer',

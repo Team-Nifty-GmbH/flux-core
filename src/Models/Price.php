@@ -78,6 +78,11 @@ class Price extends FluxModel
         return $this->belongsTo(Product::class);
     }
 
+    public function rule(): BelongsTo
+    {
+        return $this->belongsTo(Rule::class);
+    }
+
     // Public methods
     public function getGross($vat): ?string
     {
