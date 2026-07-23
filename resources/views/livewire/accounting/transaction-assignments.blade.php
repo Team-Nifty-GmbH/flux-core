@@ -490,26 +490,16 @@
                                                     )
                                                 "
                                             ></span>
-                                            <x-dropdown icon="banknotes">
-                                                <div class="p-2">
-                                                    <b
-                                                        x-text="
-                                                            transaction
-                                                                .bank_connection
-                                                                .bank_name
-                                                        "
-                                                    ></b>
-                                                    <br />
-                                                    <span
-                                                        x-text="
-                                                            transaction
-                                                                .bank_connection
-                                                                .iban
-                                                        "
-                                                    ></span>
-                                                </div>
-                                            </x-dropdown>
                                         </div>
+                                        <div
+                                            class="flex w-full justify-end text-sm text-slate-400"
+                                            x-text="
+                                                transaction.bank_connection
+                                                    ?.name ??
+                                                transaction.bank_connection
+                                                    ?.bank_name
+                                            "
+                                        ></div>
                                     </div>
                                 </div>
                                 <div
