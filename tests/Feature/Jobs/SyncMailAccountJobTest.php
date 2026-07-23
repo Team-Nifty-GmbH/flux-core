@@ -9,6 +9,9 @@ use FluxErp\Mail\MailDriverManager;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Traits\IsMonitored;
+use Illuminate\Bus\UniqueLock;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Support\Facades\Cache;
 
 test('sync mail account job is monitored', function (): void {
     expect(is_a(SyncMailAccountJob::class, ShouldBeMonitored::class, true))->toBeTrue()
@@ -27,6 +30,30 @@ test('sync mail account job name contains the account email', function (): void 
 
 test('imap mail sync driver reports sync progress', function (): void {
     expect(is_a(ImapMailSyncDriver::class, ReportsSyncProgress::class, true))->toBeTrue();
+});
+
+test('sync mail account job keeps its unique lock scoped per account and bounded', function (): void {
+    expect(is_a(SyncMailAccountJob::class, ShouldBeUnique::class, true))->toBeTrue();
+
+    $first = MailAccount::factory()->create();
+    $second = MailAccount::factory()->create();
+
+    expect((new SyncMailAccountJob($first))->uniqueId())
+        ->not->toBe((new SyncMailAccountJob($second))->uniqueId())
+        ->and((new SyncMailAccountJob($first))->uniqueFor())->toBeGreaterThan(0);
+});
+
+test('sync mail account job releases its unique lock after the timeout so a killed run cannot block the account forever', function (): void {
+    $account = MailAccount::factory()->create();
+    $job = new SyncMailAccountJob($account);
+    $lock = new UniqueLock(Cache::store());
+
+    expect($lock->acquire($job))->toBeTrue()
+        ->and($lock->acquire($job))->toBeFalse();
+
+    $this->travel($job->uniqueFor() + 1)->seconds();
+
+    expect($lock->acquire($job))->toBeTrue();
 });
 
 test('sync mail account job passes a progress callback to the driver', function (): void {
