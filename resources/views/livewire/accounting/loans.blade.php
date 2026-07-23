@@ -1,10 +1,6 @@
 <x-modal id="edit-loan-modal" :title="__('Loan')" size="xl">
     <div class="flex flex-col gap-1.5">
-        <x-input
-            wire:model="loan.name"
-            :label="__('Name')"
-            required
-        />
+        <x-input wire:model="loan.name" :label="__('Name')" required />
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
             <x-select.styled
                 :label="__('Contact')"
@@ -58,7 +54,9 @@
                 required
             >
                 @foreach (\FluxErp\Enums\RepaymentTypeEnum::cases() as $case)
-                    <option value="{{ $case->value }}">{{ __(\Illuminate\Support\Str::headline($case->value)) }}</option>
+                    <option value="{{ $case->value }}">
+                        {{ __(\Illuminate\Support\Str::headline($case->value)) }}
+                    </option>
                 @endforeach
             </x-select.native>
             <x-number
@@ -66,15 +64,9 @@
                 :label="__('Number Of Installments')"
                 step="1"
             />
-            <x-date
-                wire:model="loan.starts_at"
-                :label="__('Starts At')"
-            />
+            <x-date wire:model="loan.starts_at" :label="__('Starts At')" />
         </div>
-        <x-input
-            wire:model="loan.note"
-            :label="__('Note')"
-        />
+        <x-input wire:model="loan.note" :label="__('Note')" />
 
         @if ($installments)
             <div class="mt-4">
@@ -93,9 +85,15 @@
                         <x-table.row>
                             <td>{{ $installment['sequence'] }}</td>
                             <td>{{ $installment['due_date'] }}</td>
-                            <td class="text-right">{{ number_format((float) $installment['principal_amount'], 2) }}</td>
-                            <td class="text-right">{{ number_format((float) $installment['interest_amount'], 2) }}</td>
-                            <td class="text-right">{{ number_format((float) $installment['remaining'], 2) }}</td>
+                            <td class="text-right">
+                                {{ number_format((float) $installment['principal_amount'], 2) }}
+                            </td>
+                            <td class="text-right">
+                                {{ number_format((float) $installment['interest_amount'], 2) }}
+                            </td>
+                            <td class="text-right">
+                                {{ number_format((float) $installment['remaining'], 2) }}
+                            </td>
                             <td>
                                 <x-icon
                                     :name="$installment['is_paid'] ? 'check' : 'x-mark'"
