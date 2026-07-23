@@ -39,7 +39,29 @@ class LedgerAccount extends FluxModel
         ];
     }
 
+    // Public methods
+    public function calculateBookingBalance(): string
+    {
+        // Raw movement only: debits minus credits. Sign interpretation per account
+        // type is left to reporting, this returns the plain double-entry balance.
+        return bcsub(
+            (string) $this->debitBookings()->sum('amount'),
+            (string) $this->creditBookings()->sum('amount'),
+            2
+        );
+    }
+
     // Relations
+    public function creditBookings(): HasMany
+    {
+        return $this->hasMany(LedgerBooking::class, 'credit_ledger_account_id');
+    }
+
+    public function debitBookings(): HasMany
+    {
+        return $this->hasMany(LedgerBooking::class, 'debit_ledger_account_id');
+    }
+
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
