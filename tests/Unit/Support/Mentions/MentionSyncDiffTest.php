@@ -63,6 +63,6 @@ test('returns the delta of added rows', function (): void {
     );
     $result = app(MentionSync::class)->sync($source);
 
-    expect($result->added)->toHaveCount(1);
-    expect($result->added[0]['mention_target_id'])->toBe(2);
+    expect($result['added'])->toHaveCount(1);
+    expect($result['added'][0]['mention_target_id'])->toBe(2);
 });

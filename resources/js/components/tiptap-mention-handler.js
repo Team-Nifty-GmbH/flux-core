@@ -112,7 +112,7 @@ const buildMentionExtension = (name, char, types, element) => {
             char,
             items: async ({ query }) => {
                 const { data } = await axios.post('/search/mentionable', {
-                    q: query,
+                    query,
                     types,
                 });
 

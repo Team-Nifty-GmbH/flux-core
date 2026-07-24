@@ -10,25 +10,38 @@ use FluxErp\Models\User;
 use FluxErp\Notifications\MentionNotification;
 use FluxErp\Support\Mentions\MentionSync;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 
 class RecordsMentionsObserver
 {
-    public function __construct(private readonly MentionSync $sync) {}
+    public function __construct(protected readonly MentionSync $sync) {}
 
     public function saved(Model&MentionsContent $source): void
     {
         $result = $this->sync->sync($source);
 
-        foreach ($result->added as $row) {
+        foreach ($result['added'] as $row) {
             $this->dispatchForAddedRow($source, $row);
+        }
+
+        foreach ($result['removed'] as $mention) {
+            $this->unsubscribeForRemovedMention($source, $mention);
         }
     }
 
     public function deleted(Model&MentionsContent $source): void
     {
-        Mention::query()
+        $mentions = resolve_static(Mention::class, 'query')
             ->where('mention_source_type', $source->getMorphClass())
             ->where('mention_source_id', $source->getKey())
+            ->get();
+
+        foreach ($mentions as $mention) {
+            $this->unsubscribeForRemovedMention($source, $mention);
+        }
+
+        resolve_static(Mention::class, 'query')
+            ->whereKey($mentions->pluck('id'))
             ->delete();
     }
 
@@ -40,13 +53,19 @@ class RecordsMentionsObserver
         $type = $row['mention_type_enum'];
 
         if ($type === MentionTypeEnum::User) {
-            $notifiable = $this->resolveTarget($row)
-                ?? ($row['user_id'] ? User::query()->whereKey($row['user_id'])->first() : null);
+            $notifiable = $this->resolveTarget($row['mention_target_type'], $row['mention_target_id'])
+                ?? (
+                    $row['user_id']
+                        ? resolve_static(User::class, 'query')
+                            ->whereKey($row['user_id'])
+                            ->first()
+                        : null
+                );
 
             if ($notifiable && method_exists($notifiable, 'notify')) {
                 $notification = $source instanceof ProvidesMentionNotification
                     ? $source->mentionNotification()
-                    : new MentionNotification($source);
+                    : app(MentionNotification::class, ['source' => $source]);
 
                 $notifiable->notify($notification);
             }
@@ -58,43 +77,72 @@ class RecordsMentionsObserver
             return;
         }
 
-        $target = $this->resolveTarget($row);
-        if (! $target) {
-            return;
-        }
-
-        $creator = auth()->user();
-        $canMention = $creator
-            && method_exists($creator, 'can')
-            && $creator->can('mention', $target);
-
-        if (! $canMention) {
+        $target = $this->resolveTarget($row['mention_target_type'], $row['mention_target_id']);
+        if (! $target || ! $this->canMention($target)) {
             return;
         }
 
         if (method_exists($target, 'subscribeNotificationChannel')) {
             $target->subscribeNotificationChannel(
-                channel: method_exists($source, 'broadcastChannel')
-                    ? $source->broadcastChannel()
-                    : $source->getMorphClass() . '.' . $source->getKey(),
-                event: 'eloquent.created: ' . $source::class,
+                channel: $this->subscriptionChannel($source),
+                event: $this->subscriptionEvent($source),
             );
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $row
-     */
-    protected function resolveTarget(array $row): ?Model
+    protected function unsubscribeForRemovedMention(Model $source, Mention $mention): void
     {
-        if (! $row['mention_target_type']) {
+        if ($mention->mention_type_enum?->value !== MentionTypeEnum::Record) {
+            return;
+        }
+
+        $target = $this->resolveTarget($mention->mention_target_type, $mention->mention_target_id);
+
+        if ($target && method_exists($target, 'unsubscribeNotificationChannel')) {
+            $target->unsubscribeNotificationChannel(
+                $this->subscriptionChannel($source),
+                $this->subscriptionEvent($source),
+            );
+        }
+    }
+
+    protected function canMention(Model $target): bool
+    {
+        $creator = auth()->user();
+
+        if (! $creator || is_null(Gate::getPolicyFor($target))) {
+            return true;
+        }
+
+        return $creator->can('mention', $target);
+    }
+
+    protected function subscriptionChannel(Model $source): string
+    {
+        return method_exists($source, 'broadcastChannel')
+            ? $source->broadcastChannel()
+            : $source->getMorphClass() . '.' . $source->getKey();
+    }
+
+    protected function subscriptionEvent(Model $source): string
+    {
+        return method_exists($source, 'mentionSubscriptionEvent')
+            ? $source->mentionSubscriptionEvent()
+            : 'eloquent.created: ' . resolve_static($source::class, 'class');
+    }
+
+    protected function resolveTarget(?string $type, int|string|null $id): ?Model
+    {
+        if (! $type) {
             return null;
         }
 
-        $targetClass = function_exists('morphed_model') ? morphed_model($row['mention_target_type']) : null;
+        $targetClass = morphed_model($type);
 
         return $targetClass
-            ? $targetClass::query()->whereKey($row['mention_target_id'])->first()
+            ? $targetClass::query()
+                ->whereKey($id)
+                ->first()
             : null;
     }
 }

@@ -28,7 +28,7 @@ class MentionPillRefresher
         $recordsByKey = [];
         foreach ($idsByKey as $key => $ids) {
             $recordsByKey[$key] = resolve_static($types[$key], 'query')
-                ->whereKey(array_unique($ids))
+                ->whereKey($ids)
                 ->get()
                 ->keyBy(fn ($record) => $record->getKey());
         }

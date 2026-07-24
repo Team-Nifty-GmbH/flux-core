@@ -4,6 +4,7 @@ namespace FluxErp\Support\Mentions;
 
 use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Traits\Model\Mentionable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Throwable;
@@ -24,13 +25,13 @@ class MentionableTypeManager
 
     public function autoDiscover(): void
     {
-        if (! function_exists('get_models_with_trait')) {
-            return;
-        }
-
-        foreach (get_models_with_trait(Mentionable::class, fn (string $class): string => $class) as $class) {
+        foreach (Relation::morphMap() as $class) {
             try {
-                $this->register($class);
+                $class = resolve_static($class, 'class');
+
+                if (in_array(Mentionable::class, class_uses_recursive($class), true)) {
+                    $this->register($class);
+                }
             } catch (Throwable) {
                 // Don't throw exceptions on auto discovery
             }
@@ -42,6 +43,8 @@ class MentionableTypeManager
      */
     public function register(string $class): void
     {
+        $class = resolve_static($class, 'class');
+
         if (! in_array(Mentionable::class, class_uses_recursive($class), true)) {
             throw new InvalidArgumentException(
                 "The provided class '{$class}' does not use the Mentionable trait."
@@ -50,6 +53,8 @@ class MentionableTypeManager
 
         $key = $class::mentionTypeKey();
 
+        $this->unregister($key);
+
         if ($class::mentionType() === MentionTypeEnum::User) {
             $this->user[$key] = $class;
         } else {
@@ -57,9 +62,15 @@ class MentionableTypeManager
         }
     }
 
-    public function unregister(string $key): void
+    public function unregister(string $key, ?string $mentionType = null): void
     {
-        unset($this->record[$key], $this->user[$key]);
+        if (is_null($mentionType) || $mentionType === MentionTypeEnum::Record) {
+            unset($this->record[$key]);
+        }
+
+        if (is_null($mentionType) || $mentionType === MentionTypeEnum::User) {
+            unset($this->user[$key]);
+        }
     }
 
     /**

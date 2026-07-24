@@ -5,15 +5,14 @@ namespace FluxErp\Support\Mentions;
 use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Facades\MentionableType;
 use FluxErp\Models\User;
-use Illuminate\Support\Collection;
+use FluxErp\Support\Collection\UserCollection;
 
 class MentionParser
 {
     /**
-     * @param  Collection<int, object>  $members
      * @return array<int, array{type: string, user_id: ?int, mentionable_type: ?string, mentionable_id: ?int, raw: string}>
      */
-    public function parse(string $text, Collection $members): array
+    public function parse(string $text, UserCollection $members): array
     {
         $stripped = preg_replace('/```.*?```/s', '', $text) ?? $text;
         $stripped = preg_replace('/`[^`]*`/', '', $stripped) ?? $stripped;
@@ -24,6 +23,7 @@ class MentionParser
         $recordTypes = MentionableType::getRecordMentionableTypes();
         $userTypes = MentionableType::getUserMentionableTypes();
         $userKeys = array_keys($userTypes);
+        $userMorphKey = morph_alias(User::class);
 
         preg_match_all(
             '/(?<!\\\\)(?<![A-Za-z0-9._-])#([a-z][a-z0-9_]*):(\d+)/i',
@@ -44,7 +44,10 @@ class MentionParser
                 'mentionable_id' => (int) $matches[2][$index][0],
                 'raw' => $fullMatch[0],
             ];
-            $consumed[] = [$fullMatch[1], $fullMatch[1] + strlen($fullMatch[0])];
+            $consumed[] = [
+                $fullMatch[1],
+                $fullMatch[1] + strlen($fullMatch[0]),
+            ];
         }
 
         if ($userKeys !== []) {
@@ -65,12 +68,15 @@ class MentionParser
 
                 $out[] = [
                     'type' => MentionTypeEnum::User,
-                    'user_id' => ($userTypes[$key] ?? null) === User::class ? $id : null,
+                    'user_id' => ($userTypes[$key] ?? null) === resolve_static(User::class, 'class') ? $id : null,
                     'mentionable_type' => $key,
                     'mentionable_id' => $id,
                     'raw' => $fullMatch[0],
                 ];
-                $consumed[] = [$fullMatch[1], $fullMatch[1] + strlen($fullMatch[0])];
+                $consumed[] = [
+                    $fullMatch[1],
+                    $fullMatch[1] + strlen($fullMatch[0]),
+                ];
             }
         }
 
@@ -95,14 +101,26 @@ class MentionParser
 
             if (isset($byFirstname[$token])) {
                 foreach ($byFirstname[$token] as $member) {
-                    $out[] = $this->plain(MentionTypeEnum::User, (int) $member->id, $raw);
+                    $out[] = [
+                        'type' => MentionTypeEnum::User,
+                        'user_id' => (int) $member->id,
+                        'mentionable_type' => $userMorphKey,
+                        'mentionable_id' => (int) $member->id,
+                        'raw' => $raw,
+                    ];
                 }
 
                 continue;
             }
 
             if (isset($byCode[$token])) {
-                $out[] = $this->plain(MentionTypeEnum::User, (int) $byCode[$token]->id, $raw);
+                $out[] = [
+                    'type' => MentionTypeEnum::User,
+                    'user_id' => (int) $byCode[$token]->id,
+                    'mentionable_type' => $userMorphKey,
+                    'mentionable_id' => (int) $byCode[$token]->id,
+                    'raw' => $raw,
+                ];
             }
         }
 
@@ -121,19 +139,5 @@ class MentionParser
         }
 
         return false;
-    }
-
-    /**
-     * @return array{type: string, user_id: ?int, mentionable_type: ?string, mentionable_id: ?int, raw: string}
-     */
-    protected function plain(string $type, ?int $userId, string $raw): array
-    {
-        return [
-            'type' => $type,
-            'user_id' => $userId,
-            'mentionable_type' => $type === MentionTypeEnum::User ? morph_alias(User::class) : null,
-            'mentionable_id' => $userId,
-            'raw' => $raw,
-        ];
     }
 }

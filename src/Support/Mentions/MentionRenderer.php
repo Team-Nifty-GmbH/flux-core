@@ -4,16 +4,16 @@ namespace FluxErp\Support\Mentions;
 
 use FluxErp\Facades\MentionableType;
 use FluxErp\Models\User;
+use FluxErp\Support\Collection\UserCollection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 
 class MentionRenderer
 {
-    public function tokensToHtml(string $text, ?Collection $members = null): string
+    public function tokensToHtml(string $text, ?UserCollection $members = null): string
     {
         $text = $this->renderRecordTokens($text);
         $text = $this->renderExplicitUserTokens($text);
-        $text = $this->renderMemberTokens($text, $members ?? collect());
+        $text = $this->renderMemberTokens($text, $members ?? app(UserCollection::class));
 
         return $text;
     }
@@ -38,7 +38,7 @@ class MentionRenderer
         $recordsByKey = [];
         foreach ($idsByKey as $key => $ids) {
             $recordsByKey[$key] = resolve_static($types[$key], 'query')
-                ->whereKey(array_unique($ids))
+                ->whereKey($ids)
                 ->get()
                 ->keyBy(fn ($record) => $record->getKey());
         }
@@ -58,7 +58,7 @@ class MentionRenderer
                 }
 
                 $label = e($record->getMentionLabel());
-                $typeLabel = e($types[$key]::mentionTypeLabel());
+                $typeLabel = e(resolve_static($types[$key], 'mentionTypeLabel'));
                 $stateAttrs = $record->getMentionState()?->toPillAttributes() ?? '';
                 $url = $record->getMentionUrl();
 
@@ -112,7 +112,7 @@ class MentionRenderer
         $usersByKey = [];
         foreach ($idsByKey as $key => $ids) {
             $usersByKey[$key] = resolve_static($userTypes[$key], 'query')
-                ->whereKey(array_unique($ids))
+                ->whereKey($ids)
                 ->get()
                 ->keyBy(fn ($user) => $user->getKey());
         }
@@ -132,7 +132,7 @@ class MentionRenderer
         ) ?? $text;
     }
 
-    protected function renderMemberTokens(string $text, Collection $members): string
+    protected function renderMemberTokens(string $text, UserCollection $members): string
     {
         if ($members->isEmpty()) {
             return $text;

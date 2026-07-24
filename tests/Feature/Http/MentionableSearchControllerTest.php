@@ -23,7 +23,7 @@ test('returns mention candidates filtered by policy', function (): void {
     FixtureTicketPolicy::$allowedIds = [$allowed->getKey()];
 
     $this->actingAs($user, 'web')
-        ->postJson('/search/mentionable', ['q' => 'Test', 'types' => ['ticket']])
+        ->postJson('/search/mentionable', ['query' => 'Test', 'types' => ['ticket']])
         ->assertOk()
         ->assertJsonFragment(['token' => '#ticket:' . $allowed->getKey()])
         ->assertJsonMissing(['token' => '#ticket:' . $forbidden->getKey()]);
@@ -43,7 +43,7 @@ test('skips a mentionable type whose search throws without failing the request',
     FluxErp\Tests\Fixtures\ThrowingMentionFixture::register('throwing_fixture');
 
     $this->actingAs($admin, 'web')
-        ->postJson('/search/mentionable', ['q' => 'Findme', 'types' => ['ticket', 'throwing_fixture']])
+        ->postJson('/search/mentionable', ['query' => 'Findme', 'types' => ['ticket', 'throwing_fixture']])
         ->assertOk()
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
 });
@@ -52,7 +52,7 @@ test('returns 422 for unknown types', function (): void {
     $u = User::factory()->create();
 
     $this->actingAs($u, 'web')
-        ->postJson('/search/mentionable', ['q' => 'x', 'types' => ['banana']])
+        ->postJson('/search/mentionable', ['query' => 'x', 'types' => ['banana']])
         ->assertStatus(422);
 });
 
@@ -69,7 +69,7 @@ test('combines results from multiple types', function (): void {
     ]);
 
     $this->actingAs($admin, 'web')
-        ->postJson('/search/mentionable', ['q' => 'Findme', 'types' => ['user', 'ticket']])
+        ->postJson('/search/mentionable', ['query' => 'Findme', 'types' => ['user', 'ticket']])
         ->assertOk()
         ->assertJsonCount(2);
 });
@@ -83,7 +83,7 @@ test('excludes inactive users from mention candidates', function (): void {
     User::factory()->create(['firstname' => 'Findus', 'is_active' => false]);
 
     $this->actingAs($admin, 'web')
-        ->postJson('/search/mentionable', ['q' => 'Findus', 'types' => ['user']])
+        ->postJson('/search/mentionable', ['query' => 'Findus', 'types' => ['user']])
         ->assertOk()
         ->assertJsonCount(1)
         ->assertJsonFragment(['token' => '@user:' . $active->getKey()]);
@@ -101,7 +101,7 @@ test('tags record results with a record kind', function (): void {
     FixtureTicketPolicy::$allowedIds = [$ticket->getKey()];
 
     $this->actingAs($user, 'web')
-        ->postJson('/search/mentionable', ['q' => 'Kindcheck', 'types' => ['ticket']])
+        ->postJson('/search/mentionable', ['query' => 'Kindcheck', 'types' => ['ticket']])
         ->assertOk()
         ->assertJsonFragment(['kind' => 'record', 'token' => '#ticket:' . $ticket->getKey()]);
 });
@@ -119,7 +119,7 @@ test('scopes the search to a single type via a type prefix', function (): void {
     ]);
 
     $this->actingAs($admin, 'web')
-        ->postJson('/search/mentionable', ['q' => 'ticket:Scopeme', 'types' => ['user', 'ticket']])
+        ->postJson('/search/mentionable', ['query' => 'ticket:Scopeme', 'types' => ['user', 'ticket']])
         ->assertOk()
         ->assertJsonCount(1)
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
@@ -137,7 +137,7 @@ test('matches the type prefix case-insensitively', function (): void {
     FixtureTicketPolicy::$allowedIds = [$ticket->getKey()];
 
     $this->actingAs($user, 'web')
-        ->postJson('/search/mentionable', ['q' => 'Ticket:Caseme', 'types' => ['user', 'ticket']])
+        ->postJson('/search/mentionable', ['query' => 'Ticket:Caseme', 'types' => ['user', 'ticket']])
         ->assertOk()
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
 });
@@ -154,7 +154,7 @@ test('treats an unknown type prefix as a normal query', function (): void {
     FixtureTicketPolicy::$allowedIds = [$ticket->getKey()];
 
     $this->actingAs($user, 'web')
-        ->postJson('/search/mentionable', ['q' => 'banana:Splitme', 'types' => ['ticket']])
+        ->postJson('/search/mentionable', ['query' => 'banana:Splitme', 'types' => ['ticket']])
         ->assertOk()
         ->assertJsonFragment(['token' => '#ticket:' . $ticket->getKey()]);
 });
@@ -163,7 +163,7 @@ test('returns type scope chips for an empty query with multiple types', function
     $user = User::factory()->create();
 
     $this->actingAs($user, 'web')
-        ->postJson('/search/mentionable', ['q' => '', 'types' => ['order', 'ticket']])
+        ->postJson('/search/mentionable', ['query' => '', 'types' => ['order', 'ticket']])
         ->assertOk()
         ->assertJsonFragment(['kind' => 'scope', 'scope_key' => 'ticket'])
         ->assertJsonFragment(['kind' => 'scope', 'scope_key' => 'order']);
@@ -173,7 +173,7 @@ test('does not return scope chips for a single-type empty query', function (): v
     $user = User::factory()->create();
 
     $this->actingAs($user, 'web')
-        ->postJson('/search/mentionable', ['q' => '', 'types' => ['user']])
+        ->postJson('/search/mentionable', ['query' => '', 'types' => ['user']])
         ->assertOk()
         ->assertJsonCount(0);
 });

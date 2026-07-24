@@ -3,6 +3,7 @@
 use FluxErp\Enums\MentionTypeEnum;
 use FluxErp\Support\Mentions\MentionParser;
 use FluxErp\Tests\Fixtures\MentionableFixture;
+use FluxErp\Support\Collection\UserCollection;
 use FluxErp\Tests\Fixtures\UserMentionableFixture;
 
 beforeEach(function (): void {
@@ -12,7 +13,7 @@ beforeEach(function (): void {
 test('parses #key:id record tokens', function (): void {
     MentionableFixture::register('ticket');
 
-    $result = $this->parser->parse('Schau #ticket:1234 an', collect());
+    $result = $this->parser->parse('Schau #ticket:1234 an', app(UserCollection::class));
 
     expect($result)->toHaveCount(1);
     expect($result[0]['type'])->toBe(MentionTypeEnum::Record);
@@ -23,7 +24,7 @@ test('parses #key:id record tokens', function (): void {
 test('parses #key:id as a record mention', function (): void {
     MentionableFixture::register('ticket');
 
-    $out = $this->parser->parse('see #ticket:7', collect());
+    $out = $this->parser->parse('see #ticket:7', app(UserCollection::class));
 
     expect($out)->toHaveCount(1);
     expect($out[0]['type'])->toBe(MentionTypeEnum::Record);
@@ -32,7 +33,7 @@ test('parses #key:id as a record mention', function (): void {
 });
 
 test('parses @user:id as an explicit user mention', function (): void {
-    $out = $this->parser->parse('hi @user:42', collect());
+    $out = $this->parser->parse('hi @user:42', app(UserCollection::class));
 
     expect($out)->toHaveCount(1);
     expect($out[0]['type'])->toBe(MentionTypeEnum::User);
@@ -44,7 +45,7 @@ test('parses @user:id as an explicit user mention', function (): void {
 test('parses multiple registered user types under their own keys', function (): void {
     UserMentionableFixture::register('agent');
 
-    $out = $this->parser->parse('hi @user:42 and @agent:7', collect());
+    $out = $this->parser->parse('hi @user:42 and @agent:7', app(UserCollection::class));
 
     $agent = collect($out)->firstWhere('mentionable_type', 'agent');
     expect($agent)->not->toBeNull();
@@ -59,13 +60,13 @@ test('parses multiple registered user types under their own keys', function (): 
 test('ignores #user:id (users are @, not #)', function (): void {
     MentionableFixture::register('ticket');
 
-    expect($this->parser->parse('nope #user:1', collect()))->toBe([]);
+    expect($this->parser->parse('nope #user:1', app(UserCollection::class)))->toBe([]);
 });
 
 test('parses @firstname user tokens via member scope', function (): void {
     $member = (object) ['id' => 42, 'firstname' => 'Martin', 'user_code' => 'MS'];
 
-    $result = $this->parser->parse('Hallo @martin', collect([$member]));
+    $result = $this->parser->parse('Hallo @martin', app(UserCollection::class, ['items' => [$member]]));
 
     expect($result)->toHaveCount(1);
     expect($result[0]['type'])->toBe(MentionTypeEnum::User);
@@ -74,7 +75,7 @@ test('parses @firstname user tokens via member scope', function (): void {
 
 test('ignores @here, @all and @channel outside a chat context', function (): void {
     foreach (['here', 'all', 'channel'] as $token) {
-        expect($this->parser->parse("@{$token}", collect()))->toBe([]);
+        expect($this->parser->parse("@{$token}", app(UserCollection::class)))->toBe([]);
     }
 });
 
@@ -83,7 +84,7 @@ test('ignores mentions inside code fences', function (): void {
 
     $text = "Normal #ticket:1\n```\n#ticket:2\n```\n#ticket:3";
 
-    $result = $this->parser->parse($text, collect());
+    $result = $this->parser->parse($text, app(UserCollection::class));
 
     expect(collect($result)->pluck('mentionable_id')->all())->toEqual([1, 3]);
 });
@@ -91,7 +92,7 @@ test('ignores mentions inside code fences', function (): void {
 test('ignores escaped \\# tokens', function (): void {
     MentionableFixture::register('ticket');
 
-    $result = $this->parser->parse('\\#ticket:1 ist nicht gemeint, aber #ticket:2 schon', collect());
+    $result = $this->parser->parse('\\#ticket:1 ist nicht gemeint, aber #ticket:2 schon', app(UserCollection::class));
 
     expect($result)->toHaveCount(1);
     expect($result[0]['mentionable_id'])->toBe(2);
@@ -101,7 +102,7 @@ test('does not double-parse a record token as a user token', function (): void {
     MentionableFixture::register('ticket');
     $member = (object) ['id' => 5, 'firstname' => 'ticket', 'user_code' => 'TKT'];
 
-    $result = $this->parser->parse('#ticket:1', collect([$member]));
+    $result = $this->parser->parse('#ticket:1', app(UserCollection::class, ['items' => [$member]]));
 
     expect($result)->toHaveCount(1);
     expect($result[0]['type'])->toBe(MentionTypeEnum::Record);

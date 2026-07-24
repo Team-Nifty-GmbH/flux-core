@@ -4,32 +4,35 @@ namespace FluxErp\Support\Mentions;
 
 use FluxErp\Contracts\MentionsContent;
 use FluxErp\Models\Mention;
+use FluxErp\Support\Collection\UserCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class MentionSync
 {
-    public function __construct(private readonly MentionParser $parser) {}
+    public function __construct(protected readonly MentionParser $parser) {}
 
     /**
-     * @return object{added: array<int, array<string, mixed>>, removed: Collection<int, Mention>}
+     * @return array{added: array<int, array<string, mixed>>, removed: Collection<int, Mention>}
      */
-    public function sync(Model&MentionsContent $source): object
+    public function sync(Model&MentionsContent $source): array
     {
         $text = $source->mentionScannableText();
 
         $members = method_exists($source, 'mentionableMembersScope')
-            ? ($source->mentionableMembersScope() ?? collect())
-            : collect();
+            ? ($source->mentionableMembersScope() ?? app(UserCollection::class))
+            : app(UserCollection::class);
 
         $parsed = $this->parser->parse($text, $members);
 
-        $existing = Mention::query()
+        $existing = resolve_static(Mention::class, 'query')
             ->where('mention_source_type', $source->getMorphClass())
             ->where('mention_source_id', $source->getKey())
             ->get();
 
-        $existingKeys = $existing->map(fn (Mention $mention) => $this->keyForExisting($mention))->all();
+        $existingKeys = $existing
+            ->map(fn (Mention $mention) => $this->keyForExisting($mention))
+            ->all();
         $parsedKeys = array_map(fn (array $parsedRow) => $this->keyForParsed($parsedRow), $parsed);
 
         $toCreate = [];
@@ -55,26 +58,25 @@ class MentionSync
         );
 
         if ($toDelete->isNotEmpty()) {
-            Mention::whereKey($toDelete->pluck('id'))->delete();
-        }
-        if ($toCreate !== []) {
-            Mention::insert($toCreate);
+            resolve_static(Mention::class, 'query')
+                ->whereKey($toDelete->pluck('id'))
+                ->delete();
         }
 
-        return (object) ['added' => $toCreate, 'removed' => $toDelete];
+        if ($toCreate !== []) {
+            resolve_static(Mention::class, 'query')->insert($toCreate);
+        }
+
+        return ['added' => $toCreate, 'removed' => $toDelete];
     }
 
     protected function keyForExisting(Mention $mention): string
     {
-        $type = is_object($mention->mention_type_enum)
-            ? $mention->mention_type_enum->value
-            : (string) ($mention->mention_type_enum ?? '');
-
         return implode('|', [
-            $type,
-            (string) ($mention->mention_target_type ?? ''),
-            (string) ($mention->mention_target_id ?? ''),
-            (string) ($mention->user_id ?? ''),
+            (string) $mention->mention_type_enum?->value,
+            (string) $mention->mention_target_type,
+            (string) $mention->mention_target_id,
+            (string) $mention->user_id,
         ]);
     }
 
@@ -85,9 +87,9 @@ class MentionSync
     {
         return implode('|', [
             $row['type'],
-            (string) ($row['mentionable_type'] ?? ''),
-            (string) ($row['mentionable_id'] ?? ''),
-            (string) ($row['user_id'] ?? ''),
+            (string) $row['mentionable_type'],
+            (string) $row['mentionable_id'],
+            (string) $row['user_id'],
         ]);
     }
 }

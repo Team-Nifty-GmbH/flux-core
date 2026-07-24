@@ -10,6 +10,7 @@ use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Pivots\TenantUser;
 use FluxErp\Models\Pivots\TicketUser;
+use FluxErp\Support\Collection\UserCollection;
 use FluxErp\Traits\Model\Calendar\HasCalendars;
 use FluxErp\Traits\Model\Calendar\HasCalendarUserSettings;
 use FluxErp\Traits\Model\Filterable;
@@ -31,12 +32,13 @@ use FluxErp\Traits\Model\TwoFactorAuthentication;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -121,7 +123,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         ];
     }
 
-    public static function searchMentionCandidates(string $query, int $limit = 5): Collection
+    public static function searchMentionCandidates(string $query, int $limit = 5): BaseCollection
     {
         $trimmed = trim($query);
         if ($trimmed === '') {
@@ -301,6 +303,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function guardName(): array
     {
         return static::guardNames();
+    }
+
+    public function newCollection(array $models = []): Collection
+    {
+        return app(UserCollection::class, ['items' => $models]);
     }
 
     /**

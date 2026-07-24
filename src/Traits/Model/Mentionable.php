@@ -63,7 +63,7 @@ trait Mentionable
     public function getMentionState(): ?MentionState
     {
         $column = $this->mentionStateColumn();
-        $state = $column !== null ? ($this->{$column} ?? null) : null;
+        $state = blank($column) ? null : $this->{$column};
 
         if (! $state instanceof State) {
             return null;
@@ -77,7 +77,7 @@ trait Mentionable
         return method_exists($this, 'getUrl') ? $this->getUrl() : null;
     }
 
-    public function mentionStateColumn(): ?string
+    protected function mentionStateColumn(): ?string
     {
         return 'state';
     }

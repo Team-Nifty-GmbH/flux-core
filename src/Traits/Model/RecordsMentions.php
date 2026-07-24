@@ -23,7 +23,16 @@ trait RecordsMentions
     public function mentionScannableText(): string
     {
         return collect($this->mentionableColumns())
-            ->map(fn (string $column): string => MentionHtml::toTokens((string) $this->getAttribute($column)))
+            ->map(fn (string $column): string => resolve_static(
+                MentionHtml::class,
+                'toTokens',
+                [(string) $this->getAttribute($column)],
+            ))
             ->implode("\n");
+    }
+
+    public function mentionSubscriptionEvent(): string
+    {
+        return 'eloquent.created: ' . resolve_static(static::class, 'class');
     }
 }
