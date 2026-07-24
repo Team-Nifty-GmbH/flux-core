@@ -123,4 +123,9 @@ class SyncMailAccountJob implements Repeatable, ShouldBeMonitored, ShouldBeUniqu
     {
         return $this->mailAccount->uuid;
     }
+
+    public function uniqueFor(): int
+    {
+        return 3600;
+    }
 }

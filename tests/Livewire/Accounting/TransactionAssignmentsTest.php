@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
@@ -13,6 +14,7 @@ use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Tenant;
 use FluxErp\Models\Transaction;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
@@ -28,7 +30,12 @@ test('assign orders from selectedOrders property', function (): void {
 
     $contact = Contact::factory()->create();
     $address = Address::factory()->create(['contact_id' => $contact->getKey()]);
-    $orderType = OrderType::factory()->create();
+    // The factory picks a random order type enum, and transactions cannot be assigned
+    // to subscription orders, so pin a regular order type here.
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
     $order = Order::factory()->create([
         'address_invoice_id' => $address->getKey(),
         'contact_id' => $contact->getKey(),
@@ -138,4 +145,116 @@ test('editOrderTransaction populates the transaction payment amount', function (
     Livewire::test(TransactionAssignments::class)
         ->call('editOrderTransaction', $orderTransaction->getAttribute('pivot_id'))
         ->assertSet('orderTransactionForm.transactionAmount', 175.5);
+});
+
+test('assign ledger account through the modal', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => 3000,
+        'balance' => 3000,
+    ]);
+    $ledgerAccount = FluxErp\Models\LedgerAccount::factory()->create([
+        'tenant_id' => Tenant::default()->getKey(),
+        'ledger_account_type_enum' => FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignLedgerAccountModal', $transaction)
+        ->assertSet('ledgerAccountTransactionForm.transaction_id', $transaction->getKey())
+        ->assertSet('ledgerAccountTransactionForm.amount', 3000.0)
+        ->set('ledgerAccountTransactionForm.ledger_account_id', $ledgerAccount->getKey())
+        ->call('saveLedgerAccountTransaction')
+        ->assertOk()
+        ->assertHasNoErrors();
+
+    expect(FluxErp\Models\Pivots\LedgerAccountTransaction::query()
+        ->where('ledger_account_id', $ledgerAccount->getKey())
+        ->where('transaction_id', $transaction->getKey())
+        ->exists()
+    )->toBeTrue()
+        ->and((float) $transaction->fresh()->balance)->toBe(0.0);
+});
+
+test('assignLedgerAccountModal prefills the transaction balance for the apply button', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => -4250,
+        'balance' => -4250,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('assignLedgerAccountModal', $transaction)
+        ->assertSet('ledgerAccountTransactionForm.amount', -4250.0)
+        ->assertSet('ledgerAccountTransactionForm.transactionBalance', -4250.0);
+});
+
+test('opening the ledger account modal resets a previous validation error', function (): void {
+    $bankConnection = BankConnection::factory()->create();
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'amount' => 100,
+        'balance' => 100,
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('saveLedgerAccountTransaction')
+        ->assertHasErrors()
+        ->call('assignLedgerAccountModal', $transaction)
+        ->assertHasNoErrors();
+});
+
+test('saveAttachment stores a single attachment on the transaction', function (): void {
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('attachmentModal', $transaction)
+        ->set('attachment.file', [UploadedFile::fake()->image('receipt.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors();
+
+    expect($transaction->refresh()->getFirstMedia('attachment')?->file_name)->toBe('receipt.jpg');
+});
+
+test('uploading a second attachment replaces the first one', function (): void {
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('attachmentModal', $transaction)
+        ->set('attachment.file', [UploadedFile::fake()->image('first.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors()
+        ->call('attachmentModal', $transaction->refresh())
+        ->set('attachment.file', [UploadedFile::fake()->image('second.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors();
+
+    $media = $transaction->refresh()->getMedia('attachment');
+
+    expect($media)->toHaveCount(1)
+        ->and($media->first()->file_name)->toBe('second.jpg');
+});
+
+test('replacing a staged file before saving stores only the newly picked file', function (): void {
+    $transaction = Transaction::factory()->create([
+        'bank_connection_id' => BankConnection::factory()->create()->getKey(),
+    ]);
+
+    Livewire::test(TransactionAssignments::class)
+        ->call('attachmentModal', $transaction)
+        ->set('attachment.file', [UploadedFile::fake()->image('wrong.jpg')])
+        ->set('attachment.stagedFiles.0.shouldDelete', true)
+        ->set('attachment.file', [UploadedFile::fake()->image('right.jpg')])
+        ->call('saveAttachment')
+        ->assertHasNoErrors();
+
+    $media = $transaction->refresh()->getMedia('attachment');
+
+    expect($media)->toHaveCount(1)
+        ->and($media->first()->file_name)->toBe('right.jpg');
 });

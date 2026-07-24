@@ -2,19 +2,25 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Actions\Order\AdjustOrderTotal;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\OrderTransaction\UpdateOrderTransaction;
+use FluxErp\Livewire\Forms\LedgerAccountTransactionForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\OrderTransactionForm;
 use FluxErp\Livewire\Forms\TransactionForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Transaction;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -24,9 +30,13 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class TransactionAssignments extends Component
 {
-    use Actions, WithPagination;
+    use Actions, WithFileUploads, WithPagination;
+
+    public MediaUploadForm $attachment;
 
     public ?array $bankAccounts = null;
+
+    public LedgerAccountTransactionForm $ledgerAccountTransactionForm;
 
     public OrderTransactionForm $orderTransactionForm;
 
@@ -96,6 +106,39 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function adjustOrderToPayment(): void
+    {
+        $this->resetErrorBag();
+
+        $amount = $this->orderTransactionForm->amount;
+
+        if (blank($amount)) {
+            return;
+        }
+
+        try {
+            AdjustOrderTotal::make([
+                'id' => $this->orderTransactionForm->order_id,
+                'total_gross_price' => bcabs((string) $amount),
+            ])
+                ->validate()
+                ->execute();
+
+            $this->orderTransactionForm->is_accepted = true;
+            $this->orderTransactionForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+        $this->js(<<<'JS'
+            $tsui.close.modal('order-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function calcExchangeRate(): void
     {
         $this->orderTransactionForm->calcExchangeRate();
@@ -152,12 +195,59 @@ class TransactionAssignments extends Component
     #[Renderless]
     public function assignOrdersModal(Transaction $transaction): void
     {
+        $this->resetErrorBag();
         $this->transactionForm->reset();
         $this->transactionForm->fill($transaction);
 
         $this->js(<<<'JS'
             $tsui.open.modal('transaction-assign-orders-modal');
         JS);
+    }
+
+    #[Renderless]
+    public function assignLedgerAccountModal(Transaction $transaction): void
+    {
+        $this->resetErrorBag();
+        $this->ledgerAccountTransactionForm->reset();
+        $this->ledgerAccountTransactionForm->transaction_id = $transaction->getKey();
+        $this->ledgerAccountTransactionForm->transactionBalance = (float) $transaction->balance;
+        $this->ledgerAccountTransactionForm->amount = (float) $transaction->balance;
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('ledger-account-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function attachmentModal(Transaction $transaction): void
+    {
+        $this->resetErrorBag();
+        $this->attachment->reset();
+        $this->attachment->fill($transaction->getFirstMedia('attachment') ?? []);
+        $this->attachment->model_type = $transaction->getMorphClass();
+        $this->attachment->model_id = $transaction->getKey();
+        $this->attachment->collection_name = 'attachment';
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('transaction-attachment-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function deleteLedgerAccountTransaction(LedgerAccountTransaction $ledgerAccountTransaction): void
+    {
+        $this->ledgerAccountTransactionForm->reset();
+        $this->ledgerAccountTransactionForm->fill($ledgerAccountTransaction);
+
+        try {
+            $this->ledgerAccountTransactionForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->refreshTransactions();
     }
 
     #[Renderless]
@@ -178,8 +268,29 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function editLedgerAccountTransaction(LedgerAccountTransaction $ledgerAccountTransaction): void
+    {
+        $this->resetErrorBag();
+        $this->ledgerAccountTransactionForm->reset();
+        $this->ledgerAccountTransactionForm->fill($ledgerAccountTransaction);
+
+        // Remaining balance the transaction would have without this assignment,
+        // so "apply transaction amount" targets the full open amount again.
+        $this->ledgerAccountTransactionForm->transactionBalance = bcadd(
+            $ledgerAccountTransaction->transaction->balance,
+            $ledgerAccountTransaction->is_accepted ? $ledgerAccountTransaction->amount : '0',
+            2
+        );
+
+        $this->js(<<<'JS'
+            $tsui.open.modal('ledger-account-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function editOrderTransaction(OrderTransaction $orderTransaction): void
     {
+        $this->resetErrorBag();
         $this->orderTransactionForm->reset();
         $this->orderTransactionForm->fill($orderTransaction);
 
@@ -222,6 +333,7 @@ class TransactionAssignments extends Component
             )
             ->withCount([
                 'orderTransactions',
+                'ledgerAccountTransactions',
                 'comments',
                 'orderTransactions as suggestions' => fn ($query) => $query->where('is_accepted', false),
             ])
@@ -247,6 +359,8 @@ class TransactionAssignments extends Component
                     ])
                         ->withPivot(['pivot_id', 'amount', 'exchange_rate', 'order_currency_amount', 'is_accepted']);
                 },
+                'ledgerAccountTransactions.ledgerAccount:id,name,number',
+                'media' => fn (MorphMany $query) => $query->where('collection_name', 'attachment'),
                 'orders.addressInvoice:id,name',
                 'orders.currency:id,iso,symbol',
                 'bankConnection:id,name,bank_name,iban',
@@ -268,8 +382,47 @@ class TransactionAssignments extends Component
     }
 
     #[Renderless]
+    public function saveAttachment(): bool
+    {
+        $this->resetErrorBag();
+
+        try {
+            $this->attachment->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->refreshTransactions();
+
+        return true;
+    }
+
+    #[Renderless]
+    public function saveLedgerAccountTransaction(): void
+    {
+        $this->resetErrorBag();
+
+        try {
+            $this->ledgerAccountTransactionForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->refreshTransactions();
+        $this->js(<<<'JS'
+            $tsui.close.modal('ledger-account-transaction-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function saveOrderTransaction(): void
     {
+        $this->resetErrorBag();
+
         try {
             $this->orderTransactionForm->save();
         } catch (ValidationException|UnauthorizedException $e) {

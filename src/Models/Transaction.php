@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Models\Pivots\LedgerAccountTransaction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Traits\Model\Categorizable;
 use FluxErp\Traits\Model\Commentable;
@@ -13,6 +14,7 @@ use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasTags;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
+use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
 use FluxErp\Traits\Model\SoftDeletes;
 use FluxErp\Traits\Scout\Searchable;
@@ -20,12 +22,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
+use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscribable
+class Transaction extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable
 {
     use Categorizable, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasTags,
-        HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -59,6 +62,17 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         return $this->belongsTo(Currency::class);
     }
 
+    public function ledgerAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(LedgerAccount::class)
+            ->using(LedgerAccountTransaction::class);
+    }
+
+    public function ledgerAccountTransactions(): HasMany
+    {
+        return $this->hasMany(LedgerAccountTransaction::class);
+    }
+
     public function orders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class)
@@ -78,8 +92,14 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
         } else {
             $this->balance = bcround(
                 bcsub(
-                    $this->amount,
-                    $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                    bcsub(
+                        $this->amount,
+                        $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                        9
+                    ),
+                    $this->ledgerAccountTransactions()
+                        ->where('is_accepted', true)
+                        ->sum('amount'),
                     9
                 ),
                 2
@@ -107,5 +127,12 @@ class Transaction extends FluxModel implements InteractsWithDataTables, IsSubscr
     public function getUrl(): ?string
     {
         return null;
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachment')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/svg+xml'])
+            ->singleFile();
     }
 }

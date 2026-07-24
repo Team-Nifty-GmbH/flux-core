@@ -93,3 +93,41 @@ test('can set payment reminder level to specific value', function (): void {
 
     expect($this->order->fresh()->payment_reminder_current_level)->toBe(1);
 });
+
+test('preview payment purpose pattern returns matching transactions only', function (): void {
+    $bankConnection = FluxErp\Models\BankConnection::factory()->create();
+    $matching = FluxErp\Models\Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'purpose' => 'DARLEHEN 0047123456 Rate 07/2026',
+    ]);
+    FluxErp\Models\Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'purpose' => 'Miete Juli',
+    ]);
+
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
+
+    $matches = Livewire::test(Accounting::class, ['order' => $form])
+        ->instance()
+        ->previewPaymentPurposePattern('darlehen 0047');
+
+    expect($matches)->toHaveCount(1)
+        ->and($matches[0]['purpose'])->toContain('DARLEHEN 0047123456');
+});
+
+test('preview payment purpose pattern treats like wildcards as literals', function (): void {
+    $bankConnection = FluxErp\Models\BankConnection::factory()->create();
+    FluxErp\Models\Transaction::factory()->create([
+        'bank_connection_id' => $bankConnection->getKey(),
+        'purpose' => 'Darlehen 123',
+    ]);
+
+    $form = new OrderForm(Livewire::new(Accounting::class), 'order');
+    $form->fill($this->order);
+
+    $component = Livewire::test(Accounting::class, ['order' => $form]);
+
+    expect($component->instance()->previewPaymentPurposePattern('%'))->toBeEmpty()
+        ->and($component->instance()->previewPaymentPurposePattern(''))->toBeEmpty();
+});
