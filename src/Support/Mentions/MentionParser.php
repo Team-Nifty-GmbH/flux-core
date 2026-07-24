@@ -23,6 +23,7 @@ class MentionParser
         $recordTypes = MentionableType::getRecordMentionableTypes();
         $userTypes = MentionableType::getUserMentionableTypes();
         $userKeys = array_keys($userTypes);
+        $userClass = resolve_static(User::class, 'class');
         $userMorphKey = morph_alias(User::class);
 
         preg_match_all(
@@ -68,7 +69,7 @@ class MentionParser
 
                 $out[] = [
                     'type' => MentionTypeEnum::User,
-                    'user_id' => ($userTypes[$key] ?? null) === resolve_static(User::class, 'class') ? $id : null,
+                    'user_id' => ($userTypes[$key] ?? null) === $userClass ? $id : null,
                     'mentionable_type' => $key,
                     'mentionable_id' => $id,
                     'raw' => $fullMatch[0],
@@ -87,8 +88,8 @@ class MentionParser
             PREG_OFFSET_CAPTURE,
         );
 
-        $byFirstname = $members->groupBy(fn ($member) => strtolower((string) ($member->firstname ?? '')))->all();
-        $byCode = $members->keyBy(fn ($member) => strtolower((string) ($member->user_code ?? '')))->all();
+        $byFirstname = $members->groupByFirstname()->all();
+        $byCode = $members->keyByUserCode()->all();
 
         foreach ($matches[1] as $index => $tokenMatch) {
             $rawOffset = $matches[0][$index][1];

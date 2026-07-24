@@ -41,7 +41,7 @@ class RecordsMentionsObserver
         }
 
         resolve_static(Mention::class, 'query')
-            ->whereKey($mentions->pluck('id'))
+            ->whereKey($mentions->modelKeys())
             ->delete();
     }
 
@@ -78,7 +78,7 @@ class RecordsMentionsObserver
         }
 
         $target = $this->resolveTarget($row['mention_target_type'], $row['mention_target_id']);
-        if (! $target || ! $this->canMention($target)) {
+        if (is_null($target) || ! $this->canMention($target)) {
             return;
         }
 
@@ -98,7 +98,7 @@ class RecordsMentionsObserver
 
         $target = $this->resolveTarget($mention->mention_target_type, $mention->mention_target_id);
 
-        if ($target && method_exists($target, 'unsubscribeNotificationChannel')) {
+        if (! is_null($target) && method_exists($target, 'unsubscribeNotificationChannel')) {
             $target->unsubscribeNotificationChannel(
                 $this->subscriptionChannel($source),
                 $this->subscriptionEvent($source),
@@ -110,7 +110,7 @@ class RecordsMentionsObserver
     {
         $creator = auth()->user();
 
-        if (! $creator || is_null(Gate::getPolicyFor($target))) {
+        if (is_null($creator) || is_null(Gate::getPolicyFor($target))) {
             return true;
         }
 
@@ -140,7 +140,7 @@ class RecordsMentionsObserver
         $targetClass = morphed_model($type);
 
         return $targetClass
-            ? $targetClass::query()
+            ? resolve_static($targetClass, 'query')
                 ->whereKey($id)
                 ->first()
             : null;

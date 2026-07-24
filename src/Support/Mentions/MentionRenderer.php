@@ -53,7 +53,7 @@ class MentionRenderer
                 }
 
                 $record = $recordsByKey[$key][$id] ?? null;
-                if ($record === null) {
+                if (is_null($record)) {
                     return '<span class="mention mention--missing">' . e(__('@deleted entry')) . '</span>';
                 }
 
@@ -62,7 +62,7 @@ class MentionRenderer
                 $stateAttrs = $record->getMentionState()?->toPillAttributes() ?? '';
                 $url = $record->getMentionUrl();
 
-                if ($url === null) {
+                if (is_null($url)) {
                     return sprintf(
                         '<span class="mention mention--%s" data-mention-type="%s"%s>%s</span>',
                         e($key),
@@ -122,7 +122,7 @@ class MentionRenderer
             function (array $matches) use ($usersByKey): string {
                 $key = strtolower($matches[1]);
                 $user = $usersByKey[$key][(int) $matches[2]] ?? null;
-                if ($user === null) {
+                if (is_null($user)) {
                     return '<span class="mention mention--missing">' . e(__('@deleted entry')) . '</span>';
                 }
 
@@ -138,16 +138,16 @@ class MentionRenderer
             return $text;
         }
 
-        $byFirstname = $members->keyBy(fn ($member) => strtolower((string) ($member->firstname ?? '')))->all();
-        $byCode = $members->keyBy(fn ($member) => strtolower((string) ($member->user_code ?? '')))->all();
+        $byFirstname = $members->groupByFirstname()->all();
+        $byCode = $members->keyByUserCode()->all();
         $userKey = morph_alias(User::class);
 
         return preg_replace_callback(
             '/(?<!\\\\)(?<![A-Za-z0-9._-])@([A-Za-z0-9._-]+)/',
             function (array $matches) use ($byFirstname, $byCode, $userKey): string {
                 $token = strtolower($matches[1]);
-                $user = $byFirstname[$token] ?? $byCode[$token] ?? null;
-                if ($user === null) {
+                $user = ($byFirstname[$token] ?? null)?->first() ?? $byCode[$token] ?? null;
+                if (is_null($user)) {
                     return $matches[0];
                 }
 
@@ -163,7 +163,7 @@ class MentionRenderer
         $label = e($user->getMentionLabel());
         $url = $user->getMentionUrl();
 
-        if ($url === null) {
+        if (is_null($url)) {
             return sprintf(
                 '<span class="mention mention--user" data-mention="%s:%d" data-user-id="%d">%s</span>',
                 e($key),

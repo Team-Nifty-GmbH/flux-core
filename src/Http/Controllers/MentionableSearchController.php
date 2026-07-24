@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Facades\MentionableType;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -53,7 +54,7 @@ class MentionableSearchController extends Controller
 
             try {
                 $candidates = resolve_static($class, 'searchMentionCandidates', [$query, 5])
-                    ->filter(fn ($record): bool => is_null($user)
+                    ->filter(fn (Model $record): bool => is_null($user)
                         || is_null(Gate::getPolicyFor($record))
                         || $user->can('view', $record))
                     ->values();

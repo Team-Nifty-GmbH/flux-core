@@ -1,9 +1,10 @@
 <?php
 
 use FluxErp\Enums\MentionTypeEnum;
+use FluxErp\Models\User;
+use FluxErp\Support\Collection\UserCollection;
 use FluxErp\Support\Mentions\MentionParser;
 use FluxErp\Tests\Fixtures\MentionableFixture;
-use FluxErp\Support\Collection\UserCollection;
 use FluxErp\Tests\Fixtures\UserMentionableFixture;
 
 beforeEach(function (): void {
@@ -64,7 +65,7 @@ test('ignores #user:id (users are @, not #)', function (): void {
 });
 
 test('parses @firstname user tokens via member scope', function (): void {
-    $member = (object) ['id' => 42, 'firstname' => 'Martin', 'user_code' => 'MS'];
+    $member = User::factory()->make(['id' => 42, 'firstname' => 'Martin', 'user_code' => 'MS']);
 
     $result = $this->parser->parse('Hallo @martin', app(UserCollection::class, ['items' => [$member]]));
 
@@ -100,7 +101,7 @@ test('ignores escaped \\# tokens', function (): void {
 
 test('does not double-parse a record token as a user token', function (): void {
     MentionableFixture::register('ticket');
-    $member = (object) ['id' => 5, 'firstname' => 'ticket', 'user_code' => 'TKT'];
+    $member = User::factory()->make(['id' => 5, 'firstname' => 'ticket', 'user_code' => 'TKT']);
 
     $result = $this->parser->parse('#ticket:1', app(UserCollection::class, ['items' => [$member]]));
 
