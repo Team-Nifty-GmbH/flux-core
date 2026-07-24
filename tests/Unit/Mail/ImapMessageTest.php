@@ -3,7 +3,7 @@
 use Carbon\CarbonImmutable;
 use FluxErp\Mail\ImapMessage;
 
-it('can be constructed with all properties', function (): void {
+test('can be constructed with all properties', function (): void {
     $message = new ImapMessage(
         messageId: '<test@example.com>',
         uid: 42,

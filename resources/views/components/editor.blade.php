@@ -33,8 +33,14 @@
                                 "ms",
                             )
                             : 0
-                    }}
+                    }},
+                @else
+                    null,
+                    null,
+                    false,
+                    0,
                 @endif
+                @js($mentionable)
             )(), {
                 showBladeVariables: false,
                 bladeVariables: @js($bladeVariables)

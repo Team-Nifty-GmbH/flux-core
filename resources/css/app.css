@@ -195,7 +195,52 @@
 }
 
 @utility mention {
-    @apply rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300;
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium no-underline;
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-200;
+}
+
+/* Per-type mention pill colors (rendered via MentionRenderer as
+   `mention mention--<type>`). Unlayered so they override the `mention`
+   utility's default color. */
+.mention--user {
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-200;
+}
+
+.mention--ticket {
+    @apply bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200;
+}
+
+.mention--order {
+    @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200;
+}
+
+.mention--task {
+    @apply bg-sky-50 text-sky-700 dark:bg-sky-900 dark:text-sky-200;
+}
+
+.mention--project {
+    @apply bg-violet-50 text-violet-700 dark:bg-violet-900 dark:text-violet-200;
+}
+
+.mention--address {
+    @apply bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-200;
+}
+
+.mention--missing {
+    @apply bg-secondary-100 text-secondary-500 dark:bg-secondary-800 dark:text-secondary-400 italic;
+}
+
+.mention[data-mention-state]::before {
+    content: '';
+    @apply inline-block size-1.5 rounded-full;
+    background: var(--mention-state-color, currentColor);
+    order: -2;
+}
+
+.mention[data-mention-type]::after {
+    content: attr(data-mention-type);
+    @apply rounded bg-black/5 px-1 text-[0.625rem] font-semibold tracking-wide uppercase opacity-70 dark:bg-white/15;
+    order: -1;
 }
 
 @utility blade-variable-pill {

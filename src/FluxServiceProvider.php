@@ -32,6 +32,7 @@ use FluxErp\Providers\ComponentServiceProvider;
 use FluxErp\Providers\EditorServiceProvider;
 use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MacroServiceProvider;
+use FluxErp\Providers\MentionableTypeServiceProvider;
 use FluxErp\Providers\MenuServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RepeatableServiceProvider;
@@ -143,6 +144,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->register(MacroServiceProvider::class);
 
         $this->app->register(ActionServiceProvider::class);
+        $this->app->register(MentionableTypeServiceProvider::class);
         $this->app->register(RepeatableServiceProvider::class);
         $this->app->register(WidgetServiceProvider::class);
         $this->app->register(EditorServiceProvider::class);

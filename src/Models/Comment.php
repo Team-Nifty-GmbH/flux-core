@@ -3,23 +3,23 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\IsSubscribable;
+use FluxErp\Contracts\MentionsContent;
 use FluxErp\Traits\Model\HasPackageFactory;
 use FluxErp\Traits\Model\HasParentChildRelations;
 use FluxErp\Traits\Model\HasUserModification;
 use FluxErp\Traits\Model\HasUuid;
 use FluxErp\Traits\Model\InteractsWithMedia;
 use FluxErp\Traits\Model\LogsActivity;
-use FluxErp\Traits\Model\Notifiable;
+use FluxErp\Traits\Model\RecordsMentions;
 use FluxErp\Traits\Model\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
 
-class Comment extends FluxModel implements HasMedia, IsSubscribable
+class Comment extends FluxModel implements HasMedia, IsSubscribable, MentionsContent
 {
     use HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        SoftDeletes;
+        RecordsMentions, SoftDeletes;
 
     protected $appends = [
         'user',
@@ -28,27 +28,6 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
     protected $hidden = [
         'model_type',
     ];
-
-    protected static function booted(): void
-    {
-        static::saving(function (Comment $comment): void {
-            if ($comment->isDirty('comment')) {
-                preg_match_all('/data-id="([^:]+:\d+)"/', $comment->comment, $matches);
-                collect(data_get($matches, 1, []))
-                    ->map(fn (string $mention) => morph_to($mention))
-                    ->filter(function (?Model $notifiable) {
-                        return ! is_null($notifiable)
-                            && in_array(Notifiable::class, class_uses_recursive($notifiable));
-                    })
-                    ->each(function (Model $notifiable) use ($comment): void {
-                        $notifiable->subscribeNotificationChannel(
-                            channel: $comment->broadcastChannel(),
-                            event: 'eloquent.created: ' . resolve_static(get_class($comment), 'class')
-                        );
-                    });
-            }
-        });
-    }
 
     // Public static methods
     public static function getGenericChannelEvents(): array
@@ -87,6 +66,14 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         $data['user'] = $this->user;
 
         return ['model' => $data];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function mentionableColumns(): array
+    {
+        return ['comment'];
     }
 
     // Attributes

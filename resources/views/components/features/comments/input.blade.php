@@ -51,7 +51,11 @@
         <div class="min-w-0 flex-1">
             <div x-ref="upload">
                 <div x-ref="textarea">
-                    <x-flux::editor class="comment-input" scope="comment" />
+                    <x-flux::editor
+                        class="comment-input"
+                        scope="comment"
+                        :mentionable="\FluxErp\Facades\MentionableType::getRecordMentionableTypes(keysOnly: true)"
+                    />
                 </div>
                 <div class="grow pt-4">
                     @canAction(\FluxErp\Actions\Media\UploadMedia::class)
@@ -75,6 +79,7 @@
                         />
                         <x-button
                             color="indigo"
+                            data-test="comment-submit"
                             x-on:click="
                                 saveComment(
                                     $refs.textarea,
