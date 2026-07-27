@@ -3,6 +3,7 @@
 use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Actions\Comment\DeleteComment;
 use FluxErp\Actions\Comment\UpdateComment;
+use FluxErp\Models\Comment;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
 use Illuminate\Validation\ValidationException;
@@ -102,6 +103,21 @@ test('editing another users comment text is rejected', function (): void {
     UpdateComment::make([
         'id' => $comment->getKey(),
         'comment' => 'Hijacked',
+    ])->validate()->execute();
+})->throws(ValidationException::class);
+
+test('an authorless comment text can not be edited', function (): void {
+    $comment = CreateComment::make([
+        'model_type' => morph_alias(Task::class),
+        'model_id' => $this->task->getKey(),
+        'comment' => 'Original',
+    ])->validate()->execute();
+
+    Comment::query()->whereKey($comment->getKey())->toBase()->update(['created_by' => null]);
+
+    UpdateComment::make([
+        'id' => $comment->getKey(),
+        'comment' => 'Edited',
     ])->validate()->execute();
 })->throws(ValidationException::class);
 

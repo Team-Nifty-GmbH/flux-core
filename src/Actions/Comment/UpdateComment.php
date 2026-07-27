@@ -63,7 +63,9 @@ class UpdateComment extends FluxAction
 
             $currentUser = auth()->user()?->getMorphClass() . ':' . auth()->id();
 
-            if ($author !== $currentUser) {
+            // Authorless comments (created by the system or an import) have no
+            // owner, so their text stays locked for everyone.
+            if (is_null($author) || $author !== $currentUser) {
                 throw ValidationException::withMessages([
                     'comment' => [__('You can only edit your own comments.')],
                 ]);

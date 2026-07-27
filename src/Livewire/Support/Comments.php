@@ -259,6 +259,12 @@ abstract class Comments extends Component
             return null;
         }
 
-        return $this->commentForm->getActionResult()->toArray();
+        $comment = $this->commentForm->getActionResult();
+
+        return [
+            'id' => $comment->getKey(),
+            'comment' => $comment->comment,
+            'edited_at' => $comment->edited_at,
+        ];
     }
 }
