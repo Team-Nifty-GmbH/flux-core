@@ -76,6 +76,10 @@ class Outstanding extends ValueBox implements HasWidgetOptions
                 'label' => __('Show overdue'),
                 'method' => 'showOverdue',
             ],
+            [
+                'label' => __('Payment Reminders'),
+                'method' => 'showPaymentReminders',
+            ],
         ];
     }
 
@@ -103,6 +107,12 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->store();
 
         $this->redirectRoute('orders.orders', navigate: true);
+    }
+
+    #[Renderless]
+    public function showPaymentReminders(): void
+    {
+        $this->redirectRoute('accounting.payment-reminder-run', navigate: true);
     }
 
     protected function getListeners(): array
