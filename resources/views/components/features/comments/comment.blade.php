@@ -1,4 +1,4 @@
-<div class="flex w-full space-x-3">
+<div class="flex w-full space-x-3" x-data="{ editing: false }">
     <div
         x-init="
             $nextTick(() => {
@@ -39,6 +39,19 @@
                         </x-dropdown.items>
                     @endcanAction
 
+                    @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
+                        <x-dropdown.items
+                            x-cloak
+                            x-show="comment.is_current_user"
+                            x-on:click="
+                                editing = true;
+                                show = false;
+                            "
+                        >
+                            <span>{{ __('Edit') }}</span>
+                        </x-dropdown.items>
+                    @endcanAction
+
                     @canAction(\FluxErp\Actions\Comment\DeleteComment::class)
                         <x-dropdown.items>
                             <span
@@ -57,9 +70,51 @@
         </div>
         <div class="mt-1 text-sm dark:text-gray-50">
             <p
+                x-show="!editing"
                 class="prose prose-sm dark:prose-invert dark:text-gray-50"
                 x-html="comment.comment"
             ></p>
+            <div
+                x-cloak
+                x-show="editing"
+                x-effect="
+                    if (editing) $refs.editor.innerHTML = comment.comment;
+                "
+            >
+                <div
+                    x-ref="editor"
+                    contenteditable="true"
+                    class="prose prose-sm dark:prose-invert min-h-16 w-full rounded-md border border-gray-300 p-2 focus:outline-hidden dark:border-gray-600 dark:text-gray-50"
+                ></div>
+                <div class="mt-2 flex gap-2">
+                    <x-button
+                        sm
+                        color="indigo"
+                        :text="__('Save')"
+                        x-on:click="
+                            $wire
+                                .updateComment(
+                                    comment.id,
+                                    $refs.editor.innerHTML,
+                                )
+                                .then((updated) => {
+                                    if (updated) {
+                                        comment.comment = updated.comment;
+                                        comment.edited_at = updated.edited_at;
+                                        editing = false;
+                                    }
+                                })
+                        "
+                    />
+                    <x-button
+                        sm
+                        color="secondary"
+                        light
+                        :text="__('Cancel')"
+                        x-on:click="editing = false"
+                    />
+                </div>
+            </div>
             <div class="flex flex-wrap gap-1">
                 <template x-for="file in comment.media">
                     <div
@@ -119,6 +174,20 @@
                     ')'
                 "
             ></span>
+            <span
+                x-cloak
+                x-show="comment.edited_at"
+                class="text-gray-500 italic"
+            >
+                &middot; {{ __('edited') }}
+                <span
+                    x-text="
+                        '(' +
+                        $nuxbe.format.datetime(new Date(comment.edited_at)) +
+                        ')'
+                    "
+                ></span>
+            </span>
             @canAction(\FluxErp\Actions\Comment\CreateComment::class)
                 <span class="">&middot;</span>
                 <button

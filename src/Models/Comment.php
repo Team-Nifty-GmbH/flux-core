@@ -31,6 +31,12 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
 
     protected static function booted(): void
     {
+        static::updating(function (Comment $comment): void {
+            if ($comment->isDirty('comment')) {
+                $comment->edited_at = now();
+            }
+        });
+
         static::saving(function (Comment $comment): void {
             if ($comment->isDirty('comment')) {
                 preg_match_all('/data-id="([^:]+:\d+)"/', $comment->comment, $matches);
@@ -66,6 +72,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
         return [
             'is_internal' => 'boolean',
             'is_sticky' => 'boolean',
+            'edited_at' => 'datetime',
         ];
     }
 
