@@ -92,6 +92,27 @@ test('loadComments returns is_internal as boolean', function (): void {
         });
 });
 
+test('updateComment edits the text and marks the comment as edited', function (): void {
+    $comment = Comment::factory()->create([
+        'model_type' => morph_alias(Order::class),
+        'model_id' => $this->order->id,
+        'comment' => 'Original',
+    ]);
+
+    Livewire::test(Comments::class, ['modelId' => $this->order->id])
+        ->call('updateComment', $comment->getKey(), 'Edited text')
+        ->assertReturned(function (?array $updated): true {
+            expect(data_get($updated, 'comment'))->toBe('Edited text');
+            expect(data_get($updated, 'edited_at'))->not->toBeNull();
+
+            return true;
+        })
+        ->assertHasNoErrors();
+
+    expect(Comment::query()->whereKey($comment->getKey())->value('comment'))
+        ->toBe('Edited text');
+});
+
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])

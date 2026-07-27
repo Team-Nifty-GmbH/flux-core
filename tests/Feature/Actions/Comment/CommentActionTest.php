@@ -4,6 +4,8 @@ use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Actions\Comment\DeleteComment;
 use FluxErp\Actions\Comment\UpdateComment;
 use FluxErp\Models\Task;
+use FluxErp\Models\User;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     $this->task = Task::factory()->create();
@@ -53,6 +55,55 @@ test('update comment', function (): void {
 
     expect($updated->comment)->not->toBeNull();
 });
+
+test('editing the comment text marks it as edited', function (): void {
+    $comment = CreateComment::make([
+        'model_type' => morph_alias(Task::class),
+        'model_id' => $this->task->getKey(),
+        'comment' => 'Original',
+    ])->validate()->execute();
+
+    expect($comment->edited_at)->toBeNull();
+
+    $updated = UpdateComment::make([
+        'id' => $comment->getKey(),
+        'comment' => 'Edited text',
+    ])->validate()->execute();
+
+    expect($updated->comment)->toBe('Edited text')
+        ->and($updated->edited_at)->not->toBeNull();
+});
+
+test('toggling sticky does not mark the comment as edited', function (): void {
+    $comment = CreateComment::make([
+        'model_type' => morph_alias(Task::class),
+        'model_id' => $this->task->getKey(),
+        'comment' => 'Original',
+    ])->validate()->execute();
+
+    $updated = UpdateComment::make([
+        'id' => $comment->getKey(),
+        'is_sticky' => true,
+    ])->validate()->execute();
+
+    expect($updated->is_sticky)->toBeTrue()
+        ->and($updated->edited_at)->toBeNull();
+});
+
+test('editing another users comment text is rejected', function (): void {
+    $comment = CreateComment::make([
+        'model_type' => morph_alias(Task::class),
+        'model_id' => $this->task->getKey(),
+        'comment' => 'Original',
+    ])->validate()->execute();
+
+    $this->be(User::factory()->create(), 'web');
+
+    UpdateComment::make([
+        'id' => $comment->getKey(),
+        'comment' => 'Hijacked',
+    ])->validate()->execute();
+})->throws(ValidationException::class);
 
 test('delete comment', function (): void {
     $comment = CreateComment::make([

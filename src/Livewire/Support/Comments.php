@@ -241,4 +241,24 @@ abstract class Comments extends Component
             exception_to_notifications($e, $this);
         }
     }
+
+    #[Renderless]
+    public function updateComment(int $id, string $comment): ?array
+    {
+        $this->commentForm->reset();
+        $this->commentForm->fill([
+            'id' => $id,
+            'comment' => $comment,
+        ]);
+
+        try {
+            $this->commentForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+
+        return $this->commentForm->getActionResult()->toArray();
+    }
 }
