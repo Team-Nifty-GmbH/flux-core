@@ -82,37 +82,44 @@ trait InteractsWithMedia
         foreach ($mediaCollections as $mediaCollection) {
             $slug = data_get($mediaCollection, 'slug') ?? '';
 
-            if (
-                is_null(data_get($mediaCollection, 'id'))
-                && str_contains($slug, '.')
-            ) {
-                $cursor = &$undotted;
-                $childSlug = '';
+            if (! str_contains($slug, '.')) {
+                Arr::set($undotted, $slug, $mediaCollection);
 
-                foreach (explode('.', $slug) as $part) {
-                    $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
+                continue;
+            }
 
-                    if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
-                        $cursor[$part] = [
-                            'name' => Str::headline($part),
-                            'slug' => $childSlug,
-                        ];
-                    }
+            $parts = explode('.', $slug);
+            $lastIndex = count($parts) - 1;
+            $cursor = &$undotted;
+            $childSlug = '';
 
-                    if (
-                        ! array_key_exists('children', $cursor[$part])
-                        || ! is_array($cursor[$part]['children'])
-                    ) {
-                        $cursor[$part]['children'] = [];
-                    }
+            foreach ($parts as $index => $part) {
+                $childSlug = $childSlug === '' ? $part : $childSlug . '.' . $part;
 
-                    $cursor = &$cursor[$part]['children'];
+                if ($index === $lastIndex && ! is_null(data_get($mediaCollection, 'id'))) {
+                    $cursor[$part] = $mediaCollection;
+
+                    break;
                 }
 
-                unset($cursor);
-            } else {
-                Arr::set($undotted, $slug, $mediaCollection);
+                if (! array_key_exists($part, $cursor) || ! is_array($cursor[$part])) {
+                    $cursor[$part] = [
+                        'name' => Str::headline($part),
+                        'slug' => $childSlug,
+                    ];
+                }
+
+                if (
+                    ! array_key_exists('children', $cursor[$part])
+                    || ! is_array($cursor[$part]['children'])
+                ) {
+                    $cursor[$part]['children'] = [];
+                }
+
+                $cursor = &$cursor[$part]['children'];
             }
+
+            unset($cursor);
         }
 
         return $this->calculateTree($undotted);
