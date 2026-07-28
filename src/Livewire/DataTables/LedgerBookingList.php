@@ -34,6 +34,6 @@ class LedgerBookingList extends BaseDataTable
 
     public function getBuilder(Builder $builder): Builder
     {
-        return $builder->with(['debitLedgerAccount:id,name,number', 'creditLedgerAccount:id,name,number']);
+        return $builder->with(['debitLedgerAccount:id,name', 'creditLedgerAccount:id,name']);
     }
 }

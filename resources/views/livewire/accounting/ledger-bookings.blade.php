@@ -36,6 +36,7 @@
             wire:model="ledgerBooking.booking_text"
             :label="__('Booking Text')"
         />
+        <x-input wire:model="ledgerBooking.note" :label="__('Note')" />
     </div>
     <x-slot:footer>
         <x-button

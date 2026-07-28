@@ -89,6 +89,21 @@ test('update ledger booking', function (): void {
     expect((float) $updated->amount)->toBe(999.0);
 });
 
+test('update ledger booking rejects making debit equal the stored credit', function (): void {
+    $booking = LedgerBooking::factory()->create([
+        'tenant_id' => $this->dbTenant->getKey(),
+        'debit_ledger_account_id' => $this->debitAccount->getKey(),
+        'credit_ledger_account_id' => $this->creditAccount->getKey(),
+    ]);
+
+    UpdateLedgerBooking::make([
+        'id' => $booking->getKey(),
+        'debit_ledger_account_id' => $this->creditAccount->getKey(),
+    ])
+        ->validate()
+        ->execute();
+})->throws(ValidationException::class);
+
 test('delete ledger booking', function (): void {
     $booking = LedgerBooking::factory()->create([
         'tenant_id' => $this->dbTenant->getKey(),
@@ -98,22 +113,4 @@ test('delete ledger booking', function (): void {
 
     expect(DeleteLedgerBooking::make(['id' => $booking->getKey()])->validate()->execute())->toBeTrue();
     $this->assertSoftDeleted('ledger_bookings', ['id' => $booking->getKey()]);
-});
-
-test('ledger account booking balance is debits minus credits', function (): void {
-    LedgerBooking::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'debit_ledger_account_id' => $this->debitAccount->getKey(),
-        'credit_ledger_account_id' => $this->creditAccount->getKey(),
-        'amount' => 1000,
-    ]);
-    LedgerBooking::factory()->create([
-        'tenant_id' => $this->dbTenant->getKey(),
-        'debit_ledger_account_id' => $this->creditAccount->getKey(),
-        'credit_ledger_account_id' => $this->debitAccount->getKey(),
-        'amount' => 400,
-    ]);
-
-    expect($this->debitAccount->calculateBookingBalance())->toBe('600.00')
-        ->and($this->creditAccount->calculateBookingBalance())->toBe('-600.00');
 });

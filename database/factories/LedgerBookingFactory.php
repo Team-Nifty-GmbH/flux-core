@@ -15,6 +15,7 @@ class LedgerBookingFactory extends Factory
             'amount' => fake()->randomFloat(2, 100, 50000),
             'booking_date' => fake()->date(),
             'booking_text' => fake()->sentence(),
+            'note' => fake()->sentence(),
         ];
     }
 }
