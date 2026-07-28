@@ -50,7 +50,7 @@ class CreateLedgerBooking extends FluxAction
 
         if ($onTenant !== 2) {
             throw ValidationException::withMessages([
-                'debit_ledger_account_id' => [__('The ledger accounts must belong to the booking tenant.')],
+                'debit_ledger_account_id' => ['The ledger accounts must belong to the booking tenant.'],
             ]);
         }
     }

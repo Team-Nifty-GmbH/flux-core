@@ -46,7 +46,7 @@ class UpdateLedgerBooking extends FluxAction
 
         if ($debit === $credit) {
             throw ValidationException::withMessages([
-                'debit_ledger_account_id' => [__('The debit and credit account must differ.')],
+                'debit_ledger_account_id' => ['The debit and credit account must differ.'],
             ]);
         }
     }

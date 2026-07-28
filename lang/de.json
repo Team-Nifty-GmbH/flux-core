@@ -2718,7 +2718,6 @@
     "The category :input is no id.": "Die Kategorie :input ist keine ID.",
     "The contact has a delivery lock": "Der Kontakt hat eine Lieferungssperre",
     "The credit line of the contact is exceeded": "Die Kreditlinie des Kontakts wurde überschritten",
-    "The debit and credit account must differ.": "Soll- und Habenkonto muessen sich unterscheiden.",
     "The default mail account must be one of the selected mail accounts.": "Das Standard-Mailkonto muss eines der ausgewählten Mailkonten sein.",
     "The employee is already assigned to this work time model": "Der Mitarbeiter ist bereits diesem Arbeitszeitmodell zugewiesen",
     "The given columns must be unique.": "Jede Spalte darf nur einmal angegeben werden.",
