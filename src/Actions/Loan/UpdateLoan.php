@@ -8,6 +8,8 @@ use FluxErp\Rulesets\Loan\UpdateLoanRuleset;
 
 class UpdateLoan extends FluxAction
 {
+    use ValidatesLoanRelationsOnTenant;
+
     public static function models(): array
     {
         return [Loan::class];
@@ -28,5 +30,16 @@ class UpdateLoan extends FluxAction
         $loan->save();
 
         return $loan->withoutRelations()->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $tenantId = resolve_static(Loan::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->value('tenant_id');
+
+        $this->assertLoanRelationsOnTenant($tenantId);
     }
 }

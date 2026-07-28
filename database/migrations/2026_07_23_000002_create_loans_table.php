@@ -30,10 +30,9 @@ return new class() extends Migration
             $table->decimal('interest_rate', 40, 10)->nullable();
             $table->string('repayment_type_enum');
             $table->unsignedInteger('number_of_installments');
+            $table->decimal('installment_amount', 40, 10)->nullable();
             $table->date('starts_at');
             $table->date('ends_at')->nullable();
-            $table->decimal('installment_amount', 40, 10)->nullable();
-            $table->string('note')->nullable();
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();

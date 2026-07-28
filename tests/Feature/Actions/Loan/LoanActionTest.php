@@ -73,6 +73,34 @@ test('update loan', function (): void {
     $this->assertDatabaseHas('loans', ['id' => $loan->getKey(), 'name' => 'Renamed loan']);
 });
 
+test('update loan leaves schedule affecting fields locked', function (): void {
+    $loan = CreateLoan::make(baseLoanData())->validate()->execute();
+
+    $updated = UpdateLoan::make([
+        'id' => $loan->getKey(),
+        'amount' => 999,
+        'interest_rate' => 0.5,
+        'number_of_installments' => 3,
+    ])->validate()->execute();
+
+    expect((string) $updated->amount)->toBe((string) $loan->amount)
+        ->and($updated->number_of_installments)->toBe($loan->number_of_installments);
+});
+
+test('update loan rejects a foreign tenant contact', function (): void {
+    $loan = CreateLoan::make(baseLoanData())->validate()->execute();
+
+    $otherTenant = Tenant::factory()->create();
+    $foreignContact = Contact::factory()
+        ->hasAttached($otherTenant, relationship: 'tenants')
+        ->create();
+
+    UpdateLoan::make([
+        'id' => $loan->getKey(),
+        'contact_id' => $foreignContact->getKey(),
+    ])->validate()->execute();
+})->throws(ValidationException::class);
+
 test('delete loan soft deletes', function (): void {
     $loan = CreateLoan::make(baseLoanData())->validate()->execute();
 

@@ -22,10 +22,10 @@ class Loan extends FluxModel
     {
         return [
             'amount' => Money::class,
+            'repayment_type_enum' => RepaymentTypeEnum::class,
             'installment_amount' => Money::class,
             'starts_at' => 'date',
             'ends_at' => 'date',
-            'repayment_type_enum' => RepaymentTypeEnum::class,
         ];
     }
 

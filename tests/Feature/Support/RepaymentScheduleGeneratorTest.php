@@ -13,7 +13,7 @@ function sumPrincipals(array $schedule): string
     );
 }
 
-test('annuity schedule keeps the instalment constant while interest declines', function (): void {
+test('annuity schedule keeps the installment constant while interest declines', function (): void {
     $schedule = app(RepaymentScheduleGenerator::class)->generate(
         amount: 12000,
         interestRate: 0.06,
@@ -44,7 +44,7 @@ test('annuity schedule keeps the instalment constant while interest declines', f
     expect(sumPrincipals($schedule))->toBe('12000.00');
 });
 
-test('linear schedule keeps the principal constant while the instalment declines', function (): void {
+test('linear schedule keeps the principal constant while the installment declines', function (): void {
     $schedule = app(RepaymentScheduleGenerator::class)->generate(
         amount: 12000,
         interestRate: 0.06,
@@ -53,12 +53,12 @@ test('linear schedule keeps the principal constant while the instalment declines
         startsAt: Carbon::parse('2026-01-01'),
     );
 
-    // Constant principal on every instalment but the last.
+    // Constant principal on every installment but the last.
     for ($i = 1; $i < 11; $i++) {
         expect($schedule[$i]['principal_amount'])->toBe($schedule[0]['principal_amount']);
     }
 
-    // Total instalment declines as interest falls with the balance.
+    // Total installment declines as interest falls with the balance.
     for ($i = 1; $i < 12; $i++) {
         $current = bcadd($schedule[$i]['principal_amount'], $schedule[$i]['interest_amount'], 2);
         $previous = bcadd($schedule[$i - 1]['principal_amount'], $schedule[$i - 1]['interest_amount'], 2);

@@ -8,10 +8,10 @@ use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Loan;
 use FluxErp\Models\Order;
 use FluxErp\Models\Tenant;
+use FluxErp\Rules\EnumRule;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rule;
 
 class CreateLoanRuleset extends FluxRuleset
 {
@@ -53,16 +53,15 @@ class CreateLoanRuleset extends FluxRuleset
             ],
             'repayment_type_enum' => [
                 'required',
-                Rule::enum(RepaymentTypeEnum::class),
+                app(EnumRule::class, ['type' => RepaymentTypeEnum::class]),
             ],
             'number_of_installments' => 'required|integer|min:1',
-            'starts_at' => 'required|date',
-            'ends_at' => 'nullable|date|after_or_equal:starts_at',
             'installment_amount' => [
                 'nullable',
                 app(Numeric::class, ['min' => 0]),
             ],
-            'note' => 'string|max:255|nullable',
+            'starts_at' => 'required|date',
+            'ends_at' => 'nullable|date|after_or_equal:starts_at',
         ];
     }
 }

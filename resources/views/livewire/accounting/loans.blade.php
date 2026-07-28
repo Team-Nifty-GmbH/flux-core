@@ -33,40 +33,46 @@
                 'method' => 'POST',
             ]"
         />
+        <x-input wire:model="loan.number" :label="__('Number')" />
+        {{-- Schedule-affecting fields lock once the loan exists; rescheduling is a
+            separate concern. --}}
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
             <x-number
                 wire:model="loan.amount"
                 :label="__('Amount')"
                 step="0.01"
                 placeholder="0.00"
+                x-bind:disabled="!!$wire.loan.id"
             />
             <x-number
                 wire:model="loan.interest_rate"
                 :label="__('Interest Rate')"
                 step="0.0001"
                 placeholder="0.0000"
+                x-bind:disabled="!!$wire.loan.id"
             />
         </div>
         <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
-            <x-select.native
+            <x-select.styled
                 wire:model="loan.repayment_type_enum"
                 :label="__('Repayment Type')"
                 required
-            >
-                @foreach (\FluxErp\Enums\RepaymentTypeEnum::cases() as $case)
-                    <option value="{{ $case->value }}">
-                        {{ __(\Illuminate\Support\Str::headline($case->value)) }}
-                    </option>
-                @endforeach
-            </x-select.native>
+                select="label:label|value:value"
+                :options="\FluxErp\Enums\RepaymentTypeEnum::valuesLocalized()"
+                x-bind:disabled="!!$wire.loan.id"
+            />
             <x-number
                 wire:model="loan.number_of_installments"
                 :label="__('Number Of Installments')"
                 step="1"
+                x-bind:disabled="!!$wire.loan.id"
             />
-            <x-date wire:model="loan.starts_at" :label="__('Starts At')" />
+            <x-date
+                wire:model="loan.starts_at"
+                :label="__('Starts At')"
+                x-bind:disabled="!!$wire.loan.id"
+            />
         </div>
-        <x-input wire:model="loan.note" :label="__('Note')" />
 
         @if ($installments)
             <div class="mt-4">

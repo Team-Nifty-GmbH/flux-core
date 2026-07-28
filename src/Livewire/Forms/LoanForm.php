@@ -26,8 +26,6 @@ class LoanForm extends FluxForm
 
     public ?string $name = null;
 
-    public ?string $note = null;
-
     public ?int $number_of_installments = null;
 
     public ?string $number = null;
