@@ -11,6 +11,7 @@ use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
+use FluxErp\Livewire\Accounting\LedgerBookings;
 use FluxErp\Livewire\Accounting\Loans;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminderRun;
@@ -272,6 +273,7 @@ Route::middleware('web')
                 Route::name('accounting.')->prefix('accounting')
                     ->group(function (): void {
                         Route::get('/commissions', CommissionList::class)->name('commissions');
+                        Route::get('/ledger-bookings', LedgerBookings::class)->name('ledger-bookings');
                         Route::get('/loans', Loans::class)->name('loans');
                         Route::get('/payment-reminder-run', PaymentReminderRun::class)->name('payment-reminder-run');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
