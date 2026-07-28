@@ -80,6 +80,7 @@ class MenuServiceProvider extends ServiceProvider
             closure: function (): void {
                 Menu::register(route: 'accounting.commissions');
                 Menu::register(route: 'accounting.ledger-bookings');
+                Menu::register(route: 'accounting.loans');
                 Menu::register(route: 'accounting.payment-reminder-run');
                 Menu::register(route: 'accounting.purchase-invoices');
                 Menu::register(route: 'accounting.transactions');

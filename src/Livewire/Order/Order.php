@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use Cron\CronExpression;
 use Exception;
 use FluxErp\Actions\Discount\DeleteDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
@@ -45,6 +46,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
@@ -784,6 +786,60 @@ class Order extends Component
         }
 
         $this->redirectRoute('orders.id', ['id' => $this->replicateOrder->id], navigate: true);
+    }
+
+    #[Renderless]
+    public function prefillContractTotal(): void
+    {
+        $schedule = resolve_static(Schedule::class, 'query')
+            ->whereRelation('orders', 'orders.id', $this->order->id)
+            ->where('class', ProcessSubscriptionOrder::class)
+            ->first();
+
+        if (is_null($schedule)) {
+            $this->toast()
+                ->warning(__('Create a schedule with an end date first.'))
+                ->send();
+
+            return;
+        }
+
+        if (! $schedule->ends_at || ! $schedule->cron_expression) {
+            $this->toast()
+                ->warning(__('Set an end date on the schedule first.'))
+                ->send();
+
+            return;
+        }
+
+        $cron = new CronExpression($schedule->cron_expression);
+        $current = Carbon::parse($schedule->due_at ?? now());
+        $cycles = $current->lessThanOrEqualTo($schedule->ends_at) ? 1 : 0;
+        $limit = 10000;
+
+        while ($cycles < $limit) {
+            $current = Carbon::instance($cron->getNextRunDate($current));
+
+            if ($current->greaterThan($schedule->ends_at)) {
+                break;
+            }
+
+            $cycles++;
+        }
+
+        if ($cycles >= $limit) {
+            $this->toast()
+                ->warning(__('Too many cycles until the end date, enter the total manually.'))
+                ->send();
+
+            return;
+        }
+
+        $this->order->contract_total_amount = bcmul(
+            $cycles,
+            str_replace('-', '', (string) $this->order->total_gross_price ?: '0'),
+            2
+        );
     }
 
     #[Renderless]

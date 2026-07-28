@@ -62,7 +62,7 @@ test('sends payment reminders for overdue orders', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -98,7 +98,7 @@ test('does not send payment reminders when setting is disabled', function (): vo
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -123,7 +123,7 @@ test('does not send payment reminders for orders without invoice number', functi
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -148,7 +148,7 @@ test('does not send payment reminders for orders with zero balance', function ()
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -173,7 +173,7 @@ test('does not send payment reminders for paid orders', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -204,7 +204,7 @@ test('does not send payment reminders for overpaid orders', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -231,7 +231,7 @@ test('does not send payment reminders for not yet due orders', function (): void
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -263,7 +263,7 @@ test('does not send payment reminders for purchase orders', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($purchaseOrderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -288,7 +288,7 @@ test('does not send payment reminders for orders at maximum reminder level', fun
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -339,7 +339,7 @@ test('falls back to contact invoice address when order address has no email', fu
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -380,7 +380,7 @@ test('falls back to contact main address when no invoice addresses have email', 
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -427,7 +427,7 @@ test('does not send payment reminders when no address has email', function (): v
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -452,7 +452,7 @@ test('resolveMailableInvoiceAddress prefers order invoice address', function ():
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -497,7 +497,7 @@ test('resolveMailableInvoiceAddress falls back to contact invoice address', func
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -527,7 +527,7 @@ test('resolveMailableInvoiceAddress falls back to contact main address', functio
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -546,7 +546,7 @@ test('processes only specified order ids when provided', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),
@@ -567,7 +567,7 @@ test('processes only specified order ids when provided', function (): void {
         ->for(Currency::factory(), 'currency')
         ->for(Language::factory(), 'language')
         ->for(PriceList::factory(), 'priceList')
-        ->for(PaymentType::factory(), 'paymentType')
+        ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
         ->for($this->orderType, 'orderType')
         ->state([
             'tenant_id' => $this->dbTenant->getKey(),

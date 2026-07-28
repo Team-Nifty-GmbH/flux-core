@@ -22,7 +22,7 @@
             <div class="min-w-48 flex-1">
                 <x-input
                     wire:model.live.debounce.300ms="search"
-                    :placeholder="__('Invoice or customer number')"
+                    :placeholder="__('Name, invoice or customer number')"
                     icon="magnifying-glass"
                     size="sm"
                 />

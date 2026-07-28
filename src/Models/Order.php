@@ -15,6 +15,7 @@ use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderPaymentRun;
@@ -31,6 +32,7 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\States\PaymentRun\NotSuccessful;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\Traits\HasStates;
@@ -221,6 +223,10 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 $order->calculateBalanceDueDiscount();
             }
 
+            if ($order->isDirty('contract_total_amount')) {
+                $order->calculateBalance();
+            }
+
             if ($order->isDirty('iban')
                 && $order->iban
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
@@ -266,6 +272,23 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
                 && $order->responsible_user_id
             ) {
                 $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
+            }
+
+            // Every write to a generated order routes through here, so the parent
+            // contract's remaining balance stays current no matter which action
+            // created or adjusted the child.
+            if (
+                ($order->wasRecentlyCreated || $order->wasChanged('total_gross_price'))
+                && $order->created_from_id
+            ) {
+                $contract = $order->createdFrom;
+
+                if (
+                    ! is_null($contract?->contract_total_amount)
+                    && $contract->orderType?->order_type_enum?->isSubscription()
+                ) {
+                    $contract->calculateBalance()->save();
+                }
             }
         });
 
@@ -449,6 +472,7 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             'total_position_discount_percentage' => Percentage::class,
             'total_position_discount_flat' => Money::class,
             'balance' => Money::class,
+            'contract_total_amount' => Money::class,
             'payment_reminder_next_date' => 'date',
             'order_date' => 'date',
             'invoice_date' => 'date',
@@ -665,6 +689,27 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
     // Public methods
     public function calculateBalance(): static
     {
+        // Subscription contracts are never invoiced themselves; their balance tracks
+        // the remaining contract volume instead of an open invoice amount. Generated
+        // rates store their totals signed inconsistently (replication applies the
+        // type multiplier, AdjustOrderTotal counteracts it), so sum absolutes.
+        if ($this->orderType?->order_type_enum?->isSubscription()) {
+            $this->balance = is_null($this->contract_total_amount)
+                ? null
+                : bcround(
+                    bcsub(
+                        $this->contract_total_amount,
+                        (string) $this->createdOrders()
+                            ->selectRaw('COALESCE(SUM(ABS(total_gross_price)), 0) AS aggregate')
+                            ->value('aggregate'),
+                        9
+                    ),
+                    2
+                );
+
+            return $this;
+        }
+
         $this->balance = bcround(
             bcsub(
                 $this->total_gross_price,
@@ -1461,6 +1506,17 @@ class Order extends FluxModel implements Calendarable, HasMedia, InteractsWithDa
             ->whereHas(
                 'orderType',
                 fn (Builder $query) => $query->whereIn('order_type_enum', $remindableOrderTypes)
+            )
+            // Direct debit invoices are collected by us, so they only become
+            // remindable once at least one debit run for them has failed.
+            ->where(fn (Builder $query) => $query
+                ->whereRelation('paymentType', 'is_direct_debit', false)
+                ->orWhereHas(
+                    'paymentRuns',
+                    fn (Builder $query) => $query
+                        ->where('payment_run_type_enum', PaymentRunTypeEnum::DirectDebit)
+                        ->where('state', NotSuccessful::$name)
+                )
             )
             ->whereHasMailablePaymentReminderAddress();
     }
