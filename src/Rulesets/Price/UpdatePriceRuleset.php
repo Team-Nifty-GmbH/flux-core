@@ -22,11 +22,11 @@ class UpdatePriceRuleset extends FluxRuleset
             ],
             'product_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Product::class]),
+                app(ModelExists::class, ['model' => Product::class, 'subject' => Price::class]),
             ],
             'price_list_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => PriceList::class]),
+                app(ModelExists::class, ['model' => PriceList::class, 'subject' => Price::class]),
             ],
             'price' => 'sometimes|numeric',
         ];

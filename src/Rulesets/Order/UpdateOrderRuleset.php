@@ -53,12 +53,12 @@ class UpdateOrderRuleset extends FluxRuleset
             'agent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => Order::class]),
             ],
             'approval_user_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => Order::class]),
             ],
             'contact_bank_connection_id' => [
                 'integer',
@@ -73,53 +73,53 @@ class UpdateOrderRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
+                app(ModelExists::class, ['model' => Address::class, 'subject' => Order::class]),
             ],
             'address_delivery_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Address::class]),
+                app(ModelExists::class, ['model' => Address::class, 'subject' => Order::class]),
             ],
             'language_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => Language::class]),
+                app(ModelExists::class, ['model' => Language::class, 'subject' => Order::class]),
             ],
             'order_type_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => OrderType::class]),
+                app(ModelExists::class, ['model' => OrderType::class, 'subject' => Order::class]),
             ],
             'price_list_id' => [
                 'integer',
-                app(ModelExists::class, ['model' => PriceList::class]),
+                app(ModelExists::class, ['model' => PriceList::class, 'subject' => Order::class]),
             ],
             'unit_price_price_list_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => PriceList::class]),
+                app(ModelExists::class, ['model' => PriceList::class, 'subject' => Order::class]),
             ],
             'payment_type_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => PaymentType::class]),
+                app(ModelExists::class, ['model' => PaymentType::class, 'subject' => Order::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class, 'subject' => Order::class]),
             ],
             'vat_rate_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => VatRate::class])
+                app(ModelExists::class, ['model' => VatRate::class, 'subject' => Order::class])
                     ->where('is_tax_exemption', true),
             ],
             'lead_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Lead::class]),
+                app(ModelExists::class, ['model' => Lead::class, 'subject' => Order::class]),
             ],
 
             'address_invoice' => [
