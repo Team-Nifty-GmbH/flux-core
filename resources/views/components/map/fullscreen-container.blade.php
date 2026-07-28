@@ -6,11 +6,10 @@
 <div
     x-data="{ isFullscreen: false }"
     class="transition-all duration-500 ease-in-out"
-    x-bind:class="
-        isFullscreen && $wire.showMap
-            ? 'fixed inset-0 z-50 bg-white dark:bg-secondary-800 p-4 flex flex-col'
-            : ''
-    "
+    x-bind:class="{
+        'fixed inset-0 z-50 bg-white dark:bg-secondary-800 p-4 flex flex-col':
+            isFullscreen && $wire.showMap,
+    }"
 >
     <div
         x-on:load-map.window="$nextTick(() => onChange())"
@@ -34,7 +33,7 @@
     >
         <div
             class="w-full"
-            x-bind:class="isFullscreen ? 'flex-1 flex flex-col min-h-0' : ''"
+            x-bind:class="{ 'flex-1 flex flex-col min-h-0': isFullscreen }"
         >
             <div class="flex items-center justify-between gap-4 pb-4">
                 <div class="flex items-center gap-4">
@@ -76,9 +75,7 @@
             </div>
             <div
                 x-intersect.once="onChange()"
-                x-bind:class="
-                    isFullscreen ? 'flex-1 min-h-0 flex flex-col' : ''
-                "
+                x-bind:class="{ 'flex-1 min-h-0 flex flex-col': isFullscreen }"
                 class="border-secondary-200 dark:border-secondary-600 overflow-hidden rounded-lg border"
             >
                 <div

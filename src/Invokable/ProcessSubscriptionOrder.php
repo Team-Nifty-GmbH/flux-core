@@ -74,6 +74,15 @@ class ProcessSubscriptionOrder implements Repeatable
                 ->validate()
                 ->execute();
 
+            if ($order->orderType->order_type_enum === OrderTypeEnum::PurchaseSubscription
+                && ! $newOrder->invoice_number
+            ) {
+                $newOrder->invoice_number = $order->order_number
+                    . '-' . $newOrder->system_delivery_date?->format('Y-m');
+                $newOrder->invoice_date = $newOrder->system_delivery_date;
+                $newOrder->save();
+            }
+
             if (($autoPrint || $autoSend) && $printLayouts && count($printLayouts) > 0) {
                 $this->processPrintAndSend($newOrder, $printLayouts, $autoSend ? $emailTemplateId : null);
             }

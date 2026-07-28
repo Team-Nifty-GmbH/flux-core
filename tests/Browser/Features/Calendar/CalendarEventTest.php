@@ -29,7 +29,7 @@ function visitCalendar(): mixed
         ->assertRoute('calendars')
         ->assertNoSmoke();
 
-    waitForElement($page, '[calendar-root] .fc', 10000);
+    waitForElement($page, '[calendar-root] .fc-view', 10000);
 
     return $page;
 }

@@ -46,6 +46,7 @@ class ProductList extends BaseProductList
         parent::mount();
 
         $this->vatRates = resolve_static(VatRate::class, 'query')
+            ->where('is_sales', true)
             ->get(['id', 'name', 'rate_percentage'])
             ->toArray();
         $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
@@ -182,7 +183,7 @@ class ProductList extends BaseProductList
             ))
                 ->checkPermission()
                 ->validate()
-                ->execute();
+                ->executeAsync();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -191,7 +192,6 @@ class ProductList extends BaseProductList
 
         $this->reset('selected');
         $this->productPricesUpdate->reset();
-        $this->loadData();
 
         return true;
     }
@@ -205,6 +205,7 @@ class ProductList extends BaseProductList
                     ->get(['id', 'name'])
                     ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_sales', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
                 'roundingMethods' => resolve_static(RoundingMethodEnum::class, 'valuesLocalized'),

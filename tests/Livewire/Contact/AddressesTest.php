@@ -63,3 +63,34 @@ test('switch tabs', function (): void {
         ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
         ->cycleTabs();
 });
+
+test('invalid salutation blocks saving', function (): void {
+    Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+        ->set('address.salutation', 'Firma')
+        ->set('address.street', $street = Str::uuid())
+        ->set('edit', true)
+        ->call('save')
+        ->assertOk()
+        ->assertHasErrors('address.salutation')
+        ->assertSet('edit', true);
+
+    $this->assertDatabaseMissing('addresses', ['id' => $this->addressForm->id, 'street' => $street]);
+});
+
+test('selecting another address resets validation errors', function (): void {
+    $otherAddress = Address::factory()->create([
+        'contact_id' => $this->contactForm->id,
+    ]);
+
+    Livewire::actingAs($this->user)
+        ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+        ->set('address.salutation', 'Firma')
+        ->set('edit', true)
+        ->call('save')
+        ->assertHasErrors('address.salutation')
+        ->call('select', $otherAddress->id)
+        ->assertOk()
+        ->assertHasNoErrors()
+        ->assertSet('address.id', $otherAddress->id);
+});

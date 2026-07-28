@@ -61,14 +61,18 @@ class CreateMailExecutedSubscriber
 
     public function createPurchaseInvoice(Communication $message): ?Collection
     {
-        $contact = $this->address?->contact;
+        // Mails from one of our own domains never originate from a supplier, they
+        // belong to the tenant owning that domain.
+        $tenant = $this->findTenantByDomain($message->from);
+        $contact = $tenant ? null : $this->address?->contact;
 
         $created = [];
         foreach ($message->getMedia('attachments') as $attachment) {
             try {
                 $purchaseInvoice = CreatePurchaseInvoice::make([
-                    'tenant_id' => $contact?->getTenantId() ?? resolve_static(Tenant::class, 'default')
-                        ->getKey(),
+                    'tenant_id' => $tenant?->getKey()
+                        ?? $contact?->getTenantId()
+                        ?? resolve_static(Tenant::class, 'default')->getKey(),
                     'contact_id' => $contact?->id,
                     'currency_id' => $contact?->currency_id ?? resolve_static(Currency::class, 'default')
                         ->getKey(),
@@ -238,6 +242,57 @@ class CreateMailExecutedSubscriber
         return [
             'action.executed: ' . resolve_static(CreateMailMessage::class, 'class') => 'handle',
         ];
+    }
+
+    protected function findTenantByDomain(?string $from): ?Tenant
+    {
+        $domain = $this->normalizeDomain(Str::between($from ?? '', '<', '>'));
+
+        if (blank($domain)) {
+            return null;
+        }
+
+        return resolve_static(Tenant::class, 'query')
+            ->withoutEagerLoads()
+            ->get(['id', 'email', 'website'])
+            ->first(fn (Tenant $tenant): bool => $this->matchesTenantDomain($tenant, $domain));
+    }
+
+    protected function matchesTenantDomain(Tenant $tenant, string $domain): bool
+    {
+        foreach ([$tenant->email, $tenant->website] as $value) {
+            if (blank($value)) {
+                continue;
+            }
+
+            $tenantDomain = $this->normalizeDomain($value);
+
+            // `website` is only validated as a string, so ignore anything without a dot
+            // to keep a stray value like "test" from matching every ".test" sender.
+            if (! str_contains($tenantDomain, '.')) {
+                continue;
+            }
+
+            if ($domain === $tenantDomain || str_ends_with($domain, '.' . $tenantDomain)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function normalizeDomain(?string $value): string
+    {
+        return Str::of($value ?? '')
+            ->lower()
+            ->trim()
+            ->afterLast('@')
+            ->replaceMatches('#^[a-z][a-z\d+.-]*://#', '')
+            ->before('/')
+            ->before(':')
+            ->replaceMatches('#^www\.#', '')
+            ->trim('.')
+            ->value();
     }
 
     protected function stripQuotedReply(?string $body): ?string

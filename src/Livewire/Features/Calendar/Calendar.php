@@ -320,11 +320,11 @@ class Calendar extends Component
                         ],
                         'nowIndicator' => true,
                         'calendarWeekAbbreviation' => __('CW'),
-                        'buttonText' => [
-                            'today' => __('Today'),
-                            'month' => __('Month'),
-                            'week' => __('Week'),
-                            'day' => __('Day'),
+                        'buttons' => [
+                            'today' => ['text' => __('Today')],
+                            'dayGridMonth' => ['text' => __('Month')],
+                            'timeGridWeek' => ['text' => __('Week')],
+                            'timeGridDay' => ['text' => __('Day')],
                         ],
                     ]
                 ),

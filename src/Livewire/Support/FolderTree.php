@@ -175,8 +175,12 @@ abstract class FolderTree extends Component
     }
 
     #[Renderless]
-    public function moveItem(array $subject, array $target, ?string $subjectPath, ?string $targetPath): bool
-    {
+    public function moveItem(
+        array $subject,
+        array $target,
+        ?string $subjectPath,
+        ?string $targetPath
+    ): bool {
         $subjectPath = $this->resolveSubjectPath($subject, $subjectPath);
         $targetPath = $this->resolveTargetPath($target, $targetPath);
 
@@ -405,8 +409,12 @@ abstract class FolderTree extends Component
         return true;
     }
 
-    protected function moveMedia(array $subject, array $target, string $targetPath, string $targetType): bool
-    {
+    protected function moveMedia(
+        array $subject,
+        array $target,
+        string $targetPath,
+        string $targetType
+    ): bool {
         $targetModel = $targetType === 'collection'
             ? resolve_static($this->modelType, 'query')->whereKey($this->modelId)->first()
             : resolve_static(MediaFolder::class, 'query')->whereKey(data_get($target, 'id'))->first();
@@ -421,11 +429,16 @@ abstract class FolderTree extends Component
             return false;
         }
 
-        $collectionName = $targetType === 'folder'
-            ? $targetPath
-            : data_get($subject, 'collection_name', $targetPath);
+        $isAlreadyInTarget = $targetType === 'folder'
+            ? $media->model_type === morph_alias(MediaFolder::class)
+                && (int) $media->model_id === (int) data_get($target, 'id')
+            : $media->model_type === morph_alias($this->modelType)
+                && (int) $media->model_id === (int) $this->modelId
+                && $media->collection_name === $targetPath;
 
-        $media->move($targetModel, $collectionName);
+        if (! $isAlreadyInTarget) {
+            $media->move($targetModel, $targetPath);
+        }
 
         $this->toast()
             ->success(__('Moved successfully'))

@@ -411,9 +411,9 @@
                                         <x-icon
                                             name="chevron-down"
                                             class="h-4 w-4 transition-transform"
-                                            x-bind:class="
-                                                showAdvanced && 'rotate-180'
-                                            "
+                                            x-bind:class="{
+                                                'rotate-180': showAdvanced,
+                                            }"
                                         />
                                     </button>
                                     <div

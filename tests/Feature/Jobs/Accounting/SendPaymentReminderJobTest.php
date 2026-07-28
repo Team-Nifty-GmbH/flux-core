@@ -1,0 +1,73 @@
+<?php
+
+use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Jobs\Accounting\SendPaymentReminderJob;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
+use Spatie\Activitylog\Models\Activity;
+
+beforeEach(function (): void {
+    $contact = Contact::factory()->create();
+    $address = Address::factory()->create([
+        'contact_id' => $contact->getKey(),
+        'email_primary' => 'reminder@example.com',
+        'is_main_address' => true,
+        'is_invoice_address' => true,
+    ]);
+    $orderType = OrderType::factory()->create([
+        'order_type_enum' => OrderTypeEnum::Order,
+        'is_active' => true,
+    ]);
+    $paymentType = PaymentType::factory()
+        ->hasAttached($this->dbTenant, relationship: 'tenants')
+        ->create([
+            'is_direct_debit' => false,
+        ]);
+
+    $this->order = Order::factory()->create([
+        'order_type_id' => $orderType->getKey(),
+        'address_invoice_id' => $address->getKey(),
+        'contact_id' => $contact->getKey(),
+        'payment_type_id' => $paymentType->getKey(),
+        'price_list_id' => PriceList::factory()->create()->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+        'currency_id' => Currency::factory()->create()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'is_locked' => true,
+        'invoice_number' => 'INV-2026-100',
+        'balance' => 100,
+        'payment_reminder_current_level' => 0,
+        'payment_reminder_next_date' => now()->subDay()->toDateString(),
+    ]);
+
+    $this->order->update(['balance' => 100]);
+});
+
+test('skips without sending and logs a skip when no reminder text exists for the level', function (): void {
+    $orderId = $this->order->getKey();
+
+    (new SendPaymentReminderJob($orderId))->handle();
+
+    // No reminder record remains and the level is not advanced.
+    expect(PaymentReminder::query()->where('order_id', $orderId)->count())->toBe(0);
+
+    $order = Order::query()->whereKey($orderId)->first();
+    expect($order->payment_reminder_current_level)->toBe(0)
+        ->and($order->payment_reminder_next_date?->toDateString())
+        ->toBe(now()->subDay()->toDateString());
+
+    // A missing reminder text is a configuration gap, not a delivery failure.
+    $logged = Activity::query()
+        ->where('subject_type', morph_alias(Order::class))
+        ->where('subject_id', $orderId)
+        ->where('event', 'payment_reminder_skipped')
+        ->exists();
+
+    expect($logged)->toBeTrue();
+});

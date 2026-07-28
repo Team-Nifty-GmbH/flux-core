@@ -23,12 +23,13 @@ import selectComponent from './tallstackui/select.js';
 import toastComponent from './tallstackui/toast.js';
 import nuxbe from '../nuxbe.js';
 
-import { Calendar } from '@fullcalendar/core';
-import allLocales from '@fullcalendar/core/locales-all';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
+import { Calendar } from 'fullcalendar';
+import allLocales from 'fullcalendar/locales-all';
+import dayGridPlugin from 'fullcalendar/daygrid';
+import timeGridPlugin from 'fullcalendar/timegrid';
+import listPlugin from 'fullcalendar/list';
+import interactionPlugin from 'fullcalendar/interaction';
+import classicThemePlugin from 'fullcalendar/themes/classic';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -56,6 +57,7 @@ window.dayGridPlugin = dayGridPlugin;
 window.timeGridPlugin = timeGridPlugin;
 window.listPlugin = listPlugin;
 window.interactionPlugin = interactionPlugin;
+window.classicThemePlugin = classicThemePlugin;
 window.allLocales = allLocales;
 
 navigationSpinner();
@@ -73,8 +75,13 @@ const resolveModelId = (el) => () => {
         .find((name) => name.startsWith('wire:model'));
     const binding = bindingAttr ? root.getAttribute(bindingAttr) : null;
 
-    if (binding?.startsWith('$parent.') && wire?.$parent) {
-        const value = wire.$parent.get(binding.slice('$parent.'.length));
+    if (binding && wire?.$parent) {
+        // wire:model on a child component is evaluated in the parent's scope,
+        // whether or not it carries an explicit "$parent." prefix.
+        const prop = binding.startsWith('$parent.')
+            ? binding.slice('$parent.'.length)
+            : binding;
+        const value = wire.$parent.get(prop);
 
         if (value !== undefined && value !== null) {
             return value;
@@ -156,6 +163,23 @@ document.addEventListener('livewire:init', () => {
                 .wireable(component.id)
                 [type](title, description)
                 .confirm(confirmLabel, () => {
+                    // Livewire 4's own evaluator resolves unknown identifiers
+                    // against $wire, which breaks expressions like
+                    // addTag($nuxbe.promptValue()). Evaluate through Alpine
+                    // instead, where $wire, magics and x-for scope all work.
+                    const expression = el.getAttribute('wire:click');
+
+                    if (expression) {
+                        window.Alpine.evaluate(
+                            el,
+                            expression.trimStart().startsWith('$wire.')
+                                ? expression
+                                : '$wire.' + expression,
+                        );
+
+                        return;
+                    }
+
                     action();
                 })
                 .cancel(cancelLabel)

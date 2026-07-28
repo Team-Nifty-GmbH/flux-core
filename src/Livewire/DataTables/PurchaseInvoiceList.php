@@ -365,6 +365,7 @@ class PurchaseInvoiceList extends BaseDataTable
                     ->get(['id', 'name', 'requires_manual_transfer'])
                     ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_purchase', true)
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]

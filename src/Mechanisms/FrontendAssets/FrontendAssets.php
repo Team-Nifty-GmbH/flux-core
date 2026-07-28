@@ -2,6 +2,7 @@
 
 namespace FluxErp\Mechanisms\FrontendAssets;
 
+use FluxErp\Http\Controllers\AssetController;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\HtmlString;
@@ -307,6 +308,14 @@ class FrontendAssets
         )
             ->where('file', '.+')
             ->name('flux.assets.package');
+
+        // Registered before the /flux/{file} catch-all so the catch-all does not
+        // shadow it and return a 404 for a file that is not in the build path.
+        // No etag in the cache headers: the favicon is a BinaryFileResponse and
+        // the etag middleware would call getContent() on it and fail.
+        Route::get('/flux/favicon.svg', [AssetController::class, 'favicon'])
+            ->middleware('cache.headers:public;max_age=31536000')
+            ->name('favicon');
 
         Route::get('/flux/{file}', static fn (string $file) => app(static::class)->returnAssetFile($file))
             ->where('file', '.+')

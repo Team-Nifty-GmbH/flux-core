@@ -48,3 +48,20 @@ test('delete purchase invoice position', function (): void {
     expect(DeletePurchaseInvoicePosition::make(['id' => $position->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('create purchase invoice position rejects a sales-only vat rate', function (): void {
+    $salesOnlyVatRate = VatRate::factory()->create([
+        'is_purchase' => false,
+        'is_sales' => true,
+    ]);
+
+    CreatePurchaseInvoicePosition::assertValidationErrors([
+        'purchase_invoice_id' => $this->purchaseInvoice->getKey(),
+        'ledger_account_id' => $this->ledgerAccount->getKey(),
+        'vat_rate_id' => $salesOnlyVatRate->getKey(),
+        'name' => 'Office Supplies',
+        'amount' => 1,
+        'unit_price' => 100.00,
+        'total_price' => 100.00,
+    ], 'vat_rate_id');
+});

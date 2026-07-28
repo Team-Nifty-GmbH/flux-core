@@ -73,7 +73,8 @@ class UpdateProductRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => VatRate::class, 'subject' => Product::class]),
+                app(ModelExists::class, ['model' => VatRate::class, 'subject' => Product::class])
+                    ->where('is_sales', true),
             ],
             'unit_id' => [
                 'integer',

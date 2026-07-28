@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
 use Pest\Browser\Api\AwaitableWebpage;
 use Pest\Browser\Api\PendingAwaitablePage;
+use Pest\Browser\Playwright\Playwright;
 
 if ($auditLocale = env('TRANSLATION_AUDIT_LOCALE')) {
     require_once __DIR__ . '/Support/TranslationAuditCollector.php';
@@ -102,6 +103,12 @@ pest()
         }
 
         BrowserTestCase::installAssets();
+    })
+    ->beforeEach(function (): void {
+        // Heavy pages pay the blade compilation penalty on their first visit in each
+        // parallel worker, which intermittently exceeds the plugin's 5s default under
+        // CI load (CommentsTest flaked on roughly every other pull request run).
+        Playwright::setTimeout(15000);
     })
     ->in('Browser');
 

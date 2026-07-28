@@ -149,11 +149,11 @@ class ImapMessageBuilder
 
     public function syncReadStatus(): static
     {
-        $unreadUids = $this->messages
-            ->reject(fn (ImapMessage $message) => $message->isSeen)
-            ->map(fn (ImapMessage $message) => $message->uid)
-            ->values()
-            ->toArray();
+        $unreadUids = $this->resolveUnseenUids();
+
+        if (is_null($unreadUids)) {
+            return $this;
+        }
 
         resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->folder->mailAccount->getKey())
@@ -208,6 +208,43 @@ class ImapMessageBuilder
         }
 
         return $client->getFolderByPath($this->folder->slug, utf7: true);
+    }
+
+    /**
+     * Return the UIDs of the currently unseen messages on the server, or null
+     * when the state could not be determined.
+     *
+     * Uses a plain IMAP SEARCH (a single round-trip returning only UIDs) instead
+     * of fetching full message objects, so the read-status reconciliation no
+     * longer scales with the number of unseen mails times a per-message fetch.
+     *
+     * Returns null (not an empty array) when the folder cannot be resolved or
+     * the search fails, so the caller can skip reconciliation instead of
+     * treating the failure as "nothing is unseen".
+     *
+     * @return array<int, int>|null
+     */
+    protected function resolveUnseenUids(): ?array
+    {
+        $imapFolder = $this->resolveImapFolder();
+
+        if (! $imapFolder) {
+            return null;
+        }
+
+        try {
+            return $imapFolder->messages()
+                ->setFetchBody(false)
+                ->leaveUnread()
+                ->unseen()
+                ->since($this->folder->mailAccount->created_at)
+                ->search()
+                ->map(fn (mixed $uid): int => (int) $uid)
+                ->values()
+                ->toArray();
+        } catch (ResponseException) {
+            return null;
+        }
     }
 
     protected function fetchNewMessages(Folder $imapFolder, ?Closure $onMessage = null): void

@@ -15,7 +15,8 @@ describe('FrontendAssets', function (): void {
         expect(Route::has('flux.assets.css'))->toBeTrue()
             ->and(Route::has('flux.assets.js'))->toBeTrue()
             ->and(Route::has('flux.assets.file'))->toBeTrue()
-            ->and(Route::has('flux.assets.package'))->toBeTrue();
+            ->and(Route::has('flux.assets.package'))->toBeTrue()
+            ->and(Route::has('favicon'))->toBeTrue();
     });
 
     test('manifest is loaded correctly', function (): void {
@@ -76,6 +77,13 @@ describe('FrontendAssets', function (): void {
         $response = $this->get(route('flux.assets.file', ['file' => '../../../etc/passwd']));
 
         $response->assertNotFound();
+    });
+
+    test('favicon route is served and not shadowed by the asset file catch-all', function (): void {
+        $response = $this->get(route('favicon'));
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'image/svg+xml');
     });
 
     test('font files are served with correct mime type', function (): void {

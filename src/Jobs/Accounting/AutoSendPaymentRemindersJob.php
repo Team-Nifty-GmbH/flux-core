@@ -70,7 +70,8 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
             return;
         }
 
-        $orderIds = resolve_static(Order::class, 'query')
+        // No recipient is passed, so every reminder goes to the order's default one.
+        $orders = resolve_static(Order::class, 'query')
             ->when($this->orderIds, fn (Builder $query) => $query->whereKey($this->orderIds))
             ->with(['orderType:id,order_type_enum'])
             ->wherePaymentReminderDue()
@@ -78,14 +79,15 @@ class AutoSendPaymentRemindersJob implements Repeatable, ShouldQueue
             ->filter(fn (Order $order) => ! $order->orderType->order_type_enum->isPurchase()
                 && bccomp($order->orderType->order_type_enum->multiplier(), '1') === 0
             )
-            ->pluck('id')
+            ->map(fn (Order $order): array => ['id' => $order->getKey()])
+            ->values()
             ->all();
 
-        if (! $orderIds) {
+        if (! $orders) {
             return;
         }
 
-        BundlePaymentReminders::make(['order_ids' => $orderIds])
+        BundlePaymentReminders::make(['orders' => $orders])
             ->validate()
             ->execute();
     }

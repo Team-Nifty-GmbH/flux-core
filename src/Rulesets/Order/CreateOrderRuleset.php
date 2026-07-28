@@ -180,7 +180,10 @@ class CreateOrderRuleset extends FluxRuleset
             'header_discount' => 'numeric|min:0|nullable',
             'shipping_costs_net_price' => 'numeric|nullable',
             'margin' => 'numeric|nullable',
-            'number_of_packages' => 'integer|nullable',
+            'contract_total_amount' => [
+                'nullable',
+                app(Numeric::class),
+            ],
             'payment_reminder_days_1' => 'integer|nullable|min:1',
             'payment_reminder_days_2' => 'integer|nullable|min:1',
             'payment_reminder_days_3' => 'integer|nullable|min:1',
@@ -189,6 +192,7 @@ class CreateOrderRuleset extends FluxRuleset
 
             'order_number' => 'sometimes|required|string|max:255|unique:orders',
             'commission' => 'string|max:255|nullable',
+            'payment_purpose_pattern' => 'nullable|string|max:255',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',
             'logistic_note' => 'string|nullable',

@@ -233,11 +233,17 @@ test('tab visibility for variant product', function (): void {
 });
 
 test('vat rates computed property', function (): void {
+    $purchaseOnlyVatRate = VatRate::factory()->create([
+        'is_purchase' => true,
+        'is_sales' => false,
+    ]);
+
     $component = Livewire::test(Product::class, ['id' => $this->product->id]);
 
     $vatRates = $component->instance()->vatRates();
     expect($vatRates)->toBeArray();
     expect($vatRates)->not->toBeEmpty();
+    expect(array_column($vatRates, 'id'))->not->toContain($purchaseOnlyVatRate->getKey());
 });
 
 test('view name computed property', function (): void {
