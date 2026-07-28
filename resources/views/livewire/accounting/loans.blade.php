@@ -35,43 +35,41 @@
         />
         <x-input wire:model="loan.number" :label="__('Number')" />
         {{-- Schedule-affecting fields lock once the loan exists; rescheduling is a
-            separate concern. --}}
-        <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
-            <x-number
-                wire:model="loan.amount"
-                :label="__('Amount')"
-                step="0.01"
-                placeholder="0.00"
-                x-bind:disabled="!!$wire.loan.id"
-            />
-            <x-number
-                wire:model="loan.interest_rate"
-                :label="__('Interest Rate')"
-                step="0.0001"
-                placeholder="0.0000"
-                x-bind:disabled="!!$wire.loan.id"
-            />
-        </div>
-        <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
-            <x-select.styled
-                wire:model="loan.repayment_type_enum"
-                :label="__('Repayment Type')"
-                required
-                select="label:label|value:value"
-                :options="\FluxErp\Enums\RepaymentTypeEnum::valuesLocalized()"
-                x-bind:disabled="!!$wire.loan.id"
-            />
-            <x-number
-                wire:model="loan.number_of_installments"
-                :label="__('Number Of Installments')"
-                step="1"
-                x-bind:disabled="!!$wire.loan.id"
-            />
-            <x-date
-                wire:model="loan.starts_at"
-                :label="__('Starts At')"
-                x-bind:disabled="!!$wire.loan.id"
-            />
+            separate concern. The select ignores x-bind:disable, so the whole group
+            is disabled via pointer-events. --}}
+        <div
+            class="flex flex-col gap-1.5"
+            x-bind:class="$wire.loan.id && 'pointer-events-none opacity-60'"
+        >
+            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                <x-number
+                    wire:model="loan.amount"
+                    :label="__('Amount')"
+                    step="0.01"
+                    placeholder="0.00"
+                />
+                <x-number
+                    wire:model="loan.interest_rate"
+                    :label="__('Interest Rate')"
+                    step="0.0001"
+                    placeholder="0.0000"
+                />
+            </div>
+            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-3">
+                <x-select.styled
+                    wire:model="loan.repayment_type_enum"
+                    :label="__('Repayment Type')"
+                    required
+                    select="label:label|value:value"
+                    :options="\FluxErp\Enums\RepaymentTypeEnum::valuesLocalized()"
+                />
+                <x-number
+                    wire:model="loan.number_of_installments"
+                    :label="__('Number Of Installments')"
+                    step="1"
+                />
+                <x-date wire:model="loan.starts_at" :label="__('Starts At')" />
+            </div>
         </div>
 
         @if ($installments)
