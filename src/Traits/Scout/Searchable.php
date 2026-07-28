@@ -82,8 +82,11 @@ trait Searchable
                 'model' => $search->embedder_model,
                 'input' => ['{{text}}', '{{..}}'],
             ],
+            // The '{{..}}' repetition marker must appear in both request and response
+            // when batching; without it Meilisearch rejects the embedder with
+            // "response has a single embedding, but request has multiple texts to embed".
             'response' => [
-                'data' => [['embedding' => '{{embedding}}']],
+                'data' => [['embedding' => '{{embedding}}'], '{{..}}'],
             ],
         ];
     }
