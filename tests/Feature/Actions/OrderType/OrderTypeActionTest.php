@@ -74,3 +74,26 @@ test('order type without orders can still be deleted', function (): void {
     expect(DeleteOrderType::make(['id' => $type->getKey()])
         ->validate()->execute())->toBeTrue();
 });
+
+test('order type used only by a soft deleted order can still be deleted', function (): void {
+    $type = OrderType::factory()->create();
+    $contact = Contact::factory()->create();
+    $order = Order::factory()->create([
+        'order_type_id' => $type->getKey(),
+        'contact_id' => $contact->getKey(),
+        'address_invoice_id' => Address::factory()->create([
+            'contact_id' => $contact->getKey(),
+            'is_main_address' => true,
+            'is_invoice_address' => true,
+        ])->getKey(),
+        'price_list_id' => PriceList::factory()->create()->getKey(),
+        'payment_type_id' => PaymentType::factory()->create()->getKey(),
+        'currency_id' => Currency::factory()->create()->getKey(),
+        'language_id' => $this->defaultLanguage->getKey(),
+        'tenant_id' => $this->dbTenant->getKey(),
+    ]);
+    $order->delete();
+
+    expect(DeleteOrderType::make(['id' => $type->getKey()])
+        ->validate()->execute())->toBeTrue();
+});
