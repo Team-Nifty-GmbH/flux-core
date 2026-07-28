@@ -25,7 +25,7 @@ class UpdatePaymentReminderTextRuleset extends FluxRuleset
             'email_template_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => EmailTemplate::class])
+                app(ModelExists::class, ['model' => EmailTemplate::class, 'subject' => PaymentReminderText::class])
                     ->where(function (Builder $query): void {
                         $query->whereNull('model_type')
                             ->orWhere('model_type', morph_alias(PaymentReminder::class));

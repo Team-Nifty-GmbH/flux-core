@@ -32,12 +32,12 @@ class UpdateTenantRuleset extends FluxRuleset
             'country_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => Country::class]),
+                app(ModelExists::class, ['model' => Country::class, 'subject' => Tenant::class]),
             ],
             'commission_credit_note_order_type_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => OrderType::class])
+                app(ModelExists::class, ['model' => OrderType::class, 'subject' => Tenant::class])
                     ->where('order_type_enum', OrderTypeEnum::Refund)
                     ->where('is_active', true),
             ],

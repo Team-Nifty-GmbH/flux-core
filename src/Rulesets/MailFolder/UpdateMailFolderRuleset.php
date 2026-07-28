@@ -21,7 +21,7 @@ class UpdateMailFolderRuleset extends FluxRuleset
             'parent_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => MailFolder::class]),
+                app(ModelExists::class, ['model' => MailFolder::class, 'subject' => MailFolder::class]),
             ],
             'remote_id' => 'nullable|string|max:255',
             'name' => 'sometimes|required|string|max:255',
