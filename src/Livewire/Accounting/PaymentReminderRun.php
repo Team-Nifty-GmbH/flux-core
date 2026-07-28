@@ -110,6 +110,14 @@ class PaymentReminderRun extends Component
                             fn (Builder $query) => $query
                                 ->where('customer_number', 'like', '%' . $this->search . '%')
                         )
+                        ->orWhereHas(
+                            'contact.addresses',
+                            fn (Builder $query) => $query
+                                ->where('company', 'like', '%' . $this->search . '%')
+                                ->orWhere('name', 'like', '%' . $this->search . '%')
+                                ->orWhere('firstname', 'like', '%' . $this->search . '%')
+                                ->orWhere('lastname', 'like', '%' . $this->search . '%')
+                        )
                 )
             )
             ->with(['contact:id,customer_number'])
