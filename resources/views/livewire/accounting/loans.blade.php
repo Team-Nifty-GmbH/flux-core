@@ -34,9 +34,6 @@
             ]"
         />
         <x-input wire:model="loan.number" :label="__('Number')" />
-        {{-- Schedule-affecting fields lock once the loan exists; rescheduling is a
-            separate concern. The select ignores x-bind:disable, so the whole group
-            is disabled via pointer-events. --}}
         <div
             class="flex flex-col gap-1.5"
             x-bind:class="$wire.loan.id && 'pointer-events-none opacity-60'"
