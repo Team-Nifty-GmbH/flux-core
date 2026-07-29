@@ -39,13 +39,20 @@ trait Searchable
 
         // Semantic search: turn the keyword query into a hybrid (keyword + vector) query.
         if (config('scout.driver') === 'meilisearch' && $search = static::activeSearchSettings()) {
-            // options() replaces, so merge to preserve any caller-provided options.
-            $builder->options(array_merge($builder->options ?? [], [
+            $options = [
                 'hybrid' => [
                     'embedder' => 'default',
                     'semanticRatio' => $search->semantic_ratio,
                 ],
-            ]));
+            ];
+
+            // Drop hits scoring below the configured relevance threshold; 0 disables the cut.
+            if ($search->semantic_score_threshold > 0) {
+                $options['rankingScoreThreshold'] = $search->semantic_score_threshold;
+            }
+
+            // options() replaces, so merge to preserve any caller-provided options.
+            $builder->options(array_merge($builder->options ?? [], $options));
         }
 
         return $builder;
